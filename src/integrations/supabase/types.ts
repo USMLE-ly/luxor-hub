@@ -14,7 +14,251 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      chat_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      clothing_items: {
+        Row: {
+          brand: string | null
+          category: string
+          color: string | null
+          created_at: string
+          id: string
+          name: string | null
+          notes: string | null
+          occasion: string | null
+          photo_url: string | null
+          price: number | null
+          season: string | null
+          style: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          brand?: string | null
+          category?: string
+          color?: string | null
+          created_at?: string
+          id?: string
+          name?: string | null
+          notes?: string | null
+          occasion?: string | null
+          photo_url?: string | null
+          price?: number | null
+          season?: string | null
+          style?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          brand?: string | null
+          category?: string
+          color?: string | null
+          created_at?: string
+          id?: string
+          name?: string | null
+          notes?: string | null
+          occasion?: string | null
+          photo_url?: string | null
+          price?: number | null
+          season?: string | null
+          style?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      outfit_items: {
+        Row: {
+          clothing_item_id: string
+          id: string
+          outfit_id: string
+        }
+        Insert: {
+          clothing_item_id: string
+          id?: string
+          outfit_id: string
+        }
+        Update: {
+          clothing_item_id?: string
+          id?: string
+          outfit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outfit_items_clothing_item_id_fkey"
+            columns: ["clothing_item_id"]
+            isOneToOne: false
+            referencedRelation: "clothing_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outfit_items_outfit_id_fkey"
+            columns: ["outfit_id"]
+            isOneToOne: false
+            referencedRelation: "outfits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      outfits: {
+        Row: {
+          ai_explanation: string | null
+          ai_generated: boolean | null
+          confidence_score: number | null
+          created_at: string
+          description: string | null
+          id: string
+          is_favorite: boolean | null
+          mood: string | null
+          name: string
+          occasion: string | null
+          user_id: string
+        }
+        Insert: {
+          ai_explanation?: string | null
+          ai_generated?: boolean | null
+          confidence_score?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          mood?: string | null
+          name: string
+          occasion?: string | null
+          user_id: string
+        }
+        Update: {
+          ai_explanation?: string | null
+          ai_generated?: boolean | null
+          confidence_score?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          mood?: string | null
+          name?: string
+          occasion?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      style_profiles: {
+        Row: {
+          archetype: string | null
+          created_at: string
+          id: string
+          onboarding_completed: boolean | null
+          preferences: Json | null
+          style_score: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          archetype?: string | null
+          created_at?: string
+          id?: string
+          onboarding_completed?: boolean | null
+          preferences?: Json | null
+          style_score?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          archetype?: string | null
+          created_at?: string
+          id?: string
+          onboarding_completed?: boolean | null
+          preferences?: Json | null
+          style_score?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      wear_logs: {
+        Row: {
+          clothing_item_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          user_id: string
+          worn_at: string
+        }
+        Insert: {
+          clothing_item_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          user_id: string
+          worn_at?: string
+        }
+        Update: {
+          clothing_item_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          user_id?: string
+          worn_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wear_logs_clothing_item_id_fkey"
+            columns: ["clothing_item_id"]
+            isOneToOne: false
+            referencedRelation: "clothing_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

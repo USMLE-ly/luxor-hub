@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Check, Crown, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const tiers = [
   {
@@ -8,12 +9,7 @@ const tiers = [
     price: "€0",
     period: "forever",
     description: "Get started with AI styling",
-    features: [
-      "50 closet items",
-      "1 daily outfit",
-      "Basic style quiz",
-      "Community access",
-    ],
+    features: ["50 closet items", "1 daily outfit", "Basic style quiz", "Community access"],
     cta: "Start Free",
     highlighted: false,
   },
@@ -22,14 +18,7 @@ const tiers = [
     price: "€19",
     period: "/month",
     description: "For the style-conscious",
-    features: [
-      "Unlimited closet items",
-      "Unlimited AI outfits",
-      "Full Style DNA profile",
-      "AI Stylist Chat",
-      "Wardrobe analytics",
-      "Smart shopping AI",
-    ],
+    features: ["Unlimited closet items", "Unlimited AI outfits", "Full Style DNA profile", "AI Stylist Chat", "Wardrobe analytics", "Smart shopping AI"],
     cta: "Go Pro",
     highlighted: true,
   },
@@ -38,27 +27,33 @@ const tiers = [
     price: "€99",
     period: "/month",
     description: "The ultimate style experience",
-    features: [
-      "Everything in Pro",
-      "Priority AI processing",
-      "Human stylist overlay",
-      "Luxury brand partnerships",
-      "Exclusive style reports",
-      "VIP support",
-    ],
+    features: ["Everything in Pro", "Priority AI processing", "Human stylist overlay", "Luxury brand partnerships", "Exclusive style reports", "VIP support"],
     cta: "Join Elite",
     highlighted: false,
   },
 ];
 
+const containerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.15 } },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 40, scale: 0.95 },
+  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6, ease: "easeOut" as const } },
+};
+
 const Pricing = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="py-32 px-4" id="pricing">
       <div className="max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6 }}
           className="text-center mb-20"
         >
           <p className="text-primary font-sans font-semibold text-sm tracking-widest uppercase mb-4">Pricing</p>
@@ -67,18 +62,19 @@ const Pricing = () => {
           </h2>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {tiers.map((tier, i) => (
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-80px" }}
+          className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto"
+        >
+          {tiers.map((tier) => (
             <motion.div
               key={tier.name}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.15 }}
-              className={`rounded-2xl p-8 relative ${
-                tier.highlighted
-                  ? "glass gold-glow border-primary/40"
-                  : "glass"
+              variants={itemVariants}
+              className={`rounded-2xl p-8 relative hover:-translate-y-1 transition-transform duration-300 ${
+                tier.highlighted ? "glass gold-glow border-primary/40" : "glass"
               }`}
             >
               {tier.highlighted && (
@@ -105,6 +101,7 @@ const Pricing = () => {
               </ul>
 
               <Button
+                onClick={() => navigate("/auth")}
                 className={`w-full rounded-xl py-5 font-semibold ${
                   tier.highlighted
                     ? "gold-gradient text-primary-foreground hover:opacity-90"
@@ -116,7 +113,7 @@ const Pricing = () => {
               </Button>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
