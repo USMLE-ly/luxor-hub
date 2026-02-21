@@ -1,8 +1,12 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import heroImage from "@/assets/hero-image.jpg";
 
 const Hero = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden px-4">
       {/* Background effects */}
@@ -18,7 +22,7 @@ const Hero = () => {
           transition={{ duration: 0.8 }}
           className="mb-6"
         >
-          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-sm text-gold font-medium">
+          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-sm text-primary font-medium font-sans">
             <Sparkles className="w-4 h-4" />
             AI-Powered Personal Styling
           </span>
@@ -51,48 +55,39 @@ const Hero = () => {
           transition={{ duration: 0.8, delay: 0.45 }}
           className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
-          <Button size="lg" className="gold-gradient text-primary-foreground font-semibold px-8 py-6 text-lg rounded-xl gold-glow hover:opacity-90 transition-opacity">
+          <Button
+            size="lg"
+            onClick={() => navigate("/auth")}
+            className="gold-gradient text-primary-foreground font-semibold px-8 py-6 text-lg rounded-xl gold-glow hover:opacity-90 transition-opacity"
+          >
             Start Free
             <ArrowRight className="w-5 h-5 ml-2" />
           </Button>
-          <Button variant="outline" size="lg" className="px-8 py-6 text-lg rounded-xl border-glass-border hover:bg-card/60">
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
+            className="px-8 py-6 text-lg rounded-xl border-glass-border hover:bg-card/60"
+          >
             See How It Works
           </Button>
         </motion.div>
 
-        {/* Floating mockup cards */}
+        {/* Hero image */}
         <motion.div
           initial={{ opacity: 0, y: 60 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.7 }}
           className="mt-20 relative"
         >
-          <div className="glass rounded-2xl p-8 max-w-3xl mx-auto gold-glow">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-3 h-3 rounded-full bg-destructive/70" />
-              <div className="w-3 h-3 rounded-full bg-primary/40" />
-              <div className="w-3 h-3 rounded-full bg-muted-foreground/40" />
-              <span className="text-sm text-muted-foreground ml-2 font-sans">AURELIA Dashboard</span>
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="glass rounded-xl p-4 col-span-2">
-                <p className="text-sm text-muted-foreground font-sans mb-2">Today's Outfit</p>
-                <p className="font-display text-xl font-semibold gold-text">Modern Power Casual</p>
-                <p className="text-sm text-muted-foreground font-sans mt-2">Navy blazer · White tee · Dark jeans · Chelsea boots</p>
-                <div className="flex gap-2 mt-3">
-                  <span className="text-xs px-2 py-1 rounded-full bg-primary/20 text-primary">95% Match</span>
-                  <span className="text-xs px-2 py-1 rounded-full bg-secondary text-secondary-foreground">Office Ready</span>
-                </div>
-              </div>
-              <div className="glass rounded-xl p-4 flex flex-col justify-between">
-                <p className="text-sm text-muted-foreground font-sans mb-2">Style DNA</p>
-                <p className="font-display text-lg gold-text">Minimal Power</p>
-                <div className="w-full bg-secondary rounded-full h-1.5 mt-2">
-                  <div className="gold-gradient h-1.5 rounded-full" style={{ width: "87%" }} />
-                </div>
-                <p className="text-xs text-muted-foreground font-sans mt-1">87 Style Score</p>
-              </div>
-            </div>
+          <div className="rounded-2xl overflow-hidden gold-glow max-w-4xl mx-auto">
+            <img
+              src={heroImage}
+              alt="AURELIA AI Fashion Platform — futuristic wardrobe display with elegant clothing"
+              className="w-full h-auto object-cover rounded-2xl"
+              loading="eager"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent rounded-2xl" />
           </div>
         </motion.div>
       </div>

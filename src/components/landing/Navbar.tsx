@@ -1,15 +1,21 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const scrollTo = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  };
 
   return (
     <motion.nav
@@ -21,19 +27,25 @@ const Navbar = () => {
       }`}
     >
       <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
-        <h1 className="font-display text-2xl font-bold gold-text">AURELIA</h1>
+        <h1 className="font-display text-2xl font-bold gold-text cursor-pointer" onClick={() => navigate("/")}>
+          AURELIA
+        </h1>
 
         <div className="hidden md:flex items-center gap-8 text-sm font-sans text-muted-foreground">
-          <a href="#features" className="hover:text-foreground transition-colors">Features</a>
-          <a href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</a>
-          <a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a>
+          <button onClick={() => scrollTo("features")} className="hover:text-foreground transition-colors">Features</button>
+          <button onClick={() => scrollTo("how-it-works")} className="hover:text-foreground transition-colors">How It Works</button>
+          <button onClick={() => scrollTo("pricing")} className="hover:text-foreground transition-colors">Pricing</button>
         </div>
 
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" className="font-sans">
+          <Button variant="ghost" size="sm" className="font-sans" onClick={() => navigate("/auth")}>
             Log In
           </Button>
-          <Button size="sm" className="gold-gradient text-primary-foreground font-semibold rounded-lg hover:opacity-90 transition-opacity">
+          <Button
+            size="sm"
+            className="gold-gradient text-primary-foreground font-semibold rounded-lg hover:opacity-90 transition-opacity"
+            onClick={() => navigate("/auth")}
+          >
             Get Started
           </Button>
         </div>
