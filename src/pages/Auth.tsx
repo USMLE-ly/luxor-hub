@@ -36,7 +36,8 @@ const Auth = () => {
           },
         });
         if (error) throw error;
-        toast.success("Check your email to verify your account!");
+        toast.success("Account created! Welcome to AURELIA!");
+        navigate("/dashboard");
       }
     } catch (error: any) {
       toast.error(error.message);

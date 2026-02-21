@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import {
-  Plus, Search, Filter, Shirt, Trash2, Upload, X, Edit2, Loader2,
+  Plus, Search, Filter, Shirt, Trash2, Upload, X, Edit2, Loader2, Sparkles,
 } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
@@ -42,6 +42,7 @@ const Closet = () => {
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [uploadOpen, setUploadOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
   const [newItem, setNewItem] = useState({
     name: "", category: "top", color: "", brand: "", season: "all-season", occasion: "", style: "", notes: "", price: "",
   });
@@ -72,6 +73,36 @@ const Closet = () => {
     if (file) {
       setSelectedFile(file);
       setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
+
+  const analyzeWithAI = async () => {
+    setAnalyzing(true);
+    try {
+      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-item`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ imageUrl: previewUrl, itemName: newItem.name }),
+      });
+      if (!resp.ok) throw new Error("Analysis failed");
+      const analysis = await resp.json();
+      setNewItem((prev) => ({
+        ...prev,
+        category: analysis.category || prev.category,
+        color: analysis.color || prev.color,
+        style: analysis.style || prev.style,
+        season: analysis.season || prev.season,
+        occasion: analysis.occasion || prev.occasion,
+        name: prev.name || analysis.suggestedName || prev.name,
+      }));
+      toast.success("AI analysis complete!");
+    } catch (e: any) {
+      toast.error("AI analysis failed. Fill in details manually.");
+    } finally {
+      setAnalyzing(false);
     }
   };
 
@@ -181,6 +212,17 @@ const Closet = () => {
                     </label>
                   )}
                 </div>
+
+                {/* AI Analyze Button */}
+                <Button
+                  variant="outline"
+                  onClick={analyzeWithAI}
+                  disabled={analyzing || (!previewUrl && !newItem.name)}
+                  className="w-full border-primary/30 text-primary hover:bg-primary/10 font-sans"
+                >
+                  {analyzing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
+                  {analyzing ? "Analyzing..." : "Auto-detect with AI"}
+                </Button>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
