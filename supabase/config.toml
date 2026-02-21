@@ -1,1 +1,10 @@
 project_id = "uakkwvdjoqsceewhsfjb"
+
+[functions.ai-chat]
+verify_jwt = false
+
+[functions.generate-outfits]
+verify_jwt = false
+
+[functions.analyze-item]
+verify_jwt = false
