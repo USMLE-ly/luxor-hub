@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import {
-  Plus, Search, Filter, Shirt, Trash2, Upload, X, Edit2, Loader2, Sparkles,
+  Plus, Search, Filter, Shirt, Trash2, Upload, X, Edit2, Loader2, Sparkles, CheckCircle,
 } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
@@ -161,6 +161,19 @@ const Closet = () => {
     } else {
       setItems((prev) => prev.filter((item) => item.id !== id));
       toast.success("Item removed");
+    }
+  };
+
+  const handleWornToday = async (itemId: string) => {
+    if (!user) return;
+    const { error } = await supabase.from("wear_logs").insert({
+      user_id: user.id,
+      clothing_item_id: itemId,
+    });
+    if (error) {
+      toast.error("Failed to log wear");
+    } else {
+      toast.success("Marked as worn today! 👕");
     }
   };
 
@@ -344,6 +357,9 @@ const Closet = () => {
                       </div>
                     )}
                     <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                      <button onClick={() => handleWornToday(item.id)} className="p-2 rounded-full bg-primary/80 text-primary-foreground hover:bg-primary transition-colors" title="Worn today">
+                        <CheckCircle className="h-4 w-4" />
+                      </button>
                       <button onClick={() => handleDelete(item.id)} className="p-2 rounded-full bg-destructive/80 text-destructive-foreground hover:bg-destructive transition-colors">
                         <Trash2 className="h-4 w-4" />
                       </button>
