@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, UserPlus, UserCheck, MessageCircle, Share2, Sparkles } from "lucide-react";
+import { Heart, UserPlus, UserCheck, Share2, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -23,6 +24,7 @@ interface FeedLook {
 
 export const SocialFeed = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [looks, setLooks] = useState<FeedLook[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -81,6 +83,15 @@ export const SocialFeed = () => {
       await supabase.from("look_likes").delete().eq("user_id", user.id).eq("look_id", lookId);
     } else {
       await supabase.from("look_likes").insert({ user_id: user.id, look_id: lookId, look_type: "user" });
+      // Notify the look author
+      if (look.author_id !== user.id) {
+        await supabase.from("notifications").insert({
+          user_id: look.author_id,
+          actor_id: user.id,
+          type: "like",
+          reference_id: lookId,
+        });
+      }
     }
 
     setLooks((prev) =>
@@ -101,6 +112,12 @@ export const SocialFeed = () => {
       toast.success("Unfollowed");
     } else {
       await supabase.from("follows").insert({ follower_id: user.id, following_id: targetUserId });
+      // Notify the followed user
+      await supabase.from("notifications").insert({
+        user_id: targetUserId,
+        actor_id: user.id,
+        type: "follow",
+      });
       toast.success("Following! ✨");
     }
 
@@ -170,7 +187,7 @@ export const SocialFeed = () => {
                       {look.author_name[0]?.toUpperCase()}
                     </div>
                     <div>
-                      <p className="text-sm font-sans font-medium text-foreground">{look.author_name}</p>
+                      <p className="text-sm font-sans font-medium text-foreground cursor-pointer hover:text-primary transition-colors" onClick={() => navigate(`/profile/${look.author_id}`)}>{look.author_name}</p>
                       <p className="text-[10px] text-muted-foreground font-sans">{timeAgo(look.created_at)}</p>
                     </div>
                   </div>
