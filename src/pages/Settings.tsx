@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Settings as SettingsIcon, Save, User } from "lucide-react";
+import { NotificationPreferences } from "@/components/app/NotificationPreferences";
 
 const Settings = () => {
   const { user } = useAuth();
@@ -57,6 +58,10 @@ const Settings = () => {
               <Save className="h-4 w-4 mr-2" /> Save Changes
             </Button>
           </div>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="mt-6">
+          <NotificationPreferences />
         </motion.div>
       </div>
     </AppLayout>
