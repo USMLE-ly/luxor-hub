@@ -366,6 +366,7 @@ export type Database = {
           items: string[]
           mood: string | null
           occasion: string | null
+          photo_url: string | null
           title: string
           user_id: string
         }
@@ -378,6 +379,7 @@ export type Database = {
           items?: string[]
           mood?: string | null
           occasion?: string | null
+          photo_url?: string | null
           title: string
           user_id: string
         }
@@ -390,6 +392,7 @@ export type Database = {
           items?: string[]
           mood?: string | null
           occasion?: string | null
+          photo_url?: string | null
           title?: string
           user_id?: string
         }

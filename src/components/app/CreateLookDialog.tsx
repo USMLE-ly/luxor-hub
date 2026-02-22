@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, X, Loader2 } from "lucide-react";
+import { Plus, X, Loader2, Camera, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 
 interface CreateLookDialogProps {
@@ -29,11 +29,46 @@ export const CreateLookDialog = ({ open, onOpenChange, onCreated }: CreateLookDi
   const [mood, setMood] = useState("");
   const [isPublic, setIsPublic] = useState(false);
   const [items, setItems] = useState<string[]>([""]);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   const addItem = () => setItems([...items, ""]);
   const removeItem = (idx: number) => setItems(items.filter((_, i) => i !== idx));
   const updateItem = (idx: number, value: string) =>
     setItems(items.map((item, i) => (i === idx ? value : item)));
+
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be under 5MB");
+      return;
+    }
+    setPhotoFile(file);
+    setPhotoPreview(URL.createObjectURL(file));
+  };
+
+  const removePhoto = () => {
+    setPhotoFile(null);
+    if (photoPreview) URL.revokeObjectURL(photoPreview);
+    setPhotoPreview(null);
+  };
+
+  const uploadPhoto = async (): Promise<string | null> => {
+    if (!photoFile || !user) return null;
+    setUploading(true);
+    const ext = photoFile.name.split(".").pop();
+    const path = `${user.id}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("look-photos").upload(path, photoFile);
+    setUploading(false);
+    if (error) {
+      toast.error("Photo upload failed");
+      return null;
+    }
+    const { data: urlData } = supabase.storage.from("look-photos").getPublicUrl(path);
+    return urlData.publicUrl;
+  };
 
   const handleSave = async () => {
     if (!user || !title.trim()) {
@@ -47,6 +82,11 @@ export const CreateLookDialog = ({ open, onOpenChange, onCreated }: CreateLookDi
     }
 
     setSaving(true);
+    let photoUrl: string | null = null;
+    if (photoFile) {
+      photoUrl = await uploadPhoto();
+    }
+
     const { error } = await supabase.from("user_looks").insert({
       user_id: user.id,
       title: title.trim(),
@@ -55,6 +95,7 @@ export const CreateLookDialog = ({ open, onOpenChange, onCreated }: CreateLookDi
       mood: mood || null,
       items: validItems,
       is_public: isPublic,
+      photo_url: photoUrl,
     });
 
     if (error) {
@@ -67,6 +108,7 @@ export const CreateLookDialog = ({ open, onOpenChange, onCreated }: CreateLookDi
       setMood("");
       setIsPublic(false);
       setItems([""]);
+      removePhoto();
       onOpenChange(false);
       onCreated();
     }
@@ -81,6 +123,28 @@ export const CreateLookDialog = ({ open, onOpenChange, onCreated }: CreateLookDi
         </DialogHeader>
 
         <div className="space-y-4 mt-2">
+          {/* Photo Upload */}
+          <div>
+            <Label className="font-sans text-sm text-muted-foreground">Outfit Photo</Label>
+            {photoPreview ? (
+              <div className="relative mt-1 rounded-xl overflow-hidden border border-glass-border">
+                <img src={photoPreview} alt="Look preview" className="w-full h-48 object-cover" />
+                <button
+                  onClick={removePhoto}
+                  className="absolute top-2 right-2 p-1.5 rounded-full bg-background/80 backdrop-blur-sm text-foreground hover:text-destructive transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <label className="flex flex-col items-center justify-center mt-1 h-32 rounded-xl border-2 border-dashed border-glass-border bg-secondary/30 cursor-pointer hover:border-primary/50 transition-colors">
+                <Camera className="h-8 w-8 text-muted-foreground mb-2" />
+                <span className="text-xs font-sans text-muted-foreground">Tap to add a photo</span>
+                <input type="file" accept="image/*" onChange={handlePhotoSelect} className="hidden" />
+              </label>
+            )}
+          </div>
+
           <div>
             <Label className="font-sans text-sm text-muted-foreground">Title</Label>
             <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Weekend brunch vibes" className="bg-secondary border-glass-border mt-1" />
@@ -144,8 +208,8 @@ export const CreateLookDialog = ({ open, onOpenChange, onCreated }: CreateLookDi
             <Switch checked={isPublic} onCheckedChange={setIsPublic} />
           </div>
 
-          <Button onClick={handleSave} disabled={saving} className="w-full gold-gradient text-primary-foreground font-sans">
-            {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+          <Button onClick={handleSave} disabled={saving || uploading} className="w-full gold-gradient text-primary-foreground font-sans">
+            {(saving || uploading) ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ImageIcon className="h-4 w-4 mr-2" />}
             Create Look
           </Button>
         </div>

@@ -211,6 +211,13 @@ export const SocialFeed = () => {
                   )}
                 </div>
 
+                {/* Photo */}
+                {(look as any).photo_url && (
+                  <div className="rounded-xl overflow-hidden mb-3 border border-glass-border">
+                    <img src={(look as any).photo_url} alt={look.title} className="w-full h-56 object-cover" />
+                  </div>
+                )}
+
                 {/* Content */}
                 <h3 className="font-display text-lg font-bold text-foreground mb-1">{look.title}</h3>
                 {look.description && (
