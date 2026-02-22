@@ -178,13 +178,21 @@ const Auth = () => {
             Continue with Google
           </Button>
 
-          <div className="mt-6 text-center">
+          <div className="mt-6 text-center space-y-2">
             <button
               onClick={() => setIsLogin(!isLogin)}
-              className="text-sm text-muted-foreground hover:text-primary transition-colors font-sans"
+              className="text-sm text-muted-foreground hover:text-primary transition-colors font-sans block mx-auto"
             >
               {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
             </button>
+            {isLogin && (
+              <button
+                onClick={() => navigate("/forgot-password")}
+                className="text-xs text-muted-foreground hover:text-primary transition-colors font-sans block mx-auto"
+              >
+                Forgot your password?
+              </button>
+            )}
           </div>
         </div>
       </motion.div>
