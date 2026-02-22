@@ -224,6 +224,30 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_looks: {
+        Row: {
+          created_at: string
+          id: string
+          look_id: string
+          look_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          look_id: string
+          look_type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          look_id?: string
+          look_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       style_profiles: {
         Row: {
           archetype: string | null
@@ -253,6 +277,42 @@ export type Database = {
           preferences?: Json | null
           style_score?: number | null
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_looks: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_public: boolean
+          items: string[]
+          mood: string | null
+          occasion: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          items?: string[]
+          mood?: string | null
+          occasion?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          items?: string[]
+          mood?: string | null
+          occasion?: string | null
+          title?: string
           user_id?: string
         }
         Relationships: []
