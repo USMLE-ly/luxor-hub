@@ -52,13 +52,27 @@ const Outfits = () => {
     }
     setGenerating(true);
     try {
+      // Fetch upcoming events to factor into outfit suggestions
+      let upcomingEvents: any[] = [];
+      if (user) {
+        const today = new Date().toISOString().split("T")[0];
+        const { data: events } = await supabase
+          .from("calendar_events")
+          .select("title, event_date, occasion")
+          .eq("user_id", user.id)
+          .gte("event_date", today)
+          .order("event_date", { ascending: true })
+          .limit(5);
+        if (events) upcomingEvents = events;
+      }
+
       const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-outfits`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ closetItems, occasion, mood, styleProfile }),
+        body: JSON.stringify({ closetItems, occasion, mood, styleProfile, upcomingEvents }),
       });
       if (!resp.ok) {
         const err = await resp.json().catch(() => ({}));

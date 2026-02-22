@@ -4,6 +4,7 @@ import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Shirt, Wand2, Star, TrendingUp, RefreshCw, Sparkles, CloudSun, Droplets, Wind } from "lucide-react";
+import { CalendarWidget } from "@/components/app/CalendarWidget";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -168,6 +169,16 @@ const Dashboard = () => {
               <p className="text-muted-foreground font-sans">Outfit generation coming soon!</p>
             </div>
           )}
+        </motion.div>
+
+        {/* Calendar Widget */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45, duration: 0.5 }}
+          className="mb-8"
+        >
+          <CalendarWidget />
         </motion.div>
 
         {/* Style DNA */}
