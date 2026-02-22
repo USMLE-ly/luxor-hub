@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, UserPlus, UserCheck, Share2, Sparkles } from "lucide-react";
+import { Heart, UserPlus, UserCheck, Share2, Sparkles, TrendingUp, Flame } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { LookComments } from "./LookComments";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -20,12 +21,14 @@ interface FeedLook {
   liked: boolean;
   likeCount: number;
   isFollowing: boolean;
+  photo_url: string | null;
 }
 
 export const SocialFeed = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [looks, setLooks] = useState<FeedLook[]>([]);
+  const [trending, setTrending] = useState<FeedLook[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchFeed = async () => {
@@ -66,9 +69,17 @@ export const SocialFeed = () => {
       liked: likedSet.has(l.id),
       likeCount: likeCounts[l.id] || 0,
       isFollowing: followingSet.has(l.user_id),
+      photo_url: l.photo_url || null,
     }));
 
     setLooks(feedLooks);
+
+    // Build trending: most-liked looks from the past 7 days
+    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const recentLooks = feedLooks.filter((l) => l.created_at >= weekAgo);
+    const sorted = [...recentLooks].sort((a, b) => b.likeCount - a.likeCount).slice(0, 5);
+    setTrending(sorted.filter((l) => l.likeCount > 0));
+
     setLoading(false);
   };
 
@@ -164,6 +175,34 @@ export const SocialFeed = () => {
         <h2 className="font-display text-xl font-bold text-foreground">Community Feed</h2>
       </div>
 
+      {/* Trending Section */}
+      {trending.length > 0 && (
+        <div className="glass rounded-2xl p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Flame className="h-5 w-5 text-orange-400" />
+            <h3 className="font-display text-lg font-bold text-foreground">Trending This Week</h3>
+          </div>
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            {trending.map((look, i) => (
+              <div
+                key={look.id}
+                className="flex-shrink-0 w-48 rounded-xl bg-secondary/50 p-3 border border-glass-border hover:border-primary/30 transition-colors"
+              >
+                <div className="flex items-center gap-1 mb-2">
+                  <TrendingUp className="h-3 w-3 text-orange-400" />
+                  <span className="text-[10px] font-sans text-orange-400 font-medium">#{i + 1}</span>
+                </div>
+                {look.photo_url && (
+                  <img src={look.photo_url} alt={look.title} className="w-full h-24 object-cover rounded-lg mb-2" />
+                )}
+                <p className="text-sm font-display font-bold text-foreground truncate">{look.title}</p>
+                <p className="text-[10px] text-muted-foreground font-sans mt-0.5">{look.author_name} · {look.likeCount} ❤️</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {looks.length === 0 ? (
         <div className="text-center py-16">
           <Sparkles className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
@@ -212,9 +251,9 @@ export const SocialFeed = () => {
                 </div>
 
                 {/* Photo */}
-                {(look as any).photo_url && (
+                {look.photo_url && (
                   <div className="rounded-xl overflow-hidden mb-3 border border-glass-border">
-                    <img src={(look as any).photo_url} alt={look.title} className="w-full h-56 object-cover" />
+                    <img src={look.photo_url} alt={look.title} className="w-full h-56 object-cover" />
                   </div>
                 )}
 
@@ -267,6 +306,7 @@ export const SocialFeed = () => {
                   >
                     <Share2 className="h-4 w-4" />
                   </button>
+                  <LookComments lookId={look.id} lookType="user" lookAuthorId={look.author_id} />
                 </div>
               </motion.div>
             ))}

@@ -143,6 +143,33 @@ export type Database = {
         }
         Relationships: []
       }
+      look_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          look_id: string
+          look_type: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          look_id: string
+          look_type?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          look_id?: string
+          look_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       look_likes: {
         Row: {
           created_at: string
