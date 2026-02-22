@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Shirt, Wand2, Star, TrendingUp, RefreshCw, Sparkles } from "lucide-react";
+import { Shirt, Wand2, Star, TrendingUp, RefreshCw, Sparkles, CloudSun, Droplets, Wind } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -12,7 +12,8 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState({ items: 0, outfits: 0, styleScore: 0 });
   const [profile, setProfile] = useState<{ display_name: string | null }>({ display_name: null });
-  const [styleProfile, setStyleProfile] = useState<{ onboarding_completed: boolean | null; archetype: string | null }>({ onboarding_completed: false, archetype: null });
+  const [styleProfile, setStyleProfile] = useState<{ onboarding_completed: boolean | null; archetype: string | null }>({ onboarding_completed: null, archetype: null });
+  const [weather, setWeather] = useState<{ temp: number; description: string; icon: string; humidity: number; wind: number; outfitTip: string } | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -32,9 +33,31 @@ const Dashboard = () => {
       if (styleRes.data) setStyleProfile(styleRes.data);
     };
     fetchData();
+
+    // Fetch weather
+    const fetchWeather = async () => {
+      try {
+        // Try to get user location
+        let lat = 40.7128, lon = -74.006; // Default NYC
+        try {
+          const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
+            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 3000 })
+          );
+          lat = pos.coords.latitude;
+          lon = pos.coords.longitude;
+        } catch {}
+
+        const resp = await supabase.functions.invoke("get-weather", {
+          body: { lat, lon },
+        });
+        if (resp.data && !resp.error) setWeather(resp.data);
+      } catch {}
+    };
+    fetchWeather();
   }, [user]);
 
   useEffect(() => {
+    // Only redirect if we've actually loaded the data (not null) and it's explicitly false
     if (styleProfile.onboarding_completed === false && user) {
       navigate("/onboarding");
     }
@@ -78,6 +101,38 @@ const Dashboard = () => {
             </motion.div>
           ))}
         </div>
+
+        {/* Weather Widget */}
+        {weather && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35, duration: 0.5 }}
+            className="glass rounded-2xl p-6 mb-8"
+          >
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-4xl">{weather.icon}</span>
+                  <div>
+                    <p className="font-display text-3xl font-bold text-foreground">{weather.temp}°C</p>
+                    <p className="text-muted-foreground font-sans text-sm">{weather.description}</p>
+                  </div>
+                </div>
+                <div className="flex gap-4 mt-3 text-xs text-muted-foreground font-sans">
+                  <span className="flex items-center gap-1"><Droplets className="h-3 w-3" /> {weather.humidity}%</span>
+                  <span className="flex items-center gap-1"><Wind className="h-3 w-3" /> {weather.wind} km/h</span>
+                </div>
+              </div>
+              <div className="max-w-xs text-right">
+                <p className="text-xs text-primary font-sans font-medium flex items-center justify-end gap-1 mb-1">
+                  <CloudSun className="h-3 w-3" /> Weather-based tip
+                </p>
+                <p className="text-sm text-muted-foreground font-sans">{weather.outfitTip}</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {/* Today's Outfit Card */}
         <motion.div
