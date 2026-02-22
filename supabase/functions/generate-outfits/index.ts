@@ -9,7 +9,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { closetItems, occasion, mood, styleProfile } = await req.json();
+    const { closetItems, occasion, mood, styleProfile, upcomingEvents } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -17,18 +17,24 @@ serve(async (req) => {
       `- ${item.name || 'Unnamed'} (${item.category}, ${item.color || 'unknown color'}, ${item.style || 'unclassified'}, ${item.season || 'all-season'})`
     ).join("\n");
 
+    let calendarContext = "";
+    if (upcomingEvents && upcomingEvents.length > 0) {
+      calendarContext = `\n\nUpcoming calendar events (factor these into your suggestions):\n${upcomingEvents.map((e: any) => `- ${e.title} on ${e.event_date}${e.occasion ? ` (${e.occasion})` : ""}`).join("\n")}`;
+    }
+
     const systemPrompt = `You are AURELIA, an elite AI stylist. Generate exactly 3 complete outfit combinations from the user's closet items.
 
 User's closet items:
 ${itemsList}
 
-${styleProfile ? `Style DNA: ${styleProfile.archetype}` : ""}
+${styleProfile ? `Style DNA: ${styleProfile.archetype}` : ""}${calendarContext}
 
 Rules:
 - Each outfit must use ONLY items from the closet list above
 - Reference items by their exact names
 - Each outfit needs at minimum a top and bottom (or a dress)
-- Consider the occasion and mood requested`;
+- Consider the occasion and mood requested
+- If there are upcoming calendar events, tailor at least one outfit for the nearest event`;
 
     const userPrompt = `Create 3 outfits for: ${occasion || "everyday"}${mood ? `, mood: ${mood}` : ""}`;
 
