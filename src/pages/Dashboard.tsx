@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Shirt, Wand2, Star, TrendingUp, RefreshCw, Sparkles, CloudSun, Droplets, Wind } from "lucide-react";
 import { CalendarWidget } from "@/components/app/CalendarWidget";
+import { WardrobeStats } from "@/components/app/WardrobeStats";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -180,6 +181,11 @@ const Dashboard = () => {
         >
           <CalendarWidget />
         </motion.div>
+
+        {/* Wardrobe Stats */}
+        <div className="mb-8">
+          <WardrobeStats />
+        </div>
 
         {/* Style DNA */}
         {styleProfile.archetype && (
