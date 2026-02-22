@@ -122,6 +122,51 @@ export type Database = {
         }
         Relationships: []
       }
+      follows: {
+        Row: {
+          created_at: string
+          follower_id: string
+          following_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          follower_id: string
+          following_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          follower_id?: string
+          following_id?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      look_likes: {
+        Row: {
+          created_at: string
+          id: string
+          look_id: string
+          look_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          look_id: string
+          look_type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          look_id?: string
+          look_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       outfit_items: {
         Row: {
           clothing_item_id: string
@@ -283,6 +328,7 @@ export type Database = {
       }
       user_looks: {
         Row: {
+          author_name: string | null
           created_at: string
           description: string | null
           id: string
@@ -294,6 +340,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          author_name?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -305,6 +352,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          author_name?: string | null
           created_at?: string
           description?: string | null
           id?: string
