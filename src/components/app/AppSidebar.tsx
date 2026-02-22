@@ -1,4 +1,5 @@
-import { Home, Shirt, Wand2, MessageCircle, BarChart3, Settings, LogOut, Sparkles, Move } from "lucide-react";
+import { Home, Shirt, Wand2, MessageCircle, BarChart3, Settings, LogOut, Sparkles, Move, User } from "lucide-react";
+import { NotificationBell } from "./NotificationBell";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -44,7 +45,10 @@ export function AppSidebar() {
         {!collapsed && (
           <h1 className="font-display text-xl font-bold gold-text">AURELIA</h1>
         )}
-        <SidebarTrigger className="ml-auto text-muted-foreground hover:text-foreground" />
+        <div className="ml-auto flex items-center gap-1">
+          <NotificationBell />
+          <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
+        </div>
       </div>
 
       <SidebarContent className="px-2">
