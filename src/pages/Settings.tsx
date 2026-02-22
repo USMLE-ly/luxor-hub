@@ -6,14 +6,21 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Settings as SettingsIcon, Save, User } from "lucide-react";
+import { Settings as SettingsIcon, Save, User, Sun, Moon, Palette } from "lucide-react";
 import { NotificationPreferences } from "@/components/app/NotificationPreferences";
 
 const Settings = () => {
   const { user } = useAuth();
   const [displayName, setDisplayName] = useState("");
   const [saving, setSaving] = useState(false);
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== "undefined") {
+      return document.documentElement.classList.contains("dark");
+    }
+    return true;
+  });
 
   useEffect(() => {
     if (!user) return;
@@ -21,6 +28,29 @@ const Settings = () => {
       if (data?.display_name) setDisplayName(data.display_name);
     });
   }, [user]);
+
+  // Initialize theme from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("aurelia_theme");
+    if (saved === "light") {
+      document.documentElement.classList.remove("dark");
+      setIsDark(false);
+    } else {
+      document.documentElement.classList.add("dark");
+      setIsDark(true);
+    }
+  }, []);
+
+  const toggleTheme = (dark: boolean) => {
+    setIsDark(dark);
+    if (dark) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("aurelia_theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("aurelia_theme", "light");
+    }
+  };
 
   const handleSave = async () => {
     if (!user) return;
@@ -57,6 +87,31 @@ const Settings = () => {
             <Button onClick={handleSave} disabled={saving} className="gold-gradient text-primary-foreground font-sans">
               <Save className="h-4 w-4 mr-2" /> Save Changes
             </Button>
+          </div>
+        </motion.div>
+
+        {/* Theme Toggle */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="mt-6">
+          <div className="glass rounded-2xl p-6">
+            <h3 className="font-display text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+              <Palette className="h-5 w-5 text-primary" /> Appearance
+            </h3>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {isDark ? <Moon className="h-5 w-5 text-primary" /> : <Sun className="h-5 w-5 text-primary" />}
+                <div>
+                  <p className="text-sm font-sans text-foreground">{isDark ? "Dark Mode" : "Light Mode"}</p>
+                  <p className="text-xs text-muted-foreground font-sans">
+                    {isDark ? "Easy on the eyes, always stylish" : "Bright and airy aesthetic"}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Sun className="h-4 w-4 text-muted-foreground" />
+                <Switch checked={isDark} onCheckedChange={toggleTheme} />
+                <Moon className="h-4 w-4 text-muted-foreground" />
+              </div>
+            </div>
           </div>
         </motion.div>
 
