@@ -9,6 +9,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Wand2, Loader2, Heart, RefreshCw, Sparkles, Shirt } from "lucide-react";
+import { ShareButton } from "@/components/app/ShareCard";
 
 interface OutfitSuggestion {
   name: string;
@@ -180,6 +181,7 @@ const Outfits = () => {
                     <Button variant="ghost" size="icon" onClick={() => saveOutfit(outfit)} className="text-muted-foreground hover:text-primary">
                       <Heart className="h-4 w-4" />
                     </Button>
+                    <ShareButton outfit={outfit} />
                   </div>
                 </div>
 
