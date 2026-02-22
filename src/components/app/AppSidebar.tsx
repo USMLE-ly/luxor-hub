@@ -1,4 +1,4 @@
-import { Home, Shirt, Wand2, MessageCircle, BarChart3, Settings, LogOut, Sparkles } from "lucide-react";
+import { Home, Shirt, Wand2, MessageCircle, BarChart3, Settings, LogOut, Sparkles, Move } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -18,6 +18,7 @@ const navItems = [
   { title: "Dashboard", url: "/dashboard", icon: Home },
   { title: "My Closet", url: "/closet", icon: Shirt },
   { title: "Outfit Generator", url: "/outfits", icon: Wand2 },
+  { title: "Outfit Builder", url: "/outfit-builder", icon: Move },
   { title: "AI Stylist", url: "/chat", icon: MessageCircle },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Inspiration", url: "/inspiration", icon: Sparkles },
