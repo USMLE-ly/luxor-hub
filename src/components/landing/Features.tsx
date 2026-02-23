@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Shirt, Brain, MessageSquare, BarChart3, ShoppingBag, Palette } from "lucide-react";
 import { BentoGrid, type BentoItem } from "@/components/ui/bento-grid";
+import { GlowingEffect } from "@/components/ui/glowing-effect";
 
 const featureItems: BentoItem[] = [
   {
@@ -83,7 +84,63 @@ const Features = () => {
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          <BentoGrid items={featureItems} />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-4 max-w-7xl mx-auto">
+            {featureItems.map((item, index) => (
+              <div
+                key={index}
+                className={`relative list-none min-h-[12rem] ${item.colSpan === 2 ? "md:col-span-2" : "col-span-1"}`}
+              >
+                <div className="relative h-full rounded-[1.25rem] border-[0.75px] border-border p-2 md:rounded-[1.5rem] md:p-3">
+                  <GlowingEffect
+                    spread={40}
+                    glow={true}
+                    disabled={false}
+                    proximity={64}
+                    inactiveZone={0.01}
+                    borderWidth={3}
+                  />
+                  <div className="relative flex h-full flex-col justify-between gap-4 overflow-hidden rounded-xl border-[0.75px] border-border bg-background p-6 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-muted group-hover:bg-primary/10 transition-all duration-300">
+                        {item.icon}
+                      </div>
+                      <span className="text-xs font-medium px-2 py-1 rounded-lg backdrop-blur-sm bg-muted text-muted-foreground">
+                        {item.status || "Active"}
+                      </span>
+                    </div>
+
+                    <div className="space-y-2">
+                      <h3 className="font-medium text-foreground tracking-tight text-[15px]">
+                        {item.title}
+                        <span className="ml-2 text-xs text-muted-foreground font-normal">
+                          {item.meta}
+                        </span>
+                      </h3>
+                      <p className="text-sm text-muted-foreground leading-snug">
+                        {item.description}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-between mt-2">
+                      <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                        {item.tags?.map((tag, i) => (
+                          <span
+                            key={i}
+                            className="px-2 py-1 rounded-md bg-muted backdrop-blur-sm"
+                          >
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {item.cta || "Explore →"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </motion.div>
       </div>
     </section>

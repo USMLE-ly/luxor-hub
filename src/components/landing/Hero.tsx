@@ -4,12 +4,19 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { SplineScene } from "@/components/ui/splite";
 import { Spotlight } from "@/components/ui/spotlight";
+import { Boxes } from "@/components/ui/background-boxes";
 
 const Hero = () => {
   const navigate = useNavigate();
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Background Boxes */}
+      <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
+        <div className="absolute inset-0 w-full h-full bg-background z-20 [mask-image:radial-gradient(transparent,white)] pointer-events-none" />
+        <Boxes />
+      </div>
+
       {/* Spotlight effect */}
       <Spotlight
         className="-top-40 left-0 md:left-60 md:-top-20"

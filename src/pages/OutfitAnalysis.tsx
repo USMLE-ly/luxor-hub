@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { StyleComparison } from "@/components/app/StyleComparison";
 import { motion, AnimatePresence } from "framer-motion";
+import { GlowingEffect } from "@/components/ui/glowing-effect";
 
 interface OutfitAnalysisData {
   overallStyle: string;
@@ -236,7 +237,6 @@ export default function OutfitAnalysis() {
       setSaved(true);
       toast.success("Analysis saved!");
       fetchHistory();
-      // Check for new badge unlocks after saving
       checkAndUnlockBadges();
     } catch (err: any) {
       toast.error(err.message || "Failed to save");
@@ -259,7 +259,6 @@ export default function OutfitAnalysis() {
     setImageFile(null);
   };
 
-  // Share helpers
   const shareText = analysis
     ? `My outfit scored ${analysis.styleScore}/100 — "${analysis.overallStyle}" ✨ Analyzed by AURELIA AI\n${analysis.summary}`
     : "";
@@ -279,7 +278,6 @@ export default function OutfitAnalysis() {
     if (!analysis || !user || !imageUrl) return;
     setIsPostingToFeed(true);
     try {
-      // Get display name
       const { data: profile } = await supabase
         .from("profiles")
         .select("display_name")
@@ -371,83 +369,111 @@ export default function OutfitAnalysis() {
   return (
     <AppLayout>
       <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-8">
-        <div>
-          <h1 className="font-display text-3xl font-bold text-foreground">
+        {/* Premium Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative"
+        >
+          <div className="absolute -top-4 -left-4 w-32 h-32 bg-primary/10 rounded-full blur-[60px]" />
+          <h1 className="font-display text-4xl font-bold text-foreground relative">
             AI Outfit <span className="gold-text">Analysis</span>
           </h1>
-          <p className="text-muted-foreground mt-1">Upload a photo and get comprehensive styling feedback</p>
-        </div>
+          <p className="text-muted-foreground mt-2 text-lg">Upload a photo and get comprehensive styling feedback powered by AI</p>
+        </motion.div>
 
         <Tabs defaultValue="analyze" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="analyze" className="flex items-center gap-2">
+          <TabsList className="grid w-full grid-cols-3 mb-6 bg-muted/50 backdrop-blur-sm">
+            <TabsTrigger value="analyze" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Sparkles className="w-4 h-4" /> Analyze
             </TabsTrigger>
-            <TabsTrigger value="history" className="flex items-center gap-2" onClick={fetchHistory}>
+            <TabsTrigger value="history" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground" onClick={fetchHistory}>
               <History className="w-4 h-4" /> History
             </TabsTrigger>
-            <TabsTrigger value="compare" className="flex items-center gap-2" onClick={fetchHistory}>
+            <TabsTrigger value="compare" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground" onClick={fetchHistory}>
               <ArrowLeftRight className="w-4 h-4" /> Compare
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="analyze" className="space-y-6">
-            {/* Upload Section */}
-            <Card className="glass-card overflow-hidden">
-              <CardContent className="p-6">
-                <div className="flex flex-col md:flex-row gap-6 items-start">
-                  <div
-                    className="relative w-full md:w-80 aspect-[3/4] rounded-xl border-2 border-dashed border-border hover:border-primary/50 transition-colors cursor-pointer overflow-hidden bg-muted/30 flex-shrink-0"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    {imagePreview ? (
-                      <img src={imagePreview} alt="Outfit" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-muted-foreground">
-                        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                          <Camera className="w-8 h-8 text-primary" />
-                        </div>
-                        <p className="font-medium text-foreground">Upload Outfit Photo</p>
-                        <p className="text-sm">JPG, PNG up to 10MB</p>
-                      </div>
-                    )}
-                    <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
-                  </div>
-
-                  <div className="flex-1 space-y-4">
-                    <div className="space-y-2">
-                      <h3 className="font-display text-lg font-semibold text-foreground">How it works</h3>
-                      <div className="space-y-3">
-                        {[
-                          { icon: Upload, text: "Upload a full-body outfit photo" },
-                          { icon: Sparkles, text: "AI analyzes style, colors, fit & occasion" },
-                          { icon: TrendingUp, text: "Get detailed scores and improvement tips" },
-                        ].map((step, i) => (
-                          <div key={i} className="flex items-center gap-3 text-sm text-muted-foreground">
-                            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                              <step.icon className="w-4 h-4 text-primary" />
-                            </div>
-                            <span>{step.text}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    <Button
-                      onClick={handleAnalyze}
-                      disabled={!imageFile || isAnalyzing}
-                      className="gold-gradient text-primary-foreground font-semibold w-full md:w-auto"
-                      size="lg"
+            {/* Upload Section with GlowingEffect */}
+            <div className="relative rounded-[1.5rem] border-[0.75px] border-border p-3">
+              <GlowingEffect
+                spread={40}
+                glow={true}
+                disabled={false}
+                proximity={64}
+                inactiveZone={0.01}
+                borderWidth={3}
+              />
+              <Card className="glass-card overflow-hidden border-0 shadow-none">
+                <CardContent className="p-6">
+                  <div className="flex flex-col md:flex-row gap-6 items-start">
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      transition={{ duration: 0.3 }}
+                      className="relative w-full md:w-80 aspect-[3/4] rounded-xl border-2 border-dashed border-border hover:border-primary/50 transition-colors cursor-pointer overflow-hidden bg-muted/30 flex-shrink-0"
+                      onClick={() => fileInputRef.current?.click()}
                     >
-                      {isAnalyzing ? (
-                        <><Loader2 className="w-5 h-5 mr-2 animate-spin" />Analyzing...</>
+                      {imagePreview ? (
+                        <img src={imagePreview} alt="Outfit" className="w-full h-full object-cover" />
                       ) : (
-                        <><Sparkles className="w-5 h-5 mr-2" />Analyze My Outfit</>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-muted-foreground">
+                          <motion.div
+                            animate={{ y: [0, -5, 0] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                            className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center"
+                          >
+                            <Camera className="w-8 h-8 text-primary" />
+                          </motion.div>
+                          <p className="font-medium text-foreground">Upload Outfit Photo</p>
+                          <p className="text-sm">JPG, PNG up to 10MB</p>
+                        </div>
                       )}
-                    </Button>
+                      <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
+                    </motion.div>
+
+                    <div className="flex-1 space-y-4">
+                      <div className="space-y-2">
+                        <h3 className="font-display text-lg font-semibold text-foreground">How it works</h3>
+                        <div className="space-y-3">
+                          {[
+                            { icon: Upload, text: "Upload a full-body outfit photo", color: "text-primary" },
+                            { icon: Sparkles, text: "AI analyzes style, colors, fit & occasion", color: "text-primary" },
+                            { icon: TrendingUp, text: "Get detailed scores and improvement tips", color: "text-primary" },
+                          ].map((step, i) => (
+                            <motion.div
+                              key={i}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: i * 0.15 }}
+                              className="flex items-center gap-3 text-sm text-muted-foreground"
+                            >
+                              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                <step.icon className={`w-4 h-4 ${step.color}`} />
+                              </div>
+                              <span>{step.text}</span>
+                            </motion.div>
+                          ))}
+                        </div>
+                      </div>
+                      <Button
+                        onClick={handleAnalyze}
+                        disabled={!imageFile || isAnalyzing}
+                        className="gold-gradient text-primary-foreground font-semibold w-full md:w-auto gold-glow"
+                        size="lg"
+                      >
+                        {isAnalyzing ? (
+                          <><Loader2 className="w-5 h-5 mr-2 animate-spin" />Analyzing...</>
+                        ) : (
+                          <><Sparkles className="w-5 h-5 mr-2" />Analyze My Outfit</>
+                        )}
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
 
             {/* Results */}
             <AnimatePresence>
@@ -459,22 +485,27 @@ export default function OutfitAnalysis() {
                   className="space-y-6"
                 >
                   {/* Action bar */}
-                  <div className="flex items-center gap-3 justify-end flex-wrap">
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="flex items-center gap-3 justify-end flex-wrap"
+                  >
                     {!saved && (
-                      <Button onClick={handleSave} disabled={isSaving} variant="outline" className="border-primary/30">
+                      <Button onClick={handleSave} disabled={isSaving} variant="outline" className="border-primary/30 hover:bg-primary/10">
                         {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
                         {saved ? "Saved!" : "Save Analysis"}
                       </Button>
                     )}
                     {saved && <Badge className="bg-green-500/15 text-green-500 border-green-500/30">✓ Saved</Badge>}
-                    <Button onClick={handlePostToFeed} disabled={isPostingToFeed} variant="outline" className="border-primary/30">
+                    <Button onClick={handlePostToFeed} disabled={isPostingToFeed} variant="outline" className="border-primary/30 hover:bg-primary/10">
                       {isPostingToFeed ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Users className="w-4 h-4 mr-2" />}
                       Post to Feed
                     </Button>
-                    <Button onClick={() => setShareOpen(true)} variant="outline" className="border-primary/30">
+                    <Button onClick={() => setShareOpen(true)} variant="outline" className="border-primary/30 hover:bg-primary/10">
                       <Share2 className="w-4 h-4 mr-2" /> Share
                     </Button>
-                  </div>
+                  </motion.div>
 
                   <AnalysisResults analysis={analysis} getScoreColor={getScoreColor} getPriorityColor={getPriorityColor} />
                 </motion.div>
@@ -484,47 +515,35 @@ export default function OutfitAnalysis() {
 
           <TabsContent value="history" className="space-y-4">
             {/* Filters */}
-            <div className="flex flex-wrap gap-3 items-end">
+            <div className="flex flex-wrap gap-3 items-end p-4 rounded-xl bg-muted/30 backdrop-blur-sm border border-border">
               <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">Style</label>
+                <label className="text-xs text-muted-foreground font-medium">Style</label>
                 <input
                   type="text"
                   placeholder="Filter by style..."
                   value={styleFilter}
                   onChange={(e) => setStyleFilter(e.target.value)}
-                  className="h-9 rounded-lg border border-border bg-muted/30 px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 w-40"
+                  className="h-9 rounded-lg border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 w-40"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">Min Score</label>
-                <input
-                  type="number"
-                  min={0}
-                  max={100}
-                  placeholder="0"
-                  value={minScore}
+                <label className="text-xs text-muted-foreground font-medium">Min Score</label>
+                <input type="number" min={0} max={100} placeholder="0" value={minScore}
                   onChange={(e) => setMinScore(e.target.value)}
-                  className="h-9 rounded-lg border border-border bg-muted/30 px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 w-20"
+                  className="h-9 rounded-lg border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 w-20"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">Max Score</label>
-                <input
-                  type="number"
-                  min={0}
-                  max={100}
-                  placeholder="100"
-                  value={maxScore}
+                <label className="text-xs text-muted-foreground font-medium">Max Score</label>
+                <input type="number" min={0} max={100} placeholder="100" value={maxScore}
                   onChange={(e) => setMaxScore(e.target.value)}
-                  className="h-9 rounded-lg border border-border bg-muted/30 px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 w-20"
+                  className="h-9 rounded-lg border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 w-20"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">Date</label>
-                <select
-                  value={dateFilter}
-                  onChange={(e) => setDateFilter(e.target.value)}
-                  className="h-9 rounded-lg border border-border bg-muted/30 px-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                <label className="text-xs text-muted-foreground font-medium">Date</label>
+                <select value={dateFilter} onChange={(e) => setDateFilter(e.target.value)}
+                  className="h-9 rounded-lg border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
                 >
                   <option value="all">All time</option>
                   <option value="7d">Last 7 days</option>
@@ -552,15 +571,16 @@ export default function OutfitAnalysis() {
               </div>
             ) : (
               <div className="grid gap-4 md:grid-cols-2">
-                {filteredHistory.map((h) => (
+                {filteredHistory.map((h, i) => (
                   <motion.div
                     key={h.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="glass rounded-xl overflow-hidden cursor-pointer group"
+                    transition={{ delay: i * 0.05 }}
+                    className="relative rounded-[1.25rem] border-[0.75px] border-border p-2 cursor-pointer group"
                     onClick={() => loadSavedAnalysis(h)}
                   >
-                    <div className="flex gap-4 p-4">
+                    <div className="relative flex gap-4 p-4 rounded-xl bg-background overflow-hidden">
                       <img src={h.image_url} alt={h.overall_style} className="w-20 h-28 object-cover rounded-lg flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
@@ -609,11 +629,11 @@ export default function OutfitAnalysis() {
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
                 onClick={(e) => e.stopPropagation()}
-                className="w-full max-w-md glass rounded-xl p-5 space-y-4"
+                className="w-full max-w-md glass rounded-2xl p-6 space-y-4 border border-primary/20"
               >
                 <div className="flex items-center justify-between">
                   <h4 className="font-display text-lg font-bold text-foreground">Share Analysis</h4>
-                  <button onClick={() => setShareOpen(false)} className="text-muted-foreground hover:text-foreground">
+                  <button onClick={() => setShareOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors">
                     <X className="h-4 w-4" />
                   </button>
                 </div>
@@ -632,16 +652,16 @@ export default function OutfitAnalysis() {
                 </div>
 
                 <div className="grid grid-cols-4 gap-2">
-                  <Button variant="outline" className="border-border flex-col h-auto py-3" onClick={() => { if (navigator.share) { navigator.share({ title: `AURELIA: ${analysis.overallStyle}`, text: shareText }); } else { handleCopyLink(); } }}>
+                  <Button variant="outline" className="border-border flex-col h-auto py-3 hover:bg-primary/10" onClick={() => { if (navigator.share) { navigator.share({ title: `AURELIA: ${analysis.overallStyle}`, text: shareText }); } else { handleCopyLink(); } }}>
                     <Share2 className="h-4 w-4 mb-1" /><span className="text-[10px]">Share</span>
                   </Button>
-                  <Button variant="outline" className="border-border flex-col h-auto py-3" onClick={handleShareTwitter}>
+                  <Button variant="outline" className="border-border flex-col h-auto py-3 hover:bg-primary/10" onClick={handleShareTwitter}>
                     <Twitter className="h-4 w-4 mb-1" /><span className="text-[10px]">X</span>
                   </Button>
-                  <Button variant="outline" className="border-border flex-col h-auto py-3" onClick={handleDownloadCard}>
+                  <Button variant="outline" className="border-border flex-col h-auto py-3 hover:bg-primary/10" onClick={handleDownloadCard}>
                     <Download className="h-4 w-4 mb-1" /><span className="text-[10px]">Download</span>
                   </Button>
-                  <Button variant="outline" className="border-border flex-col h-auto py-3" onClick={handleCopyLink}>
+                  <Button variant="outline" className="border-border flex-col h-auto py-3 hover:bg-primary/10" onClick={handleCopyLink}>
                     {copied ? <Check className="h-4 w-4 mb-1 text-primary" /> : <Link className="h-4 w-4 mb-1" />}
                     <span className="text-[10px]">{copied ? "Copied!" : "Copy"}</span>
                   </Button>
@@ -655,7 +675,7 @@ export default function OutfitAnalysis() {
   );
 }
 
-// Extracted results component
+// Premium results component with glowing cards
 function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
   analysis: OutfitAnalysisData;
   getScoreColor: (s: number) => string;
@@ -663,30 +683,42 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
 }) {
   return (
     <>
-      {/* Overall Score */}
-      <Card className="glass-card overflow-hidden">
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-            <div className="relative w-24 h-24 flex-shrink-0">
-              <svg className="w-24 h-24 -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="42" fill="none" stroke="hsl(var(--muted))" strokeWidth="8" />
-                <circle cx="50" cy="50" r="42" fill="none" stroke="hsl(var(--primary))" strokeWidth="8" strokeLinecap="round"
-                  strokeDasharray={`${(analysis.styleScore / 100) * 264} 264`} />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-2xl font-bold text-foreground">{analysis.styleScore}</span>
+      {/* Overall Score — Premium card */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="relative rounded-[1.5rem] border-[0.75px] border-border p-3"
+      >
+        <GlowingEffect spread={60} glow={true} disabled={false} proximity={80} inactiveZone={0.01} borderWidth={3} />
+        <Card className="glass-card overflow-hidden border-0 shadow-none">
+          <CardContent className="p-6">
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+              <div className="relative w-28 h-28 flex-shrink-0">
+                <svg className="w-28 h-28 -rotate-90" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="42" fill="none" stroke="hsl(var(--muted))" strokeWidth="6" />
+                  <motion.circle
+                    cx="50" cy="50" r="42" fill="none" stroke="hsl(var(--primary))" strokeWidth="6" strokeLinecap="round"
+                    initial={{ strokeDasharray: "0 264" }}
+                    animate={{ strokeDasharray: `${(analysis.styleScore / 100) * 264} 264` }}
+                    transition={{ duration: 1.5, ease: "easeOut" }}
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-3xl font-bold text-foreground">{analysis.styleScore}</span>
+                </div>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <h2 className="font-display text-2xl font-bold text-foreground">{analysis.overallStyle}</h2>
+                  <Badge className="gold-gradient text-primary-foreground">{analysis.seasonalFit}</Badge>
+                </div>
+                <p className="text-muted-foreground leading-relaxed">{analysis.summary}</p>
               </div>
             </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <h2 className="font-display text-2xl font-bold text-foreground">{analysis.overallStyle}</h2>
-                <Badge className="gold-gradient text-primary-foreground">{analysis.seasonalFit}</Badge>
-              </div>
-              <p className="text-muted-foreground">{analysis.summary}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* Occasion Ratings */}
       <Card className="glass-card">
@@ -719,14 +751,20 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
           </CardHeader>
           <CardContent className="space-y-3">
             {analysis.detectedItems.map((item, i) => (
-              <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.08 }}
+                className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
+              >
                 <div className="w-3 h-3 rounded-full border border-border" style={{ backgroundColor: item.color.startsWith("#") ? item.color : undefined }} />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">{item.name}</p>
                   <p className="text-xs text-muted-foreground">{item.category} · {item.style}</p>
                 </div>
                 <Badge variant="outline" className="text-xs">{item.color}</Badge>
-              </div>
+              </motion.div>
             ))}
           </CardContent>
         </Card>
@@ -741,7 +779,15 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
           <CardContent className="space-y-4">
             <div className="flex gap-2">
               {analysis.colorPalette.colors.map((c, i) => (
-                <div key={i} className="flex-1 aspect-square rounded-lg border border-border shadow-sm" style={{ backgroundColor: c }} title={c} />
+                <motion.div
+                  key={i}
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: i * 0.1, type: "spring" }}
+                  className="flex-1 aspect-square rounded-lg border border-border shadow-sm hover:scale-110 transition-transform cursor-pointer"
+                  style={{ backgroundColor: c }}
+                  title={c}
+                />
               ))}
             </div>
             <div className="space-y-2">
@@ -769,10 +815,16 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
           </CardHeader>
           <CardContent className="space-y-3">
             {analysis.strengths.map((s, i) => (
-              <div key={i} className="flex items-start gap-3">
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.08 }}
+                className="flex items-start gap-3"
+              >
                 <ChevronRight className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                <p className="text-sm text-foreground">{s}</p>
-              </div>
+                <span className="text-sm text-foreground">{s}</span>
+              </motion.div>
             ))}
           </CardContent>
         </Card>
@@ -780,18 +832,24 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
         <Card className="glass-card">
           <CardHeader>
             <CardTitle className="font-display flex items-center gap-2 text-foreground">
-              <AlertTriangle className="w-5 h-5 text-yellow-500" /> Suggestions to Improve
+              <AlertTriangle className="w-5 h-5 text-yellow-500" /> Improvements
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {analysis.improvements.map((imp, i) => (
-              <div key={i} className="p-3 rounded-lg bg-muted/30 space-y-1">
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.08 }}
+                className="space-y-1"
+              >
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className={`text-xs ${getPriorityColor(imp.priority)}`}>{imp.priority}</Badge>
-                  <p className="text-sm font-medium text-foreground">{imp.suggestion}</p>
+                  <Badge className={`text-[10px] ${getPriorityColor(imp.priority)}`}>{imp.priority}</Badge>
+                  <span className="text-sm font-medium text-foreground">{imp.suggestion}</span>
                 </div>
-                <p className="text-xs text-muted-foreground">{imp.reason}</p>
-              </div>
+                <p className="text-xs text-muted-foreground ml-6">{imp.reason}</p>
+              </motion.div>
             ))}
           </CardContent>
         </Card>

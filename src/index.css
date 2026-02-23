@@ -6,6 +6,11 @@
 
 @layer base {
   :root {
+    --color-1: 0 100% 63%;
+    --color-2: 270 100% 63%;
+    --color-3: 210 100% 63%;
+    --color-4: 195 100% 63%;
+    --color-5: 90 100% 63%;
     --background: 45 20% 96%;
     --foreground: 240 10% 10%;
 
@@ -102,12 +107,15 @@
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: hsl(var(--border));
     transition: background-color 0.3s ease, color 0.2s ease, border-color 0.3s ease;
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     font-family: 'Inter', sans-serif;
   }
 
@@ -118,11 +126,15 @@
 
 @layer utilities {
   .glass {
-    @apply bg-card/60 backdrop-blur-xl border border-glass-border;
+    background-color: hsl(var(--card) / 0.6);
+    backdrop-filter: blur(24px);
+    border: 1px solid hsl(var(--glass-border));
   }
 
   .glass-strong {
-    @apply bg-card/80 backdrop-blur-2xl border border-glass-border;
+    background-color: hsl(var(--card) / 0.8);
+    backdrop-filter: blur(40px);
+    border: 1px solid hsl(var(--glass-border));
   }
 
   .gold-gradient {
