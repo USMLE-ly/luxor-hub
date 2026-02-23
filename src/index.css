@@ -155,4 +155,32 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  .hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px -5px hsl(var(--foreground) / 0.1);
+  }
+
+  .gold-shimmer {
+    background: linear-gradient(
+      110deg,
+      hsl(var(--gold-dark)) 0%,
+      hsl(var(--gold-light)) 45%,
+      hsl(var(--gold-dark)) 55%,
+      hsl(var(--gold-light)) 100%
+    );
+    background-size: 250% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer-slide 3s ease-in-out infinite;
+  }
+
+  @keyframes shimmer-slide {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
 }

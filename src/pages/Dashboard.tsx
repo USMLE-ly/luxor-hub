@@ -1,14 +1,39 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Shirt, Wand2, Star, TrendingUp, RefreshCw, Sparkles, CloudSun, Droplets, Wind } from "lucide-react";
+import { Shirt, Wand2, Star, TrendingUp, RefreshCw, Sparkles, CloudSun, Droplets, Wind, Camera, MessageSquare } from "lucide-react";
 import { CalendarWidget } from "@/components/app/CalendarWidget";
 import { WardrobeStats } from "@/components/app/WardrobeStats";
 import { WeeklyStyleReport } from "@/components/app/WeeklyStyleReport";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import DisplayCards from "@/components/ui/display-cards";
+import { GlowingEffect } from "@/components/ui/glowing-effect";
+import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
+
+function AnimatedCounter({ target, duration = 1.5 }: { target: number | string; duration?: number }) {
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLSpanElement>(null);
+  const numTarget = typeof target === "string" ? parseInt(target) || 0 : target;
+
+  useEffect(() => {
+    if (numTarget === 0) return;
+    let start = 0;
+    const startTime = performance.now();
+    const step = (now: number) => {
+      const progress = Math.min((now - startTime) / (duration * 1000), 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.round(eased * numTarget));
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [numTarget, duration]);
+
+  if (typeof target === "string" && target.includes("%")) return <span ref={ref}>{count}%</span>;
+  return <span ref={ref}>{count}</span>;
+}
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -37,11 +62,9 @@ const Dashboard = () => {
     };
     fetchData();
 
-    // Fetch weather
     const fetchWeather = async () => {
       try {
-        // Try to get user location
-        let lat = 40.7128, lon = -74.006; // Default NYC
+        let lat = 40.7128, lon = -74.006;
         try {
           const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
             navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 3000 })
@@ -49,10 +72,7 @@ const Dashboard = () => {
           lat = pos.coords.latitude;
           lon = pos.coords.longitude;
         } catch {}
-
-        const resp = await supabase.functions.invoke("get-weather", {
-          body: { lat, lon },
-        });
+        const resp = await supabase.functions.invoke("get-weather", { body: { lat, lon } });
         if (resp.data && !resp.error) setWeather(resp.data);
       } catch {}
     };
@@ -60,7 +80,6 @@ const Dashboard = () => {
   }, [user]);
 
   useEffect(() => {
-    // Only redirect if we've actually loaded the data (not null) and it's explicitly false
     if (styleProfile.onboarding_completed === false && user) {
       navigate("/onboarding");
     }
@@ -76,6 +95,36 @@ const Dashboard = () => {
     { label: "Trend Match", value: "87%", icon: TrendingUp, color: "text-gold-light" },
   ];
 
+  const displayCardsData = [
+    {
+      icon: <Shirt className="size-4 text-primary" />,
+      title: "Closet",
+      description: `${stats.items} items cataloged`,
+      date: "Updated today",
+      iconClassName: "text-primary",
+      titleClassName: "text-primary",
+      className: "[grid-area:stack] hover:-translate-y-10 before:absolute before:w-[100%] before:outline-1 before:rounded-xl before:outline-border before:h-[100%] before:content-[''] before:bg-blend-overlay before:bg-background/50 grayscale-[100%] hover:before:opacity-0 before:transition-opacity before:duration-700 hover:grayscale-0 before:left-0 before:top-0",
+    },
+    {
+      icon: <Star className="size-4 text-primary" />,
+      title: "Style Score",
+      description: `${stats.styleScore}/100 rating`,
+      date: "This week",
+      iconClassName: "text-primary",
+      titleClassName: "text-primary",
+      className: "[grid-area:stack] translate-x-12 translate-y-10 hover:-translate-y-1 before:absolute before:w-[100%] before:outline-1 before:rounded-xl before:outline-border before:h-[100%] before:content-[''] before:bg-blend-overlay before:bg-background/50 grayscale-[100%] hover:before:opacity-0 before:transition-opacity before:duration-700 hover:grayscale-0 before:left-0 before:top-0",
+    },
+    {
+      icon: <Wand2 className="size-4 text-primary" />,
+      title: "Outfits",
+      description: `${stats.outfits} created`,
+      date: "All time",
+      iconClassName: "text-primary",
+      titleClassName: "text-primary",
+      className: "[grid-area:stack] translate-x-24 translate-y-20 hover:translate-y-10",
+    },
+  ];
+
   return (
     <AppLayout>
       <div className="p-6 lg:p-8 max-w-7xl mx-auto">
@@ -86,24 +135,60 @@ const Dashboard = () => {
           <p className="text-muted-foreground font-sans text-sm mb-8">Here's your style overview for today.</p>
         </motion.div>
 
-        {/* Stats Grid */}
+        {/* DisplayCards showcase */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.5 }}
+          className="flex justify-center mb-12"
+        >
+          <div className="w-full max-w-lg">
+            <DisplayCards cards={displayCardsData} />
+          </div>
+        </motion.div>
+
+        {/* Stats Grid with GlowingEffect */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {statCards.map((stat, i) => (
             <motion.div
               key={stat.label}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1, duration: 0.4 }}
-              className="glass rounded-xl p-5"
+              transition={{ delay: 0.2 + i * 0.1, duration: 0.4 }}
+              className="relative rounded-[1.25rem] border-[0.75px] border-border p-2"
             >
-              <div className="flex items-center justify-between mb-3">
-                <stat.icon className={`h-5 w-5 ${stat.color}`} />
+              <GlowingEffect
+                spread={40}
+                glow={true}
+                disabled={false}
+                proximity={64}
+                inactiveZone={0.01}
+                borderWidth={2}
+              />
+              <div className="relative glass rounded-xl p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <stat.icon className={`h-5 w-5 ${stat.color}`} />
+                </div>
+                <p className="font-display text-2xl font-bold text-foreground">
+                  <AnimatedCounter target={stat.value} />
+                </p>
+                <p className="text-muted-foreground font-sans text-xs mt-1">{stat.label}</p>
               </div>
-              <p className="font-display text-2xl font-bold text-foreground">{stat.value}</p>
-              <p className="text-muted-foreground font-sans text-xs mt-1">{stat.label}</p>
             </motion.div>
           ))}
         </div>
+
+        {/* Quick Actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.5 }}
+          className="flex flex-wrap items-center gap-3 mb-8"
+        >
+          <InteractiveHoverButton text="My Closet" onClick={() => navigate("/closet")} className="w-36 border-border" />
+          <InteractiveHoverButton text="Analyze" onClick={() => navigate("/outfit-analysis")} className="w-36 border-border" />
+          <InteractiveHoverButton text="AI Chat" onClick={() => navigate("/chat")} className="w-36 border-border" />
+        </motion.div>
 
         {/* Weather Widget */}
         {weather && (

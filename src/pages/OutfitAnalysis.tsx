@@ -16,6 +16,7 @@ import {
 import { StyleComparison } from "@/components/app/StyleComparison";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
+import { RainbowButton } from "@/components/ui/rainbow-button";
 
 interface OutfitAnalysisData {
   overallStyle: string;
@@ -457,18 +458,23 @@ export default function OutfitAnalysis() {
                           ))}
                         </div>
                       </div>
-                      <Button
-                        onClick={handleAnalyze}
-                        disabled={!imageFile || isAnalyzing}
-                        className="gold-gradient text-primary-foreground font-semibold w-full md:w-auto gold-glow"
-                        size="lg"
-                      >
-                        {isAnalyzing ? (
-                          <><Loader2 className="w-5 h-5 mr-2 animate-spin" />Analyzing...</>
-                        ) : (
-                          <><Sparkles className="w-5 h-5 mr-2" />Analyze My Outfit</>
-                        )}
-                      </Button>
+                      {isAnalyzing ? (
+                        <Button
+                          disabled
+                          className="gold-gradient text-primary-foreground font-semibold w-full md:w-auto gold-glow"
+                          size="lg"
+                        >
+                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />Analyzing...
+                        </Button>
+                      ) : (
+                        <RainbowButton
+                          onClick={handleAnalyze}
+                          disabled={!imageFile}
+                          className="w-full md:w-auto px-8 font-semibold"
+                        >
+                          <Sparkles className="w-5 h-5 mr-2" />Analyze My Outfit
+                        </RainbowButton>
+                      )}
                     </div>
                   </div>
                 </CardContent>

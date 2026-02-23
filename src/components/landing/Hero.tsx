@@ -1,10 +1,11 @@
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { Sparkles, Zap, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { SplineScene } from "@/components/ui/splite";
 import { Spotlight } from "@/components/ui/spotlight";
 import { Boxes } from "@/components/ui/background-boxes";
+import { RainbowButton } from "@/components/ui/rainbow-button";
+import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -49,7 +50,7 @@ const Hero = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.15 }}
-              className="font-display text-4xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight mb-8"
+              className="font-display text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight mb-8"
             >
               Your AI Stylist That{" "}
               <span className="gold-text">Knows You</span>{" "}
@@ -60,7 +61,7 @@ const Hero = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="text-lg md:text-xl text-muted-foreground max-w-xl mb-12 font-sans"
+              className="text-base md:text-xl text-muted-foreground max-w-xl mb-12 font-sans mx-auto lg:mx-0"
             >
               Upload your wardrobe. Get daily AI-curated outfits. Shop smarter. 
               Look unstoppable — every single day.
@@ -72,36 +73,78 @@ const Hero = () => {
               transition={{ duration: 0.8, delay: 0.45 }}
               className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-4"
             >
-              <Button
-                size="lg"
+              <RainbowButton
                 onClick={() => navigate("/auth")}
-                className="gold-gradient text-primary-foreground font-semibold px-8 py-6 text-lg rounded-xl gold-glow hover:opacity-90 transition-opacity"
+                className="px-8 py-3 text-lg font-display font-semibold"
               >
+                <Sparkles className="w-5 h-5 mr-2" />
                 Start Free
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
+              </RainbowButton>
+              <InteractiveHoverButton
+                text="How It Works"
                 onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
-                className="px-8 py-6 text-lg rounded-xl border-glass-border hover:bg-card/60"
+                className="w-40 border-border"
+              />
+            </motion.div>
+
+            {/* Social proof badges */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1, delay: 0.8 }}
+              className="flex flex-wrap items-center justify-center lg:justify-start gap-3 mt-10"
+            >
+              <motion.span
+                animate={{ y: [0, -4, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full glass text-xs font-sans font-medium text-muted-foreground"
               >
-                See How It Works
-              </Button>
+                <Users className="w-3 h-3 text-primary" /> 10K+ Users
+              </motion.span>
+              <motion.span
+                animate={{ y: [0, -4, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full glass text-xs font-sans font-medium text-muted-foreground"
+              >
+                <Zap className="w-3 h-3 text-primary" /> AI-Powered
+              </motion.span>
+              <motion.span
+                animate={{ y: [0, -4, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full glass text-xs font-sans font-medium text-muted-foreground"
+              >
+                <Sparkles className="w-3 h-3 text-primary" /> 98% Satisfaction
+              </motion.span>
             </motion.div>
           </div>
 
-          {/* Right content — 3D Spline Scene */}
+          {/* Right content — 3D Spline Scene (hidden on mobile) */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1.2, delay: 0.5 }}
-            className="flex-1 relative w-full h-[500px] lg:h-[700px]"
+            className="hidden lg:block flex-1 relative w-full h-[700px]"
           >
             <SplineScene
               scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
               className="w-full h-full"
             />
+          </motion.div>
+
+          {/* Mobile fallback — gradient visual */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1, delay: 0.5 }}
+            className="lg:hidden w-full h-[300px] relative mt-8 rounded-2xl overflow-hidden"
+          >
+            <div className="absolute inset-0 gold-gradient opacity-20 rounded-2xl" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center">
+                <Sparkles className="w-16 h-16 text-primary mx-auto mb-4 animate-pulse-gold" />
+                <p className="font-display text-2xl font-bold gold-text">AI Stylist Ready</p>
+              </div>
+            </div>
           </motion.div>
         </div>
       </div>
