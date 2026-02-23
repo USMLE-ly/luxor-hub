@@ -1,116 +1,100 @@
 
 
-# AURELIA — AI Personal Stylist OS (v1)
+## Verification Results
 
-## Design System
-- **Dark luxury theme** with deep charcoal/near-black backgrounds
-- **Gold accent color** for CTAs, highlights, and branding
-- **Glassmorphism cards** with frosted glass effects and soft borders
-- **Apple-level typography** — clean sans-serif, generous spacing
-- **Micro-animations** on hover, transitions, and page changes
-- **Neutral palette**: charcoal, slate, off-white text, gold accents
+**Landing page**: BackgroundBoxes grid renders behind the hero. GlowingEffect borders active on Features BentoGrid cards. Spotlight effect visible. 3D Spline robot loads (still the robot model -- separate issue). No JS errors.
 
----
+**Pricing section**: Currently uses the original glassmorphism cards. CreativePricing component exists but is not integrated.
 
-## Pages & Features
+**Dashboard**: Uses basic glass stat cards. DisplayCards component exists but is not integrated.
 
-### 1. Landing Page
-- Hero with headline: *"Your AI Stylist That Knows You Better Than You Know Yourself"*
-- Animated mockup/visual showing the app in action
-- How It Works section (4 steps: Scan → Profile → Outfits → Optimize)
-- Feature grid showcasing key capabilities
-- Pricing section (Free / Pro / Elite tiers — display only for now)
-- CTA buttons leading to sign up
+## Implementation Plan
 
-### 2. Authentication
-- Email + password sign-up/login
-- Google OAuth login
-- Sleek dark-themed auth pages with gold accents
-- User profiles stored in database
+### Task 1: Replace Pricing Section with CreativePricing
 
-### 3. Style Onboarding (First-time flow)
-- Multi-step quiz after signup (~10 key questions covering):
-  - Style preferences (minimalist, streetwear, classic, bold, etc.)
-  - Lifestyle & occasions (corporate, casual, social, fitness)
-  - Favorite colors and patterns
-  - Budget range
-  - Body type self-selection
-  - Fashion goals
-- AI generates a **Style DNA profile** (e.g., "Modern Minimal Power") stored to the user's account
+**File**: `src/components/landing/Pricing.tsx`
 
-### 4. Dashboard (Home)
-- **Today's Outfit** card — AI-generated recommendation front and center
-- Current weather display (via weather API integration)
-- Quick stats: total items, outfits generated, style score
-- "Regenerate" button for new outfit suggestions
-- Quick access to closet and AI chat
+Rewrite to use the `CreativePricing` component with AURELIA-branded tiers:
+- Map existing Free/Pro/Elite tiers to `PricingTier` format (using euro prices converted: 0, 19, 99)
+- Use `Crown`, `Sparkles`, `Star` icons matching the brand
+- Custom props: `tag="Invest in Style"`, `title="Choose Your Plan"`, `description="From free styling to elite personal service"`
+- Wrap in `useNavigate` so CTA buttons route to `/auth`
+- Keep section id="pricing" for scroll navigation
 
-### 5. My Closet
-- **Grid layout** of all uploaded clothing items with photos
-- Upload single or multiple items (photo upload to Supabase Storage)
-- AI-powered item analysis on upload using Lovable AI:
-  - Auto-detect category (top, bottom, shoes, accessory, outerwear)
-  - Color extraction
-  - Style classification (casual, formal, streetwear, etc.)
-  - Season tagging (summer, winter, all-season)
-  - Occasion tagging
-- Filter and search by category, color, season, occasion
-- Edit item details manually
-- Delete items
+### Task 2: Add DisplayCards to Dashboard
 
-### 6. Outfit Generator
-- Select context: occasion, mood, weather preference
-- AI generates **3–5 complete outfits** from your closet items
-- Each outfit shows:
-  - Visual layout of the pieces together
-  - AI explanation of why this works
-  - Confidence/style match score
-- Save favorite outfits
-- Shuffle/regenerate individual outfits
-- Outfit history log
+**File**: `src/pages/Dashboard.tsx`
 
-### 7. AI Stylist Chat
-- Conversational chat interface with streaming responses
-- Context-aware — knows your closet, style DNA, and preferences
-- Example prompts: *"Dress me for a dinner date"*, *"What should I wear to a job interview?"*
-- Markdown-rendered responses with outfit suggestions
-- Chat history persisted
+Insert a `DisplayCards` component between the welcome header and stats grid:
+- 3 stacked cards showing: "Closet Items" (count), "Style Score" (value), "Outfits Created" (count)
+- Use gold/primary themed icon colors matching the brand
+- Cards pull from the existing `stats` state object
+- Import `DisplayCards` from `@/components/ui/display-cards`
 
-### 8. Wardrobe Analytics
-- **Cost per wear** tracking (log when items are worn)
-- Most worn / least worn items
-- Category distribution chart (pie/bar chart)
-- Style evolution timeline
-- "Underused items" alerts
-- Simple sustainability score
+### Task 3: Premium Landing Page Upgrades
 
-### 9. Sidebar Navigation
-- Dark glassmorphism sidebar with gold active indicators
-- Links: Home, My Closet, Outfit Generator, AI Stylist, Analytics, Settings
-- Collapsible with icon-only mini mode
-- User avatar and name at bottom
+**File**: `src/components/landing/Hero.tsx`
+- Add `InteractiveHoverButton` for the "See How It Works" CTA (replacing plain outline button)
+- Replace "Start Free" button with `RainbowButton` for maximum visual impact
+- Add subtle floating animated badges using `motion` (e.g., "10K+ Users", "AI-Powered") as social proof chips
 
----
+**File**: `src/components/landing/HowItWorks.tsx`
+- Wrap each step card in a `GlowingEffect` container for mouse-tracking glow, matching the Features section treatment
+- Add a connecting line/path between steps using CSS pseudo-elements for visual flow
 
-## Backend (Lovable Cloud + Supabase)
+**File**: `src/components/landing/Navbar.tsx`
+- Replace "Get Started" button with `RainbowButton` for consistent premium CTA
+- Add subtle logo glow animation on hover
 
-- **Auth**: Email + Google OAuth
-- **Database tables**: profiles, clothing_items, outfits, outfit_items, style_profiles, chat_messages, wear_logs
-- **Storage**: Clothing item photos bucket
-- **Edge Functions**: 
-  - AI item analysis (on upload)
-  - Outfit generation
-  - AI stylist chat (streaming)
-- **Lovable AI**: Powers all AI features (style DNA, outfit generation, chat, item analysis)
-- **Weather API**: Free weather data for outfit context
+**File**: `src/components/landing/Footer.tsx`
+- Upgrade to a richer footer: add social links row, newsletter CTA, and "Built with AI" trust badge
+- Add subtle top-border gold gradient
 
----
+### Task 4: Dashboard Premium Overhaul
 
-## What's NOT in v1 (Future phases)
-- 3D body scanning & virtual try-on (AR)
-- Brand detection & smart shopping with affiliate links
-- Social feed & outfit sharing
-- Stripe payments (pricing is display-only for now)
-- Video closet scanning
-- Price prediction engine
+**File**: `src/pages/Dashboard.tsx`
+- Wrap stat cards in `GlowingEffect` containers
+- Add `DisplayCards` stack for the "Today's Quick Stats" visual showcase
+- Add animated number counters for stats (count-up on mount)
+- Add a "Quick Actions" row with `InteractiveHoverButton` components for common actions (Go to Closet, Analyze Outfit, Chat with AI)
+
+### Task 5: Outfit Analysis Page Polish
+
+**File**: `src/pages/OutfitAnalysis.tsx`
+- Already has GlowingEffect and animated score ring
+- Add `RainbowButton` for the "Analyze My Outfit" primary CTA
+- Add staggered card reveal animations for the results section
+- Add a shimmer/skeleton loading state during analysis with premium animation
+
+### Task 6: Global Micro-Interactions & Motion System
+
+**File**: `src/index.css`
+- Add custom CSS for smooth page transitions
+- Add `.hover-lift` utility: `transform: translateY(-2px); box-shadow: 0 8px 25px -5px rgba(0,0,0,0.1)`
+- Add `.gold-shimmer` keyframe animation for premium text effects
+- Add scroll-triggered fade-in utility classes
+
+**File**: `tailwind.config.ts`
+- Add `hover-lift`, `shimmer`, `float` animations
+- Add `gold-shimmer` keyframes for text shine effects
+
+### Task 7: Mobile-Specific Optimizations
+
+**File**: `src/components/landing/Hero.tsx`
+- Hide Spline 3D on mobile (below `lg`) and show a static gradient/image fallback for performance
+- Stack CTAs vertically on mobile with full-width buttons
+- Reduce heading size further on `sm` breakpoints
+
+**File**: `src/components/landing/Features.tsx`
+- Single column on mobile with reduced gap
+- Disable GlowingEffect on touch devices (no hover)
+
+### Execution Order
+1. Pricing replacement (quick win, high visual impact)
+2. Dashboard DisplayCards integration
+3. Hero/Navbar premium buttons
+4. HowItWorks GlowingEffect treatment
+5. Footer upgrade
+6. Dashboard GlowingEffect + quick actions
+7. Global animations and mobile optimizations
 
