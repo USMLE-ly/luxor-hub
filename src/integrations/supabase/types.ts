@@ -47,6 +47,48 @@ export type Database = {
         }
         Relationships: []
       }
+      challenge_entries: {
+        Row: {
+          analysis_id: string
+          challenge_id: string
+          created_at: string
+          id: string
+          score: number
+          user_id: string
+        }
+        Insert: {
+          analysis_id: string
+          challenge_id: string
+          created_at?: string
+          id?: string
+          score: number
+          user_id: string
+        }
+        Update: {
+          analysis_id?: string
+          challenge_id?: string
+          created_at?: string
+          id?: string
+          score?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_entries_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "outfit_analyses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenge_entries_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_messages: {
         Row: {
           content: string
@@ -434,6 +476,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_badges: {
+        Row: {
+          badge_description: string
+          badge_icon: string
+          badge_key: string
+          badge_name: string
+          id: string
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          badge_description: string
+          badge_icon?: string
+          badge_key: string
+          badge_name: string
+          id?: string
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          badge_description?: string
+          badge_icon?: string
+          badge_key?: string
+          badge_name?: string
+          id?: string
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_looks: {
         Row: {
           author_name: string | null
@@ -511,12 +583,36 @@ export type Database = {
           },
         ]
       }
+      weekly_challenges: {
+        Row: {
+          created_at: string
+          id: string
+          theme: string | null
+          week_end: string
+          week_start: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          theme?: string | null
+          week_end: string
+          week_start: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          theme?: string | null
+          week_end?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_or_create_current_challenge: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never
