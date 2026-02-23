@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { RainbowButton } from "@/components/ui/rainbow-button";
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -27,7 +28,10 @@ const Navbar = () => {
       }`}
     >
       <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
-        <h1 className="font-display text-2xl font-bold gold-text cursor-pointer" onClick={() => navigate("/")}>
+        <h1
+          className="font-display text-2xl font-bold gold-text cursor-pointer transition-all duration-300 hover:drop-shadow-[0_0_8px_hsl(43,74%,49%,0.5)]"
+          onClick={() => navigate("/")}
+        >
           AURELIA
         </h1>
 
@@ -41,13 +45,12 @@ const Navbar = () => {
           <Button variant="ghost" size="sm" className="font-sans" onClick={() => navigate("/auth")}>
             Log In
           </Button>
-          <Button
-            size="sm"
-            className="gold-gradient text-primary-foreground font-semibold rounded-lg hover:opacity-90 transition-opacity"
+          <RainbowButton
             onClick={() => navigate("/auth")}
+            className="h-9 px-4 text-sm font-semibold"
           >
             Get Started
-          </Button>
+          </RainbowButton>
         </div>
       </div>
     </motion.nav>

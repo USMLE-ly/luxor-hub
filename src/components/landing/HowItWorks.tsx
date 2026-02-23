@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Camera, User, Wand2, TrendingUp } from "lucide-react";
+import { GlowingEffect } from "@/components/ui/glowing-effect";
 
 const steps = [
   {
@@ -60,22 +61,37 @@ const HowItWorks = () => {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-80px" }}
-          className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
+          className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 relative"
         >
+          {/* Connecting line */}
+          <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent -translate-y-1/2 z-0" />
+
           {steps.map((step) => (
             <motion.div
               key={step.step}
               variants={itemVariants}
-              className="glass rounded-2xl p-6 group hover:gold-glow transition-all duration-500 hover:-translate-y-1"
+              className="relative z-10"
             >
-              <span className="text-5xl font-display font-bold text-muted/40 group-hover:text-primary/30 transition-colors">
-                {step.step}
-              </span>
-              <div className="w-12 h-12 rounded-xl gold-gradient flex items-center justify-center mt-4 mb-4 group-hover:scale-110 transition-transform duration-300">
-                <step.icon className="w-6 h-6 text-primary-foreground" />
+              <div className="relative h-full rounded-[1.25rem] border-[0.75px] border-border p-2 md:rounded-[1.5rem] md:p-3">
+                <GlowingEffect
+                  spread={40}
+                  glow={true}
+                  disabled={false}
+                  proximity={64}
+                  inactiveZone={0.01}
+                  borderWidth={3}
+                />
+                <div className="relative glass rounded-xl p-6 h-full group hover:gold-glow transition-all duration-500 hover:-translate-y-1">
+                  <span className="text-5xl font-display font-bold text-muted/40 group-hover:text-primary/30 transition-colors">
+                    {step.step}
+                  </span>
+                  <div className="w-12 h-12 rounded-xl gold-gradient flex items-center justify-center mt-4 mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <step.icon className="w-6 h-6 text-primary-foreground" />
+                  </div>
+                  <h3 className="font-display text-xl font-semibold mb-2">{step.title}</h3>
+                  <p className="text-sm text-muted-foreground font-sans leading-relaxed">{step.description}</p>
+                </div>
               </div>
-              <h3 className="font-display text-xl font-semibold mb-2">{step.title}</h3>
-              <p className="text-sm text-muted-foreground font-sans leading-relaxed">{step.description}</p>
             </motion.div>
           ))}
         </motion.div>

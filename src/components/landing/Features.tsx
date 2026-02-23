@@ -84,7 +84,7 @@ const Features = () => {
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-4 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-4 max-w-7xl mx-auto [&_.glowing-effect]:hidden [&_.glowing-effect]:md:block">
             {featureItems.map((item, index) => (
               <div
                 key={index}
