@@ -224,6 +224,57 @@ export type Database = {
         }
         Relationships: []
       }
+      outfit_analyses: {
+        Row: {
+          body_type_notes: string | null
+          color_palette: Json
+          created_at: string
+          detected_items: Json
+          id: string
+          image_url: string
+          improvements: Json
+          occasion_ratings: Json
+          overall_style: string
+          seasonal_fit: string | null
+          strengths: Json
+          style_score: number
+          summary: string
+          user_id: string
+        }
+        Insert: {
+          body_type_notes?: string | null
+          color_palette?: Json
+          created_at?: string
+          detected_items?: Json
+          id?: string
+          image_url: string
+          improvements?: Json
+          occasion_ratings?: Json
+          overall_style: string
+          seasonal_fit?: string | null
+          strengths?: Json
+          style_score: number
+          summary: string
+          user_id: string
+        }
+        Update: {
+          body_type_notes?: string | null
+          color_palette?: Json
+          created_at?: string
+          detected_items?: Json
+          id?: string
+          image_url?: string
+          improvements?: Json
+          occasion_ratings?: Json
+          overall_style?: string
+          seasonal_fit?: string | null
+          strengths?: Json
+          style_score?: number
+          summary?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       outfit_items: {
         Row: {
           clothing_item_id: string
