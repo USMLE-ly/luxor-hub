@@ -1,4 +1,4 @@
-import { Home, Shirt, Wand2, MessageCircle, BarChart3, Settings, LogOut, Sparkles, Move, User, ScanEye, Trophy, Flame, Award } from "lucide-react";
+import { Home, Shirt, Wand2, MessageCircle, BarChart3, Settings, LogOut, Sparkles, Move, User, ScanEye, Trophy, Flame, Award, Bell } from "lucide-react";
 import { NotificationBell } from "./NotificationBell";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
@@ -27,6 +27,7 @@ const navItems = [
   { title: "Leaderboard", url: "/leaderboard", icon: Trophy },
   { title: "Weekly Challenge", url: "/weekly-challenge", icon: Flame },
   { title: "Badges", url: "/badges", icon: Award },
+  { title: "Notifications", url: "/notifications", icon: Bell },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 

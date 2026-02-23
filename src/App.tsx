@@ -23,6 +23,7 @@ import OutfitAnalysisPage from "./pages/OutfitAnalysis";
 import Leaderboard from "./pages/Leaderboard";
 import WeeklyChallenge from "./pages/WeeklyChallenge";
 import Badges from "./pages/Badges";
+import NotificationCenter from "./pages/NotificationCenter";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,7 @@ const App = () => (
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/weekly-challenge" element={<WeeklyChallenge />} />
             <Route path="/badges" element={<Badges />} />
+            <Route path="/notifications" element={<NotificationCenter />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
