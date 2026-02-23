@@ -11,8 +11,9 @@ import { toast } from "sonner";
 import {
   Upload, Camera, Sparkles, TrendingUp, Palette, ShieldCheck, AlertTriangle,
   ChevronRight, Star, Shirt, Loader2, History, Save, Trash2, Share2, X,
-  Twitter, Link, Check, Download, Clock
+  Twitter, Link, Check, Download, Clock, ArrowLeftRight, Users
 } from "lucide-react";
+import { StyleComparison } from "@/components/app/StyleComparison";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface OutfitAnalysisData {
@@ -72,6 +73,7 @@ export default function OutfitAnalysis() {
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isPostingToFeed, setIsPostingToFeed] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchHistory = async () => {
@@ -196,6 +198,37 @@ export default function OutfitAnalysis() {
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`, "_blank", "noopener,noreferrer");
   };
 
+  const handlePostToFeed = async () => {
+    if (!analysis || !user || !imageUrl) return;
+    setIsPostingToFeed(true);
+    try {
+      // Get display name
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("display_name")
+        .eq("user_id", user.id)
+        .single();
+
+      const { error } = await supabase.from("user_looks").insert({
+        user_id: user.id,
+        title: `${analysis.overallStyle} — ${analysis.styleScore}/100`,
+        description: `AI Analysis: ${analysis.summary}`,
+        items: analysis.detectedItems.map((i: any) => `${i.name} (${i.color})`),
+        occasion: analysis.occasionRatings?.[0]?.occasion || null,
+        mood: analysis.seasonalFit || null,
+        photo_url: imageUrl,
+        is_public: true,
+        author_name: profile?.display_name || user.email || "Stylist",
+      });
+      if (error) throw error;
+      toast.success("Posted to community feed! 🎉");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to post");
+    } finally {
+      setIsPostingToFeed(false);
+    }
+  };
+
   const handleDownloadCard = () => {
     if (!analysis) return;
     const canvas = document.createElement("canvas");
@@ -269,12 +302,15 @@ export default function OutfitAnalysis() {
         </div>
 
         <Tabs defaultValue="analyze" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsList className="grid w-full grid-cols-3 mb-6">
             <TabsTrigger value="analyze" className="flex items-center gap-2">
               <Sparkles className="w-4 h-4" /> Analyze
             </TabsTrigger>
             <TabsTrigger value="history" className="flex items-center gap-2" onClick={fetchHistory}>
               <History className="w-4 h-4" /> History
+            </TabsTrigger>
+            <TabsTrigger value="compare" className="flex items-center gap-2" onClick={fetchHistory}>
+              <ArrowLeftRight className="w-4 h-4" /> Compare
             </TabsTrigger>
           </TabsList>
 
@@ -346,7 +382,7 @@ export default function OutfitAnalysis() {
                   className="space-y-6"
                 >
                   {/* Action bar */}
-                  <div className="flex items-center gap-3 justify-end">
+                  <div className="flex items-center gap-3 justify-end flex-wrap">
                     {!saved && (
                       <Button onClick={handleSave} disabled={isSaving} variant="outline" className="border-primary/30">
                         {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
@@ -354,6 +390,10 @@ export default function OutfitAnalysis() {
                       </Button>
                     )}
                     {saved && <Badge className="bg-green-500/15 text-green-500 border-green-500/30">✓ Saved</Badge>}
+                    <Button onClick={handlePostToFeed} disabled={isPostingToFeed} variant="outline" className="border-primary/30">
+                      {isPostingToFeed ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Users className="w-4 h-4 mr-2" />}
+                      Post to Feed
+                    </Button>
                     <Button onClick={() => setShareOpen(true)} variant="outline" className="border-primary/30">
                       <Share2 className="w-4 h-4 mr-2" /> Share
                     </Button>
@@ -412,6 +452,10 @@ export default function OutfitAnalysis() {
                 ))}
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="compare">
+            <StyleComparison history={history} />
           </TabsContent>
         </Tabs>
 
