@@ -20,6 +20,7 @@ import Inspiration from "./pages/Inspiration";
 import OutfitBuilder from "./pages/OutfitBuilder";
 import Profile from "./pages/Profile";
 import OutfitAnalysisPage from "./pages/OutfitAnalysis";
+import Leaderboard from "./pages/Leaderboard";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ const App = () => (
             <Route path="/outfit-builder" element={<OutfitBuilder />} />
             <Route path="/profile/:userId" element={<Profile />} />
             <Route path="/outfit-analysis" element={<OutfitAnalysisPage />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

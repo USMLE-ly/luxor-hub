@@ -74,7 +74,22 @@ export default function OutfitAnalysis() {
   const [shareOpen, setShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isPostingToFeed, setIsPostingToFeed] = useState(false);
+  const [styleFilter, setStyleFilter] = useState("");
+  const [minScore, setMinScore] = useState("");
+  const [maxScore, setMaxScore] = useState("");
+  const [dateFilter, setDateFilter] = useState("all");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const filteredHistory = history.filter((h) => {
+    if (styleFilter && !h.overall_style.toLowerCase().includes(styleFilter.toLowerCase())) return false;
+    if (minScore && h.style_score < Number(minScore)) return false;
+    if (maxScore && h.style_score > Number(maxScore)) return false;
+    if (dateFilter !== "all") {
+      const days = dateFilter === "7d" ? 7 : dateFilter === "30d" ? 30 : 90;
+      if (Date.now() - new Date(h.created_at).getTime() > days * 86400000) return false;
+    }
+    return true;
+  });
 
   const fetchHistory = async () => {
     if (!user) return;
@@ -406,18 +421,76 @@ export default function OutfitAnalysis() {
           </TabsContent>
 
           <TabsContent value="history" className="space-y-4">
+            {/* Filters */}
+            <div className="flex flex-wrap gap-3 items-end">
+              <div className="space-y-1">
+                <label className="text-xs text-muted-foreground">Style</label>
+                <input
+                  type="text"
+                  placeholder="Filter by style..."
+                  value={styleFilter}
+                  onChange={(e) => setStyleFilter(e.target.value)}
+                  className="h-9 rounded-lg border border-border bg-muted/30 px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 w-40"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs text-muted-foreground">Min Score</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={100}
+                  placeholder="0"
+                  value={minScore}
+                  onChange={(e) => setMinScore(e.target.value)}
+                  className="h-9 rounded-lg border border-border bg-muted/30 px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 w-20"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs text-muted-foreground">Max Score</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={100}
+                  placeholder="100"
+                  value={maxScore}
+                  onChange={(e) => setMaxScore(e.target.value)}
+                  className="h-9 rounded-lg border border-border bg-muted/30 px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 w-20"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs text-muted-foreground">Date</label>
+                <select
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                  className="h-9 rounded-lg border border-border bg-muted/30 px-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                >
+                  <option value="all">All time</option>
+                  <option value="7d">Last 7 days</option>
+                  <option value="30d">Last 30 days</option>
+                  <option value="90d">Last 90 days</option>
+                </select>
+              </div>
+              {(styleFilter || minScore || maxScore || dateFilter !== "all") && (
+                <Button variant="ghost" size="sm" onClick={() => { setStyleFilter(""); setMinScore(""); setMaxScore(""); setDateFilter("all"); }}>
+                  Clear
+                </Button>
+              )}
+            </div>
+
             {loadingHistory ? (
               <div className="flex justify-center py-20">
                 <Loader2 className="w-6 h-6 animate-spin text-primary" />
               </div>
-            ) : history.length === 0 ? (
+            ) : filteredHistory.length === 0 ? (
               <div className="text-center py-16">
                 <History className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-                <p className="text-muted-foreground text-sm">No saved analyses yet. Analyze an outfit and save it!</p>
+                <p className="text-muted-foreground text-sm">
+                  {history.length === 0 ? "No saved analyses yet. Analyze an outfit and save it!" : "No analyses match your filters."}
+                </p>
               </div>
             ) : (
               <div className="grid gap-4 md:grid-cols-2">
-                {history.map((h) => (
+                {filteredHistory.map((h) => (
                   <motion.div
                     key={h.id}
                     initial={{ opacity: 0, y: 10 }}
