@@ -9,6 +9,7 @@ import {
   Award, Target, Flame, Star, Zap, Crown, Eye, TrendingUp, Loader2, Lock
 } from "lucide-react";
 import { motion } from "framer-motion";
+import RadialOrbitalTimeline from "@/components/ui/radial-orbital-timeline";
 
 const BADGE_DEFINITIONS = [
   { key: "first_analysis", name: "First Look", description: "Complete your first outfit analysis", icon: "eye", threshold: 1, type: "analyses_count" },
@@ -22,6 +23,17 @@ const BADGE_DEFINITIONS = [
   { key: "challenge_entry", name: "Challenger", description: "Enter a weekly style challenge", icon: "flame", threshold: 1, type: "challenge_entries" },
   { key: "closet_10", name: "Wardrobe Builder", description: "Add 10 items to your closet", icon: "target", threshold: 10, type: "closet_count" },
 ];
+
+const iconComponentMap: Record<string, React.ElementType> = {
+  eye: Eye,
+  target: Target,
+  flame: Flame,
+  crown: Crown,
+  star: Star,
+  trending_up: TrendingUp,
+  zap: Zap,
+  award: Award,
+};
 
 const iconMap: Record<string, React.ReactNode> = {
   eye: <Eye className="w-6 h-6" />,
@@ -39,6 +51,7 @@ export default function Badges() {
   const [unlockedKeys, setUnlockedKeys] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [checking, setChecking] = useState(false);
+  const [viewMode, setViewMode] = useState<"grid" | "orbital">("grid");
 
   useEffect(() => {
     if (user) {
@@ -123,9 +136,21 @@ export default function Badges() {
 
   const unlockedCount = BADGE_DEFINITIONS.filter(b => unlockedKeys.has(b.key)).length;
 
+  const timelineData = BADGE_DEFINITIONS.map((badge, index) => ({
+    id: index + 1,
+    title: badge.name,
+    date: unlockedKeys.has(badge.key) ? "Unlocked" : `Need ${badge.threshold}`,
+    content: badge.description,
+    category: badge.type,
+    icon: iconComponentMap[badge.icon] || Award,
+    relatedIds: index < BADGE_DEFINITIONS.length - 1 ? [index + 2] : [],
+    status: unlockedKeys.has(badge.key) ? "completed" as const : "pending" as const,
+    energy: unlockedKeys.has(badge.key) ? 100 : 20,
+  }));
+
   return (
     <AppLayout>
-      <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-8">
+      <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="font-display text-3xl font-bold text-foreground">
@@ -135,12 +160,32 @@ export default function Badges() {
               {unlockedCount}/{BADGE_DEFINITIONS.length} unlocked
             </p>
           </div>
-          {checking && <Loader2 className="w-5 h-5 animate-spin text-primary" />}
+          <div className="flex items-center gap-3">
+            {checking && <Loader2 className="w-5 h-5 animate-spin text-primary" />}
+            <div className="flex rounded-lg border border-border overflow-hidden">
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`px-3 py-1.5 text-xs font-medium transition-colors ${viewMode === "grid" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:text-foreground"}`}
+              >
+                Grid
+              </button>
+              <button
+                onClick={() => setViewMode("orbital")}
+                className={`px-3 py-1.5 text-xs font-medium transition-colors ${viewMode === "orbital" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:text-foreground"}`}
+              >
+                Orbital
+              </button>
+            </div>
+          </div>
         </div>
 
         {loading ? (
           <div className="flex justify-center py-20">
             <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          </div>
+        ) : viewMode === "orbital" ? (
+          <div className="h-[600px] rounded-2xl overflow-hidden border border-border">
+            <RadialOrbitalTimeline timelineData={timelineData} />
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

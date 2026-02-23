@@ -1,48 +1,62 @@
 import { motion } from "framer-motion";
 import { Shirt, Brain, MessageSquare, BarChart3, ShoppingBag, Palette } from "lucide-react";
+import { BentoGrid, type BentoItem } from "@/components/ui/bento-grid";
 
-const features = [
+const featureItems: BentoItem[] = [
   {
-    icon: Shirt,
     title: "AI Closet Scanner",
+    meta: "Auto-detect",
     description: "Upload photos and let AI auto-detect category, color, style, season, and occasion for every item.",
+    icon: <Shirt className="w-4 h-4 text-primary" />,
+    status: "Smart",
+    tags: ["Vision", "AI"],
+    colSpan: 2,
+    hasPersistentHover: true,
   },
   {
-    icon: Brain,
     title: "Style DNA Engine",
+    meta: "Personalized",
     description: "Our AI builds your unique style profile — understanding your preferences, lifestyle, and fashion goals.",
+    icon: <Brain className="w-4 h-4 text-primary" />,
+    status: "Active",
+    tags: ["Profile", "DNA"],
   },
   {
-    icon: Palette,
     title: "Smart Outfit Generator",
+    meta: "Context-aware",
     description: "Context-aware outfits generated from YOUR closet, considering weather, events, and your mood.",
+    icon: <Palette className="w-4 h-4 text-primary" />,
+    status: "Live",
+    tags: ["Weather", "Mood"],
+    colSpan: 2,
   },
   {
-    icon: MessageSquare,
     title: "AI Stylist Chat",
+    meta: "24/7",
     description: "Ask your personal AI stylist anything. It knows your closet, body, and style DNA intimately.",
+    icon: <MessageSquare className="w-4 h-4 text-primary" />,
+    status: "New",
+    tags: ["Chat", "AI"],
   },
   {
-    icon: BarChart3,
     title: "Wardrobe Analytics",
+    meta: "Insights",
     description: "Cost per wear tracking, underused item alerts, category breakdowns, and sustainability scores.",
+    icon: <BarChart3 className="w-4 h-4 text-primary" />,
+    status: "Pro",
+    tags: ["Stats", "Tracking"],
+    colSpan: 2,
+    hasPersistentHover: true,
   },
   {
-    icon: ShoppingBag,
     title: "Smart Shopping",
+    meta: "Recommendations",
     description: "AI identifies gaps in your wardrobe and recommends the perfect pieces to complete your style.",
+    icon: <ShoppingBag className="w-4 h-4 text-primary" />,
+    status: "Beta",
+    tags: ["Shop", "Gaps"],
   },
 ];
-
-const containerVariants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.1 } },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 40, scale: 0.95 },
-  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.5, ease: "easeOut" as const } },
-};
 
 const Features = () => {
   return (
@@ -55,7 +69,7 @@ const Features = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-20"
+          className="text-center mb-12"
         >
           <p className="text-primary font-sans font-semibold text-sm tracking-widest uppercase mb-4">Capabilities</p>
           <h2 className="font-display text-4xl md:text-5xl font-bold">
@@ -64,25 +78,12 @@ const Features = () => {
         </motion.div>
 
         <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
-          className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+          transition={{ duration: 0.6, delay: 0.2 }}
         >
-          {features.map((feature) => (
-            <motion.div
-              key={feature.title}
-              variants={itemVariants}
-              className="glass rounded-2xl p-8 group hover:border-primary/30 transition-all duration-500 hover:-translate-y-1"
-            >
-              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
-                <feature.icon className="w-7 h-7 text-primary" />
-              </div>
-              <h3 className="font-display text-xl font-semibold mb-3">{feature.title}</h3>
-              <p className="text-muted-foreground font-sans leading-relaxed">{feature.description}</p>
-            </motion.div>
-          ))}
+          <BentoGrid items={featureItems} />
         </motion.div>
       </div>
     </section>
