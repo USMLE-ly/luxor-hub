@@ -154,6 +154,66 @@ export default function OutfitAnalysis() {
     }
   };
 
+  const checkAndUnlockBadges = async () => {
+    if (!user) return;
+    try {
+      const BADGE_DEFINITIONS = [
+        { key: "first_analysis", name: "First Look", description: "Complete your first outfit analysis", icon: "eye", threshold: 1, type: "analyses_count" },
+        { key: "5_analyses", name: "Style Explorer", description: "Complete 5 outfit analyses", icon: "target", threshold: 5, type: "analyses_count" },
+        { key: "10_analyses", name: "Fashion Critic", description: "Complete 10 outfit analyses", icon: "flame", threshold: 10, type: "analyses_count" },
+        { key: "25_analyses", name: "Style Master", description: "Complete 25 outfit analyses", icon: "crown", threshold: 25, type: "analyses_count" },
+        { key: "score_70", name: "Rising Star", description: "Achieve an average score of 70+", icon: "star", threshold: 70, type: "avg_score" },
+        { key: "score_80", name: "Style Icon", description: "Achieve an average score of 80+", icon: "star", threshold: 80, type: "avg_score" },
+        { key: "score_90", name: "Fashion Legend", description: "Achieve an average score of 90+", icon: "zap", threshold: 90, type: "avg_score" },
+        { key: "perfect_score", name: "Perfection", description: "Get a perfect 100 on any analysis", icon: "award", threshold: 100, type: "best_score" },
+        { key: "closet_10", name: "Wardrobe Builder", description: "Add 10 items to your closet", icon: "target", threshold: 10, type: "closet_count" },
+      ];
+
+      const [analysesRes, closetRes, existingRes] = await Promise.all([
+        supabase.from("outfit_analyses").select("style_score").eq("user_id", user.id),
+        supabase.from("clothing_items").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+        supabase.from("user_badges").select("badge_key").eq("user_id", user.id),
+      ]);
+
+      const scores = (analysesRes.data || []).map((a: any) => Number(a.style_score));
+      const analysesCount = scores.length;
+      const avgScore = analysesCount > 0 ? scores.reduce((a: number, b: number) => a + b, 0) / analysesCount : 0;
+      const bestScore = analysesCount > 0 ? Math.max(...scores) : 0;
+      const closetCount = closetRes.count || 0;
+
+      const stats: Record<string, number> = {
+        analyses_count: analysesCount,
+        avg_score: Math.round(avgScore),
+        best_score: bestScore,
+        closet_count: closetCount,
+      };
+
+      const existingKeys = new Set((existingRes.data || []).map((b: any) => b.badge_key));
+
+      for (const badge of BADGE_DEFINITIONS) {
+        if (existingKeys.has(badge.key)) continue;
+        const value = stats[badge.type] || 0;
+        if (value >= badge.threshold) {
+          const { error } = await supabase.from("user_badges").insert({
+            user_id: user.id,
+            badge_key: badge.key,
+            badge_name: badge.name,
+            badge_description: badge.description,
+            badge_icon: badge.icon,
+          });
+          if (!error) {
+            toast.success(`🏅 Badge Unlocked: ${badge.name}!`, {
+              description: badge.description,
+              duration: 5000,
+            });
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Badge check error:", err);
+    }
+  };
+
   const handleSave = async () => {
     if (!analysis || !user || !imageUrl) return;
     setIsSaving(true);
@@ -176,6 +236,8 @@ export default function OutfitAnalysis() {
       setSaved(true);
       toast.success("Analysis saved!");
       fetchHistory();
+      // Check for new badge unlocks after saving
+      checkAndUnlockBadges();
     } catch (err: any) {
       toast.error(err.message || "Failed to save");
     } finally {
