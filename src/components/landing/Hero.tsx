@@ -5,6 +5,7 @@ import { Spotlight } from "@/components/ui/spotlight";
 import { Boxes } from "@/components/ui/background-boxes";
 import { RainbowButton } from "@/components/ui/rainbow-button";
 import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
+import ParticleCanvas from "@/components/ui/particle-canvas";
 import fashionHero from "@/assets/fashion-hero.jpg";
 
 const Hero = () => {
@@ -23,6 +24,15 @@ const Hero = () => {
         className="-top-40 left-0 md:left-60 md:-top-20"
         fill="hsl(43, 74%, 49%)"
       />
+
+      {/* Particle canvas background */}
+      <div className="absolute inset-0 z-[1] pointer-events-auto">
+        <ParticleCanvas
+          particleColor={{ h: 43, s: 74, l: 49 }}
+          maxParticles={60}
+          connectionDistance={110}
+        />
+      </div>
 
       {/* Background effects */}
       <div className="absolute inset-0">
