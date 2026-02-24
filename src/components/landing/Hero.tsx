@@ -2,10 +2,10 @@ import { motion } from "framer-motion";
 import { Sparkles, Zap, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Spotlight } from "@/components/ui/spotlight";
-import { Boxes } from "@/components/ui/background-boxes";
 import { RainbowButton } from "@/components/ui/rainbow-button";
 import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
 import ParticleCanvas from "@/components/ui/particle-canvas";
+import MagneticButton from "@/components/ui/magnetic-button";
 import fashionHero from "@/assets/fashion-hero.jpg";
 
 const Hero = () => {
@@ -13,12 +13,6 @@ const Hero = () => {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background Boxes */}
-      <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
-        <div className="absolute inset-0 w-full h-full bg-background z-20 [mask-image:radial-gradient(transparent,white)] pointer-events-none" />
-        <Boxes />
-      </div>
-
       {/* Spotlight effect */}
       <Spotlight
         className="-top-40 left-0 md:left-60 md:-top-20"
@@ -83,18 +77,21 @@ const Hero = () => {
               transition={{ duration: 0.8, delay: 0.45 }}
               className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-4"
             >
-              <RainbowButton
-                onClick={() => navigate("/auth")}
-                className="px-8 py-3 text-lg font-display font-semibold"
-              >
-                <Sparkles className="w-5 h-5 mr-2" />
-                Start Free
-              </RainbowButton>
-              <InteractiveHoverButton
-                text="How It Works"
+              <MagneticButton onClick={() => navigate("/auth")} strength={0.25}>
+                <RainbowButton className="px-8 py-3 text-lg font-display font-semibold pointer-events-none">
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  Start Free
+                </RainbowButton>
+              </MagneticButton>
+              <MagneticButton
                 onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
-                className="w-40 border-border"
-              />
+                strength={0.2}
+              >
+                <InteractiveHoverButton
+                  text="How It Works"
+                  className="w-40 border-border pointer-events-none"
+                />
+              </MagneticButton>
             </motion.div>
 
             {/* Social proof badges */}
@@ -136,7 +133,6 @@ const Hero = () => {
             className="hidden lg:flex flex-1 items-center justify-center relative"
           >
             <div className="relative w-full max-w-lg">
-              {/* Glow behind image */}
               <div className="absolute -inset-4 bg-primary/20 rounded-3xl blur-3xl" />
               <img
                 src={fashionHero}
@@ -144,7 +140,6 @@ const Hero = () => {
                 className="relative w-full h-auto rounded-2xl object-cover shadow-2xl"
                 loading="eager"
               />
-              {/* Overlay gradient */}
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-background/60 via-transparent to-transparent" />
             </div>
           </motion.div>
