@@ -126,13 +126,14 @@ const Features = () => {
                    <div className="relative flex h-full flex-col justify-between gap-4 overflow-hidden rounded-xl border-[0.75px] border-border bg-background p-6 shadow-sm">
                      {/* Feature illustration */}
                      {featureImages[item.title] && (
-                       <div className="absolute top-0 right-0 w-24 h-24 opacity-[0.12] pointer-events-none">
+                       <div className="absolute -top-2 -right-2 w-40 h-40 md:w-48 md:h-48 opacity-[0.25] dark:opacity-[0.18] pointer-events-none">
                          <img
                            src={featureImages[item.title]}
                            alt=""
-                           className="w-full h-full object-cover rounded-tr-xl"
+                           className="w-full h-full object-cover rounded-tr-xl rounded-bl-3xl"
                            loading="lazy"
                          />
+                         <div className="absolute inset-0 bg-gradient-to-tl from-transparent via-transparent to-background/80" />
                        </div>
                      )}
                      <div className="flex items-center justify-between">
