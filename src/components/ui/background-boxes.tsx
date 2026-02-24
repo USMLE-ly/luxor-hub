@@ -1,77 +1,50 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export const BoxesCore = ({ className, ...rest }: { className?: string }) => {
-  const rows = new Array(150).fill(1);
-  const cols = new Array(100).fill(1);
-
-  const colors = [
-    "rgb(125 211 252)",
-    "rgb(249 168 212)",
-    "rgb(134 239 172)",
-    "rgb(253 224 71)",
-    "rgb(252 165 165)",
-    "rgb(216 180 254)",
-    "rgb(147 197 253)",
-    "rgb(165 180 252)",
-    "rgb(196 181 253)",
-  ];
-
-  const getRandomColor = () => {
-    return colors[Math.floor(Math.random() * colors.length)];
-  };
-
   return (
     <div
-      style={{
-        transform: `translate(-40%,-60%) skewX(-48deg) skewY(14deg) scale(0.675) rotate(0deg) translateZ(0)`,
-      }}
       className={cn(
-        "absolute left-1/4 p-4 -top-1/4 flex -translate-x-1/2 -translate-y-1/2 w-full h-full z-0",
+        "absolute inset-0 w-full h-full z-0 overflow-hidden",
         className
       )}
       {...rest}
     >
-      {rows.map((_, i) => (
-        <motion.div
-          key={`row` + i}
-          className="w-16 h-8 border-l border-slate-700 relative"
-        >
-          {cols.map((_, j) => (
-            <motion.div
-              whileHover={{
-                backgroundColor: getRandomColor(),
-                transition: { duration: 0 },
-              }}
-              animate={{
-                transition: { duration: 2 },
-              }}
-              key={`col` + j}
-              className="w-16 h-8 border-r border-t border-slate-700 relative"
-            >
-              {j % 2 === 0 && i % 2 === 0 ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.5"
-                  stroke="currentColor"
-                  className="absolute h-6 w-10 -top-[14px] -left-[22px] text-slate-700 stroke-[1px] pointer-events-none"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 6v12m6-6H6"
-                  />
-                </svg>
-              ) : null}
-            </motion.div>
-          ))}
-        </motion.div>
-      ))}
+      {/* Lightweight CSS grid pattern instead of 15,000 motion divs */}
+      <div
+        className="absolute inset-0 opacity-[0.07]"
+        style={{
+          backgroundImage: `
+            linear-gradient(to right, hsl(var(--primary) / 0.3) 1px, transparent 1px),
+            linear-gradient(to bottom, hsl(var(--primary) / 0.3) 1px, transparent 1px)
+          `,
+          backgroundSize: "60px 60px",
+        }}
+      />
+      {/* Diagonal accent lines */}
+      <div
+        className="absolute inset-0 opacity-[0.04]"
+        style={{
+          backgroundImage: `repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 80px,
+            hsl(var(--primary) / 0.2) 80px,
+            hsl(var(--primary) / 0.2) 81px
+          )`,
+        }}
+      />
+      {/* Corner crosses using pure CSS */}
+      <svg className="absolute inset-0 w-full h-full opacity-[0.06]" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="grid-crosses" width="60" height="60" patternUnits="userSpaceOnUse">
+            <path d="M30 25v10M25 30h10" stroke="currentColor" strokeWidth="0.5" fill="none" className="text-primary" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#grid-crosses)" />
+      </svg>
     </div>
   );
 };

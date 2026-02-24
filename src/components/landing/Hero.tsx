@@ -126,7 +126,7 @@ const Hero = () => {
             className="hidden lg:block flex-1 relative w-full h-[700px]"
           >
             <SplineScene
-              scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+              scene="https://prod.spline.design/PyzDhwMnEnMFk6Mh/scene.splinecode"
               className="w-full h-full"
             />
           </motion.div>
