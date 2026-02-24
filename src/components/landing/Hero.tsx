@@ -1,11 +1,11 @@
 import { motion } from "framer-motion";
 import { Sparkles, Zap, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { SplineScene } from "@/components/ui/splite";
 import { Spotlight } from "@/components/ui/spotlight";
 import { Boxes } from "@/components/ui/background-boxes";
 import { RainbowButton } from "@/components/ui/rainbow-button";
 import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
+import fashionHero from "@/assets/fashion-hero.jpg";
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -118,33 +118,42 @@ const Hero = () => {
             </motion.div>
           </div>
 
-          {/* Right content — 3D Spline Scene (hidden on mobile) */}
+          {/* Right content — Fashion Hero Image */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1.2, delay: 0.5 }}
-            className="hidden lg:block flex-1 relative w-full h-[700px]"
+            className="hidden lg:flex flex-1 items-center justify-center relative"
           >
-            <SplineScene
-              scene="https://prod.spline.design/PyzDhwMnEnMFk6Mh/scene.splinecode"
-              className="w-full h-full"
-            />
+            <div className="relative w-full max-w-lg">
+              {/* Glow behind image */}
+              <div className="absolute -inset-4 bg-primary/20 rounded-3xl blur-3xl" />
+              <img
+                src={fashionHero}
+                alt="AI Fashion Stylist — elegant woman in luxury outfit with flowing golden hair"
+                className="relative w-full h-auto rounded-2xl object-cover shadow-2xl"
+                loading="eager"
+              />
+              {/* Overlay gradient */}
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-background/60 via-transparent to-transparent" />
+            </div>
           </motion.div>
 
-          {/* Mobile fallback — gradient visual */}
+          {/* Mobile fallback */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.5 }}
-            className="lg:hidden w-full h-[300px] relative mt-8 rounded-2xl overflow-hidden"
+            className="lg:hidden w-full max-w-sm mx-auto mt-8 relative"
           >
-            <div className="absolute inset-0 gold-gradient opacity-20 rounded-2xl" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <Sparkles className="w-16 h-16 text-primary mx-auto mb-4 animate-pulse-gold" />
-                <p className="font-display text-2xl font-bold gold-text">AI Stylist Ready</p>
-              </div>
-            </div>
+            <div className="absolute -inset-2 bg-primary/15 rounded-2xl blur-2xl" />
+            <img
+              src={fashionHero}
+              alt="AI Fashion Stylist"
+              className="relative w-full h-auto rounded-2xl object-cover shadow-xl"
+              loading="eager"
+            />
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-background/70 via-transparent to-transparent" />
           </motion.div>
         </div>
       </div>

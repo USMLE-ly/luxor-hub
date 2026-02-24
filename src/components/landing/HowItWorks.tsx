@@ -41,8 +41,17 @@ const itemVariants = {
 
 const HowItWorks = () => {
   return (
-    <section className="py-32 px-4" id="how-it-works">
-      <div className="max-w-6xl mx-auto">
+    <section className="relative py-32 px-4 overflow-hidden" id="how-it-works">
+      {/* Subtle SVG pattern background */}
+      <div
+        className="absolute inset-0 opacity-[0.04] dark:opacity-[0.03] pointer-events-none"
+        style={{
+          backgroundImage: `url('/patterns/linear-texture.svg')`,
+          backgroundSize: "400px 400px",
+          backgroundRepeat: "repeat",
+        }}
+      />
+      <div className="relative max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
