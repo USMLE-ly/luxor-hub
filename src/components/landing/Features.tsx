@@ -2,6 +2,21 @@ import { motion } from "framer-motion";
 import { Shirt, Brain, MessageSquare, BarChart3, ShoppingBag, Palette } from "lucide-react";
 import { BentoGrid, type BentoItem } from "@/components/ui/bento-grid";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
+import featureCloset from "@/assets/feature-closet-scanner.jpg";
+import featureDna from "@/assets/feature-style-dna.jpg";
+import featureOutfit from "@/assets/feature-outfit-gen.jpg";
+import featureChat from "@/assets/feature-ai-chat.jpg";
+import featureAnalytics from "@/assets/feature-analytics.jpg";
+import featureShopping from "@/assets/feature-shopping.jpg";
+
+const featureImages: Record<string, string> = {
+  "AI Closet Scanner": featureCloset,
+  "Style DNA Engine": featureDna,
+  "Smart Outfit Generator": featureOutfit,
+  "AI Stylist Chat": featureChat,
+  "Wardrobe Analytics": featureAnalytics,
+  "Smart Shopping": featureShopping,
+};
 
 const featureItems: BentoItem[] = [
   {
@@ -61,7 +76,16 @@ const featureItems: BentoItem[] = [
 
 const Features = () => {
   return (
-    <section className="py-32 px-4 relative" id="features">
+    <section className="relative py-32 px-4 overflow-hidden" id="features">
+      {/* SVG pattern background */}
+      <div
+        className="absolute inset-0 opacity-[0.04] dark:opacity-[0.03] pointer-events-none"
+        style={{
+          backgroundImage: `url('/patterns/linear-texture.svg')`,
+          backgroundSize: "400px 400px",
+          backgroundRepeat: "repeat",
+        }}
+      />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[150px]" />
 
       <div className="max-w-6xl mx-auto relative z-10">
@@ -99,15 +123,26 @@ const Features = () => {
                     inactiveZone={0.01}
                     borderWidth={3}
                   />
-                  <div className="relative flex h-full flex-col justify-between gap-4 overflow-hidden rounded-xl border-[0.75px] border-border bg-background p-6 shadow-sm">
-                    <div className="flex items-center justify-between">
-                      <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-muted group-hover:bg-primary/10 transition-all duration-300">
-                        {item.icon}
-                      </div>
-                      <span className="text-xs font-medium px-2 py-1 rounded-lg backdrop-blur-sm bg-muted text-muted-foreground">
-                        {item.status || "Active"}
-                      </span>
-                    </div>
+                   <div className="relative flex h-full flex-col justify-between gap-4 overflow-hidden rounded-xl border-[0.75px] border-border bg-background p-6 shadow-sm">
+                     {/* Feature illustration */}
+                     {featureImages[item.title] && (
+                       <div className="absolute top-0 right-0 w-24 h-24 opacity-[0.12] pointer-events-none">
+                         <img
+                           src={featureImages[item.title]}
+                           alt=""
+                           className="w-full h-full object-cover rounded-tr-xl"
+                           loading="lazy"
+                         />
+                       </div>
+                     )}
+                     <div className="flex items-center justify-between">
+                       <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-muted group-hover:bg-primary/10 transition-all duration-300">
+                         {item.icon}
+                       </div>
+                       <span className="text-xs font-medium px-2 py-1 rounded-lg backdrop-blur-sm bg-muted text-muted-foreground">
+                         {item.status || "Active"}
+                       </span>
+                     </div>
 
                     <div className="space-y-2">
                       <h3 className="font-medium text-foreground tracking-tight text-[15px]">
