@@ -33,7 +33,16 @@ const tiers: PricingTier[] = [
 
 const Pricing = () => {
   return (
-    <section className="py-32 px-4" id="pricing">
+    <section className="relative py-32 px-4 overflow-hidden" id="pricing">
+      {/* SVG pattern background */}
+      <div
+        className="absolute inset-0 opacity-[0.04] dark:opacity-[0.03] pointer-events-none"
+        style={{
+          backgroundImage: `url('/patterns/linear-texture.svg')`,
+          backgroundSize: "400px 400px",
+          backgroundRepeat: "repeat",
+        }}
+      />
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
