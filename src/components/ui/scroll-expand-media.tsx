@@ -96,8 +96,8 @@ const ScrollExpandMedia = ({
     };
   }, [scrollProgress, mediaFullyExpanded, touchStartY]);
 
-  const mediaWidth = 500 + scrollProgress * (isMobile ? 450 : 1050);
-  const mediaHeight = 500 + scrollProgress * (isMobile ? 100 : 300);
+  const mediaWidth = 300 + scrollProgress * (isMobile ? 650 : 1250);
+  const mediaHeight = 250 + scrollProgress * (isMobile ? 350 : 550);
   const textTranslateX = scrollProgress * (isMobile ? 180 : 150);
 
   const firstWord = title ? title.split(" ")[0] : "";
