@@ -16,6 +16,7 @@ import {
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell, ResponsiveContainer,
+  Tooltip as RechartsTooltip,
 } from "recharts";
 import { StyleComparison } from "@/components/app/StyleComparison";
 import { motion, AnimatePresence } from "framer-motion";
@@ -685,12 +686,43 @@ export default function OutfitAnalysis() {
   );
 }
 
+// Animated counter hook
+function useAnimatedCounter(target: number, duration = 800) {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    let start = 0;
+    const startTime = Date.now();
+    const tick = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      setValue(Math.round(target * progress));
+      if (progress < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }, [target, duration]);
+  return value;
+}
+
+// Custom radar tooltip with animated counter
+function RadarTooltipContent({ active, payload }: any) {
+  if (!active || !payload?.[0]) return null;
+  const { occasion, score } = payload[0].payload;
+  return (
+    <div className="glass rounded-lg px-3 py-2 border border-border shadow-lg">
+      <p className="text-xs text-muted-foreground font-sans">{occasion}</p>
+      <p className="text-lg font-bold text-primary">{score}%</p>
+    </div>
+  );
+}
+
 // Chart-based visual results component
 function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
   analysis: OutfitAnalysisData;
   getScoreColor: (s: number) => string;
   getPriorityColor: (p: string) => string;
 }) {
+  
+
   const radarData = analysis.occasionRatings.map((r) => ({
     occasion: r.occasion,
     score: r.score,
@@ -710,15 +742,16 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
     return "hsl(var(--muted-foreground))";
   };
 
-  // Extract short keywords from strength sentences (first 3-5 words)
   const strengthChips = analysis.strengths.map((s) => {
     const words = s.split(/\s+/);
     return words.slice(0, Math.min(4, words.length)).join(" ");
   });
 
+  const animatedScore = useAnimatedCounter(analysis.styleScore, 1200);
+
   return (
     <>
-      {/* Overall Score — Premium card */}
+      {/* Overall Score */}
       <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -740,7 +773,7 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
                   />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-3xl font-bold text-foreground">{analysis.styleScore}</span>
+                  <span className="text-3xl font-bold text-foreground">{animatedScore}</span>
                 </div>
               </div>
               <div className="flex-1">
@@ -757,134 +790,166 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
 
       {/* Occasion Radar + Color Palette row */}
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Occasion Suitability — RadarChart */}
-        <Card className="glass-card">
-          <CardHeader className="pb-2">
-            <CardTitle className="font-display flex items-center gap-2 text-foreground text-base">
-              <Star className="w-5 h-5 text-primary" /> Occasion Suitability
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={240}>
-              <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="70%">
-                <PolarGrid stroke="hsl(var(--border))" />
-                <PolarAngleAxis dataKey="occasion" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
-                <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} axisLine={false} />
-                <Radar
-                  name="Score"
-                  dataKey="score"
-                  stroke="hsl(var(--primary))"
-                  fill="hsl(var(--primary))"
-                  fillOpacity={0.25}
-                  strokeWidth={2}
-                />
-              </RadarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <Card className="glass-card">
+            <CardHeader className="pb-2">
+              <CardTitle className="font-display flex items-center gap-2 text-foreground text-base">
+                <Star className="w-5 h-5 text-primary" /> Occasion Suitability
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={240}>
+                <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="70%">
+                  <PolarGrid stroke="hsl(var(--border))" />
+                  <PolarAngleAxis dataKey="occasion" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                  <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} axisLine={false} />
+                  <Radar
+                    name="Score"
+                    dataKey="score"
+                    stroke="hsl(var(--primary))"
+                    fill="hsl(var(--primary))"
+                    fillOpacity={0.25}
+                    strokeWidth={2}
+                    animationDuration={1200}
+                  />
+                  <RechartsTooltip content={<RadarTooltipContent />} />
+                </RadarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        {/* Color Palette — compact */}
-        <Card className="glass-card">
-          <CardHeader className="pb-2">
-            <CardTitle className="font-display flex items-center gap-2 text-foreground text-base">
-              <Palette className="w-5 h-5 text-primary" /> Color Analysis
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex gap-2">
-              {analysis.colorPalette.colors.map((c, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: i * 0.1, type: "spring" }}
-                  className="flex-1 aspect-square rounded-lg border border-border shadow-sm hover:scale-110 transition-transform cursor-pointer"
-                  style={{ backgroundColor: c }}
-                  title={c}
-                />
-              ))}
-            </div>
-            <div className="flex gap-2">
-              <Badge variant="secondary">{analysis.colorPalette.harmony}</Badge>
-              <Badge variant="outline">{analysis.colorPalette.rating}</Badge>
-            </div>
-          </CardContent>
-        </Card>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <Card className="glass-card">
+            <CardHeader className="pb-2">
+              <CardTitle className="font-display flex items-center gap-2 text-foreground text-base">
+                <Palette className="w-5 h-5 text-primary" /> Color Analysis
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex gap-2">
+                {analysis.colorPalette.colors.map((c, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: i * 0.1, type: "spring" }}
+                    className="flex-1 aspect-square rounded-lg border border-border shadow-sm hover:scale-110 transition-transform cursor-pointer"
+                    style={{ backgroundColor: c }}
+                    title={c}
+                  />
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <Badge variant="secondary">{analysis.colorPalette.harmony}</Badge>
+                <Badge variant="outline">{analysis.colorPalette.rating}</Badge>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
 
       {/* Detected Items + Strengths + Improvements row */}
       <div className="grid md:grid-cols-3 gap-6">
-        {/* Detected Items — compact list */}
-        <Card className="glass-card">
-          <CardHeader className="pb-2">
-            <CardTitle className="font-display flex items-center gap-2 text-foreground text-base">
-              <Shirt className="w-5 h-5 text-primary" /> Detected Items
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {analysis.detectedItems.map((item, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-                className="flex items-center gap-2 p-2 rounded-lg bg-muted/30"
-              >
-                <div className="w-3 h-3 rounded-full border border-border flex-shrink-0" style={{ backgroundColor: item.color.startsWith("#") ? item.color : undefined }} />
-                <span className="text-sm text-foreground truncate flex-1">{item.name}</span>
-                <span className="text-[10px] text-muted-foreground">{item.category}</span>
-              </motion.div>
-            ))}
-          </CardContent>
-        </Card>
-
-        {/* Strengths — keyword chips */}
-        <Card className="glass-card">
-          <CardHeader className="pb-2">
-            <CardTitle className="font-display flex items-center gap-2 text-foreground text-base">
-              <ShieldCheck className="w-5 h-5 text-green-500" /> Strengths
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {strengthChips.map((chip, i) => (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <Card className="glass-card h-full">
+            <CardHeader className="pb-2">
+              <CardTitle className="font-display flex items-center gap-2 text-foreground text-base">
+                <Shirt className="w-5 h-5 text-primary" /> Detected Items
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {analysis.detectedItems.map((item, i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: i * 0.06 }}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="flex items-center gap-2 p-2 rounded-lg bg-muted/30"
                 >
-                  <Badge variant="secondary" className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 text-xs py-1">
-                    ✓ {chip}
-                  </Badge>
+                  <div className="w-3 h-3 rounded-full border border-border flex-shrink-0" style={{ backgroundColor: item.color.startsWith("#") ? item.color : undefined }} />
+                  <span className="text-sm text-foreground truncate flex-1">{item.name}</span>
+                  <span className="text-[10px] text-muted-foreground">{item.category}</span>
                 </motion.div>
               ))}
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        {/* Improvements — horizontal bar chart */}
-        <Card className="glass-card">
-          <CardHeader className="pb-2">
-            <CardTitle className="font-display flex items-center gap-2 text-foreground text-base">
-              <AlertTriangle className="w-5 h-5 text-yellow-500" /> Improvements
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={Math.max(120, improvementData.length * 40)}>
-              <BarChart data={improvementData} layout="vertical" margin={{ left: 0, right: 8, top: 4, bottom: 4 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
-                <XAxis type="number" domain={[0, 3]} hide />
-                <YAxis type="category" dataKey="name" width={90} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} axisLine={false} tickLine={false} />
-                <Bar dataKey="priority" radius={[0, 6, 6, 0]} barSize={14}>
-                  {improvementData.map((entry, index) => (
-                    <Cell key={index} fill={priorityBarColor(entry.priority)} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <Card className="glass-card h-full">
+            <CardHeader className="pb-2">
+              <CardTitle className="font-display flex items-center gap-2 text-foreground text-base">
+                <ShieldCheck className="w-5 h-5 text-green-500" /> Strengths
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2">
+                {strengthChips.map((chip, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: i * 0.06 }}
+                  >
+                    <Badge variant="secondary" className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 text-xs py-1">
+                      ✓ {chip}
+                    </Badge>
+                  </motion.div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <Card className="glass-card h-full">
+            <CardHeader className="pb-2">
+              <CardTitle className="font-display flex items-center gap-2 text-foreground text-base">
+                <AlertTriangle className="w-5 h-5 text-yellow-500" /> Improvements
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={Math.max(120, improvementData.length * 40)}>
+                <BarChart data={improvementData} layout="vertical" margin={{ left: 0, right: 8, top: 4, bottom: 4 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
+                  <XAxis type="number" domain={[0, 3]} hide />
+                  <YAxis type="category" dataKey="name" width={90} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} axisLine={false} tickLine={false} />
+                  <Bar dataKey="priority" radius={[0, 6, 6, 0]} barSize={14} animationDuration={1000}>
+                    {improvementData.map((entry, index) => (
+                      <Cell key={index} fill={priorityBarColor(entry.priority)} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     </>
   );
