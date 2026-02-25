@@ -31,6 +31,14 @@ const tiers: PricingTier[] = [
   },
 ];
 
+const GoldDivider = () => (
+  <div className="flex items-center gap-4 my-10 max-w-xs mx-auto">
+    <div className="flex-1 h-px bg-gradient-to-r from-transparent to-primary/40" />
+    <div className="w-1.5 h-1.5 rounded-full bg-primary/60" />
+    <div className="flex-1 h-px bg-gradient-to-l from-transparent to-primary/40" />
+  </div>
+);
+
 const Pricing = () => {
   return (
     <section className="relative py-32 px-4 overflow-hidden" id="pricing">
@@ -43,6 +51,24 @@ const Pricing = () => {
           backgroundRepeat: "repeat",
         }}
       />
+
+      <div className="max-w-6xl mx-auto relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-6"
+        >
+          <p className="text-primary font-sans font-semibold text-sm tracking-widest uppercase mb-4">Invest in Style</p>
+          <h2 className="font-display text-4xl md:text-5xl font-bold">
+            Choose Your <span className="gold-text">Plan</span>
+          </h2>
+        </motion.div>
+
+        <GoldDivider />
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}

@@ -721,7 +721,7 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
   getScoreColor: (s: number) => string;
   getPriorityColor: (p: string) => string;
 }) {
-  
+  const [expandedItem, setExpandedItem] = useState<number | null>(null);
 
   const radarData = analysis.occasionRatings.map((r) => ({
     occasion: r.occasion,
@@ -859,7 +859,7 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
       </div>
 
       {/* Detected Items + Strengths + Improvements row */}
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -879,11 +879,34 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className="flex items-center gap-2 p-2 rounded-lg bg-muted/30"
+                  className="rounded-lg bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => setExpandedItem(expandedItem === i ? null : i)}
                 >
-                  <div className="w-3 h-3 rounded-full border border-border flex-shrink-0" style={{ backgroundColor: item.color.startsWith("#") ? item.color : undefined }} />
-                  <span className="text-sm text-foreground flex-1">{item.name}</span>
-                  <span className="text-[10px] text-muted-foreground">{item.category}</span>
+                  <div className="flex items-center gap-2 p-2">
+                    <div className="w-3 h-3 rounded-full border border-border flex-shrink-0" style={{ backgroundColor: item.color.startsWith("#") ? item.color : undefined }} />
+                    <span className="text-sm text-foreground flex-1">{item.name}</span>
+                    <span className="text-[10px] text-muted-foreground">{item.category}</span>
+                  </div>
+                  <AnimatePresence>
+                    {expandedItem === i && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="px-3 pb-3 pt-1 space-y-1.5 border-t border-border/30">
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 rounded border border-border" style={{ backgroundColor: item.color.startsWith("#") ? item.color : undefined }} />
+                            <span className="text-xs text-muted-foreground">Color: <span className="text-foreground">{item.color}</span></span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">Style: <span className="text-foreground">{item.style}</span></p>
+                          <Badge variant="secondary" className="text-[10px]">{item.category}</Badge>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
               ))}
             </CardContent>

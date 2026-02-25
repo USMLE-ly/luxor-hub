@@ -155,6 +155,14 @@ function FeatureCard({ item }: { item: BentoItem }) {
   );
 }
 
+const GoldDivider = () => (
+  <div className="flex items-center gap-4 my-10 max-w-xs mx-auto">
+    <div className="flex-1 h-px bg-gradient-to-r from-transparent to-primary/40" />
+    <div className="w-1.5 h-1.5 rounded-full bg-primary/60" />
+    <div className="flex-1 h-px bg-gradient-to-l from-transparent to-primary/40" />
+  </div>
+);
+
 const Features = () => {
   return (
     <section className="relative py-32 px-4 overflow-hidden" id="features">
@@ -175,13 +183,15 @@ const Features = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          className="text-center mb-6"
         >
           <p className="text-primary font-sans font-semibold text-sm tracking-widest uppercase mb-4">Capabilities</p>
           <h2 className="font-display text-4xl md:text-5xl font-bold">
             Everything You Need to <span className="gold-text">Look Incredible</span>
           </h2>
         </motion.div>
+
+        <GoldDivider />
 
         <motion.div
           initial={{ opacity: 0, y: 30 }}
