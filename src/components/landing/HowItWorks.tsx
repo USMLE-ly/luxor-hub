@@ -6,13 +6,22 @@ import {
 } from "recharts";
 
 const steps = [
-  { icon: Camera, title: "Scan Closet", score: 25, fill: "hsl(43, 74%, 49%)" },
-  { icon: User, title: "Style DNA", score: 50, fill: "hsl(43, 74%, 55%)" },
-  { icon: Wand2, title: "AI Outfits", score: 80, fill: "hsl(43, 74%, 60%)" },
-  { icon: TrendingUp, title: "Optimize", score: 95, fill: "hsl(43, 74%, 65%)" },
+  { icon: Camera, title: "Scan Closet", desc: "Upload photos and let AI catalog every item in seconds.", score: 25, fill: "hsl(43, 74%, 49%)" },
+  { icon: User, title: "Style DNA", desc: "We build a unique profile of your taste, lifestyle, and goals.", score: 50, fill: "hsl(43, 74%, 55%)" },
+  { icon: Wand2, title: "AI Outfits", desc: "Get context-aware outfits generated from your own wardrobe.", score: 80, fill: "hsl(43, 74%, 60%)" },
+  { icon: TrendingUp, title: "Optimize", desc: "Track insights, improve your score, and refine your look.", score: 95, fill: "hsl(43, 74%, 65%)" },
 ];
 
 const areaData = steps.map((s, i) => ({ name: s.title, score: s.score, step: i + 1 }));
+
+/* Thin decorative gold divider — PDF-inspired */
+const GoldDivider = () => (
+  <div className="flex items-center gap-4 my-10 max-w-xs mx-auto">
+    <div className="flex-1 h-px bg-gradient-to-r from-transparent to-primary/40" />
+    <div className="w-1.5 h-1.5 rounded-full bg-primary/60" />
+    <div className="flex-1 h-px bg-gradient-to-l from-transparent to-primary/40" />
+  </div>
+);
 
 const HowItWorks = () => {
   return (
@@ -31,13 +40,15 @@ const HowItWorks = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-6"
         >
           <p className="text-primary font-sans font-semibold text-sm tracking-widest uppercase mb-4">How It Works</p>
           <h2 className="font-display text-4xl md:text-5xl font-bold">
             Four Steps to <span className="gold-text">Effortless Style</span>
           </h2>
         </motion.div>
+
+        <GoldDivider />
 
         {/* Style progression area chart */}
         <motion.div
@@ -71,8 +82,8 @@ const HowItWorks = () => {
           </ResponsiveContainer>
         </motion.div>
 
-        {/* Step gauges */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {/* Step cards — editorial numbering */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
           {steps.map((step, i) => (
             <motion.div
               key={step.title}
@@ -80,8 +91,13 @@ const HowItWorks = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1, duration: 0.5 }}
-              className="glass rounded-xl p-4 border border-border flex flex-col items-center text-center group hover:-translate-y-1 transition-transform"
+              className="glass rounded-xl p-5 border border-border flex flex-col items-center text-center group hover:-translate-y-1 transition-transform"
             >
+              {/* Large editorial number */}
+              <span className="font-serif text-5xl font-light text-primary/20 leading-none mb-2 select-none">
+                0{i + 1}
+              </span>
+
               <div className="relative w-20 h-20 mb-3">
                 <ResponsiveContainer width="100%" height="100%">
                   <RadialBarChart
@@ -96,9 +112,10 @@ const HowItWorks = () => {
                   <step.icon className="w-5 h-5 text-primary" />
                 </div>
               </div>
-              <span className="text-xs text-muted-foreground font-sans font-medium">0{i + 1}</span>
+
               <h3 className="font-display text-sm font-semibold text-foreground mt-1">{step.title}</h3>
-              <span className="text-lg font-bold text-primary mt-1">{step.score}%</span>
+              <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{step.desc}</p>
+              <span className="text-lg font-bold text-primary mt-2">{step.score}%</span>
             </motion.div>
           ))}
         </div>
