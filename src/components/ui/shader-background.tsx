@@ -12,12 +12,6 @@ const fsSource = `
 
   const float overallSpeed = 0.2;
   const float gridSmoothWidth = 0.015;
-  const float axisWidth = 0.05;
-  const float majorLineWidth = 0.025;
-  const float minorLineWidth = 0.0125;
-  const float majorLineFrequency = 5.0;
-  const float minorLineFrequency = 1.0;
-  const vec4 gridColor = vec4(0.5);
   const float scale = 5.0;
   const vec4 lineColor = vec4(0.72, 0.53, 0.1, 1.0);
   const float minLineWidth = 0.01;
@@ -40,6 +34,10 @@ const fsSource = `
 
   float random(float t) {
     return (cos(t) + cos(t * 1.3 + 1.3) + cos(t * 1.4 + 1.4)) / 3.0;
+  }
+
+  float hash(vec2 p) {
+    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
   }
 
   float getPlasmaY(float x, float horizontalFade, float offset) {
@@ -82,6 +80,28 @@ const fsSource = `
     fragColor *= verticalFade;
     fragColor.a = 1.0;
     fragColor += lines;
+
+    // Gold floating particles
+    float particles = 0.0;
+    for(int i = 0; i < 40; i++) {
+      float fi = float(i);
+      vec2 seed = vec2(fi * 0.17, fi * 0.31);
+      float px = hash(seed) * 2.0 - 1.0;
+      float py = hash(seed + 1.0) * 2.0 - 1.0;
+      float speed = 0.05 + hash(seed + 2.0) * 0.1;
+      float phase = hash(seed + 3.0) * 6.28;
+      vec2 particlePos = vec2(
+        px + sin(iTime * speed + phase) * 0.3,
+        py + cos(iTime * speed * 0.7 + phase) * 0.4 + iTime * speed * 0.1
+      );
+      particlePos.y = mod(particlePos.y + 1.0, 2.0) - 1.0;
+      float dist = length(uv * 2.0 - 1.0 - particlePos);
+      float size = 0.003 + hash(seed + 4.0) * 0.004;
+      float glow = smoothstep(size * 3.0, 0.0, dist) * (0.3 + hash(seed + 5.0) * 0.7);
+      float twinkle = sin(iTime * (1.0 + hash(seed + 6.0) * 3.0) + phase) * 0.5 + 0.5;
+      particles += glow * twinkle;
+    }
+    fragColor += vec4(0.85, 0.65, 0.15, 1.0) * particles * 0.4;
 
     gl_FragColor = fragColor;
   }
