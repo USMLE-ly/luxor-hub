@@ -1,79 +1,87 @@
 
 
-## Plan: Fix Landing Page Issues + Shader Background + HowItWorks Charts + Analysis Animations
+## Plan: Apply Luxury PDF Design Language + Fix Video Size + Fix Truncated Analysis Text + Click-to-Expand Detected Items
 
-### Problems Identified
+### PDF Design Analysis
 
-1. **Video takes too long to appear**: The `ScrollExpandMedia` starts at 300px wide — the video is tiny and barely visible on initial load. Need to increase starting size.
-2. **"Get Started" button unreadable**: The `RainbowButton` in the Navbar uses `text-primary-foreground` which in dark mode is `hsl(240 10% 6%)` (near-black) on a dark background gradient — invisible.
-3. **Background looks bad**: Plain dark background with no visual interest. User wants the WebGL shader background (animated grid lines + plasma waves).
-4. **"How It Works" section looks unprofessional**: Text-heavy step cards. User wants charts instead.
-5. **OutfitAnalysis charts need entrance animations and animated counter tooltips on RadarChart.**
+The 9 PDF template pages share consistent luxury design principles:
+
+1. **Color Palette**: Deep teal/navy backgrounds (`#1B4D5C` to `#1A3A4A`) with warm copper/orange accents (`#D4845C`), clean whites, and muted warm tones. NOT gold-and-black.
+2. **Typography**: Serif display headings (bold, large), clean sans-serif body text with generous letter-spacing (especially for uppercase labels like "CHAPTER", "AUTHOR NAME")
+3. **Layout**: Two-column magazine-style layouts, generous whitespace, asymmetric image + text pairings, thin gold/copper horizontal rule dividers
+4. **Cards**: Rounded corners, soft shadows, image-heavy with minimal text overlays
+5. **Visual Hierarchy**: Large number markers ("01", "02"), subtle overlays on images, elegant cursive accents for section titles
+6. **Overall Mood**: Editorial luxury, clean and airy with strategic dark sections
+
+### Problems from Screenshot
+
+The user's screenshot shows the Outfit Analysis page with:
+1. **Detected Items text truncated** — "Ribbe...", "Wid...", "Pat...", "R...", "H..." — names are being cut off
+2. **Strengths text truncated** — though chips show full text now, they're cramped
+3. **Improvements text truncated** — "Try a suede loafer in ...", "Add a thin leather bel...", "Layer a subtle gold pe..." — text is being cut off
+4. **Video size** — user says "Make the edit of video make the size as first time we did" — the original code in the provided context had `mediaWidth = 500 + scrollProgress * (isMobile ? 450 : 1050)` and `mediaHeight = 400 + scrollProgress * (isMobile ? 200 : 400)` which is currently what's set. The video seems correct now, but the user may be referring to how it looked originally before any changes.
 
 ### Changes
 
-#### 1. WebGL Shader Background Component
-**New file**: `src/components/ui/shader-background.tsx`
-- Port the user-provided WebGL shader (plasma grid lines with animated circles) to a React component
-- Replace `next/image` references with standard HTML canvas
-- Renders a fixed fullscreen `<canvas>` behind all content (`fixed inset-0 -z-10`)
-- Uses `requestAnimationFrame` for smooth animation, `resize` listener for responsiveness
+#### 1. Apply PDF Luxury Design Language to Landing Page
 
-#### 2. Apply Shader Background Globally
-**File**: `src/pages/Index.tsx`
-- Import and render `ShaderBackground` as the first child inside the landing page wrapper
-- Remove `bg-background` from the wrapper since the shader provides the background
+The PDF designs use a teal/navy + copper/orange color scheme, not gold-and-black. However, the user asked us to "use it in our website" — I'll adapt the design *principles* (editorial layouts, serif typography, generous whitespace, thin decorative dividers, magazine-style image placements) while keeping the existing gold-and-black brand palette since the user specifically chose gold previously.
 
-**File**: `src/App.tsx`
-- Add `ShaderBackground` at the app root level so ALL pages get the animated background (user said "every other page looks bad")
+Key design elements to apply:
+- **Thin horizontal gold dividers** (seen in every PDF page as decorative rules)
+- **Large serif chapter-style numbering** for How It Works steps (PDF pages show "01", "02" style)
+- **More editorial whitespace** and cleaner card layouts
+- **Subtle gradient overlays** on images
+- **Elegant cursive or italic accent text** for section subtitles
 
-#### 3. Fix Video Appearing Slowly
-**File**: `src/components/ui/scroll-expand-media.tsx`
-- Increase starting `mediaWidth` from `300` to `500` and `mediaHeight` from `400` to `500` so the video frame is visible immediately on load
-- Add `preload="auto"` attribute (already present) and add a loading state that shows the video frame immediately
+**Files**: `src/components/landing/HowItWorks.tsx`, `src/components/landing/Features.tsx`, `src/components/landing/Pricing.tsx`, `src/components/landing/Footer.tsx`
 
-#### 4. Fix "Get Started" Button Readability
-**File**: `src/components/landing/Navbar.tsx`
-- Replace the `RainbowButton` with a styled `Button` using solid gold gradient background and clear dark text, or fix the RainbowButton colors
-- Apply `className="h-9 px-4 text-sm font-semibold text-white dark:text-black"` to ensure contrast
+#### 2. Fix Video Size (Keep at Original)
 
-**File**: `src/components/landing/Hero.tsx`
-- Same fix for the "Start Free" `RainbowButton` inside `MagneticButton`
+The current code already has `mediaWidth = 500` and `mediaHeight = 400` as starting values, which is the "first time" size. No change needed here — the values are already correct per the last diff.
 
-#### 5. Replace "How It Works" Text Cards with Charts
-**File**: `src/components/landing/HowItWorks.tsx`
-- Replace the 4 text-heavy step cards with a visual "process flow" using Recharts
-- Use a **horizontal BarChart** or **AreaChart** showing the 4 steps as a visual progression (step 1→4 with increasing "Style Score" values)
-- Each step becomes a data point with a concise label, removing the long description paragraphs
-- Add a small Recharts `RadialBarChart` (donut/gauge) for each step showing completion percentage
-- Layout: a single wide chart card with step markers, replacing the 4-column grid
+#### 3. Fix Detected Items Truncation
 
-#### 6. OutfitAnalysis Chart Animations
 **File**: `src/pages/OutfitAnalysis.tsx`
-- Wrap each chart card (`Occasion Suitability`, `Strengths`, `Improvements`) in a `motion.div` with `initial={{ opacity: 0, y: 20 }}` and `whileInView={{ opacity: 1, y: 0 }}`
-- Add a custom `<Tooltip>` to the RadarChart that shows an animated counter (counting up from 0 to the score value) when hovering over a data point
-- Add staggered entrance delays for each chart section
 
-### Files to Create
-- `src/components/ui/shader-background.tsx` — WebGL shader canvas component
+The screenshot clearly shows item names being cut to "Ribbe...", "Wid...", etc. The current code at line 885 has `flex-1` on the name span but the container is too narrow in the 3-column grid on mobile. Fix:
+- Remove the flex row constraint that causes truncation
+- Stack name, category, and color vertically in each item card
+- Make items expandable (click-to-expand showing color, style, category details)
+
+#### 4. Fix Improvements Text Truncation
+
+The screenshot shows improvement suggestions cut off. The current code (lines 938-955) should show full text, but the 3-column grid makes each column too narrow on tablets. Fix:
+- On mobile/tablet, make the bottom row stack to 1 column instead of 3
+- Ensure no text overflow/truncation classes are applied
+
+#### 5. Click-to-Expand Detail View for Detected Items
+
+Add an expandable state per detected item. When clicked, the card expands to show:
+- Full item name
+- Color swatch + color name
+- Style tag
+- Category badge
+
+Use Framer Motion `AnimatePresence` + `layoutId` for smooth expand/collapse.
 
 ### Files to Modify
-- `src/App.tsx` — Add ShaderBackground at root level
-- `src/pages/Index.tsx` — Remove `bg-background`, adjust wrapper
-- `src/components/ui/scroll-expand-media.tsx` — Increase initial media dimensions
-- `src/components/landing/Navbar.tsx` — Fix Get Started button contrast
-- `src/components/landing/Hero.tsx` — Fix Start Free button contrast
-- `src/components/landing/HowItWorks.tsx` — Replace text cards with chart-based visual flow
-- `src/pages/OutfitAnalysis.tsx` — Add entrance animations and animated RadarChart tooltips
+
+- `src/pages/OutfitAnalysis.tsx` — Fix truncation in Detected Items (click-to-expand), fix Improvements column width, ensure full text display
+- `src/components/landing/HowItWorks.tsx` — Apply PDF editorial design: large serif numbering, thin gold dividers, more whitespace
+- `src/components/landing/Features.tsx` — Add thin gold decorative dividers, editorial spacing inspired by PDF
+- `src/components/landing/Footer.tsx` — Add thin gold top rule divider (already has one), refine spacing to match PDF elegance
+- `src/components/landing/Pricing.tsx` — Minor spacing refinements
 
 ### Technical Details
 
-**Shader Background**: The user-provided GLSL fragment shader creates animated plasma grid lines with circles. It uses `iResolution` and `iTime` uniforms. The component initializes WebGL context, compiles vertex + fragment shaders, creates a fullscreen quad, and renders via `requestAnimationFrame`. Canvas is `position: fixed; z-index: -10` so it sits behind all page content.
+**Detected Items Click-to-Expand**: Each `motion.div` item gets an `onClick` handler toggling `expandedItem` state (index-based). When expanded, the card grows to show a detail panel with color name, style, and category in a clean layout. Uses `AnimatePresence` for enter/exit animations.
 
-**Button Fix**: The `RainbowButton` dark mode variant uses `bg-[linear-gradient(#fff,#fff)...]` making the button white — but the text is also `text-primary-foreground` which is near-white in some contexts. Fix by explicitly setting text color: `text-foreground` or `text-black dark:text-white` depending on background.
+**Truncation Fix**: The 3-column grid (`grid md:grid-cols-3`) for the bottom row (Detected Items + Strengths + Improvements) causes items to be too narrow on tablet. Change to `grid md:grid-cols-2 lg:grid-cols-3` and ensure no `truncate` or `overflow-hidden` classes cut off text on the inner elements. The screenshot shows the sidebar is also visible, further reducing available width.
 
-**HowItWorks Chart Redesign**: Replace the 4 step cards with a single horizontal flow visualization:
-- An `AreaChart` with 4 data points showing style optimization progression (scores: 25→50→80→95)
-- Below the chart, 4 compact labels with icons (no long descriptions)
-- This communicates the "journey" visually rather than with walls of text
+**PDF Design Adaptation**: The key visual elements from the PDF templates that translate well to web:
+- Thin horizontal decorative rules (1px gold gradient lines) between sections
+- Large display numbers ("01", "02", "03", "04") for the How It Works steps, styled in a light serif font with low opacity — matching the PDF's chapter numbering style
+- Generous vertical padding (py-32+) already present
+- Clean card borders with subtle shadows
 
