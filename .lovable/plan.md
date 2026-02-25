@@ -1,100 +1,92 @@
 
 
-## Verification Results
+## Plan: Chart-Based Analysis Results, Parallax Effects & Landing Page Verification
 
-**Landing page**: BackgroundBoxes grid renders behind the hero. GlowingEffect borders active on Features BentoGrid cards. Spotlight effect visible. 3D Spline robot loads (still the robot model -- separate issue). No JS errors.
+### Context
+The user wants four changes:
+1. Replace the text-heavy Outfit Analysis results with chart-based visualizations inspired by the uploaded PDF (which shows radial gauges, donut charts, bar charts, and compact stat cards from a health dashboard)
+2. Verify the landing page scroll-to-expand effect works end-to-end on desktop
+3. Verify the landing page on mobile (390px) with video hero and typewriter animation
+4. Add parallax scroll effects to Features section illustrations
 
-**Pricing section**: Currently uses the original glassmorphism cards. CreativePricing component exists but is not integrated.
+### Analysis of Current State
+The `OutfitAnalysis.tsx` results section (lines 684-865, the `AnalysisResults` component) currently renders:
+- **Overall Score**: Already has an SVG ring chart (good, keep)
+- **Occasion Suitability**: Text-heavy — each occasion has a name, percentage, Progress bar, AND a full sentence `reason` description
+- **Detected Items**: List with text descriptions (reasonable, keep compact)
+- **Color Analysis**: Color swatches + text harmony/rating + `bodyTypeNotes` paragraph
+- **Strengths**: Bullet list of full sentences
+- **Improvements**: Each has a priority badge, suggestion text, AND a reason paragraph
 
-**Dashboard**: Uses basic glass stat cards. DisplayCards component exists but is not integrated.
+The PDF reference shows compact, visual dashboards with radial gauges, bar/area charts, and minimal text. The user specifically says "too much words, normal people will not interested."
 
-## Implementation Plan
+### Technical Approach
 
-### Task 1: Replace Pricing Section with CreativePricing
+#### Task 1: Chart-Based Analysis Redesign
+Replace the `AnalysisResults` component with visual chart equivalents using Recharts (already installed):
 
-**File**: `src/components/landing/Pricing.tsx`
+1. **Occasion Suitability** — Replace text+Progress with a **RadarChart** (spider/radar chart) showing all occasions at once. Remove the `reason` text entirely. Each axis = occasion, value = score percentage.
 
-Rewrite to use the `CreativePricing` component with AURELIA-branded tiers:
-- Map existing Free/Pro/Elite tiers to `PricingTier` format (using euro prices converted: 0, 19, 99)
-- Use `Crown`, `Sparkles`, `Star` icons matching the brand
-- Custom props: `tag="Invest in Style"`, `title="Choose Your Plan"`, `description="From free styling to elite personal service"`
-- Wrap in `useNavigate` so CTA buttons route to `/auth`
-- Keep section id="pricing" for scroll navigation
+2. **Color Analysis** — Keep the color swatches (already visual). Remove the long `bodyTypeNotes` paragraph. Show harmony/rating as compact badges instead of text rows.
 
-### Task 2: Add DisplayCards to Dashboard
+3. **Strengths** — Replace bullet text with a compact **visual scorecard**: show as short keyword chips/badges (extract key phrases, max 4-5 words each) instead of full sentences.
 
-**File**: `src/pages/Dashboard.tsx`
+4. **Improvements** — Replace text blocks with a **horizontal BarChart** showing priority levels visually. Each suggestion becomes a single-line label with a colored priority indicator bar. Remove the `reason` paragraphs.
 
-Insert a `DisplayCards` component between the welcome header and stats grid:
-- 3 stacked cards showing: "Closet Items" (count), "Style Score" (value), "Outfits Created" (count)
-- Use gold/primary themed icon colors matching the brand
-- Cards pull from the existing `stats` state object
-- Import `DisplayCards` from `@/components/ui/display-cards`
+5. **Overall layout** — Consolidate into fewer, more visual cards. Combine Occasion + Color into a single dashboard row. Keep the existing score ring.
 
-### Task 3: Premium Landing Page Upgrades
+#### Task 2 & 3: Landing Page Verification
+Navigate to the landing page on both desktop (1920px) and mobile (390px) viewports to visually verify:
+- Scroll-to-expand video effect
+- Typewriter animation
+- All sections render after expansion
+- Mobile stacking and responsiveness
 
-**File**: `src/components/landing/Hero.tsx`
-- Add `InteractiveHoverButton` for the "See How It Works" CTA (replacing plain outline button)
-- Replace "Start Free" button with `RainbowButton` for maximum visual impact
-- Add subtle floating animated badges using `motion` (e.g., "10K+ Users", "AI-Powered") as social proof chips
+#### Task 4: Parallax Scroll on Features Illustrations
+In `Features.tsx`, add a scroll-driven parallax transform to the feature illustration images using Framer Motion's `useScroll` and `useTransform`:
+- Each illustration gets a subtle vertical translate (e.g., `translateY` from 20px to -20px) as the card scrolls through the viewport
+- Uses `useInView` or `useScroll` with `offset` targeting each card's scroll position
 
-**File**: `src/components/landing/HowItWorks.tsx`
-- Wrap each step card in a `GlowingEffect` container for mouse-tracking glow, matching the Features section treatment
-- Add a connecting line/path between steps using CSS pseudo-elements for visual flow
+### Files to Modify
+- `src/pages/OutfitAnalysis.tsx` — Rewrite the `AnalysisResults` component (lines 684-865) to use Recharts `RadarChart` for occasions, compact badges for strengths, and visual bars for improvements
+- `src/components/landing/Features.tsx` — Add parallax transforms to feature illustration images using Framer Motion scroll utilities
 
-**File**: `src/components/landing/Navbar.tsx`
-- Replace "Get Started" button with `RainbowButton` for consistent premium CTA
-- Add subtle logo glow animation on hover
+### Implementation Details
 
-**File**: `src/components/landing/Footer.tsx`
-- Upgrade to a richer footer: add social links row, newsletter CTA, and "Built with AI" trust badge
-- Add subtle top-border gold gradient
+**Occasion Suitability — RadarChart:**
+```text
++---------------------------+
+|   Occasion Suitability    |
+|                           |
+|      Casual (95%)         |
+|       /        \          |
+|  Brunch ---- Work         |
+|       \        /          |
+|     Date -- Evening       |
+|                           |
+|   (Recharts RadarChart)   |
++---------------------------+
+```
 
-### Task 4: Dashboard Premium Overhaul
+**Strengths — Keyword Chips:**
+```text
++---------------------------+
+|  ✓ Strengths              |
+|  [Texture Mix] [Balance]  |
+|  [Denim Combo] [Tuck]    |
++---------------------------+
+```
 
-**File**: `src/pages/Dashboard.tsx`
-- Wrap stat cards in `GlowingEffect` containers
-- Add `DisplayCards` stack for the "Today's Quick Stats" visual showcase
-- Add animated number counters for stats (count-up on mount)
-- Add a "Quick Actions" row with `InteractiveHoverButton` components for common actions (Go to Closet, Analyze Outfit, Chat with AI)
+**Improvements — Visual Priority Bars:**
+```text
++---------------------------+
+|  ⚠ Improvements          |
+|  ██████░░ Off-white tee   |
+|  ████░░░░ Silver hoops    |
+|  ██████░░ Pop of color    |
++---------------------------+
+```
 
-### Task 5: Outfit Analysis Page Polish
-
-**File**: `src/pages/OutfitAnalysis.tsx`
-- Already has GlowingEffect and animated score ring
-- Add `RainbowButton` for the "Analyze My Outfit" primary CTA
-- Add staggered card reveal animations for the results section
-- Add a shimmer/skeleton loading state during analysis with premium animation
-
-### Task 6: Global Micro-Interactions & Motion System
-
-**File**: `src/index.css`
-- Add custom CSS for smooth page transitions
-- Add `.hover-lift` utility: `transform: translateY(-2px); box-shadow: 0 8px 25px -5px rgba(0,0,0,0.1)`
-- Add `.gold-shimmer` keyframe animation for premium text effects
-- Add scroll-triggered fade-in utility classes
-
-**File**: `tailwind.config.ts`
-- Add `hover-lift`, `shimmer`, `float` animations
-- Add `gold-shimmer` keyframes for text shine effects
-
-### Task 7: Mobile-Specific Optimizations
-
-**File**: `src/components/landing/Hero.tsx`
-- Hide Spline 3D on mobile (below `lg`) and show a static gradient/image fallback for performance
-- Stack CTAs vertically on mobile with full-width buttons
-- Reduce heading size further on `sm` breakpoints
-
-**File**: `src/components/landing/Features.tsx`
-- Single column on mobile with reduced gap
-- Disable GlowingEffect on touch devices (no hover)
-
-### Execution Order
-1. Pricing replacement (quick win, high visual impact)
-2. Dashboard DisplayCards integration
-3. Hero/Navbar premium buttons
-4. HowItWorks GlowingEffect treatment
-5. Footer upgrade
-6. Dashboard GlowingEffect + quick actions
-7. Global animations and mobile optimizations
+**Parallax on Features:**
+- Wrap each illustration `img` in a `motion.div` with `useScroll({ target, offset })` → `useTransform(scrollYProgress, [0,1], [30, -30])` applied as `y` style.
 
