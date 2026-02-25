@@ -1,92 +1,79 @@
 
 
-## Plan: Chart-Based Analysis Results, Parallax Effects & Landing Page Verification
+## Plan: Fix Landing Page Issues + Shader Background + HowItWorks Charts + Analysis Animations
 
-### Context
-The user wants four changes:
-1. Replace the text-heavy Outfit Analysis results with chart-based visualizations inspired by the uploaded PDF (which shows radial gauges, donut charts, bar charts, and compact stat cards from a health dashboard)
-2. Verify the landing page scroll-to-expand effect works end-to-end on desktop
-3. Verify the landing page on mobile (390px) with video hero and typewriter animation
-4. Add parallax scroll effects to Features section illustrations
+### Problems Identified
 
-### Analysis of Current State
-The `OutfitAnalysis.tsx` results section (lines 684-865, the `AnalysisResults` component) currently renders:
-- **Overall Score**: Already has an SVG ring chart (good, keep)
-- **Occasion Suitability**: Text-heavy — each occasion has a name, percentage, Progress bar, AND a full sentence `reason` description
-- **Detected Items**: List with text descriptions (reasonable, keep compact)
-- **Color Analysis**: Color swatches + text harmony/rating + `bodyTypeNotes` paragraph
-- **Strengths**: Bullet list of full sentences
-- **Improvements**: Each has a priority badge, suggestion text, AND a reason paragraph
+1. **Video takes too long to appear**: The `ScrollExpandMedia` starts at 300px wide — the video is tiny and barely visible on initial load. Need to increase starting size.
+2. **"Get Started" button unreadable**: The `RainbowButton` in the Navbar uses `text-primary-foreground` which in dark mode is `hsl(240 10% 6%)` (near-black) on a dark background gradient — invisible.
+3. **Background looks bad**: Plain dark background with no visual interest. User wants the WebGL shader background (animated grid lines + plasma waves).
+4. **"How It Works" section looks unprofessional**: Text-heavy step cards. User wants charts instead.
+5. **OutfitAnalysis charts need entrance animations and animated counter tooltips on RadarChart.**
 
-The PDF reference shows compact, visual dashboards with radial gauges, bar/area charts, and minimal text. The user specifically says "too much words, normal people will not interested."
+### Changes
 
-### Technical Approach
+#### 1. WebGL Shader Background Component
+**New file**: `src/components/ui/shader-background.tsx`
+- Port the user-provided WebGL shader (plasma grid lines with animated circles) to a React component
+- Replace `next/image` references with standard HTML canvas
+- Renders a fixed fullscreen `<canvas>` behind all content (`fixed inset-0 -z-10`)
+- Uses `requestAnimationFrame` for smooth animation, `resize` listener for responsiveness
 
-#### Task 1: Chart-Based Analysis Redesign
-Replace the `AnalysisResults` component with visual chart equivalents using Recharts (already installed):
+#### 2. Apply Shader Background Globally
+**File**: `src/pages/Index.tsx`
+- Import and render `ShaderBackground` as the first child inside the landing page wrapper
+- Remove `bg-background` from the wrapper since the shader provides the background
 
-1. **Occasion Suitability** — Replace text+Progress with a **RadarChart** (spider/radar chart) showing all occasions at once. Remove the `reason` text entirely. Each axis = occasion, value = score percentage.
+**File**: `src/App.tsx`
+- Add `ShaderBackground` at the app root level so ALL pages get the animated background (user said "every other page looks bad")
 
-2. **Color Analysis** — Keep the color swatches (already visual). Remove the long `bodyTypeNotes` paragraph. Show harmony/rating as compact badges instead of text rows.
+#### 3. Fix Video Appearing Slowly
+**File**: `src/components/ui/scroll-expand-media.tsx`
+- Increase starting `mediaWidth` from `300` to `500` and `mediaHeight` from `400` to `500` so the video frame is visible immediately on load
+- Add `preload="auto"` attribute (already present) and add a loading state that shows the video frame immediately
 
-3. **Strengths** — Replace bullet text with a compact **visual scorecard**: show as short keyword chips/badges (extract key phrases, max 4-5 words each) instead of full sentences.
+#### 4. Fix "Get Started" Button Readability
+**File**: `src/components/landing/Navbar.tsx`
+- Replace the `RainbowButton` with a styled `Button` using solid gold gradient background and clear dark text, or fix the RainbowButton colors
+- Apply `className="h-9 px-4 text-sm font-semibold text-white dark:text-black"` to ensure contrast
 
-4. **Improvements** — Replace text blocks with a **horizontal BarChart** showing priority levels visually. Each suggestion becomes a single-line label with a colored priority indicator bar. Remove the `reason` paragraphs.
+**File**: `src/components/landing/Hero.tsx`
+- Same fix for the "Start Free" `RainbowButton` inside `MagneticButton`
 
-5. **Overall layout** — Consolidate into fewer, more visual cards. Combine Occasion + Color into a single dashboard row. Keep the existing score ring.
+#### 5. Replace "How It Works" Text Cards with Charts
+**File**: `src/components/landing/HowItWorks.tsx`
+- Replace the 4 text-heavy step cards with a visual "process flow" using Recharts
+- Use a **horizontal BarChart** or **AreaChart** showing the 4 steps as a visual progression (step 1→4 with increasing "Style Score" values)
+- Each step becomes a data point with a concise label, removing the long description paragraphs
+- Add a small Recharts `RadialBarChart` (donut/gauge) for each step showing completion percentage
+- Layout: a single wide chart card with step markers, replacing the 4-column grid
 
-#### Task 2 & 3: Landing Page Verification
-Navigate to the landing page on both desktop (1920px) and mobile (390px) viewports to visually verify:
-- Scroll-to-expand video effect
-- Typewriter animation
-- All sections render after expansion
-- Mobile stacking and responsiveness
+#### 6. OutfitAnalysis Chart Animations
+**File**: `src/pages/OutfitAnalysis.tsx`
+- Wrap each chart card (`Occasion Suitability`, `Strengths`, `Improvements`) in a `motion.div` with `initial={{ opacity: 0, y: 20 }}` and `whileInView={{ opacity: 1, y: 0 }}`
+- Add a custom `<Tooltip>` to the RadarChart that shows an animated counter (counting up from 0 to the score value) when hovering over a data point
+- Add staggered entrance delays for each chart section
 
-#### Task 4: Parallax Scroll on Features Illustrations
-In `Features.tsx`, add a scroll-driven parallax transform to the feature illustration images using Framer Motion's `useScroll` and `useTransform`:
-- Each illustration gets a subtle vertical translate (e.g., `translateY` from 20px to -20px) as the card scrolls through the viewport
-- Uses `useInView` or `useScroll` with `offset` targeting each card's scroll position
+### Files to Create
+- `src/components/ui/shader-background.tsx` — WebGL shader canvas component
 
 ### Files to Modify
-- `src/pages/OutfitAnalysis.tsx` — Rewrite the `AnalysisResults` component (lines 684-865) to use Recharts `RadarChart` for occasions, compact badges for strengths, and visual bars for improvements
-- `src/components/landing/Features.tsx` — Add parallax transforms to feature illustration images using Framer Motion scroll utilities
+- `src/App.tsx` — Add ShaderBackground at root level
+- `src/pages/Index.tsx` — Remove `bg-background`, adjust wrapper
+- `src/components/ui/scroll-expand-media.tsx` — Increase initial media dimensions
+- `src/components/landing/Navbar.tsx` — Fix Get Started button contrast
+- `src/components/landing/Hero.tsx` — Fix Start Free button contrast
+- `src/components/landing/HowItWorks.tsx` — Replace text cards with chart-based visual flow
+- `src/pages/OutfitAnalysis.tsx` — Add entrance animations and animated RadarChart tooltips
 
-### Implementation Details
+### Technical Details
 
-**Occasion Suitability — RadarChart:**
-```text
-+---------------------------+
-|   Occasion Suitability    |
-|                           |
-|      Casual (95%)         |
-|       /        \          |
-|  Brunch ---- Work         |
-|       \        /          |
-|     Date -- Evening       |
-|                           |
-|   (Recharts RadarChart)   |
-+---------------------------+
-```
+**Shader Background**: The user-provided GLSL fragment shader creates animated plasma grid lines with circles. It uses `iResolution` and `iTime` uniforms. The component initializes WebGL context, compiles vertex + fragment shaders, creates a fullscreen quad, and renders via `requestAnimationFrame`. Canvas is `position: fixed; z-index: -10` so it sits behind all page content.
 
-**Strengths — Keyword Chips:**
-```text
-+---------------------------+
-|  ✓ Strengths              |
-|  [Texture Mix] [Balance]  |
-|  [Denim Combo] [Tuck]    |
-+---------------------------+
-```
+**Button Fix**: The `RainbowButton` dark mode variant uses `bg-[linear-gradient(#fff,#fff)...]` making the button white — but the text is also `text-primary-foreground` which is near-white in some contexts. Fix by explicitly setting text color: `text-foreground` or `text-black dark:text-white` depending on background.
 
-**Improvements — Visual Priority Bars:**
-```text
-+---------------------------+
-|  ⚠ Improvements          |
-|  ██████░░ Off-white tee   |
-|  ████░░░░ Silver hoops    |
-|  ██████░░ Pop of color    |
-+---------------------------+
-```
-
-**Parallax on Features:**
-- Wrap each illustration `img` in a `motion.div` with `useScroll({ target, offset })` → `useTransform(scrollYProgress, [0,1], [30, -30])` applied as `y` style.
+**HowItWorks Chart Redesign**: Replace the 4 step cards with a single horizontal flow visualization:
+- An `AreaChart` with 4 data points showing style optimization progression (scores: 25→50→80→95)
+- Below the chart, 4 compact labels with icons (no long descriptions)
+- This communicates the "journey" visually rather than with walls of text
 
