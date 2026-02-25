@@ -23,6 +23,7 @@ const ScrollExpandMedia = ({
   children,
 }: ScrollExpandMediaProps) => {
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [videoLoaded, setVideoLoaded] = useState(false);
   const [showContent, setShowContent] = useState(false);
   const [mediaFullyExpanded, setMediaFullyExpanded] = useState(false);
   const [touchStartY, setTouchStartY] = useState(0);
@@ -134,13 +135,19 @@ const ScrollExpandMedia = ({
                   boxShadow: "0px 0px 50px hsl(var(--foreground) / 0.15)",
                 }}
               >
-                {mediaType === "video" ? (
+              {mediaType === "video" ? (
                   <div className="relative w-full h-full pointer-events-none">
+                    {!videoLoaded && (
+                      <div className="absolute inset-0 rounded-xl bg-muted animate-pulse flex items-center justify-center">
+                        <div className="w-16 h-16 rounded-full border-4 border-primary/30 border-t-primary animate-spin" />
+                      </div>
+                    )}
                     <video
                       src={mediaSrc}
                       poster={posterSrc}
                       autoPlay muted loop playsInline
-                      className="w-full h-full object-cover rounded-xl"
+                      onLoadedData={() => setVideoLoaded(true)}
+                      className={`w-full h-full object-cover rounded-xl transition-opacity duration-500 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`}
                     />
                     <motion.div
                       className="absolute inset-0 bg-background/30 rounded-xl"
