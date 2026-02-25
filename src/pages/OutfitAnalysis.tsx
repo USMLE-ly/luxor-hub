@@ -731,7 +731,9 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
 
   const priorityValue = (p: string) => (p === "high" ? 3 : p === "medium" ? 2 : 1);
   const improvementData = analysis.improvements.map((imp) => ({
-    name: imp.suggestion.length > 25 ? imp.suggestion.slice(0, 22) + "…" : imp.suggestion,
+    name: imp.suggestion,
+    fullSuggestion: imp.suggestion,
+    reason: imp.reason,
     priority: priorityValue(imp.priority),
     label: imp.priority,
   }));
@@ -742,10 +744,7 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
     return "hsl(var(--muted-foreground))";
   };
 
-  const strengthChips = analysis.strengths.map((s) => {
-    const words = s.split(/\s+/);
-    return words.slice(0, Math.min(4, words.length)).join(" ");
-  });
+  const strengthChips = analysis.strengths;
 
   const animatedScore = useAnimatedCounter(analysis.styleScore, 1200);
 
@@ -883,7 +882,7 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
                   className="flex items-center gap-2 p-2 rounded-lg bg-muted/30"
                 >
                   <div className="w-3 h-3 rounded-full border border-border flex-shrink-0" style={{ backgroundColor: item.color.startsWith("#") ? item.color : undefined }} />
-                  <span className="text-sm text-foreground truncate flex-1">{item.name}</span>
+                  <span className="text-sm text-foreground flex-1">{item.name}</span>
                   <span className="text-[10px] text-muted-foreground">{item.category}</span>
                 </motion.div>
               ))}
@@ -935,18 +934,26 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={Math.max(120, improvementData.length * 40)}>
-                <BarChart data={improvementData} layout="vertical" margin={{ left: 0, right: 8, top: 4, bottom: 4 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
-                  <XAxis type="number" domain={[0, 3]} hide />
-                  <YAxis type="category" dataKey="name" width={90} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} axisLine={false} tickLine={false} />
-                  <Bar dataKey="priority" radius={[0, 6, 6, 0]} barSize={14} animationDuration={1000}>
-                    {improvementData.map((entry, index) => (
-                      <Cell key={index} fill={priorityBarColor(entry.priority)} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              <div className="space-y-3">
+                {analysis.improvements.map((imp, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.08 }}
+                    className="flex items-start gap-2 p-2 rounded-lg bg-muted/30"
+                  >
+                    <div
+                      className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0"
+                      style={{ backgroundColor: imp.priority === "high" ? "hsl(var(--destructive))" : imp.priority === "medium" ? "hsl(45 93% 47%)" : "hsl(var(--muted-foreground))" }}
+                    />
+                    <div>
+                      <p className="text-sm text-foreground">{imp.suggestion}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{imp.reason}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </motion.div>
