@@ -10,9 +10,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import {
   Upload, Camera, Sparkles, TrendingUp, Palette, ShieldCheck, AlertTriangle,
-  ChevronRight, Star, Shirt, Loader2, History, Save, Trash2, Share2, X,
+  Star, Shirt, Loader2, History, Save, Trash2, Share2, X,
   Twitter, Link, Check, Download, Clock, ArrowLeftRight, Users
 } from "lucide-react";
+import {
+  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell, ResponsiveContainer,
+} from "recharts";
 import { StyleComparison } from "@/components/app/StyleComparison";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
@@ -681,12 +685,37 @@ export default function OutfitAnalysis() {
   );
 }
 
-// Premium results component with glowing cards
+// Chart-based visual results component
 function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
   analysis: OutfitAnalysisData;
   getScoreColor: (s: number) => string;
   getPriorityColor: (p: string) => string;
 }) {
+  const radarData = analysis.occasionRatings.map((r) => ({
+    occasion: r.occasion,
+    score: r.score,
+    fullMark: 100,
+  }));
+
+  const priorityValue = (p: string) => (p === "high" ? 3 : p === "medium" ? 2 : 1);
+  const improvementData = analysis.improvements.map((imp) => ({
+    name: imp.suggestion.length > 25 ? imp.suggestion.slice(0, 22) + "…" : imp.suggestion,
+    priority: priorityValue(imp.priority),
+    label: imp.priority,
+  }));
+
+  const priorityBarColor = (p: number) => {
+    if (p === 3) return "hsl(var(--destructive))";
+    if (p === 2) return "hsl(45 93% 47%)";
+    return "hsl(var(--muted-foreground))";
+  };
+
+  // Extract short keywords from strength sentences (first 3-5 words)
+  const strengthChips = analysis.strengths.map((s) => {
+    const words = s.split(/\s+/);
+    return words.slice(0, Math.min(4, words.length)).join(" ");
+  });
+
   return (
     <>
       {/* Overall Score — Premium card */}
@@ -719,66 +748,45 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
                   <h2 className="font-display text-2xl font-bold text-foreground">{analysis.overallStyle}</h2>
                   <Badge className="gold-gradient text-primary-foreground">{analysis.seasonalFit}</Badge>
                 </div>
-                <p className="text-muted-foreground leading-relaxed">{analysis.summary}</p>
+                <p className="text-muted-foreground leading-relaxed text-sm">{analysis.summary}</p>
               </div>
             </div>
           </CardContent>
         </Card>
       </motion.div>
 
-      {/* Occasion Ratings */}
-      <Card className="glass-card">
-        <CardHeader>
-          <CardTitle className="font-display flex items-center gap-2 text-foreground">
-            <Star className="w-5 h-5 text-primary" /> Occasion Suitability
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {analysis.occasionRatings.map((r, i) => (
-            <motion.div key={r.occasion} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.08 }} className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-foreground">{r.occasion}</span>
-                <span className={`text-sm font-bold ${getScoreColor(r.score)}`}>{r.score}%</span>
-              </div>
-              <Progress value={r.score} className="h-2" />
-              <p className="text-xs text-muted-foreground">{r.reason}</p>
-            </motion.div>
-          ))}
-        </CardContent>
-      </Card>
-
+      {/* Occasion Radar + Color Palette row */}
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Detected Items */}
+        {/* Occasion Suitability — RadarChart */}
         <Card className="glass-card">
-          <CardHeader>
-            <CardTitle className="font-display flex items-center gap-2 text-foreground">
-              <Shirt className="w-5 h-5 text-primary" /> Detected Items
+          <CardHeader className="pb-2">
+            <CardTitle className="font-display flex items-center gap-2 text-foreground text-base">
+              <Star className="w-5 h-5 text-primary" /> Occasion Suitability
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {analysis.detectedItems.map((item, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.08 }}
-                className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
-              >
-                <div className="w-3 h-3 rounded-full border border-border" style={{ backgroundColor: item.color.startsWith("#") ? item.color : undefined }} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{item.name}</p>
-                  <p className="text-xs text-muted-foreground">{item.category} · {item.style}</p>
-                </div>
-                <Badge variant="outline" className="text-xs">{item.color}</Badge>
-              </motion.div>
-            ))}
+          <CardContent>
+            <ResponsiveContainer width="100%" height={240}>
+              <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="70%">
+                <PolarGrid stroke="hsl(var(--border))" />
+                <PolarAngleAxis dataKey="occasion" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} axisLine={false} />
+                <Radar
+                  name="Score"
+                  dataKey="score"
+                  stroke="hsl(var(--primary))"
+                  fill="hsl(var(--primary))"
+                  fillOpacity={0.25}
+                  strokeWidth={2}
+                />
+              </RadarChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        {/* Color Palette */}
+        {/* Color Palette — compact */}
         <Card className="glass-card">
-          <CardHeader>
-            <CardTitle className="font-display flex items-center gap-2 text-foreground">
+          <CardHeader className="pb-2">
+            <CardTitle className="font-display flex items-center gap-2 text-foreground text-base">
               <Palette className="w-5 h-5 text-primary" /> Color Analysis
             </CardTitle>
           </CardHeader>
@@ -796,67 +804,85 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
                 />
               ))}
             </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Harmony</span>
-                <span className="font-medium text-foreground">{analysis.colorPalette.harmony}</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Rating</span>
-                <span className="font-medium text-foreground">{analysis.colorPalette.rating}</span>
-              </div>
+            <div className="flex gap-2">
+              <Badge variant="secondary">{analysis.colorPalette.harmony}</Badge>
+              <Badge variant="outline">{analysis.colorPalette.rating}</Badge>
             </div>
-            <p className="text-xs text-muted-foreground">{analysis.bodyTypeNotes}</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Strengths & Improvements */}
-      <div className="grid md:grid-cols-2 gap-6">
+      {/* Detected Items + Strengths + Improvements row */}
+      <div className="grid md:grid-cols-3 gap-6">
+        {/* Detected Items — compact list */}
         <Card className="glass-card">
-          <CardHeader>
-            <CardTitle className="font-display flex items-center gap-2 text-foreground">
-              <ShieldCheck className="w-5 h-5 text-green-500" /> Strengths
+          <CardHeader className="pb-2">
+            <CardTitle className="font-display flex items-center gap-2 text-foreground text-base">
+              <Shirt className="w-5 h-5 text-primary" /> Detected Items
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {analysis.strengths.map((s, i) => (
+          <CardContent className="space-y-2">
+            {analysis.detectedItems.map((item, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.08 }}
-                className="flex items-start gap-3"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                className="flex items-center gap-2 p-2 rounded-lg bg-muted/30"
               >
-                <ChevronRight className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                <span className="text-sm text-foreground">{s}</span>
+                <div className="w-3 h-3 rounded-full border border-border flex-shrink-0" style={{ backgroundColor: item.color.startsWith("#") ? item.color : undefined }} />
+                <span className="text-sm text-foreground truncate flex-1">{item.name}</span>
+                <span className="text-[10px] text-muted-foreground">{item.category}</span>
               </motion.div>
             ))}
           </CardContent>
         </Card>
 
+        {/* Strengths — keyword chips */}
         <Card className="glass-card">
-          <CardHeader>
-            <CardTitle className="font-display flex items-center gap-2 text-foreground">
+          <CardHeader className="pb-2">
+            <CardTitle className="font-display flex items-center gap-2 text-foreground text-base">
+              <ShieldCheck className="w-5 h-5 text-green-500" /> Strengths
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {strengthChips.map((chip, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.06 }}
+                >
+                  <Badge variant="secondary" className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 text-xs py-1">
+                    ✓ {chip}
+                  </Badge>
+                </motion.div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Improvements — horizontal bar chart */}
+        <Card className="glass-card">
+          <CardHeader className="pb-2">
+            <CardTitle className="font-display flex items-center gap-2 text-foreground text-base">
               <AlertTriangle className="w-5 h-5 text-yellow-500" /> Improvements
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {analysis.improvements.map((imp, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.08 }}
-                className="space-y-1"
-              >
-                <div className="flex items-center gap-2">
-                  <Badge className={`text-[10px] ${getPriorityColor(imp.priority)}`}>{imp.priority}</Badge>
-                  <span className="text-sm font-medium text-foreground">{imp.suggestion}</span>
-                </div>
-                <p className="text-xs text-muted-foreground ml-6">{imp.reason}</p>
-              </motion.div>
-            ))}
+          <CardContent>
+            <ResponsiveContainer width="100%" height={Math.max(120, improvementData.length * 40)}>
+              <BarChart data={improvementData} layout="vertical" margin={{ left: 0, right: 8, top: 4, bottom: 4 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
+                <XAxis type="number" domain={[0, 3]} hide />
+                <YAxis type="category" dataKey="name" width={90} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} axisLine={false} tickLine={false} />
+                <Bar dataKey="priority" radius={[0, 6, 6, 0]} barSize={14}>
+                  {improvementData.map((entry, index) => (
+                    <Cell key={index} fill={priorityBarColor(entry.priority)} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
       </div>
