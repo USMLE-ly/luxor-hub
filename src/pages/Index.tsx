@@ -9,7 +9,7 @@ import heroVideo from "@/assets/hero-video.mp4";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Navbar />
       <ScrollExpandMedia
         mediaType="video"

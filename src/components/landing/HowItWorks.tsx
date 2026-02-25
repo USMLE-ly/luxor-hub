@@ -1,48 +1,22 @@
 import { motion } from "framer-motion";
 import { Camera, User, Wand2, TrendingUp } from "lucide-react";
-import { GlowingEffect } from "@/components/ui/glowing-effect";
+import {
+  AreaChart, Area, XAxis, YAxis, ResponsiveContainer,
+  RadialBarChart, RadialBar,
+} from "recharts";
 
 const steps = [
-  {
-    icon: Camera,
-    title: "Scan Your Closet",
-    description: "Upload photos of your clothing items. Our AI instantly categorizes, tags, and analyzes each piece.",
-    step: "01",
-  },
-  {
-    icon: User,
-    title: "Build Your Profile",
-    description: "Answer a quick style quiz. We'll create your unique Style DNA — your fashion fingerprint.",
-    step: "02",
-  },
-  {
-    icon: Wand2,
-    title: "Get AI Outfits",
-    description: "Receive daily outfit recommendations tailored to your style, weather, calendar, and mood.",
-    step: "03",
-  },
-  {
-    icon: TrendingUp,
-    title: "Optimize & Grow",
-    description: "Track wear frequency, discover underused gems, and evolve your style with data-driven insights.",
-    step: "04",
-  },
+  { icon: Camera, title: "Scan Closet", score: 25, fill: "hsl(43, 74%, 49%)" },
+  { icon: User, title: "Style DNA", score: 50, fill: "hsl(43, 74%, 55%)" },
+  { icon: Wand2, title: "AI Outfits", score: 80, fill: "hsl(43, 74%, 60%)" },
+  { icon: TrendingUp, title: "Optimize", score: 95, fill: "hsl(43, 74%, 65%)" },
 ];
 
-const containerVariants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.15 } },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 40 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } },
-};
+const areaData = steps.map((s, i) => ({ name: s.title, score: s.score, step: i + 1 }));
 
 const HowItWorks = () => {
   return (
     <section className="relative py-32 px-4 overflow-hidden" id="how-it-works">
-      {/* Subtle SVG pattern background */}
       <div
         className="absolute inset-0 opacity-[0.04] dark:opacity-[0.03] pointer-events-none"
         style={{
@@ -51,13 +25,13 @@ const HowItWorks = () => {
           backgroundRepeat: "repeat",
         }}
       />
-      <div className="relative max-w-6xl mx-auto">
+      <div className="relative max-w-5xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-20"
+          className="text-center mb-16"
         >
           <p className="text-primary font-sans font-semibold text-sm tracking-widest uppercase mb-4">How It Works</p>
           <h2 className="font-display text-4xl md:text-5xl font-bold">
@@ -65,45 +39,69 @@ const HowItWorks = () => {
           </h2>
         </motion.div>
 
+        {/* Style progression area chart */}
         <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-80px" }}
-          className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 relative"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.7 }}
+          className="glass rounded-2xl p-6 mb-10 border border-border"
         >
-          {/* Connecting line */}
-          <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent -translate-y-1/2 z-0" />
+          <p className="text-xs text-muted-foreground font-sans uppercase tracking-wider mb-4">Style Score Progression</p>
+          <ResponsiveContainer width="100%" height={200}>
+            <AreaChart data={areaData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(43, 74%, 49%)" stopOpacity={0.4} />
+                  <stop offset="95%" stopColor="hsl(43, 74%, 49%)" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <XAxis dataKey="name" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} axisLine={false} tickLine={false} />
+              <YAxis domain={[0, 100]} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} />
+              <Area
+                type="monotone"
+                dataKey="score"
+                stroke="hsl(43, 74%, 49%)"
+                strokeWidth={3}
+                fill="url(#goldGrad)"
+                dot={{ r: 6, fill: "hsl(43, 74%, 49%)", stroke: "hsl(var(--background))", strokeWidth: 3 }}
+                animationDuration={1500}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </motion.div>
 
-          {steps.map((step) => (
+        {/* Step gauges */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {steps.map((step, i) => (
             <motion.div
-              key={step.step}
-              variants={itemVariants}
-              className="relative z-10"
+              key={step.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1, duration: 0.5 }}
+              className="glass rounded-xl p-4 border border-border flex flex-col items-center text-center group hover:-translate-y-1 transition-transform"
             >
-              <div className="relative h-full rounded-[1.25rem] border-[0.75px] border-border p-2 md:rounded-[1.5rem] md:p-3">
-                <GlowingEffect
-                  spread={40}
-                  glow={true}
-                  disabled={false}
-                  proximity={64}
-                  inactiveZone={0.01}
-                  borderWidth={3}
-                />
-                <div className="relative glass rounded-xl p-6 h-full group hover:gold-glow transition-all duration-500 hover:-translate-y-1">
-                  <span className="text-5xl font-display font-bold text-muted/40 group-hover:text-primary/30 transition-colors">
-                    {step.step}
-                  </span>
-                  <div className="w-12 h-12 rounded-xl gold-gradient flex items-center justify-center mt-4 mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <step.icon className="w-6 h-6 text-primary-foreground" />
-                  </div>
-                  <h3 className="font-display text-xl font-semibold mb-2">{step.title}</h3>
-                  <p className="text-sm text-muted-foreground font-sans leading-relaxed">{step.description}</p>
+              <div className="relative w-20 h-20 mb-3">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadialBarChart
+                    cx="50%" cy="50%" innerRadius="70%" outerRadius="100%"
+                    barSize={6} startAngle={90} endAngle={-270}
+                    data={[{ value: step.score, fill: step.fill }]}
+                  >
+                    <RadialBar dataKey="value" background={{ fill: "hsl(var(--muted))" }} cornerRadius={10} />
+                  </RadialBarChart>
+                </ResponsiveContainer>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <step.icon className="w-5 h-5 text-primary" />
                 </div>
               </div>
+              <span className="text-xs text-muted-foreground font-sans font-medium">0{i + 1}</span>
+              <h3 className="font-display text-sm font-semibold text-foreground mt-1">{step.title}</h3>
+              <span className="text-lg font-bold text-primary mt-1">{step.score}%</span>
             </motion.div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );
