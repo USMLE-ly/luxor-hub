@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, useCallback, type ReactNode } from "react";
 import { motion } from "framer-motion";
-import AuroraBackground from "@/components/ui/aurora-background";
 
 interface ScrollExpandMediaProps {
   mediaType?: "video" | "image";
@@ -128,8 +127,7 @@ const ScrollExpandMedia = ({
             animate={{ opacity: 1 - scrollProgress * 0.5 }}
             transition={{ duration: 0.1 }}
           >
-            <AuroraBackground />
-            <div className="absolute inset-0 bg-background/10" />
+            <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 30% 20%, hsl(43 74% 49% / 0.08) 0%, transparent 60%), radial-gradient(ellipse at 70% 80%, hsl(240 10% 20% / 0.15) 0%, transparent 60%)' }} />
           </motion.div>
 
           <div className="container mx-auto flex flex-col items-center justify-start relative z-10">
