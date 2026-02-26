@@ -41,8 +41,8 @@ const ParticleCanvas = ({
     const init = () => {
       const mobile = window.innerWidth < 768;
       const count = Math.min(
-        Math.floor((canvas.width * canvas.height) / (mobile ? 14000 : 7500)),
-        maxParticles ?? (mobile ? 40 : 80)
+        Math.floor((canvas.width * canvas.height) / (mobile ? 20000 : 12000)),
+        maxParticles ?? (mobile ? 20 : 30)
       );
       particlesRef.current = Array.from({ length: count }, () => ({
         x: Math.random() * canvas.width,
@@ -61,7 +61,11 @@ const ParticleCanvas = ({
       init();
     };
 
-    const draw = () => {
+    let lastDrawTime = 0;
+    const draw = (now: number) => {
+      rafRef.current = requestAnimationFrame(draw);
+      if (now - lastDrawTime < 50) return; // ~20fps
+      lastDrawTime = now;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const ps = particlesRef.current;
       const m = mouseRef.current;
@@ -107,7 +111,6 @@ const ParticleCanvas = ({
           }
         }
       }
-      rafRef.current = requestAnimationFrame(draw);
     };
 
     const onMove = (e: MouseEvent) => {
@@ -122,7 +125,7 @@ const ParticleCanvas = ({
     canvas.addEventListener("mousemove", onMove);
     canvas.addEventListener("mouseleave", onLeave);
     resize();
-    draw();
+    rafRef.current = requestAnimationFrame(draw);
 
     return () => {
       window.removeEventListener("resize", resize);

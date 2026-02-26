@@ -149,8 +149,8 @@ const ShaderBackground = () => {
     const uTime = gl.getUniformLocation(program, 'iTime');
 
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      canvas.width = Math.ceil(window.innerWidth / 2);
+      canvas.height = Math.ceil(window.innerHeight / 2);
       gl.viewport(0, 0, canvas.width, canvas.height);
     };
 
@@ -159,8 +159,12 @@ const ShaderBackground = () => {
 
     let animId: number;
     const start = Date.now();
+    let lastTime = 0;
 
-    const render = () => {
+    const render = (now: number) => {
+      animId = requestAnimationFrame(render);
+      if (now - lastTime < 42) return; // ~24fps
+      lastTime = now;
       gl.clearColor(0, 0, 0, 1);
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.useProgram(program);
@@ -170,7 +174,6 @@ const ShaderBackground = () => {
       gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
       gl.enableVertexAttribArray(aPos);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-      animId = requestAnimationFrame(render);
     };
 
     animId = requestAnimationFrame(render);
@@ -181,7 +184,7 @@ const ShaderBackground = () => {
     };
   }, []);
 
-  return <canvas ref={canvasRef} className="fixed top-0 left-0 w-full h-full -z-10" />;
+  return <canvas ref={canvasRef} className="fixed top-0 left-0 -z-10" style={{ width: '200%', height: '200%', transformOrigin: 'top left', transform: 'scale(0.5)', imageRendering: 'auto' }} />;
 };
 
 export default ShaderBackground;
