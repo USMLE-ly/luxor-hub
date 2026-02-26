@@ -50,9 +50,12 @@ const testimonials = [
   },
 ];
 
+const AUTOPLAY_INTERVAL = 5000;
+
 const Testimonials = () => {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: "center" });
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
@@ -64,6 +67,13 @@ const Testimonials = () => {
     onSelect();
     return () => { emblaApi.off("select", onSelect); };
   }, [emblaApi]);
+
+  // Autoplay with pause on hover
+  useEffect(() => {
+    if (!emblaApi || isHovered) return;
+    const interval = setInterval(() => emblaApi.scrollNext(), AUTOPLAY_INTERVAL);
+    return () => clearInterval(interval);
+  }, [emblaApi, isHovered]);
 
   return (
     <section className="relative py-32 px-4 overflow-hidden" id="testimonials">
@@ -95,7 +105,7 @@ const Testimonials = () => {
         <GoldDivider />
 
         {/* Carousel */}
-        <div className="relative mt-16">
+        <div className="relative mt-16" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
           <div className="overflow-hidden" ref={emblaRef}>
             <div className="flex">
               {testimonials.map((t, i) => (
