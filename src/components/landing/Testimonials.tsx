@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Quote, ChevronLeft, ChevronRight } from "lucide-react";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
@@ -56,24 +56,53 @@ const Testimonials = () => {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: "center" });
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const progressRef = useRef<number>(0);
+  const rafRef = useRef<number>(0);
+  const startTimeRef = useRef<number>(0);
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
 
   useEffect(() => {
     if (!emblaApi) return;
-    const onSelect = () => setSelectedIndex(emblaApi.selectedScrollSnap());
+    const onSelect = () => {
+      setSelectedIndex(emblaApi.selectedScrollSnap());
+      // Reset progress on slide change
+      progressRef.current = 0;
+      startTimeRef.current = 0;
+      setProgress(0);
+    };
     emblaApi.on("select", onSelect);
     onSelect();
     return () => { emblaApi.off("select", onSelect); };
   }, [emblaApi]);
 
-  // Autoplay with pause on hover
+  // Autoplay + progress bar animation
   useEffect(() => {
-    if (!emblaApi || isHovered) return;
-    const interval = setInterval(() => emblaApi.scrollNext(), AUTOPLAY_INTERVAL);
-    return () => clearInterval(interval);
-  }, [emblaApi, isHovered]);
+    if (!emblaApi || isHovered) {
+      cancelAnimationFrame(rafRef.current);
+      return;
+    }
+
+    startTimeRef.current = performance.now();
+
+    const tick = (now: number) => {
+      const elapsed = now - startTimeRef.current;
+      const p = Math.min(elapsed / AUTOPLAY_INTERVAL, 1);
+      progressRef.current = p;
+      setProgress(p);
+
+      if (p >= 1) {
+        emblaApi.scrollNext();
+        return; // onSelect resets and re-triggers
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [emblaApi, isHovered, selectedIndex]);
 
   return (
     <section className="relative py-32 px-4 overflow-hidden" id="testimonials">
@@ -161,16 +190,25 @@ const Testimonials = () => {
               <ChevronLeft className="w-4 h-4 text-muted-foreground" />
             </button>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
               {testimonials.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => emblaApi?.scrollTo(i)}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    i === selectedIndex ? "bg-primary w-6" : "bg-muted-foreground/30"
-                  }`}
+                  className="relative flex items-center"
                   aria-label={`Go to testimonial ${i + 1}`}
-                />
+                >
+                  <div className={`h-2 rounded-full transition-all duration-300 overflow-hidden ${
+                    i === selectedIndex ? "w-8 bg-primary/20" : "w-2 bg-muted-foreground/30"
+                  }`}>
+                    {i === selectedIndex && (
+                      <div
+                        className="h-full bg-primary rounded-full transition-none"
+                        style={{ width: `${progress * 100}%` }}
+                      />
+                    )}
+                  </div>
+                </button>
               ))}
             </div>
 
