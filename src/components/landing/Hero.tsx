@@ -1,10 +1,8 @@
 import { motion } from "framer-motion";
 import { Sparkles, Zap, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Spotlight } from "@/components/ui/spotlight";
 import { RainbowButton } from "@/components/ui/rainbow-button";
 import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
-import ParticleCanvas from "@/components/ui/particle-canvas";
 import MagneticButton from "@/components/ui/magnetic-button";
 import { useEffect, useState } from "react";
 
@@ -37,25 +35,9 @@ const Hero = () => {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Spotlight effect */}
-      <Spotlight
-        className="-top-40 left-0 md:left-60 md:-top-20"
-        fill="hsl(43, 74%, 49%)"
-      />
-
-      {/* Particle canvas background */}
-      <div className="absolute inset-0 z-[1] pointer-events-auto">
-        <ParticleCanvas
-          particleColor={{ h: 43, s: 74, l: 49 }}
-          maxParticles={60}
-          connectionDistance={110}
-        />
-      </div>
-
-      {/* Background effects */}
-      <div className="absolute inset-0">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gold-dark/10 rounded-full blur-[100px]" />
+      {/* Subtle glow behind hero content */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[140px]" />
       </div>
 
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4">

@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "next-themes";
 import Index from "./pages/Index";
-import ShaderBackground from "@/components/ui/shader-background";
+import StarfieldBackground from "@/components/ui/starfield-background";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Onboarding from "./pages/Onboarding";
@@ -31,7 +31,7 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-    <ShaderBackground />
+    <StarfieldBackground />
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
