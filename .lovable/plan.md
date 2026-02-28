@@ -1,39 +1,64 @@
 
 
-## Plan: Replace Hero with Lumina Interactive Slider + Aurora Glow
+## Premium Landing Page Overhaul Plan
 
-### What changes
+### Analysis Summary
 
-The current hero uses a `ScrollExpandMedia` video container that intercepts all wheel events, preventing normal scrolling. This will be replaced with the Lumina interactive image slider as a full-screen hero section, and all content sections below will scroll normally.
+After auditing every section, here are the key weaknesses and the upgrades:
 
-### Implementation steps
+**Critical Issues Found:**
+- Slide descriptions appear/disappear abruptly — no typewriter effect
+- Hero has no parallax depth when scrolling past — feels flat and static
+- Navbar lacks mobile hamburger menu — desktop-only nav links
+- Footer newsletter has no backend — form does nothing
+- No scroll-progress indicator for the full page
+- Section transitions lack rhythm — all use identical `py-32` with no variation
+- No "back to top" mechanism
+- Light mode: Lumina slider text uses hardcoded white — unreadable on light backgrounds
 
-1. **Create `src/components/ui/lumina-interactive-list.tsx`**
-   - Adapt the provided component to fit the fashion/styling brand
-   - Replace slide titles and descriptions with fashion-themed content (e.g., "Effortless Style", "Curated Looks", "AI-Powered Fashion")
-   - Keep the external portrait images (or swap for fashion-relevant ones if available)
-   - Add the companion CSS as `src/components/ui/lumina-slider.css`
-   - Style the slider to match the dark luxury gold aesthetic (gold accent `#d4af37` mapped to `--color-accent`)
+### Implementation Steps
 
-2. **Add lumina slider CSS to `src/index.css`**
-   - Add the required CSS custom properties (`--font-mono`, `--font-display`, `--color-accent`, etc.) to the existing `:root` block
-   - Add slider-specific styles (`.slider-wrapper`, `.webgl-canvas`, `.slide-content`, `.slides-navigation`, progress bar styles)
+**1. Add parallax scroll effect to Lumina hero**
+- Wrap the `lumina-hero-container` with a Framer Motion scroll listener in `Index.tsx`
+- Apply `translateY` transform (0 → 150px) as the user scrolls past, creating a cinematic "push-back" depth effect
+- Apply subtle opacity fade (1 → 0.6) so the hero dims naturally into the next section
 
-3. **Update `src/pages/Index.tsx`**
-   - Remove `ScrollExpandMedia` and the hero video import
-   - Render the Lumina slider as the hero (full viewport height)
-   - Render `HowItWorks`, `Features`, `Testimonials`, `Pricing`, `Footer` as normal scrollable sections below — this fixes the scroll-interception issue entirely
+**2. Add typing animation to slide descriptions**
+- In `lumina-interactive-list.tsx`, replace the instant `descEl.textContent = ...` with a character-by-character typewriter using GSAP's `stagger` on individual `<span>` characters
+- Add a blinking gold cursor (`|`) at the end that fades out after typing completes
+- Each slide transition clears and retypes the new description
 
-4. **Add aurora/nebula glow to the hero area**
-   - Add a CSS radial gradient overlay behind the slider text content — a soft gold/purple nebula glow using `hsl(43 74% 49% / 0.1)` and `hsl(270 50% 30% / 0.15)` positioned at the center of the viewport
+**3. Add mobile hamburger menu to Navbar**
+- Add a `Sheet` (drawer) component triggered by a hamburger icon on screens < `md`
+- Include all nav links (Features, How It Works, Pricing) plus the Log In and Get Started CTAs
+- Glass background with gold accent dividers
 
-5. **Update `src/components/landing/Hero.tsx`**
-   - Since the Lumina slider replaces the Hero as the top section, the existing Hero component content (CTA buttons, tagline, social proof badges) will be integrated into the Lumina slider overlay — or the Hero component will be removed from the Index page layout
+**4. Add scroll-progress indicator**
+- Fixed thin gold gradient bar at the very top of the viewport (above navbar, z-50+)
+- Width scales from 0% to 100% based on `window.scrollY / maxScroll`
+- Provides spatial awareness across the full page
 
-### Technical details
+**5. Add section rhythm variation**
+- Alternate section padding: `py-32` → `py-24` → `py-32` to create visual breathing
+- Add a subtle top/bottom gold divider between hero and HowItWorks for editorial separation
 
-- GSAP and Three.js are loaded dynamically via CDN `<script>` tags (as in the provided code) — no npm install needed
-- The project already has `three@0.160.1` installed but the lumina component uses its own CDN version (`r128`) to avoid conflicts with the shader material setup
-- The `ScrollExpandMedia` component and `hero-video.mp4` import will no longer be used on the Index page (files kept for potential reuse elsewhere)
-- The slider uses `requestAnimationFrame` for rendering — performance is acceptable since it only runs on the landing page and uses a single full-screen quad
+**6. Fix light mode slider text readability**
+- Add `color-scheme` awareness to `.slide-title` and `.slide-description` — keep white text since the slider images are always dark/photographic backgrounds
+- Ensure `.lumina-bottom-gradient` is always dark regardless of theme
+
+### Files to Modify
+
+| File | Changes |
+|------|---------|
+| `src/components/ui/lumina-interactive-list.tsx` | Typewriter description animation via GSAP character splitting + blinking cursor |
+| `src/pages/Index.tsx` | Wrap LuminaSlider in Framer Motion parallax container; add scroll progress bar |
+| `src/components/landing/Navbar.tsx` | Add mobile hamburger menu with Sheet component |
+| `src/components/ui/lumina-slider.css` | Add `.slide-description-cursor` blinking animation; parallax container styles |
+
+### Technical Details
+
+- Parallax uses Framer Motion's `useScroll` + `useTransform` on the hero wrapper — no extra dependencies
+- Typewriter uses GSAP's existing CDN instance already loaded by the slider — splits description into `<span>` elements and staggers opacity with 30ms delay per character
+- Mobile menu uses the existing `Sheet` component from `@/components/ui/sheet`
+- Scroll progress bar is a lightweight `useEffect` + `requestAnimationFrame` listener — no library needed
 
