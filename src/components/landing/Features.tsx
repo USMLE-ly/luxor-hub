@@ -82,10 +82,12 @@ function FeatureCard({ item }: { item: BentoItem }) {
     offset: ["start end", "end start"],
   });
   const illustrationY = useTransform(scrollYProgress, [0, 1], [30, -30]);
+  const cardY = useTransform(scrollYProgress, [0, 0.5, 1], [15, 0, -15]);
 
   return (
-    <div
+    <motion.div
       ref={cardRef}
+      style={{ y: cardY }}
       className={`relative list-none min-h-[12rem] ${item.colSpan === 2 ? "md:col-span-2" : "col-span-1"}`}
     >
       <div className="relative h-full rounded-[1.25rem] border-[0.75px] border-border p-2 md:rounded-[1.5rem] md:p-3">
@@ -151,7 +153,7 @@ function FeatureCard({ item }: { item: BentoItem }) {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

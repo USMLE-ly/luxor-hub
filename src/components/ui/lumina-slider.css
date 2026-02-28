@@ -140,11 +140,11 @@
 .lumina-hero-overlay {
   position: absolute;
   bottom: 16%;
-  left: 5%;
+  right: 5%;
   z-index: 15;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: flex-end;
   gap: 1rem;
 }
 
@@ -246,9 +246,9 @@
 
   .lumina-hero-overlay {
     bottom: 22%;
-    left: 6%;
+    left: auto;
     right: 6%;
-    align-items: flex-start;
+    align-items: flex-end;
   }
 
   .lumina-hero-cta {
