@@ -1,17 +1,58 @@
 import React, { useEffect, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Sparkles, Zap, Users } from 'lucide-react';
+import { RainbowButton } from '@/components/ui/rainbow-button';
+import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
+import MagneticButton from '@/components/ui/magnetic-button';
 import './lumina-slider.css';
 
 declare const gsap: any;
 declare const THREE: any;
 
 const slides = [
-  { title: "Effortless Style", description: "AI-curated outfits that feel like you — every single day.", media: "https://assets.codepen.io/7558/orange-portrait-001.jpg" },
-  { title: "Curated Looks", description: "Your wardrobe, reimagined with intelligent styling suggestions.", media: "https://assets.codepen.io/7558/orange-portrait-002.jpg" },
-  { title: "AI-Powered Fashion", description: "Machine learning meets personal taste for perfect pairings.", media: "https://assets.codepen.io/7558/orange-portrait-003.jpg" },
-  { title: "Golden Hour", description: "That fleeting confidence when every piece falls into place.", media: "https://assets.codepen.io/7558/orange-portrait-004.jpg" },
-  { title: "Style DNA", description: "We decode your unique aesthetic and evolve with you.", media: "https://assets.codepen.io/7558/orange-portrait-005.jpg" },
-  { title: "Wardrobe Intelligence", description: "Smart insights that transform how you dress, shop, and express.", media: "https://assets.codepen.io/7558/orange-portrait-006.jpg" }
+  { title: "Effortless Style", description: "AI-curated outfits that feel like you — every single day.", media: "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=1200&q=80" },
+  { title: "Curated Looks", description: "Your wardrobe, reimagined with intelligent styling suggestions.", media: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&q=80" },
+  { title: "AI-Powered Fashion", description: "Machine learning meets personal taste for perfect pairings.", media: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200&q=80" },
+  { title: "Golden Hour", description: "That fleeting confidence when every piece falls into place.", media: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1200&q=80" },
+  { title: "Style DNA", description: "We decode your unique aesthetic and evolve with you.", media: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=1200&q=80" },
+  { title: "Wardrobe Intelligence", description: "Smart insights that transform how you dress, shop, and express.", media: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&q=80" }
 ];
+
+function HeroOverlay() {
+  const navigate = useNavigate();
+  return (
+    <div className="lumina-hero-overlay">
+      <div className="lumina-hero-cta">
+        <MagneticButton onClick={() => navigate("/auth")} strength={0.25}>
+          <RainbowButton className="px-8 py-3 text-lg font-display font-semibold pointer-events-none">
+            <Sparkles className="w-5 h-5 mr-2" />
+            Start Free
+          </RainbowButton>
+        </MagneticButton>
+        <MagneticButton
+          onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
+          strength={0.2}
+        >
+          <InteractiveHoverButton
+            text="How It Works"
+            className="w-40 border-border pointer-events-none"
+          />
+        </MagneticButton>
+      </div>
+      <div className="lumina-hero-badges">
+        <span className="lumina-badge">
+          <Users className="w-3 h-3" style={{ color: 'hsl(43 74% 49%)' }} /> 10K+ Users
+        </span>
+        <span className="lumina-badge">
+          <Zap className="w-3 h-3" style={{ color: 'hsl(43 74% 49%)' }} /> AI-Powered
+        </span>
+        <span className="lumina-badge">
+          <Sparkles className="w-3 h-3" style={{ color: 'hsl(43 74% 49%)' }} /> 98% Satisfaction
+        </span>
+      </div>
+    </div>
+  );
+}
 
 export function LuminaSlider() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -227,6 +268,7 @@ export function LuminaSlider() {
 
     const loadImageTexture = (src: string) => new Promise<any>((resolve, reject) => {
       const l = new THREE.TextureLoader();
+      l.crossOrigin = 'anonymous';
       l.load(src, (t: any) => {
         t.minFilter = t.magFilter = THREE.LinearFilter;
         t.userData = { size: new THREE.Vector2(t.image.width, t.image.height) };
@@ -332,7 +374,6 @@ export function LuminaSlider() {
 
   return (
     <div ref={containerRef} className="lumina-hero-container">
-      {/* Aurora / nebula glow */}
       <div className="lumina-aurora" />
 
       <main className="slider-wrapper">
@@ -344,6 +385,8 @@ export function LuminaSlider() {
           <h1 className="slide-title" id="mainTitle"></h1>
           <p className="slide-description" id="mainDesc"></p>
         </div>
+
+        <HeroOverlay />
 
         <nav className="slides-navigation" id="slidesNav"></nav>
       </main>

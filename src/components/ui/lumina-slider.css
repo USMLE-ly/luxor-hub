@@ -46,7 +46,7 @@
 .slide-total {
   position: absolute;
   z-index: 10;
-  font-family: 'Inter', var(--font-mono, monospace);
+  font-family: 'Inter', monospace;
   font-size: clamp(10px, 1.2vw, 12px);
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -70,7 +70,7 @@
 /* ── Slide Content ───────────────────────────────────────── */
 .slide-content {
   position: absolute;
-  bottom: 12%;
+  bottom: 28%;
   left: 5%;
   z-index: 10;
   max-width: 600px;
@@ -78,7 +78,7 @@
 }
 
 .slide-title {
-  font-family: 'Playfair Display', var(--font-display, serif);
+  font-family: 'Playfair Display', serif;
   font-size: clamp(2.5rem, 6vw, 5rem);
   font-weight: 700;
   line-height: 1.05;
@@ -96,6 +96,45 @@
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.7);
   max-width: 450px;
+}
+
+/* ── Hero CTA Overlay ────────────────────────────────────── */
+.lumina-hero-overlay {
+  position: absolute;
+  bottom: 16%;
+  left: 5%;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.lumina-hero-cta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.lumina-hero-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.lumina-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.03em;
 }
 
 /* ── Navigation ──────────────────────────────────────────── */
@@ -160,10 +199,31 @@
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 768px) {
   .slide-content {
-    bottom: 22%;
+    bottom: 42%;
     left: 6%;
     right: 6%;
     max-width: none;
+  }
+
+  .lumina-hero-overlay {
+    bottom: 22%;
+    left: 6%;
+    right: 6%;
+  }
+
+  .lumina-hero-cta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .lumina-hero-badges {
+    gap: 0.4rem;
+  }
+
+  .lumina-badge {
+    font-size: 0.6rem;
+    padding: 0.25rem 0.6rem;
   }
 
   .slides-navigation {
@@ -176,7 +236,7 @@
   }
 
   .slide-nav-item {
-    min-width: 60px;
+    min-width: 55px;
   }
 
   .slide-number { top: 1.5rem; right: 1.5rem; }
