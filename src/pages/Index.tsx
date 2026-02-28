@@ -1,31 +1,21 @@
 import Navbar from "@/components/landing/Navbar";
-import Hero from "@/components/landing/Hero";
 import HowItWorks from "@/components/landing/HowItWorks";
 import Features from "@/components/landing/Features";
 import Testimonials from "@/components/landing/Testimonials";
 import Pricing from "@/components/landing/Pricing";
 import Footer from "@/components/landing/Footer";
-import ScrollExpandMedia from "@/components/ui/scroll-expand-media";
-import heroVideo from "@/assets/hero-video.mp4";
+import LuminaSlider from "@/components/ui/lumina-interactive-list";
 
 const Index = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <ScrollExpandMedia
-        mediaType="video"
-        mediaSrc={heroVideo}
-        title="Your AI Stylist"
-        scrollToExpand="Scroll to explore"
-        textBlend
-      >
-        <Hero />
-        <HowItWorks />
-        <Features />
-        <Testimonials />
-        <Pricing />
-        <Footer />
-      </ScrollExpandMedia>
+      <LuminaSlider />
+      <HowItWorks />
+      <Features />
+      <Testimonials />
+      <Pricing />
+      <Footer />
     </div>
   );
 };
