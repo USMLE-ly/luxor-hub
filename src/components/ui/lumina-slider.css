@@ -98,6 +98,26 @@
   max-width: 450px;
 }
 
+/* ── Typewriter Cursor ───────────────────────────────────── */
+.slide-description-cursor {
+  display: inline;
+  color: hsl(43 74% 49%);
+  font-weight: 300;
+  animation: blink-cursor 0.8s step-end infinite;
+}
+
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ── Force slider text to always be white (over photo backgrounds) ── */
+.slide-title,
+.slide-description,
+.slide-description-cursor {
+  color-scheme: dark;
+}
+
 /* ── Dark Bottom Gradient ────────────────────────────────── */
 .lumina-bottom-gradient {
   position: absolute;

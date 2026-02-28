@@ -134,9 +134,30 @@ export function LuminaSlider() {
 
       setTimeout(() => {
         titleEl.innerHTML = splitText(slides[idx].title);
-        descEl.textContent = slides[idx].description;
+        
+        // Typewriter effect for description
+        const descText = slides[idx].description;
+        const cursorSpan = '<span class="slide-description-cursor">|</span>';
+        descEl.innerHTML = cursorSpan;
+        gsap.set(descEl, { y: 0, opacity: 1 });
+        
+        const chars = descText.split('');
+        let charIndex = 0;
+        const typeInterval = setInterval(() => {
+          if (charIndex < chars.length) {
+            descEl.innerHTML = descText.slice(0, charIndex + 1) + cursorSpan;
+            charIndex++;
+          } else {
+            clearInterval(typeInterval);
+            // Fade out cursor after typing completes
+            setTimeout(() => {
+              const cursor = descEl.querySelector('.slide-description-cursor');
+              if (cursor) gsap.to(cursor, { opacity: 0, duration: 0.5 });
+            }, 800);
+          }
+        }, 30);
+
         gsap.set(titleEl.children, { opacity: 0 });
-        gsap.set(descEl, { y: 20, opacity: 0 });
 
         const children = titleEl.children;
         const animations: Record<number, () => void> = {
@@ -148,7 +169,6 @@ export function LuminaSlider() {
           5: () => { gsap.set(children, { x: 30, y: 0 }); gsap.to(children, { x: 0, opacity: 1, duration: 0.8, stagger: 0.03, ease: "power3.out" }); },
         };
         (animations[idx] || animations[0])();
-        gsap.to(descEl, { y: 0, opacity: 1, duration: 0.8, delay: 0.2, ease: "power3.out" });
       }, 500);
     };
 
@@ -320,9 +340,28 @@ export function LuminaSlider() {
     const dEl = document.getElementById('mainDesc');
     if (tEl && dEl) {
       tEl.innerHTML = splitText(slides[0].title);
-      dEl.textContent = slides[0].description;
+      // Initial typewriter for first slide description
+      const firstDesc = slides[0].description;
+      const cursorSpan = '<span class="slide-description-cursor">|</span>';
+      dEl.innerHTML = cursorSpan;
       gsap.fromTo(tEl.children, { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 1, stagger: 0.03, ease: "power3.out", delay: 0.5 });
-      gsap.fromTo(dEl, { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 1, ease: "power3.out", delay: 0.8 });
+      
+      setTimeout(() => {
+        const chars = firstDesc.split('');
+        let ci = 0;
+        const ti = setInterval(() => {
+          if (ci < chars.length) {
+            dEl.innerHTML = firstDesc.slice(0, ci + 1) + cursorSpan;
+            ci++;
+          } else {
+            clearInterval(ti);
+            setTimeout(() => {
+              const cursor = dEl.querySelector('.slide-description-cursor');
+              if (cursor) gsap.to(cursor, { opacity: 0, duration: 0.5 });
+            }, 800);
+          }
+        }, 30);
+      }, 800);
     }
 
     initRenderer();
