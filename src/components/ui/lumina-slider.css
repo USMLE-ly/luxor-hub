@@ -98,14 +98,33 @@
   max-width: 450px;
 }
 
+/* ── Dark Bottom Gradient ────────────────────────────────── */
+.lumina-bottom-gradient {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60%;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.75) 0%,
+    rgba(0, 0, 0, 0.45) 30%,
+    rgba(0, 0, 0, 0.15) 60%,
+    transparent 100%
+  );
+}
+
 /* ── Hero CTA Overlay ────────────────────────────────────── */
 .lumina-hero-overlay {
   position: absolute;
   bottom: 16%;
-  left: 5%;
+  right: 5%;
   z-index: 15;
   display: flex;
   flex-direction: column;
+  align-items: flex-end;
   gap: 1rem;
 }
 
@@ -209,6 +228,7 @@
     bottom: 22%;
     left: 6%;
     right: 6%;
+    align-items: flex-start;
   }
 
   .lumina-hero-cta {
