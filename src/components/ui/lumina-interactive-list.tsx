@@ -375,6 +375,7 @@ export function LuminaSlider() {
   return (
     <div ref={containerRef} className="lumina-hero-container">
       <div className="lumina-aurora" />
+      <div className="lumina-bottom-gradient" />
 
       <main className="slider-wrapper">
         <canvas className="webgl-canvas" />
