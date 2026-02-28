@@ -1,53 +1,39 @@
 
 
-## Plan: Fix Landing Page Lag + Mobile Check + Progress Bar
+## Plan: Replace Hero with Lumina Interactive Slider + Aurora Glow
 
-### Root Cause Analysis
+### What changes
 
-The landing page runs **3 simultaneous GPU-intensive animation loops** competing for resources:
+The current hero uses a `ScrollExpandMedia` video container that intercepts all wheel events, preventing normal scrolling. This will be replaced with the Lumina interactive image slider as a full-screen hero section, and all content sections below will scroll normally.
 
-1. **ShaderBackground** (`src/App.tsx` line 34) — A full-screen WebGL shader with 16 line iterations + 40 particle iterations running at **uncapped ~60fps on every single page**, not just the landing page
-2. **AuroraBackground** (`src/components/ui/aurora-background.tsx`) — A Three.js WebGL shader with 18 iterations at ~30fps, rendered behind the hero video
-3. **ParticleCanvas** (`src/components/landing/Hero.tsx` line 48) — A Canvas2D animation with up to 80 particles + O(n^2) connection checks at uncapped ~60fps
+### Implementation steps
 
-Additionally, the CSS has a **global `transition` on every element** (`src/index.css` line 111: `* { transition: background-color 0.3s, color 0.2s, border-color 0.3s; }`), which triggers compositor work on scroll.
+1. **Create `src/components/ui/lumina-interactive-list.tsx`**
+   - Adapt the provided component to fit the fashion/styling brand
+   - Replace slide titles and descriptions with fashion-themed content (e.g., "Effortless Style", "Curated Looks", "AI-Powered Fashion")
+   - Keep the external portrait images (or swap for fashion-relevant ones if available)
+   - Add the companion CSS as `src/components/ui/lumina-slider.css`
+   - Style the slider to match the dark luxury gold aesthetic (gold accent `#d4af37` mapped to `--color-accent`)
 
-### Changes (Balanced Visuals)
+2. **Add lumina slider CSS to `src/index.css`**
+   - Add the required CSS custom properties (`--font-mono`, `--font-display`, `--color-accent`, etc.) to the existing `:root` block
+   - Add slider-specific styles (`.slider-wrapper`, `.webgl-canvas`, `.slide-content`, `.slides-navigation`, progress bar styles)
 
-#### 1. Throttle ShaderBackground to ~24fps and render at half resolution
-**File**: `src/components/ui/shader-background.tsx`
-- Add `lastTime` tracking and skip frames if <42ms elapsed (same pattern as aurora)
-- Set canvas size to `window.innerWidth / 2` and `window.innerHeight / 2`, then scale via CSS `transform: scale(2)` with `transform-origin: top left`
-- This cuts GPU pixel fill by 75% and frame rate by ~60%
+3. **Update `src/pages/Index.tsx`**
+   - Remove `ScrollExpandMedia` and the hero video import
+   - Render the Lumina slider as the hero (full viewport height)
+   - Render `HowItWorks`, `Features`, `Testimonials`, `Pricing`, `Footer` as normal scrollable sections below — this fixes the scroll-interception issue entirely
 
-#### 2. Remove AuroraBackground from ScrollExpandMedia — use CSS gradient instead
-**File**: `src/components/ui/scroll-expand-media.tsx`
-- Replace `<AuroraBackground />` with a simple CSS radial gradient background (dark with subtle color shifts)
-- This eliminates an entire WebGL context and Three.js overhead entirely from the landing page
-- The ShaderBackground already provides the animated background effect globally
+4. **Add aurora/nebula glow to the hero area**
+   - Add a CSS radial gradient overlay behind the slider text content — a soft gold/purple nebula glow using `hsl(43 74% 49% / 0.1)` and `hsl(270 50% 30% / 0.15)` positioned at the center of the viewport
 
-#### 3. Throttle ParticleCanvas to ~20fps and reduce particle count
-**File**: `src/components/ui/particle-canvas.tsx`
-- Add frame throttling (skip frames if <50ms elapsed)
-- Reduce default maxParticles to 30 (from 80 desktop / 40 mobile)
-- Reduce connection distance to 80 (from 110)
+5. **Update `src/components/landing/Hero.tsx`**
+   - Since the Lumina slider replaces the Hero as the top section, the existing Hero component content (CTA buttons, tagline, social proof badges) will be integrated into the Lumina slider overlay — or the Hero component will be removed from the Index page layout
 
-#### 4. Remove global wildcard transition
-**File**: `src/index.css`
-- Remove the `* { transition: ... }` rule from the base layer
-- This prevents the browser from recalculating transitions on every element during scroll, which is a major source of scroll jank
+### Technical details
 
-#### 5. Testimonials progress bar (already done — verify)
-The progress bar with fill animation was added in the previous iteration. No changes needed here. Will verify on mobile.
-
-### Files to Modify
-- `src/components/ui/shader-background.tsx` — Throttle to ~24fps, render at half resolution
-- `src/components/ui/scroll-expand-media.tsx` — Replace AuroraBackground with CSS gradient
-- `src/components/ui/particle-canvas.tsx` — Throttle to ~20fps, reduce particles
-- `src/index.css` — Remove wildcard transition rule
-
-### Verification Plan
-- Navigate to landing page on desktop (1366px) and scroll through all sections
-- Navigate to landing page on mobile (390px) and verify aurora replacement + carousel
-- Hover over testimonials carousel to verify progress bar pause/resume
+- GSAP and Three.js are loaded dynamically via CDN `<script>` tags (as in the provided code) — no npm install needed
+- The project already has `three@0.160.1` installed but the lumina component uses its own CDN version (`r128`) to avoid conflicts with the shader material setup
+- The `ScrollExpandMedia` component and `hero-video.mp4` import will no longer be used on the Index page (files kept for potential reuse elsewhere)
+- The slider uses `requestAnimationFrame` for rendering — performance is acceptable since it only runs on the landing page and uses a single full-screen quad
 
