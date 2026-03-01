@@ -3,9 +3,19 @@ import { motion } from "framer-motion";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Shirt, Wand2, Star, Check, ArrowRight, Heart, Edit2, Sparkles, Palette, Scissors } from "lucide-react";
+import { Shirt, Wand2, Star, Check, ArrowRight, Heart, Edit2, Sparkles, Palette, Scissors, ShoppingBag, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+
+interface ShopProduct {
+  name: string;
+  brand: string;
+  price: string;
+  matchScore: number;
+  category: string;
+  url: string;
+  imageUrl: string;
+}
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -17,6 +27,8 @@ const Dashboard = () => {
     archetype: string | null;
     preferences: any;
   }>({ onboarding_completed: null, archetype: null, preferences: null });
+  const [shopProducts, setShopProducts] = useState<ShopProduct[]>([]);
+  const [shopLoading, setShopLoading] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -37,6 +49,36 @@ const Dashboard = () => {
     };
     fetchData();
   }, [user]);
+
+  // Fetch shop similar products
+  useEffect(() => {
+    if (!user) return;
+    const fetchShop = async () => {
+      setShopLoading(true);
+      try {
+        const { data: analyses } = await supabase
+          .from("outfit_analyses")
+          .select("detected_items, overall_style")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(1);
+
+        const colorSeason = styleProfile.preferences?.aiAnalysis?.colorSeason || "Autumn";
+        
+        const { data } = await supabase.functions.invoke("shop-products", {
+          body: { colorSeason, category: "all" },
+        });
+        if (data?.products) {
+          setShopProducts(data.products.slice(0, 6));
+        }
+      } catch (e) {
+        console.error("Shop fetch error:", e);
+      } finally {
+        setShopLoading(false);
+      }
+    };
+    fetchShop();
+  }, [user, styleProfile.preferences]);
 
   useEffect(() => {
     if (styleProfile.onboarding_completed === false && user) {
@@ -162,6 +204,68 @@ const Dashboard = () => {
           </button>
         </motion.div>
 
+        {/* Shop Similar */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+        >
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <ShoppingBag className="w-5 h-5 text-foreground" />
+              <h2 className="font-display text-xl font-bold text-foreground">Shop Similar</h2>
+            </div>
+            <span className="text-[10px] font-sans text-muted-foreground bg-secondary px-2 py-1 rounded-full">
+              AI Picks
+            </span>
+          </div>
+
+          {shopLoading ? (
+            <div className="flex gap-3 overflow-x-auto pb-2">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="min-w-[150px] h-48 rounded-2xl bg-secondary animate-pulse" />
+              ))}
+            </div>
+          ) : shopProducts.length > 0 ? (
+            <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-none">
+              {shopProducts.map((product, i) => (
+                <a
+                  key={i}
+                  href={product.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="min-w-[150px] max-w-[150px] flex-shrink-0 rounded-2xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow"
+                >
+                  <div className="relative h-32 bg-secondary flex items-center justify-center">
+                    <ShoppingBag className="w-8 h-8 text-muted-foreground/30" />
+                    <div className="absolute top-2 right-2 bg-primary/90 text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                      {product.matchScore}%
+                    </div>
+                  </div>
+                  <div className="p-2.5">
+                    <p className="text-[10px] text-muted-foreground font-sans uppercase tracking-wide">{product.brand}</p>
+                    <p className="text-xs font-sans font-medium text-foreground truncate">{product.name}</p>
+                    <div className="flex items-center justify-between mt-1.5">
+                      <span className="text-xs font-bold text-foreground">{product.price}</span>
+                      <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-border bg-card p-6 text-center">
+              <ShoppingBag className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+              <p className="text-muted-foreground font-sans text-xs">
+                Analyze an outfit to get personalized shop recommendations
+              </p>
+              <Button onClick={() => navigate("/outfit-analysis")} size="sm" className="mt-3 rounded-full text-xs">
+                Analyze Outfit
+              </Button>
+            </div>
+          )}
+        </motion.div>
+
         {/* All My Outfits */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
@@ -188,7 +292,7 @@ const Dashboard = () => {
             </div>
           ) : (
             <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1">
-              {["Workout", "Work", "Everyday"].map((occasion, i) => (
+              {["Workout", "Work", "Everyday"].map((occasion) => (
                 <div key={occasion} className="min-w-[180px] rounded-2xl border border-border bg-card overflow-hidden">
                   <div className="relative h-40 bg-secondary flex items-center justify-center">
                     <Edit2 className="absolute top-2 left-2 w-4 h-4 text-muted-foreground" />
@@ -204,7 +308,10 @@ const Dashboard = () => {
                       <button className="text-[10px] font-sans text-muted-foreground flex items-center gap-1">
                         View items <ArrowRight className="w-2.5 h-2.5" />
                       </button>
-                      <button className="text-[10px] font-sans text-primary flex items-center gap-1">
+                      <button
+                        onClick={() => navigate("/mannequin")}
+                        className="text-[10px] font-sans text-primary flex items-center gap-1"
+                      >
                         <Sparkles className="w-2.5 h-2.5" /> Try it on
                       </button>
                     </div>
