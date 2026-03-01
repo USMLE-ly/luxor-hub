@@ -30,11 +30,13 @@ const Onboarding = () => {
     : currentStepData
       ? currentStepData.type === "notification" || currentStepData.type === "selfieIntro" || currentStepData.type === "selfieGuide"
         ? true
-        : currentStepData.type === "height"
-          ? !!(answers.heightFt?.[0] || answers.heightCm?.[0])
-          : currentStepData.type === "sizeGrid"
-            ? currentStepData.subGroups?.some((g) => (answers[`${currentStepData.key}_${g.label.toLowerCase()}`] || []).length > 0) ?? false
-            : (answers[currentStepData.key] || []).length > 0
+        : currentStepData.type === "cameraCapture"
+          ? !!(answers[currentStepData.key]?.[0])
+          : currentStepData.type === "height"
+            ? !!(answers.heightFt?.[0] || answers.heightCm?.[0])
+            : currentStepData.type === "sizeGrid"
+              ? currentStepData.subGroups?.some((g) => (answers[`${currentStepData.key}_${g.label.toLowerCase()}`] || []).length > 0) ?? false
+              : (answers[currentStepData.key] || []).length > 0
       : false;
 
   const handleSelect = (key: string, option: string, singleSelect: boolean) => {
