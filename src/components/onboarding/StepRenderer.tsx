@@ -153,11 +153,22 @@ const SelfieIntroStep = ({ step }: { step: OnboardingStep }) => {
 const SelfieGuideStep = ({ step }: { step: OnboardingStep }) => {
   return (
     <div className="flex flex-col items-center">
-      <div className="w-full aspect-[3/4] rounded-2xl bg-secondary/50 mb-6 flex items-center justify-center overflow-hidden">
-        <div className="text-center">
-          <Camera className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-          <Smartphone className="w-8 h-8 text-muted-foreground mx-auto" />
-        </div>
+      <div className="w-full aspect-[3/4] rounded-2xl bg-secondary/50 mb-6 flex items-center justify-center overflow-hidden relative">
+        {step.stepNumber === 5 ? (
+          /* Step 5: show green dashed oval preview */
+          <div className="absolute inset-0 bg-black/80 flex items-center justify-center">
+            <div className="w-56 h-72 relative">
+              <svg viewBox="0 0 224 288" className="w-full h-full" fill="none">
+                <ellipse cx="112" cy="144" rx="100" ry="130" stroke="hsl(120, 60%, 55%)" strokeWidth="4" strokeDasharray="8 6" fill="none" />
+              </svg>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center">
+            <Camera className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+            <Smartphone className="w-8 h-8 text-muted-foreground mx-auto" />
+          </div>
+        )}
       </div>
       <div className="text-center">
         <p className="text-[hsl(0,70%,68%)] font-sans text-sm mb-2">Step {step.stepNumber}</p>
@@ -274,7 +285,9 @@ const CameraCaptureStep = ({ step, answers, onSelect }: { step: OnboardingStep; 
             {/* Guide overlay */}
             {isSelfie && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-48 h-64 border-2 border-white/40 rounded-[50%]" />
+                <svg viewBox="0 0 224 288" className="w-56 h-72" fill="none">
+                  <ellipse cx="112" cy="144" rx="100" ry="130" stroke="hsl(120, 60%, 55%)" strokeWidth="4" strokeDasharray="8 6" fill="none" />
+                </svg>
               </div>
             )}
             {!isSelfie && (
@@ -317,6 +330,81 @@ const CameraCaptureStep = ({ step, answers, onSelect }: { step: OnboardingStep; 
   );
 };
 
+const GeneratingStep = ({ step }: { step: OnboardingStep }) => {
+  const [progress, setProgress] = useState<number[]>([0, 0, 0, 0, 0]);
+  const labels = [
+    "Building your Color Palette",
+    "Crafting your Style Guide",
+    "Analyzing your preferences",
+    "Finding the best matches",
+    "Generating personal outfits",
+  ];
+
+  useEffect(() => {
+    let currentStep = 0;
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        const next = [...prev];
+        if (currentStep < 5) {
+          next[currentStep] = Math.min(next[currentStep] + Math.random() * 15 + 5, 100);
+          if (next[currentStep] >= 100) {
+            next[currentStep] = 100;
+            currentStep++;
+          }
+        }
+        return next;
+      });
+      if (currentStep >= 5) clearInterval(interval);
+    }, 200);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="flex flex-col items-center pt-8">
+      <div className="w-48 h-48 mb-6 flex items-center justify-center">
+        <svg viewBox="0 0 200 160" className="w-full h-full" fill="none" stroke="hsl(var(--foreground))" strokeWidth="1">
+          {/* Clothes rack */}
+          <line x1="40" y1="20" x2="40" y2="140" strokeWidth="2" />
+          <line x1="160" y1="20" x2="160" y2="140" strokeWidth="2" />
+          <line x1="30" y1="20" x2="170" y2="20" strokeWidth="3" />
+          {/* Hangers with clothes */}
+          <path d="M60,20 L60,30 Q60,50 50,70 L70,70 Q60,50 60,30" fill="hsl(0,0%,95%)" />
+          <path d="M80,20 L80,35 Q75,55 70,75 L90,75 Q85,55 80,35" fill="hsl(0,50%,70%)" />
+          <path d="M100,20 L100,30 Q100,50 95,80 L105,80 Q100,50 100,30" fill="hsl(210,30%,75%)" />
+          <path d="M120,20 L120,35 Q115,55 110,75 L130,75 Q125,55 120,35" fill="hsl(210,20%,85%)" />
+          <path d="M140,20 L140,30 Q140,50 135,70 L145,70 Q140,50 140,30" fill="hsl(220,20%,30%)" />
+        </svg>
+      </div>
+
+      <h2 className="font-display text-2xl font-bold text-foreground text-center mb-8">
+        {step.question}
+      </h2>
+
+      <div className="w-full space-y-4">
+        {labels.map((label, i) => (
+          <div key={label}>
+            <div className="flex justify-between mb-1">
+              <span className={`font-sans text-sm ${progress[i] > 0 && progress[i] < 100 ? "font-bold text-foreground" : "text-muted-foreground"}`}>
+                {label}
+              </span>
+              <span className="font-sans text-sm text-muted-foreground">{Math.round(progress[i])}%</span>
+            </div>
+            <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-200"
+                style={{
+                  width: `${progress[i]}%`,
+                  background: progress[i] > 0 ? "linear-gradient(90deg, hsl(30,90%,60%), hsl(350,70%,65%))" : undefined,
+                }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const StepRenderer = ({ step, answers, onSelect }: StepRendererProps) => {
   const selected = answers[step.key] || [];
   const isSingle = step.type === "radio";
@@ -339,6 +427,10 @@ const StepRenderer = ({ step, answers, onSelect }: StepRendererProps) => {
 
   if (step.type === "cameraCapture") {
     return <CameraCaptureStep step={step} answers={answers} onSelect={onSelect} />;
+  }
+
+  if (step.type === "generating") {
+    return <GeneratingStep step={step} />;
   }
 
   if (step.type === "sizeGrid" && step.subGroups) {
