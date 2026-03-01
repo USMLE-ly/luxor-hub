@@ -17,3 +17,9 @@ verify_jwt = false
 
 [functions.analyze-style-dna]
 verify_jwt = false
+
+[functions.find-similar]
+verify_jwt = false
+
+[functions.shop-products]
+verify_jwt = false

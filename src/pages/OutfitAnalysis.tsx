@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import {
   Upload, Camera, Sparkles, TrendingUp, Palette, ShieldCheck, AlertTriangle,
   Star, Shirt, Loader2, History, Save, Trash2, Share2, X,
-  Twitter, Link, Check, Download, Clock, ArrowLeftRight, Users
+  Twitter, Link, Check, Download, Clock, ArrowLeftRight, Users, Search, ExternalLink, ShoppingBag
 } from "lucide-react";
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
@@ -722,6 +722,35 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
   getPriorityColor: (p: string) => string;
 }) {
   const [expandedItem, setExpandedItem] = useState<number | null>(null);
+  const [findingSimilar, setFindingSimilar] = useState<number | null>(null);
+  const [similarProducts, setSimilarProducts] = useState<Record<number, any[]>>({});
+
+  const handleFindSimilar = async (item: any, index: number) => {
+    setFindingSimilar(index);
+    try {
+      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/find-similar`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          itemName: item.name,
+          itemCategory: item.category,
+          itemColor: item.color,
+          itemStyle: item.style,
+        }),
+      });
+      if (!resp.ok) throw new Error("Failed to find similar items");
+      const data = await resp.json();
+      setSimilarProducts(prev => ({ ...prev, [index]: data.products || [] }));
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to find similar items");
+    } finally {
+      setFindingSimilar(null);
+    }
+  };
 
   const radarData = analysis.occasionRatings.map((r) => ({
     occasion: r.occasion,
@@ -896,14 +925,54 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
                         transition={{ duration: 0.2 }}
                         className="overflow-hidden"
                       >
-                        <div className="px-3 pb-3 pt-1 space-y-1.5 border-t border-border/30">
-                          <div className="flex items-center gap-2">
-                            <div className="w-4 h-4 rounded border border-border" style={{ backgroundColor: item.color.startsWith("#") ? item.color : undefined }} />
-                            <span className="text-xs text-muted-foreground">Color: <span className="text-foreground">{item.color}</span></span>
+                          <div className="px-3 pb-3 pt-1 space-y-1.5 border-t border-border/30">
+                            <div className="flex items-center gap-2">
+                              <div className="w-4 h-4 rounded border border-border" style={{ backgroundColor: item.color.startsWith("#") ? item.color : undefined }} />
+                              <span className="text-xs text-muted-foreground">Color: <span className="text-foreground">{item.color}</span></span>
+                            </div>
+                            <p className="text-xs text-muted-foreground">Style: <span className="text-foreground">{item.style}</span></p>
+                            <Badge variant="secondary" className="text-[10px]">{item.category}</Badge>
+                            
+                            {/* Find Similar Button */}
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleFindSimilar(item, i); }}
+                              disabled={findingSimilar === i}
+                              className="mt-2 w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-primary/10 text-primary text-xs font-semibold hover:bg-primary/20 transition-colors disabled:opacity-50"
+                            >
+                              {findingSimilar === i ? (
+                                <><Loader2 className="w-3 h-3 animate-spin" /> Finding similar...</>
+                              ) : (
+                                <><Search className="w-3 h-3" /> Find Similar Online</>
+                              )}
+                            </button>
+
+                            {/* Similar Products */}
+                            {similarProducts[i] && similarProducts[i].length > 0 && (
+                              <div className="mt-2 space-y-2">
+                                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Similar items found:</p>
+                                {similarProducts[i].map((product: any, pi: number) => (
+                                  <a
+                                    key={pi}
+                                    href={product.shopUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="flex items-center gap-2 p-2 rounded-lg bg-background border border-border hover:border-primary/40 transition-colors"
+                                  >
+                                    <ShoppingBag className="w-4 h-4 text-primary flex-shrink-0" />
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-[11px] font-medium text-foreground truncate">{product.name}</p>
+                                      <p className="text-[10px] text-muted-foreground">{product.brand} · {product.price}</p>
+                                    </div>
+                                    <div className="flex items-center gap-1 flex-shrink-0">
+                                      <span className="text-[10px] font-bold text-primary">{product.similarity}%</span>
+                                      <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                                    </div>
+                                  </a>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                          <p className="text-xs text-muted-foreground">Style: <span className="text-foreground">{item.style}</span></p>
-                          <Badge variant="secondary" className="text-[10px]">{item.category}</Badge>
-                        </div>
                       </motion.div>
                     )}
                   </AnimatePresence>

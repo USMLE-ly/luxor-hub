@@ -1,9 +1,9 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home, Search, Scissors, Shirt } from "lucide-react";
+import { Home, Camera, Scissors, Shirt } from "lucide-react";
 
 const tabs = [
   { label: "DNA", icon: Home, path: "/dashboard" },
-  { label: "My shop", icon: Search, path: "/inspiration" },
+  { label: "Analysis", icon: Camera, path: "/outfit-analysis" },
   { label: "AI Stylist", icon: Scissors, path: "/chat" },
   { label: "Closet", icon: Shirt, path: "/closet" },
 ];
