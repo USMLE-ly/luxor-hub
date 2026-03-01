@@ -1,47 +1,22 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Shirt, Wand2, Star, TrendingUp, RefreshCw, Sparkles, CloudSun, Droplets, Wind, Camera, MessageSquare } from "lucide-react";
-import { CalendarWidget } from "@/components/app/CalendarWidget";
-import { WardrobeStats } from "@/components/app/WardrobeStats";
-import { WeeklyStyleReport } from "@/components/app/WeeklyStyleReport";
+import { Shirt, Wand2, Star, Check, ArrowRight, Heart, Edit2, Sparkles, Palette, Scissors } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import DisplayCards from "@/components/ui/display-cards";
-import { GlowingEffect } from "@/components/ui/glowing-effect";
-import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
-
-function AnimatedCounter({ target, duration = 1.5 }: { target: number | string; duration?: number }) {
-  const [count, setCount] = useState(0);
-  const ref = useRef<HTMLSpanElement>(null);
-  const numTarget = typeof target === "string" ? parseInt(target) || 0 : target;
-
-  useEffect(() => {
-    if (numTarget === 0) return;
-    let start = 0;
-    const startTime = performance.now();
-    const step = (now: number) => {
-      const progress = Math.min((now - startTime) / (duration * 1000), 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setCount(Math.round(eased * numTarget));
-      if (progress < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  }, [numTarget, duration]);
-
-  if (typeof target === "string" && target.includes("%")) return <span ref={ref}>{count}%</span>;
-  return <span ref={ref}>{count}</span>;
-}
 
 const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState({ items: 0, outfits: 0, styleScore: 0 });
   const [profile, setProfile] = useState<{ display_name: string | null }>({ display_name: null });
-  const [styleProfile, setStyleProfile] = useState<{ onboarding_completed: boolean | null; archetype: string | null }>({ onboarding_completed: null, archetype: null });
-  const [weather, setWeather] = useState<{ temp: number; description: string; icon: string; humidity: number; wind: number; outfitTip: string } | null>(null);
+  const [styleProfile, setStyleProfile] = useState<{
+    onboarding_completed: boolean | null;
+    archetype: string | null;
+    preferences: any;
+  }>({ onboarding_completed: null, archetype: null, preferences: null });
 
   useEffect(() => {
     if (!user) return;
@@ -50,7 +25,7 @@ const Dashboard = () => {
         supabase.from("clothing_items").select("id", { count: "exact", head: true }).eq("user_id", user.id),
         supabase.from("outfits").select("id", { count: "exact", head: true }).eq("user_id", user.id),
         supabase.from("profiles").select("display_name").eq("user_id", user.id).single(),
-        supabase.from("style_profiles").select("onboarding_completed, archetype, style_score").eq("user_id", user.id).single(),
+        supabase.from("style_profiles").select("onboarding_completed, archetype, style_score, preferences").eq("user_id", user.id).single(),
       ]);
       setStats({
         items: itemsRes.count || 0,
@@ -58,25 +33,9 @@ const Dashboard = () => {
         styleScore: (styleRes.data as any)?.style_score || 0,
       });
       if (profileRes.data) setProfile(profileRes.data);
-      if (styleRes.data) setStyleProfile(styleRes.data);
+      if (styleRes.data) setStyleProfile(styleRes.data as any);
     };
     fetchData();
-
-    const fetchWeather = async () => {
-      try {
-        let lat = 40.7128, lon = -74.006;
-        try {
-          const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
-            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 3000 })
-          );
-          lat = pos.coords.latitude;
-          lon = pos.coords.longitude;
-        } catch {}
-        const resp = await supabase.functions.invoke("get-weather", { body: { lat, lon } });
-        if (resp.data && !resp.error) setWeather(resp.data);
-      } catch {}
-    };
-    fetchWeather();
   }, [user]);
 
   useEffect(() => {
@@ -85,207 +44,204 @@ const Dashboard = () => {
     }
   }, [styleProfile.onboarding_completed, user, navigate]);
 
-  const displayName = profile.display_name || user?.user_metadata?.display_name || "there";
-  const firstName = displayName.split(" ")[0];
-
-  const statCards = [
-    { label: "Closet Items", value: stats.items, icon: Shirt, color: "text-primary" },
-    { label: "Outfits Created", value: stats.outfits, icon: Wand2, color: "text-gold-light" },
-    { label: "Style Score", value: stats.styleScore, icon: Star, color: "text-primary" },
-    { label: "Trend Match", value: "87%", icon: TrendingUp, color: "text-gold-light" },
-  ];
-
-  const displayCardsData = [
-    {
-      icon: <Shirt className="size-4 text-primary" />,
-      title: "Closet",
-      description: `${stats.items} items cataloged`,
-      date: "Updated today",
-      iconClassName: "text-primary",
-      titleClassName: "text-primary",
-      className: "[grid-area:stack] hover:-translate-y-10 before:absolute before:w-[100%] before:outline-1 before:rounded-xl before:outline-border before:h-[100%] before:content-[''] before:bg-blend-overlay before:bg-background/50 grayscale-[100%] hover:before:opacity-0 before:transition-opacity before:duration-700 hover:grayscale-0 before:left-0 before:top-0",
-    },
-    {
-      icon: <Star className="size-4 text-primary" />,
-      title: "Style Score",
-      description: `${stats.styleScore}/100 rating`,
-      date: "This week",
-      iconClassName: "text-primary",
-      titleClassName: "text-primary",
-      className: "[grid-area:stack] translate-x-12 translate-y-10 hover:-translate-y-1 before:absolute before:w-[100%] before:outline-1 before:rounded-xl before:outline-border before:h-[100%] before:content-[''] before:bg-blend-overlay before:bg-background/50 grayscale-[100%] hover:before:opacity-0 before:transition-opacity before:duration-700 hover:grayscale-0 before:left-0 before:top-0",
-    },
-    {
-      icon: <Wand2 className="size-4 text-primary" />,
-      title: "Outfits",
-      description: `${stats.outfits} created`,
-      date: "All time",
-      iconClassName: "text-primary",
-      titleClassName: "text-primary",
-      className: "[grid-area:stack] translate-x-24 translate-y-20 hover:translate-y-10",
-    },
-  ];
+  const calibrationProgress = styleProfile.preferences?.calibrationProgress || 0;
+  const hasCalibration = calibrationProgress > 0;
 
   return (
     <AppLayout>
-      <div className="p-6 lg:p-8 max-w-7xl mx-auto">
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <h1 className="font-display text-3xl lg:text-4xl font-bold text-foreground mb-1">
-            Welcome back, <span className="gold-text">{firstName}</span>
-          </h1>
-          <p className="text-muted-foreground font-sans text-sm mb-8">Here's your style overview for today.</p>
-        </motion.div>
-
-        {/* DisplayCards showcase */}
+      <div className="p-5 lg:p-8 max-w-2xl mx-auto space-y-5">
+        {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1, duration: 0.5 }}
-          className="flex justify-center mb-12"
+          className="flex items-center justify-between"
         >
-          <div className="w-full max-w-lg">
-            <DisplayCards cards={displayCardsData} />
+          <div className="w-10 h-10">
+            <Sparkles className="w-8 h-8 text-foreground" />
+          </div>
+          <div className="flex items-center gap-3">
+            <button className="w-10 h-10 flex items-center justify-center">
+              <Heart className="w-5 h-5 text-foreground" />
+            </button>
+            <button
+              onClick={() => navigate("/settings")}
+              className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center"
+            >
+              <span className="text-sm font-bold text-foreground">
+                {(profile.display_name || user?.email || "U")[0].toUpperCase()}
+              </span>
+            </button>
           </div>
         </motion.div>
 
-        {/* Stats Grid with GlowingEffect */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {statCards.map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 + i * 0.1, duration: 0.4 }}
-              className="relative rounded-[1.25rem] border-[0.75px] border-border p-2"
+        {/* My Style Formula */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-display text-xl font-bold text-foreground">My Style Formula</h2>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => navigate("/style-dna")}
+              className="rounded-full bg-foreground text-background hover:bg-foreground/90 text-xs px-4"
             >
-              <GlowingEffect
-                spread={40}
-                glow={true}
-                disabled={false}
-                proximity={64}
-                inactiveZone={0.01}
-                borderWidth={2}
-              />
-              <div className="relative glass rounded-xl p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <stat.icon className={`h-5 w-5 ${stat.color}`} />
-                </div>
-                <p className="font-display text-2xl font-bold text-foreground">
-                  <AnimatedCounter target={stat.value} />
-                </p>
-                <p className="text-muted-foreground font-sans text-xs mt-1">{stat.label}</p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Quick Actions */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.5 }}
-          className="flex flex-wrap items-center gap-3 mb-8"
-        >
-          <InteractiveHoverButton text="My Closet" onClick={() => navigate("/closet")} className="w-36 border-border" />
-          <InteractiveHoverButton text="Analyze" onClick={() => navigate("/outfit-analysis")} className="w-36 border-border" />
-          <InteractiveHoverButton text="AI Chat" onClick={() => navigate("/chat")} className="w-36 border-border" />
-        </motion.div>
-
-        {/* Weather Widget */}
-        {weather && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35, duration: 0.5 }}
-            className="glass rounded-2xl p-6 mb-8"
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="text-4xl">{weather.icon}</span>
-                  <div>
-                    <p className="font-display text-3xl font-bold text-foreground">{weather.temp}°C</p>
-                    <p className="text-muted-foreground font-sans text-sm">{weather.description}</p>
-                  </div>
-                </div>
-                <div className="flex gap-4 mt-3 text-xs text-muted-foreground font-sans">
-                  <span className="flex items-center gap-1"><Droplets className="h-3 w-3" /> {weather.humidity}%</span>
-                  <span className="flex items-center gap-1"><Wind className="h-3 w-3" /> {weather.wind} km/h</span>
-                </div>
-              </div>
-              <div className="max-w-xs text-right">
-                <p className="text-xs text-primary font-sans font-medium flex items-center justify-end gap-1 mb-1">
-                  <CloudSun className="h-3 w-3" /> Weather-based tip
-                </p>
-                <p className="text-sm text-muted-foreground font-sans">{weather.outfitTip}</p>
-              </div>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Today's Outfit Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.5 }}
-          className="glass rounded-2xl p-6 lg:p-8 gold-glow mb-8"
-        >
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="font-display text-xl font-bold text-foreground flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-primary" />
-                Today's Outfit
-              </h2>
-              <p className="text-muted-foreground font-sans text-sm mt-1">AI-curated for your day</p>
-            </div>
-            <Button variant="outline" size="sm" className="border-glass-border hover:border-primary/50 font-sans">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Regenerate
+              View <ArrowRight className="w-3 h-3 ml-1" />
             </Button>
           </div>
 
-          {stats.items === 0 ? (
-            <div className="text-center py-12">
-              <Shirt className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground font-sans mb-4">Add items to your closet to get outfit recommendations</p>
-              <Button onClick={() => navigate("/closet")} className="gold-gradient text-primary-foreground font-sans">
-                Go to My Closet
+          <div className="rounded-2xl bg-secondary/40 p-5 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-[hsl(45,80%,65%)]/20 flex items-center justify-center">
+                <Palette className="w-5 h-5 text-[hsl(45,80%,55%)]" />
+              </div>
+              <div>
+                <p className="font-sans font-semibold text-foreground text-sm">COLOR TYPE</p>
+                <p className="text-muted-foreground text-xs font-sans">Determines your clothing colors</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-[hsl(0,70%,68%)]/20 flex items-center justify-center">
+                <Scissors className="w-5 h-5 text-[hsl(0,70%,68%)]" />
+              </div>
+              <div>
+                <p className="font-sans font-semibold text-foreground text-sm">STYLE PREFERENCES</p>
+                <p className="text-muted-foreground text-xs font-sans">Determines your best prints and fabrics</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-[hsl(270,40%,65%)]/20 flex items-center justify-center">
+                <Shirt className="w-5 h-5 text-[hsl(270,40%,65%)]" />
+              </div>
+              <div>
+                <p className="font-sans font-semibold text-foreground text-sm">BODY TYPE</p>
+                <p className="text-muted-foreground text-xs font-sans">Defines shapes that flatter you</p>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Calibration Progress */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="rounded-2xl p-5"
+          style={{ backgroundColor: "hsl(120, 30%, 94%)" }}
+        >
+          <h3 className="font-display text-lg font-bold text-foreground mb-3">
+            Calibration in progress!
+          </h3>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="flex-1 h-8 rounded-full bg-background overflow-hidden relative">
+              <div
+                className="h-full rounded-full flex items-center justify-between px-3"
+                style={{
+                  width: `${hasCalibration ? calibrationProgress : 30}%`,
+                  background: "linear-gradient(90deg, hsl(130,60%,50%), hsl(170,70%,55%))",
+                }}
+              >
+                <Check className="w-4 h-4 text-background" />
+                <span className="text-xs font-bold text-background">{hasCalibration ? calibrationProgress : 30}%</span>
+              </div>
+            </div>
+            <div className="w-8 h-8 rounded-full bg-background flex items-center justify-center">
+              <span className="text-sm">🎁</span>
+            </div>
+          </div>
+          <p className="text-muted-foreground text-xs font-sans">
+            Let's continue tomorrow - the more we know you, the better the results!
+          </p>
+          {!hasCalibration && (
+            <Button
+              onClick={() => navigate("/calibration")}
+              variant="outline"
+              size="sm"
+              className="mt-3 rounded-full text-xs"
+            >
+              Start Calibration <ArrowRight className="w-3 h-3 ml-1" />
+            </Button>
+          )}
+        </motion.div>
+
+        {/* All My Outfits */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-display text-xl font-bold text-foreground">All My Outfits</h2>
+            <button
+              onClick={() => navigate("/outfits")}
+              className="text-sm text-muted-foreground font-sans hover:text-foreground transition-colors"
+            >
+              View all
+            </button>
+          </div>
+
+          {stats.outfits === 0 ? (
+            <div className="rounded-2xl border border-border bg-card p-8 text-center">
+              <Wand2 className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+              <p className="text-muted-foreground font-sans text-sm mb-4">No outfits yet. Generate your first AI outfit!</p>
+              <Button onClick={() => navigate("/outfits")} size="sm" className="rounded-full">
+                Create Outfit
               </Button>
             </div>
           ) : (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground font-sans">Outfit generation coming soon!</p>
+            <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1">
+              {["Workout", "Work", "Everyday"].map((occasion, i) => (
+                <div key={occasion} className="min-w-[180px] rounded-2xl border border-border bg-card overflow-hidden">
+                  <div className="relative h-40 bg-secondary flex items-center justify-center">
+                    <Edit2 className="absolute top-2 left-2 w-4 h-4 text-muted-foreground" />
+                    <Heart className="absolute top-2 right-2 w-4 h-4 text-muted-foreground" />
+                    <Shirt className="w-12 h-12 text-muted-foreground/40" />
+                  </div>
+                  <div className="p-3">
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <span className="text-xs">👔</span>
+                      <span className="font-sans text-sm font-medium text-foreground">{occasion}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <button className="text-[10px] font-sans text-muted-foreground flex items-center gap-1">
+                        View items <ArrowRight className="w-2.5 h-2.5" />
+                      </button>
+                      <button className="text-[10px] font-sans text-primary flex items-center gap-1">
+                        <Sparkles className="w-2.5 h-2.5" /> Try it on
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </motion.div>
 
-        {/* Calendar Widget */}
+        {/* Chat with AI Stylist */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.45, duration: 0.5 }}
-          className="mb-8"
+          transition={{ delay: 0.4 }}
         >
-          <CalendarWidget />
+          <h2 className="font-display text-xl font-bold text-foreground mb-3">Chat with AI Stylist</h2>
+          <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1">
+            {[
+              "Pieces that never go out of style",
+              "Main men's winter trends",
+              "What sporty items are essential?",
+            ].map((prompt) => (
+              <button
+                key={prompt}
+                onClick={() => navigate("/chat")}
+                className="min-w-[160px] p-4 rounded-2xl bg-secondary/40 text-left hover:bg-secondary/60 transition-colors"
+              >
+                <p className="font-sans text-sm text-foreground leading-snug">{prompt}</p>
+              </button>
+            ))}
+          </div>
         </motion.div>
-
-        {/* Weekly Style Report & Wardrobe Stats */}
-        <div className="grid lg:grid-cols-2 gap-6 mb-8">
-          <WeeklyStyleReport />
-          <WardrobeStats />
-        </div>
-
-        {/* Style DNA */}
-        {styleProfile.archetype && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.5 }}
-            className="glass rounded-2xl p-6"
-          >
-            <h2 className="font-display text-xl font-bold text-foreground mb-2">Your Style DNA</h2>
-            <p className="text-primary font-display text-lg">{styleProfile.archetype}</p>
-          </motion.div>
-        )}
       </div>
     </AppLayout>
   );
