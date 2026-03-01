@@ -29,6 +29,7 @@ import NotificationCenter from "./pages/NotificationCenter";
 import StyleDNA from "./pages/StyleDNA";
 import Calibration from "./pages/Calibration";
 import ColorType from "./pages/ColorType";
+import Paywall from "./pages/Paywall";
 
 const queryClient = new QueryClient();
 
@@ -64,6 +65,7 @@ const App = () => (
             <Route path="/style-dna" element={<StyleDNA />} />
             <Route path="/calibration" element={<Calibration />} />
             <Route path="/color-type" element={<ColorType />} />
+            <Route path="/paywall" element={<Paywall />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
