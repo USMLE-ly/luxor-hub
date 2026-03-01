@@ -20,8 +20,10 @@ export type Database = {
           event_date: string
           event_time: string | null
           id: string
+          mannequin_image_url: string | null
           notes: string | null
           occasion: string | null
+          outfit_items: Json | null
           title: string
           user_id: string
         }
@@ -30,8 +32,10 @@ export type Database = {
           event_date: string
           event_time?: string | null
           id?: string
+          mannequin_image_url?: string | null
           notes?: string | null
           occasion?: string | null
+          outfit_items?: Json | null
           title: string
           user_id: string
         }
@@ -40,8 +44,10 @@ export type Database = {
           event_date?: string
           event_time?: string | null
           id?: string
+          mannequin_image_url?: string | null
           notes?: string | null
           occasion?: string | null
+          outfit_items?: Json | null
           title?: string
           user_id?: string
         }

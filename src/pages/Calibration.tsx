@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { ArrowRight, ArrowLeft, Check } from "lucide-react";
+import { ArrowRight, ArrowLeft, Check, Eye } from "lucide-react";
 
 // Import generated product images
 import calTrousersWide from "@/assets/cal-trousers-wide.jpg";
@@ -37,81 +37,87 @@ import calShoeChelsea from "@/assets/cal-shoe-chelsea.jpg";
 import calShoeSneakers from "@/assets/cal-shoe-sneakers.jpg";
 import calShoeDerby from "@/assets/cal-shoe-derby.jpg";
 
+interface CalibrationOption {
+  label: string;
+  imageUrl: string;
+  style: "Casual" | "Formal";
+}
+
 interface CalibrationStep {
   question: string;
   key: string;
-  options: { label: string; imageUrl: string }[];
+  options: CalibrationOption[];
 }
 
 const calibrationSteps: CalibrationStep[] = [
   {
-    question: "Which Trousers style do you prefer the most?",
+    question: "Which Trousers style do you prefer?",
     key: "trousersStyle",
     options: [
-      { label: "Wide-leg", imageUrl: calTrousersWide },
-      { label: "Straight", imageUrl: calTrousersStraight },
-      { label: "Checked", imageUrl: calTrousersChecked },
-      { label: "Tailored", imageUrl: calTrousersTailored },
+      { label: "Wide-leg", imageUrl: calTrousersWide, style: "Casual" },
+      { label: "Straight", imageUrl: calTrousersStraight, style: "Casual" },
+      { label: "Checked", imageUrl: calTrousersChecked, style: "Formal" },
+      { label: "Tailored", imageUrl: calTrousersTailored, style: "Formal" },
     ],
   },
   {
-    question: "Which Coat style do you prefer the most?",
+    question: "Which Coat style do you prefer?",
     key: "coatStyle",
     options: [
-      { label: "Double-breasted", imageUrl: calCoatDouble },
-      { label: "Overcoat", imageUrl: calCoatOvercoat },
-      { label: "Trench", imageUrl: calCoatTrench },
-      { label: "Belted", imageUrl: calCoatBelted },
+      { label: "Double-breasted", imageUrl: calCoatDouble, style: "Formal" },
+      { label: "Overcoat", imageUrl: calCoatOvercoat, style: "Formal" },
+      { label: "Trench", imageUrl: calCoatTrench, style: "Formal" },
+      { label: "Belted", imageUrl: calCoatBelted, style: "Casual" },
     ],
   },
   {
-    question: "Which T-shirt style do you prefer the most?",
+    question: "Which T-shirt style do you prefer?",
     key: "tshirtStyle",
     options: [
-      { label: "Basic crew", imageUrl: calTshirtBasic },
-      { label: "Graphic", imageUrl: calTshirtGraphic },
-      { label: "V-neck", imageUrl: calTshirtVneck },
-      { label: "Oversized", imageUrl: calTshirtOversized },
+      { label: "Basic crew", imageUrl: calTshirtBasic, style: "Casual" },
+      { label: "Graphic", imageUrl: calTshirtGraphic, style: "Casual" },
+      { label: "V-neck", imageUrl: calTshirtVneck, style: "Casual" },
+      { label: "Oversized", imageUrl: calTshirtOversized, style: "Casual" },
     ],
   },
   {
-    question: "Which Shirt style do you prefer the most?",
+    question: "Which Shirt style do you prefer?",
     key: "shirtStyle",
     options: [
-      { label: "Classic", imageUrl: calShirtClassic },
-      { label: "Artsy", imageUrl: calShirtArtsy },
-      { label: "Linen", imageUrl: calShirtLinen },
-      { label: "Printed", imageUrl: calShirtPrinted },
+      { label: "Classic", imageUrl: calShirtClassic, style: "Formal" },
+      { label: "Artsy", imageUrl: calShirtArtsy, style: "Casual" },
+      { label: "Linen", imageUrl: calShirtLinen, style: "Casual" },
+      { label: "Printed", imageUrl: calShirtPrinted, style: "Casual" },
     ],
   },
   {
-    question: "Which Jacket style do you prefer the most?",
+    question: "Which Jacket style do you prefer?",
     key: "jacketStyle",
     options: [
-      { label: "Biker", imageUrl: calJacketBiker },
-      { label: "Bomber", imageUrl: calJacketBomber },
-      { label: "Denim", imageUrl: calJacketDenim },
-      { label: "Suede", imageUrl: calJacketSuede },
+      { label: "Biker", imageUrl: calJacketBiker, style: "Casual" },
+      { label: "Bomber", imageUrl: calJacketBomber, style: "Casual" },
+      { label: "Denim", imageUrl: calJacketDenim, style: "Casual" },
+      { label: "Suede", imageUrl: calJacketSuede, style: "Formal" },
     ],
   },
   {
-    question: "Which Jeans style do you prefer the most?",
+    question: "Which Jeans style do you prefer?",
     key: "jeansStyle",
     options: [
-      { label: "Slim fit", imageUrl: calJeansSlim },
-      { label: "Straight", imageUrl: calJeansStraight },
-      { label: "Wide-leg", imageUrl: calJeansWide },
-      { label: "Skinny", imageUrl: calJeansSkinny },
+      { label: "Slim fit", imageUrl: calJeansSlim, style: "Casual" },
+      { label: "Straight", imageUrl: calJeansStraight, style: "Casual" },
+      { label: "Wide-leg", imageUrl: calJeansWide, style: "Casual" },
+      { label: "Skinny", imageUrl: calJeansSkinny, style: "Casual" },
     ],
   },
   {
-    question: "Which Footwear style do you prefer the most?",
+    question: "Which Footwear style do you prefer?",
     key: "footwearStyle",
     options: [
-      { label: "Loafers", imageUrl: calShoeLoafers },
-      { label: "Chelsea boots", imageUrl: calShoeChelsea },
-      { label: "Sneakers", imageUrl: calShoeSneakers },
-      { label: "Derby shoes", imageUrl: calShoeDerby },
+      { label: "Loafers", imageUrl: calShoeLoafers, style: "Formal" },
+      { label: "Chelsea boots", imageUrl: calShoeChelsea, style: "Formal" },
+      { label: "Sneakers", imageUrl: calShoeSneakers, style: "Casual" },
+      { label: "Derby shoes", imageUrl: calShoeDerby, style: "Formal" },
     ],
   },
 ];
@@ -166,6 +172,10 @@ const Calibration = () => {
       setLoading(false);
     }
   };
+
+  const selectedOption = currentStepData?.options.find(
+    (o) => o.label === answers[currentStepData?.key]
+  );
 
   if (phase === "allSet") {
     return (
@@ -326,7 +336,7 @@ const Calibration = () => {
       </div>
 
       {/* Content */}
-      <div className="flex-1 px-4 pt-6 pb-28">
+      <div className="flex-1 px-4 pt-6 pb-36">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentStep}
@@ -339,19 +349,18 @@ const Calibration = () => {
               {currentStepData.question}
             </h2>
 
-            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none -mx-1 px-1">
+            <div className="grid grid-cols-2 gap-3">
               {currentStepData.options.map((option) => {
                 const isActive = answers[currentStepData.key] === option.label;
                 return (
                   <button
                     key={option.label}
                     onClick={() => handleSelect(currentStepData.key, option.label)}
-                    className="flex-shrink-0 flex flex-col items-center"
-                    style={{ width: "calc(25% - 6px)", minWidth: "80px" }}
+                    className="flex flex-col items-center"
                   >
                     <div
-                      className={`relative w-full aspect-[3/4] rounded-lg overflow-hidden mb-1.5 transition-all bg-secondary ${
-                        isActive ? "ring-2 ring-[hsl(43,74%,49%)]" : ""
+                      className={`relative w-full aspect-[3/4] rounded-xl overflow-hidden mb-2 transition-all bg-secondary ${
+                        isActive ? "ring-2 ring-[hsl(43,74%,49%)] shadow-lg" : "ring-1 ring-border"
                       }`}
                     >
                       <img
@@ -360,18 +369,28 @@ const Calibration = () => {
                         className="w-full h-full object-cover"
                         loading="lazy"
                       />
-                      <div className="absolute bottom-1.5 right-1.5">
+                      <div className="absolute top-2 right-2">
                         <div
-                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shadow-sm ${
+                          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shadow-sm ${
                             isActive
                               ? "border-[hsl(43,74%,49%)] bg-[hsl(43,74%,49%)]"
-                              : "border-white/80 bg-white/80"
+                              : "border-white/80 bg-white/30 backdrop-blur-sm"
                           }`}
                         >
-                          {isActive && <Check className="w-3 h-3 text-white" />}
+                          {isActive && <Check className="w-3.5 h-3.5 text-white" />}
                         </div>
                       </div>
                     </div>
+                    <p className="font-sans text-sm font-medium text-foreground">{option.label}</p>
+                    <span
+                      className={`text-[10px] font-sans font-semibold uppercase tracking-wider mt-0.5 px-2 py-0.5 rounded-full ${
+                        option.style === "Formal"
+                          ? "bg-[hsl(45,80%,65%)]/20 text-[hsl(45,80%,45%)]"
+                          : "bg-[hsl(200,60%,65%)]/20 text-[hsl(200,60%,45%)]"
+                      }`}
+                    >
+                      {option.style}
+                    </span>
                   </button>
                 );
               })}
@@ -380,7 +399,18 @@ const Calibration = () => {
         </AnimatePresence>
       </div>
 
-      <div className="fixed bottom-0 inset-x-0 z-20 bg-background p-5">
+      {/* Bottom actions */}
+      <div className="fixed bottom-0 inset-x-0 z-20 bg-background border-t border-border p-4 space-y-2">
+        {canProceed && selectedOption && (
+          <Button
+            onClick={() => navigate("/mannequin")}
+            variant="outline"
+            className="w-full h-12 rounded-2xl font-sans text-sm border-border"
+          >
+            <Eye className="w-4 h-4 mr-2" />
+            Preview on me
+          </Button>
+        )}
         <Button
           onClick={handleNext}
           disabled={!canProceed}
