@@ -93,24 +93,26 @@ const Dashboard = () => {
           </div>
 
           <div className="rounded-2xl bg-secondary/40 p-5 space-y-4">
-            <div className="flex items-center gap-3">
+            <button onClick={() => navigate("/color-type")} className="flex items-center gap-3 w-full text-left hover:opacity-80 transition-opacity">
               <div className="w-9 h-9 rounded-lg bg-[hsl(45,80%,65%)]/20 flex items-center justify-center">
                 <Palette className="w-5 h-5 text-[hsl(45,80%,55%)]" />
               </div>
-              <div>
+              <div className="flex-1">
                 <p className="font-sans font-semibold text-foreground text-sm">COLOR TYPE</p>
                 <p className="text-muted-foreground text-xs font-sans">Determines your clothing colors</p>
               </div>
-            </div>
-            <div className="flex items-center gap-3">
+              <ArrowRight className="w-4 h-4 text-muted-foreground" />
+            </button>
+            <button onClick={() => navigate("/calibration")} className="flex items-center gap-3 w-full text-left hover:opacity-80 transition-opacity">
               <div className="w-9 h-9 rounded-lg bg-[hsl(0,70%,68%)]/20 flex items-center justify-center">
                 <Scissors className="w-5 h-5 text-[hsl(0,70%,68%)]" />
               </div>
-              <div>
+              <div className="flex-1">
                 <p className="font-sans font-semibold text-foreground text-sm">STYLE PREFERENCES</p>
                 <p className="text-muted-foreground text-xs font-sans">Determines your best prints and fabrics</p>
               </div>
-            </div>
+              <ArrowRight className="w-4 h-4 text-muted-foreground" />
+            </button>
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-lg bg-[hsl(270,40%,65%)]/20 flex items-center justify-center">
                 <Shirt className="w-5 h-5 text-[hsl(270,40%,65%)]" />
@@ -128,42 +130,36 @@ const Dashboard = () => {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="rounded-2xl p-5"
-          style={{ backgroundColor: "hsl(120, 30%, 94%)" }}
         >
-          <h3 className="font-display text-lg font-bold text-foreground mb-3">
-            Calibration in progress!
-          </h3>
-          <div className="flex items-center gap-2 mb-2">
-            <div className="flex-1 h-8 rounded-full bg-background overflow-hidden relative">
-              <div
-                className="h-full rounded-full flex items-center justify-between px-3"
-                style={{
-                  width: `${hasCalibration ? calibrationProgress : 30}%`,
-                  background: "linear-gradient(90deg, hsl(130,60%,50%), hsl(170,70%,55%))",
-                }}
-              >
-                <Check className="w-4 h-4 text-background" />
-                <span className="text-xs font-bold text-background">{hasCalibration ? calibrationProgress : 30}%</span>
+          <button
+            onClick={() => navigate("/calibration")}
+            className="w-full rounded-2xl p-5 text-left hover:opacity-90 transition-opacity"
+            style={{ backgroundColor: "hsl(120, 30%, 94%)" }}
+          >
+            <h3 className="font-display text-lg font-bold text-foreground mb-3">
+              Calibration in progress!
+            </h3>
+            <div className="flex items-center gap-2 mb-2">
+              <div className="flex-1 h-8 rounded-full bg-background overflow-hidden relative">
+                <div
+                  className="h-full rounded-full flex items-center justify-between px-3"
+                  style={{
+                    width: `${hasCalibration ? calibrationProgress : 30}%`,
+                    background: "linear-gradient(90deg, hsl(130,60%,50%), hsl(170,70%,55%))",
+                  }}
+                >
+                  <Check className="w-4 h-4 text-background" />
+                  <span className="text-xs font-bold text-background">{hasCalibration ? calibrationProgress : 30}%</span>
+                </div>
+              </div>
+              <div className="w-8 h-8 rounded-full bg-background flex items-center justify-center">
+                <span className="text-sm">🎁</span>
               </div>
             </div>
-            <div className="w-8 h-8 rounded-full bg-background flex items-center justify-center">
-              <span className="text-sm">🎁</span>
-            </div>
-          </div>
-          <p className="text-muted-foreground text-xs font-sans">
-            Let's continue tomorrow - the more we know you, the better the results!
-          </p>
-          {!hasCalibration && (
-            <Button
-              onClick={() => navigate("/calibration")}
-              variant="outline"
-              size="sm"
-              className="mt-3 rounded-full text-xs"
-            >
-              Start Calibration <ArrowRight className="w-3 h-3 ml-1" />
-            </Button>
-          )}
+            <p className="text-muted-foreground text-xs font-sans">
+              Let's continue tomorrow - the more we know you, the better the results!
+            </p>
+          </button>
         </motion.div>
 
         {/* All My Outfits */}
