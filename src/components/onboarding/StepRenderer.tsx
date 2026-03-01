@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Check, Camera, Smartphone } from "lucide-react";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { Check, Camera, Smartphone, Video, User, FlipHorizontal } from "lucide-react";
 import type { OnboardingStep } from "./onboardingSteps";
 
 interface StepRendererProps {
@@ -14,6 +14,8 @@ const bodyShapeSvgs: Record<string, string> = {
   "Inverted triangle": "M20,10 L60,10 L50,70 L30,70 Z",
   Rectangle: "M28,10 L52,10 L52,70 L28,70 Z",
   Round: "M30,10 Q20,25 20,40 Q20,55 30,70 L50,70 Q60,55 60,40 Q60,25 50,10 Z",
+  Oval: "M30,10 Q20,25 20,40 Q20,55 30,70 L50,70 Q60,55 60,40 Q60,25 50,10 Z",
+  Trapezoid: "M25,10 L55,10 L60,70 L20,70 Z",
 };
 
 const HeightStep = ({ answers, onSelect }: { answers: Record<string, string[]>; onSelect: StepRendererProps["onSelect"] }) => {
@@ -132,12 +134,10 @@ const SelfieIntroStep = ({ step }: { step: OnboardingStep }) => {
     <div className="flex flex-col items-center text-center pt-12">
       <div className="w-48 h-48 mb-8 flex items-center justify-center">
         <svg viewBox="0 0 200 200" className="w-full h-full" fill="none" stroke="hsl(var(--foreground))" strokeWidth="1.5">
-          {/* Person taking selfie illustration */}
-          <circle cx="85" cy="55" r="25" /> {/* Head */}
-          <path d="M60,80 Q60,130 70,160 L100,160 Q110,130 110,80" /> {/* Body */}
-          <path d="M110,90 Q130,70 140,60 L145,55" /> {/* Arm holding phone */}
-          <rect x="135" y="45" width="18" height="30" rx="3" /> {/* Phone */}
-          {/* Sparkles */}
+          <circle cx="85" cy="55" r="25" />
+          <path d="M60,80 Q60,130 70,160 L100,160 Q110,130 110,80" />
+          <path d="M110,90 Q130,70 140,60 L145,55" />
+          <rect x="135" y="45" width="18" height="30" rx="3" />
           <path d="M155,40 L157,35 L159,40 L164,42 L159,44 L157,49 L155,44 L150,42 Z" fill="hsl(40,80%,55%)" stroke="none" />
           <path d="M145,30 L146,27 L147,30 L150,31 L147,32 L146,35 L145,32 L142,31 Z" fill="hsl(40,80%,55%)" stroke="none" />
         </svg>
@@ -153,7 +153,6 @@ const SelfieIntroStep = ({ step }: { step: OnboardingStep }) => {
 const SelfieGuideStep = ({ step }: { step: OnboardingStep }) => {
   return (
     <div className="flex flex-col items-center">
-      {/* Placeholder image area */}
       <div className="w-full aspect-[3/4] rounded-2xl bg-secondary/50 mb-6 flex items-center justify-center overflow-hidden">
         <div className="text-center">
           <Camera className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
@@ -163,6 +162,156 @@ const SelfieGuideStep = ({ step }: { step: OnboardingStep }) => {
       <div className="text-center">
         <p className="text-[hsl(0,70%,68%)] font-sans text-sm mb-2">Step {step.stepNumber}</p>
         <h2 className="font-display text-xl font-bold text-foreground">{step.question}</h2>
+      </div>
+    </div>
+  );
+};
+
+const CameraCaptureStep = ({ step, answers, onSelect }: { step: OnboardingStep; answers: Record<string, string[]>; onSelect: StepRendererProps["onSelect"] }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [capturedImage, setCapturedImage] = useState<string | null>(answers[step.key]?.[0] || null);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const [facingMode, setFacingMode] = useState<"user" | "environment">(
+    step.cameraMode === "selfie" ? "user" : "environment"
+  );
+
+  const startCamera = useCallback(async () => {
+    try {
+      setCameraError(null);
+      const constraints: MediaStreamConstraints = {
+        video: {
+          facingMode,
+          width: { ideal: 1280 },
+          height: { ideal: 1920 },
+        },
+      };
+      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+      setStream(mediaStream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+      }
+    } catch (err) {
+      setCameraError("Camera access denied. Please enable camera permissions.");
+    }
+  }, [facingMode]);
+
+  useEffect(() => {
+    if (!capturedImage) {
+      startCamera();
+    }
+    return () => {
+      stream?.getTracks().forEach((t) => t.stop());
+    };
+  }, [facingMode]);
+
+  const handleCapture = () => {
+    if (!videoRef.current || !canvasRef.current) return;
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    
+    // Mirror for selfie
+    if (facingMode === "user") {
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+    }
+    ctx.drawImage(video, 0, 0);
+    
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+    setCapturedImage(dataUrl);
+    onSelect(step.key, dataUrl, true);
+    stream?.getTracks().forEach((t) => t.stop());
+  };
+
+  const handleRetake = () => {
+    setCapturedImage(null);
+    onSelect(step.key, "", true);
+    startCamera();
+  };
+
+  const toggleCamera = () => {
+    stream?.getTracks().forEach((t) => t.stop());
+    setFacingMode((prev) => (prev === "user" ? "environment" : "user"));
+  };
+
+  const isSelfie = step.cameraMode === "selfie";
+
+  return (
+    <div className="flex flex-col items-center">
+      <h2 className="font-display text-2xl font-bold text-foreground text-center mb-2">
+        {step.question}
+      </h2>
+      <p className="text-muted-foreground font-sans text-sm text-center mb-4">{step.description}</p>
+
+      <div className="relative w-full rounded-2xl overflow-hidden bg-black" style={{ aspectRatio: isSelfie ? "3/4" : "9/16" }}>
+        {cameraError ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center p-6">
+            <Camera className="w-12 h-12 mb-4 opacity-50" />
+            <p className="text-sm opacity-80">{cameraError}</p>
+            <button
+              onClick={startCamera}
+              className="mt-4 px-4 py-2 rounded-full bg-white/20 text-sm"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : capturedImage ? (
+          <img src={capturedImage} alt="Captured" className="w-full h-full object-cover" />
+        ) : (
+          <>
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className={`w-full h-full object-cover ${facingMode === "user" ? "scale-x-[-1]" : ""}`}
+            />
+            {/* Guide overlay */}
+            {isSelfie && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-48 h-64 border-2 border-white/40 rounded-[50%]" />
+              </div>
+            )}
+            {!isSelfie && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-40 h-80 border-2 border-white/40 rounded-2xl" />
+              </div>
+            )}
+          </>
+        )}
+        <canvas ref={canvasRef} className="hidden" />
+      </div>
+
+      <div className="flex items-center gap-4 mt-6">
+        {capturedImage ? (
+          <button
+            onClick={handleRetake}
+            className="px-6 py-3 rounded-full bg-secondary text-foreground font-sans font-semibold text-sm"
+          >
+            Retake
+          </button>
+        ) : (
+          <>
+            <button
+              onClick={toggleCamera}
+              className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center"
+            >
+              <FlipHorizontal className="w-5 h-5 text-foreground" />
+            </button>
+            <button
+              onClick={handleCapture}
+              className="w-16 h-16 rounded-full border-4 border-foreground/30 bg-white flex items-center justify-center"
+            >
+              <div className="w-12 h-12 rounded-full bg-[hsl(0,70%,68%)]" />
+            </button>
+            <div className="w-12" /> {/* Spacer */}
+          </>
+        )}
       </div>
     </div>
   );
@@ -186,6 +335,10 @@ const StepRenderer = ({ step, answers, onSelect }: StepRendererProps) => {
 
   if (step.type === "selfieGuide") {
     return <SelfieGuideStep step={step} />;
+  }
+
+  if (step.type === "cameraCapture") {
+    return <CameraCaptureStep step={step} answers={answers} onSelect={onSelect} />;
   }
 
   if (step.type === "sizeGrid" && step.subGroups) {
@@ -269,12 +422,16 @@ const StepRenderer = ({ step, answers, onSelect }: StepRendererProps) => {
   // checkbox or radio list
   return (
     <div>
+      {step.subtitle && (
+        <p className="text-muted-foreground font-sans text-sm text-center mb-1">{step.subtitle}</p>
+      )}
       <h2 className="font-display text-2xl lg:text-3xl font-bold text-foreground text-center mb-6">
         {step.question}
       </h2>
       <div className="flex flex-col gap-3">
         {step.options.map((option) => {
           const isActive = selected.includes(option);
+          const brands = step.brandLabels?.[option];
           return (
             <button
               key={option}
@@ -285,7 +442,18 @@ const StepRenderer = ({ step, answers, onSelect }: StepRendererProps) => {
                   : "border-border bg-secondary/30 hover:border-muted-foreground/40"
               }`}
             >
-              <span className="font-sans text-sm text-foreground pr-4">{option}</span>
+              <div className="flex-1 pr-2">
+                <span className="font-sans text-sm text-foreground">{option}</span>
+                {brands && (
+                  <div className="flex flex-wrap gap-2 mt-1.5">
+                    {brands.map((brand) => (
+                      <span key={brand} className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
+                        {brand}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
               {isSingle ? (
                 <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
                   isActive ? "border-primary" : "border-muted-foreground/40"

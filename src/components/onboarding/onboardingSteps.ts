@@ -1,4 +1,4 @@
-export type StepType = "gender" | "checkbox" | "radio" | "sizeGrid" | "bodyShape" | "height" | "notification" | "selfieIntro" | "selfieGuide";
+export type StepType = "gender" | "checkbox" | "radio" | "sizeGrid" | "bodyShape" | "height" | "notification" | "selfieIntro" | "selfieGuide" | "cameraCapture";
 
 export interface OnboardingStep {
   question: string;
@@ -12,42 +12,43 @@ export interface OnboardingStep {
   /** For selfieGuide steps */
   stepNumber?: number;
   description?: string;
+  /** Subtitle above the question */
+  subtitle?: string;
+  /** Brand labels for each option */
+  brandLabels?: Record<string, string[]>;
+  /** Camera mode: selfie or fullBody */
+  cameraMode?: "selfie" | "fullBody";
 }
 
 const sizes = ["3XS", "XXS", "XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL", "6XL", "7XL", "8XL", "9XL"];
 
 export const sharedSteps: OnboardingStep[] = [
   {
-    question: "What's your main style goal?",
-    key: "styleGoal",
+    question: "What's your biggest style challenge?",
+    key: "styleChallenge",
     type: "checkbox",
     options: [
-      "Learning how to complement my natural features",
-      "Looking chic and fashionable",
-      "Standing out from the crowd",
-      "Shopping smart and buying less",
+      "Knowing what looks good on me",
+      "Shopping taking forever",
+      "Wearing the same outfits on repeat",
+      "Wasting money on clothes I never wear",
     ],
   },
   {
-    question: "How do you want Style DNA to elevate your style?",
-    key: "elevateStyle",
+    question: "Do you ever avoid events because you don't have the right outfit?",
+    key: "avoidEvents",
     type: "radio",
-    options: [
-      "Create a color palette and personalized style guide",
-      "Tell me whether or not an item suits me before I buy it",
-      "Mix and match items I already own to create brand-new looks",
-      "Create new and unique looks from brands I love to improve my personal style",
-    ],
+    options: ["Yes, often", "Sometimes", "Not really", "Never"],
   },
   {
     question: "Tell us about your shopping experience",
     key: "shoppingExperience",
     type: "radio",
     options: [
-      "I generally feel pleased with most of my purchases",
-      "I return most items",
-      "I spend a lot of time trying to find clothes I feel confident and comfortable in",
-      "I don't buy clothes very often because I believe nothing suits me",
+      "I avoid it – too overwhelming",
+      "I stick to what I know",
+      "I buy impulsively, regret later",
+      "My stylist does most of it",
     ],
   },
   {
@@ -60,6 +61,11 @@ export const sharedSteps: OnboardingStep[] = [
       "Luxury labels",
       "A mix of fast fashion and designer brands",
     ],
+    brandLabels: {
+      "Fast fashion": ["ZARA", "H&M", "GAP", "MANGO"],
+      "Premium brands": ["COS", "GANNI", "ISABEL MARANT", "Reformation"],
+      "Luxury labels": ["GUCCI", "FENDI", "VALENTINO", "CHANEL"],
+    },
   },
   {
     question: "What sizes do you typically wear?",
@@ -72,15 +78,11 @@ export const sharedSteps: OnboardingStep[] = [
     ],
   },
   {
-    question: "How well do you know your style?",
-    key: "styleKnowledge",
-    type: "checkbox",
-    options: [
-      "I know what colors suit my skin tone",
-      "I know which prints and silhouettes suit my body type",
-      "I'm not entirely sure... but I can't wait to find out!",
-      "I'm a professional stylist",
-    ],
+    question: "Roughly how much do you spend on clothes per year?",
+    key: "budget",
+    type: "radio",
+    subtitle: "Your wardrobe is an investment",
+    options: ["$0 – $500", "$501 – $1,500", "$1,501 – $2,500", "$2,501 – $5,000", "Over $5,000"],
   },
   {
     question: "Your height",
@@ -136,16 +138,25 @@ export const sharedSteps: OnboardingStep[] = [
     options: [],
     stepNumber: 4,
   },
+  {
+    question: "Take your selfie",
+    key: "selfieCapture",
+    type: "cameraCapture",
+    options: [],
+    cameraMode: "selfie",
+    description: "Position your face within the frame and tap capture",
+  },
+  {
+    question: "Now let's capture your full body",
+    key: "fullBodyCapture",
+    type: "cameraCapture",
+    options: [],
+    cameraMode: "fullBody",
+    description: "Stand back and capture your full outfit for AI analysis",
+  },
 ];
 
 export const femaleSteps: OnboardingStep[] = [
-  {
-    question: "Which size range best describes you?",
-    key: "sizeRange",
-    type: "radio",
-    options: ["Regular", "Curvy", "Petite"],
-    forGender: "female",
-  },
   {
     question: "Do you have clothes in your Closet that you don't know how to style?",
     key: "unstyledClothes",
@@ -171,18 +182,18 @@ export const maleSteps: OnboardingStep[] = [
     forGender: "male",
   },
   {
-    question: "Which body type best describes you?",
+    question: "Which shape best describes your body?",
     key: "bodyShape",
-    type: "radio",
-    options: ["Slim / Lean", "Athletic / Fit", "Average", "Stocky / Broad", "Tall & Slim"],
+    type: "bodyShape",
+    options: ["Rectangle", "Triangle", "Inverted triangle", "Oval", "Trapezoid"],
     forGender: "male",
   },
 ];
 
 export function getStepsForGender(gender: "female" | "male"): OnboardingStep[] {
   return [
-    ...sharedSteps.slice(0, 6), // style goal through style knowledge
+    ...sharedSteps.slice(0, 6), // style challenge through budget
     ...(gender === "female" ? femaleSteps : maleSteps),
-    ...sharedSteps.slice(6), // height, age, notifications, selfie steps
+    ...sharedSteps.slice(6), // height, age, notifications, selfie steps, camera captures
   ];
 }
