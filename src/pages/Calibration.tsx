@@ -7,82 +7,111 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { ArrowRight, ArrowLeft, Check } from "lucide-react";
 
+// Import generated product images
+import calTrousersWide from "@/assets/cal-trousers-wide.jpg";
+import calTrousersStraight from "@/assets/cal-trousers-straight.jpg";
+import calTrousersChecked from "@/assets/cal-trousers-checked.jpg";
+import calTrousersTailored from "@/assets/cal-trousers-tailored.jpg";
+import calCoatDouble from "@/assets/cal-coat-double.jpg";
+import calCoatOvercoat from "@/assets/cal-coat-overcoat.jpg";
+import calCoatTrench from "@/assets/cal-coat-trench.jpg";
+import calCoatBelted from "@/assets/cal-coat-belted.jpg";
+import calTshirtBasic from "@/assets/cal-tshirt-basic.jpg";
+import calTshirtGraphic from "@/assets/cal-tshirt-graphic.jpg";
+import calTshirtVneck from "@/assets/cal-tshirt-vneck.jpg";
+import calTshirtOversized from "@/assets/cal-tshirt-oversized.jpg";
+import calShirtClassic from "@/assets/cal-shirt-classic.jpg";
+import calShirtArtsy from "@/assets/cal-shirt-artsy.jpg";
+import calShirtLinen from "@/assets/cal-shirt-linen.jpg";
+import calShirtPrinted from "@/assets/cal-shirt-printed.jpg";
+import calJacketBiker from "@/assets/cal-jacket-biker.jpg";
+import calJacketBomber from "@/assets/cal-jacket-bomber.jpg";
+import calJacketDenim from "@/assets/cal-jacket-denim.jpg";
+import calJacketSuede from "@/assets/cal-jacket-suede.jpg";
+import calJeansSlim from "@/assets/cal-jeans-slim.jpg";
+import calJeansStraight from "@/assets/cal-jeans-straight.jpg";
+import calJeansWide from "@/assets/cal-jeans-wide.jpg";
+import calJeansSkinny from "@/assets/cal-jeans-skinny.jpg";
+import calShoeLoafers from "@/assets/cal-shoe-loafers.jpg";
+import calShoeChelsea from "@/assets/cal-shoe-chelsea.jpg";
+import calShoeSneakers from "@/assets/cal-shoe-sneakers.jpg";
+import calShoeDerby from "@/assets/cal-shoe-derby.jpg";
+
 interface CalibrationStep {
   question: string;
   key: string;
   options: { label: string; imageUrl: string }[];
 }
 
-// Using reliable, high-quality product images from picsum and placeholder services
 const calibrationSteps: CalibrationStep[] = [
   {
     question: "Which Trousers style do you prefer the most?",
     key: "trousersStyle",
     options: [
-      { label: "Wide-leg", imageUrl: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=300&h=400&fit=crop&crop=center" },
-      { label: "Straight", imageUrl: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=300&h=400&fit=crop&crop=center" },
-      { label: "Checked", imageUrl: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=300&h=400&fit=crop&crop=center" },
-      { label: "Tailored", imageUrl: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=300&h=400&fit=crop&crop=center" },
+      { label: "Wide-leg", imageUrl: calTrousersWide },
+      { label: "Straight", imageUrl: calTrousersStraight },
+      { label: "Checked", imageUrl: calTrousersChecked },
+      { label: "Tailored", imageUrl: calTrousersTailored },
     ],
   },
   {
     question: "Which Coat style do you prefer the most?",
     key: "coatStyle",
     options: [
-      { label: "Double-breasted", imageUrl: "https://images.unsplash.com/photo-1544923246-77307dd270cf?w=300&h=400&fit=crop&crop=center" },
-      { label: "Overcoat", imageUrl: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=300&h=400&fit=crop&crop=center" },
-      { label: "Trench", imageUrl: "https://images.unsplash.com/photo-1608063615781-e2ef8c73d114?w=300&h=400&fit=crop&crop=center" },
-      { label: "Belted", imageUrl: "https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=300&h=400&fit=crop&crop=center" },
+      { label: "Double-breasted", imageUrl: calCoatDouble },
+      { label: "Overcoat", imageUrl: calCoatOvercoat },
+      { label: "Trench", imageUrl: calCoatTrench },
+      { label: "Belted", imageUrl: calCoatBelted },
     ],
   },
   {
     question: "Which T-shirt style do you prefer the most?",
     key: "tshirtStyle",
     options: [
-      { label: "Basic crew", imageUrl: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&h=400&fit=crop&crop=center" },
-      { label: "Graphic", imageUrl: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=300&h=400&fit=crop&crop=center" },
-      { label: "V-neck", imageUrl: "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=300&h=400&fit=crop&crop=center" },
-      { label: "Oversized", imageUrl: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=300&h=400&fit=crop&crop=center" },
+      { label: "Basic crew", imageUrl: calTshirtBasic },
+      { label: "Graphic", imageUrl: calTshirtGraphic },
+      { label: "V-neck", imageUrl: calTshirtVneck },
+      { label: "Oversized", imageUrl: calTshirtOversized },
     ],
   },
   {
     question: "Which Shirt style do you prefer the most?",
     key: "shirtStyle",
     options: [
-      { label: "Classic", imageUrl: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=300&h=400&fit=crop&crop=center" },
-      { label: "Artsy", imageUrl: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=300&h=400&fit=crop&crop=center" },
-      { label: "Linen", imageUrl: "https://images.unsplash.com/photo-1607345366928-199ea26cfe3e?w=300&h=400&fit=crop&crop=center" },
-      { label: "Printed", imageUrl: "https://images.unsplash.com/photo-1588359348347-9bc6cbbb689e?w=300&h=400&fit=crop&crop=center" },
+      { label: "Classic", imageUrl: calShirtClassic },
+      { label: "Artsy", imageUrl: calShirtArtsy },
+      { label: "Linen", imageUrl: calShirtLinen },
+      { label: "Printed", imageUrl: calShirtPrinted },
     ],
   },
   {
     question: "Which Jacket style do you prefer the most?",
     key: "jacketStyle",
     options: [
-      { label: "Biker", imageUrl: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=300&h=400&fit=crop&crop=center" },
-      { label: "Bomber", imageUrl: "https://images.unsplash.com/photo-1520975954732-35dd22299614?w=300&h=400&fit=crop&crop=center" },
-      { label: "Denim", imageUrl: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=300&h=400&fit=crop&crop=center" },
-      { label: "Suede", imageUrl: "https://images.unsplash.com/photo-1559551409-dadc959f76b8?w=300&h=400&fit=crop&crop=center" },
+      { label: "Biker", imageUrl: calJacketBiker },
+      { label: "Bomber", imageUrl: calJacketBomber },
+      { label: "Denim", imageUrl: calJacketDenim },
+      { label: "Suede", imageUrl: calJacketSuede },
     ],
   },
   {
     question: "Which Jeans style do you prefer the most?",
     key: "jeansStyle",
     options: [
-      { label: "Slim fit", imageUrl: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=300&h=400&fit=crop&crop=center" },
-      { label: "Straight", imageUrl: "https://images.unsplash.com/photo-1604176354204-9268737828e4?w=300&h=400&fit=crop&crop=center" },
-      { label: "Wide-leg", imageUrl: "https://images.unsplash.com/photo-1582552938357-32b906df40cb?w=300&h=400&fit=crop&crop=center" },
-      { label: "Skinny", imageUrl: "https://images.unsplash.com/photo-1475178626620-a4d074967571?w=300&h=400&fit=crop&crop=center" },
+      { label: "Slim fit", imageUrl: calJeansSlim },
+      { label: "Straight", imageUrl: calJeansStraight },
+      { label: "Wide-leg", imageUrl: calJeansWide },
+      { label: "Skinny", imageUrl: calJeansSkinny },
     ],
   },
   {
     question: "Which Footwear style do you prefer the most?",
     key: "footwearStyle",
     options: [
-      { label: "Loafers", imageUrl: "https://images.unsplash.com/photo-1614252369475-531eba835eb1?w=300&h=400&fit=crop&crop=center" },
-      { label: "Chelsea boots", imageUrl: "https://images.unsplash.com/photo-1638247025967-b4e38f787b76?w=300&h=400&fit=crop&crop=center" },
-      { label: "Sneakers", imageUrl: "https://images.unsplash.com/photo-1600269452121-4f2416e55c28?w=300&h=400&fit=crop&crop=center" },
-      { label: "Derby shoes", imageUrl: "https://images.unsplash.com/photo-1614252234498-1ab7ec5b1e7c?w=300&h=400&fit=crop&crop=center" },
+      { label: "Loafers", imageUrl: calShoeLoafers },
+      { label: "Chelsea boots", imageUrl: calShoeChelsea },
+      { label: "Sneakers", imageUrl: calShoeSneakers },
+      { label: "Derby shoes", imageUrl: calShoeDerby },
     ],
   },
 ];
@@ -92,7 +121,6 @@ const Calibration = () => {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [phase, setPhase] = useState<"questions" | "allSet" | "progress">("questions");
   const [loading, setLoading] = useState(false);
-  const [imgErrors, setImgErrors] = useState<Set<string>>(new Set());
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -139,17 +167,6 @@ const Calibration = () => {
     }
   };
 
-  // Color map for fallback backgrounds
-  const categoryColors: Record<string, string> = {
-    trousersStyle: "hsl(220,10%,85%)",
-    coatStyle: "hsl(30,30%,80%)",
-    tshirtStyle: "hsl(0,0%,88%)",
-    shirtStyle: "hsl(210,40%,90%)",
-    jacketStyle: "hsl(20,20%,75%)",
-    jeansStyle: "hsl(215,40%,75%)",
-    footwearStyle: "hsl(25,15%,78%)",
-  };
-
   if (phase === "allSet") {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6">
@@ -157,9 +174,9 @@ const Calibration = () => {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: "spring", delay: 0.2 }}
-          className="w-20 h-20 rounded-full border-[3px] border-[hsl(0,70%,68%)] flex items-center justify-center mb-8"
+          className="w-20 h-20 rounded-full border-[3px] border-primary flex items-center justify-center mb-8"
         >
-          <Check className="w-8 h-8 text-[hsl(0,70%,68%)]" />
+          <Check className="w-8 h-8 text-primary" />
         </motion.div>
         <motion.h1
           initial={{ y: 20, opacity: 0 }}
@@ -298,7 +315,6 @@ const Calibration = () => {
           <h2 className="font-sans font-semibold text-foreground text-base">Calibration</h2>
           <div className="w-5" />
         </div>
-        {/* Progress bar - matches the reference exactly */}
         <div className="h-[3px] rounded-full bg-muted overflow-hidden">
           <motion.div
             className="h-full bg-foreground rounded-full"
@@ -323,11 +339,9 @@ const Calibration = () => {
               {currentStepData.question}
             </h2>
 
-            {/* Horizontal scroll like the reference app */}
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none -mx-1 px-1">
               {currentStepData.options.map((option) => {
                 const isActive = answers[currentStepData.key] === option.label;
-                const hasError = imgErrors.has(`${currentStep}-${option.label}`);
                 return (
                   <button
                     key={option.label}
@@ -336,25 +350,16 @@ const Calibration = () => {
                     style={{ width: "calc(25% - 6px)", minWidth: "80px" }}
                   >
                     <div
-                      className={`relative w-full aspect-[3/4] rounded-lg overflow-hidden mb-1.5 transition-all ${
+                      className={`relative w-full aspect-[3/4] rounded-lg overflow-hidden mb-1.5 transition-all bg-secondary ${
                         isActive ? "ring-2 ring-[hsl(43,74%,49%)]" : ""
                       }`}
-                      style={{ backgroundColor: hasError ? categoryColors[currentStepData.key] : "hsl(0,0%,93%)" }}
                     >
-                      {!hasError ? (
-                        <img
-                          src={option.imageUrl}
-                          alt={option.label}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                          onError={() => setImgErrors(prev => new Set(prev).add(`${currentStep}-${option.label}`))}
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <span className="text-xs text-muted-foreground font-sans text-center px-1">{option.label}</span>
-                        </div>
-                      )}
-                      {/* Radio button at bottom-right like the reference */}
+                      <img
+                        src={option.imageUrl}
+                        alt={option.label}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
                       <div className="absolute bottom-1.5 right-1.5">
                         <div
                           className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shadow-sm ${
@@ -375,7 +380,6 @@ const Calibration = () => {
         </AnimatePresence>
       </div>
 
-      {/* Bottom button - matches reference with light gray background */}
       <div className="fixed bottom-0 inset-x-0 z-20 bg-background p-5">
         <Button
           onClick={handleNext}
