@@ -28,6 +28,7 @@ import Badges from "./pages/Badges";
 import NotificationCenter from "./pages/NotificationCenter";
 import StyleDNA from "./pages/StyleDNA";
 import Calibration from "./pages/Calibration";
+import ColorType from "./pages/ColorType";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +63,7 @@ const App = () => (
             <Route path="/notifications" element={<NotificationCenter />} />
             <Route path="/style-dna" element={<StyleDNA />} />
             <Route path="/calibration" element={<Calibration />} />
+            <Route path="/color-type" element={<ColorType />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
