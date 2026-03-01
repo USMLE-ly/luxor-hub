@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
 import { Sparkles, Palette, Star, ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BottomNav } from "@/components/app/BottomNav";
 
 interface StyleDNAData {
   colorSeason: string;
@@ -99,7 +100,7 @@ const StyleDNA = () => {
   const styleScore = profile?.style_score || 25;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20">
       {/* Hero */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -134,7 +135,7 @@ const StyleDNA = () => {
         </div>
       </motion.div>
 
-      <div className="px-6 space-y-6 pb-24">
+      <div className="px-6 space-y-6 pb-8">
         {/* Archetype Card */}
         <motion.div
           initial={{ y: 30, opacity: 0 }}
@@ -151,6 +152,26 @@ const StyleDNA = () => {
             </div>
           </div>
         </motion.div>
+
+        {/* Color Type Link */}
+        {dna && (
+          <motion.button
+            initial={{ y: 30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.55 }}
+            onClick={() => navigate("/color-type")}
+            className="w-full rounded-2xl border border-border bg-card p-5 flex items-center justify-between text-left hover:bg-secondary/30 transition-colors"
+          >
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Palette className="w-5 h-5 text-primary" />
+                <h3 className="font-display text-lg font-bold text-foreground">Color Type</h3>
+              </div>
+              <p className="text-sm text-muted-foreground font-sans">{dna.colorSeason} • View your palettes</p>
+            </div>
+            <ArrowRight className="w-5 h-5 text-muted-foreground" />
+          </motion.button>
+        )}
 
         {/* Color Season */}
         {dna && (
@@ -255,16 +276,7 @@ const StyleDNA = () => {
         )}
       </div>
 
-      {/* Bottom CTA */}
-      <div className="fixed bottom-0 inset-x-0 bg-background/80 backdrop-blur-sm p-4 border-t border-border">
-        <Button
-          onClick={() => navigate("/dashboard")}
-          className="w-full h-14 rounded-xl font-semibold font-sans text-base bg-foreground text-background hover:bg-foreground/90"
-        >
-          Go to Dashboard
-          <ArrowRight className="h-4 w-4 ml-2" />
-        </Button>
-      </div>
+      <BottomNav />
     </div>
   );
 };
