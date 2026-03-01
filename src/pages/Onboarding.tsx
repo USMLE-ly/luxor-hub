@@ -104,7 +104,7 @@ const Onboarding = () => {
 
       if (error) throw error;
       toast.success("Your Style DNA has been created!");
-      navigate("/dashboard");
+      navigate("/style-dna");
     } catch (err: any) {
       toast.error(err.message);
     } finally {
