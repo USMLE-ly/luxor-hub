@@ -1,4 +1,4 @@
-export type StepType = "gender" | "checkbox" | "radio" | "sizeGrid" | "bodyShape" | "height" | "notification" | "selfieIntro" | "selfieGuide" | "cameraCapture";
+export type StepType = "gender" | "checkbox" | "radio" | "sizeGrid" | "bodyShape" | "height" | "notification" | "selfieIntro" | "selfieGuide" | "cameraCapture" | "generating";
 
 export interface OnboardingStep {
   question: string;
@@ -139,6 +139,13 @@ export const sharedSteps: OnboardingStep[] = [
     stepNumber: 4,
   },
   {
+    question: "Look directly at the camera",
+    key: "selfieStep5",
+    type: "selfieGuide",
+    options: [],
+    stepNumber: 5,
+  },
+  {
     question: "Take your selfie",
     key: "selfieCapture",
     type: "cameraCapture",
@@ -153,6 +160,12 @@ export const sharedSteps: OnboardingStep[] = [
     options: [],
     cameraMode: "fullBody",
     description: "Stand back and capture your full outfit for AI analysis",
+  },
+  {
+    question: "Hold tight, we're generating your Style Formula!",
+    key: "generating",
+    type: "generating",
+    options: [],
   },
 ];
 
