@@ -1,4 +1,4 @@
-export type StepType = "gender" | "checkbox" | "radio" | "sizeGrid" | "bodyShape";
+export type StepType = "gender" | "checkbox" | "radio" | "sizeGrid" | "bodyShape" | "height" | "notification" | "selfieIntro" | "selfieGuide";
 
 export interface OnboardingStep {
   question: string;
@@ -9,6 +9,9 @@ export interface OnboardingStep {
   subGroups?: { label: string; options: string[] }[];
   /** Gender-specific: only show for this gender */
   forGender?: "female" | "male";
+  /** For selfieGuide steps */
+  stepNumber?: number;
+  description?: string;
 }
 
 const sizes = ["3XS", "XXS", "XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL", "6XL", "7XL", "8XL", "9XL"];
@@ -79,6 +82,60 @@ export const sharedSteps: OnboardingStep[] = [
       "I'm a professional stylist",
     ],
   },
+  {
+    question: "Your height",
+    key: "height",
+    type: "height",
+    options: [],
+  },
+  {
+    question: "What's your age range?",
+    key: "ageRange",
+    type: "radio",
+    options: ["18-24", "25-34", "35-44", "45-54", "55-64", "65-74", "75+"],
+  },
+  {
+    question: "Stay in the loop with your latest arrivals and closet updates.",
+    key: "notifications",
+    type: "notification",
+    options: [],
+    description: "Be the first to know about exclusive offers.",
+  },
+  {
+    question: "Let's discover your unique Color and Style Type",
+    key: "selfieIntro",
+    type: "selfieIntro",
+    options: [],
+    description: "We'll do this by analyzing your complexion and facial features",
+  },
+  {
+    question: "Clean your camera lens",
+    key: "selfieStep1",
+    type: "selfieGuide",
+    options: [],
+    stepNumber: 1,
+  },
+  {
+    question: "Remove glasses and hair accessories",
+    key: "selfieStep2",
+    type: "selfieGuide",
+    options: [],
+    stepNumber: 2,
+  },
+  {
+    question: "Use natural light, facing a window. Avoid direct sunlight and open spaces",
+    key: "selfieStep3",
+    type: "selfieGuide",
+    options: [],
+    stepNumber: 3,
+  },
+  {
+    question: "Keep a neutral expression",
+    key: "selfieStep4",
+    type: "selfieGuide",
+    options: [],
+    stepNumber: 4,
+  },
 ];
 
 export const femaleSteps: OnboardingStep[] = [
@@ -123,5 +180,9 @@ export const maleSteps: OnboardingStep[] = [
 ];
 
 export function getStepsForGender(gender: "female" | "male"): OnboardingStep[] {
-  return [...sharedSteps, ...(gender === "female" ? femaleSteps : maleSteps)];
+  return [
+    ...sharedSteps.slice(0, 6), // style goal through style knowledge
+    ...(gender === "female" ? femaleSteps : maleSteps),
+    ...sharedSteps.slice(6), // height, age, notifications, selfie steps
+  ];
 }

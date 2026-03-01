@@ -28,9 +28,13 @@ const Onboarding = () => {
   const canProceed = isGenderStep
     ? !!gender
     : currentStepData
-      ? currentStepData.type === "sizeGrid"
-        ? currentStepData.subGroups?.some((g) => (answers[`${currentStepData.key}_${g.label.toLowerCase()}`] || []).length > 0) ?? false
-        : (answers[currentStepData.key] || []).length > 0
+      ? currentStepData.type === "notification" || currentStepData.type === "selfieIntro" || currentStepData.type === "selfieGuide"
+        ? true
+        : currentStepData.type === "height"
+          ? !!(answers.heightFt?.[0] || answers.heightCm?.[0])
+          : currentStepData.type === "sizeGrid"
+            ? currentStepData.subGroups?.some((g) => (answers[`${currentStepData.key}_${g.label.toLowerCase()}`] || []).length > 0) ?? false
+            : (answers[currentStepData.key] || []).length > 0
       : false;
 
   const handleSelect = (key: string, option: string, singleSelect: boolean) => {
@@ -121,7 +125,11 @@ const Onboarding = () => {
         <Button
           onClick={isLast ? handleComplete : () => setCurrentStep((s) => s + 1)}
           disabled={!canProceed || loading}
-          className="w-full h-14 rounded-xl bg-muted text-foreground font-semibold font-sans text-base hover:bg-muted/80"
+          className={`w-full h-14 rounded-xl font-semibold font-sans text-base ${
+            currentStepData && ["notification", "selfieIntro", "selfieGuide"].includes(currentStepData.type)
+              ? "bg-[hsl(0,70%,68%)] text-white hover:bg-[hsl(0,70%,62%)]"
+              : "bg-muted text-foreground hover:bg-muted/80"
+          }`}
           variant="ghost"
         >
           {loading ? (
@@ -131,6 +139,8 @@ const Onboarding = () => {
               <Sparkles className="h-4 w-4 mr-2" />
               Generate My Style DNA
             </>
+          ) : currentStepData?.type === "selfieIntro" ? (
+            "CONTINUE"
           ) : (
             <>
               NEXT
