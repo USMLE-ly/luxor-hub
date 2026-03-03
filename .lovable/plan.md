@@ -1,92 +1,102 @@
 
 
-## Plan: Fix Runtime Errors, Professional Mannequin Upgrade, and Onboarding Polish
+## Plan: Match Reference App Design, Fix Analyze-Item Bug, Add Mannequin Measurements
 
-This addresses three critical issues from the screenshots: the analyze-item edge function crash, onboarding click/selection bugs, and mannequin quality upgrade.
-
----
-
-### 1. Fix analyze-item Edge Function Error (Runtime 500)
-
-The screenshot shows `supabase/functions/analyze-item/index.ts` returning a 500 "AI service error". The function looks correct structurally, but the error handling swallows details. 
-
-**Fix**: Add better error logging and response forwarding. The likely cause is the `throw new Error("AI service error")` on line 82 which doesn't include the response body. Will capture and log the actual gateway error text before throwing.
-
-**File**: `supabase/functions/analyze-item/index.ts`
+This addresses the core issues: the analyze-item blob URL crash, bottom nav alignment with the reference, and upgrading key pages to match the Style DNA reference screenshots.
 
 ---
 
-### 2. Fix Onboarding Selection Not Registering
+### 1. Fix analyze-item Edge Function (Critical Bug)
 
-The user reports "when I click anything on onboarding page appears as nothing clicked." The issue is in `Onboarding.tsx` line 165: the NEXT button always calls `setCurrentStep(s => s + 1)` regardless of step type. But the `canProceed` logic on lines 30-44 correctly gates this. The real problem is likely that clicking an option card doesn't trigger visual feedback properly because the `onSelect` handler in `StepRenderer` works on `step.key` but the `selected` array reads from `answers[step.key]` — this should work.
+**Root cause**: The client sends a `blob:` URL from `URL.createObjectURL()` to the edge function. The AI gateway cannot access blob URLs — they're local to the browser. Error: `"Invalid URL format: blob:https://..."`.
 
-After reviewing more carefully: the `handleSelect` function signature is `(key, option, singleSelect)` and in StepRenderer line 530 for radio/checkbox, `onClick={() => onSelect(step.key, option, isSingle)}` looks correct. The visual state reads from `selected = answers[step.key]` (line 409). This chain should work.
+**Fix in `src/pages/Closet.tsx`**: Convert the selected file to a base64 data URL before sending it to the edge function, instead of sending the blob URL.
 
-However, for "How well do you know your style?" (checkbox type), the `canProceed` check requires `(answers[currentStepData.key] || []).length > 0` which needs at least one checkbox checked. The issue may be that checkboxes look unselected visually due to the dark theme. Will investigate and ensure the active state contrast is strong enough.
+```typescript
+// Instead of: body: JSON.stringify({ imageUrl: previewUrl, ... })
+// Convert file to base64 first:
+const reader = new FileReader();
+reader.readAsDataURL(selectedFile);
+const base64 = await new Promise(resolve => { reader.onload = () => resolve(reader.result); });
+body: JSON.stringify({ imageUrl: base64, itemName: newItem.name })
+```
 
-**Likely root cause**: The `selected === value` check in GenderStep uses strict equality but `onSelect` passes `"female"` or `"male"` correctly. The gender step should work. Let me check if there's a state persistence issue — the `useState<"female" | "male" | null>(null)` in Onboarding.tsx is the source of truth, and GenderStep receives `selected={gender}`. This looks correct.
-
-**Fix approach**: Add more visible active states (stronger borders, background fills) and ensure click handlers fire correctly on mobile with proper touch targets. Also verify the `How well do you know your style?` step uses checkbox type correctly.
-
-**Files**: `src/components/onboarding/StepRenderer.tsx`, `src/pages/Onboarding.tsx`
-
----
-
-### 3. Professional Mannequin Upgrade
-
-The current mannequin uses primitive capsule/sphere geometries creating a toy-like segmented look. The user wants a smooth, anatomically accurate fashion mannequin.
-
-**Approach**: Build a much higher quality mannequin using `THREE.LatheGeometry` for smooth body contours. This technique rotates a profile curve around the Y-axis, producing smooth continuous surfaces similar to museum mannequins. Different profile curves for male vs female proportions.
-
-Key improvements:
-- **Smooth continuous body** using LatheGeometry with anatomical profile curves (no visible joints/gaps)
-- **8-head female / 8.5-head male proportions** matching fashion design standards
-- **Matte clay material** (`MeshStandardMaterial` with beige/clay color, high roughness, zero metalness)
-- **Studio lighting** with 3-point light setup and soft shadows
-- **Body DNA sliders** panel: Height, Shoulder Width, Waist, Hips — real-time mesh morphing via scale transforms on body segments
-- **Pose presets**: Neutral standing, Fashion pose, Walking (via joint rotations on grouped body segments)
-- **Tracing mode**: Toggle overlay with opacity slider, user can upload reference image behind mannequin
-- **Measurement display**: Show proportional guidelines as wireframe overlays
-
-**Architecture**:
-- Rebuild `src/components/app/Mannequin3D.tsx` with LatheGeometry-based torso, arms, legs
-- Body built from ~8 LatheGeometry segments (head, neck, torso-upper, torso-lower, upper-arm x2, forearm x2, thigh x2, calf x2) with smooth transitions
-- Each segment grouped under a joint node for posing
-- Body DNA sliders modify scale of joint groups in real-time
-
-**File**: `src/components/app/Mannequin3D.tsx` (full rewrite)
+Also fix `src/pages/OutfitAnalysis.tsx` if it has the same blob URL issue.
 
 ---
 
-### 4. Mannequin View UI Upgrade
+### 2. Restore Bottom Nav to Match Reference
 
-Update `src/pages/MannequinView.tsx` with the requested UI layout:
-- **Left panel**: Gender toggle + Body DNA sliders (Height, Weight, Shoulder, Waist, Hips)
-- **Right panel**: Pose presets (Neutral, Walking, Fashion, Sitting)
-- **Bottom toolbar**: Quick access to DNA, Analysis, AI Stylist, Closet, Trace Mode
-- **Tracing mode**: Upload image overlay with opacity control
+The reference shows: **DNA, My Shop, AI Stylist, Closet**. Our current nav has "Analysis" instead of "My Shop".
 
-On mobile, panels collapse to bottom sheets.
-
-**File**: `src/pages/MannequinView.tsx`
+**Fix `src/components/app/BottomNav.tsx`**: Change the Analysis tab back to "My Shop" pointing to `/inspiration`. Keep outfit analysis accessible from the dashboard/DNA page instead.
 
 ---
 
-### 5. Onboarding Visual Polish (Match Reference Screenshots)
+### 3. Upgrade Dashboard to Match Reference
 
-The reference screenshots show:
-- Clean white backgrounds with generous spacing
-- Body shape cards with anatomical illustrations and radio indicators on the right
-- Size grid with 5-column layout and rounded pill buttons
-- Age range as simple radio list cards
-- Selfie guide steps with full-bleed photos and bottom card overlay with coral/pink CTA button
+The reference DNA page shows:
+- "My Style Formula" card with decorative egg image and calibration progress bar (orange-to-pink gradient, 53%, gift icon)
+- "All My Outfits" horizontal scroll with occasion-tagged outfit cards (Party, Work, Everyday) with "View items →" and "✨ Try it on" buttons
+- "Chat with AI Stylist" prompt cards
+- "Shop My Style Formula" product grid with category pills
 
-Current implementation already matches most of this. Key polish:
-- Ensure body shape SVGs are more detailed/anatomical (add body outline strokes, skin-tone fills matching reference)
-- Selfie guide steps: make the placeholder area show actual instructional imagery (camera icon placeholder is fine since real photos would be from the user's camera)
-- Ensure NEXT button matches reference: full-width, rounded, light gray background with dark text (already implemented)
+**Changes to `src/pages/Dashboard.tsx`**:
+- Keep existing structure but polish to match reference styling more closely
+- Add outfit analysis button as a card within the dashboard instead of bottom nav
 
-**Files**: `src/components/onboarding/StepRenderer.tsx`
+---
+
+### 4. Upgrade My Shop / Inspiration Page
+
+The reference "My Shop" page shows:
+- "Check if item is a Match" scanner card with CTA
+- "Browse Matches online" with brand logo circles (Amazon, Zara, H&M, etc.)
+- "Shop My Style Formula" section with store logos and category pills
+- Product grid with heart buttons, prices, and brand names
+
+**Changes to `src/pages/Inspiration.tsx`**:
+- Add "Check Item" scanner card at top (links to outfit-analysis)
+- Add "Browse Matches online" brand row with circular logos
+- Add "Stores" row with brand circles
+- Keep existing product grid but add crossed-out original prices (sale styling)
+
+---
+
+### 5. Upgrade Closet Page
+
+The reference closet shows:
+- "My Closet" header with item counter ("0 / 7 ITEMS UPLOADED")
+- "ADD ITEM →" dark CTA button
+- Progress bars for Tops (0/4) and Bottoms (0/3)
+- "My Closet Outfits" with occasion tabs (Everyday, Weekend, Work, Party) with colored icons
+- Outfit preview cards with hanger placeholder
+- Category sections (Upper Body, Lower Body, Shoes, Accessories) with subcategory pill filters
+- Each section has "New Item" card, existing items, and "Upload your own items" placeholder
+
+**Changes to `src/pages/Closet.tsx`**:
+- Add item upload progress tracker at top
+- Add "My Closet Outfits" section with occasion tabs
+- Add "Upload your own items" placeholder cards in each category grid
+- Add subcategory filter pills per section (Upper Body: Jackets, Tops, Dresses, Coats, Blouses, Jumpsuits)
+
+---
+
+### 6. Add Mannequin Measurement Overlays
+
+**Changes to `src/components/app/Mannequin3D.tsx`**:
+- Add optional `showMeasurements` prop
+- Render HTML overlay lines using CSS positioned elements showing:
+  - Shoulder width line with label
+  - Waist line with label
+  - Hip line with label
+  - Inseam line with label
+- Lines scale based on Body DNA slider values
+- Toggle via a "Measurements" button in the MannequinView toolbar
+
+**Changes to `src/pages/MannequinView.tsx`**:
+- Add "Measurements" toggle to the bottom toolbar
+- Pass `showMeasurements` prop to Mannequin3D
 
 ---
 
@@ -94,11 +104,12 @@ Current implementation already matches most of this. Key polish:
 
 | Action | File | Description |
 |--------|------|-------------|
-| Edit | `supabase/functions/analyze-item/index.ts` | Fix 500 error with better error handling |
-| Rewrite | `src/components/app/Mannequin3D.tsx` | Professional LatheGeometry mannequin with poses, sliders, tracing |
-| Edit | `src/pages/MannequinView.tsx` | Add Body DNA panel, pose controls, tracing mode UI |
-| Edit | `src/components/onboarding/StepRenderer.tsx` | Polish active states, improve body shape SVGs |
-| Edit | `src/pages/Onboarding.tsx` | Ensure click handlers work on mobile |
-
-No new dependencies needed — Three.js LatheGeometry, BufferGeometry, and existing React Three Fiber packages handle everything.
+| Edit | `src/pages/Closet.tsx` | Fix blob URL → base64 conversion, add reference-matching UI |
+| Edit | `supabase/functions/analyze-item/index.ts` | No change needed (client-side fix) |
+| Edit | `src/components/app/BottomNav.tsx` | Restore "My Shop" tab |
+| Edit | `src/pages/Dashboard.tsx` | Add outfit analysis card, polish to match reference |
+| Edit | `src/pages/Inspiration.tsx` | Add scanner card, brand logos, store section |
+| Edit | `src/components/app/Mannequin3D.tsx` | Add measurement overlay lines |
+| Edit | `src/pages/MannequinView.tsx` | Add measurements toggle |
+| Edit | `src/pages/OutfitAnalysis.tsx` | Fix blob URL if applicable |
 
