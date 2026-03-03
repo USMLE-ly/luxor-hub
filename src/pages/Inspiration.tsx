@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Heart, ExternalLink, ShoppingBag, Sparkles, ChevronRight, Loader2 } from "lucide-react";
+import { Heart, ExternalLink, ShoppingBag, Sparkles, ChevronRight, Loader2, Camera, Search } from "lucide-react";
 
 interface Product {
   id: string;
@@ -20,8 +21,18 @@ interface Product {
 
 const categories = ["All", "Tops", "Bottoms", "Shoes", "Outerwear", "Accessories"];
 
+const brandLogos = [
+  { name: "Amazon", emoji: "📦" },
+  { name: "Zara", emoji: "👗" },
+  { name: "H&M", emoji: "🏷️" },
+  { name: "ASOS", emoji: "🛍️" },
+  { name: "Uniqlo", emoji: "👘" },
+  { name: "Nike", emoji: "👟" },
+];
+
 const Inspiration = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState("All");
   const [liked, setLiked] = useState<Set<string>>(new Set());
   const [products, setProducts] = useState<Product[]>([]);
@@ -89,20 +100,58 @@ const Inspiration = () => {
           <p className="text-muted-foreground font-sans text-xs mt-0.5">Personalized picks based on your Style DNA</p>
         </motion.div>
 
+        {/* Check if item is a Match */}
+        <motion.button
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          onClick={() => navigate("/outfit-analysis")}
+          className="w-full rounded-2xl bg-foreground text-background p-4 mb-5 flex items-center gap-3 text-left hover:opacity-90 transition-opacity"
+        >
+          <div className="w-10 h-10 rounded-xl bg-background/10 flex items-center justify-center flex-shrink-0">
+            <Camera className="w-5 h-5" />
+          </div>
+          <div className="flex-1">
+            <p className="font-sans font-semibold text-sm">Check if item is a Match</p>
+            <p className="text-xs opacity-70 font-sans">Scan any item to see if it fits your Style DNA</p>
+          </div>
+          <ChevronRight className="w-4 h-4 opacity-50" />
+        </motion.button>
+
+        {/* Browse Matches Online */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-5"
+        >
+          <h2 className="font-sans font-semibold text-foreground text-sm mb-3">Browse Matches online</h2>
+          <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none">
+            {brandLogos.map((brand) => (
+              <div key={brand.name} className="flex flex-col items-center gap-1.5 flex-shrink-0">
+                <div className="w-14 h-14 rounded-full bg-secondary flex items-center justify-center text-xl">
+                  {brand.emoji}
+                </div>
+                <span className="text-[10px] font-sans text-muted-foreground">{brand.name}</span>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
         {/* AI Match Banner */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
+          transition={{ delay: 0.15 }}
           className="rounded-2xl bg-primary/5 border border-primary/20 p-4 mb-5 flex items-center gap-3"
         >
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
             <Sparkles className="w-5 h-5 text-primary" />
           </div>
           <div className="flex-1">
-            <p className="font-sans font-semibold text-foreground text-sm">AI-Powered Picks</p>
+            <p className="font-sans font-semibold text-foreground text-sm">Shop My Style Formula</p>
             <p className="text-xs text-muted-foreground font-sans">
-              {colorSeason ? `Matched to your ${colorSeason} palette` : "Matched to your style preferences & closet gaps"}
+              {colorSeason ? `Matched to your ${colorSeason} palette` : "Personalized picks based on your DNA"}
             </p>
           </div>
         </motion.div>
@@ -188,8 +237,13 @@ const Inspiration = () => {
                 <div className="p-3">
                   <p className="text-[10px] text-muted-foreground font-sans uppercase tracking-wider">{product.brand}</p>
                   <p className="font-sans text-xs font-medium text-foreground mt-0.5 truncate">{product.name}</p>
-                  <div className="flex items-center justify-between mt-1.5">
-                    <span className="font-sans font-bold text-sm text-foreground">{product.price}</span>
+              <div className="flex items-center justify-between mt-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-sans font-bold text-sm text-foreground">{product.price}</span>
+                      <span className="font-sans text-[10px] text-muted-foreground line-through">
+                        ${(parseFloat(product.price.replace(/[^0-9.]/g, "")) * 1.35).toFixed(0)}
+                      </span>
+                    </div>
                     <a href={product.affiliateUrl} target="_blank" rel="noopener noreferrer">
                       <ExternalLink className="w-3 h-3 text-muted-foreground" />
                     </a>

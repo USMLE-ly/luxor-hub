@@ -370,6 +370,7 @@ interface Mannequin3DProps {
   className?: string;
   tracingImageUrl?: string;
   tracingOpacity?: number;
+  showMeasurements?: boolean;
 }
 
 export default function Mannequin3D({
@@ -380,7 +381,21 @@ export default function Mannequin3D({
   className = "",
   tracingImageUrl,
   tracingOpacity = 0.3,
+  showMeasurements = false,
 }: Mannequin3DProps) {
+  const isMale = gender === "male";
+  const shoulderScale = 0.8 + dna.shoulder * 0.4;
+  const waistScale = 0.75 + dna.waist * 0.5;
+  const hipScale = 0.8 + dna.hips * 0.4;
+
+  // Measurement values in cm (approximate)
+  const measurements = {
+    shoulder: Math.round((isMale ? 46 : 40) * shoulderScale),
+    waist: Math.round((isMale ? 82 : 68) * waistScale),
+    hips: Math.round((isMale ? 96 : 100) * hipScale),
+    inseam: Math.round((isMale ? 82 : 76) * (0.9 + dna.legLength * 0.2)),
+  };
+
   return (
     <div className={`w-full h-full relative ${className}`}>
       {/* Tracing image overlay */}
@@ -392,6 +407,46 @@ export default function Mannequin3D({
           style={{ opacity: tracingOpacity }}
         />
       )}
+
+      {/* Measurement overlays */}
+      {showMeasurements && (
+        <div className="absolute inset-0 pointer-events-none z-20 flex items-center justify-center">
+          <div className="relative" style={{ width: "60%", height: "80%" }}>
+            {/* Shoulder line */}
+            <div className="absolute flex items-center gap-1" style={{ top: "18%", left: "10%", right: "10%" }}>
+              <div className="flex-1 border-t-2 border-dashed border-primary/60" />
+              <span className="text-[10px] font-mono bg-background/80 text-primary px-1.5 py-0.5 rounded whitespace-nowrap">
+                {measurements.shoulder} cm
+              </span>
+              <div className="flex-1 border-t-2 border-dashed border-primary/60" />
+            </div>
+            {/* Waist line */}
+            <div className="absolute flex items-center gap-1" style={{ top: "42%", left: "18%", right: "18%" }}>
+              <div className="flex-1 border-t-2 border-dashed border-[hsl(45,80%,55%)]/60" />
+              <span className="text-[10px] font-mono bg-background/80 text-[hsl(45,80%,55%)] px-1.5 py-0.5 rounded whitespace-nowrap">
+                {measurements.waist} cm
+              </span>
+              <div className="flex-1 border-t-2 border-dashed border-[hsl(45,80%,55%)]/60" />
+            </div>
+            {/* Hip line */}
+            <div className="absolute flex items-center gap-1" style={{ top: "52%", left: "14%", right: "14%" }}>
+              <div className="flex-1 border-t-2 border-dashed border-[hsl(270,40%,65%)]/60" />
+              <span className="text-[10px] font-mono bg-background/80 text-[hsl(270,40%,65%)] px-1.5 py-0.5 rounded whitespace-nowrap">
+                {measurements.hips} cm
+              </span>
+              <div className="flex-1 border-t-2 border-dashed border-[hsl(270,40%,65%)]/60" />
+            </div>
+            {/* Inseam line */}
+            <div className="absolute flex flex-col items-center" style={{ top: "55%", bottom: "10%", left: "46%" }}>
+              <div className="flex-1 border-l-2 border-dashed border-[hsl(0,70%,60%)]/60" />
+              <span className="text-[10px] font-mono bg-background/80 text-[hsl(0,70%,60%)] px-1.5 py-0.5 rounded whitespace-nowrap mt-1">
+                {measurements.inseam} cm
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Canvas
         camera={{ position: [0, 0.3, 3.2], fov: 38 }}
         gl={{ antialias: true, alpha: true }}

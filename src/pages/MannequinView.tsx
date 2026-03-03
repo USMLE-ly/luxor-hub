@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-type Panel = "dna" | "pose" | "closet" | "trace" | null;
+type Panel = "dna" | "pose" | "closet" | "trace" | "measure" | null;
 
 const MannequinView = () => {
   const { user } = useAuth();
@@ -23,6 +23,7 @@ const MannequinView = () => {
   const [closetItems, setClosetItems] = useState<any[]>([]);
   const [showCalendar, setShowCalendar] = useState(false);
   const [activePanel, setActivePanel] = useState<Panel>(null);
+  const [showMeasurements, setShowMeasurements] = useState(false);
 
   // Body DNA
   const [dna, setDna] = useState<BodyDNA>({
@@ -133,6 +134,7 @@ const MannequinView = () => {
             pose={pose}
             tracingImageUrl={tracingUrl}
             tracingOpacity={tracingOpacity}
+            showMeasurements={showMeasurements}
             className="w-full h-full"
           />
 
@@ -183,6 +185,7 @@ const MannequinView = () => {
             { key: "pose" as Panel, icon: Activity, label: "Pose" },
             { key: "closet" as Panel, icon: Layers, label: "Closet" },
             { key: "trace" as Panel, icon: Eye, label: "Trace" },
+            { key: "measure" as Panel, icon: User, label: "Measure" },
           ].map(({ key, icon: Icon, label }) => (
             <button
               key={key}
@@ -214,6 +217,7 @@ const MannequinView = () => {
                   {activePanel === "pose" && "Pose Presets"}
                   {activePanel === "closet" && "Add from Closet"}
                   {activePanel === "trace" && "Tracing Mode"}
+                  {activePanel === "measure" && "Measurements"}
                 </h3>
                 <button onClick={() => setActivePanel(null)}>
                   <X className="w-4 h-4 text-muted-foreground" />
@@ -342,6 +346,24 @@ const MannequinView = () => {
                       </Button>
                     </>
                   )}
+                </div>
+              )}
+
+              {/* Measurements Panel */}
+              {activePanel === "measure" && (
+                <div className="p-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-sans font-medium text-foreground">Show Measurement Lines</span>
+                    <button
+                      onClick={() => setShowMeasurements(!showMeasurements)}
+                      className={`w-12 h-6 rounded-full transition-colors ${showMeasurements ? "bg-primary" : "bg-secondary"}`}
+                    >
+                      <div className={`w-5 h-5 rounded-full bg-background shadow transition-transform ${showMeasurements ? "translate-x-6" : "translate-x-0.5"}`} />
+                    </button>
+                  </div>
+                  <p className="text-xs text-muted-foreground font-sans">
+                    Display proportional measurement guidelines on the mannequin for shoulder, waist, hips, and inseam.
+                  </p>
                 </div>
               )}
             </motion.div>
