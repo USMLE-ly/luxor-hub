@@ -1,112 +1,104 @@
 
 
-## Plan: Professional Calibration, 3D Mannequin, Shop Similar Dashboard, and DNA Page Redesign
+## Plan: Fix Runtime Errors, Professional Mannequin Upgrade, and Onboarding Polish
 
-This is a large, multi-feature request. Here is the breakdown of what will be built and how.
-
----
-
-### 1. Professional Calibration Flow
-
-**Current issues**: Images may not all be clean front-facing product shots; no "Casual" / "Formal" label below items.
-
-**Changes to `src/pages/Calibration.tsx`**:
-- Add a `style` field ("Casual" or "Formal") to each calibration option and render it as a label beneath each product image card
-- Add a "Preview on me" button that transitions to the 3D mannequin view with the selected item overlaid
-- Integrate the CalendarWidget as a step or section within the calibration completion screen so users can plan outfits alongside their preferences
+This addresses three critical issues from the screenshots: the analyze-item edge function crash, onboarding click/selection bugs, and mannequin quality upgrade.
 
 ---
 
-### 2. 3D Mannequin System
+### 1. Fix analyze-item Edge Function Error (Runtime 500)
 
-**New files**:
-- `src/components/app/Mannequin3D.tsx` — A React Three Fiber scene rendering a stylized wooden mannequin (male or female based on user's onboarding gender selection). Built with primitive Three.js geometries (capsules, cylinders, spheres) to create a mannequin silhouette since we cannot load external GLB files without hosting them.
-- `src/components/app/MannequinOutfitOverlay.tsx` — Overlay system that maps selected clothing items (from closet or calibration) onto the mannequin using positioned 2D image planes or colored mesh regions on the 3D body.
-- `src/pages/MannequinView.tsx` — Full-page view for interacting with the mannequin: rotate, add/remove clothing items from closet, and save the look.
+The screenshot shows `supabase/functions/analyze-item/index.ts` returning a 500 "AI service error". The function looks correct structurally, but the error handling swallows details. 
 
-**Technical approach**:
-- Use `@react-three/fiber` (already installed v8) and `three` (already installed v0.160) to render the mannequin
-- Build the mannequin from Three.js primitives (CapsuleGeometry for torso/limbs, SphereGeometry for head, CylinderGeometry for neck) to approximate the wooden mannequin look from the reference images
-- Apply a wood-grain MeshStandardMaterial with brown tones to match the reference
-- Gender selection determines proportions (broader shoulders for male, wider hips for female)
-- Clothing is represented as colored/textured mesh shells slightly offset from body parts (e.g., a shirt = slightly larger torso capsule with clothing texture)
+**Fix**: Add better error logging and response forwarding. The likely cause is the `throw new Error("AI service error")` on line 82 which doesn't include the response body. Will capture and log the actual gateway error text before throwing.
 
-**Calendar integration**:
-- From the MannequinView, users can "Post to Calendar" — this saves the mannequin screenshot + selected clothing items to a calendar event
-- Extend the `calendar_events` table with an `outfit_snapshot` JSONB column and `mannequin_image_url` text column
+**File**: `supabase/functions/analyze-item/index.ts`
 
 ---
 
-### 3. Shop Similar on Dashboard
+### 2. Fix Onboarding Selection Not Registering
 
-**Changes to `src/pages/Dashboard.tsx`**:
-- Add a "Shop Similar" section after the outfits carousel
-- Fetch the user's most recent outfit analysis from `outfit_analyses` table
-- Use the detected items to call the existing `shop-products` edge function with the user's color season
-- Display 4-6 product cards in a horizontal scroll with match scores, prices, and "Shop" links
+The user reports "when I click anything on onboarding page appears as nothing clicked." The issue is in `Onboarding.tsx` line 165: the NEXT button always calls `setCurrentStep(s => s + 1)` regardless of step type. But the `canProceed` logic on lines 30-44 correctly gates this. The real problem is likely that clicking an option card doesn't trigger visual feedback properly because the `onSelect` handler in `StepRenderer` works on `step.key` but the `selected` array reads from `answers[step.key]` — this should work.
 
----
+After reviewing more carefully: the `handleSelect` function signature is `(key, option, singleSelect)` and in StepRenderer line 530 for radio/checkbox, `onClick={() => onSelect(step.key, option, isSingle)}` looks correct. The visual state reads from `selected = answers[step.key]` (line 409). This chain should work.
 
-### 4. Style DNA Page Redesign
+However, for "How well do you know your style?" (checkbox type), the `canProceed` check requires `(answers[currentStepData.key] || []).length > 0` which needs at least one checkbox checked. The issue may be that checkboxes look unselected visually due to the dark theme. Will investigate and ensure the active state contrast is strong enough.
 
-**Changes to `src/pages/StyleDNA.tsx`**:
-- Redesign to match the reference app's DNA page structure:
-  - Top section: "My Style Formula" header with summary cards (Color Type, Style Preferences, Body Type) — similar to dashboard but as the main content
-  - Calibration progress bar widget
-  - Color season badge with palette preview (clickable to /color-type)
-  - Style archetype card with score visualization
-  - AI recommendations as actionable cards
-- Use `AppLayout` wrapper for consistent bottom nav instead of manually rendering `BottomNav`
+**Likely root cause**: The `selected === value` check in GenderStep uses strict equality but `onSelect` passes `"female"` or `"male"` correctly. The gender step should work. Let me check if there's a state persistence issue — the `useState<"female" | "male" | null>(null)` in Onboarding.tsx is the source of truth, and GenderStep receives `selected={gender}`. This looks correct.
+
+**Fix approach**: Add more visible active states (stronger borders, background fills) and ensure click handlers fire correctly on mobile with proper touch targets. Also verify the `How well do you know your style?` step uses checkbox type correctly.
+
+**Files**: `src/components/onboarding/StepRenderer.tsx`, `src/pages/Onboarding.tsx`
 
 ---
 
-### 5. Database Migration
+### 3. Professional Mannequin Upgrade
 
-New column needed on `calendar_events`:
-```sql
-ALTER TABLE public.calendar_events 
-ADD COLUMN IF NOT EXISTS outfit_items JSONB DEFAULT '[]',
-ADD COLUMN IF NOT EXISTS mannequin_image_url TEXT;
-```
+The current mannequin uses primitive capsule/sphere geometries creating a toy-like segmented look. The user wants a smooth, anatomically accurate fashion mannequin.
 
----
+**Approach**: Build a much higher quality mannequin using `THREE.LatheGeometry` for smooth body contours. This technique rotates a profile curve around the Y-axis, producing smooth continuous surfaces similar to museum mannequins. Different profile curves for male vs female proportions.
 
-### Technical Details
+Key improvements:
+- **Smooth continuous body** using LatheGeometry with anatomical profile curves (no visible joints/gaps)
+- **8-head female / 8.5-head male proportions** matching fashion design standards
+- **Matte clay material** (`MeshStandardMaterial` with beige/clay color, high roughness, zero metalness)
+- **Studio lighting** with 3-point light setup and soft shadows
+- **Body DNA sliders** panel: Height, Shoulder Width, Waist, Hips — real-time mesh morphing via scale transforms on body segments
+- **Pose presets**: Neutral standing, Fashion pose, Walking (via joint rotations on grouped body segments)
+- **Tracing mode**: Toggle overlay with opacity slider, user can upload reference image behind mannequin
+- **Measurement display**: Show proportional guidelines as wireframe overlays
 
-**3D Mannequin geometry approach** (using Three.js primitives):
-```text
-        ○         ← SphereGeometry (head)
-        |
-    ┌───┼───┐     ← CapsuleGeometry (torso)  
-    │   │   │
-    ├───┤   │     ← CylinderGeometry (arms)
-    │       │
-    └───┬───┘
-        │
-    ┌───┴───┐     ← CapsuleGeometry (hips)
-    │       │
-    ├───┐   ├─    ← CylinderGeometry (legs)
-    │   │   │
-```
+**Architecture**:
+- Rebuild `src/components/app/Mannequin3D.tsx` with LatheGeometry-based torso, arms, legs
+- Body built from ~8 LatheGeometry segments (head, neck, torso-upper, torso-lower, upper-arm x2, forearm x2, thigh x2, calf x2) with smooth transitions
+- Each segment grouped under a joint node for posing
+- Body DNA sliders modify scale of joint groups in real-time
 
-- Wood material: `MeshStandardMaterial({ color: '#8B6914', roughness: 0.7, metalness: 0.1 })`
-- Clothing overlay: Semi-transparent mesh shells offset 0.02 units from body surface
-- OrbitControls for rotation, limited vertical angle
-
-**Dependencies**: No new packages needed — `@react-three/fiber` and `three` are already installed. Will need `@react-three/drei` for OrbitControls (v9.122.0 per constraints).
+**File**: `src/components/app/Mannequin3D.tsx` (full rewrite)
 
 ---
 
-### Summary of files to create/edit
+### 4. Mannequin View UI Upgrade
 
-| Action | File |
-|--------|------|
-| Create | `src/components/app/Mannequin3D.tsx` |
-| Create | `src/pages/MannequinView.tsx` |
-| Edit | `src/pages/Calibration.tsx` |
-| Edit | `src/pages/Dashboard.tsx` |
-| Edit | `src/pages/StyleDNA.tsx` |
-| Edit | `src/components/app/BottomNav.tsx` |
-| Edit | `src/App.tsx` (add /mannequin route) |
-| Migration | Add outfit columns to calendar_events |
+Update `src/pages/MannequinView.tsx` with the requested UI layout:
+- **Left panel**: Gender toggle + Body DNA sliders (Height, Weight, Shoulder, Waist, Hips)
+- **Right panel**: Pose presets (Neutral, Walking, Fashion, Sitting)
+- **Bottom toolbar**: Quick access to DNA, Analysis, AI Stylist, Closet, Trace Mode
+- **Tracing mode**: Upload image overlay with opacity control
+
+On mobile, panels collapse to bottom sheets.
+
+**File**: `src/pages/MannequinView.tsx`
+
+---
+
+### 5. Onboarding Visual Polish (Match Reference Screenshots)
+
+The reference screenshots show:
+- Clean white backgrounds with generous spacing
+- Body shape cards with anatomical illustrations and radio indicators on the right
+- Size grid with 5-column layout and rounded pill buttons
+- Age range as simple radio list cards
+- Selfie guide steps with full-bleed photos and bottom card overlay with coral/pink CTA button
+
+Current implementation already matches most of this. Key polish:
+- Ensure body shape SVGs are more detailed/anatomical (add body outline strokes, skin-tone fills matching reference)
+- Selfie guide steps: make the placeholder area show actual instructional imagery (camera icon placeholder is fine since real photos would be from the user's camera)
+- Ensure NEXT button matches reference: full-width, rounded, light gray background with dark text (already implemented)
+
+**Files**: `src/components/onboarding/StepRenderer.tsx`
+
+---
+
+### Summary of Changes
+
+| Action | File | Description |
+|--------|------|-------------|
+| Edit | `supabase/functions/analyze-item/index.ts` | Fix 500 error with better error handling |
+| Rewrite | `src/components/app/Mannequin3D.tsx` | Professional LatheGeometry mannequin with poses, sliders, tracing |
+| Edit | `src/pages/MannequinView.tsx` | Add Body DNA panel, pose controls, tracing mode UI |
+| Edit | `src/components/onboarding/StepRenderer.tsx` | Polish active states, improve body shape SVGs |
+| Edit | `src/pages/Onboarding.tsx` | Ensure click handlers work on mobile |
+
+No new dependencies needed — Three.js LatheGeometry, BufferGeometry, and existing React Three Fiber packages handle everything.
 
