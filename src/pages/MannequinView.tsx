@@ -1,14 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app/AppLayout";
-import Mannequin3D, { type ClothingItem } from "@/components/app/Mannequin3D";
+import Mannequin3D, { type ClothingItem, type BodyDNA, type PosePreset } from "@/components/app/Mannequin3D";
 import { Button } from "@/components/ui/button";
-import { CalendarWidget } from "@/components/app/CalendarWidget";
-import { ArrowLeft, Plus, X, CalendarDays, Shirt, Save } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import {
+  ArrowLeft, Plus, X, CalendarDays, Shirt, Image,
+  User, Activity, Layers, SlidersHorizontal, Eye,
+} from "lucide-react";
 import { toast } from "sonner";
+
+type Panel = "dna" | "pose" | "closet" | "trace" | null;
 
 const MannequinView = () => {
   const { user } = useAuth();
@@ -16,8 +21,21 @@ const MannequinView = () => {
   const [gender, setGender] = useState<"male" | "female">("male");
   const [clothing, setClothing] = useState<ClothingItem[]>([]);
   const [closetItems, setClosetItems] = useState<any[]>([]);
-  const [showCloset, setShowCloset] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
+  const [activePanel, setActivePanel] = useState<Panel>(null);
+
+  // Body DNA
+  const [dna, setDna] = useState<BodyDNA>({
+    height: 0.5, shoulder: 0.5, waist: 0.5, hips: 0.5, legLength: 0.5,
+  });
+
+  // Pose
+  const [pose, setPose] = useState<PosePreset>("neutral");
+
+  // Tracing
+  const [tracingUrl, setTracingUrl] = useState<string | undefined>();
+  const [tracingOpacity, setTracingOpacity] = useState(0.3);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -41,7 +59,7 @@ const MannequinView = () => {
       imageUrl: item.photo_url,
     };
     setClothing((prev) => [...prev, mapped]);
-    setShowCloset(false);
+    setActivePanel(null);
   };
 
   const removeItem = (index: number) => {
@@ -58,13 +76,36 @@ const MannequinView = () => {
       notes: `Mannequin outfit with ${clothing.length} items`,
       outfit_items: clothing as any,
     });
-    if (error) {
-      toast.error("Failed to save to calendar");
-    } else {
+    if (error) toast.error("Failed to save to calendar");
+    else {
       toast.success("Outfit saved to calendar!");
       setShowCalendar(false);
     }
   };
+
+  const handleTraceUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setTracingUrl(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const togglePanel = (p: Panel) => setActivePanel((prev) => (prev === p ? null : p));
+
+  const dnaSliders: { key: keyof BodyDNA; label: string }[] = [
+    { key: "height", label: "Height" },
+    { key: "shoulder", label: "Shoulders" },
+    { key: "waist", label: "Waist" },
+    { key: "hips", label: "Hips" },
+    { key: "legLength", label: "Leg Length" },
+  ];
+
+  const poses: { key: PosePreset; label: string }[] = [
+    { key: "neutral", label: "Neutral" },
+    { key: "fashion", label: "Fashion" },
+    { key: "walking", label: "Walking" },
+  ];
 
   return (
     <AppLayout>
@@ -75,30 +116,34 @@ const MannequinView = () => {
             <ArrowLeft className="w-5 h-5 text-foreground" />
           </button>
           <h1 className="font-display text-lg font-bold text-foreground">Style Mannequin</h1>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setShowCalendar(true)}
-              className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center"
-            >
-              <CalendarDays className="w-4 h-4 text-foreground" />
-            </button>
-          </div>
+          <button
+            onClick={() => setShowCalendar(true)}
+            className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center"
+          >
+            <CalendarDays className="w-4 h-4 text-foreground" />
+          </button>
         </div>
 
-        {/* 3D Mannequin */}
-        <div className="flex-1 relative bg-gradient-to-b from-secondary/20 to-background">
-          <Mannequin3D gender={gender} clothing={clothing} className="w-full h-full" />
+        {/* 3D Scene */}
+        <div className="flex-1 relative bg-gradient-to-b from-secondary/10 to-background">
+          <Mannequin3D
+            gender={gender}
+            clothing={clothing}
+            dna={dna}
+            pose={pose}
+            tracingImageUrl={tracingUrl}
+            tracingOpacity={tracingOpacity}
+            className="w-full h-full"
+          />
 
-          {/* Gender toggle */}
+          {/* Gender toggle - top left */}
           <div className="absolute top-3 left-3 flex gap-1 bg-background/80 backdrop-blur rounded-full p-1">
             {(["male", "female"] as const).map((g) => (
               <button
                 key={g}
                 onClick={() => setGender(g)}
-                className={`px-3 py-1 rounded-full text-xs font-sans font-medium transition-colors ${
-                  gender === g
-                    ? "bg-foreground text-background"
-                    : "text-muted-foreground"
+                className={`px-3 py-1.5 rounded-full text-xs font-sans font-semibold transition-colors ${
+                  gender === g ? "bg-foreground text-background" : "text-muted-foreground"
                 }`}
               >
                 {g === "male" ? "♂ Male" : "♀ Female"}
@@ -108,84 +153,195 @@ const MannequinView = () => {
         </div>
 
         {/* Clothing strip */}
-        <div className="px-4 py-3 border-t border-border">
-          <div className="flex items-center gap-2 mb-2">
-            <Shirt className="w-4 h-4 text-muted-foreground" />
-            <span className="text-xs font-sans font-semibold text-foreground">
-              Items ({clothing.length})
-            </span>
+        <div className="px-4 py-2 border-t border-border">
+          <div className="flex items-center gap-2 mb-1.5">
+            <Shirt className="w-3.5 h-3.5 text-muted-foreground" />
+            <span className="text-xs font-sans font-semibold text-foreground">Items ({clothing.length})</span>
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1">
             {clothing.map((item, i) => (
-              <div
-                key={i}
-                className="relative flex-shrink-0 w-14 h-14 rounded-lg bg-secondary flex items-center justify-center"
-              >
-                <div
-                  className="w-8 h-8 rounded-full"
-                  style={{ backgroundColor: item.color || "#6b7b8d" }}
-                />
-                <button
-                  onClick={() => removeItem(i)}
-                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive flex items-center justify-center"
-                >
+              <div key={i} className="relative flex-shrink-0 w-12 h-12 rounded-lg bg-secondary flex items-center justify-center">
+                <div className="w-7 h-7 rounded-full" style={{ backgroundColor: item.color || "#6b7b8d" }} />
+                <button onClick={() => removeItem(i)} className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive flex items-center justify-center">
                   <X className="w-2.5 h-2.5 text-destructive-foreground" />
                 </button>
-                <span className="absolute bottom-0.5 text-[8px] font-sans text-muted-foreground truncate w-full text-center px-0.5">
-                  {item.name}
-                </span>
               </div>
             ))}
             <button
-              onClick={() => setShowCloset(true)}
-              className="flex-shrink-0 w-14 h-14 rounded-lg border-2 border-dashed border-border flex items-center justify-center hover:border-foreground transition-colors"
+              onClick={() => togglePanel("closet")}
+              className="flex-shrink-0 w-12 h-12 rounded-lg border-2 border-dashed border-border flex items-center justify-center"
             >
-              <Plus className="w-5 h-5 text-muted-foreground" />
+              <Plus className="w-4 h-4 text-muted-foreground" />
             </button>
           </div>
         </div>
 
-        {/* Closet picker */}
+        {/* Bottom toolbar */}
+        <div className="flex items-center justify-around px-2 py-2 border-t border-border bg-background">
+          {[
+            { key: "dna" as Panel, icon: SlidersHorizontal, label: "Body DNA" },
+            { key: "pose" as Panel, icon: Activity, label: "Pose" },
+            { key: "closet" as Panel, icon: Layers, label: "Closet" },
+            { key: "trace" as Panel, icon: Eye, label: "Trace" },
+          ].map(({ key, icon: Icon, label }) => (
+            <button
+              key={key}
+              onClick={() => togglePanel(key)}
+              className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-colors ${
+                activePanel === key ? "text-primary" : "text-muted-foreground"
+              }`}
+            >
+              <Icon className="w-4 h-4" />
+              <span className="text-[10px] font-sans font-medium">{label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Panels */}
         <AnimatePresence>
-          {showCloset && (
+          {activePanel && (
             <motion.div
+              key={activePanel}
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 25 }}
-              className="fixed inset-x-0 bottom-0 z-50 bg-background rounded-t-2xl border-t border-border max-h-[60vh] overflow-y-auto"
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="fixed inset-x-0 bottom-0 z-50 bg-background rounded-t-2xl border-t border-border max-h-[55vh] overflow-y-auto shadow-xl"
             >
-              <div className="flex items-center justify-between px-4 py-3 border-b border-border sticky top-0 bg-background">
-                <h3 className="font-display text-base font-bold text-foreground">Add from Closet</h3>
-                <button onClick={() => setShowCloset(false)}>
-                  <X className="w-5 h-5 text-muted-foreground" />
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border sticky top-0 bg-background z-10">
+                <h3 className="font-display text-sm font-bold text-foreground">
+                  {activePanel === "dna" && "Body DNA"}
+                  {activePanel === "pose" && "Pose Presets"}
+                  {activePanel === "closet" && "Add from Closet"}
+                  {activePanel === "trace" && "Tracing Mode"}
+                </h3>
+                <button onClick={() => setActivePanel(null)}>
+                  <X className="w-4 h-4 text-muted-foreground" />
                 </button>
               </div>
-              {closetItems.length === 0 ? (
-                <div className="p-8 text-center">
-                  <p className="text-muted-foreground text-sm font-sans">No items in your closet yet.</p>
-                  <Button onClick={() => navigate("/closet")} size="sm" className="mt-3 rounded-full">
-                    Go to Closet
+
+              {/* Body DNA Panel */}
+              {activePanel === "dna" && (
+                <div className="p-4 space-y-5">
+                  {dnaSliders.map(({ key, label }) => (
+                    <div key={key}>
+                      <div className="flex justify-between mb-1.5">
+                        <span className="text-xs font-sans font-medium text-foreground">{label}</span>
+                        <span className="text-xs font-sans text-muted-foreground">{Math.round(dna[key] * 100)}%</span>
+                      </div>
+                      <Slider
+                        value={[dna[key]]}
+                        min={0}
+                        max={1}
+                        step={0.01}
+                        onValueChange={([v]) => setDna((prev) => ({ ...prev, [key]: v }))}
+                      />
+                    </div>
+                  ))}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full rounded-xl"
+                    onClick={() => setDna({ height: 0.5, shoulder: 0.5, waist: 0.5, hips: 0.5, legLength: 0.5 })}
+                  >
+                    Reset to Default
                   </Button>
                 </div>
-              ) : (
-                <div className="grid grid-cols-3 gap-2 p-4">
-                  {closetItems.map((item) => (
+              )}
+
+              {/* Pose Panel */}
+              {activePanel === "pose" && (
+                <div className="p-4 grid grid-cols-3 gap-3">
+                  {poses.map(({ key, label }) => (
                     <button
-                      key={item.id}
-                      onClick={() => addItem(item)}
-                      className="rounded-xl bg-secondary p-2 text-center hover:bg-secondary/80 transition-colors"
+                      key={key}
+                      onClick={() => setPose(key)}
+                      className={`py-4 rounded-xl font-sans text-sm font-medium transition-all ${
+                        pose === key
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+                      }`}
                     >
-                      {item.photo_url ? (
-                        <img src={item.photo_url} alt={item.name} className="w-full aspect-square rounded-lg object-cover mb-1" />
-                      ) : (
-                        <div className="w-full aspect-square rounded-lg bg-muted flex items-center justify-center mb-1">
-                          <Shirt className="w-6 h-6 text-muted-foreground" />
-                        </div>
-                      )}
-                      <p className="text-[10px] font-sans text-foreground truncate">{item.name || item.category}</p>
+                      {label}
                     </button>
                   ))}
+                </div>
+              )}
+
+              {/* Closet Panel */}
+              {activePanel === "closet" && (
+                <>
+                  {closetItems.length === 0 ? (
+                    <div className="p-8 text-center">
+                      <p className="text-muted-foreground text-sm font-sans">No items in your closet yet.</p>
+                      <Button onClick={() => navigate("/closet")} size="sm" className="mt-3 rounded-full">Go to Closet</Button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-3 gap-2 p-4">
+                      {closetItems.map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => addItem(item)}
+                          className="rounded-xl bg-secondary p-2 text-center hover:bg-secondary/80 transition-colors"
+                        >
+                          {item.photo_url ? (
+                            <img src={item.photo_url} alt={item.name} className="w-full aspect-square rounded-lg object-cover mb-1" />
+                          ) : (
+                            <div className="w-full aspect-square rounded-lg bg-muted flex items-center justify-center mb-1">
+                              <Shirt className="w-6 h-6 text-muted-foreground" />
+                            </div>
+                          )}
+                          <p className="text-[10px] font-sans text-foreground truncate">{item.name || item.category}</p>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Trace Panel */}
+              {activePanel === "trace" && (
+                <div className="p-4 space-y-4">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleTraceUpload}
+                  />
+                  <Button
+                    variant="outline"
+                    className="w-full rounded-xl"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Image className="w-4 h-4 mr-2" />
+                    {tracingUrl ? "Change Reference Image" : "Upload Reference Image"}
+                  </Button>
+                  {tracingUrl && (
+                    <>
+                      <div>
+                        <div className="flex justify-between mb-1.5">
+                          <span className="text-xs font-sans font-medium text-foreground">Opacity</span>
+                          <span className="text-xs font-sans text-muted-foreground">{Math.round(tracingOpacity * 100)}%</span>
+                        </div>
+                        <Slider
+                          value={[tracingOpacity]}
+                          min={0.05}
+                          max={0.8}
+                          step={0.01}
+                          onValueChange={([v]) => setTracingOpacity(v)}
+                        />
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full text-destructive"
+                        onClick={() => setTracingUrl(undefined)}
+                      >
+                        Remove Overlay
+                      </Button>
+                    </>
+                  )}
                 </div>
               )}
             </motion.div>
