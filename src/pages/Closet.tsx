@@ -81,10 +81,20 @@ const Closet = () => {
   const analyzeWithAI = async () => {
     setAnalyzing(true);
     try {
+      // Convert file to base64 to avoid sending blob: URLs the AI gateway can't access
+      let imageData = previewUrl;
+      if (selectedFile) {
+        imageData = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(selectedFile);
+        });
+      }
       const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-item`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
-        body: JSON.stringify({ imageUrl: previewUrl, itemName: newItem.name }),
+        body: JSON.stringify({ imageUrl: imageData, itemName: newItem.name }),
       });
       if (!resp.ok) throw new Error("Analysis failed");
       const analysis = await resp.json();
@@ -164,10 +174,41 @@ const Closet = () => {
   return (
     <AppLayout>
       <div className="px-5 py-5 max-w-lg mx-auto">
-        {/* Header */}
+        {/* Header with item counter */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-5">
-          <h1 className="font-display text-2xl font-bold text-foreground">My Closet</h1>
-          <p className="text-muted-foreground font-sans text-xs mt-0.5">{items.length} items in your wardrobe</p>
+          <div className="flex items-center justify-between">
+            <h1 className="font-display text-2xl font-bold text-foreground">My Closet</h1>
+            <span className="text-xs font-sans font-semibold text-muted-foreground bg-secondary px-3 py-1 rounded-full">
+              {items.length} / 7 ITEMS UPLOADED
+            </span>
+          </div>
+          {/* Upload progress */}
+          <div className="mt-3 space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-sans text-muted-foreground w-14">Tops</span>
+              <div className="flex-1 h-1.5 rounded-full bg-secondary overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-primary transition-all"
+                  style={{ width: `${Math.min((items.filter(i => ["top", "outerwear"].includes(i.category)).length / 4) * 100, 100)}%` }}
+                />
+              </div>
+              <span className="text-[10px] font-sans text-muted-foreground">
+                {items.filter(i => ["top", "outerwear"].includes(i.category)).length}/4
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-sans text-muted-foreground w-14">Bottoms</span>
+              <div className="flex-1 h-1.5 rounded-full bg-secondary overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-primary transition-all"
+                  style={{ width: `${Math.min((items.filter(i => i.category === "bottom").length / 3) * 100, 100)}%` }}
+                />
+              </div>
+              <span className="text-[10px] font-sans text-muted-foreground">
+                {items.filter(i => i.category === "bottom").length}/3
+              </span>
+            </div>
+          </div>
         </motion.div>
 
         {/* Action Cards */}
