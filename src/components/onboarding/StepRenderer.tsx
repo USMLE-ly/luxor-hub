@@ -483,9 +483,9 @@ const StepRenderer = ({ step, answers, onSelect }: StepRendererProps) => {
               <button
                 key={option}
                 onClick={() => onSelect(step.key, option, true)}
-                className={`flex items-center gap-4 p-3 rounded-xl border transition-all text-left ${
+                className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left active:scale-[0.98] ${
                   isActive
-                    ? "border-primary bg-primary/5"
+                    ? "border-primary bg-primary/10 shadow-sm ring-1 ring-primary/20"
                     : "border-border bg-secondary/30 hover:border-muted-foreground/40"
                 }`}
               >
@@ -528,9 +528,9 @@ const StepRenderer = ({ step, answers, onSelect }: StepRendererProps) => {
             <button
               key={option}
               onClick={() => onSelect(step.key, option, isSingle)}
-              className={`flex items-center justify-between p-4 rounded-xl border transition-all text-left ${
+              className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all text-left active:scale-[0.98] ${
                 isActive
-                  ? "border-primary bg-primary/5"
+                  ? "border-primary bg-primary/10 shadow-sm ring-1 ring-primary/20"
                   : "border-border bg-secondary/30 hover:border-muted-foreground/40"
               }`}
             >
