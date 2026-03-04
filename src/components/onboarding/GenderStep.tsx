@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Check } from "lucide-react";
 import femaleImg from "@/assets/onboarding-female.jpg";
 import maleImg from "@/assets/onboarding-male.jpg";
 
@@ -23,7 +24,7 @@ const GenderStep = ({ selected, onSelect }: GenderStepProps) => (
           onClick={() => onSelect(value)}
           className={`rounded-2xl border-2 overflow-hidden transition-all ${
             selected === value
-              ? "border-primary shadow-lg"
+              ? "border-foreground shadow-lg"
               : "border-border bg-secondary/30 hover:border-muted-foreground/40"
           }`}
         >
@@ -31,10 +32,10 @@ const GenderStep = ({ selected, onSelect }: GenderStepProps) => (
             <img src={img} alt={label} className="w-full h-full object-cover" />
           </div>
           <div className="flex items-center gap-2 p-3 justify-center">
-            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-              selected === value ? "border-primary" : "border-muted-foreground/40"
+            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+              selected === value ? "border-foreground bg-foreground" : "border-muted-foreground/40"
             }`}>
-              {selected === value && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
+              {selected === value && <Check className="h-3.5 w-3.5 text-background" />}
             </div>
             <span className="font-sans font-medium text-foreground">{label}</span>
           </div>
