@@ -111,6 +111,16 @@ const Onboarding = () => {
       // Remove base64 images from preferences to keep DB clean
       const { selfieCapture, fullBodyCapture, ...cleanPrefs } = prefsForAI as any;
 
+      // Include previously collected AI face/body results
+      const faceShapeData = aiResults.face ? {
+        faceShape: aiResults.face.faceShape,
+        faceShapeDescription: aiResults.face.faceShapeDescription,
+      } : {};
+      const bodyShapeData = aiResults.body ? {
+        bodyShape: aiResults.body.bodyShape,
+        bodyShapeTraits: aiResults.body.bodyShapeTraits,
+      } : {};
+
       let archetype = `${(answers.styleGoal?.[0] || "Stylish").split(" ").slice(0, 3).join(" ")} ${gender === "female" ? "Femme" : "Masc"} Profile`;
       let styleScore = 25;
       let aiAnalysis = null;
@@ -134,7 +144,7 @@ const Onboarding = () => {
       const { error } = await supabase
         .from("style_profiles")
         .update({
-          preferences: { ...cleanPrefs, aiAnalysis },
+          preferences: { ...cleanPrefs, ...faceShapeData, ...bodyShapeData, aiAnalysis },
           archetype,
           onboarding_completed: true,
           style_score: styleScore,
