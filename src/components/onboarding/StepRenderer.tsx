@@ -4,6 +4,35 @@ import { Check, Camera, Smartphone, Video, User, FlipHorizontal } from "lucide-r
 import type { OnboardingStep } from "./onboardingSteps";
 import FaceShapeIllustration from "@/components/app/FaceShapeIllustration";
 import BodyShapeIllustration from "@/components/app/BodyShapeIllustration";
+
+// Brand logo imports
+import brandZara from "@/assets/brand-zara.jpg";
+import brandHm from "@/assets/brand-hm.jpg";
+import brandGap from "@/assets/brand-gap.jpg";
+import brandMango from "@/assets/brand-mango.jpg";
+import brandCos from "@/assets/brand-cos.jpg";
+import brandGanni from "@/assets/brand-ganni.jpg";
+import brandIsabelmarant from "@/assets/brand-isabelmarant.jpg";
+import brandReformation from "@/assets/brand-reformation.jpg";
+import brandGucci from "@/assets/brand-gucci.jpg";
+import brandFendi from "@/assets/brand-fendi.jpg";
+import brandValentino from "@/assets/brand-valentino.jpg";
+import brandChanel from "@/assets/brand-chanel.jpg";
+
+const brandLogoMap: Record<string, string> = {
+  "brand-zara": brandZara,
+  "brand-hm": brandHm,
+  "brand-gap": brandGap,
+  "brand-mango": brandMango,
+  "brand-cos": brandCos,
+  "brand-ganni": brandGanni,
+  "brand-isabelmarant": brandIsabelmarant,
+  "brand-reformation": brandReformation,
+  "brand-gucci": brandGucci,
+  "brand-fendi": brandFendi,
+  "brand-valentino": brandValentino,
+  "brand-chanel": brandChanel,
+};
 import selfieIntroImg from "@/assets/selfie-intro.jpg";
 import selfieIntroMaleImg from "@/assets/selfie-intro-male.jpg";
 import selfieStep1Img from "@/assets/selfie-step1.jpg";
@@ -965,6 +994,7 @@ const StepRenderer = ({ step, answers, onSelect, gender, aiResults }: StepRender
       <div className="flex flex-col gap-3">
         {step.options.map((option, index) => {
           const isActive = selected.includes(option);
+          const logos = step.brandLogos?.[option];
           const brands = step.brandLabels?.[option];
           return (
             <motion.button
@@ -981,7 +1011,18 @@ const StepRenderer = ({ step, answers, onSelect, gender, aiResults }: StepRender
             >
               <div className="flex-1 pr-2">
                 <span className="font-sans text-sm text-foreground">{option}</span>
-                {brands && (
+                {logos ? (
+                  <div className="flex items-center gap-3 mt-2">
+                    {logos.map((logo) => (
+                      <img
+                        key={logo.name}
+                        src={brandLogoMap[logo.image]}
+                        alt={logo.name}
+                        className="h-7 w-auto object-contain rounded-md bg-background"
+                      />
+                    ))}
+                  </div>
+                ) : brands ? (
                   <div className="flex flex-wrap gap-3 mt-1.5">
                     {brands.map((brand) => (
                       <span key={brand} className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
@@ -989,7 +1030,7 @@ const StepRenderer = ({ step, answers, onSelect, gender, aiResults }: StepRender
                       </span>
                     ))}
                   </div>
-                )}
+                ) : null}
               </div>
               {isSingle ? (
                 <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
