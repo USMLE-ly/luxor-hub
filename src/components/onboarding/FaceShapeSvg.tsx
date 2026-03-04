@@ -39,10 +39,10 @@ const faceShapePaths: Record<string, { outline: string; overlay: string }> = {
     outline: `M50,10 C68,10 88,18 90,36 C92,50 84,66 72,78 C64,86 56,94 50,98 C44,94 36,86 28,78 C16,66 8,50 10,36 C12,18 32,10 50,10 Z`,
     overlay: `M50,13 C66,13 85,20 87,37 C89,49 82,64 71,76 C63,84 55,92 50,95 C45,92 37,84 29,76 C18,64 11,49 13,37 C15,20 34,13 50,13 Z`,
   },
-  // Oblong: very elongated, much taller than wide
+  // Oblong: very elongated and narrow — much taller than wide
   Oblong: {
-    outline: `M50,4 C66,4 76,18 76,30 L78,54 C78,70 70,88 60,92 C56,94 44,94 40,92 C30,88 22,70 22,54 L24,30 C24,18 34,4 50,4 Z`,
-    overlay: `M50,7 C64,7 73,20 73,31 L75,53 C75,68 68,85 59,89 C55,91 45,91 41,89 C32,85 25,68 25,53 L27,31 C27,20 36,7 50,7 Z`,
+    outline: `M50,2 C62,2 70,14 70,26 L72,50 C72,68 66,86 58,92 C55,94 45,94 42,92 C34,86 28,68 28,50 L30,26 C30,14 38,2 50,2 Z`,
+    overlay: `M50,5 C60,5 67,16 67,27 L69,49 C69,66 64,84 57,90 C54,92 46,92 43,90 C36,84 31,66 31,49 L33,27 C33,16 40,5 50,5 Z`,
   },
   // Diamond: very narrow forehead & chin, extremely wide cheekbones
   Diamond: {
