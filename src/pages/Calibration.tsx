@@ -70,6 +70,10 @@ import calFShoeHeels from "@/assets/cal-f-shoe-heels.jpg";
 import calFShoeFlats from "@/assets/cal-f-shoe-flats.jpg";
 import calFShoeBoots from "@/assets/cal-f-shoe-boots.jpg";
 import calFShoeSandals from "@/assets/cal-f-shoe-sandals.jpg";
+import calFSkirtMini from "@/assets/cal-f-skirt-mini.jpg";
+import calFSkirtMidi from "@/assets/cal-f-skirt-midi.jpg";
+import calFSkirtMaxi from "@/assets/cal-f-skirt-maxi.jpg";
+import calFSkirtPleated from "@/assets/cal-f-skirt-pleated.jpg";
 
 // Style inspiration images
 import styleInspo1 from "@/assets/style-inspo-1.jpg";
@@ -230,6 +234,16 @@ const femaleCalibrationSteps: CalibrationStep[] = [
       { label: "Maxi", imageUrl: calFDressMaxi, style: "Formal" },
       { label: "Mini", imageUrl: calFDressMini, style: "Formal" },
       { label: "Trench dress", imageUrl: calFDressTrench, style: "Casual" },
+    ],
+  },
+  {
+    question: "Which Skirt style do you prefer the most?",
+    key: "skirtStyle",
+    options: [
+      { label: "Mini", imageUrl: calFSkirtMini, style: "Casual" },
+      { label: "Midi", imageUrl: calFSkirtMidi, style: "Formal" },
+      { label: "Maxi", imageUrl: calFSkirtMaxi, style: "Casual" },
+      { label: "Pleated", imageUrl: calFSkirtPleated, style: "Formal" },
     ],
   },
   {
