@@ -15,6 +15,7 @@ const Onboarding = () => {
   const [currentStep, setCurrentStep] = useState(0); // 0 = gender step
   const [answers, setAnswers] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(false);
+  const [aiResults, setAiResults] = useState<Record<string, any>>({});
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -52,6 +53,44 @@ const Onboarding = () => {
       return () => clearTimeout(timer);
     }
   }, [isGenerating]);
+
+  // Trigger AI analysis when moving to a detection result step
+  useEffect(() => {
+    if (!currentStepData || currentStepData.type !== "detectionResult") return;
+    const mode = currentStepData.detectionMode;
+    if (!mode) return;
+
+    // Skip if already have results for this mode
+    if (aiResults[mode]) return;
+
+    const runAnalysis = async () => {
+      try {
+        if (mode === "face") {
+          const selfieImage = answers.selfieCapture?.[0];
+          if (!selfieImage) return;
+          const { data, error } = await supabase.functions.invoke("analyze-style-dna", {
+            body: { selfieImage, mode: "face" },
+          });
+          if (!error && data && !data.error) {
+            setAiResults((prev) => ({ ...prev, face: data }));
+          }
+        } else if (mode === "body") {
+          const fullBodyImage = answers.fullBodyCapture?.[0];
+          if (!fullBodyImage) return;
+          const { data, error } = await supabase.functions.invoke("analyze-style-dna", {
+            body: { fullBodyImage, preferences: { gender }, mode: "body" },
+          });
+          if (!error && data && !data.error) {
+            setAiResults((prev) => ({ ...prev, body: data }));
+          }
+        }
+      } catch (err) {
+        console.warn(`AI ${mode} analysis failed:`, err);
+      }
+    };
+
+    runAnalysis();
+  }, [currentStep, currentStepData?.type, currentStepData?.detectionMode]);
 
   const handleSelect = (key: string, option: string, singleSelect: boolean) => {
     setAnswers((prev) => {
@@ -152,6 +191,7 @@ const Onboarding = () => {
                   answers={answers}
                   onSelect={handleSelect}
                   gender={gender}
+                  aiResults={aiResults}
                 />
               ) : null}
             </motion.div>

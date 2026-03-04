@@ -59,6 +59,7 @@ interface StepRendererProps {
   answers: Record<string, string[]>;
   onSelect: (key: string, option: string, singleSelect: boolean) => void;
   gender?: "female" | "male" | null;
+  aiResults?: Record<string, any>;
 }
 
 const HeightStep = ({ answers, onSelect }: { answers: Record<string, string[]>; onSelect: StepRendererProps["onSelect"] }) => {
@@ -585,20 +586,34 @@ const bodyShapeResults: Record<string, { label: string; traits: string[] }[]> = 
   ],
 };
 
-const DetectionResultStep = ({ step, answers, gender }: { step: OnboardingStep; answers: Record<string, string[]>; gender?: "female" | "male" | null }) => {
+const DetectionResultStep = ({ step, answers, gender, aiResults }: { step: OnboardingStep; answers: Record<string, string[]>; gender?: "female" | "male" | null; aiResults?: Record<string, any> }) => {
   const isFace = step.detectionMode === "face";
   const [revealed, setRevealed] = useState(false);
+  const isLoading = isFace ? !aiResults?.face : !aiResults?.body;
 
   useEffect(() => {
-    const timer = setTimeout(() => setRevealed(true), 800);
-    return () => clearTimeout(timer);
-  }, []);
+    if (!isLoading) {
+      const timer = setTimeout(() => setRevealed(true), 800);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading]);
 
-  // Deterministic "detected" result based on answers
-  const detectedFaceShape = faceShapes[Math.abs((answers.ageRange?.[0]?.charCodeAt(0) || 0) + (answers.styleGoal?.[0]?.length || 0)) % faceShapes.length];
+  // Use AI results if available, fall back to deterministic mock
+  const faceAI = aiResults?.face;
+  const bodyAI = aiResults?.body;
+
+  const detectedFaceShape = faceAI
+    ? faceShapes.find((f) => f.shape === faceAI.faceShape) || { shape: faceAI.faceShape, icon: "◎", description: faceAI.description || "" }
+    : faceShapes[Math.abs((answers.ageRange?.[0]?.charCodeAt(0) || 0) + (answers.styleGoal?.[0]?.length || 0)) % faceShapes.length];
+
+  // Override description with AI description if available
+  const faceDescription = faceAI?.description || detectedFaceShape.description;
+
   const genderKey = gender || "female";
   const bodyShapes = bodyShapeResults[genderKey];
-  const detectedBodyShape = bodyShapes[Math.abs((answers.budget?.[0]?.charCodeAt(0) || 0) + (answers.styleChallenge?.[0]?.length || 0)) % bodyShapes.length];
+  const detectedBodyShape = bodyAI
+    ? { label: bodyAI.bodyShape, traits: bodyAI.traits || [] }
+    : bodyShapes[Math.abs((answers.budget?.[0]?.charCodeAt(0) || 0) + (answers.styleChallenge?.[0]?.length || 0)) % bodyShapes.length];
 
   const capturedImage = isFace ? answers.selfieCapture?.[0] : answers.fullBodyCapture?.[0];
 
@@ -611,7 +626,7 @@ const DetectionResultStep = ({ step, answers, gender }: { step: OnboardingStep; 
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          {step.question}
+          {isLoading ? "Analyzing your face..." : step.question}
         </motion.h2>
         <motion.p
           className="text-muted-foreground font-sans text-sm text-center mb-6"
@@ -619,7 +634,7 @@ const DetectionResultStep = ({ step, answers, gender }: { step: OnboardingStep; 
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
         >
-          {step.description}
+          {isLoading ? "Our AI is studying your facial proportions" : step.description}
         </motion.p>
 
         {/* Face photo with shape overlay */}
@@ -636,11 +651,16 @@ const DetectionResultStep = ({ step, answers, gender }: { step: OnboardingStep; 
               <User className="w-16 h-16 text-muted-foreground" />
             </div>
           )}
+          {isLoading && (
+            <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+              <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            </div>
+          )}
         </motion.div>
 
         {/* Detected shape */}
         <AnimatePresence>
-          {revealed && (
+          {revealed && !isLoading && (
             <motion.div
               className="flex flex-col items-center gap-2 mb-8"
               initial={{ opacity: 0, y: 20 }}
@@ -649,35 +669,37 @@ const DetectionResultStep = ({ step, answers, gender }: { step: OnboardingStep; 
             >
               <span className="text-4xl mb-1">{detectedFaceShape.icon}</span>
               <h3 className="font-display text-3xl font-bold text-foreground">{detectedFaceShape.shape}</h3>
-              <p className="text-muted-foreground font-sans text-sm text-center max-w-xs">{detectedFaceShape.description}</p>
+              <p className="text-muted-foreground font-sans text-sm text-center max-w-xs">{faceDescription}</p>
             </motion.div>
           )}
         </AnimatePresence>
 
         {/* All face shapes reference */}
-        <motion.div
-          className="w-full"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: revealed ? 1 : 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <p className="text-muted-foreground font-sans text-xs text-center mb-3 uppercase tracking-wider">Face shape guide</p>
-          <div className="grid grid-cols-3 gap-2">
-            {faceShapes.map((fs) => (
-              <div
-                key={fs.shape}
-                className={`flex flex-col items-center p-3 rounded-xl transition-all ${
-                  fs.shape === detectedFaceShape.shape
-                    ? "bg-foreground text-background"
-                    : "bg-secondary/60 text-muted-foreground"
-                }`}
-              >
-                <span className="text-lg mb-1">{fs.icon}</span>
-                <span className="font-sans text-xs font-medium">{fs.shape}</span>
-              </div>
-            ))}
-          </div>
-        </motion.div>
+        {!isLoading && (
+          <motion.div
+            className="w-full"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: revealed ? 1 : 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <p className="text-muted-foreground font-sans text-xs text-center mb-3 uppercase tracking-wider">Face shape guide</p>
+            <div className="grid grid-cols-3 gap-2">
+              {faceShapes.map((fs) => (
+                <div
+                  key={fs.shape}
+                  className={`flex flex-col items-center p-3 rounded-xl transition-all ${
+                    fs.shape === detectedFaceShape.shape
+                      ? "bg-foreground text-background"
+                      : "bg-secondary/60 text-muted-foreground"
+                  }`}
+                >
+                  <span className="text-lg mb-1">{fs.icon}</span>
+                  <span className="font-sans text-xs font-medium">{fs.shape}</span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
       </div>
     );
   }
@@ -691,7 +713,7 @@ const DetectionResultStep = ({ step, answers, gender }: { step: OnboardingStep; 
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        {step.question}
+        {isLoading ? "Analyzing your body shape..." : step.question}
       </motion.h2>
       <motion.p
         className="text-muted-foreground font-sans text-sm text-center mb-6"
@@ -699,7 +721,7 @@ const DetectionResultStep = ({ step, answers, gender }: { step: OnboardingStep; 
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
       >
-        {step.description}
+        {isLoading ? "Our AI is studying your body proportions" : step.description}
       </motion.p>
 
       {/* Body photo */}
@@ -716,11 +738,16 @@ const DetectionResultStep = ({ step, answers, gender }: { step: OnboardingStep; 
             <User className="w-12 h-12 text-muted-foreground" />
           </div>
         )}
+        {isLoading && (
+          <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+            <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          </div>
+        )}
       </motion.div>
 
       {/* Detected body shape */}
       <AnimatePresence>
-        {revealed && (
+        {revealed && !isLoading && (
           <motion.div
             className="flex flex-col items-center gap-2 mb-6"
             initial={{ opacity: 0, y: 20 }}
@@ -746,36 +773,38 @@ const DetectionResultStep = ({ step, answers, gender }: { step: OnboardingStep; 
       </AnimatePresence>
 
       {/* All body shapes */}
-      <motion.div
-        className="w-full"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: revealed ? 1 : 0 }}
-        transition={{ delay: 0.3 }}
-      >
-        <p className="text-muted-foreground font-sans text-xs text-center mb-3 uppercase tracking-wider">Body shape guide</p>
-        <div className="flex flex-col gap-2">
-          {bodyShapes.map((bs) => (
-            <div
-              key={bs.label}
-              className={`flex items-center justify-between p-3 rounded-xl transition-all ${
-                bs.label === detectedBodyShape.label
-                  ? "bg-foreground text-background"
-                  : "bg-secondary/60 text-muted-foreground"
-              }`}
-            >
-              <span className="font-sans text-sm font-medium">{bs.label}</span>
-              {bs.label === detectedBodyShape.label && (
-                <Check className="h-4 w-4" />
-              )}
-            </div>
-          ))}
-        </div>
-      </motion.div>
+      {!isLoading && (
+        <motion.div
+          className="w-full"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: revealed ? 1 : 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <p className="text-muted-foreground font-sans text-xs text-center mb-3 uppercase tracking-wider">Body shape guide</p>
+          <div className="flex flex-col gap-2">
+            {bodyShapes.map((bs) => (
+              <div
+                key={bs.label}
+                className={`flex items-center justify-between p-3 rounded-xl transition-all ${
+                  bs.label === detectedBodyShape.label
+                    ? "bg-foreground text-background"
+                    : "bg-secondary/60 text-muted-foreground"
+                }`}
+              >
+                <span className="font-sans text-sm font-medium">{bs.label}</span>
+                {bs.label === detectedBodyShape.label && (
+                  <Check className="h-4 w-4" />
+                )}
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 };
 
-const StepRenderer = ({ step, answers, onSelect, gender }: StepRendererProps) => {
+const StepRenderer = ({ step, answers, onSelect, gender, aiResults }: StepRendererProps) => {
   const selected = answers[step.key] || [];
   const isSingle = step.type === "radio";
 
@@ -804,7 +833,7 @@ const StepRenderer = ({ step, answers, onSelect, gender }: StepRendererProps) =>
   }
 
   if (step.type === "detectionResult") {
-    return <DetectionResultStep step={step} answers={answers} gender={gender} />;
+    return <DetectionResultStep step={step} answers={answers} gender={gender} aiResults={aiResults} />;
   }
 
   if (step.type === "sizeGrid" && step.subGroups) {
