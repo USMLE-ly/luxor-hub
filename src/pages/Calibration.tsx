@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { ArrowRight, ArrowLeft, Check, Eye } from "lucide-react";
 
-// Import generated product images
+// Male calibration images
 import calTrousersWide from "@/assets/cal-trousers-wide.jpg";
 import calTrousersStraight from "@/assets/cal-trousers-straight.jpg";
 import calTrousersChecked from "@/assets/cal-trousers-checked.jpg";
@@ -37,6 +37,36 @@ import calShoeChelsea from "@/assets/cal-shoe-chelsea.jpg";
 import calShoeSneakers from "@/assets/cal-shoe-sneakers.jpg";
 import calShoeDerby from "@/assets/cal-shoe-derby.jpg";
 
+// Female calibration images
+import calFJeansWide from "@/assets/cal-f-jeans-wide.jpg";
+import calFJeansStraight from "@/assets/cal-f-jeans-straight.jpg";
+import calFJeansFlare from "@/assets/cal-f-jeans-flare.jpg";
+import calFJeansMom from "@/assets/cal-f-jeans-mom.jpg";
+import calFPantsTailored from "@/assets/cal-f-pants-tailored.jpg";
+import calFPantsWide from "@/assets/cal-f-pants-wide.jpg";
+import calFPantsStraight from "@/assets/cal-f-pants-straight.jpg";
+import calFPantsFeather from "@/assets/cal-f-pants-feather.jpg";
+import calFCoatTrench from "@/assets/cal-f-coat-trench.jpg";
+import calFCoatBelted from "@/assets/cal-f-coat-belted.jpg";
+import calFCoatElegant from "@/assets/cal-f-coat-elegant.jpg";
+import calFCoatShort from "@/assets/cal-f-coat-short.jpg";
+import calFTshirtRuffle from "@/assets/cal-f-tshirt-ruffle.jpg";
+import calFTshirtGraphic from "@/assets/cal-f-tshirt-graphic.jpg";
+import calFTshirtOversized from "@/assets/cal-f-tshirt-oversized.jpg";
+import calFTshirtGothic from "@/assets/cal-f-tshirt-gothic.jpg";
+import calFShirtRuffle from "@/assets/cal-f-shirt-ruffle.jpg";
+import calFShirtClassic from "@/assets/cal-f-shirt-classic.jpg";
+import calFShirtOxford from "@/assets/cal-f-shirt-oxford.jpg";
+import calFShirtSheer from "@/assets/cal-f-shirt-sheer.jpg";
+import calFTopCami from "@/assets/cal-f-top-cami.jpg";
+import calFTopRuffle from "@/assets/cal-f-top-ruffle.jpg";
+import calFTopAsymmetric from "@/assets/cal-f-top-asymmetric.jpg";
+import calFTopPolo from "@/assets/cal-f-top-polo.jpg";
+import calFDressMidi from "@/assets/cal-f-dress-midi.jpg";
+import calFDressMaxi from "@/assets/cal-f-dress-maxi.jpg";
+import calFDressMini from "@/assets/cal-f-dress-mini.jpg";
+import calFDressTrench from "@/assets/cal-f-dress-trench.jpg";
+
 interface CalibrationOption {
   label: string;
   imageUrl: string;
@@ -49,7 +79,7 @@ interface CalibrationStep {
   options: CalibrationOption[];
 }
 
-const calibrationSteps: CalibrationStep[] = [
+const maleCalibrationSteps: CalibrationStep[] = [
   {
     question: "Which Jeans style do you prefer the most?",
     key: "jeansStyle",
@@ -122,14 +152,106 @@ const calibrationSteps: CalibrationStep[] = [
   },
 ];
 
+const femaleCalibrationSteps: CalibrationStep[] = [
+  {
+    question: "Which Jeans style do you prefer the most?",
+    key: "jeansStyle",
+    options: [
+      { label: "Wide-leg", imageUrl: calFJeansWide, style: "Casual" },
+      { label: "Straight", imageUrl: calFJeansStraight, style: "Casual" },
+      { label: "Flare", imageUrl: calFJeansFlare, style: "Casual" },
+      { label: "Mom fit", imageUrl: calFJeansMom, style: "Casual" },
+    ],
+  },
+  {
+    question: "Which Pant style do you prefer the most?",
+    key: "pantsStyle",
+    options: [
+      { label: "Tailored", imageUrl: calFPantsTailored, style: "Formal" },
+      { label: "Wide-leg", imageUrl: calFPantsWide, style: "Casual" },
+      { label: "Straight", imageUrl: calFPantsStraight, style: "Formal" },
+      { label: "Feather-trim", imageUrl: calFPantsFeather, style: "Formal" },
+    ],
+  },
+  {
+    question: "Which Coat style do you prefer the most?",
+    key: "coatStyle",
+    options: [
+      { label: "Trench", imageUrl: calFCoatTrench, style: "Formal" },
+      { label: "Belted wrap", imageUrl: calFCoatBelted, style: "Formal" },
+      { label: "Elegant", imageUrl: calFCoatElegant, style: "Formal" },
+      { label: "Short coat", imageUrl: calFCoatShort, style: "Casual" },
+    ],
+  },
+  {
+    question: "Which T-shirt style do you prefer the most?",
+    key: "tshirtStyle",
+    options: [
+      { label: "Ruffle detail", imageUrl: calFTshirtRuffle, style: "Casual" },
+      { label: "Graphic", imageUrl: calFTshirtGraphic, style: "Casual" },
+      { label: "Oversized", imageUrl: calFTshirtOversized, style: "Casual" },
+      { label: "Gothic print", imageUrl: calFTshirtGothic, style: "Casual" },
+    ],
+  },
+  {
+    question: "Which Shirt style do you prefer the most?",
+    key: "shirtStyle",
+    options: [
+      { label: "Ruffle", imageUrl: calFShirtRuffle, style: "Casual" },
+      { label: "Classic", imageUrl: calFShirtClassic, style: "Formal" },
+      { label: "Oxford stripe", imageUrl: calFShirtOxford, style: "Casual" },
+      { label: "Sheer", imageUrl: calFShirtSheer, style: "Casual" },
+    ],
+  },
+  {
+    question: "Which Top style do you prefer the most?",
+    key: "topStyle",
+    options: [
+      { label: "Camisole", imageUrl: calFTopCami, style: "Casual" },
+      { label: "Ruffle", imageUrl: calFTopRuffle, style: "Casual" },
+      { label: "Asymmetric", imageUrl: calFTopAsymmetric, style: "Casual" },
+      { label: "Polo knit", imageUrl: calFTopPolo, style: "Casual" },
+    ],
+  },
+  {
+    question: "Which Dress style do you prefer the most?",
+    key: "dressStyle",
+    options: [
+      { label: "Midi", imageUrl: calFDressMidi, style: "Casual" },
+      { label: "Maxi", imageUrl: calFDressMaxi, style: "Formal" },
+      { label: "Mini", imageUrl: calFDressMini, style: "Formal" },
+      { label: "Trench dress", imageUrl: calFDressTrench, style: "Casual" },
+    ],
+  },
+];
+
 const Calibration = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [phase, setPhase] = useState<"questions" | "allSet" | "progress">("questions");
   const [loading, setLoading] = useState(false);
+  const [gender, setGender] = useState<"female" | "male">("male");
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  // Load gender from style profile
+  useEffect(() => {
+    if (!user) return;
+    const loadGender = async () => {
+      const { data } = await supabase
+        .from("style_profiles")
+        .select("preferences")
+        .eq("user_id", user.id)
+        .single();
+      const prefs = data?.preferences as any;
+      if (prefs?.gender === "female" || prefs?.gender === "male") {
+        setGender(prefs.gender);
+      }
+    };
+    loadGender();
+  }, [user]);
+
+  const calibrationSteps = gender === "female" ? femaleCalibrationSteps : maleCalibrationSteps;
   const totalSteps = calibrationSteps.length;
   const currentStepData = calibrationSteps[currentStep];
   const canProceed = !!answers[currentStepData?.key];
@@ -349,8 +471,9 @@ const Calibration = () => {
               {currentStepData.question}
             </h2>
 
-            <div className="flex gap-2 overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory scrollbar-hide">
-              {currentStepData.options.map((option, index) => {
+            {/* 3+1 grid layout matching reference */}
+            <div className="grid grid-cols-3 gap-3 max-w-md mx-auto">
+              {currentStepData.options.slice(0, 3).map((option, index) => {
                 const isActive = answers[currentStepData.key] === option.label;
                 return (
                   <motion.button
@@ -359,8 +482,7 @@ const Calibration = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.3, delay: index * 0.06, ease: [0.22, 1, 0.36, 1] }}
                     onClick={() => handleSelect(currentStepData.key, option.label)}
-                    className="flex-shrink-0 snap-start flex flex-col items-center"
-                    style={{ width: "calc(25% - 6px)", minWidth: "140px" }}
+                    className="flex flex-col items-center"
                   >
                     <div
                       className={`relative w-full aspect-[3/4] rounded-xl overflow-hidden transition-all bg-secondary ${
@@ -373,16 +495,15 @@ const Calibration = () => {
                         className="w-full h-full object-cover"
                         loading="lazy"
                       />
-                      {/* Radio circle at bottom-right */}
                       <div className="absolute bottom-2 right-2">
                         <div
-                          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shadow-sm ${
+                          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shadow-sm transition-all ${
                             isActive
                               ? "border-primary bg-primary"
                               : "border-white/80 bg-white/60 backdrop-blur-sm"
                           }`}
                         >
-                          {isActive && <div className="w-2.5 h-2.5 rounded-full bg-white" />}
+                          {isActive && <Check className="w-3 h-3 text-white" />}
                         </div>
                       </div>
                     </div>
@@ -390,6 +511,47 @@ const Calibration = () => {
                 );
               })}
             </div>
+            {/* 4th item centered below */}
+            {currentStepData.options[3] && (
+              <div className="flex justify-center mt-3 max-w-md mx-auto">
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                  onClick={() => handleSelect(currentStepData.key, currentStepData.options[3].label)}
+                  className="flex flex-col items-center"
+                  style={{ width: "calc(33.333% - 4px)" }}
+                >
+                  <div
+                    className={`relative w-full aspect-[3/4] rounded-xl overflow-hidden transition-all bg-secondary ${
+                      answers[currentStepData.key] === currentStepData.options[3].label
+                        ? "ring-2 ring-primary shadow-lg"
+                        : ""
+                    }`}
+                  >
+                    <img
+                      src={currentStepData.options[3].imageUrl}
+                      alt={currentStepData.options[3].label}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                    <div className="absolute bottom-2 right-2">
+                      <div
+                        className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shadow-sm transition-all ${
+                          answers[currentStepData.key] === currentStepData.options[3].label
+                            ? "border-primary bg-primary"
+                            : "border-white/80 bg-white/60 backdrop-blur-sm"
+                        }`}
+                      >
+                        {answers[currentStepData.key] === currentStepData.options[3].label && (
+                          <Check className="w-3 h-3 text-white" />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </motion.button>
+              </div>
+            )}
           </motion.div>
         </AnimatePresence>
       </div>
