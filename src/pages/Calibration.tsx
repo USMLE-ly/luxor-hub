@@ -51,7 +51,17 @@ interface CalibrationStep {
 
 const calibrationSteps: CalibrationStep[] = [
   {
-    question: "Which Trousers style do you prefer?",
+    question: "Which Jeans style do you prefer the most?",
+    key: "jeansStyle",
+    options: [
+      { label: "Wide-leg", imageUrl: calJeansWide, style: "Casual" },
+      { label: "Slim fit", imageUrl: calJeansSlim, style: "Casual" },
+      { label: "Skinny", imageUrl: calJeansSkinny, style: "Casual" },
+      { label: "Straight", imageUrl: calJeansStraight, style: "Casual" },
+    ],
+  },
+  {
+    question: "Which Trousers style do you prefer the most?",
     key: "trousersStyle",
     options: [
       { label: "Wide-leg", imageUrl: calTrousersWide, style: "Casual" },
@@ -61,7 +71,7 @@ const calibrationSteps: CalibrationStep[] = [
     ],
   },
   {
-    question: "Which Coat style do you prefer?",
+    question: "Which Coat style do you prefer the most?",
     key: "coatStyle",
     options: [
       { label: "Double-breasted", imageUrl: calCoatDouble, style: "Formal" },
@@ -71,7 +81,7 @@ const calibrationSteps: CalibrationStep[] = [
     ],
   },
   {
-    question: "Which T-shirt style do you prefer?",
+    question: "Which T-shirt style do you prefer the most?",
     key: "tshirtStyle",
     options: [
       { label: "Basic crew", imageUrl: calTshirtBasic, style: "Casual" },
@@ -81,7 +91,7 @@ const calibrationSteps: CalibrationStep[] = [
     ],
   },
   {
-    question: "Which Shirt style do you prefer?",
+    question: "Which Shirt style do you prefer the most?",
     key: "shirtStyle",
     options: [
       { label: "Classic", imageUrl: calShirtClassic, style: "Formal" },
@@ -91,7 +101,7 @@ const calibrationSteps: CalibrationStep[] = [
     ],
   },
   {
-    question: "Which Jacket style do you prefer?",
+    question: "Which Jacket style do you prefer the most?",
     key: "jacketStyle",
     options: [
       { label: "Biker", imageUrl: calJacketBiker, style: "Casual" },
@@ -101,17 +111,7 @@ const calibrationSteps: CalibrationStep[] = [
     ],
   },
   {
-    question: "Which Jeans style do you prefer?",
-    key: "jeansStyle",
-    options: [
-      { label: "Slim fit", imageUrl: calJeansSlim, style: "Casual" },
-      { label: "Straight", imageUrl: calJeansStraight, style: "Casual" },
-      { label: "Wide-leg", imageUrl: calJeansWide, style: "Casual" },
-      { label: "Skinny", imageUrl: calJeansSkinny, style: "Casual" },
-    ],
-  },
-  {
-    question: "Which Footwear style do you prefer?",
+    question: "Which Footwear style do you prefer the most?",
     key: "footwearStyle",
     options: [
       { label: "Loafers", imageUrl: calShoeLoafers, style: "Formal" },
@@ -349,18 +349,22 @@ const Calibration = () => {
               {currentStepData.question}
             </h2>
 
-            <div className="grid grid-cols-2 gap-3">
-              {currentStepData.options.map((option) => {
+            <div className="flex gap-2 overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory scrollbar-hide">
+              {currentStepData.options.map((option, index) => {
                 const isActive = answers[currentStepData.key] === option.label;
                 return (
-                  <button
+                  <motion.button
                     key={option.label}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3, delay: index * 0.06, ease: [0.22, 1, 0.36, 1] }}
                     onClick={() => handleSelect(currentStepData.key, option.label)}
-                    className="flex flex-col items-center"
+                    className="flex-shrink-0 snap-start flex flex-col items-center"
+                    style={{ width: "calc(25% - 6px)", minWidth: "140px" }}
                   >
                     <div
-                      className={`relative w-full aspect-[3/4] rounded-xl overflow-hidden mb-2 transition-all bg-secondary ${
-                        isActive ? "ring-2 ring-[hsl(43,74%,49%)] shadow-lg" : "ring-1 ring-border"
+                      className={`relative w-full aspect-[3/4] rounded-xl overflow-hidden transition-all bg-secondary ${
+                        isActive ? "ring-2 ring-primary shadow-lg" : ""
                       }`}
                     >
                       <img
@@ -369,29 +373,20 @@ const Calibration = () => {
                         className="w-full h-full object-cover"
                         loading="lazy"
                       />
-                      <div className="absolute top-2 right-2">
+                      {/* Radio circle at bottom-right */}
+                      <div className="absolute bottom-2 right-2">
                         <div
                           className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shadow-sm ${
                             isActive
-                              ? "border-[hsl(43,74%,49%)] bg-[hsl(43,74%,49%)]"
-                              : "border-white/80 bg-white/30 backdrop-blur-sm"
+                              ? "border-primary bg-primary"
+                              : "border-white/80 bg-white/60 backdrop-blur-sm"
                           }`}
                         >
-                          {isActive && <Check className="w-3.5 h-3.5 text-white" />}
+                          {isActive && <div className="w-2.5 h-2.5 rounded-full bg-white" />}
                         </div>
                       </div>
                     </div>
-                    <p className="font-sans text-sm font-medium text-foreground">{option.label}</p>
-                    <span
-                      className={`text-[10px] font-sans font-semibold uppercase tracking-wider mt-0.5 px-2 py-0.5 rounded-full ${
-                        option.style === "Formal"
-                          ? "bg-[hsl(45,80%,65%)]/20 text-[hsl(45,80%,45%)]"
-                          : "bg-[hsl(200,60%,65%)]/20 text-[hsl(200,60%,45%)]"
-                      }`}
-                    >
-                      {option.style}
-                    </span>
-                  </button>
+                  </motion.button>
                 );
               })}
             </div>
