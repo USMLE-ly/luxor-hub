@@ -1,7 +1,6 @@
 /**
- * Professional body shape illustrations matching Style DNA reference.
- * Full anatomical body outline with shape-specific overlay geometry
- * using peach fill + orange outline, dashed measurement lines.
+ * Professional body shape illustrations with exaggerated, distinct shape overlays.
+ * Each shape is visually obvious at a glance.
  */
 
 interface BodyShapeSvgProps {
@@ -11,7 +10,7 @@ interface BodyShapeSvgProps {
   className?: string;
 }
 
-// Female body outline — head, neck, shoulders, arms, torso curves, legs
+// Female body outline — head, neck, shoulders, arms, torso, legs
 const femaleBodyOutline = `
   M50,5 C54,5 57,8 57,12 C57,16 54,19 50,19 C46,19 43,16 43,12 C43,8 46,5 50,5
   M50,19 L50,22
@@ -37,98 +36,98 @@ const maleBodyOutline = `
   M64,27 L72,31 L75,38 L77,46 L78,52 L76,54
 `;
 
-// Female shape overlays — shaped to follow the torso contour
+// Female shape overlays — highly exaggerated for visual distinction
 const femaleShapeOverlays: Record<string, string> = {
-  // Hourglass: wide shoulders, narrow waist, wide hips
+  // Hourglass: very wide top & bottom, dramatically narrow waist
   Hourglass: `
-    M40,26 L60,26
-    L62,30 L60,36 L57,42 L55,46
-    L56,50 L58,54 L60,60 L60,66 L58,70
-    L42,70 L40,66 L40,60 L42,54 L44,50
-    L45,46 L43,42 L40,36 L38,30 Z
+    M38,25 L62,25
+    L64,30 L62,34 L58,38 L54,44 L52,48
+    L54,52 L58,56 L62,60 L64,66 L62,70
+    L38,70 L36,66 L38,60 L42,56 L46,52
+    L48,48 L46,44 L42,38 L38,34 L36,30 Z
   `,
-  // Triangle (pear): narrow shoulders, wide hips
+  // Triangle (pear): very narrow shoulders, very wide hips
   Triangle: `
-    M44,26 L56,26
-    L57,30 L56,36 L55,42 L54,46
-    L55,50 L57,54 L60,60 L62,66 L60,70
-    L40,70 L38,66 L40,60 L43,54 L45,50
-    L46,46 L45,42 L44,36 L43,30 Z
+    M45,25 L55,25
+    L56,30 L55,36 L54,42 L53,48
+    L54,52 L57,56 L62,62 L66,68 L64,70
+    L36,70 L34,68 L38,62 L43,56 L46,52
+    L47,48 L46,42 L45,36 L44,30 Z
   `,
-  // Inverted triangle: wide shoulders, narrow hips
+  // Inverted triangle: very wide shoulders, very narrow hips
   "Inverted triangle": `
-    M36,26 L64,26
-    L65,30 L63,36 L60,42 L58,46
-    L57,50 L56,54 L55,60 L54,66 L54,70
-    L46,70 L46,66 L45,60 L44,54 L43,50
-    L42,46 L40,42 L37,36 L35,30 Z
+    M32,25 L68,25
+    L67,30 L64,36 L60,42 L57,48
+    L56,52 L54,56 L53,62 L52,68 L52,70
+    L48,70 L48,68 L47,62 L46,56 L44,52
+    L43,48 L40,42 L36,36 L33,30 Z
   `,
-  // Rectangle: even proportions throughout
+  // Rectangle: very straight, even width throughout
   Rectangle: `
-    M42,26 L58,26
-    L59,30 L59,36 L58,42 L58,46
-    L58,50 L58,54 L59,60 L59,66 L58,70
-    L42,70 L41,66 L41,60 L42,54 L42,50
-    L42,46 L42,42 L41,36 L41,30 Z
+    M42,25 L58,25
+    L59,30 L59,36 L59,42 L59,48
+    L59,52 L59,56 L59,62 L59,68 L58,70
+    L42,70 L41,68 L41,62 L41,56 L41,52
+    L41,48 L41,42 L41,36 L41,30 Z
   `,
-  // Round: fuller midsection, curved shape
+  // Round: very full, circular midsection bulge
   Round: `
-    M44,26 L56,26
-    L58,30 L59,36
-    Q62,44 62,50
-    Q62,56 60,62
-    L58,66 L56,70
-    L44,70 L42,66 L40,62
-    Q38,56 38,50
-    Q38,44 41,36
+    M44,25 L56,25
+    L58,30 L60,36
+    Q66,46 66,52
+    Q66,58 62,64
+    L58,68 L56,70
+    L44,70 L42,68 L38,64
+    Q34,58 34,52
+    Q34,46 40,36
     L42,30 Z
   `,
 };
 
-// Male shape overlays
+// Male shape overlays — highly exaggerated
 const maleShapeOverlays: Record<string, string> = {
-  // Rectangle: even proportions
+  // Rectangle: perfectly straight sides
   Rectangle: `
-    M39,28 L61,28
-    L62,33 L62,40 L62,48 L62,52
-    L62,56 L62,62 L62,68 L61,73
-    L39,73 L38,68 L38,62 L38,56
-    L38,52 L38,48 L38,40 L38,33 Z
+    M40,27 L60,27
+    L61,32 L61,40 L61,48 L61,52
+    L61,58 L61,64 L61,70 L60,74
+    L40,74 L39,70 L39,64 L39,58
+    L39,52 L39,48 L39,40 L39,32 Z
   `,
-  // Triangle: narrow shoulders, wider lower
+  // Triangle: very narrow shoulders, very wide bottom
   Triangle: `
-    M43,28 L57,28
-    L58,33 L57,40 L56,48 L56,52
-    L57,56 L59,62 L62,68 L63,73
-    L37,73 L38,68 L41,62 L43,56
-    L44,52 L44,48 L43,40 L42,33 Z
+    M44,27 L56,27
+    L57,32 L56,40 L55,48 L55,52
+    L57,58 L61,64 L66,70 L65,74
+    L35,74 L34,70 L39,64 L43,58
+    L45,52 L45,48 L44,40 L43,32 Z
   `,
-  // Inverted triangle: broad shoulders, narrow waist/hips — V-shape
+  // Inverted triangle: very wide shoulders, very narrow hips — strong V
   "Inverted triangle": `
-    M32,28 L68,28
-    L67,33 L64,40 L61,48 L59,52
-    L58,56 L56,62 L55,68 L55,73
-    L45,73 L45,68 L44,62 L42,56
-    L41,52 L39,48 L36,40 L33,33 Z
+    M28,27 L72,27
+    L70,32 L66,40 L62,48 L59,52
+    L57,58 L55,64 L54,70 L54,74
+    L46,74 L46,70 L45,64 L43,58
+    L41,52 L38,48 L34,40 L30,32 Z
   `,
-  // Oval: fuller midsection
+  // Oval: very round, prominent belly area
   Oval: `
-    M42,28 L58,28
-    L60,33 L62,40
-    Q66,50 64,58
-    Q62,66 60,70 L58,73
-    L42,73 L40,70
-    Q38,66 36,58
-    Q34,50 38,40
-    L40,33 Z
+    M43,27 L57,27
+    L60,32 L63,40
+    Q70,52 66,62
+    Q62,70 58,74
+    L42,74
+    Q38,70 34,62
+    Q30,52 37,40
+    L40,32 Z
   `,
-  // Trapezoid: wide shoulders, slightly narrower waist, athletic
+  // Trapezoid: wide shoulders tapering to moderate hips
   Trapezoid: `
-    M34,28 L66,28
-    L65,33 L63,40 L61,48 L60,52
-    L60,56 L60,62 L60,68 L59,73
-    L41,73 L40,68 L40,62 L40,56
-    L40,52 L39,48 L37,40 L35,33 Z
+    M32,27 L68,27
+    L67,32 L64,40 L62,48 L61,52
+    L61,58 L61,64 L60,70 L59,74
+    L41,74 L40,70 L39,64 L39,58
+    L39,52 L38,48 L36,40 L33,32 Z
   `,
 };
 
@@ -146,7 +145,7 @@ const BodyShapeSvg = ({ shape, gender, size = 80, className = "" }: BodyShapeSvg
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        {/* Shape overlay first (behind outline for visual layering) */}
+        {/* Shape overlay first (behind outline) */}
         {overlayPath && (
           <path
             d={overlayPath}
@@ -159,7 +158,7 @@ const BodyShapeSvg = ({ shape, gender, size = 80, className = "" }: BodyShapeSvg
           />
         )}
 
-        {/* Body outline - thin dark strokes on top */}
+        {/* Body outline on top */}
         <path
           d={bodyOutline}
           stroke="hsl(0, 0%, 25%)"
@@ -172,9 +171,9 @@ const BodyShapeSvg = ({ shape, gender, size = 80, className = "" }: BodyShapeSvg
         {/* Dashed measurement lines */}
         {overlayPath && (
           <>
-            <line x1="28" y1="28" x2="72" y2="28" stroke="hsl(0,0%,40%)" strokeWidth="0.3" strokeDasharray="1.5,1.5" opacity="0.3" />
-            <line x1="28" y1="48" x2="72" y2="48" stroke="hsl(0,0%,40%)" strokeWidth="0.3" strokeDasharray="1.5,1.5" opacity="0.3" />
-            <line x1="28" y1="68" x2="72" y2="68" stroke="hsl(0,0%,40%)" strokeWidth="0.3" strokeDasharray="1.5,1.5" opacity="0.3" />
+            <line x1="26" y1="27" x2="74" y2="27" stroke="hsl(0,0%,40%)" strokeWidth="0.3" strokeDasharray="1.5,1.5" opacity="0.3" />
+            <line x1="26" y1="48" x2="74" y2="48" stroke="hsl(0,0%,40%)" strokeWidth="0.3" strokeDasharray="1.5,1.5" opacity="0.3" />
+            <line x1="26" y1="68" x2="74" y2="68" stroke="hsl(0,0%,40%)" strokeWidth="0.3" strokeDasharray="1.5,1.5" opacity="0.3" />
           </>
         )}
       </svg>

@@ -970,7 +970,35 @@ const StepRenderer = ({ step, answers, onSelect, gender, aiResults }: StepRender
     );
   }
 
+  const bodyShapeDescriptions: Record<string, Record<string, string>> = {
+    female: {
+      Hourglass: "Balanced shoulders & hips with a defined, narrow waist",
+      Triangle: "Narrower shoulders with wider hips and a fuller lower body",
+      "Inverted triangle": "Broader shoulders tapering to narrower hips",
+      Rectangle: "Even proportions with a straight, balanced silhouette",
+      Round: "Fuller midsection with soft, proportionate curves",
+    },
+    male: {
+      Rectangle: "Even proportions with a straight, balanced torso",
+      Triangle: "Narrower shoulders with a wider waist and solid lower body",
+      "Inverted triangle": "Broad shoulders tapering to a narrow waist — V-shaped",
+      Oval: "Fuller midsection with a rounded torso and proportionate limbs",
+      Trapezoid: "Wide shoulders with a slightly narrower waist — athletic build",
+    },
+  };
+
+  const faceShapeDescriptions: Record<string, string> = {
+    Oval: "Balanced proportions with a gently rounded jawline",
+    Round: "Equal width and length with soft, curved angles",
+    Square: "Strong, angular jawline with an equally wide forehead",
+    Heart: "Wider forehead tapering to a narrow, pointed chin",
+    Oblong: "Longer than wide with a straight, elongated cheek line",
+    Diamond: "Narrow forehead and jaw with prominent, wide cheekbones",
+  };
+
   if (step.type === "bodyShape") {
+    const genderKey = gender || "female";
+    const descriptions = bodyShapeDescriptions[genderKey] || {};
     return (
       <div>
         <h2 className="font-display text-2xl lg:text-3xl font-bold text-foreground text-center mb-6">
@@ -979,8 +1007,6 @@ const StepRenderer = ({ step, answers, onSelect, gender, aiResults }: StepRender
         <div className="flex flex-col gap-3">
           {step.options.map((option, index) => {
             const isActive = selected.includes(option);
-            const genderKey = gender || "female";
-            const shapeImg = bodyShapeImages[genderKey]?.[option];
             return (
               <motion.button
                 key={option}
@@ -997,8 +1023,11 @@ const StepRenderer = ({ step, answers, onSelect, gender, aiResults }: StepRender
                 <div className="w-16 h-20 flex items-center justify-center flex-shrink-0 bg-white/90 dark:bg-white/95 rounded-lg">
                   <BodyShapeSvg shape={option} gender={genderKey as "female" | "male"} size={52} />
                 </div>
-                <span className="font-sans font-medium text-foreground">{option}</span>
-                <div className={`ml-auto w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                <div className="flex-1 min-w-0">
+                  <span className="font-sans font-medium text-foreground block">{option}</span>
+                  <span className="font-sans text-xs text-muted-foreground leading-tight block mt-0.5">{descriptions[option]}</span>
+                </div>
+                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
                   isActive ? "border-foreground bg-foreground" : "border-muted-foreground/30 bg-background"
                 }`}>
                   {isActive && <Check className="h-3.5 w-3.5 text-background" />}
@@ -1035,8 +1064,11 @@ const StepRenderer = ({ step, answers, onSelect, gender, aiResults }: StepRender
                 <div className="w-14 h-16 flex items-center justify-center flex-shrink-0 bg-white/90 dark:bg-white/95 rounded-lg">
                   <FaceShapeSvg shape={option} size={44} />
                 </div>
-                <span className="font-sans font-medium text-foreground">{option}</span>
-                <div className={`ml-auto w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                <div className="flex-1 min-w-0">
+                  <span className="font-sans font-medium text-foreground block">{option}</span>
+                  <span className="font-sans text-xs text-muted-foreground leading-tight block mt-0.5">{faceShapeDescriptions[option]}</span>
+                </div>
+                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
                   isActive ? "border-foreground bg-foreground" : "border-muted-foreground/30 bg-background"
                 }`}>
                   {isActive && <Check className="h-3.5 w-3.5 text-background" />}
