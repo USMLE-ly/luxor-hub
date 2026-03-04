@@ -24,6 +24,17 @@ const sizes = ["3XS", "XXS", "XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5X
 
 export const sharedSteps: OnboardingStep[] = [
   {
+    question: "What's your biggest style challenge?",
+    key: "styleChallenge",
+    type: "checkbox",
+    options: [
+      "Knowing what looks good on me",
+      "Shopping taking forever",
+      "Wearing the same outfits on repeat",
+      "Wasting money on clothes I never wear",
+    ],
+  },
+  {
     question: "What's your main style goal?",
     key: "styleGoal",
     type: "checkbox",
@@ -235,8 +246,8 @@ export const maleSteps: OnboardingStep[] = [
 
 export function getStepsForGender(gender: "female" | "male"): OnboardingStep[] {
   return [
-    ...sharedSteps.slice(0, 7), // style goal through budget
+    ...sharedSteps.slice(0, 8), // style challenge, style goal through budget
     ...(gender === "female" ? femaleSteps : maleSteps),
-    ...sharedSteps.slice(7), // height, age, notifications, selfie steps, camera captures
+    ...sharedSteps.slice(8), // height, age, notifications, selfie steps, camera captures
   ];
 }
