@@ -74,6 +74,10 @@ import calFSkirtMini from "@/assets/cal-f-skirt-mini.jpg";
 import calFSkirtMidi from "@/assets/cal-f-skirt-midi.jpg";
 import calFSkirtMaxi from "@/assets/cal-f-skirt-maxi.jpg";
 import calFSkirtPleated from "@/assets/cal-f-skirt-pleated.jpg";
+import calFAccBag from "@/assets/cal-f-acc-bag.jpg";
+import calFAccJewelry from "@/assets/cal-f-acc-jewelry.jpg";
+import calFAccScarf from "@/assets/cal-f-acc-scarf.jpg";
+import calFAccHat from "@/assets/cal-f-acc-hat.jpg";
 
 // Style inspiration images
 import styleInspo1 from "@/assets/style-inspo-1.jpg";
@@ -254,6 +258,16 @@ const femaleCalibrationSteps: CalibrationStep[] = [
       { label: "Flats", imageUrl: calFShoeFlats, style: "Casual" },
       { label: "Boots", imageUrl: calFShoeBoots, style: "Casual" },
       { label: "Sandals", imageUrl: calFShoeSandals, style: "Casual" },
+    ],
+  },
+  {
+    question: "Which Accessory do you gravitate towards?",
+    key: "accessoryStyle",
+    options: [
+      { label: "Bags", imageUrl: calFAccBag, style: "Casual" },
+      { label: "Jewelry", imageUrl: calFAccJewelry, style: "Formal" },
+      { label: "Scarves", imageUrl: calFAccScarf, style: "Casual" },
+      { label: "Hats", imageUrl: calFAccHat, style: "Casual" },
     ],
   },
 ];
