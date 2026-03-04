@@ -498,10 +498,10 @@ const StepRenderer = ({ step, answers, onSelect }: StepRendererProps) => {
                   />
                 </svg>
                 <span className="font-sans font-medium text-foreground">{option}</span>
-                <div className={`ml-auto w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                  isActive ? "border-primary" : "border-muted-foreground/40"
+                <div className={`ml-auto w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                  isActive ? "border-primary bg-primary" : "border-muted-foreground/40"
                 }`}>
-                  {isActive && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
+                  {isActive && <Check className="h-3.5 w-3.5 text-primary-foreground" />}
                 </div>
               </button>
             );
@@ -547,10 +547,10 @@ const StepRenderer = ({ step, answers, onSelect }: StepRendererProps) => {
                 )}
               </div>
               {isSingle ? (
-                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                  isActive ? "border-primary" : "border-muted-foreground/40"
+                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                  isActive ? "border-primary bg-primary" : "border-muted-foreground/40"
                 }`}>
-                  {isActive && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
+                  {isActive && <Check className="h-3.5 w-3.5 text-primary-foreground" />}
                 </div>
               ) : (
                 <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${
