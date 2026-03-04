@@ -5,6 +5,7 @@ import type { OnboardingStep } from "./onboardingSteps";
 import FaceShapeIllustration from "@/components/app/FaceShapeIllustration";
 import BodyShapeIllustration from "@/components/app/BodyShapeIllustration";
 import BodyShapeSvg from "@/components/onboarding/BodyShapeSvg";
+import FaceShapeSvg from "@/components/onboarding/FaceShapeSvg";
 
 // Brand logo imports
 import brandZara from "@/assets/brand-zara.jpg";
@@ -995,6 +996,44 @@ const StepRenderer = ({ step, answers, onSelect, gender, aiResults }: StepRender
               >
                 <div className="w-16 h-20 flex items-center justify-center flex-shrink-0 bg-white/90 dark:bg-white/95 rounded-lg">
                   <BodyShapeSvg shape={option} gender={genderKey as "female" | "male"} size={52} />
+                </div>
+                <span className="font-sans font-medium text-foreground">{option}</span>
+                <div className={`ml-auto w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                  isActive ? "border-foreground bg-foreground" : "border-muted-foreground/30 bg-background"
+                }`}>
+                  {isActive && <Check className="h-3.5 w-3.5 text-background" />}
+                </div>
+              </motion.button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+  if (step.type === "faceShape") {
+    return (
+      <div>
+        <h2 className="font-display text-2xl lg:text-3xl font-bold text-foreground text-center mb-6">
+          {step.question}
+        </h2>
+        <div className="flex flex-col gap-3">
+          {step.options.map((option, index) => {
+            const isActive = selected.includes(option);
+            return (
+              <motion.button
+                key={option}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                onClick={() => onSelect(step.key, option, true)}
+                className={`flex items-center gap-4 p-3 rounded-2xl transition-all text-left active:scale-[0.98] ${
+                  isActive
+                    ? "bg-secondary ring-2 ring-foreground"
+                    : "bg-secondary/50"
+                }`}
+              >
+                <div className="w-14 h-16 flex items-center justify-center flex-shrink-0 bg-white/90 dark:bg-white/95 rounded-lg">
+                  <FaceShapeSvg shape={option} size={44} />
                 </div>
                 <span className="font-sans font-medium text-foreground">{option}</span>
                 <div className={`ml-auto w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${

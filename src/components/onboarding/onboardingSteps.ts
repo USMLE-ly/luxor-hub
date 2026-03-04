@@ -1,4 +1,4 @@
-export type StepType = "gender" | "checkbox" | "radio" | "sizeGrid" | "bodyShape" | "height" | "notification" | "selfieIntro" | "selfieGuide" | "cameraCapture" | "generating" | "detectionResult";
+export type StepType = "gender" | "checkbox" | "radio" | "sizeGrid" | "bodyShape" | "faceShape" | "height" | "notification" | "selfieIntro" | "selfieGuide" | "cameraCapture" | "generating" | "detectionResult";
 
 export interface BrandLogo {
   name: string;
@@ -257,6 +257,13 @@ export const femaleSteps: OnboardingStep[] = [
     forGender: "female",
   },
   {
+    question: "Which shape best describes your face?",
+    key: "faceShape",
+    type: "faceShape",
+    options: ["Oval", "Round", "Square", "Heart", "Oblong", "Diamond"],
+    forGender: "female",
+  },
+  {
     question: "Which size range best describes you?",
     key: "sizeRange",
     type: "radio",
@@ -274,6 +281,13 @@ export const maleSteps: OnboardingStep[] = [
     forGender: "male",
   },
   {
+    question: "Which shape best describes your face?",
+    key: "faceShape",
+    type: "faceShape",
+    options: ["Oval", "Round", "Square", "Heart", "Oblong", "Diamond"],
+    forGender: "male",
+  },
+  {
     question: "Which build best describes you?",
     key: "sizeRange",
     type: "radio",
@@ -285,7 +299,7 @@ export const maleSteps: OnboardingStep[] = [
 export function getStepsForGender(gender: "female" | "male"): OnboardingStep[] {
   return [
     ...sharedSteps.slice(0, 9), // challenge, goal, elevate, shopping, brands, sizes, styleKnowledge, unstyledClothes, budget
-    ...(gender === "female" ? femaleSteps : maleSteps), // bodyShape, sizeRange/build
+    ...(gender === "female" ? femaleSteps : maleSteps), // bodyShape, faceShape, sizeRange/build
     ...sharedSteps.slice(9), // height, age, notifications, selfie steps, camera captures
   ];
 }
