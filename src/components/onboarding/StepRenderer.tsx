@@ -1018,7 +1018,7 @@ const StepRenderer = ({ step, answers, onSelect, gender, aiResults }: StepRender
                         key={logo.name}
                         src={brandLogoMap[logo.image]}
                         alt={logo.name}
-                        className="h-10 w-auto object-contain rounded-md bg-background transition-transform duration-200 hover:scale-110 active:scale-95"
+                        className="h-10 w-auto object-contain rounded-md bg-background border border-border shadow-sm transition-transform duration-200 hover:scale-110 active:scale-95"
                       />
                     ))}
                   </div>
