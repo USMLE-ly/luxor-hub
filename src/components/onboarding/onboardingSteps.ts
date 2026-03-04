@@ -105,12 +105,19 @@ export const sharedSteps: OnboardingStep[] = [
     ],
   },
   {
+    question: "Do you have clothes in your Closet that you don't know how to style?",
+    key: "unstyledClothes",
+    type: "radio",
+    options: ["Totally", "Not really"],
+  },
+  {
     question: "Roughly how much do you spend on clothes per year?",
     key: "budget",
     type: "radio",
     subtitle: "Your wardrobe is an investment",
     options: ["$0 – $500", "$501 – $1,500", "$1,501 – $2,500", "$2,501 – $5,000", "Over $5,000"],
   },
+  // --- gender-specific steps inserted here via getStepsForGender ---
   {
     question: "Your height",
     key: "height",
@@ -198,43 +205,22 @@ export const sharedSteps: OnboardingStep[] = [
 
 export const femaleSteps: OnboardingStep[] = [
   {
-    question: "Which size range best describes you?",
-    key: "sizeRange",
-    type: "radio",
-    options: ["Regular", "Curvy", "Petite"],
-    forGender: "female",
-  },
-  {
-    question: "Do you have clothes in your Closet that you don't know how to style?",
-    key: "unstyledClothes",
-    type: "radio",
-    options: ["Totally", "Not really"],
-    forGender: "female",
-  },
-  {
     question: "Which shape best describes your body?",
     key: "bodyShape",
     type: "bodyShape",
     options: ["Hourglass", "Triangle", "Inverted triangle", "Rectangle", "Round"],
     forGender: "female",
   },
+  {
+    question: "Which size range best describes you?",
+    key: "sizeRange",
+    type: "radio",
+    options: ["Regular", "Curvy", "Petite"],
+    forGender: "female",
+  },
 ];
 
 export const maleSteps: OnboardingStep[] = [
-  {
-    question: "Which build best describes you?",
-    key: "sizeRange",
-    type: "radio",
-    options: ["Slim", "Regular", "Athletic", "Big & Tall"],
-    forGender: "male",
-  },
-  {
-    question: "Do you have clothes in your Closet that you don't know how to style?",
-    key: "unstyledClothes",
-    type: "radio",
-    options: ["Totally", "Not really"],
-    forGender: "male",
-  },
   {
     question: "Which shape best describes your body?",
     key: "bodyShape",
@@ -242,12 +228,19 @@ export const maleSteps: OnboardingStep[] = [
     options: ["Rectangle", "Triangle", "Inverted triangle", "Oval", "Trapezoid"],
     forGender: "male",
   },
+  {
+    question: "Which build best describes you?",
+    key: "sizeRange",
+    type: "radio",
+    options: ["Slim", "Regular", "Athletic", "Big & Tall"],
+    forGender: "male",
+  },
 ];
 
 export function getStepsForGender(gender: "female" | "male"): OnboardingStep[] {
   return [
-    ...sharedSteps.slice(0, 8), // style challenge, style goal through budget
-    ...(gender === "female" ? femaleSteps : maleSteps),
-    ...sharedSteps.slice(8), // height, age, notifications, selfie steps, camera captures
+    ...sharedSteps.slice(0, 9), // challenge, goal, elevate, shopping, brands, sizes, styleKnowledge, unstyledClothes, budget
+    ...(gender === "female" ? femaleSteps : maleSteps), // bodyShape, sizeRange/build
+    ...sharedSteps.slice(9), // height, age, notifications, selfie steps, camera captures
   ];
 }
