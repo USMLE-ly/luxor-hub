@@ -217,12 +217,116 @@ const SelfieGuideStep = ({ step, gender }: { step: OnboardingStep; gender?: "fem
   );
 };
 
+const LightingIndicator = () => {
+  const [level, setLevel] = useState(0.5);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setLevel(0.4 + Math.random() * 0.4); // simulate lighting fluctuation
+    }, 1200);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="absolute left-3 top-1/2 -translate-y-1/2 flex flex-col items-center gap-1 z-10 pointer-events-none">
+      <div className="w-2 rounded-full overflow-hidden relative" style={{ height: 120 }}>
+        <div
+          className="absolute inset-0 rounded-full"
+          style={{
+            background: "linear-gradient(to bottom, hsl(0,70%,55%), hsl(40,90%,55%), hsl(120,60%,45%))",
+          }}
+        />
+        <div
+          className="absolute left-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-white/80 shadow-md transition-all duration-700"
+          style={{ top: `${(1 - level) * 100}%`, transform: "translate(-50%, -50%)" }}
+        />
+      </div>
+    </div>
+  );
+};
+
+const faceLandmarks = [
+  // Forehead
+  { x: 50, y: 28 },
+  // Eyebrows
+  { x: 36, y: 36 }, { x: 44, y: 34 }, { x: 56, y: 34 }, { x: 64, y: 36 },
+  // Eyes
+  { x: 38, y: 42 }, { x: 42, y: 41 }, { x: 58, y: 41 }, { x: 62, y: 42 },
+  // Nose
+  { x: 50, y: 46 }, { x: 48, y: 52 }, { x: 50, y: 54 }, { x: 52, y: 52 },
+  // Mouth
+  { x: 43, y: 62 }, { x: 47, y: 64 }, { x: 50, y: 65 }, { x: 53, y: 64 }, { x: 57, y: 62 },
+  // Jaw
+  { x: 32, y: 48 }, { x: 34, y: 58 }, { x: 38, y: 68 }, { x: 44, y: 73 },
+  { x: 50, y: 75 }, { x: 56, y: 73 }, { x: 62, y: 68 }, { x: 66, y: 58 }, { x: 68, y: 48 },
+];
+
+const bodyLandmarks = [
+  // Head
+  { x: 50, y: 8 },
+  // Shoulders
+  { x: 35, y: 20 }, { x: 65, y: 20 },
+  // Elbows
+  { x: 28, y: 38 }, { x: 72, y: 38 },
+  // Wrists
+  { x: 25, y: 52 }, { x: 75, y: 52 },
+  // Torso
+  { x: 42, y: 28 }, { x: 58, y: 28 }, { x: 44, y: 42 }, { x: 56, y: 42 },
+  // Hips
+  { x: 40, y: 50 }, { x: 60, y: 50 },
+  // Knees
+  { x: 42, y: 68 }, { x: 58, y: 68 },
+  // Ankles
+  { x: 42, y: 85 }, { x: 58, y: 85 },
+];
+
+const AnalyzingOverlay = ({ isSelfie }: { isSelfie: boolean }) => {
+  const landmarks = isSelfie ? faceLandmarks : bodyLandmarks;
+  const [visibleCount, setVisibleCount] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setVisibleCount((prev) => Math.min(prev + 1, landmarks.length));
+    }, 80);
+    return () => clearInterval(interval);
+  }, [landmarks.length]);
+
+  return (
+    <div className="absolute inset-0 z-10 pointer-events-none">
+      {/* Scanning line */}
+      <motion.div
+        className="absolute left-0 right-0 h-[2px]"
+        style={{ background: "linear-gradient(90deg, transparent, hsl(120,60%,55%), transparent)" }}
+        initial={{ top: "10%" }}
+        animate={{ top: ["10%", "85%", "10%"] }}
+        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+      />
+      {/* Landmark dots */}
+      {landmarks.slice(0, visibleCount).map((pt, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_4px_rgba(255,255,255,0.8)]"
+          style={{ left: `${pt.x}%`, top: `${pt.y}%` }}
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: [0.6, 1, 0.6], scale: 1 }}
+          transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.05 }}
+        />
+      ))}
+      {/* Analyzing text */}
+      <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+        <span className="text-white font-sans text-sm font-semibold tracking-wide">Analyzing...</span>
+      </div>
+    </div>
+  );
+};
+
 const CameraCaptureStep = ({ step, answers, onSelect }: { step: OnboardingStep; answers: Record<string, string[]>; onSelect: StepRendererProps["onSelect"] }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(answers[step.key]?.[0] || null);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [facingMode, setFacingMode] = useState<"user" | "environment">(
     step.cameraMode === "selfie" ? "user" : "environment"
   );
@@ -265,7 +369,6 @@ const CameraCaptureStep = ({ step, answers, onSelect }: { step: OnboardingStep; 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     
-    // Mirror for selfie
     if (facingMode === "user") {
       ctx.translate(canvas.width, 0);
       ctx.scale(-1, 1);
@@ -274,12 +377,19 @@ const CameraCaptureStep = ({ step, answers, onSelect }: { step: OnboardingStep; 
     
     const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
     setCapturedImage(dataUrl);
-    onSelect(step.key, dataUrl, true);
+    setIsAnalyzing(true);
     stream?.getTracks().forEach((t) => t.stop());
+
+    // Simulate analysis then save
+    setTimeout(() => {
+      setIsAnalyzing(false);
+      onSelect(step.key, dataUrl, true);
+    }, 3000);
   };
 
   const handleRetake = () => {
     setCapturedImage(null);
+    setIsAnalyzing(false);
     onSelect(step.key, "", true);
     startCamera();
   };
@@ -311,7 +421,10 @@ const CameraCaptureStep = ({ step, answers, onSelect }: { step: OnboardingStep; 
             </button>
           </div>
         ) : capturedImage ? (
-          <img src={capturedImage} alt="Captured" className="w-full h-full object-cover" />
+          <>
+            <img src={capturedImage} alt="Captured" className="w-full h-full object-cover" />
+            {isAnalyzing && <AnalyzingOverlay isSelfie={isSelfie} />}
+          </>
         ) : (
           <>
             <video
@@ -321,6 +434,8 @@ const CameraCaptureStep = ({ step, answers, onSelect }: { step: OnboardingStep; 
               muted
               className={`w-full h-full object-cover ${facingMode === "user" ? "scale-x-[-1]" : ""}`}
             />
+            {/* Lighting quality indicator */}
+            <LightingIndicator />
             {/* Guide overlay */}
             {isSelfie && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -340,14 +455,14 @@ const CameraCaptureStep = ({ step, answers, onSelect }: { step: OnboardingStep; 
       </div>
 
       <div className="flex items-center gap-4 mt-6">
-        {capturedImage ? (
+        {capturedImage && !isAnalyzing ? (
           <button
             onClick={handleRetake}
             className="px-6 py-3 rounded-full bg-secondary text-foreground font-sans font-semibold text-sm"
           >
             Retake
           </button>
-        ) : (
+        ) : !capturedImage ? (
           <>
             <button
               onClick={toggleCamera}
@@ -361,9 +476,9 @@ const CameraCaptureStep = ({ step, answers, onSelect }: { step: OnboardingStep; 
             >
               <div className="w-12 h-12 rounded-full bg-[hsl(0,70%,68%)]" />
             </button>
-            <div className="w-12" /> {/* Spacer */}
+            <div className="w-12" />
           </>
-        )}
+        ) : null}
       </div>
     </div>
   );
