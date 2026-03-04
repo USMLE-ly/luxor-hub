@@ -254,24 +254,19 @@ const LightingIndicator = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setLevel(0.4 + Math.random() * 0.4); // simulate lighting fluctuation
+      setLevel(0.4 + Math.random() * 0.4);
     }, 1200);
     return () => clearInterval(interval);
   }, []);
 
+  const quality = level > 0.6 ? "Good" : level > 0.4 ? "Fair" : "Low";
+  const color = level > 0.6 ? "hsl(120,60%,55%)" : level > 0.4 ? "hsl(40,90%,55%)" : "hsl(0,70%,55%)";
+
   return (
-    <div className="absolute left-3 top-1/2 -translate-y-1/2 flex flex-col items-center gap-1 z-10 pointer-events-none">
-      <div className="w-2 rounded-full overflow-hidden relative" style={{ height: 120 }}>
-        <div
-          className="absolute inset-0 rounded-full"
-          style={{
-            background: "linear-gradient(to bottom, hsl(0,70%,55%), hsl(40,90%,55%), hsl(120,60%,45%))",
-          }}
-        />
-        <div
-          className="absolute left-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-white/80 shadow-md transition-all duration-700"
-          style={{ top: `${(1 - level) * 100}%`, transform: "translate(-50%, -50%)" }}
-        />
+    <div className="absolute top-4 right-4 z-10 pointer-events-none">
+      <div className="flex items-center gap-1.5 bg-black/50 backdrop-blur-sm rounded-full px-3 py-1.5">
+        <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: color }} />
+        <span className="text-white/90 text-[10px] font-sans font-medium tracking-wider uppercase">{quality} light</span>
       </div>
     </div>
   );
@@ -471,14 +466,48 @@ const CameraCaptureStep = ({ step, answers, onSelect }: { step: OnboardingStep; 
             {/* Guide overlay */}
             {isSelfie && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <svg viewBox="0 0 224 288" className="w-56 h-72" fill="none">
-                  <ellipse cx="112" cy="144" rx="100" ry="130" stroke="hsl(120, 60%, 55%)" strokeWidth="4" strokeDasharray="8 6" fill="none" />
-                </svg>
+                {/* Professional face scanning frame */}
+                <div className="relative w-56 h-72">
+                  {/* Corner brackets */}
+                  <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-white/70 rounded-tl-2xl" />
+                  <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-white/70 rounded-tr-2xl" />
+                  <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-white/70 rounded-bl-2xl" />
+                  <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-white/70 rounded-br-2xl" />
+                  {/* Subtle oval guide */}
+                  <svg viewBox="0 0 224 288" className="w-full h-full" fill="none">
+                    <ellipse cx="112" cy="144" rx="90" ry="120" stroke="white" strokeWidth="1" strokeDasharray="6 4" opacity="0.35" />
+                  </svg>
+                  {/* Center crosshair */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                    <div className="w-4 h-[1px] bg-white/40" />
+                    <div className="w-[1px] h-4 bg-white/40 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                  </div>
+                </div>
+                {/* Instruction text */}
+                <div className="absolute bottom-6 left-0 right-0 flex justify-center">
+                  <span className="text-white/80 text-xs font-sans tracking-wide bg-black/30 backdrop-blur-sm px-3 py-1 rounded-full">Position your face within the frame</span>
+                </div>
               </div>
             )}
             {!isSelfie && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-40 h-80 border-2 border-white/40 rounded-2xl" />
+                {/* Professional body scanning frame */}
+                <div className="relative w-44 h-[22rem]">
+                  {/* Corner brackets */}
+                  <div className="absolute top-0 left-0 w-10 h-10 border-t-2 border-l-2 border-white/70 rounded-tl-xl" />
+                  <div className="absolute top-0 right-0 w-10 h-10 border-t-2 border-r-2 border-white/70 rounded-tr-xl" />
+                  <div className="absolute bottom-0 left-0 w-10 h-10 border-b-2 border-l-2 border-white/70 rounded-bl-xl" />
+                  <div className="absolute bottom-0 right-0 w-10 h-10 border-b-2 border-r-2 border-white/70 rounded-br-xl" />
+                  {/* Subtle body silhouette guide */}
+                  <svg viewBox="0 0 176 352" className="w-full h-full" fill="none">
+                    <path d="M88,30 C88,30 70,30 70,50 C70,65 75,70 65,100 C55,130 50,140 50,170 C50,200 55,220 55,250 C55,280 50,310 50,330 M88,30 C88,30 106,30 106,50 C106,65 101,70 111,100 C121,130 126,140 126,170 C126,200 121,220 121,250 C121,280 126,310 126,330" stroke="white" strokeWidth="1" strokeDasharray="6 4" opacity="0.25" />
+                    <circle cx="88" cy="18" r="12" stroke="white" strokeWidth="1" strokeDasharray="4 3" opacity="0.25" />
+                  </svg>
+                </div>
+                {/* Instruction text */}
+                <div className="absolute bottom-6 left-0 right-0 flex justify-center">
+                  <span className="text-white/80 text-xs font-sans tracking-wide bg-black/30 backdrop-blur-sm px-3 py-1 rounded-full">Stand back and fit your full body</span>
+                </div>
               </div>
             )}
           </>
