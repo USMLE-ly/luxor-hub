@@ -4,6 +4,7 @@ import { Check, Camera, Smartphone, Video, User, FlipHorizontal } from "lucide-r
 import type { OnboardingStep } from "./onboardingSteps";
 import FaceShapeIllustration from "@/components/app/FaceShapeIllustration";
 import BodyShapeIllustration from "@/components/app/BodyShapeIllustration";
+import BodyShapeSvg from "@/components/onboarding/BodyShapeSvg";
 
 // Brand logo imports
 import brandZara from "@/assets/brand-zara.jpg";
@@ -992,11 +993,9 @@ const StepRenderer = ({ step, answers, onSelect, gender, aiResults }: StepRender
                     : "bg-secondary/50"
                 }`}
               >
-                {shapeImg ? (
-                  <img src={shapeImg} alt={option} className="w-14 h-20 object-contain flex-shrink-0" />
-                ) : (
-                  <div className="w-14 h-20 bg-muted rounded-lg flex-shrink-0" />
-                )}
+                <div className="w-16 h-20 flex items-center justify-center flex-shrink-0 bg-white/90 dark:bg-white/95 rounded-lg">
+                  <BodyShapeSvg shape={option} gender={genderKey as "female" | "male"} size={52} />
+                </div>
                 <span className="font-sans font-medium text-foreground">{option}</span>
                 <div className={`ml-auto w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
                   isActive ? "border-foreground bg-foreground" : "border-muted-foreground/30 bg-background"
