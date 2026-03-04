@@ -2,12 +2,12 @@ import { useRef, useState, useEffect } from "react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { ArrowUp } from "lucide-react";
 import Navbar from "@/components/landing/Navbar";
+import Hero from "@/components/landing/Hero";
 import HowItWorks from "@/components/landing/HowItWorks";
 import Features from "@/components/landing/Features";
 import Testimonials from "@/components/landing/Testimonials";
 import Pricing from "@/components/landing/Pricing";
 import Footer from "@/components/landing/Footer";
-import LuminaSlider from "@/components/ui/lumina-interactive-list";
 
 const ScrollProgressBar = () => {
   const [progress, setProgress] = useState(0);
@@ -76,7 +76,7 @@ const Index = () => {
       <BackToTop />
       <Navbar />
       <motion.div ref={heroRef} style={{ y: heroY, opacity: heroOpacity }}>
-        <LuminaSlider />
+        <Hero />
       </motion.div>
       <HowItWorks />
       <Features />

@@ -323,6 +323,35 @@ const Closet = () => {
           />
         </div>
 
+        {/* Occasion Outfit Tabs */}
+        <div className="mb-5">
+          <h2 className="font-sans font-semibold text-foreground text-sm mb-3">My Closet Outfits</h2>
+          <div className="grid grid-cols-4 gap-2 mb-3">
+            {[
+              { label: "Everyday", icon: "☀️", color: "hsl(142, 60%, 45%)" },
+              { label: "Weekend", icon: "🌸", color: "hsl(330, 60%, 55%)" },
+              { label: "Work", icon: "💼", color: "hsl(30, 80%, 55%)" },
+              { label: "Party", icon: "🎉", color: "hsl(270, 60%, 55%)" },
+            ].map((tab) => {
+              const count = items.filter(i => i.occasion?.toLowerCase() === tab.label.toLowerCase()).length;
+              return (
+                <button
+                  key={tab.label}
+                  className="flex flex-col items-center gap-1 p-3 rounded-xl bg-card border border-border hover:border-primary/40 transition-colors"
+                >
+                  <span className="text-lg">{tab.icon}</span>
+                  <span className="font-sans text-[10px] font-semibold text-foreground">{tab.label}</span>
+                  <span className="text-[9px] font-sans text-muted-foreground">{count} OUTFITS</span>
+                </button>
+              );
+            })}
+          </div>
+          <div className="rounded-xl border border-dashed border-border p-6 flex flex-col items-center justify-center text-center">
+            <Shirt className="h-8 w-8 text-muted-foreground mb-2" />
+            <p className="text-xs text-muted-foreground font-sans">Add your items to create outfits</p>
+          </div>
+        </div>
+
         {/* Category Pills */}
         <div className="flex gap-2 overflow-x-auto pb-3 mb-4 scrollbar-none">
           {filterPills.map((pill) => (
