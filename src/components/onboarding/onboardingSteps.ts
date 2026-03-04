@@ -1,4 +1,4 @@
-export type StepType = "gender" | "checkbox" | "radio" | "sizeGrid" | "bodyShape" | "height" | "notification" | "selfieIntro" | "selfieGuide" | "cameraCapture" | "generating";
+export type StepType = "gender" | "checkbox" | "radio" | "sizeGrid" | "bodyShape" | "height" | "notification" | "selfieIntro" | "selfieGuide" | "cameraCapture" | "generating" | "detectionResult";
 
 export interface OnboardingStep {
   question: string;
@@ -18,6 +18,8 @@ export interface OnboardingStep {
   brandLabels?: Record<string, string[]>;
   /** Camera mode: selfie or fullBody */
   cameraMode?: "selfie" | "fullBody";
+  /** Detection result mode: face or body */
+  detectionMode?: "face" | "body";
 }
 
 const sizes = ["3XS", "XXS", "XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL", "6XL", "7XL", "8XL", "9XL"];
@@ -188,12 +190,28 @@ export const sharedSteps: OnboardingStep[] = [
     description: "Position your face within the frame and tap capture",
   },
   {
+    question: "Face Shape Detected",
+    key: "faceResult",
+    type: "detectionResult",
+    options: [],
+    detectionMode: "face",
+    description: "Based on your facial proportions and features",
+  },
+  {
     question: "Now let's capture your full body",
     key: "fullBodyCapture",
     type: "cameraCapture",
     options: [],
     cameraMode: "fullBody",
     description: "Stand back and capture your full outfit for AI analysis",
+  },
+  {
+    question: "Body Shape Detected",
+    key: "bodyResult",
+    type: "detectionResult",
+    options: [],
+    detectionMode: "body",
+    description: "Based on your body proportions and silhouette",
   },
   {
     question: "Hold tight, we're generating your Style Formula!",
