@@ -660,6 +660,11 @@ const DetectionResultStep = ({ step, answers, gender, aiResults }: { step: Onboa
           )}
         </motion.div>
 
+        {/* Morphing face illustration during analysis */}
+        {isLoading && (
+          <FaceShapeIllustration shape="oval" size={80} morphing className="mb-4" />
+        )}
+
         {/* Detected shape */}
         <AnimatePresence>
           {revealed && !isLoading && (
@@ -746,6 +751,11 @@ const DetectionResultStep = ({ step, answers, gender, aiResults }: { step: Onboa
           </div>
         )}
       </motion.div>
+
+      {/* Morphing body illustration during analysis */}
+      {isLoading && (
+        <BodyShapeIllustration shape="rectangle" size={100} morphing className="mb-4" />
+      )}
 
       {/* Detected body shape */}
       <AnimatePresence>
