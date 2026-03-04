@@ -5,6 +5,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app/AppLayout";
 import Mannequin3D, { type ClothingItem, type BodyDNA, type PosePreset } from "@/components/app/Mannequin3D";
+import type { GarmentFit } from "@/components/app/GarmentGeometry";
+import type { FabricType } from "@/components/app/FabricMaterials";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import {
@@ -52,15 +54,28 @@ const MannequinView = () => {
     fetchData();
   }, [user]);
 
-  const addItem = (item: any) => {
+  const [pendingItem, setPendingItem] = useState<any>(null);
+  const [selectedFit, setSelectedFit] = useState<GarmentFit>("regular");
+  const [selectedFabric, setSelectedFabric] = useState<FabricType>("default");
+
+  const confirmAddItem = () => {
+    if (!pendingItem) return;
     const mapped: ClothingItem = {
-      category: item.category || "tops",
-      color: item.color || "navy",
-      name: item.name || item.category,
-      imageUrl: item.photo_url,
+      category: pendingItem.category || "tops",
+      color: pendingItem.color || "navy",
+      name: pendingItem.name || pendingItem.category,
+      imageUrl: pendingItem.photo_url,
+      fit: selectedFit,
+      fabric: selectedFabric,
     };
     setClothing((prev) => [...prev, mapped]);
-    setActivePanel(null);
+    setPendingItem(null);
+    setSelectedFit("regular");
+    setSelectedFabric("default");
+  };
+
+  const addItem = (item: any) => {
+    setPendingItem(item);
   };
 
   const removeItem = (index: number) => {
@@ -275,7 +290,72 @@ const MannequinView = () => {
               {/* Closet Panel */}
               {activePanel === "closet" && (
                 <>
-                  {closetItems.length === 0 ? (
+                  {pendingItem ? (
+                    <div className="p-4 space-y-4">
+                      <div className="flex items-center gap-3 mb-2">
+                        {pendingItem.photo_url ? (
+                          <img src={pendingItem.photo_url} alt={pendingItem.name} className="w-14 h-14 rounded-lg object-cover" />
+                        ) : (
+                          <div className="w-14 h-14 rounded-lg bg-muted flex items-center justify-center">
+                            <Shirt className="w-6 h-6 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-sm font-sans font-semibold text-foreground">{pendingItem.name || pendingItem.category}</p>
+                          <p className="text-xs text-muted-foreground font-sans">{pendingItem.category}</p>
+                        </div>
+                      </div>
+
+                      {/* Fit selector */}
+                      <div>
+                        <p className="text-xs font-sans font-medium text-foreground mb-2">Garment Fit</p>
+                        <div className="grid grid-cols-3 gap-2">
+                          {(["slim", "regular", "oversized"] as GarmentFit[]).map((f) => (
+                            <button
+                              key={f}
+                              onClick={() => setSelectedFit(f)}
+                              className={`py-2.5 rounded-xl text-xs font-sans font-medium capitalize transition-all ${
+                                selectedFit === f
+                                  ? "bg-primary text-primary-foreground"
+                                  : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+                              }`}
+                            >
+                              {f}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Fabric selector */}
+                      <div>
+                        <p className="text-xs font-sans font-medium text-foreground mb-2">Fabric Type</p>
+                        <div className="grid grid-cols-3 gap-2">
+                          {(["cotton", "denim", "leather", "wool", "silk", "synthetic", "canvas", "knit", "default"] as FabricType[]).map((f) => (
+                            <button
+                              key={f}
+                              onClick={() => setSelectedFabric(f)}
+                              className={`py-2 rounded-xl text-[11px] font-sans font-medium capitalize transition-all ${
+                                selectedFabric === f
+                                  ? "bg-primary text-primary-foreground"
+                                  : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+                              }`}
+                            >
+                              {f === "default" ? "Auto" : f}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" className="flex-1 rounded-xl" onClick={() => setPendingItem(null)}>
+                          Back
+                        </Button>
+                        <Button size="sm" className="flex-1 rounded-xl" onClick={confirmAddItem}>
+                          Add to Mannequin
+                        </Button>
+                      </div>
+                    </div>
+                  ) : closetItems.length === 0 ? (
                     <div className="p-8 text-center">
                       <p className="text-muted-foreground text-sm font-sans">No items in your closet yet.</p>
                       <Button onClick={() => navigate("/closet")} size="sm" className="mt-3 rounded-full">Go to Closet</Button>

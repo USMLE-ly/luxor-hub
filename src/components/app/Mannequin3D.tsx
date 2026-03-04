@@ -1,13 +1,32 @@
-import { useRef, useMemo, useEffect } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { useRef, useMemo } from "react";
+import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
+import {
+  createTopGeometry,
+  createPantLegGeometry,
+  createWaistbandGeometry,
+  createOuterwearGeometry,
+  createShoeGeometry,
+  createHatGeometry,
+  resolveSubtype,
+  type GarmentFit,
+  type GarmentSubtype,
+} from "./GarmentGeometry";
+import {
+  createFabricMaterial,
+  createTexturedMaterial,
+  guessFabric,
+  type FabricType,
+} from "./FabricMaterials";
 
 interface ClothingItem {
   category: string;
   color: string;
   name: string;
   imageUrl?: string;
+  fit?: GarmentFit;
+  fabric?: FabricType;
 }
 
 interface BodyDNA {
@@ -218,18 +237,30 @@ function SmoothBody({
 
   const poseData = POSES[pose];
 
-  // Clothing overlay helper
-  const clothingOverlays = useMemo(() => {
+  // Clothing overlay — new garment geometry system
+  const garmentData = useMemo(() => {
     return clothing.map((item) => {
-      const colorMap: Record<string, string> = {
-        black: "#1a1a1a", white: "#f0f0f0", navy: "#1e3a5f", blue: "#3b5998",
-        red: "#c0392b", green: "#27ae60", brown: "#8B6914", beige: "#d4b896",
-        gray: "#7f8c8d", cream: "#f5f0e1", olive: "#556b2f", burgundy: "#800020",
-      };
-      const color = colorMap[(item.color || "").toLowerCase()] || "#6b7b8d";
-      return { ...item, resolvedColor: color };
+      const subtype = resolveSubtype(item.category, item.name);
+      const fit: GarmentFit = item.fit || "regular";
+      const fabric: FabricType = item.fabric || guessFabric(item.category, item.name);
+      const mat = item.imageUrl
+        ? createTexturedMaterial(item.imageUrl, fabric, item.color || "gray")
+        : createFabricMaterial(item.color || "gray", fabric);
+      return { ...item, subtype, fit, fabric, mat };
     });
   }, [clothing]);
+
+  // Determine clothing category group for each item
+  const isTopCat = (s: GarmentSubtype) =>
+    s.includes("tshirt") || s.includes("shirt") || s.includes("sweater") || s.includes("hoodie") || s === "generic-top";
+  const isBottomCat = (s: GarmentSubtype) =>
+    s.includes("jeans") || s.includes("trousers") || s === "generic-bottom";
+  const isOuterCat = (s: GarmentSubtype) =>
+    s.includes("jacket") || s.includes("coat") || s === "generic-outerwear";
+  const isShoeCat = (s: GarmentSubtype) =>
+    s.includes("sneakers") || s.includes("boots") || s.includes("loafers") || s.includes("derby") || s === "generic-shoe";
+  const isHatCat = (s: GarmentSubtype) =>
+    s.includes("cap") || s.includes("beanie") || s.includes("fedora") || s === "generic-hat";
 
   return (
     <group ref={groupRef} scale={[heightScale, heightScale, heightScale]}>
@@ -304,58 +335,94 @@ function SmoothBody({
         <cylinderGeometry args={[0.3, 0.35, 0.04, 24]} />
       </mesh>
 
-      {/* Clothing overlays */}
-      {clothingOverlays.map((item, i) => {
-        const mat = new THREE.MeshStandardMaterial({
-          color: item.resolvedColor,
-          roughness: 0.85,
-          metalness: 0,
-          transparent: true,
-          opacity: 0.82,
-        });
-        const cat = item.category.toLowerCase();
-        if (["tops", "shirt", "t-shirt", "tshirt", "top"].includes(cat)) {
+      {/* ====== CLOTHING — New garment geometry system ====== */}
+      {garmentData.map((item, i) => {
+        // --- TOPS ---
+        if (isTopCat(item.subtype)) {
+          const { torso, sleeves } = createTopGeometry(item.subtype, item.fit, shoulderScale, waistScale);
           return (
             <group key={`clothing-${i}`}>
-              <mesh position={[0, 0.45, 0]} material={mat}>
-                <capsuleGeometry args={[0.25 * shoulderScale, 0.5, 12, 16]} />
-              </mesh>
+              <mesh geometry={torso} material={item.mat} position={[0, 0.45, 0]} />
+              {sleeves && (
+                <>
+                  {/* Left sleeve */}
+                  <mesh
+                    geometry={sleeves.geo}
+                    material={item.mat}
+                    position={[-(isMale ? 0.28 : 0.24) * shoulderScale, 0.82, 0]}
+                    rotation={[0, 0, 0.2]}
+                  />
+                  {/* Right sleeve */}
+                  <mesh
+                    geometry={sleeves.geo}
+                    material={item.mat}
+                    position={[(isMale ? 0.28 : 0.24) * shoulderScale, 0.82, 0]}
+                    rotation={[0, 0, -0.2]}
+                  />
+                </>
+              )}
             </group>
           );
         }
-        if (["bottoms", "trousers", "jeans", "pants", "bottom"].includes(cat)) {
+
+        // --- BOTTOMS ---
+        if (isBottomCat(item.subtype)) {
+          const legGeo = createPantLegGeometry(item.subtype, item.fit, hipScale, legScale);
+          const waistGeo = createWaistbandGeometry(hipScale, item.fit);
           return (
             <group key={`clothing-${i}`}>
-              <mesh position={[-0.1, -0.3, 0]} material={mat}>
-                <capsuleGeometry args={[0.08, 0.45 * legScale, 8, 12]} />
-              </mesh>
-              <mesh position={[0.1, -0.3, 0]} material={mat}>
-                <capsuleGeometry args={[0.08, 0.45 * legScale, 8, 12]} />
-              </mesh>
+              {/* Waistband */}
+              <mesh geometry={waistGeo} material={item.mat} position={[0, 0.0, 0]} />
+              {/* Left pant leg */}
+              <mesh geometry={legGeo} material={item.mat} position={[-0.1 * hipScale, -0.35, 0]} />
+              {/* Right pant leg */}
+              <mesh geometry={legGeo} material={item.mat} position={[0.1 * hipScale, -0.35, 0]} />
             </group>
           );
         }
-        if (["outerwear", "coat", "jacket"].includes(cat)) {
+
+        // --- OUTERWEAR ---
+        if (isOuterCat(item.subtype)) {
+          const { torso, collar } = createOuterwearGeometry(item.subtype, item.fit, shoulderScale, waistScale, hipScale);
           return (
             <group key={`clothing-${i}`}>
-              <mesh position={[0, 0.45, 0]} material={mat}>
-                <capsuleGeometry args={[0.28 * shoulderScale, 0.6, 12, 16]} />
-              </mesh>
+              <mesh geometry={torso} material={item.mat} position={[0, 0.45, 0]} />
+              {collar && (
+                <mesh geometry={collar} material={item.mat} position={[0, 0.96, 0]} />
+              )}
             </group>
           );
         }
-        if (["shoes", "footwear"].includes(cat)) {
+
+        // --- SHOES ---
+        if (isShoeCat(item.subtype)) {
+          const shoeGeo = createShoeGeometry(item.subtype);
           return (
             <group key={`clothing-${i}`}>
-              <mesh position={[-0.1, -0.95 * legScale, 0.05]} material={mat}>
-                <boxGeometry args={[0.12, 0.08, 0.24]} />
-              </mesh>
-              <mesh position={[0.1, -0.95 * legScale, 0.05]} material={mat}>
-                <boxGeometry args={[0.12, 0.08, 0.24]} />
-              </mesh>
+              <mesh geometry={shoeGeo} material={item.mat} position={[-0.1 * hipScale, -0.95 * legScale, 0.03]} />
+              <mesh geometry={shoeGeo} material={item.mat} position={[0.1 * hipScale, -0.95 * legScale, 0.03]} />
             </group>
           );
         }
+
+        // --- HATS ---
+        if (isHatCat(item.subtype)) {
+          const { crown, brim } = createHatGeometry(item.subtype);
+          return (
+            <group key={`clothing-${i}`} position={[0, 1.32, 0]}>
+              <mesh geometry={crown} material={item.mat} />
+              {brim && (
+                <mesh
+                  geometry={brim}
+                  material={item.mat}
+                  position={[0, -0.02, 0.04]}
+                  rotation={[-Math.PI / 2, 0, 0]}
+                />
+              )}
+            </group>
+          );
+        }
+
         return null;
       })}
     </group>
