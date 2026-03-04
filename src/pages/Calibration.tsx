@@ -36,6 +36,10 @@ import calShoeLoafers from "@/assets/cal-shoe-loafers.jpg";
 import calShoeChelsea from "@/assets/cal-shoe-chelsea.jpg";
 import calShoeSneakers from "@/assets/cal-shoe-sneakers.jpg";
 import calShoeDerby from "@/assets/cal-shoe-derby.jpg";
+import calSunglassesAviator from "@/assets/cal-sunglasses-aviator.jpg";
+import calSunglassesWayfarer from "@/assets/cal-sunglasses-wayfarer.jpg";
+import calSunglassesRound from "@/assets/cal-sunglasses-round.jpg";
+import calSunglassesSport from "@/assets/cal-sunglasses-sport.jpg";
 
 // Female calibration images
 import calFJeansWide from "@/assets/cal-f-jeans-wide.jpg";
@@ -169,6 +173,16 @@ const maleCalibrationSteps: CalibrationStep[] = [
       { label: "Chelsea boots", imageUrl: calShoeChelsea, style: "Formal" },
       { label: "Sneakers", imageUrl: calShoeSneakers, style: "Casual" },
       { label: "Derby shoes", imageUrl: calShoeDerby, style: "Formal" },
+    ],
+  },
+  {
+    question: "Which Sunglasses style do you prefer the most?",
+    key: "sunglassesStyle",
+    options: [
+      { label: "Aviator", imageUrl: calSunglassesAviator, style: "Casual" },
+      { label: "Wayfarer", imageUrl: calSunglassesWayfarer, style: "Casual" },
+      { label: "Round", imageUrl: calSunglassesRound, style: "Casual" },
+      { label: "Sport", imageUrl: calSunglassesSport, style: "Casual" },
     ],
   },
 ];
