@@ -1,7 +1,6 @@
 /**
- * Face shape SVG illustrations for onboarding selection.
- * Shows a face outline with the specific shape geometry overlay
- * using peach fill + orange outline, matching body shape style.
+ * Face shape SVG illustrations with exaggerated, visually distinct outlines.
+ * Each face shape is immediately recognizable at a glance.
  */
 
 interface FaceShapeSvgProps {
@@ -10,7 +9,7 @@ interface FaceShapeSvgProps {
   className?: string;
 }
 
-// Base face outline — eyes, nose, mouth hints
+// Subtle facial features
 const faceFeatures = `
   M40,42 C40,40 43,39 44,41
   M56,41 C57,39 60,40 60,42
@@ -18,31 +17,37 @@ const faceFeatures = `
   M45,60 Q50,64 55,60
 `;
 
-// Face shape outlines with specific geometry
+// Exaggerated face shape outlines — very distinct from each other
 const faceShapePaths: Record<string, { outline: string; overlay: string }> = {
+  // Oval: classic egg shape, narrower at forehead and chin, widest at cheeks
   Oval: {
-    outline: `M50,12 C68,12 80,28 80,44 C80,62 70,80 60,86 C56,88 44,88 40,86 C30,80 20,62 20,44 C20,28 32,12 50,12 Z`,
-    overlay: `M50,14 C66,14 78,29 78,44 C78,61 69,78 59,84 C55,86 45,86 41,84 C31,78 22,61 22,44 C22,29 34,14 50,14 Z`,
+    outline: `M50,10 C70,10 82,30 82,46 C82,64 72,82 62,88 C57,91 43,91 38,88 C28,82 18,64 18,46 C18,30 30,10 50,10 Z`,
+    overlay: `M50,13 C68,13 79,31 79,46 C79,63 70,80 61,86 C56,89 44,89 39,86 C30,80 21,63 21,46 C21,31 32,13 50,13 Z`,
   },
+  // Round: perfect circle, equal width and height
   Round: {
-    outline: `M50,14 C72,14 84,30 84,50 C84,70 72,86 50,86 C28,86 16,70 16,50 C16,30 28,14 50,14 Z`,
-    overlay: `M50,16 C70,16 82,31 82,50 C82,69 70,84 50,84 C30,84 18,69 18,50 C18,31 30,16 50,16 Z`,
+    outline: `M50,12 C74,12 88,28 88,50 C88,72 74,88 50,88 C26,88 12,72 12,50 C12,28 26,12 50,12 Z`,
+    overlay: `M50,15 C72,15 85,30 85,50 C85,70 72,85 50,85 C28,85 15,70 15,50 C15,30 28,15 50,15 Z`,
   },
+  // Square: very angular, strong jaw, flat forehead, boxy
   Square: {
-    outline: `M24,16 L76,16 C78,16 80,18 80,20 L82,58 C82,70 74,84 62,88 C56,90 44,90 38,88 C26,84 18,70 18,58 L20,20 C20,18 22,16 24,16 Z`,
-    overlay: `M26,18 L74,18 C76,18 78,20 78,22 L80,57 C80,69 73,82 61,86 C56,88 44,88 39,86 C27,82 20,69 20,57 L22,22 C22,20 24,18 26,18 Z`,
+    outline: `M20,14 L80,14 C82,14 84,16 84,18 L86,56 C86,70 76,86 64,90 C58,92 42,92 36,90 C24,86 14,70 14,56 L16,18 C16,16 18,14 20,14 Z`,
+    overlay: `M23,17 L77,17 C79,17 81,19 81,21 L83,55 C83,68 74,83 63,87 C57,89 43,89 37,87 C26,83 17,68 17,55 L19,21 C19,19 21,17 23,17 Z`,
   },
+  // Heart: very wide forehead, dramatically narrow pointed chin
   Heart: {
-    outline: `M50,14 C64,14 78,20 82,34 C84,46 78,64 68,76 C62,84 56,88 50,90 C44,88 38,84 32,76 C22,64 16,46 18,34 C22,20 36,14 50,14 Z`,
-    overlay: `M50,16 C63,16 76,22 80,35 C82,46 76,63 67,74 C61,82 55,86 50,88 C45,86 39,82 33,74 C24,63 18,46 20,35 C24,22 37,16 50,16 Z`,
+    outline: `M50,10 C66,10 84,18 88,36 C90,50 82,68 70,80 C62,88 56,94 50,96 C44,94 38,88 30,80 C18,68 10,50 12,36 C16,18 34,10 50,10 Z`,
+    overlay: `M50,13 C64,13 81,20 85,37 C87,49 80,66 69,78 C61,86 55,91 50,93 C45,91 39,86 31,78 C20,66 13,49 15,37 C19,20 36,13 50,13 Z`,
   },
+  // Oblong: very elongated, much taller than wide
   Oblong: {
-    outline: `M50,8 C66,8 78,20 78,32 L80,56 C80,70 72,86 60,90 C56,92 44,92 40,90 C28,86 20,70 20,56 L22,32 C22,20 34,8 50,8 Z`,
-    overlay: `M50,10 C64,10 76,21 76,33 L78,55 C78,69 71,84 59,88 C55,90 45,90 41,88 C29,84 22,69 22,55 L24,33 C24,21 36,10 50,10 Z`,
+    outline: `M50,4 C66,4 76,18 76,30 L78,54 C78,70 70,88 60,92 C56,94 44,94 40,92 C30,88 22,70 22,54 L24,30 C24,18 34,4 50,4 Z`,
+    overlay: `M50,7 C64,7 73,20 73,31 L75,53 C75,68 68,85 59,89 C55,91 45,91 41,89 C32,85 25,68 25,53 L27,31 C27,20 36,7 50,7 Z`,
   },
+  // Diamond: very narrow forehead & chin, extremely wide cheekbones
   Diamond: {
-    outline: `M50,12 C56,12 66,28 76,46 C80,52 80,56 76,62 C66,78 58,88 50,88 C42,88 34,78 24,62 C20,56 20,52 24,46 C34,28 44,12 50,12 Z`,
-    overlay: `M50,14 C55,14 64,30 74,47 C78,53 78,56 74,61 C65,76 57,86 50,86 C43,86 35,76 26,61 C22,56 22,53 26,47 C36,30 45,14 50,14 Z`,
+    outline: `M50,8 C54,8 62,22 74,42 C82,54 82,58 74,68 C62,82 56,92 50,92 C44,92 38,82 26,68 C18,58 18,54 26,42 C38,22 46,8 50,8 Z`,
+    overlay: `M50,12 C53,12 60,24 72,43 C79,54 79,57 72,66 C61,80 55,89 50,89 C45,89 39,80 28,66 C21,57 21,54 28,43 C40,24 47,12 50,12 Z`,
   },
 };
 
@@ -89,9 +94,9 @@ const FaceShapeSvg = ({ shape, size = 60, className = "" }: FaceShapeSvgProps) =
           opacity="0.4"
         />
 
-        {/* Dashed vertical/horizontal guides */}
-        <line x1="50" y1="8" x2="50" y2="92" stroke="hsl(0,0%,40%)" strokeWidth="0.3" strokeDasharray="2,2" opacity="0.2" />
-        <line x1="16" y1="50" x2="84" y2="50" stroke="hsl(0,0%,40%)" strokeWidth="0.3" strokeDasharray="2,2" opacity="0.2" />
+        {/* Dashed guides */}
+        <line x1="50" y1="4" x2="50" y2="96" stroke="hsl(0,0%,40%)" strokeWidth="0.3" strokeDasharray="2,2" opacity="0.2" />
+        <line x1="10" y1="50" x2="90" y2="50" stroke="hsl(0,0%,40%)" strokeWidth="0.3" strokeDasharray="2,2" opacity="0.2" />
       </svg>
     </div>
   );
