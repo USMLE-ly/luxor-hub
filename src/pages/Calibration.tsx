@@ -78,6 +78,10 @@ import calFAccBag from "@/assets/cal-f-acc-bag.jpg";
 import calFAccJewelry from "@/assets/cal-f-acc-jewelry.jpg";
 import calFAccScarf from "@/assets/cal-f-acc-scarf.jpg";
 import calFAccHat from "@/assets/cal-f-acc-hat.jpg";
+import calFSunglassesAviator from "@/assets/cal-f-sunglasses-aviator.jpg";
+import calFSunglassesCateye from "@/assets/cal-f-sunglasses-cateye.jpg";
+import calFSunglassesRound from "@/assets/cal-f-sunglasses-round.jpg";
+import calFSunglassesOversized from "@/assets/cal-f-sunglasses-oversized.jpg";
 
 // Style inspiration images
 import styleInspo1 from "@/assets/style-inspo-1.jpg";
@@ -268,6 +272,16 @@ const femaleCalibrationSteps: CalibrationStep[] = [
       { label: "Jewelry", imageUrl: calFAccJewelry, style: "Formal" },
       { label: "Scarves", imageUrl: calFAccScarf, style: "Casual" },
       { label: "Hats", imageUrl: calFAccHat, style: "Casual" },
+    ],
+  },
+  {
+    question: "Which Sunglasses style do you prefer the most?",
+    key: "sunglassesStyle",
+    options: [
+      { label: "Aviator", imageUrl: calFSunglassesAviator, style: "Casual" },
+      { label: "Cat-eye", imageUrl: calFSunglassesCateye, style: "Formal" },
+      { label: "Round", imageUrl: calFSunglassesRound, style: "Casual" },
+      { label: "Oversized", imageUrl: calFSunglassesOversized, style: "Casual" },
     ],
   },
 ];
