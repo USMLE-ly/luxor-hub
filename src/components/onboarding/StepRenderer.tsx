@@ -1,6 +1,20 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Check, Camera, Smartphone, Video, User, FlipHorizontal } from "lucide-react";
 import type { OnboardingStep } from "./onboardingSteps";
+import selfieIntroImg from "@/assets/selfie-intro.jpg";
+import selfieStep1Img from "@/assets/selfie-step1.jpg";
+import selfieStep2Img from "@/assets/selfie-step2.jpg";
+import selfieStep3Img from "@/assets/selfie-step3.jpg";
+import selfieStep4Img from "@/assets/selfie-step4.jpg";
+import selfieStep5Img from "@/assets/selfie-step5.jpg";
+
+const selfieStepImages: Record<number, string> = {
+  1: selfieStep1Img,
+  2: selfieStep2Img,
+  3: selfieStep3Img,
+  4: selfieStep4Img,
+  5: selfieStep5Img,
+};
 
 interface StepRendererProps {
   step: OnboardingStep;
@@ -133,14 +147,7 @@ const SelfieIntroStep = ({ step }: { step: OnboardingStep }) => {
   return (
     <div className="flex flex-col items-center text-center pt-12">
       <div className="w-48 h-48 mb-8 flex items-center justify-center">
-        <svg viewBox="0 0 200 200" className="w-full h-full" fill="none" stroke="hsl(var(--foreground))" strokeWidth="1.5">
-          <circle cx="85" cy="55" r="25" />
-          <path d="M60,80 Q60,130 70,160 L100,160 Q110,130 110,80" />
-          <path d="M110,90 Q130,70 140,60 L145,55" />
-          <rect x="135" y="45" width="18" height="30" rx="3" />
-          <path d="M155,40 L157,35 L159,40 L164,42 L159,44 L157,49 L155,44 L150,42 Z" fill="hsl(40,80%,55%)" stroke="none" />
-          <path d="M145,30 L146,27 L147,30 L150,31 L147,32 L146,35 L145,32 L142,31 Z" fill="hsl(40,80%,55%)" stroke="none" />
-        </svg>
+        <img src={selfieIntroImg} alt="Style analysis" className="w-full h-full object-contain" />
       </div>
       <h2 className="font-display text-2xl lg:text-3xl font-bold text-foreground mb-3">
         {step.question}
@@ -151,22 +158,23 @@ const SelfieIntroStep = ({ step }: { step: OnboardingStep }) => {
 };
 
 const SelfieGuideStep = ({ step }: { step: OnboardingStep }) => {
+  const stepImg = step.stepNumber ? selfieStepImages[step.stepNumber] : null;
   return (
     <div className="flex flex-col items-center">
       <div className="w-full aspect-[3/4] rounded-2xl bg-secondary/50 mb-6 flex items-center justify-center overflow-hidden relative">
-        {step.stepNumber === 5 ? (
-          /* Step 5: show green dashed oval preview */
-          <div className="absolute inset-0 bg-black/80 flex items-center justify-center">
-            <div className="w-56 h-72 relative">
-              <svg viewBox="0 0 224 288" className="w-full h-full" fill="none">
-                <ellipse cx="112" cy="144" rx="100" ry="130" stroke="hsl(120, 60%, 55%)" strokeWidth="4" strokeDasharray="8 6" fill="none" />
-              </svg>
-            </div>
-          </div>
+        {stepImg ? (
+          <img src={stepImg} alt={step.question} className="w-full h-full object-contain" />
         ) : (
           <div className="text-center">
             <Camera className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
             <Smartphone className="w-8 h-8 text-muted-foreground mx-auto" />
+          </div>
+        )}
+        {step.stepNumber === 5 && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <svg viewBox="0 0 224 288" className="w-56 h-72" fill="none">
+              <ellipse cx="112" cy="144" rx="100" ry="130" stroke="hsl(120, 60%, 55%)" strokeWidth="4" strokeDasharray="8 6" fill="none" />
+            </svg>
           </div>
         )}
       </div>
