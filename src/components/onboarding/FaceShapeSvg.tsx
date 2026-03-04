@@ -36,8 +36,8 @@ const faceShapePaths: Record<string, { outline: string; overlay: string }> = {
   },
   // Heart: very wide forehead, dramatically narrow pointed chin
   Heart: {
-    outline: `M50,10 C66,10 84,18 88,36 C90,50 82,68 70,80 C62,88 56,94 50,96 C44,94 38,88 30,80 C18,68 10,50 12,36 C16,18 34,10 50,10 Z`,
-    overlay: `M50,13 C64,13 81,20 85,37 C87,49 80,66 69,78 C61,86 55,91 50,93 C45,91 39,86 31,78 C20,66 13,49 15,37 C19,20 36,13 50,13 Z`,
+    outline: `M50,10 C68,10 88,18 90,36 C92,50 84,66 72,78 C64,86 56,94 50,98 C44,94 36,86 28,78 C16,66 8,50 10,36 C12,18 32,10 50,10 Z`,
+    overlay: `M50,13 C66,13 85,20 87,37 C89,49 82,64 71,76 C63,84 55,92 50,95 C45,92 37,84 29,76 C18,64 11,49 13,37 C15,20 34,13 50,13 Z`,
   },
   // Oblong: very elongated, much taller than wide
   Oblong: {
@@ -46,8 +46,8 @@ const faceShapePaths: Record<string, { outline: string; overlay: string }> = {
   },
   // Diamond: very narrow forehead & chin, extremely wide cheekbones
   Diamond: {
-    outline: `M50,8 C54,8 62,22 74,42 C82,54 82,58 74,68 C62,82 56,92 50,92 C44,92 38,82 26,68 C18,58 18,54 26,42 C38,22 46,8 50,8 Z`,
-    overlay: `M50,12 C53,12 60,24 72,43 C79,54 79,57 72,66 C61,80 55,89 50,89 C45,89 39,80 28,66 C21,57 21,54 28,43 C40,24 47,12 50,12 Z`,
+    outline: `M50,6 C54,6 58,16 78,40 C90,54 90,58 78,70 C62,84 56,94 50,94 C44,94 38,84 22,70 C10,58 10,54 22,40 C42,16 46,6 50,6 Z`,
+    overlay: `M50,10 C53,10 56,18 76,41 C87,54 87,57 76,68 C61,82 55,91 50,91 C45,91 39,82 24,68 C13,57 13,54 24,41 C44,18 47,10 50,10 Z`,
   },
 };
 
