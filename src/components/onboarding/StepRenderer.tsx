@@ -483,10 +483,10 @@ const StepRenderer = ({ step, answers, onSelect }: StepRendererProps) => {
               <button
                 key={option}
                 onClick={() => onSelect(step.key, option, true)}
-                className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left active:scale-[0.98] ${
+                className={`flex items-center gap-4 p-4 rounded-2xl transition-all text-left active:scale-[0.98] ${
                   isActive
-                    ? "border-primary bg-primary/10 shadow-sm ring-1 ring-primary/20"
-                    : "border-border bg-secondary/30 hover:border-muted-foreground/40"
+                    ? "bg-secondary ring-2 ring-foreground"
+                    : "bg-secondary/50"
                 }`}
               >
                 <svg width="50" height="80" viewBox="0 0 80 80" className="flex-shrink-0">
@@ -499,9 +499,9 @@ const StepRenderer = ({ step, answers, onSelect }: StepRendererProps) => {
                 </svg>
                 <span className="font-sans font-medium text-foreground">{option}</span>
                 <div className={`ml-auto w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                  isActive ? "border-primary bg-primary" : "border-muted-foreground/40"
+                  isActive ? "border-foreground bg-foreground" : "border-muted-foreground/30 bg-background"
                 }`}>
-                  {isActive && <Check className="h-3.5 w-3.5 text-primary-foreground" />}
+                  {isActive && <Check className="h-3.5 w-3.5 text-background" />}
                 </div>
               </button>
             );
@@ -528,16 +528,16 @@ const StepRenderer = ({ step, answers, onSelect }: StepRendererProps) => {
             <button
               key={option}
               onClick={() => onSelect(step.key, option, isSingle)}
-              className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all text-left active:scale-[0.98] ${
+              className={`flex items-center justify-between p-4 rounded-2xl transition-all text-left active:scale-[0.98] ${
                 isActive
-                  ? "border-primary bg-primary/10 shadow-sm ring-1 ring-primary/20"
-                  : "border-border bg-secondary/30 hover:border-muted-foreground/40"
+                  ? "bg-secondary ring-2 ring-foreground"
+                  : "bg-secondary/50"
               }`}
             >
               <div className="flex-1 pr-2">
                 <span className="font-sans text-sm text-foreground">{option}</span>
                 {brands && (
-                  <div className="flex flex-wrap gap-2 mt-1.5">
+                  <div className="flex flex-wrap gap-3 mt-1.5">
                     {brands.map((brand) => (
                       <span key={brand} className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
                         {brand}
@@ -548,15 +548,15 @@ const StepRenderer = ({ step, answers, onSelect }: StepRendererProps) => {
               </div>
               {isSingle ? (
                 <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                  isActive ? "border-primary bg-primary" : "border-muted-foreground/40"
+                  isActive ? "border-foreground bg-foreground" : "border-muted-foreground/30 bg-background"
                 }`}>
-                  {isActive && <Check className="h-3.5 w-3.5 text-primary-foreground" />}
+                  {isActive && <Check className="h-3.5 w-3.5 text-background" />}
                 </div>
               ) : (
-                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${
-                  isActive ? "border-primary bg-primary" : "border-muted-foreground/40"
+                <div className={`w-5 h-5 rounded-[4px] border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                  isActive ? "border-foreground bg-foreground" : "border-muted-foreground/30 bg-background"
                 }`}>
-                  {isActive && <Check className="h-3 w-3 text-primary-foreground" />}
+                  {isActive && <Check className="h-3 w-3 text-background" />}
                 </div>
               )}
             </button>

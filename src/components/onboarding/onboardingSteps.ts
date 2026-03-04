@@ -24,31 +24,36 @@ const sizes = ["3XS", "XXS", "XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5X
 
 export const sharedSteps: OnboardingStep[] = [
   {
-    question: "What's your biggest style challenge?",
-    key: "styleChallenge",
+    question: "What's your main style goal?",
+    key: "styleGoal",
     type: "checkbox",
     options: [
-      "Knowing what looks good on me",
-      "Shopping taking forever",
-      "Wearing the same outfits on repeat",
-      "Wasting money on clothes I never wear",
+      "Learning how to complement my natural features",
+      "Looking chic and fashionable",
+      "Standing out from the crowd",
+      "Shopping smart and buying less",
     ],
   },
   {
-    question: "Do you ever avoid events because you don't have the right outfit?",
-    key: "avoidEvents",
+    question: "How do you want Style DNA to elevate your style?",
+    key: "elevateStyle",
     type: "radio",
-    options: ["Yes, often", "Sometimes", "Not really", "Never"],
+    options: [
+      "Create a color palette and personalized style guide",
+      "Tell me whether or not an item suits me before I buy it",
+      "Mix and match items I already own to create brand-new looks",
+      "Create new and unique looks from brands I love to improve my personal style",
+    ],
   },
   {
     question: "Tell us about your shopping experience",
     key: "shoppingExperience",
     type: "radio",
     options: [
-      "I avoid it – too overwhelming",
-      "I stick to what I know",
-      "I buy impulsively, regret later",
-      "My stylist does most of it",
+      "I generally feel pleased with most of my purchases",
+      "I return most items",
+      "I spend a lot of time trying to find clothes I feel confident and comfortable in",
+      "I don't buy clothes very often because I believe nothing suits me",
     ],
   },
   {
@@ -75,6 +80,17 @@ export const sharedSteps: OnboardingStep[] = [
     subGroups: [
       { label: "Tops", options: sizes },
       { label: "Bottoms", options: sizes },
+    ],
+  },
+  {
+    question: "How well do you know your style?",
+    key: "styleKnowledge",
+    type: "checkbox",
+    options: [
+      "I know what colors suit my skin tone",
+      "I know which prints and silhouettes suit my body type",
+      "I'm not entirely sure... but I can't wait to find out!",
+      "I'm a professional stylist",
     ],
   },
   {
@@ -171,6 +187,13 @@ export const sharedSteps: OnboardingStep[] = [
 
 export const femaleSteps: OnboardingStep[] = [
   {
+    question: "Which size range best describes you?",
+    key: "sizeRange",
+    type: "radio",
+    options: ["Regular", "Curvy", "Petite"],
+    forGender: "female",
+  },
+  {
     question: "Do you have clothes in your Closet that you don't know how to style?",
     key: "unstyledClothes",
     type: "radio",
@@ -205,8 +228,8 @@ export const maleSteps: OnboardingStep[] = [
 
 export function getStepsForGender(gender: "female" | "male"): OnboardingStep[] {
   return [
-    ...sharedSteps.slice(0, 6), // style challenge through budget
+    ...sharedSteps.slice(0, 7), // style goal through budget
     ...(gender === "female" ? femaleSteps : maleSteps),
-    ...sharedSteps.slice(6), // height, age, notifications, selfie steps, camera captures
+    ...sharedSteps.slice(7), // height, age, notifications, selfie steps, camera captures
   ];
 }
