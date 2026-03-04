@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { Sparkles, Palette, Star, ArrowRight, CheckCircle2, ShieldCheck, Scissors, Shirt, Check, Dna, User, ScanFace } from "lucide-react";
+import { Sparkles, Palette, Star, ArrowRight, CheckCircle2, ShieldCheck, Scissors, Shirt, Check, Dna, User, ScanFace, Glasses, Gem } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AppLayout } from "@/components/app/AppLayout";
 
@@ -33,6 +33,92 @@ const colorNameToHsl: Record<string, string> = {
 
 function getColorHsl(name: string): string {
   return colorNameToHsl[name] || `hsl(${Math.abs(name.split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % 360}, 50%, 50%)`;
+}
+
+function getFaceShapeTips(shape: string): string[] {
+  const s = shape.toLowerCase();
+  if (s.includes("oval")) return [
+    "Most frame shapes work — experiment with bold or geometric sunglasses",
+    "Side-swept bangs and layered cuts enhance your balanced proportions",
+    "Crew-neck and V-neck tops both complement your face shape equally well",
+    "Statement earrings in any shape will look flattering on you",
+  ];
+  if (s.includes("round")) return [
+    "Angular sunglasses and rectangular frames add definition to soft contours",
+    "V-necklines and open collars elongate your face visually",
+    "Longer hairstyles with volume at the crown create a lengthening effect",
+    "Avoid oversized round earrings — opt for drop or linear styles instead",
+  ];
+  if (s.includes("square")) return [
+    "Round or oval sunglasses soften your strong jawline beautifully",
+    "Scoop and round necklines balance angular features",
+    "Soft, layered hairstyles with side parts complement your bone structure",
+    "Curved, delicate jewelry pieces contrast nicely with your defined angles",
+  ];
+  if (s.includes("heart") || s.includes("inverted triangle")) return [
+    "Cat-eye or bottom-heavy frames balance a wider forehead",
+    "Chin-length bobs and side-swept bangs add width at the jaw",
+    "V-neck and scoop-neck tops draw attention downward harmoniously",
+    "Chandelier and teardrop earrings add visual weight near the chin",
+  ];
+  if (s.includes("oblong") || s.includes("long") || s.includes("rectangle")) return [
+    "Wide frames and aviator sunglasses add horizontal balance",
+    "Bangs and chin-length cuts help shorten the appearance of your face",
+    "Boat-neck and crew-neck tops create the illusion of width",
+    "Round or hoop earrings add softness to elongated proportions",
+  ];
+  if (s.includes("diamond")) return [
+    "Oval frames or rimless glasses highlight your cheekbones",
+    "V-neck and sweetheart necklines mirror your face's natural geometry",
+    "Volume at the forehead or chin balances your widest points",
+    "Stud or small cluster earrings avoid overwhelming narrow temples",
+  ];
+  return [
+    "Choose sunglasses that contrast your face's dominant lines — angular for soft, round for strong",
+    "Necklines that mirror your face shape create visual harmony",
+    "Hairstyles adding volume where your face is narrowest create balance",
+    "Earrings in contrasting shapes to your jaw add visual interest",
+  ];
+}
+
+function getBodyShapeTips(shape: string): string[] {
+  const s = shape.toLowerCase();
+  if (s.includes("hourglass")) return [
+    "Fitted silhouettes and wrap dresses celebrate your balanced proportions",
+    "Defined waistlines are your best friend — belted coats and high-waisted trousers",
+    "Avoid boxy or oversized pieces that hide your natural waist definition",
+    "Structured fabrics hold your shape better than stiff or overly drapey materials",
+  ];
+  if (s.includes("pear") || s.includes("triangle")) return [
+    "Boat-neck, off-shoulder, and statement-collar tops broaden your shoulders",
+    "A-line skirts and straight-leg trousers skim over the hip area elegantly",
+    "Draw attention upward with bold necklaces, scarves, and detailed necklines",
+    "Dark bottoms paired with lighter or patterned tops create balanced proportions",
+  ];
+  if (s.includes("inverted") || s.includes("trapezoid")) return [
+    "V-necklines and vertical details soften broader shoulders",
+    "Flared or wide-leg pants add volume to balance your upper body",
+    "Avoid heavy shoulder padding or wide-striped tops that exaggerate width",
+    "A-line and fuller skirts create proportional harmony with your frame",
+  ];
+  if (s.includes("rectangle") || s.includes("athletic")) return [
+    "Create curves with peplum tops, ruching, and belted pieces at the waist",
+    "Layering adds dimension — try jackets over fitted tops with textured bottoms",
+    "High-waisted bottoms paired with tucked-in tops define your midsection",
+    "Draped fabrics and wrap styles add the illusion of curves naturally",
+  ];
+  if (s.includes("round") || s.includes("oval") || s.includes("apple")) return [
+    "Empire waistlines and A-line silhouettes skim over the midsection gracefully",
+    "V-necklines create a lengthening vertical line through your torso",
+    "Structured blazers and jackets define your shape without clinging",
+    "Monochromatic outfits with vertical details create a streamlined, elongated look",
+  ];
+  return [
+    "Focus on fit — well-tailored pieces always look better than trendy but ill-fitting items",
+    "Use color blocking strategically to highlight areas you love",
+    "Layering with structured outer pieces adds dimension to any silhouette",
+    "Invest in a great tailor — small alterations make a dramatic difference",
+  ];
 }
 
 const StyleDNA = () => {
@@ -197,6 +283,52 @@ const StyleDNA = () => {
                   )}
                 </div>
               )}
+            </motion.div>
+          )}
+
+          {/* Face Shape Styling Tips */}
+          {faceShape && (
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.14 }}
+              className="rounded-2xl border border-border bg-card p-5"
+            >
+              <div className="flex items-center gap-2 mb-4">
+                <Glasses className="w-5 h-5 text-[hsl(200,50%,60%)]" />
+                <h3 className="font-display text-base font-bold text-foreground">Tips for {faceShape} Face</h3>
+              </div>
+              <div className="space-y-3">
+                {getFaceShapeTips(faceShape).map((tip, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <CheckCircle2 className="w-4 h-4 text-[hsl(200,50%,60%)] mt-0.5 flex-shrink-0" />
+                    <p className="text-sm font-sans text-muted-foreground leading-relaxed">{tip}</p>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Body Shape Styling Tips */}
+          {bodyShape && (
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.15 }}
+              className="rounded-2xl border border-border bg-card p-5"
+            >
+              <div className="flex items-center gap-2 mb-4">
+                <Gem className="w-5 h-5 text-[hsl(270,40%,65%)]" />
+                <h3 className="font-display text-base font-bold text-foreground">Tips for {bodyShape} Body</h3>
+              </div>
+              <div className="space-y-3">
+                {getBodyShapeTips(bodyShape).map((tip, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <CheckCircle2 className="w-4 h-4 text-[hsl(270,40%,65%)] mt-0.5 flex-shrink-0" />
+                    <p className="text-sm font-sans text-muted-foreground leading-relaxed">{tip}</p>
+                  </div>
+                ))}
+              </div>
             </motion.div>
           )}
 
