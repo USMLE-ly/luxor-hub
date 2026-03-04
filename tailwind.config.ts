@@ -70,18 +70,32 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-      },
-      borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
-      },
-      colors: {
+        main: {
+          DEFAULT: "hsl(var(--main))",
+        },
+        mtext: "hsl(var(--mtext))",
+        bw: "hsl(var(--bw))",
+        text: "hsl(var(--text))",
         "color-1": "hsl(var(--color-1))",
         "color-2": "hsl(var(--color-2))",
         "color-3": "hsl(var(--color-3))",
         "color-4": "hsl(var(--color-4))",
         "color-5": "hsl(var(--color-5))",
+      },
+      borderRadius: {
+        base: "var(--border-radius)",
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
+      translate: {
+        boxShadowX: "var(--box-shadow-x)",
+        boxShadowY: "var(--box-shadow-y)",
+        reverseBoxShadowX: "calc(var(--box-shadow-x) * -1)",
+        reverseBoxShadowY: "calc(var(--box-shadow-y) * -1)",
+      },
+      boxShadow: {
+        shadow: "var(--box-shadow-x) var(--box-shadow-y) 0px 0px hsl(var(--border))",
       },
       keyframes: {
         "accordion-down": {
