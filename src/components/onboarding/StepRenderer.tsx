@@ -493,7 +493,7 @@ const StepRenderer = ({ step, answers, onSelect, gender }: StepRendererProps) =>
                       initial={{ opacity: 0, scale: 0.85 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.25, delay: sizeIdx * 0.02, ease: [0.22, 1, 0.36, 1] }}
-                      onClick={() => onSelect(groupKey, size, true)}
+                      onClick={() => onSelect(groupKey, size, false)}
                       className={`py-3 px-1 rounded-xl text-sm font-sans font-medium transition-all active:scale-95 ${
                         isActive
                           ? "bg-foreground text-background shadow-md"
