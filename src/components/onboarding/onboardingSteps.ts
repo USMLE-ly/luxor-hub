@@ -1,5 +1,10 @@
 export type StepType = "gender" | "checkbox" | "radio" | "sizeGrid" | "bodyShape" | "height" | "notification" | "selfieIntro" | "selfieGuide" | "cameraCapture" | "generating" | "detectionResult";
 
+export interface BrandLogo {
+  name: string;
+  image: string;
+}
+
 export interface OnboardingStep {
   question: string;
   key: string;
@@ -16,6 +21,8 @@ export interface OnboardingStep {
   subtitle?: string;
   /** Brand labels for each option */
   brandLabels?: Record<string, string[]>;
+  /** Brand logos for each option */
+  brandLogos?: Record<string, BrandLogo[]>;
   /** Camera mode: selfie or fullBody */
   cameraMode?: "selfie" | "fullBody";
   /** Detection result mode: face or body */
@@ -83,6 +90,26 @@ export const sharedSteps: OnboardingStep[] = [
       "Fast fashion": ["ZARA", "H&M", "GAP", "MANGO"],
       "Premium brands": ["COS", "GANNI", "ISABEL MARANT", "Reformation"],
       "Luxury labels": ["GUCCI", "FENDI", "VALENTINO", "CHANEL"],
+    },
+    brandLogos: {
+      "Fast fashion": [
+        { name: "ZARA", image: "brand-zara" },
+        { name: "H&M", image: "brand-hm" },
+        { name: "GAP", image: "brand-gap" },
+        { name: "MANGO", image: "brand-mango" },
+      ],
+      "Premium brands": [
+        { name: "COS", image: "brand-cos" },
+        { name: "GANNI", image: "brand-ganni" },
+        { name: "ISABEL MARANT", image: "brand-isabelmarant" },
+        { name: "Reformation", image: "brand-reformation" },
+      ],
+      "Luxury labels": [
+        { name: "GUCCI", image: "brand-gucci" },
+        { name: "FENDI", image: "brand-fendi" },
+        { name: "VALENTINO", image: "brand-valentino" },
+        { name: "CHANEL", image: "brand-chanel" },
+      ],
     },
   },
   {
