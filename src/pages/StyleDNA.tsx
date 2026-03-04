@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { Sparkles, Palette, Star, ArrowRight, CheckCircle2, ShieldCheck, Scissors, Shirt, Check, Dna } from "lucide-react";
+import { Sparkles, Palette, Star, ArrowRight, CheckCircle2, ShieldCheck, Scissors, Shirt, Check, Dna, User, ScanFace } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AppLayout } from "@/components/app/AppLayout";
 
@@ -74,6 +74,11 @@ const StyleDNA = () => {
   const archetype = profile?.archetype || "Style Explorer";
   const styleScore = profile?.style_score || 25;
   const calibrationProgress = (profile?.preferences as any)?.calibrationProgress || 0;
+  const prefs = profile?.preferences as any;
+  const faceShape = prefs?.faceShape || null;
+  const faceShapeDescription = prefs?.faceShapeDescription || null;
+  const bodyShape = prefs?.bodyShape || null;
+  const bodyShapeTraits = prefs?.bodyShapeTraits || [];
 
   return (
     <AppLayout>
@@ -136,10 +141,64 @@ const StyleDNA = () => {
               </div>
               <div className="flex-1">
                 <p className="font-sans font-semibold text-foreground text-sm">Body Type</p>
-                <p className="text-muted-foreground text-xs font-sans">Defines shapes that flatter you</p>
+                <p className="text-muted-foreground text-xs font-sans">
+                  {bodyShape || "Defines shapes that flatter you"}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[hsl(200,50%,60%)]/20 flex items-center justify-center">
+                <ScanFace className="w-5 h-5 text-[hsl(200,50%,60%)]" />
+              </div>
+              <div className="flex-1">
+                <p className="font-sans font-semibold text-foreground text-sm">Face Shape</p>
+                <p className="text-muted-foreground text-xs font-sans">
+                  {faceShape || "Guides accessories & hairstyles"}
+                </p>
               </div>
             </div>
           </motion.div>
+
+          {/* Face & Body Shape Details */}
+          {(faceShape || bodyShape) && (
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.13 }}
+              className="rounded-2xl border border-border bg-card p-5 space-y-5"
+            >
+              {faceShape && (
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <ScanFace className="w-5 h-5 text-[hsl(200,50%,60%)]" />
+                    <h3 className="font-display text-base font-bold text-foreground">Face Shape: {faceShape}</h3>
+                  </div>
+                  {faceShapeDescription && (
+                    <p className="text-sm font-sans text-muted-foreground leading-relaxed">{faceShapeDescription}</p>
+                  )}
+                </div>
+              )}
+
+              {bodyShape && (
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <User className="w-5 h-5 text-[hsl(270,40%,65%)]" />
+                    <h3 className="font-display text-base font-bold text-foreground">Body Shape: {bodyShape}</h3>
+                  </div>
+                  {bodyShapeTraits.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {bodyShapeTraits.map((trait: string, i: number) => (
+                        <span key={i} className="px-3 py-1 rounded-full bg-secondary text-xs font-sans text-foreground">
+                          {trait}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </motion.div>
+          )}
 
           {/* Calibration progress */}
           <motion.button
