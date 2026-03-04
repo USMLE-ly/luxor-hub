@@ -494,10 +494,10 @@ const StepRenderer = ({ step, answers, onSelect, gender }: StepRendererProps) =>
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.25, delay: sizeIdx * 0.02, ease: [0.22, 1, 0.36, 1] }}
                       onClick={() => onSelect(groupKey, size, true)}
-                      className={`py-2.5 px-1 rounded-lg text-sm font-sans font-medium transition-all ${
+                      className={`py-3 px-1 rounded-xl text-sm font-sans font-medium transition-all active:scale-95 ${
                         isActive
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-secondary/60 text-muted-foreground hover:bg-secondary"
+                          ? "bg-foreground text-background shadow-md"
+                          : "bg-secondary text-foreground hover:bg-secondary/80"
                       }`}
                     >
                       {size}
