@@ -30,7 +30,7 @@ const Onboarding = () => {
   const canProceed = isGenderStep
     ? !!gender
     : currentStepData
-      ? currentStepData.type === "notification" || currentStepData.type === "selfieIntro" || currentStepData.type === "selfieGuide"
+      ? currentStepData.type === "notification" || currentStepData.type === "selfieIntro" || currentStepData.type === "selfieGuide" || currentStepData.type === "detectionResult"
         ? true
         : currentStepData.type === "cameraCapture"
           ? !!(answers[currentStepData.key]?.[0])

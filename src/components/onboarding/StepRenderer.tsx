@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Check, Camera, Smartphone, Video, User, FlipHorizontal } from "lucide-react";
 import type { OnboardingStep } from "./onboardingSteps";
 import selfieIntroImg from "@/assets/selfie-intro.jpg";
@@ -559,6 +559,222 @@ const GeneratingStep = ({ step }: { step: OnboardingStep }) => {
   );
 };
 
+const faceShapes = [
+  { shape: "Oval", icon: "⬮", description: "Balanced proportions with a gently rounded jawline" },
+  { shape: "Round", icon: "⬤", description: "Equal width and length with soft angles" },
+  { shape: "Square", icon: "⬜", description: "Strong jawline with equal width forehead" },
+  { shape: "Heart", icon: "♡", description: "Wider forehead tapering to a narrow chin" },
+  { shape: "Oblong", icon: "⏐", description: "Longer than wide with a straight cheek line" },
+  { shape: "Diamond", icon: "◇", description: "Narrow forehead and jaw, wide cheekbones" },
+];
+
+const bodyShapeResults: Record<string, { label: string; traits: string[] }[]> = {
+  female: [
+    { label: "Hourglass", traits: ["Balanced shoulders & hips", "Defined waist", "Curvy silhouette"] },
+    { label: "Triangle", traits: ["Narrower shoulders", "Wider hips", "Defined lower body"] },
+    { label: "Inverted Triangle", traits: ["Broader shoulders", "Narrower hips", "Athletic upper body"] },
+    { label: "Rectangle", traits: ["Balanced proportions", "Straight silhouette", "Even distribution"] },
+    { label: "Round", traits: ["Fuller midsection", "Proportionate limbs", "Soft curves"] },
+  ],
+  male: [
+    { label: "Rectangle", traits: ["Even proportions", "Straight torso", "Balanced build"] },
+    { label: "Triangle", traits: ["Narrower shoulders", "Wider waist", "Solid lower body"] },
+    { label: "Inverted Triangle", traits: ["Broad shoulders", "Narrow waist", "V-shaped torso"] },
+    { label: "Oval", traits: ["Fuller midsection", "Rounded torso", "Proportionate limbs"] },
+    { label: "Trapezoid", traits: ["Wide shoulders", "Slightly narrow waist", "Athletic build"] },
+  ],
+};
+
+const DetectionResultStep = ({ step, answers, gender }: { step: OnboardingStep; answers: Record<string, string[]>; gender?: "female" | "male" | null }) => {
+  const isFace = step.detectionMode === "face";
+  const [revealed, setRevealed] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setRevealed(true), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Deterministic "detected" result based on answers
+  const detectedFaceShape = faceShapes[Math.abs((answers.ageRange?.[0]?.charCodeAt(0) || 0) + (answers.styleGoal?.[0]?.length || 0)) % faceShapes.length];
+  const genderKey = gender || "female";
+  const bodyShapes = bodyShapeResults[genderKey];
+  const detectedBodyShape = bodyShapes[Math.abs((answers.budget?.[0]?.charCodeAt(0) || 0) + (answers.styleChallenge?.[0]?.length || 0)) % bodyShapes.length];
+
+  const capturedImage = isFace ? answers.selfieCapture?.[0] : answers.fullBodyCapture?.[0];
+
+  if (isFace) {
+    return (
+      <div className="flex flex-col items-center">
+        <motion.h2
+          className="font-display text-2xl lg:text-3xl font-bold text-foreground text-center mb-2"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          {step.question}
+        </motion.h2>
+        <motion.p
+          className="text-muted-foreground font-sans text-sm text-center mb-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          {step.description}
+        </motion.p>
+
+        {/* Face photo with shape overlay */}
+        <motion.div
+          className="relative w-40 h-40 rounded-full overflow-hidden mb-6 ring-4 ring-primary/30"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {capturedImage ? (
+            <img src={capturedImage} alt="Your selfie" className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full bg-secondary flex items-center justify-center">
+              <User className="w-16 h-16 text-muted-foreground" />
+            </div>
+          )}
+        </motion.div>
+
+        {/* Detected shape */}
+        <AnimatePresence>
+          {revealed && (
+            <motion.div
+              className="flex flex-col items-center gap-2 mb-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <span className="text-4xl mb-1">{detectedFaceShape.icon}</span>
+              <h3 className="font-display text-3xl font-bold text-foreground">{detectedFaceShape.shape}</h3>
+              <p className="text-muted-foreground font-sans text-sm text-center max-w-xs">{detectedFaceShape.description}</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* All face shapes reference */}
+        <motion.div
+          className="w-full"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: revealed ? 1 : 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <p className="text-muted-foreground font-sans text-xs text-center mb-3 uppercase tracking-wider">Face shape guide</p>
+          <div className="grid grid-cols-3 gap-2">
+            {faceShapes.map((fs) => (
+              <div
+                key={fs.shape}
+                className={`flex flex-col items-center p-3 rounded-xl transition-all ${
+                  fs.shape === detectedFaceShape.shape
+                    ? "bg-foreground text-background"
+                    : "bg-secondary/60 text-muted-foreground"
+                }`}
+              >
+                <span className="text-lg mb-1">{fs.icon}</span>
+                <span className="font-sans text-xs font-medium">{fs.shape}</span>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // Body shape result
+  return (
+    <div className="flex flex-col items-center">
+      <motion.h2
+        className="font-display text-2xl lg:text-3xl font-bold text-foreground text-center mb-2"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        {step.question}
+      </motion.h2>
+      <motion.p
+        className="text-muted-foreground font-sans text-sm text-center mb-6"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}
+      >
+        {step.description}
+      </motion.p>
+
+      {/* Body photo */}
+      <motion.div
+        className="relative w-32 h-52 rounded-2xl overflow-hidden mb-6 ring-4 ring-primary/30"
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      >
+        {capturedImage ? (
+          <img src={capturedImage} alt="Your body" className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full bg-secondary flex items-center justify-center">
+            <User className="w-12 h-12 text-muted-foreground" />
+          </div>
+        )}
+      </motion.div>
+
+      {/* Detected body shape */}
+      <AnimatePresence>
+        {revealed && (
+          <motion.div
+            className="flex flex-col items-center gap-2 mb-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <h3 className="font-display text-3xl font-bold text-foreground">{detectedBodyShape.label}</h3>
+            <div className="flex flex-wrap justify-center gap-2 mt-1">
+              {detectedBodyShape.traits.map((trait, i) => (
+                <motion.span
+                  key={trait}
+                  className="px-3 py-1 rounded-full bg-secondary text-foreground font-sans text-xs font-medium"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.6 + i * 0.15 }}
+                >
+                  {trait}
+                </motion.span>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* All body shapes */}
+      <motion.div
+        className="w-full"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: revealed ? 1 : 0 }}
+        transition={{ delay: 0.3 }}
+      >
+        <p className="text-muted-foreground font-sans text-xs text-center mb-3 uppercase tracking-wider">Body shape guide</p>
+        <div className="flex flex-col gap-2">
+          {bodyShapes.map((bs) => (
+            <div
+              key={bs.label}
+              className={`flex items-center justify-between p-3 rounded-xl transition-all ${
+                bs.label === detectedBodyShape.label
+                  ? "bg-foreground text-background"
+                  : "bg-secondary/60 text-muted-foreground"
+              }`}
+            >
+              <span className="font-sans text-sm font-medium">{bs.label}</span>
+              {bs.label === detectedBodyShape.label && (
+                <Check className="h-4 w-4" />
+              )}
+            </div>
+          ))}
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
 const StepRenderer = ({ step, answers, onSelect, gender }: StepRendererProps) => {
   const selected = answers[step.key] || [];
   const isSingle = step.type === "radio";
@@ -585,6 +801,10 @@ const StepRenderer = ({ step, answers, onSelect, gender }: StepRendererProps) =>
 
   if (step.type === "generating") {
     return <GeneratingStep step={step} />;
+  }
+
+  if (step.type === "detectionResult") {
+    return <DetectionResultStep step={step} answers={answers} gender={gender} />;
   }
 
   if (step.type === "sizeGrid" && step.subGroups) {
