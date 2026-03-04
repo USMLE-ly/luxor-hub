@@ -2,6 +2,8 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Camera, Smartphone, Video, User, FlipHorizontal } from "lucide-react";
 import type { OnboardingStep } from "./onboardingSteps";
+import FaceShapeIllustration from "@/components/app/FaceShapeIllustration";
+import BodyShapeIllustration from "@/components/app/BodyShapeIllustration";
 import selfieIntroImg from "@/assets/selfie-intro.jpg";
 import selfieIntroMaleImg from "@/assets/selfie-intro-male.jpg";
 import selfieStep1Img from "@/assets/selfie-step1.jpg";
@@ -667,7 +669,7 @@ const DetectionResultStep = ({ step, answers, gender, aiResults }: { step: Onboa
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
-              <span className="text-4xl mb-1">{detectedFaceShape.icon}</span>
+              <FaceShapeIllustration shape={detectedFaceShape.shape} size={90} className="mb-2" />
               <h3 className="font-display text-3xl font-bold text-foreground">{detectedFaceShape.shape}</h3>
               <p className="text-muted-foreground font-sans text-sm text-center max-w-xs">{faceDescription}</p>
             </motion.div>
@@ -754,6 +756,7 @@ const DetectionResultStep = ({ step, answers, gender, aiResults }: { step: Onboa
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           >
+            <BodyShapeIllustration shape={detectedBodyShape.label} size={100} className="mb-2" />
             <h3 className="font-display text-3xl font-bold text-foreground">{detectedBodyShape.label}</h3>
             <div className="flex flex-wrap justify-center gap-2 mt-1">
               {detectedBodyShape.traits.map((trait, i) => (
