@@ -151,6 +151,7 @@ const Onboarding = () => {
                   step={currentStepData}
                   answers={answers}
                   onSelect={handleSelect}
+                  gender={gender}
                 />
               ) : null}
             </motion.div>

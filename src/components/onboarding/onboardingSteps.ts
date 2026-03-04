@@ -211,6 +211,13 @@ export const femaleSteps: OnboardingStep[] = [
 
 export const maleSteps: OnboardingStep[] = [
   {
+    question: "Which build best describes you?",
+    key: "sizeRange",
+    type: "radio",
+    options: ["Slim", "Regular", "Athletic", "Big & Tall"],
+    forGender: "male",
+  },
+  {
     question: "Do you have clothes in your Closet that you don't know how to style?",
     key: "unstyledClothes",
     type: "radio",

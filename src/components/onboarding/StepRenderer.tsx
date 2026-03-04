@@ -2,24 +2,33 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { Check, Camera, Smartphone, Video, User, FlipHorizontal } from "lucide-react";
 import type { OnboardingStep } from "./onboardingSteps";
 import selfieIntroImg from "@/assets/selfie-intro.jpg";
+import selfieIntroMaleImg from "@/assets/selfie-intro-male.jpg";
 import selfieStep1Img from "@/assets/selfie-step1.jpg";
 import selfieStep2Img from "@/assets/selfie-step2.jpg";
 import selfieStep3Img from "@/assets/selfie-step3.jpg";
 import selfieStep4Img from "@/assets/selfie-step4.jpg";
 import selfieStep5Img from "@/assets/selfie-step5.jpg";
+import selfieStep1MaleImg from "@/assets/selfie-step1-male.jpg";
+import selfieStep2MaleImg from "@/assets/selfie-step2-male.jpg";
+import selfieStep3MaleImg from "@/assets/selfie-step3-male.jpg";
+import selfieStep4MaleImg from "@/assets/selfie-step4-male.jpg";
+import selfieStep5MaleImg from "@/assets/selfie-step5-male.jpg";
 
-const selfieStepImages: Record<number, string> = {
-  1: selfieStep1Img,
-  2: selfieStep2Img,
-  3: selfieStep3Img,
-  4: selfieStep4Img,
-  5: selfieStep5Img,
+const selfieStepImages: Record<string, Record<number, string>> = {
+  female: { 1: selfieStep1Img, 2: selfieStep2Img, 3: selfieStep3Img, 4: selfieStep4Img, 5: selfieStep5Img },
+  male: { 1: selfieStep1MaleImg, 2: selfieStep2MaleImg, 3: selfieStep3MaleImg, 4: selfieStep4MaleImg, 5: selfieStep5MaleImg },
+};
+
+const selfieIntroImages: Record<string, string> = {
+  female: selfieIntroImg,
+  male: selfieIntroMaleImg,
 };
 
 interface StepRendererProps {
   step: OnboardingStep;
   answers: Record<string, string[]>;
   onSelect: (key: string, option: string, singleSelect: boolean) => void;
+  gender?: "female" | "male" | null;
 }
 
 const bodyShapeSvgs: Record<string, string> = {
@@ -143,11 +152,12 @@ const NotificationStep = ({ step }: { step: OnboardingStep }) => {
   );
 };
 
-const SelfieIntroStep = ({ step }: { step: OnboardingStep }) => {
+const SelfieIntroStep = ({ step, gender }: { step: OnboardingStep; gender?: "female" | "male" | null }) => {
+  const introImg = selfieIntroImages[gender || "female"];
   return (
     <div className="flex flex-col items-center text-center pt-12">
       <div className="w-48 h-48 mb-8 flex items-center justify-center">
-        <img src={selfieIntroImg} alt="Style analysis" className="w-full h-full object-contain" />
+        <img src={introImg} alt="Style analysis" className="w-full h-full object-contain" />
       </div>
       <h2 className="font-display text-2xl lg:text-3xl font-bold text-foreground mb-3">
         {step.question}
@@ -157,8 +167,9 @@ const SelfieIntroStep = ({ step }: { step: OnboardingStep }) => {
   );
 };
 
-const SelfieGuideStep = ({ step }: { step: OnboardingStep }) => {
-  const stepImg = step.stepNumber ? selfieStepImages[step.stepNumber] : null;
+const SelfieGuideStep = ({ step, gender }: { step: OnboardingStep; gender?: "female" | "male" | null }) => {
+  const images = selfieStepImages[gender || "female"];
+  const stepImg = step.stepNumber ? images[step.stepNumber] : null;
   return (
     <div className="flex flex-col items-center">
       <div className="w-full aspect-[3/4] rounded-2xl bg-secondary/50 mb-6 flex items-center justify-center overflow-hidden relative">
@@ -413,7 +424,7 @@ const GeneratingStep = ({ step }: { step: OnboardingStep }) => {
   );
 };
 
-const StepRenderer = ({ step, answers, onSelect }: StepRendererProps) => {
+const StepRenderer = ({ step, answers, onSelect, gender }: StepRendererProps) => {
   const selected = answers[step.key] || [];
   const isSingle = step.type === "radio";
 
@@ -426,11 +437,11 @@ const StepRenderer = ({ step, answers, onSelect }: StepRendererProps) => {
   }
 
   if (step.type === "selfieIntro") {
-    return <SelfieIntroStep step={step} />;
+    return <SelfieIntroStep step={step} gender={gender} />;
   }
 
   if (step.type === "selfieGuide") {
-    return <SelfieGuideStep step={step} />;
+    return <SelfieGuideStep step={step} gender={gender} />;
   }
 
   if (step.type === "cameraCapture") {
