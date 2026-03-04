@@ -14,6 +14,18 @@ import selfieStep3MaleImg from "@/assets/selfie-step3-male.jpg";
 import selfieStep4MaleImg from "@/assets/selfie-step4-male.jpg";
 import selfieStep5MaleImg from "@/assets/selfie-step5-male.jpg";
 
+// Body shape illustrations
+import bodyFemaleHourglass from "@/assets/body-female-hourglass.png";
+import bodyFemaleTriangle from "@/assets/body-female-triangle.png";
+import bodyFemaleInvTriangle from "@/assets/body-female-invtriangle.png";
+import bodyFemaleRectangle from "@/assets/body-female-rectangle.png";
+import bodyFemaleRound from "@/assets/body-female-round.png";
+import bodyMaleRectangle from "@/assets/body-male-rectangle.png";
+import bodyMaleTriangle from "@/assets/body-male-triangle.png";
+import bodyMaleInvTriangle from "@/assets/body-male-invtriangle.png";
+import bodyMaleOval from "@/assets/body-male-oval.png";
+import bodyMaleTrapezoid from "@/assets/body-male-trapezoid.png";
+
 const selfieStepImages: Record<string, Record<number, string>> = {
   female: { 1: selfieStep1Img, 2: selfieStep2Img, 3: selfieStep3Img, 4: selfieStep4Img, 5: selfieStep5Img },
   male: { 1: selfieStep1MaleImg, 2: selfieStep2MaleImg, 3: selfieStep3MaleImg, 4: selfieStep4MaleImg, 5: selfieStep5MaleImg },
@@ -24,22 +36,29 @@ const selfieIntroImages: Record<string, string> = {
   male: selfieIntroMaleImg,
 };
 
+const bodyShapeImages: Record<string, Record<string, string>> = {
+  female: {
+    Hourglass: bodyFemaleHourglass,
+    Triangle: bodyFemaleTriangle,
+    "Inverted triangle": bodyFemaleInvTriangle,
+    Rectangle: bodyFemaleRectangle,
+    Round: bodyFemaleRound,
+  },
+  male: {
+    Rectangle: bodyMaleRectangle,
+    Triangle: bodyMaleTriangle,
+    "Inverted triangle": bodyMaleInvTriangle,
+    Oval: bodyMaleOval,
+    Trapezoid: bodyMaleTrapezoid,
+  },
+};
+
 interface StepRendererProps {
   step: OnboardingStep;
   answers: Record<string, string[]>;
   onSelect: (key: string, option: string, singleSelect: boolean) => void;
   gender?: "female" | "male" | null;
 }
-
-const bodyShapeSvgs: Record<string, string> = {
-  Hourglass: "M30,10 Q30,10 25,25 Q20,40 25,55 Q30,70 30,70 L50,70 Q50,70 55,55 Q60,40 55,25 Q50,10 50,10 Z",
-  Triangle: "M35,10 L30,10 L20,70 L60,70 L50,10 L45,10 Z",
-  "Inverted triangle": "M20,10 L60,10 L50,70 L30,70 Z",
-  Rectangle: "M28,10 L52,10 L52,70 L28,70 Z",
-  Round: "M30,10 Q20,25 20,40 Q20,55 30,70 L50,70 Q60,55 60,40 Q60,25 50,10 Z",
-  Oval: "M30,10 Q20,25 20,40 Q20,55 30,70 L50,70 Q60,55 60,40 Q60,25 50,10 Z",
-  Trapezoid: "M25,10 L55,10 L60,70 L20,70 Z",
-};
 
 const HeightStep = ({ answers, onSelect }: { answers: Record<string, string[]>; onSelect: StepRendererProps["onSelect"] }) => {
   const [unit, setUnit] = useState<"inch" | "cm">(answers.heightUnit?.[0] === "cm" ? "cm" : "inch");
@@ -498,24 +517,23 @@ const StepRenderer = ({ step, answers, onSelect, gender }: StepRendererProps) =>
         <div className="flex flex-col gap-3">
           {step.options.map((option) => {
             const isActive = selected.includes(option);
+            const genderKey = gender || "female";
+            const shapeImg = bodyShapeImages[genderKey]?.[option];
             return (
               <button
                 key={option}
                 onClick={() => onSelect(step.key, option, true)}
-                className={`flex items-center gap-4 p-4 rounded-2xl transition-all text-left active:scale-[0.98] ${
+                className={`flex items-center gap-4 p-3 rounded-2xl transition-all text-left active:scale-[0.98] ${
                   isActive
                     ? "bg-secondary ring-2 ring-foreground"
                     : "bg-secondary/50"
                 }`}
               >
-                <svg width="50" height="80" viewBox="0 0 80 80" className="flex-shrink-0">
-                  <path
-                    d={bodyShapeSvgs[option] || bodyShapeSvgs.Rectangle}
-                    fill="hsl(20, 40%, 88%)"
-                    stroke="hsl(20, 20%, 60%)"
-                    strokeWidth="1.5"
-                  />
-                </svg>
+                {shapeImg ? (
+                  <img src={shapeImg} alt={option} className="w-14 h-20 object-contain flex-shrink-0" />
+                ) : (
+                  <div className="w-14 h-20 bg-muted rounded-lg flex-shrink-0" />
+                )}
                 <span className="font-sans font-medium text-foreground">{option}</span>
                 <div className={`ml-auto w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
                   isActive ? "border-foreground bg-foreground" : "border-muted-foreground/30 bg-background"
