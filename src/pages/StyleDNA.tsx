@@ -6,6 +6,8 @@ import { motion } from "framer-motion";
 import { Sparkles, Palette, Star, ArrowRight, CheckCircle2, ShieldCheck, Scissors, Shirt, Check, Dna, User, ScanFace, Glasses, Gem } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AppLayout } from "@/components/app/AppLayout";
+import FaceShapeIllustration from "@/components/app/FaceShapeIllustration";
+import BodyShapeIllustration from "@/components/app/BodyShapeIllustration";
 
 interface StyleDNAData {
   colorSeason: string;
@@ -255,32 +257,40 @@ const StyleDNA = () => {
               className="rounded-2xl border border-border bg-card p-5 space-y-5"
             >
               {faceShape && (
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <ScanFace className="w-5 h-5 text-[hsl(200,50%,60%)]" />
-                    <h3 className="font-display text-base font-bold text-foreground">Face Shape: {faceShape}</h3>
+                <div className="flex items-start gap-4">
+                  <FaceShapeIllustration shape={faceShape} size={100} />
+                  <div className="flex-1 pt-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <ScanFace className="w-5 h-5 text-[hsl(200,50%,60%)]" />
+                      <h3 className="font-display text-base font-bold text-foreground">{faceShape}</h3>
+                    </div>
+                    {faceShapeDescription && (
+                      <p className="text-sm font-sans text-muted-foreground leading-relaxed">{faceShapeDescription}</p>
+                    )}
                   </div>
-                  {faceShapeDescription && (
-                    <p className="text-sm font-sans text-muted-foreground leading-relaxed">{faceShapeDescription}</p>
-                  )}
                 </div>
               )}
 
+              {faceShape && bodyShape && <div className="border-t border-border" />}
+
               {bodyShape && (
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <User className="w-5 h-5 text-[hsl(270,40%,65%)]" />
-                    <h3 className="font-display text-base font-bold text-foreground">Body Shape: {bodyShape}</h3>
-                  </div>
-                  {bodyShapeTraits.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {bodyShapeTraits.map((trait: string, i: number) => (
-                        <span key={i} className="px-3 py-1 rounded-full bg-secondary text-xs font-sans text-foreground">
-                          {trait}
-                        </span>
-                      ))}
+                <div className="flex items-start gap-4">
+                  <BodyShapeIllustration shape={bodyShape} size={120} />
+                  <div className="flex-1 pt-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <User className="w-5 h-5 text-[hsl(270,40%,65%)]" />
+                      <h3 className="font-display text-base font-bold text-foreground">{bodyShape}</h3>
                     </div>
-                  )}
+                    {bodyShapeTraits.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {bodyShapeTraits.map((trait: string, i: number) => (
+                          <span key={i} className="px-3 py-1 rounded-full bg-secondary text-xs font-sans text-foreground">
+                            {trait}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </motion.div>
