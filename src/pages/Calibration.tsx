@@ -66,6 +66,10 @@ import calFDressMidi from "@/assets/cal-f-dress-midi.jpg";
 import calFDressMaxi from "@/assets/cal-f-dress-maxi.jpg";
 import calFDressMini from "@/assets/cal-f-dress-mini.jpg";
 import calFDressTrench from "@/assets/cal-f-dress-trench.jpg";
+import calFShoeHeels from "@/assets/cal-f-shoe-heels.jpg";
+import calFShoeFlats from "@/assets/cal-f-shoe-flats.jpg";
+import calFShoeBoots from "@/assets/cal-f-shoe-boots.jpg";
+import calFShoeSandals from "@/assets/cal-f-shoe-sandals.jpg";
 
 interface CalibrationOption {
   label: string;
@@ -223,14 +227,30 @@ const femaleCalibrationSteps: CalibrationStep[] = [
       { label: "Trench dress", imageUrl: calFDressTrench, style: "Casual" },
     ],
   },
+  {
+    question: "Which Footwear style do you prefer the most?",
+    key: "footwearStyle",
+    options: [
+      { label: "Heels", imageUrl: calFShoeHeels, style: "Formal" },
+      { label: "Flats", imageUrl: calFShoeFlats, style: "Casual" },
+      { label: "Boots", imageUrl: calFShoeBoots, style: "Casual" },
+      { label: "Sandals", imageUrl: calFShoeSandals, style: "Casual" },
+    ],
+  },
+];
+
+const styleTypes = [
+  "Romantic-gamine", "Classic-natural", "Dramatic-classic", "Gamine-romantic",
+  "Natural-dramatic", "Romantic-classic", "Classic-gamine", "Dramatic-natural",
 ];
 
 const Calibration = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [phase, setPhase] = useState<"questions" | "allSet" | "progress">("questions");
+  const [phase, setPhase] = useState<"questions" | "definingStyle" | "styleResult" | "progress">("questions");
   const [loading, setLoading] = useState(false);
   const [gender, setGender] = useState<"female" | "male">("male");
+  const [styleType, setStyleType] = useState("");
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -251,6 +271,18 @@ const Calibration = () => {
     loadGender();
   }, [user]);
 
+  // Auto-transition from definingStyle to styleResult
+  useEffect(() => {
+    if (phase === "definingStyle") {
+      const randomType = styleTypes[Math.floor(Math.random() * styleTypes.length)];
+      const timer = setTimeout(() => {
+        setStyleType(randomType);
+        setPhase("styleResult");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [phase]);
+
   const calibrationSteps = gender === "female" ? femaleCalibrationSteps : maleCalibrationSteps;
   const totalSteps = calibrationSteps.length;
   const currentStepData = calibrationSteps[currentStep];
@@ -264,7 +296,7 @@ const Calibration = () => {
     if (currentStep < totalSteps - 1) {
       setCurrentStep((s) => s + 1);
     } else {
-      setPhase("allSet");
+      setPhase("definingStyle");
     }
   };
 
@@ -282,7 +314,7 @@ const Calibration = () => {
       const { error } = await supabase
         .from("style_profiles")
         .update({
-          preferences: { ...currentPrefs, calibration: answers, calibrationProgress: 73 },
+          preferences: { ...currentPrefs, calibration: answers, calibrationProgress: 73, styleType },
         })
         .eq("user_id", user.id);
 
@@ -299,42 +331,118 @@ const Calibration = () => {
     (o) => o.label === answers[currentStepData?.key]
   );
 
-  if (phase === "allSet") {
+  // "Defining your Style Type..." loading screen
+  if (phase === "definingStyle") {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6">
         <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: "spring", delay: 0.2 }}
-          className="w-20 h-20 rounded-full border-[3px] border-primary flex items-center justify-center mb-8"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", damping: 15 }}
+          className="w-20 h-20 mb-8 relative"
         >
-          <Check className="w-8 h-8 text-primary" />
+          {/* Two overlapping circles like reference */}
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+            className="absolute inset-0"
+          >
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-[hsl(15,80%,65%)] opacity-80" />
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-[hsl(260,60%,70%)] opacity-80" />
+          </motion.div>
+          {/* Icons overlay */}
+          <div className="absolute inset-0 flex items-center justify-center gap-0.5 z-10">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-foreground">
+              <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z" />
+            </svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-foreground">
+              <rect x="3" y="3" width="18" height="18" rx="2" strokeDasharray="4 2" />
+            </svg>
+          </div>
         </motion.div>
-        <motion.h1
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="font-display text-3xl font-bold text-foreground mb-3"
-        >
-          You're all set
-        </motion.h1>
         <motion.p
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="text-muted-foreground font-sans text-center"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="font-sans text-lg text-foreground"
         >
-          We'll use them to personalize your app experience
+          Defining your Style Type...
         </motion.p>
+        {/* Subtle pulsing dots */}
+        <div className="flex gap-1.5 mt-6">
+          {[0, 1, 2].map((i) => (
+            <motion.div
+              key={i}
+              animate={{ opacity: [0.3, 1, 0.3] }}
+              transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2 }}
+              className="w-2 h-2 rounded-full bg-foreground/40"
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Style Type result card
+  if (phase === "styleResult") {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6">
+        <motion.div
+          initial={{ y: 40, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ type: "spring", damping: 20, delay: 0.1 }}
+          className="w-full max-w-sm bg-card rounded-3xl shadow-xl p-6 border border-border"
+        >
+          {/* Icon pair */}
+          <div className="flex justify-center mb-4">
+            <div className="flex items-center gap-1">
+              <div className="w-9 h-9 rounded-full bg-[hsl(15,80%,65%)] flex items-center justify-center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+                  <path d="M4 4l6 6M10 4L4 10M14 14l6 6M20 14l-6 6" />
+                </svg>
+              </div>
+              <div className="w-9 h-9 rounded-full bg-[hsl(340,70%,70%)] flex items-center justify-center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+                  <rect x="4" y="4" width="16" height="16" rx="2" strokeDasharray="4 2" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <p className="text-center text-sm text-muted-foreground font-sans mb-1">Your Style type</p>
+          <h2 className="text-center text-2xl font-display font-bold text-foreground mb-5">{styleType}</h2>
+
+          {/* Style inspiration images */}
+          <div className="flex gap-2 mb-5">
+            {[1, 2, 3].map((i) => (
+              <motion.div
+                key={i}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.3 + i * 0.1 }}
+                className="flex-1 aspect-[3/4] rounded-lg bg-secondary overflow-hidden relative"
+              >
+                <div className="absolute inset-0 bg-gradient-to-t from-foreground/20 to-transparent" />
+                <div className="absolute bottom-1 right-1.5 bg-foreground/60 text-background text-[10px] px-1.5 py-0.5 rounded-md font-sans font-medium">
+                  {i + 2}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <p className="text-center text-sm text-muted-foreground font-sans leading-relaxed">
+            Congratulations! Now you know exactly which prints and fabrics flatter you.
+          </p>
+        </motion.div>
+
         <div className="fixed bottom-0 inset-x-0 p-5 bg-background">
           <Button
             onClick={handleComplete}
             disabled={loading}
-            className="w-full h-14 rounded-2xl font-semibold font-sans text-base bg-muted text-foreground hover:bg-muted/80"
-            variant="ghost"
+            className="w-full h-14 rounded-2xl font-semibold font-sans text-base bg-foreground text-background hover:bg-foreground/90"
           >
             {loading ? (
-              <div className="w-5 h-5 border-2 border-foreground/30 border-t-foreground rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-background/30 border-t-background rounded-full animate-spin" />
             ) : (
               <>CONTINUE <ArrowRight className="h-4 w-4 ml-2" /></>
             )}
