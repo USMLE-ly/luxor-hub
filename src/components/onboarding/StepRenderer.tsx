@@ -595,7 +595,28 @@ const DetectionResultStep = ({ step, answers, gender, aiResults }: { step: Onboa
 
   useEffect(() => {
     if (!isLoading) {
-      const timer = setTimeout(() => setRevealed(true), 800);
+      const timer = setTimeout(() => {
+        setRevealed(true);
+        // Haptic feedback
+        if (navigator.vibrate) navigator.vibrate([15, 50, 25]);
+        // Subtle chime via Web Audio API
+        try {
+          const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+          const playTone = (freq: number, start: number, dur: number) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = "sine";
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.12, ctx.currentTime + start);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
+            osc.connect(gain).connect(ctx.destination);
+            osc.start(ctx.currentTime + start);
+            osc.stop(ctx.currentTime + start + dur);
+          };
+          playTone(880, 0, 0.15);
+          playTone(1320, 0.1, 0.2);
+        } catch (_) {}
+      }, 800);
       return () => clearTimeout(timer);
     }
   }, [isLoading]);
