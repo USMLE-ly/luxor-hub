@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { motion } from "framer-motion";
 import { Check, Camera, Smartphone, Video, User, FlipHorizontal } from "lucide-react";
 import type { OnboardingStep } from "./onboardingSteps";
 import selfieIntroImg from "@/assets/selfie-intro.jpg";
@@ -484,11 +485,14 @@ const StepRenderer = ({ step, answers, onSelect, gender }: StepRendererProps) =>
             <div key={group.label} className="mb-6">
               <h3 className="font-sans font-semibold text-foreground text-center mb-3">{group.label}</h3>
               <div className="grid grid-cols-5 gap-2">
-                {group.options.map((size) => {
+                {group.options.map((size, sizeIdx) => {
                   const isActive = groupSelected.includes(size);
                   return (
-                    <button
+                    <motion.button
                       key={size}
+                      initial={{ opacity: 0, scale: 0.85 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.25, delay: sizeIdx * 0.02, ease: [0.22, 1, 0.36, 1] }}
                       onClick={() => onSelect(groupKey, size, true)}
                       className={`py-2.5 px-1 rounded-lg text-sm font-sans font-medium transition-all ${
                         isActive
@@ -497,7 +501,7 @@ const StepRenderer = ({ step, answers, onSelect, gender }: StepRendererProps) =>
                       }`}
                     >
                       {size}
-                    </button>
+                    </motion.button>
                   );
                 })}
               </div>
@@ -515,13 +519,16 @@ const StepRenderer = ({ step, answers, onSelect, gender }: StepRendererProps) =>
           {step.question}
         </h2>
         <div className="flex flex-col gap-3">
-          {step.options.map((option) => {
+          {step.options.map((option, index) => {
             const isActive = selected.includes(option);
             const genderKey = gender || "female";
             const shapeImg = bodyShapeImages[genderKey]?.[option];
             return (
-              <button
+              <motion.button
                 key={option}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
                 onClick={() => onSelect(step.key, option, true)}
                 className={`flex items-center gap-4 p-3 rounded-2xl transition-all text-left active:scale-[0.98] ${
                   isActive
@@ -540,7 +547,7 @@ const StepRenderer = ({ step, answers, onSelect, gender }: StepRendererProps) =>
                 }`}>
                   {isActive && <Check className="h-3.5 w-3.5 text-background" />}
                 </div>
-              </button>
+              </motion.button>
             );
           })}
         </div>
@@ -558,12 +565,15 @@ const StepRenderer = ({ step, answers, onSelect, gender }: StepRendererProps) =>
         {step.question}
       </h2>
       <div className="flex flex-col gap-3">
-        {step.options.map((option) => {
+        {step.options.map((option, index) => {
           const isActive = selected.includes(option);
           const brands = step.brandLabels?.[option];
           return (
-            <button
+            <motion.button
               key={option}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
               onClick={() => onSelect(step.key, option, isSingle)}
               className={`flex items-center justify-between p-4 rounded-2xl transition-all text-left active:scale-[0.98] ${
                 isActive
@@ -596,7 +606,7 @@ const StepRenderer = ({ step, answers, onSelect, gender }: StepRendererProps) =>
                   {isActive && <Check className="h-3 w-3 text-background" />}
                 </div>
               )}
-            </button>
+            </motion.button>
           );
         })}
       </div>
