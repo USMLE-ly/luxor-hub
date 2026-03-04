@@ -1012,13 +1012,13 @@ const StepRenderer = ({ step, answers, onSelect, gender, aiResults }: StepRender
               <div className="flex-1 pr-2">
                 <span className="font-sans text-sm text-foreground">{option}</span>
                 {logos ? (
-                  <div className="flex items-center gap-3 mt-2">
+                  <div className="flex items-center gap-4 mt-2">
                     {logos.map((logo) => (
                       <img
                         key={logo.name}
                         src={brandLogoMap[logo.image]}
                         alt={logo.name}
-                        className="h-7 w-auto object-contain rounded-md bg-background"
+                        className="h-10 w-auto object-contain rounded-md bg-background transition-transform duration-200 hover:scale-110 active:scale-95"
                       />
                     ))}
                   </div>
