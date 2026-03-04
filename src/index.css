@@ -40,14 +40,14 @@
     --ring: 43 74% 49%;
 
     --radius: 0.75rem;
-    --border-radius: 0.5rem;
+    --border-radius: 0.625rem;
 
     --main: 43 74% 49%;
     --mtext: 0 0% 100%;
     --bw: 0 0% 100%;
     --text: 240 10% 10%;
-    --box-shadow-x: 4px;
-    --box-shadow-y: 4px;
+    --box-shadow-x: 2px;
+    --box-shadow-y: 2px;
 
     --gold: 43 74% 49%;
     --gold-light: 43 80% 65%;
@@ -99,8 +99,8 @@
     --mtext: 240 10% 6%;
     --bw: 240 10% 6%;
     --text: 40 20% 95%;
-    --box-shadow-x: 4px;
-    --box-shadow-y: 4px;
+    --box-shadow-x: 2px;
+    --box-shadow-y: 2px;
 
     --gold: 43 74% 49%;
     --gold-light: 43 80% 65%;
