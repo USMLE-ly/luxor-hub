@@ -71,6 +71,11 @@ import calFShoeFlats from "@/assets/cal-f-shoe-flats.jpg";
 import calFShoeBoots from "@/assets/cal-f-shoe-boots.jpg";
 import calFShoeSandals from "@/assets/cal-f-shoe-sandals.jpg";
 
+// Style inspiration images
+import styleInspo1 from "@/assets/style-inspo-1.jpg";
+import styleInspo2 from "@/assets/style-inspo-2.jpg";
+import styleInspo3 from "@/assets/style-inspo-3.jpg";
+
 interface CalibrationOption {
   label: string;
   imageUrl: string;
@@ -414,18 +419,16 @@ const Calibration = () => {
 
           {/* Style inspiration images */}
           <div className="flex gap-2 mb-5">
-            {[1, 2, 3].map((i) => (
+            {[styleInspo1, styleInspo2, styleInspo3].map((src, i) => (
               <motion.div
                 key={i}
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.3 + i * 0.1 }}
-                className="flex-1 aspect-[3/4] rounded-lg bg-secondary overflow-hidden relative"
+                className="flex-1 aspect-[3/4] rounded-xl overflow-hidden relative"
               >
-                <div className="absolute inset-0 bg-gradient-to-t from-foreground/20 to-transparent" />
-                <div className="absolute bottom-1 right-1.5 bg-foreground/60 text-background text-[10px] px-1.5 py-0.5 rounded-md font-sans font-medium">
-                  {i + 2}
-                </div>
+                <img src={src} alt={`Style inspiration ${i + 1}`} className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-foreground/30 to-transparent" />
               </motion.div>
             ))}
           </div>
