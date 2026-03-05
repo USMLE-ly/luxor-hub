@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, Zap, Users } from 'lucide-react';
-import { GradientButton } from '@/components/ui/gradient-button';
 import './lumina-slider.css';
 
 declare const gsap: any;
@@ -25,17 +24,19 @@ function HeroOverlay() {
   return (
     <div className="lumina-hero-overlay">
       <div className="lumina-hero-cta">
-        <GradientButton onClick={() => navigate("/auth")} className="text-lg">
-          <Sparkles className="w-5 h-5 mr-2" />
+        <button
+          onClick={() => navigate("/auth")}
+          className="lumina-cta-primary"
+        >
+          <Sparkles className="w-4 h-4" />
           Start Free
-        </GradientButton>
-        <GradientButton
-          variant="variant"
+        </button>
+        <button
           onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
-          className="text-lg"
+          className="lumina-cta-secondary"
         >
           How It Works
-        </GradientButton>
+        </button>
       </div>
       <div className="lumina-hero-badges">
         <span className="lumina-badge">

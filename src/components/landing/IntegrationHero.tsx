@@ -1,4 +1,5 @@
 import { GradientButton } from "@/components/ui/gradient-button";
+import { motion } from "framer-motion";
 
 const ICONS_ROW1 = [
   "https://cdn-icons-png.flaticon.com/512/2111/2111463.png",   // Instagram
@@ -30,21 +31,52 @@ export default function IntegrationHero() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,hsl(var(--foreground)/0.04)_1px,transparent_1px)] [background-size:24px_24px]" />
 
       <div className="relative max-w-7xl mx-auto px-6 text-center">
-        <span className="inline-flex items-center gap-1.5 px-4 py-1.5 mb-5 text-sm rounded-full border border-border bg-card text-foreground font-sans font-medium">
+        <motion.span
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.5 }}
+          className="inline-flex items-center gap-1.5 px-4 py-1.5 mb-5 text-sm rounded-full border border-border bg-card text-foreground font-sans font-medium"
+        >
           ⚡ Integrations
-        </span>
-        <h2 className="font-display text-4xl lg:text-6xl font-bold tracking-tight text-foreground">
+        </motion.span>
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="font-display text-4xl lg:text-6xl font-bold tracking-tight text-foreground"
+        >
           Connect your favorite fashion platforms
-        </h2>
-        <p className="mt-4 text-lg font-sans text-muted-foreground max-w-xl mx-auto">
+        </motion.h2>
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="mt-4 text-lg font-sans text-muted-foreground max-w-xl mx-auto"
+        >
           Sync with Instagram, Pinterest, Shopify, and 250+ apps to elevate your style workflow.
-        </p>
-        <GradientButton className="mt-8">
-          Get started
-        </GradientButton>
+        </motion.p>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <GradientButton className="mt-8">
+            Get started
+          </GradientButton>
+        </motion.div>
 
         {/* Icon Carousel */}
-        <div className="mt-12 overflow-hidden relative pb-2">
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="mt-12 overflow-hidden relative pb-2"
+        >
           {/* Row 1 - scrolls left */}
           <div className="flex gap-10 whitespace-nowrap animate-integration-left">
             {repeatedIcons(ICONS_ROW1, 4).map((src, i) => (
@@ -72,7 +104,7 @@ export default function IntegrationHero() {
           {/* Fade overlays */}
           <div className="absolute left-0 top-0 h-full w-24 bg-gradient-to-r from-background to-transparent pointer-events-none" />
           <div className="absolute right-0 top-0 h-full w-24 bg-gradient-to-l from-background to-transparent pointer-events-none" />
-        </div>
+        </motion.div>
       </div>
     </section>
   );
