@@ -365,7 +365,7 @@ const Dashboard = () => {
                           View items <ChevronRight className="w-2.5 h-2.5" />
                         </button>
                         <button
-                          onClick={() => navigate("/mannequin")}
+                          onClick={() => navigate("/closet")}
                           className="text-[10px] font-sans text-primary flex items-center gap-1"
                         >
                           <Sparkles className="w-2.5 h-2.5" /> Try it on

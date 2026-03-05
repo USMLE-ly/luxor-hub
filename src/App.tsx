@@ -30,7 +30,7 @@ import StyleDNA from "./pages/StyleDNA";
 import Calibration from "./pages/Calibration";
 import ColorType from "./pages/ColorType";
 import Paywall from "./pages/Paywall";
-import MannequinView from "./pages/MannequinView";
+
 
 const queryClient = new QueryClient();
 
@@ -67,7 +67,7 @@ const App = () => (
             <Route path="/calibration" element={<Calibration />} />
             <Route path="/color-type" element={<ColorType />} />
             <Route path="/paywall" element={<Paywall />} />
-            <Route path="/mannequin" element={<MannequinView />} />
+            
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -727,7 +727,7 @@ const Calibration = () => {
       <div className="fixed bottom-0 inset-x-0 z-20 bg-background border-t border-border p-4 space-y-2">
         {canProceed && selectedOption && (
           <Button
-            onClick={() => navigate("/mannequin")}
+            onClick={() => navigate("/closet")}
             variant="outline"
             className="w-full h-12 rounded-2xl font-sans text-sm border-border"
           >

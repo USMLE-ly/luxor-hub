@@ -212,9 +212,25 @@ const Closet = () => {
     else toast.success("Marked as worn today! 👕");
   };
 
-  // Add closet item to mannequin
+  // Add closet item to mannequin and switch to mannequin tab
   const addToMannequin = (item: ClothingItem) => {
     setPendingItem(item);
+    setActiveTab("mannequin");
+  };
+
+  // Quick try-on: instantly add to mannequin with defaults and switch tab
+  const quickTryOn = (item: ClothingItem) => {
+    const mapped: MannequinClothingItem = {
+      category: closetToMannequinCategory[item.category] || "tops",
+      color: item.color || "navy",
+      name: item.name || item.category,
+      imageUrl: item.photo_url || undefined,
+      fit: "regular",
+      fabric: "default",
+    };
+    setMannequinClothing((prev) => [...prev, mapped]);
+    setActiveTab("mannequin");
+    toast.success(`👗 ${mapped.name} added to mannequin`);
   };
 
   const confirmAddToMannequin = () => {
@@ -511,7 +527,7 @@ const Closet = () => {
               <div className="grid grid-cols-3 gap-2">
                 <AnimatePresence>
                   {filtered.map((item, i) => (
-                    <ItemCard key={item.id} item={item} index={i} onDelete={handleDelete} onWear={handleWornToday} onAddToMannequin={() => addToMannequin(item)} />
+                    <ItemCard key={item.id} item={item} index={i} onDelete={handleDelete} onWear={handleWornToday} onAddToMannequin={() => addToMannequin(item)} onQuickTryOn={() => quickTryOn(item)} />
                   ))}
                 </AnimatePresence>
               </div>
@@ -539,7 +555,7 @@ const Closet = () => {
                           <span className="text-[10px] font-sans font-medium text-muted-foreground">New Item</span>
                         </button>
                         {sectionItems.slice(0, 5).map((item, i) => (
-                          <ItemCard key={item.id} item={item} index={i} onDelete={handleDelete} onWear={handleWornToday} onAddToMannequin={() => addToMannequin(item)} />
+                          <ItemCard key={item.id} item={item} index={i} onDelete={handleDelete} onWear={handleWornToday} onAddToMannequin={() => addToMannequin(item)} onQuickTryOn={() => quickTryOn(item)} />
                         ))}
                         {sectionItems.length < 2 && placeholders.slice(0, 2 - sectionItems.length).map((src, i) => (
                           <div key={`ph-${i}`} className="aspect-square rounded-xl overflow-hidden border border-border bg-card relative group cursor-pointer" onClick={() => setUploadOpen(true)}>
@@ -857,11 +873,12 @@ const Closet = () => {
 };
 
 function ItemCard({
-  item, index, onDelete, onWear, onAddToMannequin,
+  item, index, onDelete, onWear, onAddToMannequin, onQuickTryOn,
 }: {
   item: ClothingItem; index: number;
   onDelete: (id: string) => void; onWear: (id: string) => void;
   onAddToMannequin?: () => void;
+  onQuickTryOn?: () => void;
 }) {
   return (
     <motion.div
@@ -877,12 +894,14 @@ function ItemCard({
             <Shirt className="h-8 w-8 text-muted-foreground" />
           </div>
         )}
-        <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-          {onAddToMannequin && (
-            <button onClick={onAddToMannequin} className="p-1.5 rounded-full bg-primary/80 text-primary-foreground hover:bg-primary transition-colors" title="Add to mannequin">
-              <User className="h-3.5 w-3.5" />
-            </button>
-          )}
+        {/* Try On button - always visible at bottom */}
+        {onQuickTryOn && (
+          <button onClick={onQuickTryOn}
+            className="absolute bottom-1.5 left-1.5 right-1.5 py-1 rounded-lg bg-primary/90 text-primary-foreground text-[10px] font-sans font-semibold opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1 backdrop-blur-sm">
+            <User className="w-3 h-3" /> Try On
+          </button>
+        )}
+        <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 pb-8">
           <button onClick={() => onWear(item.id)} className="p-1.5 rounded-full bg-primary/80 text-primary-foreground hover:bg-primary transition-colors">
             <CheckCircle className="h-3.5 w-3.5" />
           </button>
