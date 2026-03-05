@@ -34,10 +34,10 @@ export default function IntegrationHero() {
           ⚡ Integrations
         </span>
         <h2 className="font-display text-4xl lg:text-6xl font-bold tracking-tight text-foreground">
-          Integrate with favorite tools
+          Connect your favorite fashion platforms
         </h2>
         <p className="mt-4 text-lg font-sans text-muted-foreground max-w-xl mx-auto">
-          250+ top apps are available to integrate seamlessly with your workflow.
+          Sync with Instagram, Pinterest, Shopify, and 250+ apps to elevate your style workflow.
         </p>
         <GradientButton className="mt-8">
           Get started
