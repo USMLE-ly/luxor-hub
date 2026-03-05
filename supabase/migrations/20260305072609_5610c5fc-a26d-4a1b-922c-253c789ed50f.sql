@@ -1,0 +1,1 @@
+ALTER TABLE public.outfits ADD COLUMN mannequin_items jsonb DEFAULT '[]'::jsonb;
