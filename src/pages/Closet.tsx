@@ -1,14 +1,19 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import {
   Plus, Search, Shirt, Trash2, Upload, X, Loader2, Sparkles, CheckCircle, Camera, ChevronRight,
+  SlidersHorizontal, Activity, Eye, User, Layers, CalendarDays, Image,
 } from "lucide-react";
+import Mannequin3D, { type ClothingItem as MannequinClothingItem, type BodyDNA, type PosePreset } from "@/components/app/Mannequin3D";
+import type { GarmentFit } from "@/components/app/GarmentGeometry";
+import type { FabricType } from "@/components/app/FabricMaterials";
 
 /* Placeholder product images for empty closet sections */
 import imgCoatBelted from "@/assets/cal-f-coat-belted.jpg";
@@ -64,9 +69,23 @@ const categoryMap: Record<string, { label: string; categories: string[] }> = {
   "Other": { label: "Other", categories: ["other"] },
 };
 
+// Map closet categories to mannequin categories
+const closetToMannequinCategory: Record<string, string> = {
+  top: "tops",
+  outerwear: "outerwear",
+  bottom: "bottoms",
+  shoes: "shoes",
+  accessory: "hat",
+  dress: "dress",
+  other: "tops",
+};
+
 const filterPills = ["All", "Upper Body", "Lower Body", "Shoes", "Accessories", "Dresses"];
 const uploadCategories = ["top", "bottom", "shoes", "accessory", "outerwear", "dress", "other"];
 const seasons = ["spring", "summer", "fall", "winter", "all-season"];
+
+type ClosetTab = "inventory" | "mannequin";
+type MannequinPanel = "dna" | "pose" | "trace" | "measure" | null;
 
 const Closet = () => {
   const { user } = useAuth();
@@ -83,15 +102,32 @@ const Closet = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
+  // Mannequin state
+  const [activeTab, setActiveTab] = useState<ClosetTab>("inventory");
+  const [mannequinClothing, setMannequinClothing] = useState<MannequinClothingItem[]>([]);
+  const [gender, setGender] = useState<"male" | "female">("male");
+  const [dna, setDna] = useState<BodyDNA>({ height: 0.5, shoulder: 0.5, waist: 0.5, hips: 0.5, legLength: 0.5 });
+  const [pose, setPose] = useState<PosePreset>("neutral");
+  const [activePanel, setActivePanel] = useState<MannequinPanel>(null);
+  const [showMeasurements, setShowMeasurements] = useState(false);
+  const [tracingUrl, setTracingUrl] = useState<string | undefined>();
+  const [tracingOpacity, setTracingOpacity] = useState(0.3);
+  const [pendingItem, setPendingItem] = useState<ClothingItem | null>(null);
+  const [selectedFit, setSelectedFit] = useState<GarmentFit>("regular");
+  const [selectedFabric, setSelectedFabric] = useState<FabricType>("default");
+  const [showCalendar, setShowCalendar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const fetchItems = useCallback(async () => {
     if (!user) return;
-    const { data, error } = await supabase
-      .from("clothing_items")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
-    if (error) toast.error("Failed to load closet items");
-    else setItems(data || []);
+    const [itemsRes, styleRes] = await Promise.all([
+      supabase.from("clothing_items").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+      supabase.from("style_profiles").select("preferences").eq("user_id", user.id).single(),
+    ]);
+    if (itemsRes.error) toast.error("Failed to load closet items");
+    else setItems(itemsRes.data || []);
+    const prefs = (styleRes.data?.preferences as any) || {};
+    if (prefs.gender === "female") setGender("female");
     setLoading(false);
   }, [user]);
 
@@ -105,7 +141,6 @@ const Closet = () => {
   const analyzeWithAI = async () => {
     setAnalyzing(true);
     try {
-      // Convert file to base64 to avoid sending blob: URLs the AI gateway can't access
       let imageData = previewUrl;
       if (selectedFile) {
         imageData = await new Promise<string>((resolve, reject) => {
@@ -177,6 +212,56 @@ const Closet = () => {
     else toast.success("Marked as worn today! 👕");
   };
 
+  // Add closet item to mannequin
+  const addToMannequin = (item: ClothingItem) => {
+    setPendingItem(item);
+  };
+
+  const confirmAddToMannequin = () => {
+    if (!pendingItem) return;
+    const mapped: MannequinClothingItem = {
+      category: closetToMannequinCategory[pendingItem.category] || "tops",
+      color: pendingItem.color || "navy",
+      name: pendingItem.name || pendingItem.category,
+      imageUrl: pendingItem.photo_url || undefined,
+      fit: selectedFit,
+      fabric: selectedFabric,
+    };
+    setMannequinClothing((prev) => [...prev, mapped]);
+    setPendingItem(null);
+    setSelectedFit("regular");
+    setSelectedFabric("default");
+    toast.success(`Added ${mapped.name} to mannequin`);
+  };
+
+  const removeFromMannequin = (index: number) => {
+    setMannequinClothing((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const saveToCalendar = async (date: string) => {
+    if (!user) return;
+    const { error } = await supabase.from("calendar_events").insert({
+      user_id: user.id,
+      title: `Outfit: ${mannequinClothing.map((c) => c.name).join(", ")}`,
+      event_date: date,
+      occasion: "Planned Outfit",
+      notes: `Mannequin outfit with ${mannequinClothing.length} items`,
+      outfit_items: mannequinClothing as any,
+    });
+    if (error) toast.error("Failed to save to calendar");
+    else { toast.success("Outfit saved to calendar!"); setShowCalendar(false); }
+  };
+
+  const handleTraceUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setTracingUrl(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const togglePanel = (p: MannequinPanel) => setActivePanel((prev) => (prev === p ? null : p));
+
   // Filter items
   const filtered = items.filter((item) => {
     const matchesSearch = !searchQuery ||
@@ -188,290 +273,582 @@ const Closet = () => {
     return matchesSearch && cats.includes(item.category);
   });
 
-  // Group items by section
-  const groupedItems = Object.entries(categoryMap).reduce((acc, [section, { categories }]) => {
-    const sectionItems = filtered.filter((item) => categories.includes(item.category));
-    if (sectionItems.length > 0) acc[section] = sectionItems;
-    return acc;
-  }, {} as Record<string, ClothingItem[]>);
+  const dnaSliders: { key: keyof BodyDNA; label: string }[] = [
+    { key: "height", label: "Height" },
+    { key: "shoulder", label: "Shoulders" },
+    { key: "waist", label: "Waist" },
+    { key: "hips", label: "Hips" },
+    { key: "legLength", label: "Leg Length" },
+  ];
+
+  const poses: { key: PosePreset; label: string }[] = [
+    { key: "neutral", label: "Neutral" },
+    { key: "fashion", label: "Fashion" },
+    { key: "walking", label: "Walking" },
+  ];
 
   return (
     <AppLayout>
       <div className="px-5 py-5 max-w-lg mx-auto">
-        {/* Header with item counter */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-5">
+        {/* Header */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
           <div className="flex items-center justify-between">
             <h1 className="font-display text-2xl font-bold text-foreground">My Closet</h1>
             <span className="text-xs font-sans font-semibold text-muted-foreground bg-secondary px-3 py-1 rounded-full">
-              {items.length} / 7 ITEMS UPLOADED
+              {items.length} ITEMS
             </span>
-          </div>
-          {/* Upload progress */}
-          <div className="mt-3 space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-sans text-muted-foreground w-14">Tops</span>
-              <div className="flex-1 h-1.5 rounded-full bg-secondary overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-primary transition-all"
-                  style={{ width: `${Math.min((items.filter(i => ["top", "outerwear"].includes(i.category)).length / 4) * 100, 100)}%` }}
-                />
-              </div>
-              <span className="text-[10px] font-sans text-muted-foreground">
-                {items.filter(i => ["top", "outerwear"].includes(i.category)).length}/4
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-sans text-muted-foreground w-14">Bottoms</span>
-              <div className="flex-1 h-1.5 rounded-full bg-secondary overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-primary transition-all"
-                  style={{ width: `${Math.min((items.filter(i => i.category === "bottom").length / 3) * 100, 100)}%` }}
-                />
-              </div>
-              <span className="text-[10px] font-sans text-muted-foreground">
-                {items.filter(i => i.category === "bottom").length}/3
-              </span>
-            </div>
           </div>
         </motion.div>
 
-        {/* Action Cards */}
-        <div className="grid grid-cols-2 gap-3 mb-5">
-          <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
-            <DialogTrigger asChild>
-              <motion.button
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.05 }}
-                className="rounded-2xl border border-border bg-card p-4 text-left hover:border-primary/40 transition-colors"
-              >
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
-                  <Plus className="w-5 h-5 text-primary" />
-                </div>
-                <p className="font-sans font-semibold text-sm text-foreground">New Item</p>
-                <p className="text-xs text-muted-foreground font-sans mt-0.5">Add manually</p>
-              </motion.button>
-            </DialogTrigger>
-            <DialogContent className="bg-card border-border max-w-md max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="font-display text-xl">Add Clothing Item</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 mt-4">
-                {/* Photo upload */}
-                <div>
-                  <Label className="font-sans text-sm text-muted-foreground">Photo</Label>
-                  {previewUrl ? (
-                    <div className="relative mt-2">
-                      <img src={previewUrl} alt="Preview" className="w-full h-48 object-cover rounded-xl" />
-                      <button onClick={() => { setSelectedFile(null); setPreviewUrl(null); }} className="absolute top-2 right-2 p-1 bg-background/80 rounded-full">
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ) : (
-                    <label className="mt-2 flex flex-col items-center justify-center h-32 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/50 transition-colors">
-                      <Upload className="h-6 w-6 text-muted-foreground mb-2" />
-                      <span className="text-sm text-muted-foreground font-sans">Upload photo</span>
-                      <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
-                    </label>
-                  )}
-                </div>
-                <Button variant="outline" onClick={analyzeWithAI} disabled={analyzing || (!previewUrl && !newItem.name)} className="w-full border-primary/30 text-primary hover:bg-primary/10 font-sans">
-                  {analyzing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
-                  {analyzing ? "Analyzing..." : "Auto-detect with AI"}
-                </Button>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label className="font-sans text-sm text-muted-foreground">Name</Label>
-                    <Input value={newItem.name} onChange={(e) => setNewItem({ ...newItem, name: e.target.value })} placeholder="Blue Oxford Shirt" className="bg-secondary border-border mt-1" />
-                  </div>
-                  <div>
-                    <Label className="font-sans text-sm text-muted-foreground">Category</Label>
-                    <Select value={newItem.category} onValueChange={(v) => setNewItem({ ...newItem, category: v })}>
-                      <SelectTrigger className="bg-secondary border-border mt-1"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {uploadCategories.map((c) => <SelectItem key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label className="font-sans text-sm text-muted-foreground">Color</Label>
-                    <Input value={newItem.color} onChange={(e) => setNewItem({ ...newItem, color: e.target.value })} placeholder="Navy" className="bg-secondary border-border mt-1" />
-                  </div>
-                  <div>
-                    <Label className="font-sans text-sm text-muted-foreground">Brand</Label>
-                    <Input value={newItem.brand} onChange={(e) => setNewItem({ ...newItem, brand: e.target.value })} placeholder="Zara" className="bg-secondary border-border mt-1" />
-                  </div>
-                  <div>
-                    <Label className="font-sans text-sm text-muted-foreground">Season</Label>
-                    <Select value={newItem.season} onValueChange={(v) => setNewItem({ ...newItem, season: v })}>
-                      <SelectTrigger className="bg-secondary border-border mt-1"><SelectValue /></SelectTrigger>
-                      <SelectContent>{seasons.map((s) => <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>)}</SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label className="font-sans text-sm text-muted-foreground">Price</Label>
-                    <Input type="number" value={newItem.price} onChange={(e) => setNewItem({ ...newItem, price: e.target.value })} placeholder="49.99" className="bg-secondary border-border mt-1" />
-                  </div>
-                </div>
-                <Button onClick={handleUpload} disabled={uploading} className="w-full gold-gradient text-primary-foreground font-sans">
-                  {uploading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
-                  Add to Closet
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-
-          <motion.button
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            onClick={() => setUploadOpen(true)}
-            className="rounded-2xl border border-border bg-card p-4 text-left hover:border-primary/40 transition-colors"
-          >
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
-              <Camera className="w-5 h-5 text-primary" />
-            </div>
-            <p className="font-sans font-semibold text-sm text-foreground">Upload Items</p>
-            <p className="text-xs text-muted-foreground font-sans mt-0.5">Scan with AI</p>
-          </motion.button>
-        </div>
-
-        {/* Search */}
-        <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search items..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-secondary border-border rounded-xl h-10"
-          />
-        </div>
-
-        {/* Occasion Outfit Tabs */}
-        <div className="mb-5">
-          <h2 className="font-sans font-semibold text-foreground text-sm mb-3">My Closet Outfits</h2>
-          <div className="grid grid-cols-4 gap-2 mb-3">
-            {[
-              { label: "Everyday", icon: "☀️", color: "hsl(142, 60%, 45%)" },
-              { label: "Weekend", icon: "🌸", color: "hsl(330, 60%, 55%)" },
-              { label: "Work", icon: "💼", color: "hsl(30, 80%, 55%)" },
-              { label: "Party", icon: "🎉", color: "hsl(270, 60%, 55%)" },
-            ].map((tab) => {
-              const count = items.filter(i => i.occasion?.toLowerCase() === tab.label.toLowerCase()).length;
-              return (
-                <button
-                  key={tab.label}
-                  className="flex flex-col items-center gap-1 p-3 rounded-xl bg-card border border-border hover:border-primary/40 transition-colors"
-                >
-                  <span className="text-lg">{tab.icon}</span>
-                  <span className="font-sans text-[10px] font-semibold text-foreground">{tab.label}</span>
-                  <span className="text-[9px] font-sans text-muted-foreground">{count} OUTFITS</span>
-                </button>
-              );
-            })}
-          </div>
-          <div className="rounded-xl border border-dashed border-border p-6 flex flex-col items-center justify-center text-center">
-            <Shirt className="h-8 w-8 text-muted-foreground mb-2" />
-            <p className="text-xs text-muted-foreground font-sans">Add your items to create outfits</p>
-          </div>
-        </div>
-
-        {/* Category Pills */}
-        <div className="flex gap-2 overflow-x-auto pb-3 mb-4 scrollbar-none">
-          {filterPills.map((pill) => (
+        {/* Tab Switch: Inventory / Mannequin */}
+        <div className="flex gap-1 bg-secondary rounded-xl p-1 mb-5">
+          {([
+            { key: "inventory" as ClosetTab, label: "👗 Inventory", icon: Shirt },
+            { key: "mannequin" as ClosetTab, label: "🧍 3D Mannequin", icon: User },
+          ]).map(({ key, label }) => (
             <button
-              key={pill}
-              onClick={() => setActiveFilter(pill)}
-              className={`px-4 py-1.5 rounded-full text-xs font-sans whitespace-nowrap transition-all ${
-                activeFilter === pill
-                  ? "bg-foreground text-background font-semibold"
-                  : "bg-secondary text-muted-foreground hover:text-foreground"
+              key={key}
+              onClick={() => setActiveTab(key)}
+              className={`flex-1 py-2.5 rounded-lg text-xs font-sans font-semibold transition-all ${
+                activeTab === key
+                  ? "bg-foreground text-background shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              {pill}
+              {label}
             </button>
           ))}
         </div>
 
-        {/* Items */}
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        ) : filtered.length === 0 ? (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16">
-            <Shirt className="h-14 w-14 text-muted-foreground mx-auto mb-3" />
-            <h3 className="font-display text-lg text-foreground mb-1.5">
-              {items.length === 0 ? "Your closet is empty" : "No items match"}
-            </h3>
-            <p className="text-muted-foreground font-sans text-xs mb-5">
-              {items.length === 0 ? "Start by adding your first clothing item" : "Try adjusting your search or filters"}
-            </p>
-            {items.length === 0 && (
-              <Button onClick={() => setUploadOpen(true)} className="gold-gradient text-primary-foreground font-sans text-sm h-10 px-5">
-                <Plus className="h-4 w-4 mr-2" /> Add Your First Item
-              </Button>
-            )}
-          </motion.div>
-        ) : activeFilter !== "All" ? (
-          /* Flat grid when filtering */
-          <div className="grid grid-cols-3 gap-2">
-            <AnimatePresence>
-              {filtered.map((item, i) => (
-                <ItemCard key={item.id} item={item} index={i} onDelete={handleDelete} onWear={handleWornToday} />
-              ))}
-            </AnimatePresence>
-          </div>
-        ) : (
-          /* Grouped sections */
-          <div className="space-y-6">
-            {Object.entries(categoryMap).map(([section, { categories }], si) => {
-              const sectionItems = filtered.filter((item) => categories.includes(item.category));
-              const placeholders = placeholdersBySection[section] || [];
-              return (
-                <motion.div
-                  key={section}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: si * 0.1 }}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <h2 className="font-sans font-semibold text-foreground text-sm">{section}</h2>
-                    {sectionItems.length > 0 && (
-                      <button className="flex items-center gap-1 text-xs text-muted-foreground font-sans hover:text-foreground transition-colors">
-                        {sectionItems.length} items <ChevronRight className="w-3 h-3" />
-                      </button>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    {/* New Item card */}
-                    <button
-                      onClick={() => setUploadOpen(true)}
-                      className="aspect-square rounded-xl border border-dashed border-border bg-card flex flex-col items-center justify-center gap-2 hover:border-primary/40 transition-colors"
-                    >
-                      <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
-                        <Plus className="w-5 h-5 text-primary" />
-                      </div>
-                      <span className="text-[10px] font-sans font-medium text-muted-foreground">New Item</span>
-                    </button>
-                    {/* User items */}
-                    {sectionItems.slice(0, 5).map((item, i) => (
-                      <ItemCard key={item.id} item={item} index={i} onDelete={handleDelete} onWear={handleWornToday} />
-                    ))}
-                    {/* Placeholder images when user has few items */}
-                    {sectionItems.length < 2 && placeholders.slice(0, 2 - sectionItems.length).map((src, i) => (
-                      <div key={`ph-${i}`} className="aspect-square rounded-xl overflow-hidden border border-border bg-card relative group cursor-pointer" onClick={() => setUploadOpen(true)}>
-                        <img src={src} alt="Example item" className="w-full h-full object-cover opacity-50" />
-                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/30">
-                          <Shirt className="w-6 h-6 text-muted-foreground mb-1" />
-                          <span className="text-[9px] font-sans text-muted-foreground text-center px-2">Upload your own items</span>
+        {/* ==================== INVENTORY TAB ==================== */}
+        {activeTab === "inventory" && (
+          <>
+            {/* Upload progress */}
+            <div className="mb-5 space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-sans text-muted-foreground w-14">Tops</span>
+                <div className="flex-1 h-1.5 rounded-full bg-secondary overflow-hidden">
+                  <div className="h-full rounded-full bg-primary transition-all"
+                    style={{ width: `${Math.min((items.filter(i => ["top", "outerwear"].includes(i.category)).length / 4) * 100, 100)}%` }} />
+                </div>
+                <span className="text-[10px] font-sans text-muted-foreground">
+                  {items.filter(i => ["top", "outerwear"].includes(i.category)).length}/4
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-sans text-muted-foreground w-14">Bottoms</span>
+                <div className="flex-1 h-1.5 rounded-full bg-secondary overflow-hidden">
+                  <div className="h-full rounded-full bg-primary transition-all"
+                    style={{ width: `${Math.min((items.filter(i => i.category === "bottom").length / 3) * 100, 100)}%` }} />
+                </div>
+                <span className="text-[10px] font-sans text-muted-foreground">
+                  {items.filter(i => i.category === "bottom").length}/3
+                </span>
+              </div>
+            </div>
+
+            {/* Action Cards */}
+            <div className="grid grid-cols-2 gap-3 mb-5">
+              <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
+                <DialogTrigger asChild>
+                  <motion.button
+                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
+                    className="rounded-2xl border border-border bg-card p-4 text-left hover:border-primary/40 transition-colors"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
+                      <Plus className="w-5 h-5 text-primary" />
+                    </div>
+                    <p className="font-sans font-semibold text-sm text-foreground">New Item</p>
+                    <p className="text-xs text-muted-foreground font-sans mt-0.5">Add manually</p>
+                  </motion.button>
+                </DialogTrigger>
+                <DialogContent className="bg-card border-border max-w-md max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle className="font-display text-xl">Add Clothing Item</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 mt-4">
+                    <div>
+                      <Label className="font-sans text-sm text-muted-foreground">Photo</Label>
+                      {previewUrl ? (
+                        <div className="relative mt-2">
+                          <img src={previewUrl} alt="Preview" className="w-full h-48 object-cover rounded-xl" />
+                          <button onClick={() => { setSelectedFile(null); setPreviewUrl(null); }} className="absolute top-2 right-2 p-1 bg-background/80 rounded-full">
+                            <X className="h-4 w-4" />
+                          </button>
                         </div>
+                      ) : (
+                        <label className="mt-2 flex flex-col items-center justify-center h-32 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/50 transition-colors">
+                          <Upload className="h-6 w-6 text-muted-foreground mb-2" />
+                          <span className="text-sm text-muted-foreground font-sans">Upload photo</span>
+                          <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+                        </label>
+                      )}
+                    </div>
+                    <Button variant="outline" onClick={analyzeWithAI} disabled={analyzing || (!previewUrl && !newItem.name)} className="w-full border-primary/30 text-primary hover:bg-primary/10 font-sans">
+                      {analyzing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
+                      {analyzing ? "Analyzing..." : "Auto-detect with AI"}
+                    </Button>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label className="font-sans text-sm text-muted-foreground">Name</Label>
+                        <Input value={newItem.name} onChange={(e) => setNewItem({ ...newItem, name: e.target.value })} placeholder="Blue Oxford Shirt" className="bg-secondary border-border mt-1" />
                       </div>
-                    ))}
+                      <div>
+                        <Label className="font-sans text-sm text-muted-foreground">Category</Label>
+                        <Select value={newItem.category} onValueChange={(v) => setNewItem({ ...newItem, category: v })}>
+                          <SelectTrigger className="bg-secondary border-border mt-1"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {uploadCategories.map((c) => <SelectItem key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="font-sans text-sm text-muted-foreground">Color</Label>
+                        <Input value={newItem.color} onChange={(e) => setNewItem({ ...newItem, color: e.target.value })} placeholder="Navy" className="bg-secondary border-border mt-1" />
+                      </div>
+                      <div>
+                        <Label className="font-sans text-sm text-muted-foreground">Brand</Label>
+                        <Input value={newItem.brand} onChange={(e) => setNewItem({ ...newItem, brand: e.target.value })} placeholder="Zara" className="bg-secondary border-border mt-1" />
+                      </div>
+                      <div>
+                        <Label className="font-sans text-sm text-muted-foreground">Season</Label>
+                        <Select value={newItem.season} onValueChange={(v) => setNewItem({ ...newItem, season: v })}>
+                          <SelectTrigger className="bg-secondary border-border mt-1"><SelectValue /></SelectTrigger>
+                          <SelectContent>{seasons.map((s) => <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>)}</SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="font-sans text-sm text-muted-foreground">Price</Label>
+                        <Input type="number" value={newItem.price} onChange={(e) => setNewItem({ ...newItem, price: e.target.value })} placeholder="49.99" className="bg-secondary border-border mt-1" />
+                      </div>
+                    </div>
+                    <Button onClick={handleUpload} disabled={uploading} className="w-full gold-gradient text-primary-foreground font-sans">
+                      {uploading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+                      Add to Closet
+                    </Button>
                   </div>
+                </DialogContent>
+              </Dialog>
+
+              <motion.button
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+                onClick={() => setUploadOpen(true)}
+                className="rounded-2xl border border-border bg-card p-4 text-left hover:border-primary/40 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
+                  <Camera className="w-5 h-5 text-primary" />
+                </div>
+                <p className="font-sans font-semibold text-sm text-foreground">Upload Items</p>
+                <p className="text-xs text-muted-foreground font-sans mt-0.5">Scan with AI</p>
+              </motion.button>
+            </div>
+
+            {/* Search */}
+            <div className="relative mb-4">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="Search items..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-secondary border-border rounded-xl h-10" />
+            </div>
+
+            {/* Occasion Outfit Tabs */}
+            <div className="mb-5">
+              <h2 className="font-sans font-semibold text-foreground text-sm mb-3">My Closet Outfits</h2>
+              <div className="grid grid-cols-4 gap-2 mb-3">
+                {[
+                  { label: "Everyday", icon: "☀️" },
+                  { label: "Weekend", icon: "🌸" },
+                  { label: "Work", icon: "💼" },
+                  { label: "Party", icon: "🎉" },
+                ].map((tab) => {
+                  const count = items.filter(i => i.occasion?.toLowerCase() === tab.label.toLowerCase()).length;
+                  return (
+                    <button key={tab.label}
+                      className="flex flex-col items-center gap-1 p-3 rounded-xl bg-card border border-border hover:border-primary/40 transition-colors">
+                      <span className="text-lg">{tab.icon}</span>
+                      <span className="font-sans text-[10px] font-semibold text-foreground">{tab.label}</span>
+                      <span className="text-[9px] font-sans text-muted-foreground">{count} OUTFITS</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Category Pills */}
+            <div className="flex gap-2 overflow-x-auto pb-3 mb-4 scrollbar-none">
+              {filterPills.map((pill) => (
+                <button key={pill} onClick={() => setActiveFilter(pill)}
+                  className={`px-4 py-1.5 rounded-full text-xs font-sans whitespace-nowrap transition-all ${
+                    activeFilter === pill
+                      ? "bg-foreground text-background font-semibold"
+                      : "bg-secondary text-muted-foreground hover:text-foreground"
+                  }`}>
+                  {pill}
+                </button>
+              ))}
+            </div>
+
+            {/* Items */}
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : filtered.length === 0 ? (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16">
+                <Shirt className="h-14 w-14 text-muted-foreground mx-auto mb-3" />
+                <h3 className="font-display text-lg text-foreground mb-1.5">
+                  {items.length === 0 ? "Your closet is empty" : "No items match"}
+                </h3>
+                <p className="text-muted-foreground font-sans text-xs mb-5">
+                  {items.length === 0 ? "Start by adding your first clothing item" : "Try adjusting your search or filters"}
+                </p>
+                {items.length === 0 && (
+                  <Button onClick={() => setUploadOpen(true)} className="gold-gradient text-primary-foreground font-sans text-sm h-10 px-5">
+                    <Plus className="h-4 w-4 mr-2" /> Add Your First Item
+                  </Button>
+                )}
+              </motion.div>
+            ) : activeFilter !== "All" ? (
+              <div className="grid grid-cols-3 gap-2">
+                <AnimatePresence>
+                  {filtered.map((item, i) => (
+                    <ItemCard key={item.id} item={item} index={i} onDelete={handleDelete} onWear={handleWornToday} onAddToMannequin={() => addToMannequin(item)} />
+                  ))}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {Object.entries(categoryMap).map(([section, { categories }], si) => {
+                  const sectionItems = filtered.filter((item) => categories.includes(item.category));
+                  const placeholders = placeholdersBySection[section] || [];
+                  return (
+                    <motion.div key={section} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: si * 0.1 }}>
+                      <div className="flex items-center justify-between mb-3">
+                        <h2 className="font-sans font-semibold text-foreground text-sm">{section}</h2>
+                        {sectionItems.length > 0 && (
+                          <button className="flex items-center gap-1 text-xs text-muted-foreground font-sans hover:text-foreground transition-colors">
+                            {sectionItems.length} items <ChevronRight className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        <button onClick={() => setUploadOpen(true)}
+                          className="aspect-square rounded-xl border border-dashed border-border bg-card flex flex-col items-center justify-center gap-2 hover:border-primary/40 transition-colors">
+                          <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+                            <Plus className="w-5 h-5 text-primary" />
+                          </div>
+                          <span className="text-[10px] font-sans font-medium text-muted-foreground">New Item</span>
+                        </button>
+                        {sectionItems.slice(0, 5).map((item, i) => (
+                          <ItemCard key={item.id} item={item} index={i} onDelete={handleDelete} onWear={handleWornToday} onAddToMannequin={() => addToMannequin(item)} />
+                        ))}
+                        {sectionItems.length < 2 && placeholders.slice(0, 2 - sectionItems.length).map((src, i) => (
+                          <div key={`ph-${i}`} className="aspect-square rounded-xl overflow-hidden border border-border bg-card relative group cursor-pointer" onClick={() => setUploadOpen(true)}>
+                            <img src={src} alt="Example item" className="w-full h-full object-cover opacity-50" />
+                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/30">
+                              <Shirt className="w-6 h-6 text-muted-foreground mb-1" />
+                              <span className="text-[9px] font-sans text-muted-foreground text-center px-2">Upload your own items</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* ==================== MANNEQUIN TAB ==================== */}
+        {activeTab === "mannequin" && (
+          <div className="-mx-5 -mt-2">
+            {/* 3D Scene */}
+            <div className="relative bg-gradient-to-b from-secondary/10 to-background" style={{ height: "50vh" }}>
+              <Mannequin3D
+                gender={gender}
+                clothing={mannequinClothing}
+                dna={dna}
+                pose={pose}
+                tracingImageUrl={tracingUrl}
+                tracingOpacity={tracingOpacity}
+                showMeasurements={showMeasurements}
+                className="w-full h-full"
+              />
+
+              {/* Gender toggle */}
+              <div className="absolute top-3 left-3 flex gap-1 bg-background/80 backdrop-blur rounded-full p-1">
+                {(["male", "female"] as const).map((g) => (
+                  <button key={g} onClick={() => setGender(g)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-sans font-semibold transition-colors ${
+                      gender === g ? "bg-foreground text-background" : "text-muted-foreground"
+                    }`}>
+                    {g === "male" ? "♂ Male" : "♀ Female"}
+                  </button>
+                ))}
+              </div>
+
+              {/* Item count badge */}
+              <div className="absolute top-3 right-3 bg-background/80 backdrop-blur rounded-full px-3 py-1.5">
+                <span className="text-xs font-sans font-semibold text-foreground">
+                  {mannequinClothing.length} item{mannequinClothing.length !== 1 ? "s" : ""}
+                </span>
+              </div>
+            </div>
+
+            {/* Clothing strip */}
+            <div className="px-4 py-3 border-t border-border">
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {mannequinClothing.map((item, i) => (
+                  <div key={i} className="relative flex-shrink-0 w-12 h-12 rounded-lg bg-secondary flex items-center justify-center">
+                    <div className="w-7 h-7 rounded-full" style={{ backgroundColor: item.color || "#6b7b8d" }} />
+                    <button onClick={() => removeFromMannequin(i)} className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive flex items-center justify-center">
+                      <X className="w-2.5 h-2.5 text-destructive-foreground" />
+                    </button>
+                  </div>
+                ))}
+                <button onClick={() => togglePanel(null)}
+                  className="flex-shrink-0 w-12 h-12 rounded-lg border-2 border-dashed border-border flex items-center justify-center">
+                  <Plus className="w-4 h-4 text-muted-foreground" />
+                </button>
+              </div>
+
+              {/* Schedule CTA */}
+              {mannequinClothing.length > 0 && (
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-xs font-sans text-muted-foreground">
+                    {mannequinClothing.map(c => c.name).join(", ")}
+                  </span>
+                  <Button size="sm" onClick={() => setShowCalendar(true)}
+                    className="rounded-full text-xs px-4 bg-primary text-primary-foreground">
+                    <CalendarDays className="w-3.5 h-3.5 mr-1.5" /> Schedule
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {/* Add from closet - item grid */}
+            <div className="px-4 py-3 border-t border-border">
+              <h3 className="font-sans text-sm font-semibold text-foreground mb-3">
+                <Layers className="w-4 h-4 inline mr-1.5" />
+                Add from Closet
+              </h3>
+
+              {/* Pending item confirmation */}
+              <AnimatePresence>
+                {pendingItem && (
+                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
+                    className="mb-4 p-4 rounded-xl border border-primary/30 bg-primary/5">
+                    <div className="flex items-center gap-3 mb-3">
+                      {pendingItem.photo_url ? (
+                        <img src={pendingItem.photo_url} alt={pendingItem.name || ""} className="w-14 h-14 rounded-lg object-cover" />
+                      ) : (
+                        <div className="w-14 h-14 rounded-lg bg-muted flex items-center justify-center">
+                          <Shirt className="w-6 h-6 text-muted-foreground" />
+                        </div>
+                      )}
+                      <div>
+                        <p className="text-sm font-sans font-semibold text-foreground">{pendingItem.name || pendingItem.category}</p>
+                        <p className="text-xs text-muted-foreground font-sans capitalize">{pendingItem.category} • {pendingItem.color || "no color"}</p>
+                      </div>
+                    </div>
+
+                    <div className="mb-3">
+                      <p className="text-xs font-sans font-medium text-foreground mb-2">Garment Fit</p>
+                      <div className="grid grid-cols-3 gap-2">
+                        {(["slim", "regular", "oversized"] as GarmentFit[]).map((f) => (
+                          <button key={f} onClick={() => setSelectedFit(f)}
+                            className={`py-2 rounded-xl text-xs font-sans font-medium capitalize transition-all ${
+                              selectedFit === f ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
+                            }`}>
+                            {f}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mb-3">
+                      <p className="text-xs font-sans font-medium text-foreground mb-2">Fabric Type</p>
+                      <div className="grid grid-cols-3 gap-2">
+                        {(["cotton", "denim", "leather", "wool", "silk", "synthetic", "canvas", "knit", "default"] as FabricType[]).map((f) => (
+                          <button key={f} onClick={() => setSelectedFabric(f)}
+                            className={`py-1.5 rounded-xl text-[11px] font-sans font-medium capitalize transition-all ${
+                              selectedFabric === f ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
+                            }`}>
+                            {f === "default" ? "Auto" : f}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" className="flex-1 rounded-xl" onClick={() => setPendingItem(null)}>Cancel</Button>
+                      <Button size="sm" className="flex-1 rounded-xl" onClick={confirmAddToMannequin}>
+                        <Plus className="w-3.5 h-3.5 mr-1" /> Add to Mannequin
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {items.length === 0 ? (
+                <div className="text-center py-8">
+                  <Shirt className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground font-sans">No items in closet yet</p>
+                  <Button size="sm" className="mt-3 rounded-full" onClick={() => setActiveTab("inventory")}>
+                    Go to Inventory
+                  </Button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-4 gap-2">
+                  {items.map((item) => (
+                    <button key={item.id} onClick={() => addToMannequin(item)}
+                      className="rounded-xl bg-secondary p-1.5 text-center hover:bg-primary/10 transition-colors">
+                      {item.photo_url ? (
+                        <img src={item.photo_url} alt={item.name || ""} className="w-full aspect-square rounded-lg object-cover mb-1" />
+                      ) : (
+                        <div className="w-full aspect-square rounded-lg bg-muted flex items-center justify-center mb-1">
+                          <Shirt className="w-5 h-5 text-muted-foreground" />
+                        </div>
+                      )}
+                      <p className="text-[9px] font-sans text-foreground truncate">{item.name || item.category}</p>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Bottom toolbar */}
+            <div className="flex items-center justify-around px-2 py-2 border-t border-border bg-background">
+              {[
+                { key: "dna" as MannequinPanel, icon: SlidersHorizontal, label: "Body DNA" },
+                { key: "pose" as MannequinPanel, icon: Activity, label: "Pose" },
+                { key: "trace" as MannequinPanel, icon: Eye, label: "Trace" },
+                { key: "measure" as MannequinPanel, icon: User, label: "Measure" },
+              ].map(({ key, icon: Icon, label }) => (
+                <button key={key} onClick={() => togglePanel(key)}
+                  className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-colors ${
+                    activePanel === key ? "text-primary" : "text-muted-foreground"
+                  }`}>
+                  <Icon className="w-4 h-4" />
+                  <span className="text-[10px] font-sans font-medium">{label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Panels */}
+            <AnimatePresence>
+              {activePanel && (
+                <motion.div key={activePanel} initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }} className="overflow-hidden border-t border-border bg-background">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                    <h3 className="font-display text-sm font-bold text-foreground">
+                      {activePanel === "dna" && "Body DNA"}
+                      {activePanel === "pose" && "Pose Presets"}
+                      {activePanel === "trace" && "Tracing Mode"}
+                      {activePanel === "measure" && "Measurements"}
+                    </h3>
+                    <button onClick={() => setActivePanel(null)}>
+                      <X className="w-4 h-4 text-muted-foreground" />
+                    </button>
+                  </div>
+
+                  {activePanel === "dna" && (
+                    <div className="p-4 space-y-5">
+                      {dnaSliders.map(({ key, label }) => (
+                        <div key={key}>
+                          <div className="flex justify-between mb-1.5">
+                            <span className="text-xs font-sans font-medium text-foreground">{label}</span>
+                            <span className="text-xs font-sans text-muted-foreground">{Math.round(dna[key] * 100)}%</span>
+                          </div>
+                          <Slider value={[dna[key]]} min={0} max={1} step={0.01}
+                            onValueChange={([v]) => setDna((prev) => ({ ...prev, [key]: v }))} />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {activePanel === "pose" && (
+                    <div className="p-4 grid grid-cols-3 gap-3">
+                      {poses.map(({ key, label }) => (
+                        <button key={key} onClick={() => setPose(key)}
+                          className={`py-4 rounded-xl font-sans text-sm font-medium transition-all ${
+                            pose === key ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
+                          }`}>
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {activePanel === "trace" && (
+                    <div className="p-4 space-y-4">
+                      <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleTraceUpload} />
+                      <Button variant="outline" className="w-full rounded-xl" onClick={() => fileInputRef.current?.click()}>
+                        <Image className="w-4 h-4 mr-2" />
+                        {tracingUrl ? "Change Reference Image" : "Upload Reference Image"}
+                      </Button>
+                      {tracingUrl && (
+                        <>
+                          <div>
+                            <div className="flex justify-between mb-1.5">
+                              <span className="text-xs font-sans font-medium text-foreground">Opacity</span>
+                              <span className="text-xs font-sans text-muted-foreground">{Math.round(tracingOpacity * 100)}%</span>
+                            </div>
+                            <Slider value={[tracingOpacity]} min={0.05} max={0.8} step={0.01}
+                              onValueChange={([v]) => setTracingOpacity(v)} />
+                          </div>
+                          <Button variant="ghost" size="sm" className="w-full text-destructive" onClick={() => setTracingUrl(undefined)}>
+                            Remove Overlay
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {activePanel === "measure" && (
+                    <div className="p-4 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-sans font-medium text-foreground">Show Measurement Lines</span>
+                        <button onClick={() => setShowMeasurements(!showMeasurements)}
+                          className={`w-12 h-6 rounded-full transition-colors ${showMeasurements ? "bg-primary" : "bg-secondary"}`}>
+                          <div className={`w-5 h-5 rounded-full bg-background shadow transition-transform ${showMeasurements ? "translate-x-6" : "translate-x-0.5"}`} />
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </motion.div>
-              );
-            })}
+              )}
+            </AnimatePresence>
+
+            {/* Calendar modal */}
+            <AnimatePresence>
+              {showCalendar && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-50 bg-black/50 flex items-end" onClick={() => setShowCalendar(false)}>
+                  <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
+                    transition={{ type: "spring", damping: 25 }}
+                    className="w-full bg-background rounded-t-2xl p-5" onClick={(e) => e.stopPropagation()}>
+                    <h3 className="font-display text-lg font-bold text-foreground mb-3">Schedule This Outfit</h3>
+                    <p className="text-sm text-muted-foreground font-sans mb-4">
+                      Pick a date to wear this look ({mannequinClothing.length} item{mannequinClothing.length !== 1 ? "s" : ""})
+                    </p>
+                    <div className="flex gap-2 overflow-x-auto pb-4">
+                      {Array.from({ length: 7 }, (_, i) => {
+                        const d = new Date(); d.setDate(d.getDate() + i);
+                        const dateStr = d.toISOString().split("T")[0];
+                        return (
+                          <button key={dateStr} onClick={() => saveToCalendar(dateStr)}
+                            className="flex-shrink-0 w-16 py-3 rounded-xl bg-secondary hover:bg-primary/20 transition-colors text-center">
+                            <p className="text-[10px] text-muted-foreground font-sans">{d.toLocaleDateString("en", { weekday: "short" })}</p>
+                            <p className="text-lg font-bold text-foreground">{d.getDate()}</p>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         )}
       </div>
@@ -480,17 +857,16 @@ const Closet = () => {
 };
 
 function ItemCard({
-  item, index, onDelete, onWear,
+  item, index, onDelete, onWear, onAddToMannequin,
 }: {
   item: ClothingItem; index: number;
   onDelete: (id: string) => void; onWear: (id: string) => void;
+  onAddToMannequin?: () => void;
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ delay: index * 0.03 }}
+      initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }} transition={{ delay: index * 0.03 }}
       className="rounded-xl overflow-hidden group bg-card border border-border"
     >
       <div className="aspect-square bg-secondary relative">
@@ -502,6 +878,11 @@ function ItemCard({
           </div>
         )}
         <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+          {onAddToMannequin && (
+            <button onClick={onAddToMannequin} className="p-1.5 rounded-full bg-primary/80 text-primary-foreground hover:bg-primary transition-colors" title="Add to mannequin">
+              <User className="h-3.5 w-3.5" />
+            </button>
+          )}
           <button onClick={() => onWear(item.id)} className="p-1.5 rounded-full bg-primary/80 text-primary-foreground hover:bg-primary transition-colors">
             <CheckCircle className="h-3.5 w-3.5" />
           </button>
