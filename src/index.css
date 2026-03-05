@@ -203,14 +203,13 @@
 .gradient-button {
   --gradient-bg: linear-gradient(135deg, hsl(var(--gold-dark)), hsl(var(--gold)), hsl(var(--gold-light)));
   --gradient-hover: linear-gradient(135deg, hsl(var(--gold)), hsl(var(--gold-light)), hsl(var(--gold)));
-  --gradient-border: linear-gradient(135deg, hsl(var(--gold-light) / 0.5), hsl(var(--gold) / 0.8), hsl(var(--gold-light) / 0.5));
 
   position: relative;
   background: var(--gradient-bg);
   color: hsl(var(--primary-foreground));
   border: none;
+  border-bottom: 4px solid hsl(var(--gold-dark));
   overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
 }
 
@@ -228,11 +227,6 @@
   opacity: 1;
 }
 
-.gradient-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 30px -8px hsl(var(--gold) / 0.4);
-}
-
 .gradient-button > * {
   position: relative;
   z-index: 1;
@@ -242,14 +236,10 @@
 .gradient-button-variant {
   background: transparent;
   border: 1.5px solid hsl(var(--gold) / 0.4);
+  border-bottom: 4px solid hsl(var(--gold) / 0.2);
   color: hsl(var(--gold));
 }
 
 .gradient-button-variant::before {
   background: hsl(var(--gold) / 0.08);
-}
-
-.gradient-button-variant:hover {
-  border-color: hsl(var(--gold) / 0.7);
-  box-shadow: 0 0 20px -4px hsl(var(--gold) / 0.25);
 }
