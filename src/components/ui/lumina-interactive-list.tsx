@@ -12,9 +12,13 @@ declare const THREE: any;
 const slides = [
   { title: "Effortless Style", description: "AI-curated outfits that feel like you — every single day.", media: "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=1200&q=80" },
   { title: "Curated Looks", description: "Your wardrobe, reimagined with intelligent styling suggestions.", media: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&q=80" },
-  { title: "AI-Powered Fashion", description: "Machine learning meets personal taste for perfect pairings.", media: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200&q=80" },
+  { title: "Street Luxe", description: "Where high fashion meets the raw energy of the city streets.", media: "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=1200&q=80" },
   { title: "Golden Hour", description: "That fleeting confidence when every piece falls into place.", media: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1200&q=80" },
+  { title: "Minimalist Edge", description: "Clean lines. Bold silhouettes. Nothing more, nothing less.", media: "https://images.unsplash.com/photo-1581044777550-4cfa60707998?w=1200&q=80" },
+  { title: "Power Tailoring", description: "Sharp cuts that command attention from boardroom to bar.", media: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&q=80" },
+  { title: "Boho Essence", description: "Free-spirited layers and textures that tell your story.", media: "https://images.unsplash.com/photo-1485968579580-b6d095142e6e?w=1200&q=80" },
   { title: "Style DNA", description: "We decode your unique aesthetic and evolve with you.", media: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=1200&q=80" },
+  { title: "Urban Noir", description: "Dark palettes and structured layers for the modern sophisticate.", media: "https://images.unsplash.com/photo-1475180098004-ca77a66827be?w=1200&q=80" },
   { title: "Wardrobe Intelligence", description: "Smart insights that transform how you dress, shop, and express.", media: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&q=80" }
 ];
 
@@ -419,7 +423,7 @@ export function LuminaSlider() {
       <main className="slider-wrapper">
         <canvas className="webgl-canvas" />
         <span className="slide-number" id="slideNumber">01</span>
-        <span className="slide-total" id="slideTotal">06</span>
+        <span className="slide-total" id="slideTotal">10</span>
 
         <div className="slide-content">
           <h1 className="slide-title" id="mainTitle"></h1>
