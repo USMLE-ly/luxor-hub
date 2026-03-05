@@ -25,6 +25,43 @@ function useTypewriter(text: string, speed = 60, startDelay = 800) {
   return displayed;
 }
 
+/* ── Floating shape ──────────────────────────────────────────── */
+function FloatingShape({
+  className,
+  delay = 0,
+  width = 400,
+  height = 100,
+  rotate = 0,
+  gradient = "from-primary/[0.08]",
+}: {
+  className?: string;
+  delay?: number;
+  width?: number;
+  height?: number;
+  rotate?: number;
+  gradient?: string;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -100, rotate: rotate - 10 }}
+      animate={{ opacity: 1, y: 0, rotate }}
+      transition={{ duration: 2.2, delay, ease: [0.23, 0.86, 0.39, 0.96], opacity: { duration: 1.2 } }}
+      className={`absolute pointer-events-none ${className || ""}`}
+    >
+      <motion.div
+        animate={{ y: [0, 15, 0] }}
+        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+        style={{ width, height }}
+        className="relative"
+      >
+        <div
+          className={`absolute inset-0 rounded-full bg-gradient-to-r to-transparent ${gradient} backdrop-blur-[2px] border border-primary/[0.1] shadow-[0_8px_32px_0_hsl(var(--primary)/0.08)] after:absolute after:inset-0 after:rounded-full after:bg-[radial-gradient(circle_at_50%_50%,hsl(var(--primary)/0.15),transparent_70%)]`}
+        />
+      </motion.div>
+    </motion.div>
+  );
+}
+
 const Hero = () => {
   const navigate = useNavigate();
   const tagline = useTypewriter(
@@ -35,9 +72,25 @@ const Hero = () => {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Subtle glow behind hero content */}
+      {/* Aurora glow layers */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[140px]" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-primary/8 rounded-full blur-[180px]" />
+        <div className="absolute top-1/3 left-1/3 w-[400px] h-[400px] bg-[hsl(43,74%,49%)]/6 rounded-full blur-[140px]" />
+        <div className="absolute bottom-1/4 right-1/3 w-[350px] h-[350px] bg-[hsl(270,40%,50%)]/5 rounded-full blur-[120px]" />
+      </div>
+
+      {/* Floating geometric shapes */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <FloatingShape delay={0.3} width={500} height={120} rotate={12} gradient="from-[hsl(43,74%,49%)]/[0.12]"
+          className="left-[-8%] top-[18%]" />
+        <FloatingShape delay={0.5} width={400} height={100} rotate={-15} gradient="from-primary/[0.1]"
+          className="right-[-5%] top-[72%]" />
+        <FloatingShape delay={0.4} width={250} height={70} rotate={-8} gradient="from-[hsl(270,40%,65%)]/[0.1]"
+          className="left-[8%] bottom-[8%]" />
+        <FloatingShape delay={0.6} width={180} height={50} rotate={20} gradient="from-[hsl(43,74%,49%)]/[0.08]"
+          className="right-[18%] top-[12%]" />
+        <FloatingShape delay={0.7} width={120} height={35} rotate={-25} gradient="from-primary/[0.06]"
+          className="left-[22%] top-[8%]" />
       </div>
 
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4">
@@ -61,7 +114,15 @@ const Hero = () => {
             className="font-display text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight mb-8"
           >
             Your AI Stylist That{" "}
-            <span className="gold-text">Knows You</span>{" "}
+            <span className="gold-text relative">
+              Knows You
+              <motion.span
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                animate={{ x: ["-100%", "200%"] }}
+                transition={{ duration: 3, repeat: Infinity, repeatDelay: 2, ease: "easeInOut" }}
+                style={{ WebkitBackgroundClip: "text" }}
+              />
+            </span>{" "}
             Better
           </motion.h1>
 
@@ -129,6 +190,9 @@ const Hero = () => {
           </motion.div>
         </div>
       </div>
+
+      {/* Bottom fade */}
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent pointer-events-none" />
     </section>
   );
 };

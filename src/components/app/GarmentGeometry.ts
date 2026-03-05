@@ -7,6 +7,10 @@ export type GarmentSubtype =
   | "tshirt-crew" | "tshirt-vneck" | "shirt-classic" | "shirt-oxford" | "sweater" | "hoodie"
   // Bottoms
   | "jeans-slim" | "jeans-straight" | "jeans-wide" | "trousers-tailored" | "trousers-wide"
+  // Skirts
+  | "skirt-mini" | "skirt-midi" | "skirt-maxi" | "skirt-pencil" | "skirt-aline"
+  // Dresses
+  | "dress-mini" | "dress-midi" | "dress-maxi"
   // Outerwear
   | "jacket-bomber" | "jacket-biker" | "coat-trench" | "coat-overcoat"
   // Shoes
@@ -14,7 +18,8 @@ export type GarmentSubtype =
   // Hats
   | "cap" | "beanie" | "fedora"
   // Generic fallbacks
-  | "generic-top" | "generic-bottom" | "generic-outerwear" | "generic-shoe" | "generic-hat";
+  | "generic-top" | "generic-bottom" | "generic-outerwear" | "generic-shoe" | "generic-hat"
+  | "generic-skirt" | "generic-dress";
 
 // --- Lathe profile helper ---
 function createGarmentProfile(points: [number, number][], segments = 24): THREE.LatheGeometry {
@@ -46,26 +51,22 @@ function createTopGeometry(
   const waistR = 0.17 * waistScale * f;
   const chestR = 0.215 * shoulderScale * f;
 
-  // Neckline radius varies by subtype
   const neckR = subtype === "tshirt-vneck" ? 0.06 : 0.04;
   const neckY = subtype === "tshirt-vneck" ? 0.5 : 0.52;
-
-  // Hem length
   const hemY = subtype.includes("sweater") || subtype.includes("hoodie") ? 0.08 : 0.12;
 
   const torso = createGarmentProfile([
-    [0.001, 0.56],         // collar top
-    [neckR, neckY],        // neckline opening
-    [shoulderR, 0.46],     // shoulder seam
-    [chestR, 0.36],        // chest
-    [chestR * 0.98, 0.28], // mid-torso
-    [waistR * 1.02, 0.18], // natural waist
-    [waistR, hemY],        // hem
+    [0.001, 0.56],
+    [neckR, neckY],
+    [shoulderR, 0.46],
+    [chestR, 0.36],
+    [chestR * 0.98, 0.28],
+    [waistR * 1.02, 0.18],
+    [waistR, hemY],
     [waistR * 0.98, hemY - 0.01],
-    [0.001, hemY - 0.02],  // close bottom
+    [0.001, hemY - 0.02],
   ], 24);
 
-  // Sleeve
   const sleeveBaseR = shoulderR * 0.35;
   const isShort = subtype.includes("tshirt") || subtype === "generic-top";
   const sleeveLen = isShort ? 0.15 : 0.32;
@@ -117,7 +118,7 @@ function createPantLegGeometry(
   ], 14);
 }
 
-// Waistband — a belt-like ring around the hips
+// Waistband
 function createWaistbandGeometry(hipScale: number, fit: GarmentFit): THREE.LatheGeometry {
   const f = fitScale(fit);
   const r = 0.19 * hipScale * f;
@@ -131,6 +132,145 @@ function createWaistbandGeometry(hipScale: number, fit: GarmentFit): THREE.Lathe
 }
 
 // =============================================
+// SKIRT GEOMETRIES
+// =============================================
+function createSkirtGeometry(
+  subtype: GarmentSubtype,
+  fit: GarmentFit,
+  waistScale: number,
+  hipScale: number,
+): THREE.LatheGeometry {
+  const f = fitScale(fit);
+  const waistR = 0.17 * waistScale * f;
+  const hipR = 0.22 * hipScale * f;
+
+  // Length and flare based on subtype
+  let hemY: number;
+  let hemFlare: number;
+
+  switch (subtype) {
+    case "skirt-mini":
+      hemY = -0.15;
+      hemFlare = 1.3;
+      break;
+    case "skirt-midi":
+      hemY = -0.32;
+      hemFlare = 1.4;
+      break;
+    case "skirt-maxi":
+      hemY = -0.52;
+      hemFlare = 1.5;
+      break;
+    case "skirt-pencil":
+      hemY = -0.30;
+      hemFlare = 0.85; // tighter than hips
+      break;
+    case "skirt-aline":
+      hemY = -0.28;
+      hemFlare = 1.8; // wide flare
+      break;
+    default: // generic-skirt
+      hemY = -0.25;
+      hemFlare = 1.3;
+      break;
+  }
+
+  const hemR = hipR * hemFlare;
+
+  return createGarmentProfile([
+    [0.001, 0.06],          // waistband top (close center)
+    [waistR, 0.04],          // waist
+    [waistR * 1.02, 0.02],   // waist-hip transition
+    [hipR, -0.02],           // hip
+    [hipR * 1.05, -0.06],    // upper thigh
+    [hemR * 0.85, hemY * 0.5], // mid-skirt
+    [hemR * 0.95, hemY * 0.75],
+    [hemR, hemY],            // hem
+    [hemR * 0.98, hemY - 0.01],
+    [0.001, hemY - 0.02],   // close bottom
+  ], 28);
+}
+
+// =============================================
+// DRESS GEOMETRIES (torso + skirt combined)
+// =============================================
+function createDressGeometry(
+  subtype: GarmentSubtype,
+  fit: GarmentFit,
+  shoulderScale: number,
+  waistScale: number,
+  hipScale: number,
+): { body: THREE.LatheGeometry; sleeves?: { geo: THREE.LatheGeometry; length: number } } {
+  const f = fitScale(fit);
+  const shoulderR = 0.23 * shoulderScale * f;
+  const chestR = 0.215 * shoulderScale * f;
+  const waistR = 0.17 * waistScale * f;
+  const hipR = 0.22 * hipScale * f;
+
+  let hemY: number;
+  let hemFlare: number;
+
+  switch (subtype) {
+    case "dress-mini":
+      hemY = -0.12;
+      hemFlare = 1.2;
+      break;
+    case "dress-midi":
+      hemY = -0.32;
+      hemFlare = 1.35;
+      break;
+    case "dress-maxi":
+      hemY = -0.52;
+      hemFlare = 1.5;
+      break;
+    default: // generic-dress
+      hemY = -0.20;
+      hemFlare = 1.25;
+      break;
+  }
+
+  const hemR = hipR * hemFlare;
+
+  const body = createGarmentProfile([
+    // Torso section
+    [0.001, 0.56],           // collar top
+    [0.04, 0.52],            // neckline
+    [shoulderR, 0.46],       // shoulder
+    [chestR, 0.36],          // chest
+    [chestR * 0.98, 0.28],   // mid torso
+    [waistR * 1.02, 0.18],   // natural waist
+    [waistR, 0.12],          // waist bottom
+    // Hip/skirt transition
+    [hipR * 0.95, 0.02],     // hip start
+    [hipR, -0.02],           // hip widest
+    [hipR * 1.05, -0.06],    // upper thigh
+    // Skirt section
+    [hemR * 0.8, hemY * 0.4],
+    [hemR * 0.9, hemY * 0.65],
+    [hemR * 0.98, hemY * 0.85],
+    [hemR, hemY],            // hem
+    [hemR * 0.98, hemY - 0.01],
+    [0.001, hemY - 0.02],
+  ], 28);
+
+  // Short cap sleeves for dresses
+  const sleeveBaseR = shoulderR * 0.3;
+  const sleeves = {
+    geo: createGarmentProfile([
+      [0.001, 0.10],
+      [sleeveBaseR * 0.6, 0.09],
+      [sleeveBaseR, 0.05],
+      [sleeveBaseR * 0.9, 0.01],
+      [sleeveBaseR * 0.75, -0.02],
+      [0.001, -0.03],
+    ], 10),
+    length: 0.10,
+  };
+
+  return { body, sleeves };
+}
+
+// =============================================
 // OUTERWEAR GEOMETRIES
 // =============================================
 function createOuterwearGeometry(
@@ -140,7 +280,7 @@ function createOuterwearGeometry(
   waistScale: number,
   hipScale: number,
 ): { torso: THREE.LatheGeometry; collar?: THREE.LatheGeometry } {
-  const f = fitScale(fit) * 1.06; // outerwear is worn over clothes
+  const f = fitScale(fit) * 1.06;
   const shoulderR = 0.26 * shoulderScale * f;
   const chestR = 0.24 * shoulderScale * f;
   const waistR = 0.20 * waistScale * f;
@@ -161,7 +301,6 @@ function createOuterwearGeometry(
     [0.001, hemY - 0.02],
   ], 24);
 
-  // Collar
   const collar = createGarmentProfile([
     [0.001, 0.06],
     [0.08, 0.05],
@@ -182,7 +321,6 @@ function createShoeGeometry(subtype: GarmentSubtype): THREE.BufferGeometry {
   const isSneaker = subtype === "sneakers" || subtype === "generic-shoe";
 
   if (isBoot) {
-    // Boot: taller, ankle coverage
     return createGarmentProfile([
       [0.001, 0.14],
       [0.04, 0.13],
@@ -196,7 +334,6 @@ function createShoeGeometry(subtype: GarmentSubtype): THREE.BufferGeometry {
     ], 12);
   }
 
-  // Sneaker / loafer / derby — low-cut shoe
   const height = isSneaker ? 0.06 : 0.05;
   return createGarmentProfile([
     [0.001, height + 0.02],
@@ -256,7 +393,6 @@ function createHatGeometry(subtype: GarmentSubtype): {
     [0.001, -0.025],
   ], 16);
 
-  // Simple visor brim using a half-ring
   const brimShape = new THREE.Shape();
   brimShape.absarc(0, 0, 0.18, 0, Math.PI, false);
   brimShape.absarc(0, 0, 0.13, Math.PI, 0, true);
@@ -292,8 +428,24 @@ export function resolveSubtype(category: string, name?: string): GarmentSubtype 
     if (nm.includes("biker") || nm.includes("leather")) return "jacket-biker";
     return "jacket-bomber";
   }
+  // Dresses — check BEFORE bottoms/tops since "dress" could be misclassified
+  if (["dress", "dresses", "gown"].some(k => cat.includes(k))) {
+    if (nm.includes("mini")) return "dress-mini";
+    if (nm.includes("maxi")) return "dress-maxi";
+    if (nm.includes("midi")) return "dress-midi";
+    return "dress-midi"; // default dress
+  }
+  // Skirts
+  if (["skirt", "skirts"].some(k => cat.includes(k))) {
+    if (nm.includes("mini")) return "skirt-mini";
+    if (nm.includes("maxi")) return "skirt-maxi";
+    if (nm.includes("pencil")) return "skirt-pencil";
+    if (nm.includes("a-line") || nm.includes("aline")) return "skirt-aline";
+    if (nm.includes("midi")) return "skirt-midi";
+    return "skirt-midi"; // default skirt
+  }
   // Bottoms
-  if (["bottoms", "trousers", "jeans", "pants", "bottom", "skirt"].some(k => cat.includes(k))) {
+  if (["bottoms", "trousers", "jeans", "pants", "bottom"].some(k => cat.includes(k))) {
     if (nm.includes("wide")) return "jeans-wide";
     if (nm.includes("slim") || nm.includes("skinny")) return "jeans-slim";
     if (nm.includes("tailored")) return "trousers-tailored";
@@ -320,6 +472,8 @@ export {
   createTopGeometry,
   createPantLegGeometry,
   createWaistbandGeometry,
+  createSkirtGeometry,
+  createDressGeometry,
   createOuterwearGeometry,
   createShoeGeometry,
   createHatGeometry,
