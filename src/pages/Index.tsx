@@ -7,6 +7,7 @@ import HowItWorks from "@/components/landing/HowItWorks";
 import Features from "@/components/landing/Features";
 import AppPreview from "@/components/landing/AppPreview";
 import BrandMarquee from "@/components/landing/BrandMarquee";
+import IntegrationHero from "@/components/landing/IntegrationHero";
 import Pricing from "@/components/landing/Pricing";
 import Footer from "@/components/landing/Footer";
 
@@ -83,7 +84,7 @@ const Index = () => {
       <Features />
       <AppPreview />
       <BrandMarquee />
-      
+      <IntegrationHero />
       <Pricing />
       <Footer />
     </div>

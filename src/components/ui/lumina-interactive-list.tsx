@@ -1,9 +1,7 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, Zap, Users } from 'lucide-react';
-import { RainbowButton } from '@/components/ui/rainbow-button';
-import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
-import MagneticButton from '@/components/ui/magnetic-button';
+import { GradientButton } from '@/components/ui/gradient-button';
 import './lumina-slider.css';
 
 declare const gsap: any;
@@ -27,21 +25,17 @@ function HeroOverlay() {
   return (
     <div className="lumina-hero-overlay">
       <div className="lumina-hero-cta">
-        <MagneticButton onClick={() => navigate("/auth")} strength={0.25}>
-          <RainbowButton className="px-8 py-3 text-lg font-display font-semibold pointer-events-none">
-            <Sparkles className="w-5 h-5 mr-2" />
-            Start Free
-          </RainbowButton>
-        </MagneticButton>
-        <MagneticButton
+        <GradientButton onClick={() => navigate("/auth")} className="text-lg">
+          <Sparkles className="w-5 h-5 mr-2" />
+          Start Free
+        </GradientButton>
+        <GradientButton
+          variant="variant"
           onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
-          strength={0.2}
+          className="text-lg"
         >
-          <InteractiveHoverButton
-            text="How It Works"
-            className="w-40 border-border pointer-events-none"
-          />
-        </MagneticButton>
+          How It Works
+        </GradientButton>
       </div>
       <div className="lumina-hero-badges">
         <span className="lumina-badge">
