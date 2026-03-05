@@ -1,7 +1,10 @@
+import { useNavigate } from "react-router-dom";
 import { ContainerScroll } from "@/components/ui/container-scroll";
+import { GradientButton } from "@/components/ui/gradient-button";
 import { Sparkles, TrendingUp, Palette, Calendar, ShoppingBag, BarChart3 } from "lucide-react";
 
 const AppPreview = () => {
+  const navigate = useNavigate();
   return (
     <section className="relative overflow-hidden bg-background">
       <ContainerScroll
@@ -16,6 +19,10 @@ const AppPreview = () => {
             <p className="text-muted-foreground font-sans text-lg max-w-2xl">
               Everything you need to master your personal style — powered by AI, designed for you.
             </p>
+            <GradientButton onClick={() => navigate("/auth")} className="mt-2">
+              <Sparkles className="w-4 h-4 mr-2" />
+              Try It Free
+            </GradientButton>
           </div>
         }
       >
