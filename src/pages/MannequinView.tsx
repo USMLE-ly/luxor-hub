@@ -12,10 +12,22 @@ import { Slider } from "@/components/ui/slider";
 import {
   ArrowLeft, Plus, X, CalendarDays, Shirt, Image,
   User, Activity, Layers, SlidersHorizontal, Eye,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 
 type Panel = "dna" | "pose" | "closet" | "trace" | "measure" | null;
+
+// Demo items for quick-add when closet is empty
+const DEMO_ITEMS: { label: string; category: string; color: string; name: string }[] = [
+  { label: "👕 T-Shirt", category: "tops", color: "white", name: "Basic T-Shirt" },
+  { label: "👖 Jeans", category: "bottoms", color: "indigo", name: "Straight Jeans" },
+  { label: "👗 Dress", category: "dress", color: "red", name: "Midi Dress" },
+  { label: "👟 Sneakers", category: "shoes", color: "white", name: "White Sneakers" },
+  { label: "🩳 Skirt", category: "skirt", color: "black", name: "A-Line Skirt" },
+  { label: "🧥 Jacket", category: "outerwear", color: "black", name: "Bomber Jacket" },
+  { label: "🎩 Hat", category: "hat", color: "black", name: "Cap" },
+];
 
 const MannequinView = () => {
   const { user } = useAuth();
@@ -27,15 +39,10 @@ const MannequinView = () => {
   const [activePanel, setActivePanel] = useState<Panel>(null);
   const [showMeasurements, setShowMeasurements] = useState(false);
 
-  // Body DNA
   const [dna, setDna] = useState<BodyDNA>({
     height: 0.5, shoulder: 0.5, waist: 0.5, hips: 0.5, legLength: 0.5,
   });
-
-  // Pose
   const [pose, setPose] = useState<PosePreset>("neutral");
-
-  // Tracing
   const [tracingUrl, setTracingUrl] = useState<string | undefined>();
   const [tracingOpacity, setTracingOpacity] = useState(0.3);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -72,10 +79,23 @@ const MannequinView = () => {
     setPendingItem(null);
     setSelectedFit("regular");
     setSelectedFabric("default");
+    setActivePanel(null);
   };
 
   const addItem = (item: any) => {
     setPendingItem(item);
+  };
+
+  const quickAddDemo = (demo: typeof DEMO_ITEMS[0]) => {
+    const mapped: ClothingItem = {
+      category: demo.category,
+      color: demo.color,
+      name: demo.name,
+      fit: "regular",
+      fabric: "default",
+    };
+    setClothing((prev) => [...prev, mapped]);
+    toast.success(`Added ${demo.name}`);
   };
 
   const removeItem = (index: number) => {
@@ -141,7 +161,7 @@ const MannequinView = () => {
         </div>
 
         {/* 3D Scene */}
-        <div className="flex-1 relative bg-gradient-to-b from-secondary/10 to-background">
+        <div className="flex-1 relative bg-gradient-to-b from-secondary/10 to-background min-h-0">
           <Mannequin3D
             gender={gender}
             clothing={clothing}
@@ -153,7 +173,7 @@ const MannequinView = () => {
             className="w-full h-full"
           />
 
-          {/* Gender toggle - top left */}
+          {/* Gender toggle */}
           <div className="absolute top-3 left-3 flex gap-1 bg-background/80 backdrop-blur rounded-full p-1">
             {(["male", "female"] as const).map((g) => (
               <button
@@ -169,12 +189,48 @@ const MannequinView = () => {
           </div>
         </div>
 
+        {/* ====== DRESS & SCHEDULE SECTION ====== */}
+        <div className="px-4 py-3 border-t border-border bg-secondary/20">
+          {/* Quick-add row */}
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="w-3.5 h-3.5 text-primary" />
+            <span className="text-xs font-sans font-semibold text-foreground">Quick Add</span>
+          </div>
+          <div className="flex gap-1.5 overflow-x-auto pb-2">
+            {DEMO_ITEMS.map((demo) => (
+              <button
+                key={demo.category + demo.name}
+                onClick={() => quickAddDemo(demo)}
+                className="flex-shrink-0 px-3 py-1.5 rounded-full bg-secondary text-[11px] font-sans font-medium text-foreground hover:bg-primary/20 transition-colors whitespace-nowrap"
+              >
+                {demo.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Current outfit + Schedule CTA */}
+          <div className="flex items-center justify-between mt-1">
+            <div className="flex items-center gap-2">
+              <Shirt className="w-3.5 h-3.5 text-muted-foreground" />
+              <span className="text-xs font-sans text-muted-foreground">
+                {clothing.length === 0 ? "No items yet" : `${clothing.length} item${clothing.length > 1 ? "s" : ""} on mannequin`}
+              </span>
+            </div>
+            {clothing.length > 0 && (
+              <Button
+                size="sm"
+                onClick={() => setShowCalendar(true)}
+                className="rounded-full text-xs px-4 bg-primary text-primary-foreground"
+              >
+                <CalendarDays className="w-3.5 h-3.5 mr-1.5" />
+                Schedule Outfit
+              </Button>
+            )}
+          </div>
+        </div>
+
         {/* Clothing strip */}
         <div className="px-4 py-2 border-t border-border">
-          <div className="flex items-center gap-2 mb-1.5">
-            <Shirt className="w-3.5 h-3.5 text-muted-foreground" />
-            <span className="text-xs font-sans font-semibold text-foreground">Items ({clothing.length})</span>
-          </div>
           <div className="flex gap-2 overflow-x-auto pb-1">
             {clothing.map((item, i) => (
               <div key={i} className="relative flex-shrink-0 w-12 h-12 rounded-lg bg-secondary flex items-center justify-center">
@@ -250,19 +306,13 @@ const MannequinView = () => {
                       </div>
                       <Slider
                         value={[dna[key]]}
-                        min={0}
-                        max={1}
-                        step={0.01}
+                        min={0} max={1} step={0.01}
                         onValueChange={([v]) => setDna((prev) => ({ ...prev, [key]: v }))}
                       />
                     </div>
                   ))}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full rounded-xl"
-                    onClick={() => setDna({ height: 0.5, shoulder: 0.5, waist: 0.5, hips: 0.5, legLength: 0.5 })}
-                  >
+                  <Button variant="outline" size="sm" className="w-full rounded-xl"
+                    onClick={() => setDna({ height: 0.5, shoulder: 0.5, waist: 0.5, hips: 0.5, legLength: 0.5 })}>
                     Reset to Default
                   </Button>
                 </div>
@@ -272,15 +322,10 @@ const MannequinView = () => {
               {activePanel === "pose" && (
                 <div className="p-4 grid grid-cols-3 gap-3">
                   {poses.map(({ key, label }) => (
-                    <button
-                      key={key}
-                      onClick={() => setPose(key)}
+                    <button key={key} onClick={() => setPose(key)}
                       className={`py-4 rounded-xl font-sans text-sm font-medium transition-all ${
-                        pose === key
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-secondary text-muted-foreground hover:bg-secondary/80"
-                      }`}
-                    >
+                        pose === key ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+                      }`}>
                       {label}
                     </button>
                   ))}
@@ -306,40 +351,28 @@ const MannequinView = () => {
                         </div>
                       </div>
 
-                      {/* Fit selector */}
                       <div>
                         <p className="text-xs font-sans font-medium text-foreground mb-2">Garment Fit</p>
                         <div className="grid grid-cols-3 gap-2">
                           {(["slim", "regular", "oversized"] as GarmentFit[]).map((f) => (
-                            <button
-                              key={f}
-                              onClick={() => setSelectedFit(f)}
+                            <button key={f} onClick={() => setSelectedFit(f)}
                               className={`py-2.5 rounded-xl text-xs font-sans font-medium capitalize transition-all ${
-                                selectedFit === f
-                                  ? "bg-primary text-primary-foreground"
-                                  : "bg-secondary text-muted-foreground hover:bg-secondary/80"
-                              }`}
-                            >
+                                selectedFit === f ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+                              }`}>
                               {f}
                             </button>
                           ))}
                         </div>
                       </div>
 
-                      {/* Fabric selector */}
                       <div>
                         <p className="text-xs font-sans font-medium text-foreground mb-2">Fabric Type</p>
                         <div className="grid grid-cols-3 gap-2">
                           {(["cotton", "denim", "leather", "wool", "silk", "synthetic", "canvas", "knit", "default"] as FabricType[]).map((f) => (
-                            <button
-                              key={f}
-                              onClick={() => setSelectedFabric(f)}
+                            <button key={f} onClick={() => setSelectedFabric(f)}
                               className={`py-2 rounded-xl text-[11px] font-sans font-medium capitalize transition-all ${
-                                selectedFabric === f
-                                  ? "bg-primary text-primary-foreground"
-                                  : "bg-secondary text-muted-foreground hover:bg-secondary/80"
-                              }`}
-                            >
+                                selectedFabric === f ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+                              }`}>
                               {f === "default" ? "Auto" : f}
                             </button>
                           ))}
@@ -347,27 +380,21 @@ const MannequinView = () => {
                       </div>
 
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm" className="flex-1 rounded-xl" onClick={() => setPendingItem(null)}>
-                          Back
-                        </Button>
-                        <Button size="sm" className="flex-1 rounded-xl" onClick={confirmAddItem}>
-                          Add to Mannequin
-                        </Button>
+                        <Button variant="outline" size="sm" className="flex-1 rounded-xl" onClick={() => setPendingItem(null)}>Back</Button>
+                        <Button size="sm" className="flex-1 rounded-xl" onClick={confirmAddItem}>Add to Mannequin</Button>
                       </div>
                     </div>
                   ) : closetItems.length === 0 ? (
-                    <div className="p-8 text-center">
+                    <div className="p-6 text-center space-y-4">
                       <p className="text-muted-foreground text-sm font-sans">No items in your closet yet.</p>
-                      <Button onClick={() => navigate("/closet")} size="sm" className="mt-3 rounded-full">Go to Closet</Button>
+                      <p className="text-muted-foreground text-xs font-sans">Use the Quick Add buttons above to try demo items, or add items to your closet first.</p>
+                      <Button onClick={() => navigate("/closet")} size="sm" className="rounded-full">Go to Closet</Button>
                     </div>
                   ) : (
                     <div className="grid grid-cols-3 gap-2 p-4">
                       {closetItems.map((item) => (
-                        <button
-                          key={item.id}
-                          onClick={() => addItem(item)}
-                          className="rounded-xl bg-secondary p-2 text-center hover:bg-secondary/80 transition-colors"
-                        >
+                        <button key={item.id} onClick={() => addItem(item)}
+                          className="rounded-xl bg-secondary p-2 text-center hover:bg-secondary/80 transition-colors">
                           {item.photo_url ? (
                             <img src={item.photo_url} alt={item.name} className="w-full aspect-square rounded-lg object-cover mb-1" />
                           ) : (
@@ -386,18 +413,8 @@ const MannequinView = () => {
               {/* Trace Panel */}
               {activePanel === "trace" && (
                 <div className="p-4 space-y-4">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleTraceUpload}
-                  />
-                  <Button
-                    variant="outline"
-                    className="w-full rounded-xl"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
+                  <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleTraceUpload} />
+                  <Button variant="outline" className="w-full rounded-xl" onClick={() => fileInputRef.current?.click()}>
                     <Image className="w-4 h-4 mr-2" />
                     {tracingUrl ? "Change Reference Image" : "Upload Reference Image"}
                   </Button>
@@ -408,20 +425,10 @@ const MannequinView = () => {
                           <span className="text-xs font-sans font-medium text-foreground">Opacity</span>
                           <span className="text-xs font-sans text-muted-foreground">{Math.round(tracingOpacity * 100)}%</span>
                         </div>
-                        <Slider
-                          value={[tracingOpacity]}
-                          min={0.05}
-                          max={0.8}
-                          step={0.01}
-                          onValueChange={([v]) => setTracingOpacity(v)}
-                        />
+                        <Slider value={[tracingOpacity]} min={0.05} max={0.8} step={0.01}
+                          onValueChange={([v]) => setTracingOpacity(v)} />
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="w-full text-destructive"
-                        onClick={() => setTracingUrl(undefined)}
-                      >
+                      <Button variant="ghost" size="sm" className="w-full text-destructive" onClick={() => setTracingUrl(undefined)}>
                         Remove Overlay
                       </Button>
                     </>
@@ -454,23 +461,19 @@ const MannequinView = () => {
         <AnimatePresence>
           {showCalendar && (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               className="fixed inset-0 z-50 bg-black/50 flex items-end"
               onClick={() => setShowCalendar(false)}
             >
               <motion.div
-                initial={{ y: "100%" }}
-                animate={{ y: 0 }}
-                exit={{ y: "100%" }}
+                initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
                 transition={{ type: "spring", damping: 25 }}
                 className="w-full bg-background rounded-t-2xl p-5"
                 onClick={(e) => e.stopPropagation()}
               >
-                <h3 className="font-display text-lg font-bold text-foreground mb-3">Post to Calendar</h3>
+                <h3 className="font-display text-lg font-bold text-foreground mb-3">Schedule This Outfit</h3>
                 <p className="text-sm text-muted-foreground font-sans mb-4">
-                  Pick a date to save this outfit ({clothing.length} items)
+                  Pick a date to wear this look ({clothing.length} item{clothing.length !== 1 ? "s" : ""})
                 </p>
                 <div className="flex gap-2 overflow-x-auto pb-4">
                   {Array.from({ length: 7 }, (_, i) => {
@@ -480,11 +483,8 @@ const MannequinView = () => {
                     const dayName = d.toLocaleDateString("en", { weekday: "short" });
                     const dayNum = d.getDate();
                     return (
-                      <button
-                        key={dateStr}
-                        onClick={() => saveToCalendar(dateStr)}
-                        className="flex-shrink-0 w-16 py-3 rounded-xl bg-secondary hover:bg-primary/20 transition-colors text-center"
-                      >
+                      <button key={dateStr} onClick={() => saveToCalendar(dateStr)}
+                        className="flex-shrink-0 w-16 py-3 rounded-xl bg-secondary hover:bg-primary/20 transition-colors text-center">
                         <p className="text-[10px] text-muted-foreground font-sans">{dayName}</p>
                         <p className="text-lg font-bold text-foreground">{dayNum}</p>
                       </button>
