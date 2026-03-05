@@ -230,13 +230,29 @@ export function LuminaSlider() {
       }
     };
 
-    const navigateToSlide = (targetIndex: number) => {
+    const ensureTextureLoaded = async (idx: number) => {
+      if (slideTextures[idx]) return slideTextures[idx];
+      try {
+        const tex = await loadImageTexture(slides[idx].media);
+        slideTextures[idx] = tex;
+        return tex;
+      } catch { console.warn(`Failed lazy-load texture ${idx}`); return null; }
+    };
+
+    const preloadAhead = (fromIdx: number) => {
+      const next1 = (fromIdx + 1) % slides.length;
+      const next2 = (fromIdx + 2) % slides.length;
+      if (!slideTextures[next1]) ensureTextureLoaded(next1);
+      if (!slideTextures[next2]) ensureTextureLoaded(next2);
+    };
+
+    const navigateToSlide = async (targetIndex: number) => {
       if (isTransitioning || targetIndex === currentSlideIndex) return;
       stopAutoSlideTimer();
       quickResetProgress(currentSlideIndex);
 
       const currentTexture = slideTextures[currentSlideIndex];
-      const targetTexture = slideTextures[targetIndex];
+      const targetTexture = await ensureTextureLoaded(targetIndex);
       if (!currentTexture || !targetTexture) return;
 
       isTransitioning = true;
@@ -255,12 +271,13 @@ export function LuminaSlider() {
         {
           value: 1, duration: TRANSITION_DURATION(), ease: "power2.inOut",
           onComplete: () => {
-            shaderMaterial.uniforms.uProgress.value = 0;
-            shaderMaterial.uniforms.uTexture1.value = targetTexture;
-            shaderMaterial.uniforms.uTexture1Size.value = targetTexture.userData.size;
-            isTransitioning = false;
-            safeStartTimer(100);
-          }
+                        shaderMaterial.uniforms.uProgress.value = 0;
+                        shaderMaterial.uniforms.uTexture1.value = targetTexture;
+                        shaderMaterial.uniforms.uTexture1Size.value = targetTexture.userData.size;
+                        isTransitioning = false;
+                        preloadAhead(currentSlideIndex);
+                        safeStartTimer(100);
+                      }
         }
       );
     };
@@ -319,11 +336,13 @@ export function LuminaSlider() {
       });
       scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), shaderMaterial));
 
-      for (const s of slides) {
-        try { slideTextures.push(await loadImageTexture(s.media)); } catch { console.warn("Failed texture load"); }
+      // Only load first 3 textures eagerly, rest lazy-loaded on demand
+      slideTextures = new Array(slides.length).fill(null);
+      for (let i = 0; i < Math.min(3, slides.length); i++) {
+        try { slideTextures[i] = await loadImageTexture(slides[i].media); } catch { console.warn("Failed texture load", i); }
       }
 
-      if (slideTextures.length >= 2) {
+      if (slideTextures[0] && slideTextures[1]) {
         shaderMaterial.uniforms.uTexture1.value = slideTextures[0];
         shaderMaterial.uniforms.uTexture2.value = slideTextures[1];
         shaderMaterial.uniforms.uTexture1Size.value = slideTextures[0].userData.size;
