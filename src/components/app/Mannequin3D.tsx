@@ -1,6 +1,6 @@
-import { useRef, useMemo } from "react";
-import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
+import { useRef, useMemo, useState } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { OrbitControls, ContactShadows, Environment } from "@react-three/drei";
 import * as THREE from "three";
 import {
   createTopGeometry,
@@ -12,6 +12,8 @@ import {
   createShoeGeometry,
   createHatGeometry,
   resolveSubtype,
+  LAYER_ORDER,
+  LAYER_RADIAL_OFFSET,
   type GarmentFit,
   type GarmentSubtype,
 } from "./GarmentGeometry";
@@ -96,14 +98,61 @@ const isShoeCat = (s: GarmentSubtype) =>
 const isHatCat = (s: GarmentSubtype) =>
   s.includes("cap") || s.includes("beanie") || s.includes("fedora") || s === "generic-hat";
 
+// --- Animated Garment Wrapper ---
+function AnimatedGarment({ children, category }: { children: React.ReactNode; category: string }) {
+  const groupRef = useRef<THREE.Group>(null);
+  const [progress, setProgress] = useState(0);
+
+  // Determine entry animation direction
+  const isBottom = ["bottoms", "skirts", "shoes"].some(c => category.includes(c));
+  const startY = isBottom ? -0.3 : 0.3;
+
+  useFrame((_, delta) => {
+    if (progress < 1) {
+      const next = Math.min(progress + delta * 2.5, 1);
+      setProgress(next);
+      if (groupRef.current) {
+        const ease = 1 - Math.pow(1 - next, 3); // easeOutCubic
+        groupRef.current.position.y = startY * (1 - ease);
+        // Set opacity on all mesh children
+        groupRef.current.traverse((child) => {
+          if ((child as THREE.Mesh).isMesh) {
+            const mat = (child as THREE.Mesh).material as THREE.MeshStandardMaterial;
+            if (mat && mat.transparent !== undefined) {
+              mat.transparent = true;
+              mat.opacity = ease;
+            }
+          }
+        });
+      }
+    }
+  });
+
+  return <group ref={groupRef}>{children}</group>;
+}
+
+// --- Idle Rotation Component ---
+function IdleRotation({ children, enabled }: { children: React.ReactNode; enabled: boolean }) {
+  const groupRef = useRef<THREE.Group>(null);
+
+  useFrame((state) => {
+    if (enabled && groupRef.current) {
+      groupRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.17; // ±10deg
+    }
+  });
+
+  return <group ref={groupRef}>{children}</group>;
+}
+
 // --- Smooth Anatomical Body ---
 function SmoothBody({
-  gender, dna, pose, clothing,
+  gender, dna, pose, clothing, autoRotate,
 }: {
   gender: "male" | "female";
   dna: BodyDNA;
   pose: PosePreset;
   clothing: ClothingItem[];
+  autoRotate: boolean;
 }) {
   const groupRef = useRef<THREE.Group>(null);
   const isMale = gender === "male";
@@ -174,200 +223,248 @@ function SmoothBody({
 
   const poseData = POSES[pose];
 
-  // Clothing overlay
+  // Clothing overlay - sorted by layer order with radial offsets
   const garmentData = useMemo(() => {
-    return clothing.map((item) => {
-      const subtype = resolveSubtype(item.category, item.name);
-      const fit: GarmentFit = item.fit || "regular";
-      const fabric: FabricType = item.fabric || guessFabric(item.category, item.name);
+    return clothing
+      .map((item) => {
+        const subtype = resolveSubtype(item.category, item.name);
+        const fit: GarmentFit = item.fit || "regular";
+        const fabric: FabricType = item.fabric || guessFabric(item.category, item.name);
+        const layerIdx = LAYER_ORDER[item.category] ?? 1;
+        const layerOffset = LAYER_RADIAL_OFFSET[layerIdx] ?? 1.0;
 
-      // Determine zone for wrinkle pattern
-      let zone = "torso";
-      if (isBottomCat(subtype) || isSkirtCat(subtype)) zone = "leg";
-      else if (isShoeCat(subtype)) zone = "leg";
+        let zone = "torso";
+        if (isBottomCat(subtype) || isSkirtCat(subtype)) zone = "leg";
+        else if (isShoeCat(subtype)) zone = "leg";
 
-      const mat = item.imageUrl
-        ? createTexturedMaterial(item.imageUrl, fabric, item.color || "gray", zone)
-        : createFabricMaterial(item.color || "gray", fabric, zone);
-      return { ...item, subtype, fit, fabric, mat };
-    });
+        const mat = item.imageUrl
+          ? createTexturedMaterial(item.imageUrl, fabric, item.color || "gray", zone)
+          : createFabricMaterial(item.color || "gray", fabric, zone);
+        return { ...item, subtype, fit, fabric, mat, layerIdx, layerOffset };
+      })
+      .sort((a, b) => a.layerIdx - b.layerIdx);
   }, [clothing]);
 
+  // Body-relative anchor positions
+  const armX = (isMale ? 0.28 : 0.24) * shoulderScale;
+  const legX = 0.1 * hipScale;
+  const waistY = 0.0;
+  const shoeY = -0.95 * legScale;
+
   return (
-    <group ref={groupRef} scale={[heightScale, heightScale, heightScale]}>
-      {/* Head */}
-      <mesh geometry={headGeo} material={clayMaterial} position={[0, 1.18, 0]} />
-      {/* Neck */}
-      <mesh geometry={neckGeo} material={darkClayMaterial} position={[0, 0.95, 0]} />
-      {/* Torso */}
-      <group rotation={poseData.torso.map(v => v) as [number, number, number]}>
-        <mesh geometry={torsoGeo} material={clayMaterial} position={[0, 0.45, 0]} />
-      </group>
+    <IdleRotation enabled={autoRotate}>
+      <group ref={groupRef} scale={[heightScale, heightScale, heightScale]}>
+        {/* Head */}
+        <mesh geometry={headGeo} material={clayMaterial} position={[0, 1.18, 0]} castShadow />
+        {/* Neck */}
+        <mesh geometry={neckGeo} material={darkClayMaterial} position={[0, 0.95, 0]} castShadow />
+        {/* Torso */}
+        <group rotation={poseData.torso.map(v => v) as [number, number, number]}>
+          <mesh geometry={torsoGeo} material={clayMaterial} position={[0, 0.45, 0]} castShadow />
+        </group>
 
-      {/* Left arm */}
-      <group position={[-(isMale ? 0.28 : 0.24) * shoulderScale, 0.85, 0]}>
-        <group rotation={poseData.leftUpperArm as [number, number, number]}>
-          <mesh geometry={upperArmGeo} material={clayMaterial} position={[0, -0.22, 0]} />
-          <group position={[0, -0.42, 0]}>
-            <group rotation={poseData.leftForearm as [number, number, number]}>
-              <mesh geometry={forearmGeo} material={clayMaterial} position={[0, -0.18, 0]} />
-              <mesh geometry={handGeo} material={darkClayMaterial} position={[0, -0.38, 0]} />
+        {/* Left arm */}
+        <group position={[-armX, 0.85, 0]}>
+          <group rotation={poseData.leftUpperArm as [number, number, number]}>
+            <mesh geometry={upperArmGeo} material={clayMaterial} position={[0, -0.22, 0]} castShadow />
+            <group position={[0, -0.42, 0]}>
+              <group rotation={poseData.leftForearm as [number, number, number]}>
+                <mesh geometry={forearmGeo} material={clayMaterial} position={[0, -0.18, 0]} castShadow />
+                <mesh geometry={handGeo} material={darkClayMaterial} position={[0, -0.38, 0]} castShadow />
+              </group>
             </group>
           </group>
         </group>
-      </group>
 
-      {/* Right arm */}
-      <group position={[(isMale ? 0.28 : 0.24) * shoulderScale, 0.85, 0]}>
-        <group rotation={poseData.rightUpperArm as [number, number, number]}>
-          <mesh geometry={upperArmGeo} material={clayMaterial} position={[0, -0.22, 0]} />
-          <group position={[0, -0.42, 0]}>
-            <group rotation={poseData.rightForearm as [number, number, number]}>
-              <mesh geometry={forearmGeo} material={clayMaterial} position={[0, -0.18, 0]} />
-              <mesh geometry={handGeo} material={darkClayMaterial} position={[0, -0.38, 0]} />
+        {/* Right arm */}
+        <group position={[armX, 0.85, 0]}>
+          <group rotation={poseData.rightUpperArm as [number, number, number]}>
+            <mesh geometry={upperArmGeo} material={clayMaterial} position={[0, -0.22, 0]} castShadow />
+            <group position={[0, -0.42, 0]}>
+              <group rotation={poseData.rightForearm as [number, number, number]}>
+                <mesh geometry={forearmGeo} material={clayMaterial} position={[0, -0.18, 0]} castShadow />
+                <mesh geometry={handGeo} material={darkClayMaterial} position={[0, -0.38, 0]} castShadow />
+              </group>
             </group>
           </group>
         </group>
-      </group>
 
-      {/* Left leg */}
-      <group position={[-0.1 * hipScale, -0.05, 0]}>
-        <group rotation={poseData.leftThigh as [number, number, number]}>
-          <mesh geometry={thighGeo} material={clayMaterial} position={[0, -0.3 * legScale, 0]} />
-          <group position={[0, -0.55 * legScale, 0]}>
-            <group rotation={poseData.leftCalf as [number, number, number]}>
-              <mesh geometry={calfGeo} material={clayMaterial} position={[0, -0.22 * legScale, 0]} />
-              <mesh geometry={footGeo} material={darkClayMaterial} position={[0, -0.46 * legScale, 0.05]} />
+        {/* Left leg */}
+        <group position={[-legX, -0.05, 0]}>
+          <group rotation={poseData.leftThigh as [number, number, number]}>
+            <mesh geometry={thighGeo} material={clayMaterial} position={[0, -0.3 * legScale, 0]} castShadow />
+            <group position={[0, -0.55 * legScale, 0]}>
+              <group rotation={poseData.leftCalf as [number, number, number]}>
+                <mesh geometry={calfGeo} material={clayMaterial} position={[0, -0.22 * legScale, 0]} castShadow />
+                <mesh geometry={footGeo} material={darkClayMaterial} position={[0, -0.46 * legScale, 0.05]} castShadow />
+              </group>
             </group>
           </group>
         </group>
-      </group>
 
-      {/* Right leg */}
-      <group position={[0.1 * hipScale, -0.05, 0]}>
-        <group rotation={poseData.rightThigh as [number, number, number]}>
-          <mesh geometry={thighGeo} material={clayMaterial} position={[0, -0.3 * legScale, 0]} />
-          <group position={[0, -0.55 * legScale, 0]}>
-            <group rotation={poseData.rightCalf as [number, number, number]}>
-              <mesh geometry={calfGeo} material={clayMaterial} position={[0, -0.22 * legScale, 0]} />
-              <mesh geometry={footGeo} material={darkClayMaterial} position={[0, -0.46 * legScale, 0.05]} />
+        {/* Right leg */}
+        <group position={[legX, -0.05, 0]}>
+          <group rotation={poseData.rightThigh as [number, number, number]}>
+            <mesh geometry={thighGeo} material={clayMaterial} position={[0, -0.3 * legScale, 0]} castShadow />
+            <group position={[0, -0.55 * legScale, 0]}>
+              <group rotation={poseData.rightCalf as [number, number, number]}>
+                <mesh geometry={calfGeo} material={clayMaterial} position={[0, -0.22 * legScale, 0]} castShadow />
+                <mesh geometry={footGeo} material={darkClayMaterial} position={[0, -0.46 * legScale, 0.05]} castShadow />
+              </group>
             </group>
           </group>
         </group>
+
+        {/* Stand */}
+        <mesh material={darkClayMaterial} position={[0, -1.1 * legScale, 0]} receiveShadow>
+          <cylinderGeometry args={[0.02, 0.02, 0.15, 8]} />
+        </mesh>
+        <mesh material={clayMaterial} position={[0, -1.18 * legScale, 0]} receiveShadow>
+          <cylinderGeometry args={[0.3, 0.35, 0.04, 24]} />
+        </mesh>
+
+        {/* ====== CLOTHING ====== */}
+        {garmentData.map((item, i) => {
+          const lo = item.layerOffset;
+
+          // --- TOPS ---
+          if (isTopCat(item.subtype)) {
+            const { torso, sleeves } = createTopGeometry(item.subtype, item.fit, shoulderScale, waistScale, lo);
+            return (
+              <AnimatedGarment key={`clothing-${i}`} category={item.category}>
+                <mesh geometry={torso} material={item.mat} position={[0, 0.45, 0]} castShadow />
+                {sleeves && (
+                  <>
+                    <group position={[-armX, 0.85, 0]}>
+                      <group rotation={poseData.leftUpperArm as [number, number, number]}>
+                        <mesh geometry={sleeves.geo} material={item.mat} position={[0, -0.02, 0]} castShadow />
+                      </group>
+                    </group>
+                    <group position={[armX, 0.85, 0]}>
+                      <group rotation={poseData.rightUpperArm as [number, number, number]}>
+                        <mesh geometry={sleeves.geo} material={item.mat} position={[0, -0.02, 0]} castShadow />
+                      </group>
+                    </group>
+                  </>
+                )}
+              </AnimatedGarment>
+            );
+          }
+
+          // --- BOTTOMS ---
+          if (isBottomCat(item.subtype)) {
+            const legGeo = createPantLegGeometry(item.subtype, item.fit, hipScale, legScale, lo);
+            const waistGeo = createWaistbandGeometry(hipScale, item.fit, lo);
+            const waistYPos = waistY - (dna.waist - 0.5) * 0.04; // adjust with DNA
+            return (
+              <AnimatedGarment key={`clothing-${i}`} category={item.category}>
+                <mesh geometry={waistGeo} material={item.mat} position={[0, waistYPos, 0]} castShadow />
+                <group position={[-legX, -0.05, 0]}>
+                  <group rotation={poseData.leftThigh as [number, number, number]}>
+                    <mesh geometry={legGeo} material={item.mat} position={[0, -0.3 * legScale, 0]} castShadow />
+                  </group>
+                </group>
+                <group position={[legX, -0.05, 0]}>
+                  <group rotation={poseData.rightThigh as [number, number, number]}>
+                    <mesh geometry={legGeo} material={item.mat} position={[0, -0.3 * legScale, 0]} castShadow />
+                  </group>
+                </group>
+              </AnimatedGarment>
+            );
+          }
+
+          // --- SKIRTS ---
+          if (isSkirtCat(item.subtype)) {
+            const skirtGeo = createSkirtGeometry(item.subtype, item.fit, waistScale, hipScale, lo);
+            return (
+              <AnimatedGarment key={`clothing-${i}`} category={item.category}>
+                <mesh geometry={skirtGeo} material={item.mat} position={[0, waistY, 0]} castShadow />
+              </AnimatedGarment>
+            );
+          }
+
+          // --- DRESSES ---
+          if (isDressCat(item.subtype)) {
+            const { body, sleeves } = createDressGeometry(item.subtype, item.fit, shoulderScale, waistScale, hipScale, lo);
+            return (
+              <AnimatedGarment key={`clothing-${i}`} category={item.category}>
+                <mesh geometry={body} material={item.mat} position={[0, 0.45, 0]} castShadow />
+                {sleeves && (
+                  <>
+                    <group position={[-armX, 0.85, 0]}>
+                      <group rotation={poseData.leftUpperArm as [number, number, number]}>
+                        <mesh geometry={sleeves.geo} material={item.mat} position={[0, -0.02, 0]} castShadow />
+                      </group>
+                    </group>
+                    <group position={[armX, 0.85, 0]}>
+                      <group rotation={poseData.rightUpperArm as [number, number, number]}>
+                        <mesh geometry={sleeves.geo} material={item.mat} position={[0, -0.02, 0]} castShadow />
+                      </group>
+                    </group>
+                  </>
+                )}
+              </AnimatedGarment>
+            );
+          }
+
+          // --- OUTERWEAR ---
+          if (isOuterCat(item.subtype)) {
+            const { torso, collar } = createOuterwearGeometry(item.subtype, item.fit, shoulderScale, waistScale, hipScale, lo);
+            return (
+              <AnimatedGarment key={`clothing-${i}`} category={item.category}>
+                <mesh geometry={torso} material={item.mat} position={[0, 0.45, 0]} castShadow />
+                {collar && <mesh geometry={collar} material={item.mat} position={[0, 0.96, 0]} castShadow />}
+              </AnimatedGarment>
+            );
+          }
+
+          // --- SHOES ---
+          if (isShoeCat(item.subtype)) {
+            const shoeGeo = createShoeGeometry(item.subtype);
+            return (
+              <AnimatedGarment key={`clothing-${i}`} category={item.category}>
+                <group position={[-legX, -0.05, 0]}>
+                  <group rotation={poseData.leftThigh as [number, number, number]}>
+                    <group position={[0, -0.55 * legScale, 0]}>
+                      <group rotation={poseData.leftCalf as [number, number, number]}>
+                        <mesh geometry={shoeGeo} material={item.mat} position={[0, -0.46 * legScale, 0.05]} castShadow />
+                      </group>
+                    </group>
+                  </group>
+                </group>
+                <group position={[legX, -0.05, 0]}>
+                  <group rotation={poseData.rightThigh as [number, number, number]}>
+                    <group position={[0, -0.55 * legScale, 0]}>
+                      <group rotation={poseData.rightCalf as [number, number, number]}>
+                        <mesh geometry={shoeGeo} material={item.mat} position={[0, -0.46 * legScale, 0.05]} castShadow />
+                      </group>
+                    </group>
+                  </group>
+                </group>
+              </AnimatedGarment>
+            );
+          }
+
+          // --- HATS ---
+          if (isHatCat(item.subtype)) {
+            const { crown, brim } = createHatGeometry(item.subtype);
+            return (
+              <AnimatedGarment key={`clothing-${i}`} category={item.category}>
+                <group position={[0, 1.32, 0]}>
+                  <mesh geometry={crown} material={item.mat} castShadow />
+                  {brim && (
+                    <mesh geometry={brim} material={item.mat}
+                      position={[0, -0.02, 0.04]} rotation={[-Math.PI / 2, 0, 0]} castShadow />
+                  )}
+                </group>
+              </AnimatedGarment>
+            );
+          }
+
+          return null;
+        })}
       </group>
-
-      {/* Stand */}
-      <mesh material={darkClayMaterial} position={[0, -1.1 * legScale, 0]}>
-        <cylinderGeometry args={[0.02, 0.02, 0.15, 8]} />
-      </mesh>
-      <mesh material={clayMaterial} position={[0, -1.18 * legScale, 0]}>
-        <cylinderGeometry args={[0.3, 0.35, 0.04, 24]} />
-      </mesh>
-
-      {/* ====== CLOTHING ====== */}
-      {garmentData.map((item, i) => {
-        // --- TOPS ---
-        if (isTopCat(item.subtype)) {
-          const { torso, sleeves } = createTopGeometry(item.subtype, item.fit, shoulderScale, waistScale);
-          return (
-            <group key={`clothing-${i}`}>
-              <mesh geometry={torso} material={item.mat} position={[0, 0.45, 0]} />
-              {sleeves && (
-                <>
-                  <mesh geometry={sleeves.geo} material={item.mat}
-                    position={[-(isMale ? 0.28 : 0.24) * shoulderScale, 0.82, 0]}
-                    rotation={[0, 0, 0.2]} />
-                  <mesh geometry={sleeves.geo} material={item.mat}
-                    position={[(isMale ? 0.28 : 0.24) * shoulderScale, 0.82, 0]}
-                    rotation={[0, 0, -0.2]} />
-                </>
-              )}
-            </group>
-          );
-        }
-
-        // --- BOTTOMS ---
-        if (isBottomCat(item.subtype)) {
-          const legGeo = createPantLegGeometry(item.subtype, item.fit, hipScale, legScale);
-          const waistGeo = createWaistbandGeometry(hipScale, item.fit);
-          return (
-            <group key={`clothing-${i}`}>
-              <mesh geometry={waistGeo} material={item.mat} position={[0, 0.0, 0]} />
-              <mesh geometry={legGeo} material={item.mat} position={[-0.1 * hipScale, -0.35, 0]} />
-              <mesh geometry={legGeo} material={item.mat} position={[0.1 * hipScale, -0.35, 0]} />
-            </group>
-          );
-        }
-
-        // --- SKIRTS ---
-        if (isSkirtCat(item.subtype)) {
-          const skirtGeo = createSkirtGeometry(item.subtype, item.fit, waistScale, hipScale);
-          return (
-            <group key={`clothing-${i}`}>
-              <mesh geometry={skirtGeo} material={item.mat} position={[0, 0.0, 0]} />
-            </group>
-          );
-        }
-
-        // --- DRESSES ---
-        if (isDressCat(item.subtype)) {
-          const { body, sleeves } = createDressGeometry(item.subtype, item.fit, shoulderScale, waistScale, hipScale);
-          return (
-            <group key={`clothing-${i}`}>
-              <mesh geometry={body} material={item.mat} position={[0, 0.45, 0]} />
-              {sleeves && (
-                <>
-                  <mesh geometry={sleeves.geo} material={item.mat}
-                    position={[-(isMale ? 0.28 : 0.24) * shoulderScale, 0.84, 0]}
-                    rotation={[0, 0, 0.2]} />
-                  <mesh geometry={sleeves.geo} material={item.mat}
-                    position={[(isMale ? 0.28 : 0.24) * shoulderScale, 0.84, 0]}
-                    rotation={[0, 0, -0.2]} />
-                </>
-              )}
-            </group>
-          );
-        }
-
-        // --- OUTERWEAR ---
-        if (isOuterCat(item.subtype)) {
-          const { torso, collar } = createOuterwearGeometry(item.subtype, item.fit, shoulderScale, waistScale, hipScale);
-          return (
-            <group key={`clothing-${i}`}>
-              <mesh geometry={torso} material={item.mat} position={[0, 0.45, 0]} />
-              {collar && <mesh geometry={collar} material={item.mat} position={[0, 0.96, 0]} />}
-            </group>
-          );
-        }
-
-        // --- SHOES ---
-        if (isShoeCat(item.subtype)) {
-          const shoeGeo = createShoeGeometry(item.subtype);
-          return (
-            <group key={`clothing-${i}`}>
-              <mesh geometry={shoeGeo} material={item.mat} position={[-0.1 * hipScale, -0.95 * legScale, 0.03]} />
-              <mesh geometry={shoeGeo} material={item.mat} position={[0.1 * hipScale, -0.95 * legScale, 0.03]} />
-            </group>
-          );
-        }
-
-        // --- HATS ---
-        if (isHatCat(item.subtype)) {
-          const { crown, brim } = createHatGeometry(item.subtype);
-          return (
-            <group key={`clothing-${i}`} position={[0, 1.32, 0]}>
-              <mesh geometry={crown} material={item.mat} />
-              {brim && (
-                <mesh geometry={brim} material={item.mat}
-                  position={[0, -0.02, 0.04]} rotation={[-Math.PI / 2, 0, 0]} />
-              )}
-            </group>
-          );
-        }
-
-        return null;
-      })}
-    </group>
+    </IdleRotation>
   );
 }
 
@@ -380,6 +477,7 @@ interface Mannequin3DProps {
   tracingImageUrl?: string;
   tracingOpacity?: number;
   showMeasurements?: boolean;
+  autoRotate?: boolean;
 }
 
 export default function Mannequin3D({
@@ -391,6 +489,7 @@ export default function Mannequin3D({
   tracingImageUrl,
   tracingOpacity = 0.3,
   showMeasurements = false,
+  autoRotate = true,
 }: Mannequin3DProps) {
   const isMale = gender === "male";
   const shoulderScale = 0.8 + dna.shoulder * 0.4;
@@ -449,13 +548,34 @@ export default function Mannequin3D({
       <Canvas
         camera={{ position: [0, 0.3, 3.2], fov: 38 }}
         gl={{ antialias: true, alpha: true }}
+        shadows
         style={{ background: "transparent" }}
       >
-        <ambientLight intensity={0.45} />
-        <directionalLight position={[2, 4, 3]} intensity={0.7} castShadow />
-        <directionalLight position={[-2, 3, -1]} intensity={0.35} />
-        <pointLight position={[0, -1, 2]} intensity={0.2} />
-        <SmoothBody gender={gender} dna={dna} pose={pose} clothing={clothing} />
+        <ambientLight intensity={0.4} />
+        <directionalLight
+          position={[2, 4, 3]}
+          intensity={0.8}
+          castShadow
+          shadow-mapSize-width={1024}
+          shadow-mapSize-height={1024}
+          shadow-camera-near={0.1}
+          shadow-camera-far={10}
+        />
+        <directionalLight position={[-2, 3, -1]} intensity={0.3} />
+        <spotLight position={[0, 5, 0]} intensity={0.3} angle={0.6} penumbra={0.8} castShadow />
+        <pointLight position={[0, -1, 2]} intensity={0.15} />
+
+        <SmoothBody gender={gender} dna={dna} pose={pose} clothing={clothing} autoRotate={autoRotate} />
+
+        <ContactShadows
+          position={[0, -1.2, 0]}
+          opacity={0.35}
+          scale={3}
+          blur={2.5}
+          far={4}
+        />
+        <Environment preset="studio" environmentIntensity={0.3} />
+
         <OrbitControls
           enablePan={false} enableZoom={true}
           minPolarAngle={Math.PI / 6} maxPolarAngle={Math.PI / 1.3}

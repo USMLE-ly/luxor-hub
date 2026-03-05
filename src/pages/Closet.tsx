@@ -12,7 +12,7 @@ import {
   SlidersHorizontal, Activity, Eye, User, Layers, CalendarDays, Image, Save, FolderOpen, Heart,
 } from "lucide-react";
 import Mannequin3D, { type ClothingItem as MannequinClothingItem, type BodyDNA, type PosePreset } from "@/components/app/Mannequin3D";
-import type { GarmentFit } from "@/components/app/GarmentGeometry";
+import { SLOT_MAP, DRESS_REPLACES, type GarmentFit } from "@/components/app/GarmentGeometry";
 import type { FabricType } from "@/components/app/FabricMaterials";
 
 /* Placeholder product images for empty closet sections */
@@ -138,6 +138,27 @@ const Closet = () => {
   }, [user]);
 
   useEffect(() => { fetchItems(); }, [fetchItems]);
+
+  // localStorage persistence for mannequin clothing
+  const STORAGE_KEY = user ? `mannequin-outfit-${user.id}` : null;
+
+  // Restore from localStorage on mount
+  useEffect(() => {
+    if (!STORAGE_KEY) return;
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored) as MannequinClothingItem[];
+        if (Array.isArray(parsed) && parsed.length > 0) setMannequinClothing(parsed);
+      }
+    } catch {}
+  }, [STORAGE_KEY]);
+
+  // Persist on change
+  useEffect(() => {
+    if (!STORAGE_KEY) return;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(mannequinClothing));
+  }, [mannequinClothing, STORAGE_KEY]);
 
   // Fetch saved mannequin outfits
   const fetchSavedOutfits = useCallback(async () => {
@@ -282,32 +303,46 @@ const Closet = () => {
     setActiveTab("mannequin");
   };
 
-  // Quick try-on: instantly add to mannequin with defaults and switch tab
+  // Quick try-on: instantly add to mannequin with defaults and switch tab (with replacement)
   const quickTryOn = (item: ClothingItem) => {
+    const mappedCat = closetToMannequinCategory[item.category] || "tops";
     const mapped: MannequinClothingItem = {
-      category: closetToMannequinCategory[item.category] || "tops",
+      category: mappedCat,
       color: item.color || "navy",
       name: item.name || item.category,
       imageUrl: item.photo_url || undefined,
       fit: "regular",
       fabric: "default",
     };
-    setMannequinClothing((prev) => [...prev, mapped]);
+    setMannequinClothing((prev) => replaceBySlot(prev, mapped));
     setActiveTab("mannequin");
     toast.success(`👗 ${mapped.name} added to mannequin`);
   };
 
+  // Same-category replacement logic
+  const replaceBySlot = (current: MannequinClothingItem[], newItem: MannequinClothingItem): MannequinClothingItem[] => {
+    const cat = newItem.category;
+    const conflictSlots = SLOT_MAP[cat] || [cat];
+    // If adding a dress, also remove tops/bottoms/skirts
+    const toRemove = cat === "dress"
+      ? [...conflictSlots, ...DRESS_REPLACES]
+      : conflictSlots;
+    const filtered = current.filter(item => !toRemove.includes(item.category));
+    return [...filtered, newItem];
+  };
+
   const confirmAddToMannequin = () => {
     if (!pendingItem) return;
+    const mappedCat = closetToMannequinCategory[pendingItem.category] || "tops";
     const mapped: MannequinClothingItem = {
-      category: closetToMannequinCategory[pendingItem.category] || "tops",
+      category: mappedCat,
       color: pendingItem.color || "navy",
       name: pendingItem.name || pendingItem.category,
       imageUrl: pendingItem.photo_url || undefined,
       fit: selectedFit,
       fabric: selectedFabric,
     };
-    setMannequinClothing((prev) => [...prev, mapped]);
+    setMannequinClothing((prev) => replaceBySlot(prev, mapped));
     setPendingItem(null);
     setSelectedFit("regular");
     setSelectedFabric("default");
@@ -675,41 +710,59 @@ const Closet = () => {
               </div>
             </div>
 
-            {/* Clothing strip */}
+            {/* Currently Wearing */}
             <div className="px-4 py-3 border-t border-border">
-              <div className="flex gap-2 overflow-x-auto pb-1">
-                {mannequinClothing.map((item, i) => (
-                  <div key={i} className="relative flex-shrink-0 w-12 h-12 rounded-lg bg-secondary flex items-center justify-center">
-                    <div className="w-7 h-7 rounded-full" style={{ backgroundColor: item.color || "#6b7b8d" }} />
-                    <button onClick={() => removeFromMannequin(i)} className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive flex items-center justify-center">
-                      <X className="w-2.5 h-2.5 text-destructive-foreground" />
-                    </button>
-                  </div>
-                ))}
-                <button onClick={() => togglePanel(null)}
-                  className="flex-shrink-0 w-12 h-12 rounded-lg border-2 border-dashed border-border flex items-center justify-center">
-                  <Plus className="w-4 h-4 text-muted-foreground" />
-                </button>
-              </div>
+              <h3 className="font-sans text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                Currently Wearing
+              </h3>
+              {mannequinClothing.length === 0 ? (
+                <p className="text-xs text-muted-foreground font-sans py-2">No items on mannequin. Use "Try On" to add clothes.</p>
+              ) : (
+                <div className="space-y-1.5 mb-3">
+                  {mannequinClothing.map((item, i) => {
+                    const catIcons: Record<string, string> = {
+                      tops: "👕", outerwear: "🧥", bottoms: "👖", skirts: "👗", dress: "👗",
+                      shoes: "👟", hat: "🎩", accessory: "👜",
+                    };
+                    const catColors: Record<string, string> = {
+                      tops: "hsl(210,70%,55%)", outerwear: "hsl(30,60%,50%)", bottoms: "hsl(240,40%,50%)",
+                      skirts: "hsl(330,60%,55%)", dress: "hsl(350,55%,55%)", shoes: "hsl(0,0%,40%)",
+                      hat: "hsl(45,70%,50%)", accessory: "hsl(160,50%,45%)",
+                    };
+                    return (
+                      <div key={i} className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg bg-secondary/60 group">
+                        <span className="text-sm">{catIcons[item.category] || "👕"}</span>
+                        <div className="w-4 h-4 rounded-full flex-shrink-0 border border-border"
+                          style={{ backgroundColor: item.color || "#6b7b8d" }} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-sans font-medium text-foreground truncate">{item.name}</p>
+                          <p className="text-[10px] font-sans text-muted-foreground capitalize">{item.category} • {item.fit || "regular"}</p>
+                        </div>
+                        <button onClick={() => removeFromMannequin(i)}
+                          className="w-6 h-6 rounded-full flex items-center justify-center opacity-60 hover:opacity-100 hover:bg-destructive/15 transition-all">
+                          <X className="w-3.5 h-3.5 text-destructive" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
 
               {/* Actions: Save & Schedule */}
               {mannequinClothing.length > 0 && (
-                <div className="mt-2 space-y-2">
-                  <div className="flex items-center gap-1.5 overflow-x-auto">
-                    <span className="text-xs font-sans text-muted-foreground truncate flex-1">
-                      {mannequinClothing.map(c => c.name).join(", ")}
-                    </span>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={() => setShowSaveDialog(true)}
-                      className="rounded-full text-xs px-4 flex-1">
-                      <Save className="w-3.5 h-3.5 mr-1.5" /> Save Outfit
-                    </Button>
-                    <Button size="sm" onClick={() => setShowCalendar(true)}
-                      className="rounded-full text-xs px-4 flex-1 bg-primary text-primary-foreground">
-                      <CalendarDays className="w-3.5 h-3.5 mr-1.5" /> Schedule
-                    </Button>
-                  </div>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" onClick={() => setShowSaveDialog(true)}
+                    className="rounded-full text-xs px-4 flex-1">
+                    <Save className="w-3.5 h-3.5 mr-1.5" /> Save Outfit
+                  </Button>
+                  <Button size="sm" onClick={() => setShowCalendar(true)}
+                    className="rounded-full text-xs px-4 flex-1 bg-primary text-primary-foreground">
+                    <CalendarDays className="w-3.5 h-3.5 mr-1.5" /> Schedule
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setMannequinClothing([])}
+                    className="rounded-full text-xs px-3 text-destructive hover:bg-destructive/10">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </Button>
                 </div>
               )}
 
