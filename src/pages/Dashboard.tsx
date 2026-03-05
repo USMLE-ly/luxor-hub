@@ -3,7 +3,10 @@ import { motion } from "framer-motion";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Shirt, Wand2, Star, Check, ArrowRight, Heart, Edit2, Sparkles, Palette, Scissors, ShoppingBag, ExternalLink } from "lucide-react";
+import {
+  Shirt, Wand2, ArrowRight, Heart, Sparkles, Palette, Scissors,
+  ShoppingBag, ExternalLink, Check, Gift, Calendar, Briefcase, PartyPopper, Sun, ChevronRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -50,27 +53,16 @@ const Dashboard = () => {
     fetchData();
   }, [user]);
 
-  // Fetch shop similar products
   useEffect(() => {
     if (!user) return;
     const fetchShop = async () => {
       setShopLoading(true);
       try {
-        const { data: analyses } = await supabase
-          .from("outfit_analyses")
-          .select("detected_items, overall_style")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false })
-          .limit(1);
-
         const colorSeason = styleProfile.preferences?.aiAnalysis?.colorSeason || "Autumn";
-        
         const { data } = await supabase.functions.invoke("shop-products", {
           body: { colorSeason, category: "all" },
         });
-        if (data?.products) {
-          setShopProducts(data.products.slice(0, 6));
-        }
+        if (data?.products) setShopProducts(data.products.slice(0, 6));
       } catch (e) {
         console.error("Shop fetch error:", e);
       } finally {
@@ -88,6 +80,18 @@ const Dashboard = () => {
 
   const calibrationProgress = styleProfile.preferences?.calibrationProgress || 0;
   const hasCalibration = calibrationProgress > 0;
+  const displayProgress = hasCalibration ? calibrationProgress : 73;
+
+  const colorType = styleProfile.preferences?.aiAnalysis?.colorSeason || "—";
+  const styleType = styleProfile.archetype || "—";
+  const bodyType = styleProfile.preferences?.bodyShape || "—";
+
+  const occasionTabs = [
+    { label: "Everyday", icon: <Sun className="w-5 h-5" />, color: "hsl(142, 60%, 45%)" },
+    { label: "Weekend", icon: <Calendar className="w-5 h-5" />, color: "hsl(330, 60%, 55%)" },
+    { label: "Work", icon: <Briefcase className="w-5 h-5" />, color: "hsl(30, 80%, 55%)" },
+    { label: "Party", icon: <PartyPopper className="w-5 h-5" />, color: "hsl(270, 60%, 55%)" },
+  ];
 
   return (
     <AppLayout>
@@ -116,99 +120,198 @@ const Dashboard = () => {
           </div>
         </motion.div>
 
-        {/* My Style Formula */}
+        {/* ── My Style Formula Card ─────────────────────────── */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
+          className="rounded-2xl border border-border overflow-hidden"
+          style={{ background: "linear-gradient(135deg, hsl(30 40% 95%), hsl(35 50% 92%))" }}
         >
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-display text-xl font-bold text-foreground">My Style Formula</h2>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={() => navigate("/style-dna")}
-              className="rounded-full bg-foreground text-background hover:bg-foreground/90 text-xs px-4"
-            >
-              View <ArrowRight className="w-3 h-3 ml-1" />
-            </Button>
-          </div>
+          <div className="p-5">
+            {/* Title row */}
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="font-display text-xl font-bold text-foreground">My Style Formula</h2>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => navigate("/style-dna")}
+                className="rounded-full bg-foreground text-background hover:bg-foreground/90 text-xs px-4 h-8"
+              >
+                View <ArrowRight className="w-3 h-3 ml-1" />
+              </Button>
+            </div>
 
-          <div className="rounded-2xl bg-secondary/40 p-5 space-y-4">
-            <button onClick={() => navigate("/color-type")} className="flex items-center gap-3 w-full text-left hover:opacity-80 transition-opacity">
-              <div className="w-9 h-9 rounded-lg bg-[hsl(45,80%,65%)]/20 flex items-center justify-center">
-                <Palette className="w-5 h-5 text-[hsl(45,80%,55%)]" />
+            {/* 3-column style attributes */}
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              <button onClick={() => navigate("/color-type")} className="text-left hover:opacity-80 transition-opacity">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <div className="w-5 h-5 rounded-md bg-[hsl(45,80%,55%)]/20 flex items-center justify-center">
+                    <Palette className="w-3 h-3 text-[hsl(45,80%,55%)]" />
+                  </div>
+                  <span className="text-[10px] font-sans text-muted-foreground">Color type</span>
+                </div>
+                <p className="font-sans font-bold text-foreground text-sm leading-tight">{colorType}</p>
+              </button>
+              <button onClick={() => navigate("/calibration")} className="text-left hover:opacity-80 transition-opacity">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <div className="w-5 h-5 rounded-md bg-[hsl(0,70%,68%)]/20 flex items-center justify-center">
+                    <Scissors className="w-3 h-3 text-[hsl(0,70%,68%)]" />
+                  </div>
+                  <span className="text-[10px] font-sans text-muted-foreground">Style Type</span>
+                </div>
+                <p className="font-sans font-bold text-foreground text-sm leading-tight">{styleType}</p>
+              </button>
+              <div className="text-left">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <div className="w-5 h-5 rounded-md bg-[hsl(270,40%,65%)]/20 flex items-center justify-center">
+                    <Shirt className="w-3 h-3 text-[hsl(270,40%,65%)]" />
+                  </div>
+                  <span className="text-[10px] font-sans text-muted-foreground">Body Type</span>
+                </div>
+                <p className="font-sans font-bold text-foreground text-sm leading-tight">{bodyType}</p>
               </div>
-              <div className="flex-1">
-                <p className="font-sans font-semibold text-foreground text-sm">COLOR TYPE</p>
-                <p className="text-muted-foreground text-xs font-sans">Determines your clothing colors</p>
+            </div>
+
+            {/* Decorative divider */}
+            <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent mb-5" />
+
+            {/* Calibration Section */}
+            <div className="text-center space-y-3">
+              {/* Decorative orb */}
+              <div className="mx-auto w-28 h-28 rounded-full flex items-center justify-center"
+                style={{ background: "radial-gradient(circle at 40% 35%, hsl(25 80% 65%), hsl(350 60% 50%), hsl(15 70% 40%))" }}
+              >
+                <div className="w-20 h-20 rounded-full border-2 border-white/20 flex items-center justify-center">
+                  <Sparkles className="w-8 h-8 text-white/80" />
+                </div>
               </div>
-              <ArrowRight className="w-4 h-4 text-muted-foreground" />
-            </button>
-            <button onClick={() => navigate("/calibration")} className="flex items-center gap-3 w-full text-left hover:opacity-80 transition-opacity">
-              <div className="w-9 h-9 rounded-lg bg-[hsl(0,70%,68%)]/20 flex items-center justify-center">
-                <Scissors className="w-5 h-5 text-[hsl(0,70%,68%)]" />
+
+              <h3 className="font-display text-lg font-bold text-foreground">
+                Calibrate your Style Formula
+              </h3>
+              <p className="text-muted-foreground text-xs font-sans max-w-[280px] mx-auto">
+                Like or dislike your Style Formula outfits to help the AI learn your style identity better
+              </p>
+
+              {/* Progress bar */}
+              <div className="flex items-center gap-2 pt-1">
+                <div className="flex-1 h-9 rounded-full bg-background/80 overflow-hidden relative border border-border/50">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${displayProgress}%` }}
+                    transition={{ duration: 1.2, ease: "easeOut", delay: 0.5 }}
+                    className="h-full rounded-full flex items-center justify-between px-3"
+                    style={{
+                      background: "linear-gradient(90deg, hsl(130,55%,48%), hsl(0,70%,62%))",
+                    }}
+                  >
+                    <Check className="w-4 h-4 text-white" />
+                    <span className="text-xs font-bold text-white">{displayProgress}%</span>
+                  </motion.div>
+                </div>
+                <div className="w-9 h-9 rounded-full bg-[hsl(0,70%,68%)]/10 border border-border/50 flex items-center justify-center flex-shrink-0">
+                  <Gift className="w-4 h-4 text-[hsl(0,70%,62%)]" />
+                </div>
               </div>
-              <div className="flex-1">
-                <p className="font-sans font-semibold text-foreground text-sm">STYLE PREFERENCES</p>
-                <p className="text-muted-foreground text-xs font-sans">Determines your best prints and fabrics</p>
-              </div>
-              <ArrowRight className="w-4 h-4 text-muted-foreground" />
-            </button>
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-[hsl(270,40%,65%)]/20 flex items-center justify-center">
-                <Shirt className="w-5 h-5 text-[hsl(270,40%,65%)]" />
-              </div>
-              <div>
-                <p className="font-sans font-semibold text-foreground text-sm">BODY TYPE</p>
-                <p className="text-muted-foreground text-xs font-sans">Defines shapes that flatter you</p>
-              </div>
+
+              {/* Start button */}
+              <Button
+                onClick={() => navigate("/calibration")}
+                className="w-full rounded-full bg-foreground text-background hover:bg-foreground/90 font-sans font-semibold h-12 text-base"
+              >
+                Start <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
             </div>
           </div>
         </motion.div>
 
-        {/* Calibration Progress */}
+        {/* ── My Closet Outfits ─────────────────────────────── */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <button
-            onClick={() => navigate("/calibration")}
-            className="w-full rounded-2xl p-5 text-left hover:opacity-90 transition-opacity"
-            style={{ backgroundColor: "hsl(120, 30%, 94%)" }}
-          >
-            <h3 className="font-display text-lg font-bold text-foreground mb-3">
-              Calibration in progress!
-            </h3>
-            <div className="flex items-center gap-2 mb-2">
-              <div className="flex-1 h-8 rounded-full bg-background overflow-hidden relative">
-                <div
-                  className="h-full rounded-full flex items-center justify-between px-3"
-                  style={{
-                    width: `${hasCalibration ? calibrationProgress : 30}%`,
-                    background: "linear-gradient(90deg, hsl(130,60%,50%), hsl(170,70%,55%))",
-                  }}
-                >
-                  <Check className="w-4 h-4 text-background" />
-                  <span className="text-xs font-bold text-background">{hasCalibration ? calibrationProgress : 30}%</span>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-display text-xl font-bold text-foreground">All My Outfits</h2>
+            <button
+              onClick={() => navigate("/outfits")}
+              className="text-sm text-muted-foreground font-sans hover:text-foreground transition-colors"
+            >
+              View all
+            </button>
+          </div>
+
+          {/* Occasion tabs */}
+          <div className="flex gap-2 mb-4 overflow-x-auto scrollbar-none">
+            {occasionTabs.map((tab) => (
+              <button
+                key={tab.label}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-card border border-border hover:border-primary/40 transition-colors flex-shrink-0"
+              >
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${tab.color}20`, color: tab.color }}>
+                  {tab.icon}
+                </div>
+                <div className="text-left">
+                  <span className="font-sans text-xs font-semibold text-foreground block">{tab.label}</span>
+                  <span className="text-[9px] font-sans text-muted-foreground">
+                    {stats.outfits} OUTFITS
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {stats.outfits === 0 ? (
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-2xl border border-border bg-card overflow-hidden">
+                <div className="h-40 bg-secondary flex items-center justify-center relative">
+                  <div className="text-center">
+                    <Shirt className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
+                    <p className="text-[10px] text-muted-foreground font-sans px-4">
+                      Add your items and AI stylist will mix and match them into Outfits
+                    </p>
+                  </div>
                 </div>
               </div>
-              <div className="w-8 h-8 rounded-full bg-background flex items-center justify-center">
-                <span className="text-sm">🎁</span>
+              <div className="rounded-2xl border border-border bg-card overflow-hidden flex items-center justify-center p-6">
+                <Button onClick={() => navigate("/outfits")} size="sm" className="rounded-full gold-gradient text-primary-foreground">
+                  <Wand2 className="w-4 h-4 mr-2" /> Generate
+                </Button>
               </div>
             </div>
-            <p className="text-muted-foreground text-xs font-sans">
-              Let's continue tomorrow - the more we know you, the better the results!
-            </p>
-          </button>
+          ) : (
+            <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-none">
+              {["Everyday", "Work", "Party"].map((occasion) => (
+                <div key={occasion} className="min-w-[180px] rounded-2xl border border-border bg-card overflow-hidden flex-shrink-0">
+                  <div className="relative h-40 bg-secondary flex items-center justify-center">
+                    <Shirt className="w-12 h-12 text-muted-foreground/30" />
+                  </div>
+                  <div className="p-3">
+                    <span className="font-sans text-sm font-medium text-foreground">{occasion}</span>
+                    <div className="flex gap-3 mt-2">
+                      <button className="text-[10px] font-sans text-muted-foreground flex items-center gap-1">
+                        View items <ChevronRight className="w-2.5 h-2.5" />
+                      </button>
+                      <button
+                        onClick={() => navigate("/mannequin")}
+                        className="text-[10px] font-sans text-primary flex items-center gap-1"
+                      >
+                        <Sparkles className="w-2.5 h-2.5" /> Try it on
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </motion.div>
 
-        {/* Shop Similar */}
+        {/* ── Shop Similar ──────────────────────────────────── */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25 }}
+          transition={{ delay: 0.3 }}
         >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -266,79 +369,24 @@ const Dashboard = () => {
           )}
         </motion.div>
 
-        {/* All My Outfits */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-display text-xl font-bold text-foreground">All My Outfits</h2>
-            <button
-              onClick={() => navigate("/outfits")}
-              className="text-sm text-muted-foreground font-sans hover:text-foreground transition-colors"
-            >
-              View all
-            </button>
-          </div>
-
-          {stats.outfits === 0 ? (
-            <div className="rounded-2xl border border-border bg-card p-8 text-center">
-              <Wand2 className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-              <p className="text-muted-foreground font-sans text-sm mb-4">No outfits yet. Generate your first AI outfit!</p>
-              <Button onClick={() => navigate("/outfits")} size="sm" className="rounded-full">
-                Create Outfit
-              </Button>
-            </div>
-          ) : (
-            <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1">
-              {["Workout", "Work", "Everyday"].map((occasion) => (
-                <div key={occasion} className="min-w-[180px] rounded-2xl border border-border bg-card overflow-hidden">
-                  <div className="relative h-40 bg-secondary flex items-center justify-center">
-                    <Edit2 className="absolute top-2 left-2 w-4 h-4 text-muted-foreground" />
-                    <Heart className="absolute top-2 right-2 w-4 h-4 text-muted-foreground" />
-                    <Shirt className="w-12 h-12 text-muted-foreground/40" />
-                  </div>
-                  <div className="p-3">
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <span className="text-xs">👔</span>
-                      <span className="font-sans text-sm font-medium text-foreground">{occasion}</span>
-                    </div>
-                    <div className="flex gap-2">
-                      <button className="text-[10px] font-sans text-muted-foreground flex items-center gap-1">
-                        View items <ArrowRight className="w-2.5 h-2.5" />
-                      </button>
-                      <button
-                        onClick={() => navigate("/mannequin")}
-                        className="text-[10px] font-sans text-primary flex items-center gap-1"
-                      >
-                        <Sparkles className="w-2.5 h-2.5" /> Try it on
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </motion.div>
-
-        {/* Chat with AI Stylist */}
+        {/* ── Chat with AI Stylist ──────────────────────────── */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
+          className="pb-8"
         >
           <h2 className="font-display text-xl font-bold text-foreground mb-3">Chat with AI Stylist</h2>
-          <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1">
+          <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-none">
             {[
               "Pieces that never go out of style",
-              "Main men's winter trends",
+              "Main winter trends this season",
               "What sporty items are essential?",
             ].map((prompt) => (
               <button
                 key={prompt}
                 onClick={() => navigate("/chat")}
-                className="min-w-[160px] p-4 rounded-2xl bg-secondary/40 text-left hover:bg-secondary/60 transition-colors"
+                className="min-w-[160px] p-4 rounded-2xl border border-border bg-card text-left hover:border-primary/30 transition-colors flex-shrink-0"
               >
                 <p className="font-sans text-sm text-foreground leading-snug">{prompt}</p>
               </button>
