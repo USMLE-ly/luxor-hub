@@ -121,6 +121,7 @@ const Closet = () => {
   const [savingOutfit, setSavingOutfit] = useState(false);
   const [savedOutfits, setSavedOutfits] = useState<any[]>([]);
   const [loadingSavedOutfits, setLoadingSavedOutfits] = useState(false);
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchItems = useCallback(async () => {
@@ -187,6 +188,13 @@ const Closet = () => {
       setSavedOutfits(prev => prev.filter(o => o.id !== id));
       toast.success("Outfit deleted");
     }
+  };
+
+  const toggleFavorite = async (outfit: any) => {
+    const newVal = !outfit.is_favorite;
+    const { error } = await supabase.from("outfits").update({ is_favorite: newVal }).eq("id", outfit.id);
+    if (error) toast.error("Failed to update");
+    else setSavedOutfits(prev => prev.map(o => o.id === outfit.id ? { ...o, is_favorite: newVal } : o));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -731,52 +739,71 @@ const Closet = () => {
               </AnimatePresence>
             </div>
 
-            {/* Saved Outfits */}
             <div className="px-4 py-3 border-t border-border">
-              <h3 className="font-sans text-sm font-semibold text-foreground mb-3">
-                <FolderOpen className="w-4 h-4 inline mr-1.5" />
-                Saved Outfits
-              </h3>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-sans text-sm font-semibold text-foreground">
+                  <FolderOpen className="w-4 h-4 inline mr-1.5" />
+                  Saved Outfits
+                </h3>
+                {savedOutfits.length > 0 && (
+                  <button onClick={() => setShowFavoritesOnly(prev => !prev)}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-sans font-semibold transition-all ${
+                      showFavoritesOnly ? "bg-primary/15 text-primary" : "bg-secondary text-muted-foreground"
+                    }`}>
+                    <Heart className={`w-3 h-3 ${showFavoritesOnly ? "fill-primary" : ""}`} />
+                    Favorites
+                  </button>
+                )}
+              </div>
               {loadingSavedOutfits ? (
                 <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
               ) : savedOutfits.length === 0 ? (
                 <p className="text-xs text-muted-foreground font-sans text-center py-4">
                   No saved outfits yet. Dress the mannequin and save your look!
                 </p>
-              ) : (
-                <div className="space-y-2">
-                  {savedOutfits.map((outfit) => {
-                    const outfitItems = (outfit.mannequin_items || []) as MannequinClothingItem[];
-                    return (
-                      <motion.div key={outfit.id}
-                        initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                        className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:border-primary/30 transition-colors group">
-                        {/* Color dots preview */}
-                        <div className="flex -space-x-1.5 flex-shrink-0">
-                          {outfitItems.slice(0, 4).map((item, i) => (
-                            <div key={i} className="w-6 h-6 rounded-full border-2 border-background"
-                              style={{ backgroundColor: item.color || "#6b7b8d" }} />
-                          ))}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-sans font-semibold text-foreground truncate">{outfit.name}</p>
-                          <p className="text-[10px] text-muted-foreground font-sans">
-                            {outfitItems.length} item{outfitItems.length !== 1 ? "s" : ""} • {new Date(outfit.created_at).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => loadOutfit(outfit)}>
-                            <FolderOpen className="w-3.5 h-3.5 text-primary" />
-                          </Button>
-                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => deleteSavedOutfit(outfit.id)}>
-                            <Trash2 className="w-3.5 h-3.5 text-destructive" />
-                          </Button>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              )}
+              ) : (() => {
+                const displayed = showFavoritesOnly
+                  ? [...savedOutfits].filter(o => o.is_favorite).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                  : [...savedOutfits].sort((a, b) => (b.is_favorite ? 1 : 0) - (a.is_favorite ? 1 : 0) || new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+                return displayed.length === 0 ? (
+                  <p className="text-xs text-muted-foreground font-sans text-center py-4">No favorite outfits yet</p>
+                ) : (
+                  <div className="space-y-2">
+                    {displayed.map((outfit) => {
+                      const outfitItems = (outfit.mannequin_items || []) as MannequinClothingItem[];
+                      return (
+                        <motion.div key={outfit.id}
+                          initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                          className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:border-primary/30 transition-colors group">
+                          <div className="flex -space-x-1.5 flex-shrink-0">
+                            {outfitItems.slice(0, 4).map((item, i) => (
+                              <div key={i} className="w-6 h-6 rounded-full border-2 border-background"
+                                style={{ backgroundColor: item.color || "#6b7b8d" }} />
+                            ))}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-sans font-semibold text-foreground truncate">{outfit.name}</p>
+                            <p className="text-[10px] text-muted-foreground font-sans">
+                              {outfitItems.length} item{outfitItems.length !== 1 ? "s" : ""} • {new Date(outfit.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <div className="flex gap-1">
+                            <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => toggleFavorite(outfit)}>
+                              <Heart className={`w-3.5 h-3.5 transition-colors ${outfit.is_favorite ? "fill-primary text-primary" : "text-muted-foreground"}`} />
+                            </Button>
+                            <Button size="sm" variant="ghost" className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => loadOutfit(outfit)}>
+                              <FolderOpen className="w-3.5 h-3.5 text-primary" />
+                            </Button>
+                            <Button size="sm" variant="ghost" className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => deleteSavedOutfit(outfit.id)}>
+                              <Trash2 className="w-3.5 h-3.5 text-destructive" />
+                            </Button>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Add from closet - item grid */}
