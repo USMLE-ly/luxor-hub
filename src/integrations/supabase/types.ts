@@ -383,6 +383,7 @@ export type Database = {
           description: string | null
           id: string
           is_favorite: boolean | null
+          mannequin_items: Json | null
           mood: string | null
           name: string
           occasion: string | null
@@ -396,6 +397,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_favorite?: boolean | null
+          mannequin_items?: Json | null
           mood?: string | null
           name: string
           occasion?: string | null
@@ -409,6 +411,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_favorite?: boolean | null
+          mannequin_items?: Json | null
           mood?: string | null
           name?: string
           occasion?: string | null
