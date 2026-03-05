@@ -1,75 +1,67 @@
 
 
-## Plan: Googolplex-Level Mannequin Clothing System + Hero Restoration
+## Enhanced 3D Garment Fitting System
 
-This plan addresses four major areas: fixing the item-to-mannequin flow, adding skirt/dress geometries, adding wrinkle normal maps, adding an outfit scheduling section below the mannequin, and restoring the hero to its previous quality level.
+This is a large, multi-faceted enhancement to the existing mannequin clothing system. The current system already has solid foundations: LatheGeometry-based garment shells, fabric materials with wrinkle normal maps, category-based subtype resolution, and fit variants. The request asks for improvements across 15 areas. I will scope this into practical, high-impact changes.
 
----
+### What Already Works
+- Category-based garment geometry (tops, bottoms, skirts, dresses, outerwear, shoes, hats)
+- Fabric material system with 9 presets + wrinkle normal maps
+- Fit variants (slim/regular/oversized)
+- Body DNA sliders affecting mannequin proportions
+- Pose presets (neutral, fashion, walking)
+- Tracing mode, measurements overlay
+- Outfit saving/loading/favorites
 
-### 1. Fix "Can't Add Items to Mannequin"
+### Implementation Plan
 
-**Root cause**: The closet panel works correctly in code — items fetch from `clothing_items`, clicking opens the fit/fabric selector, and "Add to Mannequin" calls `confirmAddItem`. The issue is likely that the user has no items in their closet (the empty state shows "No items in your closet yet"), OR the `category` values in the DB (e.g., "tops", "dresses") don't map to valid garment subtypes, causing `resolveSubtype` to fall through to `generic-top` for everything including dresses and skirts.
+#### 1. Garment Layer & Replacement System (`Mannequin3D.tsx`)
+- Add a `LAYER_ORDER` map: `{ underwear: 0, tops: 1, sweater: 2, outerwear: 3, bottoms: 4, skirts: 4, dress: 5, shoes: 6, hat: 7, accessory: 8 }`
+- Sort `garmentData` by layer order before rendering, applying small radial offsets per layer (e.g., outerwear shell is 1.06x the top shell) to prevent z-fighting
+- Implement **same-category replacement**: when adding a garment, check if one in the same slot already exists and replace it. Dresses replace tops+bottoms. Tops don't replace outerwear.
 
-**Fix**:
-- Add "dress" and "skirt" to the `resolveSubtype` function in `GarmentGeometry.ts` so they map to new dress/skirt subtypes instead of falling through
-- Add `isDressCat` and `isSkirtCat` detection in `Mannequin3D.tsx` to render dress/skirt geometries
-- Add a "Quick Add" section below the 3D scene that lets users add demo items (Top, Bottom, Dress, Shoes) without needing closet items — this ensures the mannequin is always testable
+#### 2. Improved Garment Positioning & Scaling (`GarmentGeometry.ts`, `Mannequin3D.tsx`)
+- Refine anchor positions: pass `dna` values into garment position calculations so garments track body morphs
+- Fix sleeve attachment to follow arm pose rotations (currently static)
+- Add body-relative offsets: shirts offset +0.005 from torso, jackets +0.01, ensuring no mesh intersection
+- Pants waistband position tied to `dna.waist` value
+- Shoes snap to foot positions using `legScale` and `hipScale`
 
----
+#### 3. Garment Entry Animation (`Mannequin3D.tsx`)
+- Wrap each garment group in an animated `<group>` using `useFrame` or spring-based animation
+- On mount: fade opacity 0→1 over 0.4s + slight Y-translate (shirt drops onto torso, pants rise from feet)
+- Add a subtle auto-rotate (±15deg over 1.5s) when a new garment is added
 
-### 2. Add Skirt and Dress Geometry Types
+#### 4. Per-Item Remove Buttons & Worn Items UI (`Closet.tsx`)
+- Below the 3D canvas, show a "Currently Wearing" list with item name, category icon, and an (×) remove button
+- Clicking remove filters that item from `mannequinClothing` state
+- Each item card shows category color dot
 
-New subtypes in `GarmentGeometry.ts`:
-- `skirt-mini`, `skirt-midi`, `skirt-maxi`, `skirt-pencil`, `skirt-aline`
-- `dress-mini`, `dress-midi`, `dress-maxi`
+#### 5. Enhanced Lighting & Shadows (`Mannequin3D.tsx`)
+- Replace current lighting with: `ambientLight(0.4)` + `directionalLight(0.8, castShadow)` + `spotLight` from above
+- Enable `receiveShadow` on the stand, `castShadow` on body and clothing meshes
+- Add `<ContactShadows>` from drei for soft ground shadows
+- Subtle `envMap` using drei's `Environment` preset for realistic reflections on leather/silk
 
-**Skirt geometry**: `createSkirtGeometry()` — LatheGeometry bells starting at waist height, varying in flare (pencil = tight taper, A-line = wide flare) and length (mini stops at mid-thigh, maxi extends to ankles).
+#### 6. Idle Rotation (`Mannequin3D.tsx`)
+- Add optional `autoRotate` prop; use `useFrame` to gently oscillate the root group ±10deg on Y axis
 
-**Dress geometry**: `createDressGeometry()` — Combined torso shell + skirt continuation as a single LatheGeometry profile. The top portion follows shoulder/chest/waist contours, then flares into the skirt section below the waist.
+#### 7. Outfit State Memory (`Closet.tsx`)
+- Persist `mannequinClothing` to `localStorage` keyed by user ID
+- On page mount, restore from localStorage before any fetch
 
-Update `resolveSubtype` to detect "dress", "skirt" categories and map to appropriate subtypes based on name keywords.
-
----
-
-### 3. Add Wrinkle Normal Maps (Procedural)
-
-In `FabricMaterials.ts`:
-- Create `generateWrinkleNormalMap()` using an offscreen canvas (256x256)
-- Draw sine-wave displacement patterns at configurable frequency/amplitude to simulate fabric creases
-- Different patterns per zone: horizontal waves for waist area, diagonal for elbows, vertical for knee area
-- Return as `THREE.CanvasTexture` applied as `normalMap` with low intensity (0.15-0.3)
-- Integrate into `createFabricMaterial` — automatically attach wrinkle normal map based on fabric type (cotton/wool get more wrinkles, leather/silk get fewer)
-
----
-
-### 4. Outfit Action Section Below Mannequin
-
-Add a "Dress & Schedule" section between the 3D scene and the clothing strip in `MannequinView.tsx`:
-- **Quick-add buttons**: Row of category buttons (Top, Bottom, Dress, Skirt, Shoes, Hat) that open the closet panel pre-filtered to that category, OR add a demo item directly
-- **"Schedule This Outfit" button**: Prominent gold CTA that opens the calendar modal (currently only accessible from the tiny header icon)
-- **Outfit summary**: Show currently worn items with thumbnails and names
-
----
-
-### 5. Restore Hero Quality
-
-The current hero is a text-only section with typewriter effect. The user wants it restored to the previous high-impact level. Based on the memory notes, the hero uses ScrollExpandMedia expansion pattern.
-
-**Restore**:
-- Re-add the aurora/nebula glow effects (gold and purple radial gradients) behind the text
-- Add floating geometric shapes using the `ElegantShape` component from `shape-landing-hero.tsx` adapted with gold/primary brand colors
-- Add a subtle parallax floating animation layer behind the CTA area
-- Ensure the gold-shimmer text animation is applied to the headline
-
----
+#### 8. Alignment Auto-Correction (`Mannequin3D.tsx`)
+- Ensure all garment meshes are centered (geometry.center() after creation)
+- Validate rotation is identity for standard garments
 
 ### Files to Modify
+1. **`src/components/app/Mannequin3D.tsx`** -- Layer system, positioning fixes, animations, lighting, idle rotation, shadows
+2. **`src/components/app/GarmentGeometry.ts`** -- Body-relative offset constants, geometry centering
+3. **`src/pages/Closet.tsx`** -- Replacement logic, worn items UI with remove buttons, localStorage persistence, entry animation trigger
 
-| File | Changes |
-|------|---------|
-| `src/components/app/GarmentGeometry.ts` | Add skirt/dress subtypes, `createSkirtGeometry()`, `createDressGeometry()`, update `resolveSubtype` |
-| `src/components/app/FabricMaterials.ts` | Add `generateWrinkleNormalMap()`, integrate into `createFabricMaterial` |
-| `src/components/app/Mannequin3D.tsx` | Add `isSkirtCat`, `isDressCat` detection, render skirt/dress geometries, apply wrinkle normals |
-| `src/pages/MannequinView.tsx` | Add quick-add section, schedule CTA, outfit summary below 3D scene |
-| `src/components/landing/Hero.tsx` | Add aurora glow effects, floating geometric shapes, gold-shimmer headline |
+### Technical Notes
+- Using `@react-three/drei` ContactShadows and Environment for visual quality (already installed)
+- Garment animations via `useFrame` interpolation rather than adding framer-motion inside R3F canvas
+- Layer offsets are multiplicative on the garment radii (1.0 base, +0.005 per layer) to avoid z-fighting without visible gaps
+- Same-category replacement uses a slot-based map to determine conflicts
 
