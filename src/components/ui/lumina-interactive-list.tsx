@@ -11,7 +11,7 @@ declare const THREE: any;
 
 const slides = [
   { title: "Effortless Style", description: "AI-curated outfits that feel like you — every single day.", media: "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=1200&q=80" },
-  { title: "Curated Looks", description: "Your wardrobe, reimagined with intelligent styling suggestions.", media: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&q=80" },
+  { title: "Curated Looks", description: "Your wardrobe, reimagined with intelligent styling suggestions.", media: "https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?w=1200&q=80" },
   { title: "Street Luxe", description: "Where high fashion meets the raw energy of the city streets.", media: "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=1200&q=80" },
   { title: "Golden Hour", description: "That fleeting confidence when every piece falls into place.", media: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1200&q=80" },
   { title: "Minimalist Edge", description: "Clean lines. Bold silhouettes. Nothing more, nothing less.", media: "https://images.unsplash.com/photo-1581044777550-4cfa60707998?w=1200&q=80" },
@@ -308,13 +308,17 @@ export function LuminaSlider() {
     };
 
     const loadImageTexture = (src: string) => new Promise<any>((resolve, reject) => {
-      const l = new THREE.TextureLoader();
-      l.crossOrigin = 'anonymous';
-      l.load(src, (t: any) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        const t = new THREE.Texture(img);
         t.minFilter = t.magFilter = THREE.LinearFilter;
-        t.userData = { size: new THREE.Vector2(t.image.width, t.image.height) };
+        t.needsUpdate = true;
+        t.userData = { size: new THREE.Vector2(img.width, img.height) };
         resolve(t);
-      }, undefined, reject);
+      };
+      img.onerror = () => reject(new Error(`Failed to load: ${src}`));
+      img.src = src;
     });
 
     const initRenderer = async () => {
@@ -342,11 +346,13 @@ export function LuminaSlider() {
         try { slideTextures[i] = await loadImageTexture(slides[i].media); } catch { console.warn("Failed texture load", i); }
       }
 
-      if (slideTextures[0] && slideTextures[1]) {
-        shaderMaterial.uniforms.uTexture1.value = slideTextures[0];
-        shaderMaterial.uniforms.uTexture2.value = slideTextures[1];
-        shaderMaterial.uniforms.uTexture1Size.value = slideTextures[0].userData.size;
-        shaderMaterial.uniforms.uTexture2Size.value = slideTextures[1].userData.size;
+      const firstValid = slideTextures.find(t => t !== null);
+      if (firstValid) {
+        const secondValid = slideTextures.find((t, i) => t !== null && t !== firstValid) || firstValid;
+        shaderMaterial.uniforms.uTexture1.value = firstValid;
+        shaderMaterial.uniforms.uTexture2.value = secondValid;
+        shaderMaterial.uniforms.uTexture1Size.value = firstValid.userData.size;
+        shaderMaterial.uniforms.uTexture2Size.value = secondValid.userData.size;
         texturesLoaded = true; sliderEnabled = true;
         containerRef.current?.querySelector(".slider-wrapper")?.classList.add("loaded");
         safeStartTimer(500);
