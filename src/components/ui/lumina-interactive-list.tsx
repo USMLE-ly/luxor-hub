@@ -440,13 +440,14 @@ export function LuminaSlider() {
       <div className="lumina-bottom-gradient" />
 
       <main className="slider-wrapper">
+        <div className="lumina-fallback-bg" />
         <canvas className="webgl-canvas" />
         <span className="slide-number" id="slideNumber">01</span>
         <span className="slide-total" id="slideTotal">10</span>
 
         <div className="slide-content">
-          <h1 className="slide-title" id="mainTitle"></h1>
-          <p className="slide-description" id="mainDesc"></p>
+          <h1 className="slide-title" id="mainTitle">{slides[0].title}</h1>
+          <p className="slide-description" id="mainDesc">{slides[0].description}</p>
         </div>
 
         <HeroOverlay />

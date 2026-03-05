@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
@@ -32,15 +32,19 @@ const Dashboard = () => {
   }>({ onboarding_completed: null, archetype: null, preferences: null });
   const [shopProducts, setShopProducts] = useState<ShopProduct[]>([]);
   const [shopLoading, setShopLoading] = useState(false);
+  const [closetItems, setClosetItems] = useState<{ id: string; photo_url: string | null; name: string | null; category: string }[]>([]);
+  const [outfitsList, setOutfitsList] = useState<{ id: string; name: string; occasion: string | null; items: string[] }[]>([]);
 
   useEffect(() => {
     if (!user) return;
     const fetchData = async () => {
-      const [itemsRes, outfitsRes, profileRes, styleRes] = await Promise.all([
+      const [itemsRes, outfitsRes, profileRes, styleRes, closetRes, outfitsListRes] = await Promise.all([
         supabase.from("clothing_items").select("id", { count: "exact", head: true }).eq("user_id", user.id),
         supabase.from("outfits").select("id", { count: "exact", head: true }).eq("user_id", user.id),
         supabase.from("profiles").select("display_name").eq("user_id", user.id).single(),
         supabase.from("style_profiles").select("onboarding_completed, archetype, style_score, preferences").eq("user_id", user.id).single(),
+        supabase.from("clothing_items").select("id, photo_url, name, category").eq("user_id", user.id).order("created_at", { ascending: false }).limit(12),
+        supabase.from("outfits").select("id, name, occasion").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
       ]);
       setStats({
         items: itemsRes.count || 0,
@@ -49,6 +53,22 @@ const Dashboard = () => {
       });
       if (profileRes.data) setProfile(profileRes.data);
       if (styleRes.data) setStyleProfile(styleRes.data as any);
+      if (closetRes.data) setClosetItems(closetRes.data);
+      
+      // Fetch outfit items for each outfit
+      if (outfitsListRes.data && outfitsListRes.data.length > 0) {
+        const outfitsWithItems = await Promise.all(
+          outfitsListRes.data.map(async (outfit: any) => {
+            const { data: oi } = await supabase
+              .from("outfit_items")
+              .select("clothing_item_id")
+              .eq("outfit_id", outfit.id)
+              .limit(4);
+            return { ...outfit, items: oi?.map((i: any) => i.clothing_item_id) || [] };
+          })
+        );
+        setOutfitsList(outfitsWithItems);
+      }
     };
     fetchData();
   }, [user]);
@@ -178,14 +198,28 @@ const Dashboard = () => {
 
             {/* Calibration Section */}
             <div className="text-center space-y-3">
-              {/* Decorative orb */}
-              <div className="mx-auto w-28 h-28 rounded-full flex items-center justify-center"
+              {/* Animated Decorative orb */}
+              <motion.div
+                className="mx-auto w-28 h-28 rounded-full flex items-center justify-center relative"
                 style={{ background: "radial-gradient(circle at 40% 35%, hsl(25 80% 65%), hsl(350 60% 50%), hsl(15 70% 40%))" }}
+                animate={{ rotate: 360 }}
+                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
               >
-                <div className="w-20 h-20 rounded-full border-2 border-white/20 flex items-center justify-center">
+                {/* Glow pulse */}
+                <motion.div
+                  className="absolute inset-[-8px] rounded-full"
+                  style={{ background: "radial-gradient(circle, hsl(25 80% 65% / 0.4), transparent 70%)" }}
+                  animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.8, 0.5] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <motion.div
+                  className="w-20 h-20 rounded-full border-2 border-white/20 flex items-center justify-center"
+                  animate={{ rotate: -360 }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                >
                   <Sparkles className="w-8 h-8 text-white/80" />
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
 
               <h3 className="font-display text-lg font-bold text-foreground">
                 Calibrate your Style Formula
@@ -262,16 +296,33 @@ const Dashboard = () => {
             ))}
           </div>
 
-          {stats.outfits === 0 ? (
+          {outfitsList.length === 0 && stats.outfits === 0 ? (
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-2xl border border-border bg-card overflow-hidden">
                 <div className="h-40 bg-secondary flex items-center justify-center relative">
-                  <div className="text-center">
-                    <Shirt className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
-                    <p className="text-[10px] text-muted-foreground font-sans px-4">
-                      Add your items and AI stylist will mix and match them into Outfits
-                    </p>
-                  </div>
+                  {/* Show closet item thumbnails as preview */}
+                  {closetItems.length > 0 ? (
+                    <div className="grid grid-cols-2 gap-1 p-2 w-full h-full">
+                      {closetItems.slice(0, 4).map((item) => (
+                        <div key={item.id} className="rounded-lg overflow-hidden bg-background/50">
+                          {item.photo_url ? (
+                            <img src={item.photo_url} alt={item.name || ""} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Shirt className="w-5 h-5 text-muted-foreground/30" />
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center">
+                      <Shirt className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
+                      <p className="text-[10px] text-muted-foreground font-sans px-4">
+                        Add your items and AI stylist will mix and match them into Outfits
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="rounded-2xl border border-border bg-card overflow-hidden flex items-center justify-center p-6">
@@ -282,27 +333,48 @@ const Dashboard = () => {
             </div>
           ) : (
             <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-none">
-              {["Everyday", "Work", "Party"].map((occasion) => (
-                <div key={occasion} className="min-w-[180px] rounded-2xl border border-border bg-card overflow-hidden flex-shrink-0">
-                  <div className="relative h-40 bg-secondary flex items-center justify-center">
-                    <Shirt className="w-12 h-12 text-muted-foreground/30" />
-                  </div>
-                  <div className="p-3">
-                    <span className="font-sans text-sm font-medium text-foreground">{occasion}</span>
-                    <div className="flex gap-3 mt-2">
-                      <button className="text-[10px] font-sans text-muted-foreground flex items-center gap-1">
-                        View items <ChevronRight className="w-2.5 h-2.5" />
-                      </button>
-                      <button
-                        onClick={() => navigate("/mannequin")}
-                        className="text-[10px] font-sans text-primary flex items-center gap-1"
-                      >
-                        <Sparkles className="w-2.5 h-2.5" /> Try it on
-                      </button>
+              {(outfitsList.length > 0 ? outfitsList : [{ id: "1", name: "Everyday", occasion: "everyday", items: [] }, { id: "2", name: "Work", occasion: "work", items: [] }, { id: "3", name: "Party", occasion: "party", items: [] }]).map((outfit) => {
+                const outfitItemPhotos = outfit.items
+                  .map((itemId: string) => closetItems.find((ci) => ci.id === itemId))
+                  .filter(Boolean);
+                return (
+                  <div key={outfit.id} className="min-w-[180px] rounded-2xl border border-border bg-card overflow-hidden flex-shrink-0">
+                    <div className="relative h-40 bg-secondary flex items-center justify-center">
+                      {outfitItemPhotos.length > 0 ? (
+                        <div className="grid grid-cols-2 gap-0.5 p-1 w-full h-full">
+                          {outfitItemPhotos.slice(0, 4).map((item: any) => (
+                            <div key={item.id} className="overflow-hidden">
+                              {item.photo_url ? (
+                                <img src={item.photo_url} alt={item.name || ""} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-background/30">
+                                  <Shirt className="w-4 h-4 text-muted-foreground/30" />
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <Shirt className="w-12 h-12 text-muted-foreground/30" />
+                      )}
+                    </div>
+                    <div className="p-3">
+                      <span className="font-sans text-sm font-medium text-foreground">{outfit.name}</span>
+                      <div className="flex gap-3 mt-2">
+                        <button className="text-[10px] font-sans text-muted-foreground flex items-center gap-1">
+                          View items <ChevronRight className="w-2.5 h-2.5" />
+                        </button>
+                        <button
+                          onClick={() => navigate("/mannequin")}
+                          className="text-[10px] font-sans text-primary flex items-center gap-1"
+                        >
+                          <Sparkles className="w-2.5 h-2.5" /> Try it on
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </motion.div>
