@@ -4,74 +4,70 @@ import { useNavigate } from "react-router-dom";
 import { RainbowButton } from "@/components/ui/rainbow-button";
 import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
 import MagneticButton from "@/components/ui/magnetic-button";
-import { useEffect, useState } from "react";
 
-/* ── Typewriter hook ──────────────────────────────────────────── */
-function useTypewriter(text: string, speed = 60, startDelay = 800) {
-  const [displayed, setDisplayed] = useState("");
-  useEffect(() => {
-    setDisplayed("");
-    const timeout = setTimeout(() => {
-      let i = 0;
-      const interval = setInterval(() => {
-        i++;
-        setDisplayed(text.slice(0, i));
-        if (i >= text.length) clearInterval(interval);
-      }, speed);
-      return () => clearInterval(interval);
-    }, startDelay);
-    return () => clearTimeout(timeout);
-  }, [text, speed, startDelay]);
-  return displayed;
-}
+/* ── Image imports for marquee rows ──────────────────────────── */
+import imgCoatBelted from "@/assets/cal-f-coat-belted.jpg";
+import imgCoatElegant from "@/assets/cal-f-coat-elegant.jpg";
+import imgCoatTrench from "@/assets/cal-f-coat-trench.jpg";
+import imgDressMidi from "@/assets/cal-f-dress-midi.jpg";
+import imgDressMini from "@/assets/cal-f-dress-mini.jpg";
+import imgDressMaxi from "@/assets/cal-f-dress-maxi.jpg";
+import imgJeansFlare from "@/assets/cal-f-jeans-flare.jpg";
+import imgJeansWide from "@/assets/cal-f-jeans-wide.jpg";
+import imgPantsTailored from "@/assets/cal-f-pants-tailored.jpg";
+import imgPantsWide from "@/assets/cal-f-pants-wide.jpg";
+import imgShirtClassic from "@/assets/cal-f-shirt-classic.jpg";
+import imgShirtRuffle from "@/assets/cal-f-shirt-ruffle.jpg";
+import imgTopCami from "@/assets/cal-f-top-cami.jpg";
+import imgTopRuffle from "@/assets/cal-f-top-ruffle.jpg";
+import imgSkirtMidi from "@/assets/cal-f-skirt-midi.jpg";
+import imgSkirtPleated from "@/assets/cal-f-skirt-pleated.jpg";
+import imgShoeHeels from "@/assets/cal-f-shoe-heels.jpg";
+import imgShoeBoots from "@/assets/cal-f-shoe-boots.jpg";
+import imgSunglassesCateye from "@/assets/cal-f-sunglasses-cateye.jpg";
+import imgSunglassesOversized from "@/assets/cal-f-sunglasses-oversized.jpg";
+import imgTshirtGraphic from "@/assets/cal-f-tshirt-graphic.jpg";
+import imgTshirtOversized from "@/assets/cal-f-tshirt-oversized.jpg";
+import imgAccBag from "@/assets/cal-f-acc-bag.jpg";
+import imgAccJewelry from "@/assets/cal-f-acc-jewelry.jpg";
 
-/* ── Floating shape ──────────────────────────────────────────── */
-function FloatingShape({
-  className,
-  delay = 0,
-  width = 400,
-  height = 100,
-  rotate = 0,
-  gradient = "from-primary/[0.08]",
-}: {
-  className?: string;
-  delay?: number;
-  width?: number;
-  height?: number;
-  rotate?: number;
-  gradient?: string;
-}) {
+const row1 = [imgCoatBelted, imgDressMidi, imgShirtClassic, imgJeansFlare, imgTopCami, imgSkirtMidi, imgShoeHeels, imgSunglassesCateye, imgTshirtGraphic, imgAccBag, imgPantsTailored, imgDressMaxi];
+const row2 = [imgCoatElegant, imgDressMini, imgShirtRuffle, imgJeansWide, imgTopRuffle, imgSkirtPleated, imgShoeBoots, imgSunglassesOversized, imgTshirtOversized, imgAccJewelry, imgPantsWide, imgCoatTrench];
+
+/* ── Marquee row component ───────────────────────────────────── */
+function MarqueeRow({ images, direction = "left", speed = 40 }: { images: string[]; direction?: "left" | "right"; speed?: number }) {
+  const doubled = [...images, ...images];
+  const totalWidth = images.length * 220; // approx width per card
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -100, rotate: rotate - 10 }}
-      animate={{ opacity: 1, y: 0, rotate }}
-      transition={{ duration: 2.2, delay, ease: [0.23, 0.86, 0.39, 0.96], opacity: { duration: 1.2 } }}
-      className={`absolute pointer-events-none ${className || ""}`}
-    >
+    <div className="relative overflow-hidden w-full">
       <motion.div
-        animate={{ y: [0, 15, 0] }}
-        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-        style={{ width, height }}
-        className="relative"
+        className="flex gap-3"
+        animate={{ x: direction === "left" ? [0, -totalWidth] : [-totalWidth, 0] }}
+        transition={{ duration: speed, repeat: Infinity, ease: "linear" }}
       >
-        <div
-          className={`absolute inset-0 rounded-full bg-gradient-to-r to-transparent ${gradient} backdrop-blur-[2px] border border-primary/[0.1] shadow-[0_8px_32px_0_hsl(var(--primary)/0.08)] after:absolute after:inset-0 after:rounded-full after:bg-[radial-gradient(circle_at_50%_50%,hsl(var(--primary)/0.15),transparent_70%)]`}
-        />
+        {doubled.map((src, i) => (
+          <div
+            key={i}
+            className="flex-shrink-0 w-[180px] h-[240px] md:w-[200px] md:h-[270px] rounded-2xl overflow-hidden border border-border/30 shadow-lg"
+          >
+            <img
+              src={src}
+              alt=""
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+          </div>
+        ))}
       </motion.div>
-    </motion.div>
+    </div>
   );
 }
 
 const Hero = () => {
   const navigate = useNavigate();
-  const tagline = useTypewriter(
-    "Upload your wardrobe. Get daily AI-curated outfits. Shop smarter. Look unstoppable — every single day.",
-    35,
-    600,
-  );
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
       {/* Aurora glow layers */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-primary/8 rounded-full blur-[180px]" />
@@ -79,20 +75,17 @@ const Hero = () => {
         <div className="absolute bottom-1/4 right-1/3 w-[350px] h-[350px] bg-[hsl(270,40%,50%)]/5 rounded-full blur-[120px]" />
       </div>
 
-      {/* Floating geometric shapes */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <FloatingShape delay={0.3} width={500} height={120} rotate={12} gradient="from-[hsl(43,74%,49%)]/[0.12]"
-          className="left-[-8%] top-[18%]" />
-        <FloatingShape delay={0.5} width={400} height={100} rotate={-15} gradient="from-primary/[0.1]"
-          className="right-[-5%] top-[72%]" />
-        <FloatingShape delay={0.4} width={250} height={70} rotate={-8} gradient="from-[hsl(270,40%,65%)]/[0.1]"
-          className="left-[8%] bottom-[8%]" />
-        <FloatingShape delay={0.6} width={180} height={50} rotate={20} gradient="from-[hsl(43,74%,49%)]/[0.08]"
-          className="right-[18%] top-[12%]" />
-        <FloatingShape delay={0.7} width={120} height={35} rotate={-25} gradient="from-primary/[0.06]"
-          className="left-[22%] top-[8%]" />
+      {/* ── Photo Marquee Rows ──────────────────────────────── */}
+      <div className="absolute inset-0 flex flex-col justify-center gap-3 opacity-[0.18] pointer-events-none">
+        <MarqueeRow images={row1} direction="left" speed={50} />
+        <MarqueeRow images={row2} direction="right" speed={55} />
+        <MarqueeRow images={[...row1].reverse()} direction="left" speed={45} />
       </div>
 
+      {/* Gradient overlay on top of photos */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/40 to-background/80 pointer-events-none" />
+
+      {/* ── Hero Content ───────────────────────────────────── */}
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4">
         <div className="flex flex-col items-center justify-center min-h-[80vh] text-center">
           <motion.div
@@ -114,14 +107,8 @@ const Hero = () => {
             className="font-display text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight mb-8"
           >
             Your AI Stylist That{" "}
-            <span className="gold-text relative">
+            <span className="gold-shimmer relative">
               Knows You
-              <motion.span
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                animate={{ x: ["-100%", "200%"] }}
-                transition={{ duration: 3, repeat: Infinity, repeatDelay: 2, ease: "easeInOut" }}
-                style={{ WebkitBackgroundClip: "text" }}
-              />
             </span>{" "}
             Better
           </motion.h1>
@@ -130,10 +117,9 @@ const Hero = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="text-base md:text-xl text-muted-foreground max-w-xl mb-12 font-sans mx-auto min-h-[3.5rem]"
+            className="text-base md:text-xl text-muted-foreground max-w-xl mb-12 font-sans mx-auto"
           >
-            {tagline}
-            <span className="inline-block w-[2px] h-[1.1em] bg-primary/70 ml-0.5 align-text-bottom animate-pulse" />
+            Upload your wardrobe. Get daily AI-curated outfits. Shop smarter. Look unstoppable — every single day.
           </motion.p>
 
           <motion.div

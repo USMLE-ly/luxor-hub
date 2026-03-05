@@ -9,6 +9,30 @@ import { toast } from "sonner";
 import {
   Plus, Search, Shirt, Trash2, Upload, X, Loader2, Sparkles, CheckCircle, Camera, ChevronRight,
 } from "lucide-react";
+
+/* Placeholder product images for empty closet sections */
+import imgCoatBelted from "@/assets/cal-f-coat-belted.jpg";
+import imgShirtClassic from "@/assets/cal-f-shirt-classic.jpg";
+import imgTopCami from "@/assets/cal-f-top-cami.jpg";
+import imgPantsTailored from "@/assets/cal-f-pants-tailored.jpg";
+import imgJeansFlare from "@/assets/cal-f-jeans-flare.jpg";
+import imgSkirtMidi from "@/assets/cal-f-skirt-midi.jpg";
+import imgShoeHeels from "@/assets/cal-f-shoe-heels.jpg";
+import imgShoeBoots from "@/assets/cal-f-shoe-boots.jpg";
+import imgAccBag from "@/assets/cal-f-acc-bag.jpg";
+import imgAccJewelry from "@/assets/cal-f-acc-jewelry.jpg";
+import imgDressMidi from "@/assets/cal-f-dress-midi.jpg";
+import imgDressMini from "@/assets/cal-f-dress-mini.jpg";
+import imgSunglassesCateye from "@/assets/cal-f-sunglasses-cateye.jpg";
+
+const placeholdersBySection: Record<string, string[]> = {
+  "Upper Body": [imgShirtClassic, imgTopCami, imgCoatBelted],
+  "Lower Body": [imgPantsTailored, imgJeansFlare, imgSkirtMidi],
+  "Shoes": [imgShoeHeels, imgShoeBoots],
+  "Accessories": [imgAccBag, imgAccJewelry, imgSunglassesCateye],
+  "Dresses": [imgDressMidi, imgDressMini],
+  "Other": [],
+};
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
@@ -401,26 +425,53 @@ const Closet = () => {
         ) : (
           /* Grouped sections */
           <div className="space-y-6">
-            {Object.entries(groupedItems).map(([section, sectionItems], si) => (
-              <motion.div
-                key={section}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: si * 0.1 }}
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="font-sans font-semibold text-foreground text-sm">{section}</h2>
-                  <button className="flex items-center gap-1 text-xs text-muted-foreground font-sans hover:text-foreground transition-colors">
-                    {sectionItems.length} items <ChevronRight className="w-3 h-3" />
-                  </button>
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  {sectionItems.slice(0, 6).map((item, i) => (
-                    <ItemCard key={item.id} item={item} index={i} onDelete={handleDelete} onWear={handleWornToday} />
-                  ))}
-                </div>
-              </motion.div>
-            ))}
+            {Object.entries(categoryMap).map(([section, { categories }], si) => {
+              const sectionItems = filtered.filter((item) => categories.includes(item.category));
+              const placeholders = placeholdersBySection[section] || [];
+              return (
+                <motion.div
+                  key={section}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: si * 0.1 }}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <h2 className="font-sans font-semibold text-foreground text-sm">{section}</h2>
+                    {sectionItems.length > 0 && (
+                      <button className="flex items-center gap-1 text-xs text-muted-foreground font-sans hover:text-foreground transition-colors">
+                        {sectionItems.length} items <ChevronRight className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {/* New Item card */}
+                    <button
+                      onClick={() => setUploadOpen(true)}
+                      className="aspect-square rounded-xl border border-dashed border-border bg-card flex flex-col items-center justify-center gap-2 hover:border-primary/40 transition-colors"
+                    >
+                      <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Plus className="w-5 h-5 text-primary" />
+                      </div>
+                      <span className="text-[10px] font-sans font-medium text-muted-foreground">New Item</span>
+                    </button>
+                    {/* User items */}
+                    {sectionItems.slice(0, 5).map((item, i) => (
+                      <ItemCard key={item.id} item={item} index={i} onDelete={handleDelete} onWear={handleWornToday} />
+                    ))}
+                    {/* Placeholder images when user has few items */}
+                    {sectionItems.length < 2 && placeholders.slice(0, 2 - sectionItems.length).map((src, i) => (
+                      <div key={`ph-${i}`} className="aspect-square rounded-xl overflow-hidden border border-border bg-card relative group cursor-pointer" onClick={() => setUploadOpen(true)}>
+                        <img src={src} alt="Example item" className="w-full h-full object-cover opacity-50" />
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/30">
+                          <Shirt className="w-6 h-6 text-muted-foreground mb-1" />
+                          <span className="text-[9px] font-sans text-muted-foreground text-center px-2">Upload your own items</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         )}
       </div>
