@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, Zap, Users } from 'lucide-react';
+import { motion } from 'framer-motion';
 import './lumina-slider.css';
 
 declare const gsap: any;
@@ -24,19 +25,27 @@ function HeroOverlay() {
   return (
     <div className="lumina-hero-overlay">
       <div className="lumina-hero-cta">
-        <button
+        <motion.button
           onClick={() => navigate("/auth")}
           className="lumina-cta-primary"
+          initial={{ boxShadow: '0 5px 0 0 hsl(43 74% 32%)', y: 0 }}
+          whileHover={{ scale: 1.03, boxShadow: '0 7px 0 0 hsl(43 74% 32%)', transition: { duration: 0.1 } }}
+          whileTap={{ scale: 0.97, y: 4, boxShadow: '0 1px 0 0 hsl(43 74% 32%)', transition: { duration: 0.08 } }}
+          transition={{ type: "spring", stiffness: 400, damping: 20 }}
         >
           <Sparkles className="w-4 h-4" />
           Start Free
-        </button>
-        <button
+        </motion.button>
+        <motion.button
           onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
           className="lumina-cta-secondary"
+          initial={{ boxShadow: '0 5px 0 0 rgba(255,255,255,0.08)', y: 0 }}
+          whileHover={{ scale: 1.03, boxShadow: '0 7px 0 0 rgba(255,255,255,0.1)', transition: { duration: 0.1 } }}
+          whileTap={{ scale: 0.97, y: 4, boxShadow: '0 1px 0 0 rgba(255,255,255,0.05)', transition: { duration: 0.08 } }}
+          transition={{ type: "spring", stiffness: 400, damping: 20 }}
         >
           How It Works
-        </button>
+        </motion.button>
       </div>
       <div className="lumina-hero-badges">
         <span className="lumina-badge">

@@ -177,14 +177,15 @@
   gap: 0.75rem;
 }
 
-/* Primary CTA */
+/* Primary CTA — 3D press effect */
 .lumina-cta-primary {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.65rem 1.5rem;
-  border-radius: 9999px;
+  border-radius: 12px;
   border: none;
+  border-bottom: 4px solid hsl(43 74% 32%);
   background: linear-gradient(135deg, hsl(43 74% 42%), hsl(43 74% 49%), hsl(43 80% 58%));
   color: #fff;
   font-family: 'Inter', sans-serif;
@@ -192,40 +193,34 @@
   font-weight: 600;
   letter-spacing: 0.02em;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 20px -4px hsl(43 74% 49% / 0.4);
+  user-select: none;
+  outline: none;
 }
 
-.lumina-cta-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px -4px hsl(43 74% 49% / 0.5);
-  background: linear-gradient(135deg, hsl(43 74% 49%), hsl(43 80% 58%), hsl(43 74% 49%));
+.lumina-cta-primary:focus-visible {
+  ring: 4px;
+  ring-color: hsl(43 74% 49% / 0.4);
 }
 
-/* Secondary CTA */
+/* Secondary CTA — 3D press effect */
 .lumina-cta-secondary {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.65rem 1.5rem;
-  border-radius: 9999px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 4px solid rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.85);
   font-family: 'Inter', sans-serif;
   font-size: 0.85rem;
   font-weight: 500;
   letter-spacing: 0.02em;
   cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.lumina-cta-secondary:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: hsl(43 74% 49% / 0.4);
-  color: hsl(43 80% 65%);
-  transform: translateY(-2px);
+  user-select: none;
+  outline: none;
 }
 
 .lumina-hero-badges {
