@@ -1,23 +1,23 @@
 import { GradientButton } from "@/components/ui/gradient-button";
 
 const ICONS_ROW1 = [
-  "https://cdn-icons-png.flaticon.com/512/5968/5968854.png",
-  "https://cdn-icons-png.flaticon.com/512/732/732221.png",
-  "https://cdn-icons-png.flaticon.com/512/733/733609.png",
-  "https://cdn-icons-png.flaticon.com/512/732/732084.png",
-  "https://cdn-icons-png.flaticon.com/512/733/733585.png",
-  "https://cdn-icons-png.flaticon.com/512/281/281763.png",
-  "https://cdn-icons-png.flaticon.com/512/888/888879.png",
+  "https://cdn-icons-png.flaticon.com/512/2111/2111463.png",   // Instagram
+  "https://cdn-icons-png.flaticon.com/512/174/174863.png",     // Pinterest
+  "https://cdn-icons-png.flaticon.com/512/5968/5968830.png",   // Shopify
+  "https://cdn-icons-png.flaticon.com/512/3536/3536505.png",   // TikTok
+  "https://cdn-icons-png.flaticon.com/512/5968/5968764.png",   // Figma
+  "https://cdn-icons-png.flaticon.com/512/888/888879.png",     // Google
+  "https://cdn-icons-png.flaticon.com/512/5968/5968841.png",   // Spotify
 ];
 
 const ICONS_ROW2 = [
-  "https://cdn-icons-png.flaticon.com/512/174/174857.png",
-  "https://cdn-icons-png.flaticon.com/512/906/906324.png",
-  "https://cdn-icons-png.flaticon.com/512/888/888841.png",
-  "https://cdn-icons-png.flaticon.com/512/5968/5968875.png",
-  "https://cdn-icons-png.flaticon.com/512/906/906361.png",
-  "https://cdn-icons-png.flaticon.com/512/732/732190.png",
-  "https://cdn-icons-png.flaticon.com/512/888/888847.png",
+  "https://cdn-icons-png.flaticon.com/512/733/733635.png",     // Twitter/X
+  "https://cdn-icons-png.flaticon.com/512/5968/5968756.png",   // Etsy
+  "https://cdn-icons-png.flaticon.com/512/174/174848.png",     // Stripe
+  "https://cdn-icons-png.flaticon.com/512/5968/5968958.png",   // Notion
+  "https://cdn-icons-png.flaticon.com/512/733/733547.png",     // Facebook
+  "https://cdn-icons-png.flaticon.com/512/3670/3670147.png",   // Canva
+  "https://cdn-icons-png.flaticon.com/512/732/732200.png",     // Snapchat
 ];
 
 const repeatedIcons = (icons: string[], repeat = 4) =>
