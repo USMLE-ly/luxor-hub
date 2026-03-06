@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -10,13 +9,15 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages, userId, styleProfile, closetSummary } = await req.json();
+    const { messages, userId, styleProfile, closetSummary, image } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const systemPrompt = `You are AURELIA, an elite AI personal stylist. You speak with warmth, confidence, and deep fashion knowledge.
 
 ${styleProfile ? `User's Style DNA: ${styleProfile.archetype}
+Color Season: ${(styleProfile.preferences as any)?.aiAnalysis?.colorSeason || "Unknown"}
+Body Type: ${(styleProfile.preferences as any)?.bodyShape || "Unknown"}
 Preferences: ${JSON.stringify(styleProfile.preferences)}` : ""}
 
 ${closetSummary ? `User's Closet Summary: ${closetSummary}` : ""}
@@ -27,7 +28,31 @@ Guidelines:
 - Consider occasion, weather, and personal style
 - Be encouraging and supportive
 - Use markdown formatting for readability
-- Keep responses concise but helpful`;
+- Keep responses concise but helpful
+
+When the user shares an image of a clothing item for compatibility checking:
+- Analyze the item's color, style, silhouette, and fabric
+- Compare against their color season palette (best colors vs colors to avoid)
+- Evaluate fit with their body type and style archetype
+- Give a **Match Score** from 0-100% with clear reasoning
+- Format: Start with "## 🎯 Match Score: X%" followed by breakdown
+- Categories: Color Match, Style Fit, Wardrobe Synergy, Body Type Compatibility
+- End with a verdict: ✅ Great Match, ⚠️ Partial Match, or ❌ Not Recommended`;
+
+    // Build the last user message with optional image
+    const processedMessages = [...messages];
+    if (image && processedMessages.length > 0) {
+      const lastMsg = processedMessages[processedMessages.length - 1];
+      if (lastMsg.role === "user") {
+        processedMessages[processedMessages.length - 1] = {
+          role: "user",
+          content: [
+            { type: "text", text: lastMsg.content },
+            { type: "image_url", image_url: { url: image } },
+          ],
+        };
+      }
+    }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -39,7 +64,7 @@ Guidelines:
         model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: systemPrompt },
-          ...messages,
+          ...processedMessages,
         ],
         stream: true,
       }),

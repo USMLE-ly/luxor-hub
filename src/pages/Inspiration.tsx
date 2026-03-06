@@ -220,17 +220,26 @@ const Inspiration = () => {
                     />
                   </button>
 
-                  {/* Shop overlay */}
-                  <a
-                    href={product.affiliateUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="absolute inset-0 bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                  >
-                    <div className="flex items-center gap-1.5 bg-foreground text-background px-3 py-1.5 rounded-full text-xs font-sans font-semibold">
+                  {/* Shop overlay with compatibility check */}
+                  <div className="absolute inset-0 bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                    <a
+                      href={product.affiliateUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 bg-foreground text-background px-3 py-1.5 rounded-full text-xs font-sans font-semibold"
+                    >
                       <ShoppingBag className="w-3 h-3" /> Shop Now
-                    </div>
-                  </a>
+                    </a>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/chat?prefill=${encodeURIComponent(`Is this a good match for me? ${product.name} by ${product.brand} in ${product.color} (${product.category})`)}`);
+                      }}
+                      className="flex items-center gap-1.5 bg-primary text-primary-foreground px-3 py-1.5 rounded-full text-xs font-sans font-semibold"
+                    >
+                      <Sparkles className="w-3 h-3" /> Check Match
+                    </button>
+                  </div>
                 </div>
 
                 {/* Info */}

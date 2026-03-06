@@ -1,17 +1,19 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Send, Sparkles, Loader2, Trash2, ArrowUp } from "lucide-react";
+import { Send, Sparkles, Loader2, Trash2, ArrowUp, Camera, Image, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 interface Message {
   id?: string;
   role: "user" | "assistant";
   content: string;
+  imagePreview?: string;
 }
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`;
@@ -21,19 +23,22 @@ const quickPrompts = [
   { emoji: "🌙", label: "Outfit for a dinner date" },
   { emoji: "💼", label: "Smart casual for work" },
   { emoji: "🎉", label: "Party outfit ideas" },
-  { emoji: "🧳", label: "Travel capsule wardrobe" },
+  { emoji: "📸", label: "Check if this item matches me" },
   { emoji: "🛍️", label: "What's missing in my closet?" },
 ];
 
 const Chat = () => {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [styleProfile, setStyleProfile] = useState<any>(null);
   const [closetSummary, setClosetSummary] = useState("");
+  const [pendingImage, setPendingImage] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -48,6 +53,14 @@ const Chat = () => {
     });
   }, [user]);
 
+  // Handle pre-filled context from navigation (e.g., from Inspiration page)
+  useEffect(() => {
+    const prefill = searchParams.get("prefill");
+    if (prefill) {
+      setInput(prefill);
+    }
+  }, [searchParams]);
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -57,14 +70,33 @@ const Chat = () => {
     await supabase.from("chat_messages").insert({ user_id: user.id, role, content });
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be under 5MB");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setPendingImage(reader.result as string);
+      if (!input.trim()) {
+        setInput("Check if this item matches my style DNA");
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   const send = async (overrideInput?: string) => {
     const text = overrideInput || input.trim();
     if (!text || isLoading || !user) return;
-    const userMsg: Message = { role: "user", content: text };
+    const userMsg: Message = { role: "user", content: text, imagePreview: pendingImage || undefined };
+    const imageToSend = pendingImage;
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
+    setPendingImage(null);
     setIsLoading(true);
-    saveMessage("user", userMsg.content);
+    saveMessage("user", imageToSend ? `[Image attached] ${userMsg.content}` : userMsg.content);
 
     let assistantSoFar = "";
     const allMessages = [...messages, userMsg].map((m) => ({ role: m.role, content: m.content }));
@@ -76,7 +108,13 @@ const Chat = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ messages: allMessages, userId: user.id, styleProfile, closetSummary }),
+        body: JSON.stringify({
+          messages: allMessages,
+          userId: user.id,
+          styleProfile,
+          closetSummary,
+          ...(imageToSend ? { image: imageToSend } : {}),
+        }),
       });
 
       if (!resp.ok) {
@@ -211,7 +249,13 @@ const Chat = () => {
                 {quickPrompts.map((prompt) => (
                   <button
                     key={prompt.label}
-                    onClick={() => send(prompt.label)}
+                    onClick={() => {
+                      if (prompt.emoji === "📸") {
+                        fileInputRef.current?.click();
+                      } else {
+                        send(prompt.label);
+                      }
+                    }}
                     className="rounded-xl border border-border bg-card p-3 text-left hover:border-primary/40 transition-colors group"
                   >
                     <span className="text-lg mb-1 block">{prompt.emoji}</span>
@@ -239,6 +283,11 @@ const Chat = () => {
                       : "bg-card border border-border rounded-bl-md"
                   }`}
                 >
+                  {msg.imagePreview && (
+                    <div className="mb-2 rounded-lg overflow-hidden">
+                      <img src={msg.imagePreview} alt="Uploaded item" className="w-full max-h-48 object-cover rounded-lg" />
+                    </div>
+                  )}
                   {msg.role === "assistant" ? (
                     <div className="prose prose-sm prose-invert max-w-none [&>p]:my-1 [&>ul]:my-1 [&>ol]:my-1 [&>h1]:text-base [&>h2]:text-sm [&>h3]:text-sm">
                       <ReactMarkdown>{msg.content}</ReactMarkdown>
@@ -263,9 +312,38 @@ const Chat = () => {
           <div ref={bottomRef} />
         </div>
 
+        {/* Pending Image Preview */}
+        {pendingImage && (
+          <div className="px-4 pt-2">
+            <div className="relative inline-block">
+              <img src={pendingImage} alt="To upload" className="h-20 w-20 object-cover rounded-xl border border-border" />
+              <button
+                onClick={() => setPendingImage(null)}
+                className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Input Area */}
         <div className="px-4 pb-4 pt-2">
           <div className="flex items-end gap-2 bg-card border border-border rounded-2xl px-3 py-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleImageUpload}
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-muted-foreground hover:text-primary transition-colors"
+              title="Upload image for compatibility check"
+            >
+              <Camera className="w-4 h-4" />
+            </button>
             <textarea
               ref={inputRef}
               value={input}
@@ -277,9 +355,9 @@ const Chat = () => {
             />
             <button
               onClick={() => send()}
-              disabled={isLoading || !input.trim()}
+              disabled={isLoading || (!input.trim() && !pendingImage)}
               className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
-                input.trim() && !isLoading
+                (input.trim() || pendingImage) && !isLoading
                   ? "bg-foreground text-background"
                   : "bg-secondary text-muted-foreground"
               }`}
