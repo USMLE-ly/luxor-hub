@@ -175,95 +175,103 @@ const StyleDNA = () => {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mx-4 mt-5 rounded-3xl overflow-hidden"
-          style={{
-            background: "linear-gradient(165deg, hsl(30 60% 96%), hsl(25 70% 92%), hsl(35 50% 90%))",
-          }}
+          className="mx-4 mt-5 rounded-2xl border border-border/60 overflow-hidden relative bg-card/60 backdrop-blur-xl"
         >
-          <div className="p-5">
+          {/* Shimmer sweep */}
+          <motion.div
+            className="absolute inset-0 pointer-events-none"
+            style={{ background: "linear-gradient(105deg, transparent 40%, hsl(var(--primary) / 0.06) 50%, transparent 60%)" }}
+            initial={{ x: "-100%" }}
+            animate={{ x: "200%" }}
+            transition={{ duration: 2.5, delay: 0.8, ease: "easeInOut" }}
+          />
+
+          <div className="p-5 relative z-10">
             {/* Header row */}
             <div className="flex items-center justify-between mb-5">
-              <h2 className="font-display text-lg font-bold text-foreground">My Style Formula</h2>
-              <button
+              <h2 className="font-display text-xl font-bold text-foreground">My Style Formula</h2>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => navigate("/color-type")}
-                className="flex items-center gap-1 px-4 py-2 rounded-full text-xs font-sans font-semibold text-background bg-foreground hover:opacity-90 transition-opacity"
+                className="rounded-full text-xs px-4 h-8 border-border/60"
               >
-                View <ArrowRight className="w-3 h-3" />
-              </button>
+                View <ArrowRight className="w-3 h-3 ml-1" />
+              </Button>
             </div>
 
-            {/* Three columns: Color type / Style Type / Body Type */}
+            {/* Three columns */}
             <div className="grid grid-cols-3 gap-3 mb-6">
-              <div>
-                <div className="flex items-center gap-1.5 mb-1">
-                  <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: "hsl(45, 80%, 65%)" }}>
-                    <Palette className="w-3 h-3 text-background" />
+              <button onClick={() => navigate("/color-type")} className="text-left group">
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shadow-[0_0_8px_hsl(var(--primary)/0.15)]">
+                    <Palette className="w-3.5 h-3.5 text-primary" />
                   </div>
                   <span className="text-[10px] font-sans text-muted-foreground">Color type</span>
                 </div>
-                <p className="font-display text-sm font-bold text-foreground leading-tight">{colorSeason}</p>
-              </div>
-              <div>
-                <div className="flex items-center gap-1.5 mb-1">
-                  <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: "linear-gradient(135deg, hsl(15,80%,60%), hsl(45,80%,60%))" }}>
-                    <Scissors className="w-3 h-3 text-background" />
+                <p className="font-sans font-bold text-foreground text-sm leading-tight">{colorSeason}</p>
+              </button>
+              <button onClick={() => navigate("/calibration")} className="text-left group">
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <div className="w-6 h-6 rounded-lg bg-destructive/10 flex items-center justify-center group-hover:bg-destructive/20 transition-colors shadow-[0_0_8px_hsl(var(--destructive)/0.15)]">
+                    <Scissors className="w-3.5 h-3.5 text-destructive" />
                   </div>
                   <span className="text-[10px] font-sans text-muted-foreground">Style Type</span>
                 </div>
-                <p className="font-display text-sm font-bold text-foreground leading-tight">{styleType}</p>
-              </div>
-              <div>
-                <div className="flex items-center gap-1.5 mb-1">
-                  <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: "hsl(270, 40%, 65%)" }}>
-                    <User className="w-3 h-3 text-background" />
+                <p className="font-sans font-bold text-foreground text-sm leading-tight">{styleType}</p>
+              </button>
+              <div className="text-left">
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <div className="w-6 h-6 rounded-lg bg-accent/10 flex items-center justify-center shadow-[0_0_8px_hsl(var(--accent)/0.15)]">
+                    <Shirt className="w-3.5 h-3.5 text-accent" />
                   </div>
                   <span className="text-[10px] font-sans text-muted-foreground">Body Type</span>
                 </div>
-                <p className="font-display text-sm font-bold text-foreground leading-tight">{bodyType}</p>
+                <p className="font-sans font-bold text-foreground text-sm leading-tight">{bodyType}</p>
               </div>
             </div>
 
-            {/* Calibration egg illustration area */}
-            <div className="flex flex-col items-center mb-5">
-              <div className="w-32 h-32 rounded-full flex items-center justify-center mb-4" style={{
-                background: "radial-gradient(circle at 40% 35%, hsl(30, 80%, 65%), hsl(15, 70%, 50%), hsl(25, 60%, 35%))",
-                boxShadow: "0 12px 40px -10px hsla(15, 70%, 40%, 0.4)",
-              }}>
-                <Dna className="w-12 h-12 text-background/80" />
-              </div>
-              <h3 className="font-display text-base font-bold text-foreground text-center">Calibrate your Style Formula</h3>
-              <p className="text-xs font-sans text-muted-foreground text-center mt-1 max-w-[280px]">
+            {/* Decorative divider */}
+            <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent mb-5" />
+
+            {/* Calibration Section */}
+            <div className="text-center space-y-3">
+              <h3 className="font-display text-lg font-bold text-foreground">
+                Calibrate your Style Formula
+              </h3>
+              <p className="text-muted-foreground text-xs font-sans max-w-[280px] mx-auto">
                 Like or dislike your Style Formula outfits to help the AI learn your style identity better
               </p>
-            </div>
 
-            {/* Progress bar */}
-            <div className="flex items-center gap-2 mb-4">
-              <div className="flex-1 h-8 rounded-full bg-background/60 overflow-hidden relative">
-                <div
-                  className="h-full rounded-full flex items-center justify-between px-3 transition-all duration-700"
-                  style={{
-                    width: `${Math.max(calibrationProgress || 30, 10)}%`,
-                    background: "linear-gradient(90deg, hsl(15, 80%, 55%), hsl(45, 85%, 60%))",
-                  }}
-                >
-                  <Check className="w-4 h-4 text-background" />
-                  <span className="text-xs font-bold text-background">{calibrationProgress || 30}%</span>
+              {/* Progress bar */}
+              <div className="flex items-center gap-2 pt-1">
+                <div className="flex-1 h-9 rounded-full bg-secondary/80 overflow-hidden relative border border-border/50">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.max(calibrationProgress || 30, 10)}%` }}
+                    transition={{ duration: 1.2, ease: "easeOut", delay: 0.5 }}
+                    className="h-full rounded-full flex items-center justify-between px-3"
+                    style={{
+                      background: "linear-gradient(90deg, hsl(142, 60%, 48%), hsl(var(--primary)))",
+                    }}
+                  >
+                    <Check className="w-4 h-4 text-primary-foreground" />
+                    <span className="text-xs font-bold text-primary-foreground">{calibrationProgress || 30}%</span>
+                  </motion.div>
+                </div>
+                <div className="w-9 h-9 rounded-full bg-primary/10 border border-border/50 flex items-center justify-center flex-shrink-0">
+                  <Gift className="w-4 h-4 text-primary" />
                 </div>
               </div>
-              <div className="w-8 h-8 rounded-full bg-background/60 flex items-center justify-center">
-                <Gift className="w-4 h-4 text-[hsl(0,65%,55%)]" />
-              </div>
-            </div>
 
-            {/* Start CTA */}
-            <button
-              onClick={() => navigate("/calibration")}
-              className="w-full py-3.5 rounded-full font-sans font-bold text-sm text-background flex items-center justify-center gap-2 transition-all hover:opacity-90"
-              style={{ background: "hsl(220, 15%, 18%)" }}
-            >
-              Start <ArrowRight className="w-4 h-4" />
-            </button>
+              {/* Start CTA */}
+              <GradientButton
+                onClick={() => navigate("/calibration")}
+                className="w-full rounded-full h-12 text-base"
+              >
+                Start <ArrowRight className="w-4 h-4 ml-2" />
+              </GradientButton>
+            </div>
           </div>
         </motion.div>
 

@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { ArrowRight, ArrowLeft, Check, Eye } from "lucide-react";
+import { ArrowRight, ArrowLeft, Check, Eye, Gift } from "lucide-react";
 
 // Male calibration images
 import calTrousersWide from "@/assets/cal-trousers-wide.jpg";
