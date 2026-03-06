@@ -671,25 +671,31 @@ const GeneratingStep = ({ step, gender }: { step: OnboardingStep; gender?: "fema
     frame = requestAnimationFrame(animate);
     if (navigator.vibrate) navigator.vibrate([15, 50, 25]);
 
-    // Premium completion chime via Web Audio API
+    // Dramatic completion chime via Web Audio API
     try {
       const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const playNote = (freq: number, start: number, dur: number, vol: number) => {
+      const playNote = (freq: number, start: number, dur: number, vol: number, type: OscillatorType = "sine") => {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
-        osc.type = "sine";
+        osc.type = type;
         osc.frequency.value = freq;
         gain.gain.setValueAtTime(vol, audioCtx.currentTime + start);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime + start + 0.02);
         gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + start + dur);
         osc.connect(gain).connect(audioCtx.destination);
         osc.start(audioCtx.currentTime + start);
         osc.stop(audioCtx.currentTime + start + dur);
       };
-      // Ascending arpeggio: C6 → E6 → G6 → C7
-      playNote(1047, 0, 0.2, 0.1);
-      playNote(1319, 0.1, 0.2, 0.1);
-      playNote(1568, 0.2, 0.25, 0.12);
-      playNote(2093, 0.35, 0.4, 0.08);
+      // Fast dramatic arpeggio: G5 → C6 → E6 → G6 → C7 with harmonics
+      playNote(784, 0, 0.15, 0.18, "triangle");
+      playNote(1047, 0.07, 0.18, 0.2, "triangle");
+      playNote(1319, 0.14, 0.22, 0.22, "sine");
+      playNote(1568, 0.2, 0.3, 0.2, "sine");
+      playNote(2093, 0.28, 0.6, 0.15, "sine");
+      // Resonant sub-bass thump for impact
+      playNote(130, 0, 0.3, 0.12, "sine");
+      // Shimmer overtone
+      playNote(3136, 0.3, 0.8, 0.04, "sine");
     } catch (_) {}
 
     return () => cancelAnimationFrame(frame);
