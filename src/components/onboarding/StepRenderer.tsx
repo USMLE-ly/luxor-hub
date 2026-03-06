@@ -903,7 +903,7 @@ const DetectionResultStep = ({ step, answers, gender, aiResults }: { step: Onboa
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           >
             <BodyShapeIllustration shape={detectedBodyShape.label} size={100} className="mb-2" />
-            <h3 className="font-display text-3xl font-bold text-foreground">{detectedBodyShape.label}</h3>
+            <p className="text-xs text-muted-foreground font-sans uppercase tracking-wider">{detectedBodyShape.label} shape</p>
             <div className="flex flex-wrap justify-center gap-2 mt-1">
               {detectedBodyShape.traits.map((trait, i) => (
                 <motion.span
@@ -921,7 +921,38 @@ const DetectionResultStep = ({ step, answers, gender, aiResults }: { step: Onboa
         )}
       </AnimatePresence>
 
-      {/* All body shapes */}
+      {/* Best For You — clothing */}
+      {revealed && !isLoading && (() => {
+        const recs = bodyRecommendations[detectedBodyShape.label] || bodyRecommendations.Rectangle;
+        return (
+          <motion.div
+            className="w-full space-y-3 mb-6"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <h4 className="font-display text-lg font-bold text-foreground text-center">Best For You</h4>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="p-3 rounded-xl bg-secondary/50 space-y-1">
+                <div className="flex items-center gap-1.5"><Shirt className="w-4 h-4 text-primary" /><span className="text-xs font-semibold text-foreground font-sans">Silhouettes</span></div>
+                {recs.silhouettes.map(n => <p key={n} className="text-xs text-muted-foreground font-sans">• {n}</p>)}
+              </div>
+              <div className="p-3 rounded-xl bg-secondary/50 space-y-1">
+                <div className="flex items-center gap-1.5"><Scissors className="w-4 h-4 text-primary" /><span className="text-xs font-semibold text-foreground font-sans">Dresses</span></div>
+                {recs.dresses.map(n => <p key={n} className="text-xs text-muted-foreground font-sans">• {n}</p>)}
+              </div>
+              <div className="p-3 rounded-xl bg-secondary/50 space-y-1">
+                <div className="flex items-center gap-1.5"><Watch className="w-4 h-4 text-primary" /><span className="text-xs font-semibold text-foreground font-sans">Trousers</span></div>
+                {recs.trousers.map(n => <p key={n} className="text-xs text-muted-foreground font-sans">• {n}</p>)}
+              </div>
+              <div className="p-3 rounded-xl bg-secondary/50 space-y-1">
+                <div className="flex items-center gap-1.5"><Gem className="w-4 h-4 text-primary" /><span className="text-xs font-semibold text-foreground font-sans">Jackets</span></div>
+                {recs.jackets.map(n => <p key={n} className="text-xs text-muted-foreground font-sans">• {n}</p>)}
+              </div>
+            </div>
+          </motion.div>
+        );
+      })()}
       {!isLoading && (
         <motion.div
           className="w-full"
