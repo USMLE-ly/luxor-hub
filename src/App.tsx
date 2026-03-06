@@ -30,6 +30,8 @@ import StyleDNA from "./pages/StyleDNA";
 import Calibration from "./pages/Calibration";
 import ColorType from "./pages/ColorType";
 import Paywall from "./pages/Paywall";
+import OutfitCalendar from "./pages/OutfitCalendar";
+import MoodBoard from "./pages/MoodBoard";
 
 
 const queryClient = new QueryClient();
@@ -67,6 +69,8 @@ const App = () => (
             <Route path="/calibration" element={<Calibration />} />
             <Route path="/color-type" element={<ColorType />} />
             <Route path="/paywall" element={<Paywall />} />
+            <Route path="/outfit-calendar" element={<OutfitCalendar />} />
+            <Route path="/mood-board" element={<MoodBoard />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
