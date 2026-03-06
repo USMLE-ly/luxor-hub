@@ -772,17 +772,50 @@ const DetectionResultStep = ({ step, answers, gender, aiResults }: { step: Onboa
         <AnimatePresence>
           {revealed && !isLoading && (
             <motion.div
-              className="flex flex-col items-center gap-2 mb-8"
+              className="flex flex-col items-center gap-2 mb-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
               <FaceShapeIllustration shape={detectedFaceShape.shape} size={90} className="mb-2" />
-              <h3 className="font-display text-3xl font-bold text-foreground">{detectedFaceShape.shape}</h3>
+              <p className="text-xs text-muted-foreground font-sans uppercase tracking-wider">{detectedFaceShape.shape} face</p>
               <p className="text-muted-foreground font-sans text-sm text-center max-w-xs">{faceDescription}</p>
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Best For You — accessories */}
+        {revealed && !isLoading && (() => {
+          const recs = faceRecommendations[detectedFaceShape.shape] || faceRecommendations.Oval;
+          return (
+            <motion.div
+              className="w-full space-y-3 mb-6"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <h4 className="font-display text-lg font-bold text-foreground text-center">Best For You</h4>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="p-3 rounded-xl bg-secondary/50 space-y-1">
+                  <div className="flex items-center gap-1.5"><Shirt className="w-4 h-4 text-primary" /><span className="text-xs font-semibold text-foreground font-sans">Necklines</span></div>
+                  {recs.necklines.map(n => <p key={n} className="text-xs text-muted-foreground font-sans">• {n}</p>)}
+                </div>
+                <div className="p-3 rounded-xl bg-secondary/50 space-y-1">
+                  <div className="flex items-center gap-1.5"><Glasses className="w-4 h-4 text-primary" /><span className="text-xs font-semibold text-foreground font-sans">Glasses</span></div>
+                  {recs.glasses.map(n => <p key={n} className="text-xs text-muted-foreground font-sans">• {n}</p>)}
+                </div>
+                <div className="p-3 rounded-xl bg-secondary/50 space-y-1">
+                  <div className="flex items-center gap-1.5"><Gem className="w-4 h-4 text-primary" /><span className="text-xs font-semibold text-foreground font-sans">Earrings</span></div>
+                  {recs.earrings.map(n => <p key={n} className="text-xs text-muted-foreground font-sans">• {n}</p>)}
+                </div>
+                <div className="p-3 rounded-xl bg-secondary/50 space-y-1">
+                  <div className="flex items-center gap-1.5"><Scissors className="w-4 h-4 text-primary" /><span className="text-xs font-semibold text-foreground font-sans">Hairstyles</span></div>
+                  {recs.hairstyles.map(n => <p key={n} className="text-xs text-muted-foreground font-sans">• {n}</p>)}
+                </div>
+              </div>
+            </motion.div>
+          );
+        })()}
 
         {/* All face shapes reference */}
         {!isLoading && (
