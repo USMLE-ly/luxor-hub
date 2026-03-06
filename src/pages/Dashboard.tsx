@@ -6,8 +6,10 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Shirt, Wand2, ArrowRight, Heart, Sparkles, Palette, Scissors,
   ShoppingBag, ExternalLink, Check, Gift, Calendar, Briefcase, PartyPopper, Sun, ChevronRight,
+  TrendingUp, Snowflake, Dumbbell,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { GradientButton } from "@/components/ui/gradient-button";
 import { useNavigate } from "react-router-dom";
 
 interface ShopProduct {
@@ -18,6 +20,21 @@ interface ShopProduct {
   category: string;
   url: string;
   imageUrl: string;
+}
+
+const stagger = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.08 } },
+};
+const fadeUp = {
+  hidden: { opacity: 0, y: 15 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" as const } },
+};
+
+function getScoreColor(score: number) {
+  if (score >= 85) return { bg: "hsl(142 60% 45%)", text: "hsl(142 60% 95%)", border: "hsl(142 60% 45% / 0.3)" };
+  if (score >= 70) return { bg: "hsl(43 74% 49%)", text: "hsl(43 74% 10%)", border: "hsl(43 74% 49% / 0.3)" };
+  return { bg: "hsl(var(--muted))", text: "hsl(var(--muted-foreground))", border: "hsl(var(--border))" };
 }
 
 const Dashboard = () => {
@@ -34,6 +51,7 @@ const Dashboard = () => {
   const [shopLoading, setShopLoading] = useState(false);
   const [closetItems, setClosetItems] = useState<{ id: string; photo_url: string | null; name: string | null; category: string }[]>([]);
   const [outfitsList, setOutfitsList] = useState<{ id: string; name: string; occasion: string | null; items: string[] }[]>([]);
+  const [activeOccasion, setActiveOccasion] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -54,8 +72,7 @@ const Dashboard = () => {
       if (profileRes.data) setProfile(profileRes.data);
       if (styleRes.data) setStyleProfile(styleRes.data as any);
       if (closetRes.data) setClosetItems(closetRes.data);
-      
-      // Fetch outfit items for each outfit
+
       if (outfitsListRes.data && outfitsListRes.data.length > 0) {
         const outfitsWithItems = await Promise.all(
           outfitsListRes.data.map(async (outfit: any) => {
@@ -107,21 +124,32 @@ const Dashboard = () => {
   const bodyType = styleProfile.preferences?.bodyShape || "—";
 
   const occasionTabs = [
-    { label: "Everyday", icon: <Sun className="w-5 h-5" />, color: "hsl(142, 60%, 45%)" },
-    { label: "Weekend", icon: <Calendar className="w-5 h-5" />, color: "hsl(330, 60%, 55%)" },
-    { label: "Work", icon: <Briefcase className="w-5 h-5" />, color: "hsl(30, 80%, 55%)" },
-    { label: "Party", icon: <PartyPopper className="w-5 h-5" />, color: "hsl(270, 60%, 55%)" },
+    { label: "All", icon: <Sparkles className="w-4 h-4" />, color: "hsl(var(--primary))", value: null },
+    { label: "Everyday", icon: <Sun className="w-4 h-4" />, color: "hsl(142, 60%, 45%)", value: "everyday" },
+    { label: "Work", icon: <Briefcase className="w-4 h-4" />, color: "hsl(30, 80%, 55%)", value: "work" },
+    { label: "Party", icon: <PartyPopper className="w-4 h-4" />, color: "hsl(270, 60%, 55%)", value: "party" },
+  ];
+
+  const filteredOutfits = activeOccasion
+    ? outfitsList.filter((o) => o.occasion?.toLowerCase() === activeOccasion)
+    : outfitsList;
+
+  const chatPrompts = [
+    { text: "Pieces that never go out of style", icon: <TrendingUp className="w-4 h-4 text-primary" /> },
+    { text: "Main winter trends this season", icon: <Snowflake className="w-4 h-4 text-primary" /> },
+    { text: "What sporty items are essential?", icon: <Dumbbell className="w-4 h-4 text-primary" /> },
   ];
 
   return (
     <AppLayout>
-      <div className="p-5 lg:p-8 max-w-2xl mx-auto space-y-5">
+      <motion.div
+        className="p-5 lg:p-8 max-w-2xl mx-auto space-y-5"
+        variants={stagger}
+        initial="hidden"
+        animate="show"
+      >
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between"
-        >
+        <motion.div variants={fadeUp} className="flex items-center justify-between">
           <div className="w-10 h-10">
             <Sparkles className="w-8 h-8 text-foreground" />
           </div>
@@ -142,21 +170,27 @@ const Dashboard = () => {
 
         {/* ── My Style Formula Card ─────────────────────────── */}
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="rounded-2xl border border-border overflow-hidden"
-          style={{ background: "linear-gradient(135deg, hsl(30 40% 95%), hsl(35 50% 92%))" }}
+          variants={fadeUp}
+          className="rounded-2xl border border-border/60 overflow-hidden relative bg-card/60 backdrop-blur-xl"
         >
-          <div className="p-5">
+          {/* Shimmer sweep */}
+          <motion.div
+            className="absolute inset-0 pointer-events-none"
+            style={{ background: "linear-gradient(105deg, transparent 40%, hsl(var(--primary) / 0.06) 50%, transparent 60%)" }}
+            initial={{ x: "-100%" }}
+            animate={{ x: "200%" }}
+            transition={{ duration: 2.5, delay: 0.8, ease: "easeInOut" }}
+          />
+
+          <div className="p-5 relative z-10">
             {/* Title row */}
             <div className="flex items-center justify-between mb-5">
               <h2 className="font-display text-xl font-bold text-foreground">My Style Formula</h2>
               <Button
-                variant="default"
+                variant="outline"
                 size="sm"
                 onClick={() => navigate("/style-dna")}
-                className="rounded-full bg-foreground text-background hover:bg-foreground/90 text-xs px-4 h-8"
+                className="rounded-full text-xs px-4 h-8 border-border/60"
               >
                 View <ArrowRight className="w-3 h-3 ml-1" />
               </Button>
@@ -164,28 +198,28 @@ const Dashboard = () => {
 
             {/* 3-column style attributes */}
             <div className="grid grid-cols-3 gap-3 mb-6">
-              <button onClick={() => navigate("/color-type")} className="text-left hover:opacity-80 transition-opacity">
-                <div className="flex items-center gap-1.5 mb-1">
-                  <div className="w-5 h-5 rounded-md bg-[hsl(45,80%,55%)]/20 flex items-center justify-center">
-                    <Palette className="w-3 h-3 text-[hsl(45,80%,55%)]" />
+              <button onClick={() => navigate("/color-type")} className="text-left group">
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shadow-[0_0_8px_hsl(var(--primary)/0.15)]">
+                    <Palette className="w-3.5 h-3.5 text-primary" />
                   </div>
                   <span className="text-[10px] font-sans text-muted-foreground">Color type</span>
                 </div>
                 <p className="font-sans font-bold text-foreground text-sm leading-tight">{colorType}</p>
               </button>
-              <button onClick={() => navigate("/calibration")} className="text-left hover:opacity-80 transition-opacity">
-                <div className="flex items-center gap-1.5 mb-1">
-                  <div className="w-5 h-5 rounded-md bg-[hsl(0,70%,68%)]/20 flex items-center justify-center">
-                    <Scissors className="w-3 h-3 text-[hsl(0,70%,68%)]" />
+              <button onClick={() => navigate("/calibration")} className="text-left group">
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <div className="w-6 h-6 rounded-lg bg-destructive/10 flex items-center justify-center group-hover:bg-destructive/20 transition-colors shadow-[0_0_8px_hsl(var(--destructive)/0.15)]">
+                    <Scissors className="w-3.5 h-3.5 text-destructive" />
                   </div>
                   <span className="text-[10px] font-sans text-muted-foreground">Style Type</span>
                 </div>
                 <p className="font-sans font-bold text-foreground text-sm leading-tight">{styleType}</p>
               </button>
               <div className="text-left">
-                <div className="flex items-center gap-1.5 mb-1">
-                  <div className="w-5 h-5 rounded-md bg-[hsl(270,40%,65%)]/20 flex items-center justify-center">
-                    <Shirt className="w-3 h-3 text-[hsl(270,40%,65%)]" />
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <div className="w-6 h-6 rounded-lg bg-accent/10 flex items-center justify-center shadow-[0_0_8px_hsl(var(--accent)/0.15)]">
+                    <Shirt className="w-3.5 h-3.5 text-accent" />
                   </div>
                   <span className="text-[10px] font-sans text-muted-foreground">Body Type</span>
                 </div>
@@ -198,28 +232,32 @@ const Dashboard = () => {
 
             {/* Calibration Section */}
             <div className="text-center space-y-3">
-              {/* Animated Decorative orb */}
-              <motion.div
-                className="mx-auto w-28 h-28 rounded-full flex items-center justify-center relative"
-                style={{ background: "radial-gradient(circle at 40% 35%, hsl(25 80% 65%), hsl(350 60% 50%), hsl(15 70% 40%))" }}
-                animate={{ rotate: 360 }}
-                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-              >
-                {/* Glow pulse */}
-                <motion.div
-                  className="absolute inset-[-8px] rounded-full"
-                  style={{ background: "radial-gradient(circle, hsl(25 80% 65% / 0.4), transparent 70%)" }}
-                  animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.8, 0.5] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                />
-                <motion.div
-                  className="w-20 h-20 rounded-full border-2 border-white/20 flex items-center justify-center"
-                  animate={{ rotate: -360 }}
-                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                >
-                  <Sparkles className="w-8 h-8 text-white/80" />
-                </motion.div>
-              </motion.div>
+              {/* Circular progress ring */}
+              <div className="mx-auto w-28 h-28 relative flex items-center justify-center">
+                <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 112 112">
+                  <circle cx="56" cy="56" r="48" fill="none" stroke="hsl(var(--border))" strokeWidth="4" opacity="0.3" />
+                  <motion.circle
+                    cx="56" cy="56" r="48" fill="none"
+                    stroke="url(#progressGrad)"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeDasharray={2 * Math.PI * 48}
+                    initial={{ strokeDashoffset: 2 * Math.PI * 48 }}
+                    animate={{ strokeDashoffset: 2 * Math.PI * 48 * (1 - displayProgress / 100) }}
+                    transition={{ duration: 1.5, ease: "easeOut", delay: 0.5 }}
+                  />
+                  <defs>
+                    <linearGradient id="progressGrad" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="hsl(142, 60%, 48%)" />
+                      <stop offset="100%" stopColor="hsl(var(--primary))" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div className="flex flex-col items-center">
+                  <Sparkles className="w-6 h-6 text-primary mb-1" />
+                  <span className="text-lg font-bold text-foreground font-sans">{displayProgress}%</span>
+                </div>
+              </div>
 
               <h3 className="font-display text-lg font-bold text-foreground">
                 Calibrate your Style Formula
@@ -230,42 +268,38 @@ const Dashboard = () => {
 
               {/* Progress bar */}
               <div className="flex items-center gap-2 pt-1">
-                <div className="flex-1 h-9 rounded-full bg-background/80 overflow-hidden relative border border-border/50">
+                <div className="flex-1 h-9 rounded-full bg-secondary/80 overflow-hidden relative border border-border/50">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${displayProgress}%` }}
                     transition={{ duration: 1.2, ease: "easeOut", delay: 0.5 }}
                     className="h-full rounded-full flex items-center justify-between px-3"
                     style={{
-                      background: "linear-gradient(90deg, hsl(130,55%,48%), hsl(0,70%,62%))",
+                      background: "linear-gradient(90deg, hsl(142, 60%, 48%), hsl(var(--primary)))",
                     }}
                   >
-                    <Check className="w-4 h-4 text-white" />
-                    <span className="text-xs font-bold text-white">{displayProgress}%</span>
+                    <Check className="w-4 h-4 text-primary-foreground" />
+                    <span className="text-xs font-bold text-primary-foreground">{displayProgress}%</span>
                   </motion.div>
                 </div>
-                <div className="w-9 h-9 rounded-full bg-[hsl(0,70%,68%)]/10 border border-border/50 flex items-center justify-center flex-shrink-0">
-                  <Gift className="w-4 h-4 text-[hsl(0,70%,62%)]" />
+                <div className="w-9 h-9 rounded-full bg-primary/10 border border-border/50 flex items-center justify-center flex-shrink-0">
+                  <Gift className="w-4 h-4 text-primary" />
                 </div>
               </div>
 
-              {/* Start button */}
-              <Button
+              {/* Start button — GradientButton with 3D press */}
+              <GradientButton
                 onClick={() => navigate("/calibration")}
-                className="w-full rounded-full bg-foreground text-background hover:bg-foreground/90 font-sans font-semibold h-12 text-base"
+                className="w-full rounded-full h-12 text-base"
               >
                 Start <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
+              </GradientButton>
             </div>
           </div>
         </motion.div>
 
         {/* ── My Closet Outfits ─────────────────────────────── */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
+        <motion.div variants={fadeUp}>
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-display text-xl font-bold text-foreground">All My Outfits</h2>
             <button
@@ -276,31 +310,38 @@ const Dashboard = () => {
             </button>
           </div>
 
-          {/* Occasion tabs */}
+          {/* Occasion tabs — functional filtering */}
           <div className="flex gap-2 mb-4 overflow-x-auto scrollbar-none">
-            {occasionTabs.map((tab) => (
-              <button
-                key={tab.label}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-card border border-border hover:border-primary/40 transition-colors flex-shrink-0"
-              >
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${tab.color}20`, color: tab.color }}>
-                  {tab.icon}
-                </div>
-                <div className="text-left">
-                  <span className="font-sans text-xs font-semibold text-foreground block">{tab.label}</span>
-                  <span className="text-[9px] font-sans text-muted-foreground">
-                    {stats.outfits} OUTFITS
+            {occasionTabs.map((tab) => {
+              const isActive = activeOccasion === tab.value;
+              return (
+                <button
+                  key={tab.label}
+                  onClick={() => setActiveOccasion(tab.value)}
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border transition-all flex-shrink-0 ${
+                    isActive
+                      ? "bg-primary/10 border-primary/40 shadow-[0_0_12px_hsl(var(--primary)/0.1)]"
+                      : "bg-card border-border hover:border-primary/20"
+                  }`}
+                >
+                  <div
+                    className="w-7 h-7 rounded-lg flex items-center justify-center"
+                    style={{ backgroundColor: `${tab.color}20`, color: tab.color }}
+                  >
+                    {tab.icon}
+                  </div>
+                  <span className={`font-sans text-xs font-semibold ${isActive ? "text-foreground" : "text-muted-foreground"}`}>
+                    {tab.label}
                   </span>
-                </div>
-              </button>
-            ))}
+                </button>
+              );
+            })}
           </div>
 
-          {outfitsList.length === 0 && stats.outfits === 0 ? (
+          {filteredOutfits.length === 0 && stats.outfits === 0 ? (
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-2xl border border-border bg-card overflow-hidden">
                 <div className="h-40 bg-secondary flex items-center justify-center relative">
-                  {/* Show closet item thumbnails as preview */}
                   {closetItems.length > 0 ? (
                     <div className="grid grid-cols-2 gap-1 p-2 w-full h-full">
                       {closetItems.slice(0, 4).map((item) => (
@@ -326,19 +367,25 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="rounded-2xl border border-border bg-card overflow-hidden flex items-center justify-center p-6">
-                <Button onClick={() => navigate("/outfits")} size="sm" className="rounded-full gold-gradient text-primary-foreground">
+                <GradientButton onClick={() => navigate("/outfits")} className="rounded-full">
                   <Wand2 className="w-4 h-4 mr-2" /> Generate
-                </Button>
+                </GradientButton>
               </div>
             </div>
           ) : (
-            <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-none">
-              {(outfitsList.length > 0 ? outfitsList : [{ id: "1", name: "Everyday", occasion: "everyday", items: [] }, { id: "2", name: "Work", occasion: "work", items: [] }, { id: "3", name: "Party", occasion: "party", items: [] }]).map((outfit) => {
+            <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-none snap-x snap-mandatory">
+              {(filteredOutfits.length > 0 ? filteredOutfits : [{ id: "1", name: "Everyday", occasion: "everyday", items: [] }, { id: "2", name: "Work", occasion: "work", items: [] }, { id: "3", name: "Party", occasion: "party", items: [] }]).map((outfit, i) => {
                 const outfitItemPhotos = outfit.items
                   .map((itemId: string) => closetItems.find((ci) => ci.id === itemId))
                   .filter(Boolean);
                 return (
-                  <div key={outfit.id} className="min-w-[180px] rounded-2xl border border-border bg-card overflow-hidden flex-shrink-0">
+                  <motion.div
+                    key={outfit.id}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.05, duration: 0.35 }}
+                    className="min-w-[180px] rounded-2xl border border-border bg-card overflow-hidden flex-shrink-0 snap-start"
+                  >
                     <div className="relative h-40 bg-secondary flex items-center justify-center">
                       {outfitItemPhotos.length > 0 ? (
                         <div className="grid grid-cols-2 gap-0.5 p-1 w-full h-full">
@@ -372,7 +419,7 @@ const Dashboard = () => {
                         </button>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>
@@ -380,19 +427,15 @@ const Dashboard = () => {
         </motion.div>
 
         {/* ── Shop Similar ──────────────────────────────────── */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
+        <motion.div variants={fadeUp}>
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <ShoppingBag className="w-5 h-5 text-foreground" />
               <h2 className="font-display text-xl font-bold text-foreground">Shop Similar</h2>
             </div>
-            <span className="text-[10px] font-sans text-muted-foreground bg-secondary px-2 py-1 rounded-full">
-              AI Picks
-            </span>
+            <button onClick={() => navigate("/inspiration")} className="text-xs font-sans text-primary hover:underline">
+              View All
+            </button>
           </div>
 
           {shopLoading ? (
@@ -402,31 +445,40 @@ const Dashboard = () => {
               ))}
             </div>
           ) : shopProducts.length > 0 ? (
-            <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-none">
-              {shopProducts.map((product, i) => (
-                <a
-                  key={i}
-                  href={product.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="min-w-[150px] max-w-[150px] flex-shrink-0 rounded-2xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow"
-                >
-                  <div className="relative h-32 bg-secondary flex items-center justify-center">
-                    <ShoppingBag className="w-8 h-8 text-muted-foreground/30" />
-                    <div className="absolute top-2 right-2 bg-primary/90 text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                      {product.matchScore}%
+            <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-none snap-x snap-mandatory">
+              {shopProducts.map((product, i) => {
+                const sc = getScoreColor(product.matchScore);
+                return (
+                  <a
+                    key={i}
+                    href={product.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="min-w-[150px] max-w-[150px] flex-shrink-0 rounded-2xl border bg-card overflow-hidden hover:shadow-md transition-shadow snap-start"
+                    style={{ borderColor: sc.border }}
+                  >
+                    <div className="relative h-32 bg-secondary flex items-center justify-center">
+                      <div className="w-full h-full bg-gradient-to-br from-secondary to-muted flex items-center justify-center">
+                        <ShoppingBag className="w-8 h-8 text-muted-foreground/20" />
+                      </div>
+                      <div
+                        className="absolute top-2 right-2 text-[10px] font-bold px-2 py-0.5 rounded-full"
+                        style={{ backgroundColor: sc.bg, color: sc.text }}
+                      >
+                        {product.matchScore}%
+                      </div>
                     </div>
-                  </div>
-                  <div className="p-2.5">
-                    <p className="text-[10px] text-muted-foreground font-sans uppercase tracking-wide">{product.brand}</p>
-                    <p className="text-xs font-sans font-medium text-foreground truncate">{product.name}</p>
-                    <div className="flex items-center justify-between mt-1.5">
-                      <span className="text-xs font-bold text-foreground">{product.price}</span>
-                      <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                    <div className="p-2.5" style={{ borderTop: `2px solid ${sc.bg}` }}>
+                      <p className="text-[10px] text-muted-foreground font-sans uppercase tracking-wide">{product.brand}</p>
+                      <p className="text-xs font-sans font-medium text-foreground truncate">{product.name}</p>
+                      <div className="flex items-center justify-between mt-1.5">
+                        <span className="text-xs font-bold text-foreground">{product.price}</span>
+                        <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                      </div>
                     </div>
-                  </div>
-                </a>
-              ))}
+                  </a>
+                );
+              })}
             </div>
           ) : (
             <div className="rounded-2xl border border-border bg-card p-6 text-center">
@@ -442,30 +494,26 @@ const Dashboard = () => {
         </motion.div>
 
         {/* ── Chat with AI Stylist ──────────────────────────── */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="pb-8"
-        >
+        <motion.div variants={fadeUp} className="pb-8">
           <h2 className="font-display text-xl font-bold text-foreground mb-3">Chat with AI Stylist</h2>
-          <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-none">
-            {[
-              "Pieces that never go out of style",
-              "Main winter trends this season",
-              "What sporty items are essential?",
-            ].map((prompt) => (
+          <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-none snap-x snap-mandatory">
+            {chatPrompts.map((prompt) => (
               <button
-                key={prompt}
-                onClick={() => navigate("/chat")}
-                className="min-w-[160px] p-4 rounded-2xl border border-border bg-card text-left hover:border-primary/30 transition-colors flex-shrink-0"
+                key={prompt.text}
+                onClick={() => navigate(`/chat?prefill=${encodeURIComponent(prompt.text)}`)}
+                className="min-w-[160px] p-4 rounded-2xl border border-border bg-card text-left hover:border-primary/30 transition-colors flex-shrink-0 snap-start relative overflow-hidden"
               >
-                <p className="font-sans text-sm text-foreground leading-snug">{prompt}</p>
+                {/* Left accent border */}
+                <div className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-gradient-to-b from-primary/60 to-primary/10" />
+                <div className="pl-2 flex items-start gap-2.5">
+                  <div className="mt-0.5 flex-shrink-0">{prompt.icon}</div>
+                  <p className="font-sans text-sm text-foreground leading-snug">{prompt.text}</p>
+                </div>
               </button>
             ))}
           </div>
         </motion.div>
-      </div>
+      </motion.div>
     </AppLayout>
   );
 };
