@@ -217,12 +217,12 @@ export const sharedSteps: OnboardingStep[] = [
     description: "Position your face within the frame and tap capture",
   },
   {
-    question: "Face Shape Detected",
+    question: "Your Best Accessory Matches",
     key: "faceResult",
     type: "detectionResult",
     options: [],
     detectionMode: "face",
-    description: "Based on your facial proportions and features",
+    description: "Based on your facial proportions, here are the accessories and necklines that suit you best",
   },
   {
     question: "Now let's capture your full body",
