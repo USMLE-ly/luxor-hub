@@ -653,6 +653,23 @@ const faceShapes = [
   { shape: "Diamond", icon: "◇", description: "Narrow forehead and jaw, wide cheekbones" },
 ];
 
+const bodyShapeResults: Record<string, { label: string; traits: string[] }[]> = {
+  female: [
+    { label: "Hourglass", traits: ["Balanced shoulders & hips", "Defined waist", "Curvy silhouette"] },
+    { label: "Triangle", traits: ["Narrower shoulders", "Wider hips", "Defined lower body"] },
+    { label: "Inverted Triangle", traits: ["Broader shoulders", "Narrower hips", "Athletic upper body"] },
+    { label: "Rectangle", traits: ["Balanced proportions", "Straight silhouette", "Even distribution"] },
+    { label: "Round", traits: ["Fuller midsection", "Proportionate limbs", "Soft curves"] },
+  ],
+  male: [
+    { label: "Rectangle", traits: ["Even proportions", "Straight torso", "Balanced build"] },
+    { label: "Triangle", traits: ["Narrower shoulders", "Wider waist", "Solid lower body"] },
+    { label: "Inverted Triangle", traits: ["Broad shoulders", "Narrow waist", "V-shaped torso"] },
+    { label: "Oval", traits: ["Fuller midsection", "Rounded torso", "Proportionate limbs"] },
+    { label: "Trapezoid", traits: ["Wide shoulders", "Slightly narrow waist", "Athletic build"] },
+  ],
+};
+
 const DetectionResultStep = ({ step, answers, gender, aiResults }: { step: OnboardingStep; answers: Record<string, string[]>; gender?: "female" | "male" | null; aiResults?: Record<string, any> }) => {
   const isFace = step.detectionMode === "face";
   const [revealed, setRevealed] = useState(false);
