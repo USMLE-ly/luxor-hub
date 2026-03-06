@@ -344,6 +344,60 @@ const Calibration = () => {
     }
   }, [phase]);
 
+  // Confetti effect on progress screen
+  useEffect(() => {
+    if (phase !== "progress") return;
+    const timer = setTimeout(() => {
+      const canvas = document.createElement("canvas");
+      canvas.style.cssText = "position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:100;pointer-events:none";
+      document.body.appendChild(canvas);
+      const ctx = canvas.getContext("2d")!;
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const colors = ["hsl(142,60%,48%)", "hsl(43,74%,49%)", "#a855f7", "#fff", "hsl(270,60%,55%)"];
+      const particles = Array.from({ length: 80 }, () => ({
+        x: canvas.width / 2 + (Math.random() - 0.5) * 200,
+        y: canvas.height * 0.3,
+        vx: (Math.random() - 0.5) * 12,
+        vy: -Math.random() * 10 - 2,
+        w: Math.random() * 8 + 4,
+        h: Math.random() * 6 + 2,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        rotation: Math.random() * 360,
+        rotSpeed: (Math.random() - 0.5) * 15,
+        alpha: 1,
+      }));
+
+      let frame = 0;
+      const animate = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let alive = false;
+        particles.forEach(p => {
+          p.vy += 0.25;
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rotation += p.rotSpeed;
+          p.alpha = Math.max(0, p.alpha - 0.005);
+          if (p.alpha <= 0) return;
+          alive = true;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rotation * Math.PI) / 180);
+          ctx.globalAlpha = p.alpha;
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          ctx.restore();
+        });
+        frame++;
+        if (alive && frame < 200) requestAnimationFrame(animate);
+        else { canvas.remove(); }
+      };
+      requestAnimationFrame(animate);
+    }, 1800);
+    return () => clearTimeout(timer);
+  }, [phase]);
+
   const calibrationSteps = gender === "female" ? femaleCalibrationSteps : maleCalibrationSteps;
   const totalSteps = calibrationSteps.length;
   const currentStepData = calibrationSteps[currentStep];
