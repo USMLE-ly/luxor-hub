@@ -1009,7 +1009,7 @@ const StepRenderer = ({ step, answers, onSelect, gender, aiResults }: StepRender
   }
 
   if (step.type === "generating") {
-    return <GeneratingStep step={step} />;
+    return <GeneratingStep step={step} gender={gender} />;
   }
 
   if (step.type === "detectionResult") {
