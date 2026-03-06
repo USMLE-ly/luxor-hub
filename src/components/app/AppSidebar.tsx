@@ -1,4 +1,4 @@
-import { Home, Shirt, Wand2, MessageCircle, BarChart3, Settings, LogOut, Sparkles, Move, User, ScanEye, Trophy, Flame, Award, Bell } from "lucide-react";
+import { Home, Shirt, Wand2, MessageCircle, BarChart3, Settings, LogOut, Sparkles, Move, User, ScanEye, Trophy, Flame, Award, Bell, CalendarDays, LayoutGrid } from "lucide-react";
 import { NotificationBell } from "./NotificationBell";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
@@ -21,9 +21,11 @@ const navItems = [
   { title: "Outfit Generator", url: "/outfits", icon: Wand2 },
   { title: "Outfit Builder", url: "/outfit-builder", icon: Move },
   { title: "Outfit Analysis", url: "/outfit-analysis", icon: ScanEye },
+  { title: "Outfit Calendar", url: "/outfit-calendar", icon: CalendarDays },
   { title: "AI Stylist", url: "/chat", icon: MessageCircle },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Inspiration", url: "/inspiration", icon: Sparkles },
+  { title: "Mood Board", url: "/mood-board", icon: LayoutGrid },
   { title: "Leaderboard", url: "/leaderboard", icon: Trophy },
   { title: "Weekly Challenge", url: "/weekly-challenge", icon: Flame },
   { title: "Badges", url: "/badges", icon: Award },

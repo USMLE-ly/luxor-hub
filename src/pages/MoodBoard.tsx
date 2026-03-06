@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
-  LayoutGrid, Plus, Trash2, Image, Type, Palette, Link2, GripVertical, X, Save, FolderOpen,
+  LayoutGrid, Plus, Trash2, Image, Type, Palette, Link2, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,15 +50,15 @@ const MoodBoard = () => {
 
   const fetchBoards = async () => {
     if (!user) return;
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("mood_boards")
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
     if (data) {
-      setBoards(data);
+      setBoards(data as Board[]);
       if (data.length > 0 && !activeBoard) {
-        setActiveBoard(data[0]);
+        setActiveBoard(data[0] as Board);
         fetchItems(data[0].id);
       }
     }
@@ -66,15 +66,15 @@ const MoodBoard = () => {
   };
 
   const fetchItems = async (boardId: string) => {
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("mood_board_items")
       .select("*")
       .eq("board_id", boardId)
       .order("created_at");
     if (data) {
-      setItems(data.map(d => ({
+      setItems((data as any[]).map((d: any) => ({
         id: d.id,
-        type: d.type as any,
+        type: d.type,
         content: d.content,
         x: d.position_x,
         y: d.position_y,
@@ -86,7 +86,7 @@ const MoodBoard = () => {
 
   const createBoard = async () => {
     if (!user || !newBoardName.trim()) return;
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("mood_boards")
       .insert({ user_id: user.id, name: newBoardName.trim() })
       .select()
@@ -96,15 +96,15 @@ const MoodBoard = () => {
       toast.success("Board created!");
       setShowNewBoard(false);
       setNewBoardName("");
-      setActiveBoard(data);
+      setActiveBoard(data as Board);
       setItems([]);
       fetchBoards();
     }
   };
 
   const deleteBoard = async (id: string) => {
-    await supabase.from("mood_board_items").delete().eq("board_id", id);
-    const { error } = await supabase.from("mood_boards").delete().eq("id", id);
+    await (supabase as any).from("mood_board_items").delete().eq("board_id", id);
+    const { error } = await (supabase as any).from("mood_boards").delete().eq("id", id);
     if (error) toast.error("Failed to delete board");
     else {
       toast.success("Board deleted");
@@ -121,7 +121,7 @@ const MoodBoard = () => {
     else if (newItemType === "link") content = { url: newItemContent };
     else if (newItemType === "image") content = { url: newItemContent };
 
-    const newItem = {
+    const newDbItem = {
       board_id: activeBoard.id,
       type: newItemType,
       content,
@@ -131,12 +131,13 @@ const MoodBoard = () => {
       height: newItemType === "color" ? 80 : newItemType === "text" ? 60 : 180,
     };
 
-    const { data, error } = await supabase.from("mood_board_items").insert(newItem).select().single();
+    const { data, error } = await (supabase as any).from("mood_board_items").insert(newDbItem).select().single();
     if (error) toast.error("Failed to add item");
     else {
+      const d = data as any;
       setItems(prev => [...prev, {
-        id: data.id, type: data.type as any, content: data.content,
-        x: data.position_x, y: data.position_y, width: data.width, height: data.height,
+        id: d.id, type: d.type, content: d.content,
+        x: d.position_x, y: d.position_y, width: d.width, height: d.height,
       }]);
       setShowAddItem(false);
       setNewItemContent("");
@@ -154,15 +155,16 @@ const MoodBoard = () => {
       if (uploadErr) { toast.error("Upload failed"); return; }
       const { data: urlData } = supabase.storage.from("look-photos").getPublicUrl(path);
       
-      const newItem = {
-        board_id: activeBoard.id, type: "image" as const,
+      const newDbItem = {
+        board_id: activeBoard.id, type: "image",
         content: { url: urlData.publicUrl },
         position_x: 20 + Math.random() * 200, position_y: 20 + Math.random() * 200,
         width: 180, height: 180,
       };
-      const { data, error } = await supabase.from("mood_board_items").insert(newItem).select().single();
+      const { data, error } = await (supabase as any).from("mood_board_items").insert(newDbItem).select().single();
       if (!error && data) {
-        setItems(prev => [...prev, { id: data.id, type: "image", content: data.content, x: data.position_x, y: data.position_y, width: 180, height: 180 }]);
+        const d = data as any;
+        setItems(prev => [...prev, { id: d.id, type: "image", content: d.content, x: d.position_x, y: d.position_y, width: 180, height: 180 }]);
         toast.success("Image added!");
       }
     };
@@ -170,7 +172,7 @@ const MoodBoard = () => {
   };
 
   const deleteItem = async (id: string) => {
-    await supabase.from("mood_board_items").delete().eq("id", id);
+    await (supabase as any).from("mood_board_items").delete().eq("id", id);
     setItems(prev => prev.filter(i => i.id !== id));
   };
 
@@ -195,7 +197,7 @@ const MoodBoard = () => {
     if (!dragging) return;
     const item = items.find(i => i.id === dragging);
     if (item) {
-      await supabase.from("mood_board_items").update({ position_x: item.x, position_y: item.y }).eq("id", item.id);
+      await (supabase as any).from("mood_board_items").update({ position_x: item.x, position_y: item.y }).eq("id", item.id);
     }
     setDragging(null);
   }, [dragging, items]);
@@ -259,9 +261,9 @@ const MoodBoard = () => {
         {/* Canvas */}
         {activeBoard ? (
           <>
-            <div className="flex gap-2 mb-3">
+            <div className="flex gap-2 mb-3 flex-wrap">
               <Button size="sm" variant="outline" onClick={() => { setNewItemType("image"); setShowAddItem(true); }} className="gap-1.5 text-xs">
-                <Image className="w-3.5 h-3.5" /> Image
+                <Image className="w-3.5 h-3.5" /> Image URL
               </Button>
               <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()} className="gap-1.5 text-xs">
                 <Image className="w-3.5 h-3.5" /> Upload
@@ -336,8 +338,7 @@ const MoodBoard = () => {
                 placeholder={
                   newItemType === "image" ? "Image URL" :
                   newItemType === "color" ? "Hex color (e.g. #D4A574)" :
-                  newItemType === "text" ? "Your text" :
-                  "URL"
+                  newItemType === "text" ? "Your text" : "URL"
                 }
                 value={newItemContent}
                 onChange={e => setNewItemContent(e.target.value)}
