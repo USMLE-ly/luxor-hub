@@ -670,6 +670,28 @@ const GeneratingStep = ({ step, gender }: { step: OnboardingStep; gender?: "fema
     };
     frame = requestAnimationFrame(animate);
     if (navigator.vibrate) navigator.vibrate([15, 50, 25]);
+
+    // Premium completion chime via Web Audio API
+    try {
+      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const playNote = (freq: number, start: number, dur: number, vol: number) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime + start);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + start + dur);
+        osc.connect(gain).connect(audioCtx.destination);
+        osc.start(audioCtx.currentTime + start);
+        osc.stop(audioCtx.currentTime + start + dur);
+      };
+      // Ascending arpeggio: C6 → E6 → G6 → C7
+      playNote(1047, 0, 0.2, 0.1);
+      playNote(1319, 0.1, 0.2, 0.1);
+      playNote(1568, 0.2, 0.25, 0.12);
+      playNote(2093, 0.35, 0.4, 0.08);
+    } catch (_) {}
+
     return () => cancelAnimationFrame(frame);
   }, [allDone]);
 
