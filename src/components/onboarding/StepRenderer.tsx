@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Camera, Smartphone, Video, User, FlipHorizontal } from "lucide-react";
+import { Check, Camera, Smartphone, Video, User, FlipHorizontal, Shirt, Glasses, Watch, Gem, Scissors } from "lucide-react";
 import type { OnboardingStep } from "./onboardingSteps";
 import FaceShapeIllustration from "@/components/app/FaceShapeIllustration";
 import BodyShapeIllustration from "@/components/app/BodyShapeIllustration";
