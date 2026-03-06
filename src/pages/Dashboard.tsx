@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -52,6 +52,11 @@ const Dashboard = () => {
   const [closetItems, setClosetItems] = useState<{ id: string; photo_url: string | null; name: string | null; category: string }[]>([]);
   const [outfitsList, setOutfitsList] = useState<{ id: string; name: string; occasion: string | null; items: string[] }[]>([]);
   const [activeOccasion, setActiveOccasion] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [pullDistance, setPullDistance] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const touchStartY = useRef(0);
+  const isPulling = useRef(false);
 
   useEffect(() => {
     if (!user) return;
@@ -115,6 +120,56 @@ const Dashboard = () => {
     }
   }, [styleProfile.onboarding_completed, user, navigate]);
 
+  const refreshData = useCallback(async () => {
+    if (!user || refreshing) return;
+    setRefreshing(true);
+    try {
+      const colorSeason = styleProfile.preferences?.aiAnalysis?.colorSeason || "Autumn";
+      const [shopRes, outfitsRes] = await Promise.all([
+        supabase.functions.invoke("shop-products", { body: { colorSeason, category: "all" } }),
+        supabase.from("outfits").select("id, name, occasion").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
+      ]);
+      if (shopRes.data?.products) setShopProducts(shopRes.data.products.slice(0, 6));
+      if (outfitsRes.data) {
+        const outfitsWithItems = await Promise.all(
+          outfitsRes.data.map(async (outfit: any) => {
+            const { data: oi } = await supabase.from("outfit_items").select("clothing_item_id").eq("outfit_id", outfit.id).limit(4);
+            return { ...outfit, items: oi?.map((i: any) => i.clothing_item_id) || [] };
+          })
+        );
+        setOutfitsList(outfitsWithItems);
+      }
+    } catch (e) {
+      console.error("Refresh error:", e);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [user, refreshing, styleProfile.preferences]);
+
+  // Pull-to-refresh touch handlers
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (scrollRef.current && scrollRef.current.scrollTop <= 0) {
+      touchStartY.current = e.touches[0].clientY;
+      isPulling.current = true;
+    }
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!isPulling.current) return;
+    const diff = e.touches[0].clientY - touchStartY.current;
+    if (diff > 0) {
+      setPullDistance(Math.min(diff * 0.5, 80));
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    if (pullDistance > 60) {
+      refreshData();
+    }
+    setPullDistance(0);
+    isPulling.current = false;
+  }, [pullDistance, refreshData]);
+
   const calibrationProgress = styleProfile.preferences?.calibrationProgress || 0;
   const hasCalibration = calibrationProgress > 0;
   const displayProgress = hasCalibration ? calibrationProgress : 73;
@@ -142,12 +197,37 @@ const Dashboard = () => {
 
   return (
     <AppLayout>
-      <motion.div
-        className="p-5 lg:p-8 max-w-2xl mx-auto space-y-5"
-        variants={stagger}
-        initial="hidden"
-        animate="show"
+      <div
+        ref={scrollRef}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        className="relative"
       >
+        {/* Pull-to-refresh indicator */}
+        <AnimatePresence>
+          {(pullDistance > 0 || refreshing) && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: refreshing ? 48 : pullDistance }}
+              exit={{ opacity: 0, height: 0 }}
+              className="flex items-center justify-center overflow-hidden"
+            >
+              <motion.div
+                animate={refreshing ? { rotate: 360 } : { rotate: pullDistance * 3 }}
+                transition={refreshing ? { duration: 0.8, repeat: Infinity, ease: "linear" } : { duration: 0 }}
+                className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full"
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <motion.div
+          className="p-5 lg:p-8 max-w-2xl mx-auto space-y-5"
+          variants={stagger}
+          initial="hidden"
+          animate="show"
+        >
         {/* Header */}
         <motion.div variants={fadeUp} className="flex items-center justify-between">
           <div className="w-10 h-10">
@@ -232,33 +312,6 @@ const Dashboard = () => {
 
             {/* Calibration Section */}
             <div className="text-center space-y-3">
-              {/* Circular progress ring */}
-              <div className="mx-auto w-28 h-28 relative flex items-center justify-center">
-                <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 112 112">
-                  <circle cx="56" cy="56" r="48" fill="none" stroke="hsl(var(--border))" strokeWidth="4" opacity="0.3" />
-                  <motion.circle
-                    cx="56" cy="56" r="48" fill="none"
-                    stroke="url(#progressGrad)"
-                    strokeWidth="4"
-                    strokeLinecap="round"
-                    strokeDasharray={2 * Math.PI * 48}
-                    initial={{ strokeDashoffset: 2 * Math.PI * 48 }}
-                    animate={{ strokeDashoffset: 2 * Math.PI * 48 * (1 - displayProgress / 100) }}
-                    transition={{ duration: 1.5, ease: "easeOut", delay: 0.5 }}
-                  />
-                  <defs>
-                    <linearGradient id="progressGrad" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor="hsl(142, 60%, 48%)" />
-                      <stop offset="100%" stopColor="hsl(var(--primary))" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-                <div className="flex flex-col items-center">
-                  <Sparkles className="w-6 h-6 text-primary mb-1" />
-                  <span className="text-lg font-bold text-foreground font-sans">{displayProgress}%</span>
-                </div>
-              </div>
-
               <h3 className="font-display text-lg font-bold text-foreground">
                 Calibrate your Style Formula
               </h3>
@@ -514,6 +567,7 @@ const Dashboard = () => {
           </div>
         </motion.div>
       </motion.div>
+      </div>
     </AppLayout>
   );
 };
