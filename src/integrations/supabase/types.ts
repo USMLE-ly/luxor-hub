@@ -242,6 +242,71 @@ export type Database = {
         }
         Relationships: []
       }
+      mood_board_items: {
+        Row: {
+          board_id: string
+          content: Json
+          created_at: string
+          height: number
+          id: string
+          position_x: number
+          position_y: number
+          type: string
+          width: number
+        }
+        Insert: {
+          board_id: string
+          content?: Json
+          created_at?: string
+          height?: number
+          id?: string
+          position_x?: number
+          position_y?: number
+          type?: string
+          width?: number
+        }
+        Update: {
+          board_id?: string
+          content?: Json
+          created_at?: string
+          height?: number
+          id?: string
+          position_x?: number
+          position_y?: number
+          type?: string
+          width?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mood_board_items_board_id_fkey"
+            columns: ["board_id"]
+            isOneToOne: false
+            referencedRelation: "mood_boards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mood_boards: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       newsletter_subscribers: {
         Row: {
           email: string
