@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
-  LayoutGrid, Plus, Trash2, Image, Type, Palette, Link2, X,
+  LayoutGrid, Plus, Trash2, Image, Type, Palette, Link2, X, GripVertical,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,7 +34,7 @@ const MoodBoard = () => {
   const [items, setItems] = useState<BoardItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [dragging, setDragging] = useState<string | null>(null);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const dragOffsetRef = useRef({ x: 0, y: 0 });
   const [showNewBoard, setShowNewBoard] = useState(false);
   const [newBoardName, setNewBoardName] = useState("");
   const [showAddItem, setShowAddItem] = useState(false);
@@ -42,6 +42,12 @@ const MoodBoard = () => {
   const [newItemContent, setNewItemContent] = useState("");
   const canvasRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const draggingRef = useRef<string | null>(null);
+  const itemsRef = useRef<BoardItem[]>([]);
+
+  // Keep refs in sync
+  useEffect(() => { itemsRef.current = items; }, [items]);
+  useEffect(() => { draggingRef.current = dragging; }, [dragging]);
 
   useEffect(() => {
     if (!user) return;
@@ -73,13 +79,8 @@ const MoodBoard = () => {
       .order("created_at");
     if (data) {
       setItems((data as any[]).map((d: any) => ({
-        id: d.id,
-        type: d.type,
-        content: d.content,
-        x: d.position_x,
-        y: d.position_y,
-        width: d.width,
-        height: d.height,
+        id: d.id, type: d.type, content: d.content,
+        x: d.position_x, y: d.position_y, width: d.width, height: d.height,
       })));
     }
   };
@@ -176,43 +177,56 @@ const MoodBoard = () => {
     setItems(prev => prev.filter(i => i.id !== id));
   };
 
-  const handleMouseDown = (e: React.MouseEvent, itemId: string) => {
-    const item = items.find(i => i.id === itemId);
-    if (!item) return;
-    const rect = canvasRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    setDragging(itemId);
-    setDragOffset({ x: e.clientX - rect.left - item.x, y: e.clientY - rect.top - item.y });
+  // Unified pointer event handlers for both mouse and touch
+  const getPointerPos = (e: React.MouseEvent | React.TouchEvent) => {
+    if ('touches' in e) {
+      return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }
+    return { x: e.clientX, y: e.clientY };
   };
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!dragging || !canvasRef.current) return;
+  const handlePointerDown = (e: React.MouseEvent | React.TouchEvent, itemId: string) => {
+    const item = items.find(i => i.id === itemId);
+    if (!item || !canvasRef.current) return;
+    e.preventDefault();
+    const pos = getPointerPos(e);
     const rect = canvasRef.current.getBoundingClientRect();
-    const newX = Math.max(0, e.clientX - rect.left - dragOffset.x);
-    const newY = Math.max(0, e.clientY - rect.top - dragOffset.y);
-    setItems(prev => prev.map(i => i.id === dragging ? { ...i, x: newX, y: newY } : i));
-  }, [dragging, dragOffset]);
+    setDragging(itemId);
+    dragOffsetRef.current = { x: pos.x - rect.left - item.x, y: pos.y - rect.top - item.y };
+  };
 
-  const handleMouseUp = useCallback(async () => {
-    if (!dragging) return;
-    const item = items.find(i => i.id === dragging);
+  const handlePointerMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    if (!draggingRef.current || !canvasRef.current) return;
+    e.preventDefault();
+    const pos = 'touches' in e ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : { x: e.clientX, y: e.clientY };
+    const rect = canvasRef.current.getBoundingClientRect();
+    const newX = Math.max(0, Math.min(rect.width - 40, pos.x - rect.left - dragOffsetRef.current.x));
+    const newY = Math.max(0, Math.min(rect.height - 40, pos.y - rect.top - dragOffsetRef.current.y));
+    setItems(prev => prev.map(i => i.id === draggingRef.current ? { ...i, x: newX, y: newY } : i));
+  }, []);
+
+  const handlePointerUp = useCallback(async () => {
+    const dragId = draggingRef.current;
+    if (!dragId) return;
+    const item = itemsRef.current.find(i => i.id === dragId);
     if (item) {
       await (supabase as any).from("mood_board_items").update({ position_x: item.x, position_y: item.y }).eq("id", item.id);
     }
     setDragging(null);
-  }, [dragging, items]);
+  }, []);
 
   const renderItem = (item: BoardItem) => {
     switch (item.type) {
       case "image":
-        return <img src={item.content?.url} alt="" className="w-full h-full object-cover rounded-lg" />;
+        return <img src={item.content?.url} alt="" className="w-full h-full object-cover rounded-lg pointer-events-none" draggable={false} />;
       case "color":
-        return <div className="w-full h-full rounded-lg" style={{ backgroundColor: item.content?.hex || "#ccc" }} />;
+        return <div className="w-full h-full rounded-lg pointer-events-none" style={{ backgroundColor: item.content?.hex || "#ccc" }} />;
       case "text":
-        return <div className="w-full h-full flex items-center justify-center p-2"><p className="font-sans text-xs text-foreground text-center">{item.content?.text}</p></div>;
+        return <div className="w-full h-full flex items-center justify-center p-2 pointer-events-none"><p className="font-sans text-xs text-foreground text-center">{item.content?.text}</p></div>;
       case "link":
         return (
-          <a href={item.content?.url} target="_blank" rel="noopener noreferrer" className="w-full h-full flex items-center justify-center p-2 bg-secondary/50 rounded-lg">
+          <a href={item.content?.url} target="_blank" rel="noopener noreferrer" className="w-full h-full flex items-center justify-center p-2 bg-secondary/50 rounded-lg"
+            onClick={e => { if (dragging) e.preventDefault(); }}>
             <div className="text-center">
               <Link2 className="w-5 h-5 text-primary mx-auto mb-1" />
               <p className="font-sans text-[10px] text-muted-foreground truncate">{item.content?.url}</p>
@@ -244,16 +258,16 @@ const MoodBoard = () => {
         {boards.length > 0 && (
           <div className="flex gap-2 overflow-x-auto pb-3 mb-4 scrollbar-none">
             {boards.map(board => (
-              <button key={board.id}
+              <div key={board.id}
                 onClick={() => { setActiveBoard(board); fetchItems(board.id); }}
-                className={`px-4 py-1.5 rounded-full text-xs font-sans whitespace-nowrap transition-all flex items-center gap-1.5 ${
+                className={`px-4 py-1.5 rounded-full text-xs font-sans whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
                   activeBoard?.id === board.id ? "bg-foreground text-background font-semibold" : "bg-secondary text-muted-foreground hover:text-foreground"
                 }`}>
                 {board.name}
-                <button onClick={(e) => { e.stopPropagation(); deleteBoard(board.id); }} className="hover:text-destructive">
+                <span onClick={(e) => { e.stopPropagation(); deleteBoard(board.id); }} className="hover:text-destructive cursor-pointer">
                   <X className="w-3 h-3" />
-                </button>
-              </button>
+                </span>
+              </div>
             ))}
           </div>
         )}
@@ -282,10 +296,13 @@ const MoodBoard = () => {
 
             <div
               ref={canvasRef}
-              className="relative rounded-2xl border border-border bg-card min-h-[500px] overflow-hidden select-none"
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
+              className="relative rounded-2xl border border-border bg-card min-h-[500px] overflow-hidden select-none touch-none"
+              onMouseMove={handlePointerMove}
+              onMouseUp={handlePointerUp}
+              onMouseLeave={handlePointerUp}
+              onTouchMove={handlePointerMove}
+              onTouchEnd={handlePointerUp}
+              onTouchCancel={handlePointerUp}
             >
               {items.length === 0 && (
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -295,13 +312,22 @@ const MoodBoard = () => {
               {items.map(item => (
                 <div
                   key={item.id}
-                  className={`absolute group cursor-move rounded-lg border border-border shadow-sm overflow-hidden ${dragging === item.id ? "ring-2 ring-primary z-50" : "hover:ring-1 hover:ring-primary/50"}`}
+                  className={`absolute group rounded-lg border border-border shadow-sm overflow-hidden transition-shadow ${
+                    dragging === item.id ? "ring-2 ring-primary z-50 shadow-lg cursor-grabbing" : "hover:ring-1 hover:ring-primary/50 cursor-grab"
+                  }`}
                   style={{ left: item.x, top: item.y, width: item.width, height: item.height }}
-                  onMouseDown={e => handleMouseDown(e, item.id)}
+                  onMouseDown={e => handlePointerDown(e, item.id)}
+                  onTouchStart={e => handlePointerDown(e, item.id)}
                 >
                   {renderItem(item)}
+                  {/* Drag handle indicator */}
+                  <div className="absolute top-1 left-1 w-5 h-5 rounded bg-background/60 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <GripVertical className="w-3 h-3 text-foreground/60" />
+                  </div>
                   <button
                     onClick={(e) => { e.stopPropagation(); deleteItem(item.id); }}
+                    onMouseDown={e => e.stopPropagation()}
+                    onTouchStart={e => e.stopPropagation()}
                     className="absolute top-1 right-1 w-5 h-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     <X className="w-3 h-3" />

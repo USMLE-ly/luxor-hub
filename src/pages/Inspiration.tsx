@@ -31,7 +31,7 @@ const brandLogos = [
 ];
 
 const Inspiration = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState("All");
   const [liked, setLiked] = useState<Set<string>>(new Set());
@@ -43,6 +43,7 @@ const Inspiration = () => {
   const [closetCategories, setClosetCategories] = useState<string[]>([]);
   const [imgErrors, setImgErrors] = useState<Set<string>>(new Set());
   const [sortByMatch, setSortByMatch] = useState(true);
+  const [profileLoaded, setProfileLoaded] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -55,12 +56,14 @@ const Inspiration = () => {
       setBodyShape(prefs?.bodyShape || "");
       setArchetype(styleRes.data?.archetype || "");
       if (closetRes.data) setClosetCategories(closetRes.data.map(i => i.category));
+      setProfileLoaded(true);
     });
   }, [user]);
 
   useEffect(() => {
+    if (!profileLoaded) return;
     fetchProducts();
-  }, [activeCategory, colorSeason, bodyShape, archetype]);
+  }, [activeCategory, profileLoaded, colorSeason, bodyShape, archetype]);
 
   const fetchProducts = async () => {
     setLoading(true);
