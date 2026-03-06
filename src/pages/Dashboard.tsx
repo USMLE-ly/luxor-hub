@@ -197,12 +197,37 @@ const Dashboard = () => {
 
   return (
     <AppLayout>
-      <motion.div
-        className="p-5 lg:p-8 max-w-2xl mx-auto space-y-5"
-        variants={stagger}
-        initial="hidden"
-        animate="show"
+      <div
+        ref={scrollRef}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        className="relative"
       >
+        {/* Pull-to-refresh indicator */}
+        <AnimatePresence>
+          {(pullDistance > 0 || refreshing) && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: refreshing ? 48 : pullDistance }}
+              exit={{ opacity: 0, height: 0 }}
+              className="flex items-center justify-center overflow-hidden"
+            >
+              <motion.div
+                animate={refreshing ? { rotate: 360 } : { rotate: pullDistance * 3 }}
+                transition={refreshing ? { duration: 0.8, repeat: Infinity, ease: "linear" } : { duration: 0 }}
+                className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full"
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <motion.div
+          className="p-5 lg:p-8 max-w-2xl mx-auto space-y-5"
+          variants={stagger}
+          initial="hidden"
+          animate="show"
+        >
         {/* Header */}
         <motion.div variants={fadeUp} className="flex items-center justify-between">
           <div className="w-10 h-10">
