@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import {
   Sparkles, Palette, Star, ArrowRight, CheckCircle2, ShieldCheck,
   Scissors, Shirt, Check, Dna, User, ScanFace, Glasses, Gem, Gift,
+  Layers, Shapes, Paintbrush,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AppLayout } from "@/components/app/AppLayout";
@@ -22,6 +23,10 @@ interface StyleDNAData {
   styleScore: number;
   recommendations: string[];
   summary: string;
+  recommendedPrints?: string[];
+  recommendedFabrics?: string[];
+  flatteringSilhouettes?: string[];
+  colorUsageTips?: { color: string; usage: string }[];
 }
 
 const colorNameToHsl: Record<string, string> = {
@@ -417,6 +422,99 @@ const StyleDNA = () => {
                   <ArrowRight className="w-4 h-4 text-muted-foreground" />
                 </div>
               </motion.button>
+
+              {/* ===== RECOMMENDED PRINTS & FABRICS ===== */}
+              {(dna.recommendedPrints?.length || dna.recommendedFabrics?.length) ? (
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.36 }}
+                  className="rounded-2xl border border-border bg-card p-5"
+                >
+                  <div className="flex items-center gap-2 mb-4">
+                    <Layers className="w-5 h-5 text-[hsl(15,80%,55%)]" />
+                    <h3 className="font-display text-base font-bold text-foreground">Prints & Fabrics</h3>
+                  </div>
+                  {dna.recommendedPrints && dna.recommendedPrints.length > 0 && (
+                    <div className="mb-4">
+                      <p className="text-[10px] font-sans uppercase tracking-widest text-muted-foreground mb-2">Recommended Prints</p>
+                      <div className="flex flex-wrap gap-2">
+                        {dna.recommendedPrints.map((print, i) => (
+                          <span key={i} className="px-3 py-1.5 rounded-full bg-secondary text-xs font-sans text-foreground flex items-center gap-1.5">
+                            <Paintbrush className="w-3 h-3 text-[hsl(15,80%,55%)]" />
+                            {print}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {dna.recommendedFabrics && dna.recommendedFabrics.length > 0 && (
+                    <div>
+                      <p className="text-[10px] font-sans uppercase tracking-widest text-muted-foreground mb-2">Best Fabrics</p>
+                      <div className="flex flex-wrap gap-2">
+                        {dna.recommendedFabrics.map((fabric, i) => (
+                          <span key={i} className="px-3 py-1.5 rounded-full bg-secondary text-xs font-sans text-foreground flex items-center gap-1.5">
+                            <Layers className="w-3 h-3 text-[hsl(45,80%,55%)]" />
+                            {fabric}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              ) : null}
+
+              {/* ===== FLATTERING SILHOUETTES ===== */}
+              {dna.flatteringSilhouettes && dna.flatteringSilhouettes.length > 0 && (
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.37 }}
+                  className="rounded-2xl border border-border bg-card p-5"
+                >
+                  <div className="flex items-center gap-2 mb-4">
+                    <Shapes className="w-5 h-5 text-[hsl(270,40%,65%)]" />
+                    <h3 className="font-display text-base font-bold text-foreground">Flattering Silhouettes</h3>
+                  </div>
+                  <div className="space-y-3">
+                    {dna.flatteringSilhouettes.map((sil, i) => (
+                      <div key={i} className="flex items-start gap-3">
+                        <CheckCircle2 className="w-4 h-4 text-[hsl(270,40%,65%)] mt-0.5 flex-shrink-0" />
+                        <p className="text-sm font-sans text-muted-foreground leading-relaxed">{sil}</p>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* ===== COLOR USAGE TIPS ===== */}
+              {dna.colorUsageTips && dna.colorUsageTips.length > 0 && (
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.38 }}
+                  className="rounded-2xl border border-border bg-card p-5"
+                >
+                  <div className="flex items-center gap-2 mb-4">
+                    <Palette className="w-5 h-5 text-[hsl(45,80%,55%)]" />
+                    <h3 className="font-display text-base font-bold text-foreground">Color Usage Guide</h3>
+                  </div>
+                  <div className="space-y-2.5">
+                    {dna.colorUsageTips.map((tip, i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <div
+                          className="w-6 h-6 rounded-full border border-border flex-shrink-0"
+                          style={{ backgroundColor: getColorHsl(tip.color) }}
+                        />
+                        <div className="flex-1">
+                          <span className="text-xs font-sans font-semibold text-foreground">{tip.color}</span>
+                          <span className="text-xs font-sans text-muted-foreground ml-1.5">— {tip.usage}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
 
               {/* AI Summary */}
               <motion.div

@@ -35,6 +35,10 @@ serve(async (req) => {
 6. **Key Recommendations**: 3-4 specific style tips for their body type and coloring.
 7. **Face Shape**: Determine face shape from selfie (Oval, Round, Square, Heart, Oblong, or Diamond).
 8. **Body Shape**: Determine body shape from full body photo. For women: Hourglass, Triangle, Inverted Triangle, Rectangle, or Round. For men: Rectangle, Triangle, Inverted Triangle, Oval, or Trapezoid.
+9. **Recommended Prints**: 4-6 print/pattern types that suit their style archetype and body type.
+10. **Recommended Fabrics**: 4-6 fabric/material types that complement their body and style.
+11. **Flattering Silhouettes**: 4-6 specific garment silhouettes/cuts that flatter their body type.
+12. **Color Usage Tips**: For each best color, suggest what garment type it works best for.
 
 User preferences: ${JSON.stringify(preferences)}
 
@@ -51,7 +55,11 @@ Return JSON with this exact structure:
   "faceShape": "string",
   "faceShapeDescription": "string (1 sentence about their face shape characteristics)",
   "bodyShape": "string",
-  "bodyShapeTraits": ["string (3 traits)"]
+  "bodyShapeTraits": ["string (3 traits)"],
+  "recommendedPrints": ["string"],
+  "recommendedFabrics": ["string"],
+  "flatteringSilhouettes": ["string"],
+  "colorUsageTips": [{"color": "string", "usage": "string"}]
 }`
       }
     ];
@@ -93,8 +101,12 @@ Return JSON with this exact structure:
                   faceShapeDescription: { type: "string" },
                   bodyShape: { type: "string" },
                   bodyShapeTraits: { type: "array", items: { type: "string" } },
+                  recommendedPrints: { type: "array", items: { type: "string" } },
+                  recommendedFabrics: { type: "array", items: { type: "string" } },
+                  flatteringSilhouettes: { type: "array", items: { type: "string" } },
+                  colorUsageTips: { type: "array", items: { type: "object", properties: { color: { type: "string" }, usage: { type: "string" } }, required: ["color", "usage"] } },
                 },
-                required: ["colorSeason", "undertone", "bestColors", "colorsToAvoid", "archetype", "styleScore", "recommendations", "summary", "faceShape", "faceShapeDescription", "bodyShape", "bodyShapeTraits"],
+                required: ["colorSeason", "undertone", "bestColors", "colorsToAvoid", "archetype", "styleScore", "recommendations", "summary", "faceShape", "faceShapeDescription", "bodyShape", "bodyShapeTraits", "recommendedPrints", "recommendedFabrics", "flatteringSilhouettes", "colorUsageTips"],
                 additionalProperties: false,
               },
             },

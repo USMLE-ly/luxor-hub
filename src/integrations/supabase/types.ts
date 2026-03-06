@@ -477,6 +477,7 @@ export type Database = {
           id: string
           onboarding_completed: boolean | null
           preferences: Json | null
+          style_formula: Json | null
           style_score: number | null
           updated_at: string
           user_id: string
@@ -487,6 +488,7 @@ export type Database = {
           id?: string
           onboarding_completed?: boolean | null
           preferences?: Json | null
+          style_formula?: Json | null
           style_score?: number | null
           updated_at?: string
           user_id: string
@@ -497,6 +499,7 @@ export type Database = {
           id?: string
           onboarding_completed?: boolean | null
           preferences?: Json | null
+          style_formula?: Json | null
           style_score?: number | null
           updated_at?: string
           user_id?: string
