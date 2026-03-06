@@ -30,6 +30,8 @@ import StyleDNA from "./pages/StyleDNA";
 import Calibration from "./pages/Calibration";
 import ColorType from "./pages/ColorType";
 import Paywall from "./pages/Paywall";
+import OutfitCalendar from "./pages/OutfitCalendar";
+import MoodBoard from "./pages/MoodBoard";
 
 
 const queryClient = new QueryClient();
