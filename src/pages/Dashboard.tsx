@@ -164,6 +164,7 @@ const Dashboard = () => {
 
   const handleTouchEnd = useCallback(() => {
     if (pullDistance > 60) {
+      if (navigator.vibrate) navigator.vibrate(15);
       refreshData();
     }
     setPullDistance(0);
