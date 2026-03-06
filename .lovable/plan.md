@@ -1,50 +1,90 @@
 
 
-# Color Type Functionality + Scanner Reframing + Confetti + Haptic Feedback
+# AI Style Enhancement Suite -- Implementation Plan
 
-## 1. Color Type Palette — Add Color Detail Functionality
+All 8 features, organized into 4 implementation batches to keep changes manageable.
 
-**Problem**: The "View colors" buttons and palette swatches are non-interactive. Tapping them does nothing.
+---
 
-**Fix in `src/pages/ColorType.tsx`**:
-- Add an expandable detail view: tapping a palette section's "View colors" toggles showing ALL colors (not just 7+overflow) in a full grid with hex labels and color names
-- Tapping an individual color swatch shows a tooltip/modal with: hex code, color name, and which clothing categories it works best for (e.g., "Great for tops and accessories")
-- Add a copy-to-clipboard on hex code tap with toast confirmation
+## Batch 1: Item Compatibility Checker + Style Formula Dashboard
 
-## 2. Reframe Face & Body Scanner — "Best Clothes Match" Instead of Shape Detection
+### Item Compatibility Checker
+- **`src/pages/Chat.tsx`**: Add image upload button (camera icon) next to the text input. Convert uploaded image to base64, send alongside messages to the edge function. Add a quick prompt: "📸 Check if this item matches me".
+- **`supabase/functions/ai-chat/index.ts`**: Accept optional `image` field in the request body. When present, construct a multimodal message with the image + system prompt instructing AURELIA to evaluate the item against the user's color season, body type, style archetype, and existing closet. Return a compatibility verdict with percentage score and reasoning.
+- **`src/pages/Inspiration.tsx`**: Add a "Check Compatibility" action on each product card that navigates to `/chat` with pre-filled context about that product.
 
-**Problem**: The current detection result says "Face Shape Detected" / "Body Shape Detected" and shows shape labels. User wants it reframed as clothing compatibility.
+### Style Formula Dashboard
+- **`src/pages/StyleDNA.tsx`**: Add three new expandable sections below the existing hero card:
+  - **Recommended Prints & Fabrics**: AI-generated list of patterns, textures, materials suited to their archetype
+  - **Flattering Silhouettes**: Specific garment cuts, necklines, skirt lengths with icons
+  - **Complete Color Palette**: Enhanced view with "best for" labels on each swatch (e.g., "great for tops", "accent only")
+- **`supabase/functions/analyze-style-dna/index.ts`**: Extend the tool call schema to include `recommendedPrints`, `recommendedFabrics`, `flatteringSilhouettes` arrays. Store in existing `preferences` JSONB field.
+- **DB Migration**: Add `style_formula` JSONB column to `style_profiles` to cache the expanded formula separately.
 
-**Fix in `src/components/onboarding/onboardingSteps.ts`**:
-- Change `faceResult` question from "Face Shape Detected" to "Your Best Accessory Matches"
-- Change description to "Based on your facial proportions, here are the accessories and necklines that suit you best"
-- Change `bodyResult` question from "Body Shape Detected" to "Your Best Clothing Matches"
-- Change description to "Based on your body proportions, here are the silhouettes and cuts that flatter you most"
+---
 
-**Fix in `src/components/onboarding/StepRenderer.tsx`**:
-- After revealing the detected face shape, add a "Best For You" section showing: recommended necklines, glasses frames, earring styles, and hairstyles mapped to the detected face shape
-- After revealing the detected body shape, add a "Best For You" section showing: recommended silhouettes, dress cuts, trouser styles, and jacket fits mapped to the detected body shape
-- Keep the shape name as a secondary label but lead with the clothing recommendations
-- Add clothing-specific icons (Shirt, Scissors, etc.) to each recommendation
+## Batch 2: Wardrobe Gap Analysis + Shopping Match Score
 
-## 3. Confetti Animation on Calibration 73% Progress Screen
+### Wardrobe Gap Analysis
+- **New edge function `supabase/functions/wardrobe-gap/index.ts`**: Accepts the user's closet items list + style profile. Uses Gemini to analyze completeness across categories (basics, statement pieces, occasion wear, seasonal gaps) and returns a prioritized list of missing items with category, description, priority (high/medium/low), and estimated price range.
+- **`src/pages/Analytics.tsx`**: Add a "Wardrobe Gaps" section with a "Run AI Analysis" button. Display results as cards with missing item type, why it matters, and a "Shop This" CTA linking to Inspiration with pre-filtered category.
 
-**Fix in `src/pages/Calibration.tsx`**:
-- Add a canvas-based confetti burst that triggers when the progress bar animation completes (after ~1.8s delay = 0.6 delay + 1.2 duration)
-- Use a simple particle system: 80 confetti pieces in gold/primary/white colors, falling with gravity and rotation
-- Confetti fires from center-top, spreads across viewport, fades out over 3 seconds
-- No new dependencies — implement with a small canvas-based function inline
+### Shopping Match Score
+- **`supabase/functions/shop-products/index.ts`**: Replace the random score logic. Accept user's `colorSeason`, `bodyShape`, `archetype`, and `closetCategories` as query params. Calculate a deterministic match score based on: color compatibility with season (40%), style archetype fit (30%), wardrobe gap fill potential (30%).
+- **`src/pages/Inspiration.tsx`**: Color-code the match score badge (green >85%, gold 70-85%, gray <70%). Add a "Sort by Match" toggle button. Pass user profile data when fetching products.
 
-## 4. Haptic Feedback on Pull-to-Refresh
+---
 
-**Fix in `src/pages/Dashboard.tsx`**:
-- In `handleTouchEnd`, before calling `refreshData()`, trigger `navigator.vibrate(15)` for a subtle haptic tap
-- Add a second vibrate pattern `navigator.vibrate([10, 30, 10])` when refresh completes (in the `finally` block of `refreshData`)
+## Batch 3: Outfit Calendar Planner + Wear History Timeline
 
-## Files Modified
-- `src/pages/ColorType.tsx` — Interactive palettes with expand/detail/copy
-- `src/components/onboarding/onboardingSteps.ts` — Reframe detection result text
-- `src/components/onboarding/StepRenderer.tsx` — Add clothing recommendations to detection results
-- `src/pages/Calibration.tsx` — Confetti particle animation
-- `src/pages/Dashboard.tsx` — Haptic vibrate on pull-to-refresh
+### Outfit Calendar Planner
+- **New page `src/pages/OutfitCalendar.tsx`**: Month view calendar using existing `calendar_events` table. Each day cell shows outfit thumbnail or "+" to add. Tapping a day opens a sheet to select from saved outfits or type a quick description. Week/month toggle. Weather indicator per day (uses existing `get-weather` function).
+- **`src/App.tsx`**: Add route `/outfit-calendar`.
+- **`src/components/app/AppSidebar.tsx`**: Add "Outfit Calendar" nav item with `CalendarDays` icon.
+- **`src/components/app/BottomNav.tsx`**: No change (keep 4 tabs compact).
+
+### Wear History Timeline
+- **`src/pages/Analytics.tsx`**: Add a "Wear History" tab/section. Vertical timeline showing date, item name, category badge, and occasion. Data from `wear_logs` joined with `clothing_items`. Group by week/month with collapsible sections.
+- **`src/pages/Closet.tsx`**: Make the existing "Log Wear" action more prominent -- add a date picker so users can log past wears, not just today.
+
+---
+
+## Batch 4: Color Palette from Photo + Visual Mood Board
+
+### Color Palette from Photo
+- **New edge function `supabase/functions/extract-palette/index.ts`**: Accepts a base64 image. Uses Gemini Vision to extract 6-8 dominant colors with hex values and names. Cross-references against the user's color season palette to mark each as "Match" or "Avoid".
+- **`src/pages/ColorType.tsx`**: Add an "Extract from Photo" section with upload area. Display extracted colors as swatches with match/avoid indicators and a summary like "5 of 7 colors match your season".
+
+### Visual Mood Board Builder
+- **DB Migration**: Create `mood_boards` (id, user_id, name, created_at) and `mood_board_items` (id, board_id, type enum [image/color/text/link], content JSONB, position_x float, position_y float, width float, height float) tables with RLS policies scoped to `auth.uid() = user_id`.
+- **New page `src/pages/MoodBoard.tsx`**: Free-form canvas editor. Users can add images (upload/URL), color swatches (pick from palette or custom hex), text notes, and website links. Items are draggable and resizable. Multiple boards with a board selector sidebar. Save/load via the database.
+- **`src/App.tsx`**: Add route `/mood-board`.
+- **`src/components/app/AppSidebar.tsx`**: Add "Mood Board" nav item with `LayoutGrid` icon.
+
+---
+
+## Database Migrations Summary
+1. Add `style_formula JSONB DEFAULT '{}'` to `style_profiles`
+2. Create `mood_boards` table + RLS
+3. Create `mood_board_items` table + RLS
+
+## New Edge Functions
+1. `wardrobe-gap/index.ts` -- AI closet gap analysis
+2. `extract-palette/index.ts` -- Color extraction from photos
+
+## New Pages
+1. `/outfit-calendar` -- Calendar planner
+2. `/mood-board` -- Visual mood board builder
+
+## Modified Files
+- `src/pages/Chat.tsx` -- Image upload for compatibility checking
+- `src/pages/StyleDNA.tsx` -- Expanded style formula sections
+- `src/pages/Analytics.tsx` -- Gap analysis + wear history
+- `src/pages/Inspiration.tsx` -- Match score coloring + sort + compatibility CTA
+- `src/pages/ColorType.tsx` -- Photo palette extraction
+- `src/pages/Closet.tsx` -- Enhanced wear logging
+- `src/components/app/AppSidebar.tsx` -- New nav items
+- `supabase/functions/ai-chat/index.ts` -- Multimodal image support
+- `supabase/functions/analyze-style-dna/index.ts` -- Extended formula output
+- `supabase/functions/shop-products/index.ts` -- Deterministic match scoring
 

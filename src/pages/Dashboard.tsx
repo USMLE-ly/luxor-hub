@@ -143,6 +143,7 @@ const Dashboard = () => {
       console.error("Refresh error:", e);
     } finally {
       setRefreshing(false);
+      if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
     }
   }, [user, refreshing, styleProfile.preferences]);
 
@@ -164,6 +165,7 @@ const Dashboard = () => {
 
   const handleTouchEnd = useCallback(() => {
     if (pullDistance > 60) {
+      if (navigator.vibrate) navigator.vibrate(15);
       refreshData();
     }
     setPullDistance(0);

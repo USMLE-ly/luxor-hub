@@ -217,12 +217,12 @@ export const sharedSteps: OnboardingStep[] = [
     description: "Position your face within the frame and tap capture",
   },
   {
-    question: "Face Shape Detected",
+    question: "Your Best Accessory Matches",
     key: "faceResult",
     type: "detectionResult",
     options: [],
     detectionMode: "face",
-    description: "Based on your facial proportions and features",
+    description: "Based on your facial proportions, here are the accessories and necklines that suit you best",
   },
   {
     question: "Now let's capture your full body",
@@ -233,12 +233,12 @@ export const sharedSteps: OnboardingStep[] = [
     description: "Stand back and capture your full outfit for AI analysis",
   },
   {
-    question: "Body Shape Detected",
+    question: "Your Best Clothing Matches",
     key: "bodyResult",
     type: "detectionResult",
     options: [],
     detectionMode: "body",
-    description: "Based on your body proportions and silhouette",
+    description: "Based on your body proportions, here are the silhouettes and cuts that flatter you most",
   },
   {
     question: "Hold tight, we're generating your Style Formula!",

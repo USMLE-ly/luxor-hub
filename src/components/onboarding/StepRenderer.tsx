@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Camera, Smartphone, Video, User, FlipHorizontal } from "lucide-react";
+import { Check, Camera, Smartphone, Video, User, FlipHorizontal, Shirt, Glasses, Watch, Gem, Scissors } from "lucide-react";
 import type { OnboardingStep } from "./onboardingSteps";
 import FaceShapeIllustration from "@/components/app/FaceShapeIllustration";
 import BodyShapeIllustration from "@/components/app/BodyShapeIllustration";
@@ -622,6 +622,28 @@ const GeneratingStep = ({ step }: { step: OnboardingStep }) => {
   );
 };
 
+// Face shape → accessory/neckline recommendations
+const faceRecommendations: Record<string, { necklines: string[]; glasses: string[]; earrings: string[]; hairstyles: string[] }> = {
+  Oval: { necklines: ["V-neck", "Scoop", "Off-shoulder"], glasses: ["Any frame shape"], earrings: ["Drop earrings", "Studs"], hairstyles: ["Side part", "Loose waves"] },
+  Round: { necklines: ["V-neck", "Deep scoop", "Asymmetric"], glasses: ["Angular frames", "Cat-eye"], earrings: ["Long drops", "Angular shapes"], hairstyles: ["Side-swept bangs", "Layers"] },
+  Square: { necklines: ["Round neck", "Cowl neck", "Off-shoulder"], glasses: ["Round frames", "Oval"], earrings: ["Hoops", "Round drops"], hairstyles: ["Soft layers", "Side part"] },
+  Heart: { necklines: ["Boat neck", "Sweetheart", "Scoop"], glasses: ["Bottom-heavy frames", "Aviator"], earrings: ["Chandelier", "Teardrop"], hairstyles: ["Chin-length bob", "Side bangs"] },
+  Oblong: { necklines: ["Boat neck", "Square neck", "Turtleneck"], glasses: ["Wide frames", "Aviator"], earrings: ["Wide studs", "Button earrings"], hairstyles: ["Bangs", "Volume at sides"] },
+  Diamond: { necklines: ["Scoop", "V-neck", "Halter"], glasses: ["Oval frames", "Cat-eye"], earrings: ["Linear drops", "Studs"], hairstyles: ["Side-swept", "Chin-length layers"] },
+};
+
+// Body shape → clothing recommendations
+const bodyRecommendations: Record<string, { silhouettes: string[]; dresses: string[]; trousers: string[]; jackets: string[] }> = {
+  Hourglass: { silhouettes: ["Fitted & belted", "Wrap styles"], dresses: ["Wrap dress", "Bodycon", "Fit & flare"], trousers: ["High-waisted", "Bootcut"], jackets: ["Cropped blazer", "Belted coat"] },
+  Triangle: { silhouettes: ["A-line", "Empire waist"], dresses: ["A-line dress", "Fit & flare"], trousers: ["Wide leg", "Bootcut"], jackets: ["Structured blazer", "Peplum top"] },
+  "Inverted triangle": { silhouettes: ["V-neck tops", "A-line skirts"], dresses: ["V-neck dress", "A-line"], trousers: ["Wide leg", "Cargo"], jackets: ["Unstructured blazer", "Waterfall jacket"] },
+  "Inverted Triangle": { silhouettes: ["V-neck tops", "A-line skirts"], dresses: ["V-neck dress", "A-line"], trousers: ["Wide leg", "Cargo"], jackets: ["Unstructured blazer", "Waterfall jacket"] },
+  Rectangle: { silhouettes: ["Belted styles", "Peplum"], dresses: ["Wrap dress", "Peplum dress"], trousers: ["Tapered", "Pleated"], jackets: ["Belted trench", "Cropped jacket"] },
+  Round: { silhouettes: ["Empire waist", "Vertical lines"], dresses: ["Empire dress", "Shift dress"], trousers: ["Straight leg", "Bootcut"], jackets: ["Longline blazer", "Open-front cardigan"] },
+  Oval: { silhouettes: ["Empire waist", "Vertical lines"], dresses: ["Empire dress", "Shift dress"], trousers: ["Straight leg", "Flat-front"], jackets: ["Structured blazer", "Single-breasted coat"] },
+  Trapezoid: { silhouettes: ["Relaxed fit", "Layered looks"], dresses: ["Relaxed shirt dress", "Henley"], trousers: ["Straight leg", "Chinos"], jackets: ["Bomber", "Harrington jacket"] },
+};
+
 const faceShapes = [
   { shape: "Oval", icon: "⬮", description: "Balanced proportions with a gently rounded jawline" },
   { shape: "Round", icon: "⬤", description: "Equal width and length with soft angles" },
@@ -750,17 +772,50 @@ const DetectionResultStep = ({ step, answers, gender, aiResults }: { step: Onboa
         <AnimatePresence>
           {revealed && !isLoading && (
             <motion.div
-              className="flex flex-col items-center gap-2 mb-8"
+              className="flex flex-col items-center gap-2 mb-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
               <FaceShapeIllustration shape={detectedFaceShape.shape} size={90} className="mb-2" />
-              <h3 className="font-display text-3xl font-bold text-foreground">{detectedFaceShape.shape}</h3>
+              <p className="text-xs text-muted-foreground font-sans uppercase tracking-wider">{detectedFaceShape.shape} face</p>
               <p className="text-muted-foreground font-sans text-sm text-center max-w-xs">{faceDescription}</p>
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Best For You — accessories */}
+        {revealed && !isLoading && (() => {
+          const recs = faceRecommendations[detectedFaceShape.shape] || faceRecommendations.Oval;
+          return (
+            <motion.div
+              className="w-full space-y-3 mb-6"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <h4 className="font-display text-lg font-bold text-foreground text-center">Best For You</h4>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="p-3 rounded-xl bg-secondary/50 space-y-1">
+                  <div className="flex items-center gap-1.5"><Shirt className="w-4 h-4 text-primary" /><span className="text-xs font-semibold text-foreground font-sans">Necklines</span></div>
+                  {recs.necklines.map(n => <p key={n} className="text-xs text-muted-foreground font-sans">• {n}</p>)}
+                </div>
+                <div className="p-3 rounded-xl bg-secondary/50 space-y-1">
+                  <div className="flex items-center gap-1.5"><Glasses className="w-4 h-4 text-primary" /><span className="text-xs font-semibold text-foreground font-sans">Glasses</span></div>
+                  {recs.glasses.map(n => <p key={n} className="text-xs text-muted-foreground font-sans">• {n}</p>)}
+                </div>
+                <div className="p-3 rounded-xl bg-secondary/50 space-y-1">
+                  <div className="flex items-center gap-1.5"><Gem className="w-4 h-4 text-primary" /><span className="text-xs font-semibold text-foreground font-sans">Earrings</span></div>
+                  {recs.earrings.map(n => <p key={n} className="text-xs text-muted-foreground font-sans">• {n}</p>)}
+                </div>
+                <div className="p-3 rounded-xl bg-secondary/50 space-y-1">
+                  <div className="flex items-center gap-1.5"><Scissors className="w-4 h-4 text-primary" /><span className="text-xs font-semibold text-foreground font-sans">Hairstyles</span></div>
+                  {recs.hairstyles.map(n => <p key={n} className="text-xs text-muted-foreground font-sans">• {n}</p>)}
+                </div>
+              </div>
+            </motion.div>
+          );
+        })()}
 
         {/* All face shapes reference */}
         {!isLoading && (
@@ -848,7 +903,7 @@ const DetectionResultStep = ({ step, answers, gender, aiResults }: { step: Onboa
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           >
             <BodyShapeIllustration shape={detectedBodyShape.label} size={100} className="mb-2" />
-            <h3 className="font-display text-3xl font-bold text-foreground">{detectedBodyShape.label}</h3>
+            <p className="text-xs text-muted-foreground font-sans uppercase tracking-wider">{detectedBodyShape.label} shape</p>
             <div className="flex flex-wrap justify-center gap-2 mt-1">
               {detectedBodyShape.traits.map((trait, i) => (
                 <motion.span
@@ -866,7 +921,38 @@ const DetectionResultStep = ({ step, answers, gender, aiResults }: { step: Onboa
         )}
       </AnimatePresence>
 
-      {/* All body shapes */}
+      {/* Best For You — clothing */}
+      {revealed && !isLoading && (() => {
+        const recs = bodyRecommendations[detectedBodyShape.label] || bodyRecommendations.Rectangle;
+        return (
+          <motion.div
+            className="w-full space-y-3 mb-6"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <h4 className="font-display text-lg font-bold text-foreground text-center">Best For You</h4>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="p-3 rounded-xl bg-secondary/50 space-y-1">
+                <div className="flex items-center gap-1.5"><Shirt className="w-4 h-4 text-primary" /><span className="text-xs font-semibold text-foreground font-sans">Silhouettes</span></div>
+                {recs.silhouettes.map(n => <p key={n} className="text-xs text-muted-foreground font-sans">• {n}</p>)}
+              </div>
+              <div className="p-3 rounded-xl bg-secondary/50 space-y-1">
+                <div className="flex items-center gap-1.5"><Scissors className="w-4 h-4 text-primary" /><span className="text-xs font-semibold text-foreground font-sans">Dresses</span></div>
+                {recs.dresses.map(n => <p key={n} className="text-xs text-muted-foreground font-sans">• {n}</p>)}
+              </div>
+              <div className="p-3 rounded-xl bg-secondary/50 space-y-1">
+                <div className="flex items-center gap-1.5"><Watch className="w-4 h-4 text-primary" /><span className="text-xs font-semibold text-foreground font-sans">Trousers</span></div>
+                {recs.trousers.map(n => <p key={n} className="text-xs text-muted-foreground font-sans">• {n}</p>)}
+              </div>
+              <div className="p-3 rounded-xl bg-secondary/50 space-y-1">
+                <div className="flex items-center gap-1.5"><Gem className="w-4 h-4 text-primary" /><span className="text-xs font-semibold text-foreground font-sans">Jackets</span></div>
+                {recs.jackets.map(n => <p key={n} className="text-xs text-muted-foreground font-sans">• {n}</p>)}
+              </div>
+            </div>
+          </motion.div>
+        );
+      })()}
       {!isLoading && (
         <motion.div
           className="w-full"

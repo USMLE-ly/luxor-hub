@@ -2,27 +2,94 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Edit2, Upload, Loader2, CheckCircle, XCircle, Camera } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, ArrowRight, Edit2, Upload, Loader2, CheckCircle, XCircle, Camera, Copy, X, Shirt, Glasses, Watch } from "lucide-react";
 import { BottomNav } from "@/components/app/BottomNav";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
-const seasonPalettes: Record<string, { primary: string[]; complementary: string[]; universal: string[] }> = {
+const seasonPalettes: Record<string, { primary: { hex: string; name: string; tip: string }[]; complementary: { hex: string; name: string; tip: string }[]; universal: { hex: string; name: string; tip: string }[] }> = {
   "Deep Winter": {
-    primary: ["hsl(180,80%,40%)", "hsl(210,90%,50%)", "hsl(240,70%,50%)", "hsl(270,60%,50%)", "hsl(300,50%,45%)", "hsl(330,70%,50%)", "hsl(350,80%,55%)", "hsl(0,70%,45%)"],
-    complementary: ["hsl(15,70%,40%)", "hsl(25,80%,55%)", "hsl(35,70%,55%)", "hsl(45,80%,55%)", "hsl(55,80%,50%)", "hsl(80,60%,50%)", "hsl(120,70%,45%)", "hsl(160,60%,45%)"],
-    universal: ["hsl(0,0%,5%)", "hsl(0,0%,15%)", "hsl(20,15%,25%)", "hsl(20,20%,35%)", "hsl(15,30%,45%)", "hsl(10,35%,50%)", "hsl(0,0%,8%)", "hsl(0,0%,12%)"],
+    primary: [
+      { hex: "hsl(180,80%,40%)", name: "Deep Teal", tip: "Great for tops and scarves" },
+      { hex: "hsl(210,90%,50%)", name: "Royal Blue", tip: "Perfect for blazers and dresses" },
+      { hex: "hsl(240,70%,50%)", name: "Cobalt", tip: "Ideal for statement pieces" },
+      { hex: "hsl(270,60%,50%)", name: "Purple", tip: "Stunning for evening wear" },
+      { hex: "hsl(300,50%,45%)", name: "Plum", tip: "Great for accessories and bags" },
+      { hex: "hsl(330,70%,50%)", name: "Magenta", tip: "Perfect for blouses and lipstick" },
+      { hex: "hsl(350,80%,55%)", name: "Crimson", tip: "Ideal for coats and dresses" },
+      { hex: "hsl(0,70%,45%)", name: "Deep Red", tip: "Great for knitwear and shoes" },
+    ],
+    complementary: [
+      { hex: "hsl(15,70%,40%)", name: "Rust", tip: "Perfect for autumn layering" },
+      { hex: "hsl(25,80%,55%)", name: "Burnt Orange", tip: "Great for scarves and belts" },
+      { hex: "hsl(35,70%,55%)", name: "Amber", tip: "Ideal for accessories" },
+      { hex: "hsl(45,80%,55%)", name: "Gold", tip: "Perfect for jewelry and details" },
+      { hex: "hsl(55,80%,50%)", name: "Mustard", tip: "Great for bags and shoes" },
+      { hex: "hsl(80,60%,50%)", name: "Olive", tip: "Ideal for trousers and jackets" },
+      { hex: "hsl(120,70%,45%)", name: "Forest Green", tip: "Perfect for coats" },
+      { hex: "hsl(160,60%,45%)", name: "Jade", tip: "Great for tops and blouses" },
+    ],
+    universal: [
+      { hex: "hsl(0,0%,5%)", name: "Jet Black", tip: "Foundation for any outfit" },
+      { hex: "hsl(0,0%,15%)", name: "Charcoal", tip: "Great for trousers and suits" },
+      { hex: "hsl(20,15%,25%)", name: "Dark Brown", tip: "Perfect for leather goods" },
+      { hex: "hsl(20,20%,35%)", name: "Espresso", tip: "Ideal for boots and bags" },
+      { hex: "hsl(15,30%,45%)", name: "Warm Taupe", tip: "Great for layering pieces" },
+      { hex: "hsl(10,35%,50%)", name: "Sienna", tip: "Perfect for accessories" },
+      { hex: "hsl(0,0%,8%)", name: "Onyx", tip: "Ideal for formal wear" },
+      { hex: "hsl(0,0%,12%)", name: "Graphite", tip: "Great for coats and outerwear" },
+    ],
   },
   "Cold Winter": {
-    primary: ["hsl(180,80%,45%)", "hsl(200,90%,55%)", "hsl(230,80%,55%)", "hsl(260,70%,55%)", "hsl(280,60%,50%)", "hsl(310,70%,55%)", "hsl(340,80%,55%)", "hsl(355,75%,50%)"],
-    complementary: ["hsl(10,80%,40%)", "hsl(20,80%,50%)", "hsl(30,80%,55%)", "hsl(40,85%,55%)", "hsl(50,85%,50%)", "hsl(70,70%,50%)", "hsl(100,60%,45%)", "hsl(150,60%,45%)"],
-    universal: ["hsl(0,0%,5%)", "hsl(0,0%,12%)", "hsl(15,12%,25%)", "hsl(20,18%,35%)", "hsl(15,30%,45%)", "hsl(10,35%,50%)", "hsl(0,0%,8%)", "hsl(0,0%,15%)"],
+    primary: [
+      { hex: "hsl(180,80%,45%)", name: "Teal", tip: "Perfect for tops and blouses" },
+      { hex: "hsl(200,90%,55%)", name: "Sky Blue", tip: "Great for shirts and dresses" },
+      { hex: "hsl(230,80%,55%)", name: "Sapphire", tip: "Ideal for blazers" },
+      { hex: "hsl(260,70%,55%)", name: "Amethyst", tip: "Perfect for evening pieces" },
+      { hex: "hsl(280,60%,50%)", name: "Violet", tip: "Great for accessories" },
+      { hex: "hsl(310,70%,55%)", name: "Fuchsia", tip: "Stunning for statement tops" },
+      { hex: "hsl(340,80%,55%)", name: "Rose", tip: "Perfect for knitwear" },
+      { hex: "hsl(355,75%,50%)", name: "Ruby", tip: "Ideal for coats and shoes" },
+    ],
+    complementary: [
+      { hex: "hsl(10,80%,40%)", name: "Brick", tip: "Great for autumn layers" },
+      { hex: "hsl(20,80%,50%)", name: "Terracotta", tip: "Perfect for accessories" },
+      { hex: "hsl(30,80%,55%)", name: "Copper", tip: "Ideal for jewelry" },
+      { hex: "hsl(40,85%,55%)", name: "Honey", tip: "Great for belts and bags" },
+      { hex: "hsl(50,85%,50%)", name: "Saffron", tip: "Perfect for scarves" },
+      { hex: "hsl(70,70%,50%)", name: "Chartreuse", tip: "Great for accent pieces" },
+      { hex: "hsl(100,60%,45%)", name: "Moss", tip: "Ideal for outerwear" },
+      { hex: "hsl(150,60%,45%)", name: "Emerald", tip: "Perfect for dresses" },
+    ],
+    universal: [
+      { hex: "hsl(0,0%,5%)", name: "Jet Black", tip: "Foundation for any outfit" },
+      { hex: "hsl(0,0%,12%)", name: "Charcoal", tip: "Great for trousers" },
+      { hex: "hsl(15,12%,25%)", name: "Dark Brown", tip: "Perfect for leather" },
+      { hex: "hsl(20,18%,35%)", name: "Cocoa", tip: "Ideal for bags and boots" },
+      { hex: "hsl(15,30%,45%)", name: "Warm Taupe", tip: "Great for layering" },
+      { hex: "hsl(10,35%,50%)", name: "Clay", tip: "Perfect for accessories" },
+      { hex: "hsl(0,0%,8%)", name: "Onyx", tip: "Ideal for formal wear" },
+      { hex: "hsl(0,0%,15%)", name: "Slate", tip: "Great for suits" },
+    ],
   },
 };
 
 function getPalettes(season: string) {
   return seasonPalettes[season] || seasonPalettes["Cold Winter"];
+}
+
+function hslToHex(hslStr: string): string {
+  const match = hslStr.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+  if (!match) return hslStr;
+  const [, h, s, l] = match.map(Number);
+  const a2 = (s / 100) * Math.min(l / 100, 1 - l / 100);
+  const f = (n: number) => {
+    const k = (n + h / 30) % 12;
+    const color = l / 100 - a2 * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * color).toString(16).padStart(2, '0');
+  };
+  return `#${f(0)}${f(8)}${f(4)}`.toUpperCase();
 }
 
 interface ExtractedColor {
@@ -41,6 +108,8 @@ const ColorType = () => {
   const [extracting, setExtracting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
+  const [selectedColor, setSelectedColor] = useState<{ hex: string; name: string; tip: string } | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -86,6 +155,12 @@ const ColorType = () => {
     reader.readAsDataURL(file);
   };
 
+  const copyHex = (hex: string) => {
+    const hexCode = hslToHex(hex);
+    navigator.clipboard.writeText(hexCode);
+    toast.success(`Copied ${hexCode}`);
+  };
+
   if (loading || authLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -97,26 +172,78 @@ const ColorType = () => {
   const colorSeason = dna?.colorSeason || "Cold Winter";
   const palettes = getPalettes(colorSeason);
 
-  const PaletteSection = ({ title, description, colors, totalExtra }: { title: string; description: string; colors: string[]; totalExtra?: number }) => (
-    <div className="rounded-2xl border border-border bg-card p-5 space-y-3">
-      <div className="flex items-center justify-between">
-        <h3 className="font-display text-lg font-bold text-foreground">{title}</h3>
-        <ArrowRight className="w-4 h-4 text-muted-foreground" />
+  const PaletteSection = ({ title, description, colors, sectionKey }: { title: string; description: string; colors: { hex: string; name: string; tip: string }[]; sectionKey: string }) => {
+    const isExpanded = expandedSection === sectionKey;
+    const displayColors = isExpanded ? colors : colors.slice(0, 7);
+    const extra = colors.length - 7;
+
+    return (
+      <div className="rounded-2xl border border-border bg-card p-5 space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="font-display text-lg font-bold text-foreground">{title}</h3>
+          <ArrowRight className="w-4 h-4 text-muted-foreground" />
+        </div>
+        <p className="text-muted-foreground text-sm font-sans leading-relaxed">{description}</p>
+        <div className="grid grid-cols-4 gap-2">
+          {displayColors.map((color, i) => (
+            <button
+              key={i}
+              onClick={() => setSelectedColor(color)}
+              className="group relative aspect-square rounded-lg transition-transform hover:scale-105 active:scale-95"
+              style={{ backgroundColor: color.hex }}
+            >
+              <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 flex items-center justify-center">
+                <span className="text-[8px] font-bold text-white font-sans">{hslToHex(color.hex)}</span>
+              </div>
+            </button>
+          ))}
+          {!isExpanded && extra > 0 && (
+            <button
+              onClick={() => setExpandedSection(sectionKey)}
+              className="aspect-square rounded-lg flex items-center justify-center"
+              style={{ backgroundColor: colors[7]?.hex || colors[colors.length - 1].hex }}
+            >
+              <span className="text-sm font-bold text-background/90 font-sans">+{extra}</span>
+            </button>
+          )}
+        </div>
+        <button
+          onClick={() => setExpandedSection(isExpanded ? null : sectionKey)}
+          className="w-full py-3 rounded-xl bg-secondary/50 text-sm font-sans text-foreground flex items-center justify-center gap-2 hover:bg-secondary/70 transition-colors"
+        >
+          {isExpanded ? "Show less" : "View colors"} <ArrowRight className={`w-3.5 h-3.5 transition-transform ${isExpanded ? "rotate-90" : ""}`} />
+        </button>
+
+        {/* Expanded color grid with names */}
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="grid grid-cols-2 gap-2 pt-2">
+                {colors.map((color, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setSelectedColor(color)}
+                    className="flex items-center gap-3 p-2 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors text-left"
+                  >
+                    <div className="w-8 h-8 rounded-lg flex-shrink-0" style={{ backgroundColor: color.hex }} />
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-foreground font-sans truncate">{color.name}</p>
+                      <p className="text-[10px] text-muted-foreground font-sans">{hslToHex(color.hex)}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-      <p className="text-muted-foreground text-sm font-sans leading-relaxed">{description}</p>
-      <div className="grid grid-cols-4 gap-2">
-        {colors.slice(0, 7).map((color, i) => (<div key={i} className="aspect-square rounded-lg" style={{ backgroundColor: color }} />))}
-        {totalExtra && totalExtra > 0 ? (
-          <div className="aspect-square rounded-lg flex items-center justify-center" style={{ backgroundColor: colors[7] || colors[colors.length - 1] }}>
-            <span className="text-sm font-bold text-background/90 font-sans">+{totalExtra}</span>
-          </div>
-        ) : (<div className="aspect-square rounded-lg" style={{ backgroundColor: colors[7] || colors[colors.length - 1] }} />)}
-      </div>
-      <button className="w-full py-3 rounded-xl bg-secondary/50 text-sm font-sans text-foreground flex items-center justify-center gap-2 hover:bg-secondary/70 transition-colors">
-        View colors <ArrowRight className="w-3.5 h-3.5" />
-      </button>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -201,15 +328,63 @@ const ColorType = () => {
 
         {/* Palettes */}
         <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }}>
-          <PaletteSection title="Primary Advanced Palette" description="The best colors for every category." colors={palettes.primary} totalExtra={296} />
+          <PaletteSection title="Primary Advanced Palette" description="The best colors for every category." colors={palettes.primary} sectionKey="primary" />
         </motion.div>
         <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
-          <PaletteSection title="Complementary Palette" description="Ideal colors for bottoms, shoes, and accessories." colors={palettes.complementary} totalExtra={296} />
+          <PaletteSection title="Complementary Palette" description="Ideal colors for bottoms, shoes, and accessories." colors={palettes.complementary} sectionKey="complementary" />
         </motion.div>
         <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }}>
-          <PaletteSection title="Universal Palette" description="Core colors that pair well with any shade." colors={palettes.universal} totalExtra={7} />
+          <PaletteSection title="Universal Palette" description="Core colors that pair well with any shade." colors={palettes.universal} sectionKey="universal" />
         </motion.div>
       </div>
+
+      {/* Color Detail Modal */}
+      <AnimatePresence>
+        {selectedColor && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end justify-center"
+            onClick={() => setSelectedColor(null)}
+          >
+            <motion.div
+              initial={{ y: 200 }}
+              animate={{ y: 0 }}
+              exit={{ y: 200 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-md rounded-t-3xl bg-card border border-border p-6 space-y-4"
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="font-display text-lg font-bold text-foreground">Color Detail</h3>
+                <button onClick={() => setSelectedColor(null)}>
+                  <X className="w-5 h-5 text-muted-foreground" />
+                </button>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="w-20 h-20 rounded-2xl shadow-lg" style={{ backgroundColor: selectedColor.hex }} />
+                <div>
+                  <p className="font-display text-xl font-bold text-foreground">{selectedColor.name}</p>
+                  <button
+                    onClick={() => copyHex(selectedColor.hex)}
+                    className="flex items-center gap-1.5 mt-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                    <span className="font-sans font-mono">{hslToHex(selectedColor.hex)}</span>
+                  </button>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 p-3 rounded-xl bg-primary/5 border border-primary/10">
+                <Shirt className="w-5 h-5 text-primary flex-shrink-0" />
+                <p className="text-sm font-sans text-foreground">{selectedColor.tip}</p>
+              </div>
+              <Button onClick={() => copyHex(selectedColor.hex)} className="w-full" variant="outline">
+                <Copy className="w-4 h-4 mr-2" /> Copy Hex Code
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <BottomNav />
     </div>
