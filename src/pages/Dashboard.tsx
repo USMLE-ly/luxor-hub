@@ -143,6 +143,7 @@ const Dashboard = () => {
       console.error("Refresh error:", e);
     } finally {
       setRefreshing(false);
+      if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
     }
   }, [user, refreshing, styleProfile.preferences]);
 

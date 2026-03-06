@@ -233,12 +233,12 @@ export const sharedSteps: OnboardingStep[] = [
     description: "Stand back and capture your full outfit for AI analysis",
   },
   {
-    question: "Body Shape Detected",
+    question: "Your Best Clothing Matches",
     key: "bodyResult",
     type: "detectionResult",
     options: [],
     detectionMode: "body",
-    description: "Based on your body proportions and silhouette",
+    description: "Based on your body proportions, here are the silhouettes and cuts that flatter you most",
   },
   {
     question: "Hold tight, we're generating your Style Formula!",
