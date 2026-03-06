@@ -513,23 +513,21 @@ const Calibration = () => {
 
   if (phase === "progress") {
     return (
-      <div className="min-h-screen bg-[hsl(120,30%,94%)] flex flex-col items-center px-6 pt-16">
+      <div className="min-h-screen bg-background flex flex-col items-center px-6 pt-16">
+        {/* Animated checkmark */}
         <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
+          initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="w-48 h-48 mb-8 flex items-center justify-center"
+          transition={{ type: "spring", damping: 12, delay: 0.2 }}
+          className="w-28 h-28 mb-8 rounded-full border-4 border-primary flex items-center justify-center"
         >
-          <svg viewBox="0 0 200 200" className="w-full h-full">
-            <circle cx="100" cy="100" r="75" fill="hsl(0,0%,95%)" opacity="0.3" />
-            <rect x="85" y="30" width="30" height="80" rx="3" fill="hsl(0,0%,20%)" />
-            <rect x="80" y="25" width="40" height="15" rx="3" fill="hsl(0,0%,15%)" />
-            <rect x="90" y="15" width="20" height="15" rx="2" fill="hsl(0,0%,10%)" />
-            <rect x="93" y="5" width="14" height="12" rx="2" fill="hsl(0,0%,8%)" />
-            <rect x="65" y="110" width="70" height="8" rx="2" fill="hsl(0,0%,25%)" />
-            <ellipse cx="100" cy="160" rx="55" ry="12" fill="hsl(0,0%,18%)" />
-            <rect x="55" y="118" width="90" height="42" rx="5" fill="hsl(0,0%,22%)" />
-            <path d="M60,115 Q70,130 65,145 Q60,155 70,158 L130,158 Q140,155 135,145 Q130,130 140,115 Z" fill="hsl(130,60%,50%)" />
-          </svg>
+          <motion.div
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: 1 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+          >
+            <Check className="w-14 h-14 text-primary" strokeWidth={3} />
+          </motion.div>
         </motion.div>
 
         <motion.h1
@@ -548,20 +546,22 @@ const Calibration = () => {
           className="w-full max-w-sm mb-4"
         >
           <div className="flex items-center gap-2">
-            <div className="flex-1 h-10 rounded-full bg-background overflow-hidden">
-              <div
+            <div className="flex-1 h-10 rounded-full bg-secondary/80 overflow-hidden border border-border/50">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: "73%" }}
+                transition={{ duration: 1.2, ease: "easeOut", delay: 0.6 }}
                 className="h-full rounded-full flex items-center justify-between px-4"
                 style={{
-                  width: "73%",
-                  background: "linear-gradient(90deg, hsl(130,60%,50%), hsl(170,70%,55%))",
+                  background: "linear-gradient(90deg, hsl(142, 60%, 48%), hsl(var(--primary)))",
                 }}
               >
-                <Check className="w-5 h-5 text-background" />
-                <span className="text-sm font-bold text-background">73%</span>
-              </div>
+                <Check className="w-5 h-5 text-primary-foreground" />
+                <span className="text-sm font-bold text-primary-foreground">73%</span>
+              </motion.div>
             </div>
-            <div className="w-10 h-10 rounded-full bg-background flex items-center justify-center">
-              <span className="text-lg">🎁</span>
+            <div className="w-10 h-10 rounded-full bg-primary/10 border border-border/50 flex items-center justify-center">
+              <Gift className="w-5 h-5 text-primary" />
             </div>
           </div>
         </motion.div>
@@ -584,7 +584,7 @@ const Calibration = () => {
           Discover your Style Formula. Let's continue tomorrow - the more we know you, the better the results!
         </motion.p>
 
-        <div className="fixed bottom-0 inset-x-0 p-5 bg-[hsl(120,30%,94%)]">
+        <div className="fixed bottom-0 inset-x-0 p-5 bg-background">
           <Button
             onClick={() => navigate("/dashboard")}
             className="w-full h-14 rounded-2xl font-semibold font-sans text-base bg-foreground text-background hover:bg-foreground/90"
