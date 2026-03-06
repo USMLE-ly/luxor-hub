@@ -622,6 +622,28 @@ const GeneratingStep = ({ step }: { step: OnboardingStep }) => {
   );
 };
 
+// Face shape → accessory/neckline recommendations
+const faceRecommendations: Record<string, { necklines: string[]; glasses: string[]; earrings: string[]; hairstyles: string[] }> = {
+  Oval: { necklines: ["V-neck", "Scoop", "Off-shoulder"], glasses: ["Any frame shape"], earrings: ["Drop earrings", "Studs"], hairstyles: ["Side part", "Loose waves"] },
+  Round: { necklines: ["V-neck", "Deep scoop", "Asymmetric"], glasses: ["Angular frames", "Cat-eye"], earrings: ["Long drops", "Angular shapes"], hairstyles: ["Side-swept bangs", "Layers"] },
+  Square: { necklines: ["Round neck", "Cowl neck", "Off-shoulder"], glasses: ["Round frames", "Oval"], earrings: ["Hoops", "Round drops"], hairstyles: ["Soft layers", "Side part"] },
+  Heart: { necklines: ["Boat neck", "Sweetheart", "Scoop"], glasses: ["Bottom-heavy frames", "Aviator"], earrings: ["Chandelier", "Teardrop"], hairstyles: ["Chin-length bob", "Side bangs"] },
+  Oblong: { necklines: ["Boat neck", "Square neck", "Turtleneck"], glasses: ["Wide frames", "Aviator"], earrings: ["Wide studs", "Button earrings"], hairstyles: ["Bangs", "Volume at sides"] },
+  Diamond: { necklines: ["Scoop", "V-neck", "Halter"], glasses: ["Oval frames", "Cat-eye"], earrings: ["Linear drops", "Studs"], hairstyles: ["Side-swept", "Chin-length layers"] },
+};
+
+// Body shape → clothing recommendations
+const bodyRecommendations: Record<string, { silhouettes: string[]; dresses: string[]; trousers: string[]; jackets: string[] }> = {
+  Hourglass: { silhouettes: ["Fitted & belted", "Wrap styles"], dresses: ["Wrap dress", "Bodycon", "Fit & flare"], trousers: ["High-waisted", "Bootcut"], jackets: ["Cropped blazer", "Belted coat"] },
+  Triangle: { silhouettes: ["A-line", "Empire waist"], dresses: ["A-line dress", "Fit & flare"], trousers: ["Wide leg", "Bootcut"], jackets: ["Structured blazer", "Peplum top"] },
+  "Inverted triangle": { silhouettes: ["V-neck tops", "A-line skirts"], dresses: ["V-neck dress", "A-line"], trousers: ["Wide leg", "Cargo"], jackets: ["Unstructured blazer", "Waterfall jacket"] },
+  "Inverted Triangle": { silhouettes: ["V-neck tops", "A-line skirts"], dresses: ["V-neck dress", "A-line"], trousers: ["Wide leg", "Cargo"], jackets: ["Unstructured blazer", "Waterfall jacket"] },
+  Rectangle: { silhouettes: ["Belted styles", "Peplum"], dresses: ["Wrap dress", "Peplum dress"], trousers: ["Tapered", "Pleated"], jackets: ["Belted trench", "Cropped jacket"] },
+  Round: { silhouettes: ["Empire waist", "Vertical lines"], dresses: ["Empire dress", "Shift dress"], trousers: ["Straight leg", "Bootcut"], jackets: ["Longline blazer", "Open-front cardigan"] },
+  Oval: { silhouettes: ["Empire waist", "Vertical lines"], dresses: ["Empire dress", "Shift dress"], trousers: ["Straight leg", "Flat-front"], jackets: ["Structured blazer", "Single-breasted coat"] },
+  Trapezoid: { silhouettes: ["Relaxed fit", "Layered looks"], dresses: ["Relaxed shirt dress", "Henley"], trousers: ["Straight leg", "Chinos"], jackets: ["Bomber", "Harrington jacket"] },
+};
+
 const faceShapes = [
   { shape: "Oval", icon: "⬮", description: "Balanced proportions with a gently rounded jawline" },
   { shape: "Round", icon: "⬤", description: "Equal width and length with soft angles" },
@@ -630,23 +652,6 @@ const faceShapes = [
   { shape: "Oblong", icon: "⏐", description: "Longer than wide with a straight cheek line" },
   { shape: "Diamond", icon: "◇", description: "Narrow forehead and jaw, wide cheekbones" },
 ];
-
-const bodyShapeResults: Record<string, { label: string; traits: string[] }[]> = {
-  female: [
-    { label: "Hourglass", traits: ["Balanced shoulders & hips", "Defined waist", "Curvy silhouette"] },
-    { label: "Triangle", traits: ["Narrower shoulders", "Wider hips", "Defined lower body"] },
-    { label: "Inverted Triangle", traits: ["Broader shoulders", "Narrower hips", "Athletic upper body"] },
-    { label: "Rectangle", traits: ["Balanced proportions", "Straight silhouette", "Even distribution"] },
-    { label: "Round", traits: ["Fuller midsection", "Proportionate limbs", "Soft curves"] },
-  ],
-  male: [
-    { label: "Rectangle", traits: ["Even proportions", "Straight torso", "Balanced build"] },
-    { label: "Triangle", traits: ["Narrower shoulders", "Wider waist", "Solid lower body"] },
-    { label: "Inverted Triangle", traits: ["Broad shoulders", "Narrow waist", "V-shaped torso"] },
-    { label: "Oval", traits: ["Fuller midsection", "Rounded torso", "Proportionate limbs"] },
-    { label: "Trapezoid", traits: ["Wide shoulders", "Slightly narrow waist", "Athletic build"] },
-  ],
-};
 
 const DetectionResultStep = ({ step, answers, gender, aiResults }: { step: OnboardingStep; answers: Record<string, string[]>; gender?: "female" | "male" | null; aiResults?: Record<string, any> }) => {
   const isFace = step.detectionMode === "face";
