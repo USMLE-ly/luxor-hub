@@ -120,6 +120,56 @@ const Dashboard = () => {
     }
   }, [styleProfile.onboarding_completed, user, navigate]);
 
+  const refreshData = useCallback(async () => {
+    if (!user || refreshing) return;
+    setRefreshing(true);
+    try {
+      const colorSeason = styleProfile.preferences?.aiAnalysis?.colorSeason || "Autumn";
+      const [shopRes, outfitsRes] = await Promise.all([
+        supabase.functions.invoke("shop-products", { body: { colorSeason, category: "all" } }),
+        supabase.from("outfits").select("id, name, occasion").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
+      ]);
+      if (shopRes.data?.products) setShopProducts(shopRes.data.products.slice(0, 6));
+      if (outfitsRes.data) {
+        const outfitsWithItems = await Promise.all(
+          outfitsRes.data.map(async (outfit: any) => {
+            const { data: oi } = await supabase.from("outfit_items").select("clothing_item_id").eq("outfit_id", outfit.id).limit(4);
+            return { ...outfit, items: oi?.map((i: any) => i.clothing_item_id) || [] };
+          })
+        );
+        setOutfitsList(outfitsWithItems);
+      }
+    } catch (e) {
+      console.error("Refresh error:", e);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [user, refreshing, styleProfile.preferences]);
+
+  // Pull-to-refresh touch handlers
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (scrollRef.current && scrollRef.current.scrollTop <= 0) {
+      touchStartY.current = e.touches[0].clientY;
+      isPulling.current = true;
+    }
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!isPulling.current) return;
+    const diff = e.touches[0].clientY - touchStartY.current;
+    if (diff > 0) {
+      setPullDistance(Math.min(diff * 0.5, 80));
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    if (pullDistance > 60) {
+      refreshData();
+    }
+    setPullDistance(0);
+    isPulling.current = false;
+  }, [pullDistance, refreshData]);
+
   const calibrationProgress = styleProfile.preferences?.calibrationProgress || 0;
   const hasCalibration = calibrationProgress > 0;
   const displayProgress = hasCalibration ? calibrationProgress : 73;
