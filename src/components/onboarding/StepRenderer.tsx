@@ -589,6 +589,8 @@ const SparkleParticles = () => {
 
 const GeneratingStep = ({ step, gender }: { step: OnboardingStep; gender?: "female" | "male" | null }) => {
   const [progress, setProgress] = useState<number[]>([0, 0, 0, 0, 0]);
+  const [allDone, setAllDone] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const garments = (gender === "male") ? maleGarments : femaleGarments;
   const labels = [
     "Building your Color Palette",
@@ -610,6 +612,7 @@ const GeneratingStep = ({ step, gender }: { step: OnboardingStep; gender?: "fema
             currentStep++;
           }
         }
+        if (currentStep >= 5 && !allDone) setAllDone(true);
         return next;
       });
       if (currentStep >= 5) clearInterval(interval);
@@ -617,10 +620,70 @@ const GeneratingStep = ({ step, gender }: { step: OnboardingStep; gender?: "fema
     return () => clearInterval(interval);
   }, []);
 
+  // Confetti burst when all done
+  useEffect(() => {
+    if (!allDone || !canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    canvas.width = canvas.offsetWidth * 2;
+    canvas.height = canvas.offsetHeight * 2;
+    ctx.scale(2, 2);
+    const W = canvas.offsetWidth;
+    const H = canvas.offsetHeight;
+
+    const colors = ["hsl(43,74%,49%)", "hsl(350,70%,65%)", "hsl(30,90%,60%)", "hsl(0,0%,100%)", "hsl(280,30%,75%)"];
+    const particles = Array.from({ length: 80 }, () => ({
+      x: W / 2 + (Math.random() - 0.5) * 60,
+      y: H * 0.3,
+      vx: (Math.random() - 0.5) * 8,
+      vy: -Math.random() * 6 - 2,
+      w: 4 + Math.random() * 4,
+      h: 3 + Math.random() * 3,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rotation: Math.random() * 360,
+      rotSpeed: (Math.random() - 0.5) * 12,
+      opacity: 1,
+    }));
+
+    let frame: number;
+    const animate = () => {
+      ctx.clearRect(0, 0, W, H);
+      let alive = false;
+      for (const p of particles) {
+        p.x += p.vx;
+        p.vy += 0.15;
+        p.y += p.vy;
+        p.rotation += p.rotSpeed;
+        p.opacity = Math.max(0, p.opacity - 0.005);
+        if (p.opacity <= 0) continue;
+        alive = true;
+        ctx.save();
+        ctx.globalAlpha = p.opacity;
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.rotation * Math.PI) / 180);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+      }
+      if (alive) frame = requestAnimationFrame(animate);
+    };
+    frame = requestAnimationFrame(animate);
+    if (navigator.vibrate) navigator.vibrate([15, 50, 25]);
+    return () => cancelAnimationFrame(frame);
+  }, [allDone]);
+
   return (
-    <div className="flex flex-col items-center pt-8">
-      <div className="w-56 h-48 mb-6 flex items-center justify-center">
-        <svg viewBox="0 0 200 100" className="w-full h-full" fill="none">
+    <div className="flex flex-col items-center pt-8 relative">
+      {/* Confetti canvas overlay */}
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full pointer-events-none z-10"
+        style={{ opacity: allDone ? 1 : 0 }}
+      />
+
+      <div className="w-56 h-52 mb-4 flex flex-col items-center justify-center">
+        <svg viewBox="0 0 200 100" className="w-full flex-1" fill="none">
           <defs>
             <linearGradient id="rackShimmer" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="hsl(var(--foreground))" stopOpacity="0.6" />
@@ -640,14 +703,16 @@ const GeneratingStep = ({ step, gender }: { step: OnboardingStep; gender?: "fema
           <line x1="160" y1="18" x2="160" y2="95" stroke="hsl(var(--foreground))" strokeWidth="1.5" opacity="0.4" />
           <line x1="35" y1="18" x2="165" y2="18" stroke="url(#rackShimmer)" strokeWidth="2.5" strokeLinecap="round" />
 
-          <motion.rect
-            x="35" y="20" width="130" height="2"
-            fill="url(#scanBeam)"
-            initial={{ y: 20 }}
-            animate={{ y: [20, 85, 20] }}
-            transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
-            rx="1"
-          />
+          {!allDone && (
+            <motion.rect
+              x="35" y="20" width="130" height="2"
+              fill="url(#scanBeam)"
+              initial={{ y: 20 }}
+              animate={{ y: [20, 85, 20] }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
+              rx="1"
+            />
+          )}
 
           {garments.map((g, i) => (
             <motion.g key={i}>
@@ -677,6 +742,21 @@ const GeneratingStep = ({ step, gender }: { step: OnboardingStep; gender?: "fema
                   style={{ transformOrigin: `${60 + i * 20}px 25px` }}
                 />
               )}
+              {/* Garment label tooltip */}
+              <motion.text
+                x={60 + i * 20}
+                y={94}
+                textAnchor="middle"
+                fill="hsl(var(--foreground))"
+                fontSize="5.5"
+                fontFamily="sans-serif"
+                opacity="0.6"
+                initial={{ opacity: 0, y: 98 }}
+                animate={{ opacity: 0.6, y: 94 }}
+                transition={{ delay: i * 0.3 + 0.6 }}
+              >
+                {g.label}
+              </motion.text>
             </motion.g>
           ))}
 
@@ -684,15 +764,32 @@ const GeneratingStep = ({ step, gender }: { step: OnboardingStep; gender?: "fema
         </svg>
       </div>
 
+      {/* Completion checkmark */}
+      <AnimatePresence>
+        {allDone && (
+          <motion.div
+            className="flex items-center gap-2 mb-4"
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          >
+            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+              <Check className="w-5 h-5 text-primary-foreground" />
+            </div>
+            <span className="font-sans text-sm font-semibold text-primary">Style Formula Ready!</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <h2 className="font-display text-2xl font-bold text-foreground text-center mb-8">
-        {step.question}
+        {allDone ? "Your Style Formula is ready!" : step.question}
       </h2>
 
       <div className="w-full space-y-4">
         {labels.map((label, i) => (
           <div key={label}>
             <div className="flex justify-between mb-1">
-              <span className={`font-sans text-sm ${progress[i] > 0 && progress[i] < 100 ? "font-bold text-foreground" : "text-muted-foreground"}`}>
+              <span className={`font-sans text-sm ${progress[i] >= 100 ? "text-primary font-bold" : progress[i] > 0 ? "font-bold text-foreground" : "text-muted-foreground"}`}>
                 {label}
               </span>
               <span className="font-sans text-sm text-muted-foreground">{Math.round(progress[i])}%</span>
