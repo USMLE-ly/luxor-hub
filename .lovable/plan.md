@@ -1,90 +1,88 @@
 
 
-# AI Style Enhancement Suite -- Implementation Plan
+# Dashboard & App-Wide Design Overhaul + Outfit Analysis Nav
 
-All 8 features, organized into 4 implementation batches to keep changes manageable.
+## 1. Add Outfit Analysis to Bottom Nav
 
----
+**`src/components/app/BottomNav.tsx`**: Insert a 5th tab "Analysis" with `ScanEye` icon at position 3 (after "My Shop", before "AI Stylist"). Update active state logic to include `/outfit-analysis` path.
 
-## Batch 1: Item Compatibility Checker + Style Formula Dashboard
+```text
+DNA | My Shop | Analysis | AI Stylist | Closet
+```
 
-### Item Compatibility Checker
-- **`src/pages/Chat.tsx`**: Add image upload button (camera icon) next to the text input. Convert uploaded image to base64, send alongside messages to the edge function. Add a quick prompt: "📸 Check if this item matches me".
-- **`supabase/functions/ai-chat/index.ts`**: Accept optional `image` field in the request body. When present, construct a multimodal message with the image + system prompt instructing AURELIA to evaluate the item against the user's color season, body type, style archetype, and existing closet. Return a compatibility verdict with percentage score and reasoning.
-- **`src/pages/Inspiration.tsx`**: Add a "Check Compatibility" action on each product card that navigates to `/chat` with pre-filled context about that product.
-
-### Style Formula Dashboard
-- **`src/pages/StyleDNA.tsx`**: Add three new expandable sections below the existing hero card:
-  - **Recommended Prints & Fabrics**: AI-generated list of patterns, textures, materials suited to their archetype
-  - **Flattering Silhouettes**: Specific garment cuts, necklines, skirt lengths with icons
-  - **Complete Color Palette**: Enhanced view with "best for" labels on each swatch (e.g., "great for tops", "accent only")
-- **`supabase/functions/analyze-style-dna/index.ts`**: Extend the tool call schema to include `recommendedPrints`, `recommendedFabrics`, `flatteringSilhouettes` arrays. Store in existing `preferences` JSONB field.
-- **DB Migration**: Add `style_formula` JSONB column to `style_profiles` to cache the expanded formula separately.
+Reduce icon/text sizes slightly to fit 5 tabs cleanly on mobile.
 
 ---
 
-## Batch 2: Wardrobe Gap Analysis + Shopping Match Score
+## 2. Style Formula Card — Premium Redesign
 
-### Wardrobe Gap Analysis
-- **New edge function `supabase/functions/wardrobe-gap/index.ts`**: Accepts the user's closet items list + style profile. Uses Gemini to analyze completeness across categories (basics, statement pieces, occasion wear, seasonal gaps) and returns a prioritized list of missing items with category, description, priority (high/medium/low), and estimated price range.
-- **`src/pages/Analytics.tsx`**: Add a "Wardrobe Gaps" section with a "Run AI Analysis" button. Display results as cards with missing item type, why it matters, and a "Shop This" CTA linking to Inspiration with pre-filtered category.
+**Problem**: The card looks flat and generic. The warm beige gradient doesn't match the dark luxury brand. The orb animation is decorative but lacks informational value.
 
-### Shopping Match Score
-- **`supabase/functions/shop-products/index.ts`**: Replace the random score logic. Accept user's `colorSeason`, `bodyShape`, `archetype`, and `closetCategories` as query params. Calculate a deterministic match score based on: color compatibility with season (40%), style archetype fit (30%), wardrobe gap fill potential (30%).
-- **`src/pages/Inspiration.tsx`**: Color-code the match score badge (green >85%, gold 70-85%, gray <70%). Add a "Sort by Match" toggle button. Pass user profile data when fetching products.
-
----
-
-## Batch 3: Outfit Calendar Planner + Wear History Timeline
-
-### Outfit Calendar Planner
-- **New page `src/pages/OutfitCalendar.tsx`**: Month view calendar using existing `calendar_events` table. Each day cell shows outfit thumbnail or "+" to add. Tapping a day opens a sheet to select from saved outfits or type a quick description. Week/month toggle. Weather indicator per day (uses existing `get-weather` function).
-- **`src/App.tsx`**: Add route `/outfit-calendar`.
-- **`src/components/app/AppSidebar.tsx`**: Add "Outfit Calendar" nav item with `CalendarDays` icon.
-- **`src/components/app/BottomNav.tsx`**: No change (keep 4 tabs compact).
-
-### Wear History Timeline
-- **`src/pages/Analytics.tsx`**: Add a "Wear History" tab/section. Vertical timeline showing date, item name, category badge, and occasion. Data from `wear_logs` joined with `clothing_items`. Group by week/month with collapsible sections.
-- **`src/pages/Closet.tsx`**: Make the existing "Log Wear" action more prominent -- add a date picker so users can log past wears, not just today.
+**Fix in `src/pages/Dashboard.tsx`**:
+- Replace beige gradient with a dark glassmorphic card: `bg-card/60 backdrop-blur-xl border border-white/5`
+- Redesign the 3-column style attributes as premium pill badges with subtle glow on each icon
+- Replace the generic spinning orb with a circular progress ring (SVG) showing calibration % with the Sparkles icon centered
+- Add a subtle shimmer sweep animation across the card on mount
+- Make the "Start" CTA use the existing `GradientButton` with 3D press effect instead of flat black
+- Tighten vertical spacing — current card is too tall for its content density
 
 ---
 
-## Batch 4: Color Palette from Photo + Visual Mood Board
+## 3. Shop Similar Section — Authority Upgrade
 
-### Color Palette from Photo
-- **New edge function `supabase/functions/extract-palette/index.ts`**: Accepts a base64 image. Uses Gemini Vision to extract 6-8 dominant colors with hex values and names. Cross-references against the user's color season palette to mark each as "Match" or "Avoid".
-- **`src/pages/ColorType.tsx`**: Add an "Extract from Photo" section with upload area. Display extracted colors as swatches with match/avoid indicators and a summary like "5 of 7 colors match your season".
+**Problem**: Product cards show placeholder icons instead of images. Match score badges lack the color-coded system already built in Inspiration. No visual hierarchy between high and low matches.
 
-### Visual Mood Board Builder
-- **DB Migration**: Create `mood_boards` (id, user_id, name, created_at) and `mood_board_items` (id, board_id, type enum [image/color/text/link], content JSONB, position_x float, position_y float, width float, height float) tables with RLS policies scoped to `auth.uid() = user_id`.
-- **New page `src/pages/MoodBoard.tsx`**: Free-form canvas editor. Users can add images (upload/URL), color swatches (pick from palette or custom hex), text notes, and website links. Items are draggable and resizable. Multiple boards with a board selector sidebar. Save/load via the database.
-- **`src/App.tsx`**: Add route `/mood-board`.
-- **`src/components/app/AppSidebar.tsx`**: Add "Mood Board" nav item with `LayoutGrid` icon.
+**Fix in `src/pages/Dashboard.tsx`**:
+- Apply the same `getScoreColor()` logic from Inspiration: green (>85%), gold (70-85%), gray (<70%)
+- Add a subtle colored bottom border on each card matching the score tier
+- Replace `ShoppingBag` placeholder with a more premium empty state: gradient background with category icon
+- Add horizontal scroll snap (`scroll-snap-type: x mandatory`) for smoother mobile swiping
+- Add "View All" link pointing to `/inspiration`
 
 ---
 
-## Database Migrations Summary
-1. Add `style_formula JSONB DEFAULT '{}'` to `style_profiles`
-2. Create `mood_boards` table + RLS
-3. Create `mood_board_items` table + RLS
+## 4. All My Outfits Section — Interaction Polish
 
-## New Edge Functions
-1. `wardrobe-gap/index.ts` -- AI closet gap analysis
-2. `extract-palette/index.ts` -- Color extraction from photos
+**Fix in `src/pages/Dashboard.tsx`**:
+- Add scroll snap to the horizontal outfit cards
+- Make occasion tabs actually filter the outfit list (currently decorative)
+- Add a subtle entrance stagger (0.05s per card) for the horizontal scroll items
+- "Generate" CTA: swap to `GradientButton` with sparkle icon for consistency
 
-## New Pages
-1. `/outfit-calendar` -- Calendar planner
-2. `/mood-board` -- Visual mood board builder
+---
 
-## Modified Files
-- `src/pages/Chat.tsx` -- Image upload for compatibility checking
-- `src/pages/StyleDNA.tsx` -- Expanded style formula sections
-- `src/pages/Analytics.tsx` -- Gap analysis + wear history
-- `src/pages/Inspiration.tsx` -- Match score coloring + sort + compatibility CTA
-- `src/pages/ColorType.tsx` -- Photo palette extraction
-- `src/pages/Closet.tsx` -- Enhanced wear logging
-- `src/components/app/AppSidebar.tsx` -- New nav items
-- `supabase/functions/ai-chat/index.ts` -- Multimodal image support
-- `supabase/functions/analyze-style-dna/index.ts` -- Extended formula output
-- `supabase/functions/shop-products/index.ts` -- Deterministic match scoring
+## 5. Chat with AI Stylist Section — Conversion Boost
+
+**Fix in `src/pages/Dashboard.tsx`**:
+- Add an icon to each prompt card (e.g., `TrendingUp`, `Snowflake`, `Dumbbell`)
+- Add a subtle gradient left-border on each card for visual anchoring
+- Pass the actual prompt text to `/chat?prefill=` so tapping pre-fills the message
+
+---
+
+## 6. Bottom Nav — Premium Micro-interactions
+
+**Fix in `src/components/app/BottomNav.tsx`**:
+- Add a subtle scale-up animation on the active icon (`scale-110`)
+- Add a 2px colored dot indicator below the active tab instead of just color change
+- Add `safe-area-inset-bottom` padding for notched devices
+- Use `backdrop-blur-lg` on the nav bar for depth
+
+---
+
+## 7. Global Scroll & Motion Refinements
+
+**Fix in `src/pages/Dashboard.tsx`**:
+- Replace individual `motion.div` with staggered children using `staggerChildren: 0.08`
+- Add `will-change: transform` to scrollable containers for GPU acceleration
+- Ensure all horizontal scrolls use `-webkit-overflow-scrolling: touch` and `scrollbar-none`
+
+---
+
+## Files Modified
+- `src/components/app/BottomNav.tsx` — 5th tab + glassmorphic bar + micro-interactions
+- `src/pages/Dashboard.tsx` — All section redesigns (formula card, shop, outfits, chat prompts)
+
+## No New Dependencies Required
+All changes use existing Framer Motion, Tailwind, and Lucide icons.
 
