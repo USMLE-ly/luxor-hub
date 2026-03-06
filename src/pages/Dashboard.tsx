@@ -312,33 +312,6 @@ const Dashboard = () => {
 
             {/* Calibration Section */}
             <div className="text-center space-y-3">
-              {/* Circular progress ring */}
-              <div className="mx-auto w-28 h-28 relative flex items-center justify-center">
-                <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 112 112">
-                  <circle cx="56" cy="56" r="48" fill="none" stroke="hsl(var(--border))" strokeWidth="4" opacity="0.3" />
-                  <motion.circle
-                    cx="56" cy="56" r="48" fill="none"
-                    stroke="url(#progressGrad)"
-                    strokeWidth="4"
-                    strokeLinecap="round"
-                    strokeDasharray={2 * Math.PI * 48}
-                    initial={{ strokeDashoffset: 2 * Math.PI * 48 }}
-                    animate={{ strokeDashoffset: 2 * Math.PI * 48 * (1 - displayProgress / 100) }}
-                    transition={{ duration: 1.5, ease: "easeOut", delay: 0.5 }}
-                  />
-                  <defs>
-                    <linearGradient id="progressGrad" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor="hsl(142, 60%, 48%)" />
-                      <stop offset="100%" stopColor="hsl(var(--primary))" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-                <div className="flex flex-col items-center">
-                  <Sparkles className="w-6 h-6 text-primary mb-1" />
-                  <span className="text-lg font-bold text-foreground font-sans">{displayProgress}%</span>
-                </div>
-              </div>
-
               <h3 className="font-display text-lg font-bold text-foreground">
                 Calibrate your Style Formula
               </h3>
