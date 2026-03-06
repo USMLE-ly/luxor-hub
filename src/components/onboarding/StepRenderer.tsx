@@ -547,8 +547,49 @@ const CameraCaptureStep = ({ step, answers, onSelect }: { step: OnboardingStep; 
   );
 };
 
-const GeneratingStep = ({ step }: { step: OnboardingStep }) => {
+const femaleGarments = [
+  { d: "M60,25 L55,35 Q50,55 45,80 Q44,85 48,85 L72,85 Q76,85 75,80 Q70,55 65,35 Z", fill: "hsl(43,74%,49%)", label: "Dress" },
+  { d: "M80,25 L76,32 Q78,40 74,55 L72,60 L88,60 L86,55 Q82,40 84,32 Z", fill: "hsl(350,60%,72%)", label: "Wrap Top" },
+  { d: "M100,25 L100,35 Q95,45 90,70 Q89,75 94,75 L106,75 Q111,75 110,70 Q105,45 100,35 Z", fill: "hsl(280,30%,75%)", label: "A-Line" },
+  { d: "M120,25 L117,33 Q119,42 116,55 L114,62 L126,62 L124,55 Q121,42 123,33 Z", fill: "hsl(0,0%,92%)", label: "Blouse" },
+  { d: "M140,25 L140,35 Q142,50 148,80 L152,80 Q150,70 148,60 L152,60 Q150,50 140,35 M140,35 Q130,50 128,60 L132,60 Q130,70 128,80 L132,80 Q138,50 140,35 Z", fill: "hsl(210,25%,68%)", label: "Wide Leg" },
+];
+
+const maleGarments = [
+  { d: "M60,25 L52,35 L50,80 L54,80 L56,45 L60,35 L64,45 L66,80 L70,80 L68,35 Z", fill: "hsl(220,30%,35%)", label: "Blazer" },
+  { d: "M80,25 L77,33 Q78,42 77,58 L76,65 L84,65 L83,58 Q82,42 83,33 Z", fill: "hsl(0,0%,95%)", label: "Shirt" },
+  { d: "M100,25 L100,35 Q99,50 98,75 L102,75 Q101,50 100,35 M100,35 Q97,55 96,75 L104,75 Q103,55 100,35 Z", fill: "hsl(30,20%,55%)", label: "Chinos" },
+  { d: "M120,25 L117,33 Q118,40 117,52 L116,58 L124,58 L123,52 Q122,40 123,33 Z", fill: "hsl(160,25%,55%)", label: "Polo" },
+  { d: "M140,25 L133,35 L130,85 L135,85 L136,45 L140,35 L144,45 L145,85 L150,85 L147,35 Z", fill: "hsl(0,0%,25%)", label: "Overcoat" },
+];
+
+const SparkleParticles = () => {
+  const particles = Array.from({ length: 12 }, (_, i) => ({
+    x: 30 + Math.random() * 140,
+    delay: Math.random() * 3,
+    duration: 2 + Math.random() * 2,
+  }));
+  return (
+    <>
+      {particles.map((p, i) => (
+        <motion.circle
+          key={i}
+          cx={p.x}
+          cy={90}
+          r={1.2}
+          fill="hsl(43,74%,70%)"
+          initial={{ opacity: 0, cy: 90 }}
+          animate={{ opacity: [0, 0.8, 0], cy: [90, 40 + Math.random() * 30, 10] }}
+          transition={{ duration: p.duration, delay: p.delay, repeat: Infinity, ease: "easeOut" }}
+        />
+      ))}
+    </>
+  );
+};
+
+const GeneratingStep = ({ step, gender }: { step: OnboardingStep; gender?: "female" | "male" | null }) => {
   const [progress, setProgress] = useState<number[]>([0, 0, 0, 0, 0]);
+  const garments = (gender === "male") ? maleGarments : femaleGarments;
   const labels = [
     "Building your Color Palette",
     "Crafting your Style Guide",
@@ -578,18 +619,68 @@ const GeneratingStep = ({ step }: { step: OnboardingStep }) => {
 
   return (
     <div className="flex flex-col items-center pt-8">
-      <div className="w-48 h-48 mb-6 flex items-center justify-center">
-        <svg viewBox="0 0 200 160" className="w-full h-full" fill="none" stroke="hsl(var(--foreground))" strokeWidth="1">
-          {/* Clothes rack */}
-          <line x1="40" y1="20" x2="40" y2="140" strokeWidth="2" />
-          <line x1="160" y1="20" x2="160" y2="140" strokeWidth="2" />
-          <line x1="30" y1="20" x2="170" y2="20" strokeWidth="3" />
-          {/* Hangers with clothes */}
-          <path d="M60,20 L60,30 Q60,50 50,70 L70,70 Q60,50 60,30" fill="hsl(0,0%,95%)" />
-          <path d="M80,20 L80,35 Q75,55 70,75 L90,75 Q85,55 80,35" fill="hsl(0,50%,70%)" />
-          <path d="M100,20 L100,30 Q100,50 95,80 L105,80 Q100,50 100,30" fill="hsl(210,30%,75%)" />
-          <path d="M120,20 L120,35 Q115,55 110,75 L130,75 Q125,55 120,35" fill="hsl(210,20%,85%)" />
-          <path d="M140,20 L140,30 Q140,50 135,70 L145,70 Q140,50 140,30" fill="hsl(220,20%,30%)" />
+      <div className="w-56 h-48 mb-6 flex items-center justify-center">
+        <svg viewBox="0 0 200 100" className="w-full h-full" fill="none">
+          <defs>
+            <linearGradient id="rackShimmer" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="hsl(var(--foreground))" stopOpacity="0.6" />
+              <stop offset="50%" stopColor="hsl(43,74%,49%)" stopOpacity="0.9" />
+              <stop offset="100%" stopColor="hsl(var(--foreground))" stopOpacity="0.6" />
+              <animateTransform attributeName="gradientTransform" type="translate" values="-1 0;1 0;-1 0" dur="3s" repeatCount="indefinite" />
+            </linearGradient>
+            <linearGradient id="scanBeam" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="transparent" />
+              <stop offset="45%" stopColor="hsl(43,74%,49%)" stopOpacity="0.4" />
+              <stop offset="55%" stopColor="hsl(43,74%,49%)" stopOpacity="0.4" />
+              <stop offset="100%" stopColor="transparent" />
+            </linearGradient>
+          </defs>
+
+          <line x1="40" y1="18" x2="40" y2="95" stroke="hsl(var(--foreground))" strokeWidth="1.5" opacity="0.4" />
+          <line x1="160" y1="18" x2="160" y2="95" stroke="hsl(var(--foreground))" strokeWidth="1.5" opacity="0.4" />
+          <line x1="35" y1="18" x2="165" y2="18" stroke="url(#rackShimmer)" strokeWidth="2.5" strokeLinecap="round" />
+
+          <motion.rect
+            x="35" y="20" width="130" height="2"
+            fill="url(#scanBeam)"
+            initial={{ y: 20 }}
+            animate={{ y: [20, 85, 20] }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
+            rx="1"
+          />
+
+          {garments.map((g, i) => (
+            <motion.g key={i}>
+              <motion.line
+                x1={60 + i * 20} y1={18} x2={60 + i * 20} y2={25}
+                stroke="hsl(var(--foreground))" strokeWidth="1" opacity="0.5"
+                initial={{ opacity: 0 }} animate={{ opacity: 0.5 }}
+                transition={{ delay: i * 0.3 }}
+              />
+              <motion.path
+                d={g.d} fill={g.fill} opacity="0.85"
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 0.85, rotate: [0, -2, 2, -1, 0], y: [0, -1.5, 1.5, -0.5, 0] }}
+                transition={{
+                  scale: { delay: i * 0.3, duration: 0.5, type: "spring", stiffness: 200 },
+                  opacity: { delay: i * 0.3, duration: 0.4 },
+                  rotate: { delay: i * 0.3 + 0.5, duration: 4, repeat: Infinity, ease: "easeInOut" },
+                  y: { delay: i * 0.3 + 0.5, duration: 3, repeat: Infinity, ease: "easeInOut" },
+                }}
+                style={{ transformOrigin: `${60 + i * 20}px 25px` }}
+              />
+              {progress[i] >= 100 && (
+                <motion.path
+                  d={g.d} fill="white"
+                  initial={{ opacity: 0.6 }} animate={{ opacity: 0 }}
+                  transition={{ duration: 0.8 }}
+                  style={{ transformOrigin: `${60 + i * 20}px 25px` }}
+                />
+              )}
+            </motion.g>
+          ))}
+
+          <SparkleParticles />
         </svg>
       </div>
 
