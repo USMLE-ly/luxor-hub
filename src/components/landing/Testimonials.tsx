@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
-import { Quote, Star, ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
 import proof1 from "@/assets/proof-1.jpg";
 import proof2 from "@/assets/proof-2.jpeg";
 import proof3 from "@/assets/proof-3.jpg";
@@ -8,83 +8,27 @@ import proof4 from "@/assets/proof-4.png";
 import proof5 from "@/assets/proof-5.jpg";
 import proof6 from "@/assets/proof-6.png";
 
-const testimonials = [
-  {
-    name: "Sophia Chen",
-    role: "Creative Director",
-    company: "Atelier Studio",
-    avatar: proof1,
-    rating: 5,
-    text: "AURELIA transformed how I approach my wardrobe. The AI suggestions are eerily accurate — it's like having a personal stylist who knows me better than I know myself.",
-    results: ["300% faster styling", "Zero outfit repeats", "Perfect colour matches"],
-  },
-  {
-    name: "Marcus Rivera",
-    role: "Startup Founder",
-    company: "NovaTech",
-    avatar: proof2,
-    rating: 5,
-    text: "I used to spend 30 minutes every morning deciding what to wear. Now it takes seconds. The outfit generator considers weather, my calendar, and my mood.",
-    results: ["30 min saved daily", "Weather-aware looks", "Calendar-synced outfits"],
-  },
-  {
-    name: "Aisha Patel",
-    role: "Fashion Editor",
-    company: "Vogue Digital",
-    avatar: proof3,
-    rating: 5,
-    text: "The closet scanner alone is worth it. I discovered pieces that paired beautifully together — combinations I never would have tried on my own.",
-    results: ["Hidden pairings found", "Full closet utilised", "AI-powered combos"],
-  },
-  {
-    name: "James Thornton",
-    role: "Investment Banker",
-    company: "Goldman & Co",
-    avatar: proof4,
-    rating: 5,
-    text: "As a busy professional, AURELIA saved me hours every week. The style DNA feature captured my aesthetic perfectly — I've never felt more confident.",
-    results: ["Hours saved weekly", "Style DNA mapped", "Confidence boost"],
-  },
-  {
-    name: "Elena Vasquez",
-    role: "Interior Designer",
-    company: "Maison Studio",
-    avatar: proof5,
-    rating: 5,
-    text: "The community feed is incredibly inspiring. Seeing how others style similar pieces gave me so many new ideas. It's like Pinterest meets a personal stylist.",
-    results: ["Endless inspiration", "Community driven", "Style evolution"],
-  },
-  {
-    name: "Liam Foster",
-    role: "E-commerce Manager",
-    company: "StyleHaus",
-    avatar: proof6,
-    rating: 5,
-    text: "The analytics and outfit tracking are game-changers. I can see exactly what works, what doesn't, and how my style has evolved over time.",
-    results: ["Data-driven style", "Trend tracking", "ROI on wardrobe"],
-  },
+const proofImages = [
+  { src: proof1, alt: "Revenue proof - $673K total sales" },
+  { src: proof2, alt: "Revenue proof - $81K total sales" },
+  { src: proof3, alt: "Stripe payout - €48,579" },
+  { src: proof4, alt: "Revenue proof - $105K total sales" },
+  { src: proof5, alt: "Revenue proof - €390K gross sales" },
+  { src: proof6, alt: "Revenue proof - $10K total sales" },
 ];
 
 const slideVariants = {
   enter: (direction: number) => ({
-    x: direction > 0 ? 1000 : -1000,
+    x: direction > 0 ? 600 : -600,
     opacity: 0,
-    scale: 0.8,
-    rotateY: direction > 0 ? 45 : -45,
+    scale: 0.85,
   }),
-  center: {
-    zIndex: 1,
-    x: 0,
-    opacity: 1,
-    scale: 1,
-    rotateY: 0,
-  },
+  center: { zIndex: 1, x: 0, opacity: 1, scale: 1 },
   exit: (direction: number) => ({
     zIndex: 0,
-    x: direction < 0 ? 1000 : -1000,
+    x: direction < 0 ? 600 : -600,
     opacity: 0,
-    scale: 0.8,
-    rotateY: direction < 0 ? 45 : -45,
+    scale: 0.85,
   }),
 };
 
@@ -117,25 +61,23 @@ const Testimonials = () => {
   const [direction, setDirection] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const nextSlide = () => {
+    setDirection(1);
+    setCurrentIndex((prev) => (prev + 1) % proofImages.length);
+  };
+
+  const prevSlide = () => {
+    setDirection(-1);
+    setCurrentIndex((prev) => (prev - 1 + proofImages.length) % proofImages.length);
+  };
+
   useEffect(() => {
     const timer = setInterval(() => {
       setDirection(1);
-      setCurrentIndex((prev) => (prev + 1) % testimonials.length);
-    }, 6000);
+      setCurrentIndex((prev) => (prev + 1) % proofImages.length);
+    }, 5000);
     return () => clearInterval(timer);
   }, []);
-
-  const nextTestimonial = () => {
-    setDirection(1);
-    setCurrentIndex((prev) => (prev + 1) % testimonials.length);
-  };
-
-  const prevTestimonial = () => {
-    setDirection(-1);
-    setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
-  };
-
-  const current = testimonials[currentIndex];
 
   return (
     <section
@@ -188,12 +130,12 @@ const Testimonials = () => {
             <motion.div animate={{ rotate: 360 }} transition={{ duration: 3, repeat: Infinity, ease: "linear" }}>
               <Sparkles className="h-4 w-4 text-primary" />
             </motion.div>
-            <span className="text-sm font-medium text-muted-foreground">✨ Voices of Style</span>
+            <span className="text-sm font-medium text-muted-foreground">✨ Proven Results</span>
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
           </motion.div>
 
           <motion.h2 className="font-display text-4xl sm:text-6xl md:text-7xl font-bold mb-8 tracking-tight" variants={fadeInUp}>
-            <span className="text-foreground">What Our</span>
+            <span className="text-foreground">Real</span>
             <br />
             <motion.span
               className="gold-text"
@@ -201,7 +143,7 @@ const Testimonials = () => {
               transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
               style={{ backgroundSize: "200% 200%" }}
             >
-              Members Say
+              Success Stories
             </motion.span>
           </motion.h2>
 
@@ -210,9 +152,9 @@ const Testimonials = () => {
           </motion.p>
         </motion.div>
 
-        {/* Main Testimonial Display */}
-        <div className="relative max-w-6xl mx-auto mb-16">
-          <div className="relative h-[520px] sm:h-[460px] md:h-[400px]" style={{ perspective: "1000px" }}>
+        {/* Proof Image Slider */}
+        <div className="relative max-w-4xl mx-auto mb-16">
+          <div className="relative h-[400px] sm:h-[500px] md:h-[550px]">
             <AnimatePresence initial={false} custom={direction}>
               <motion.div
                 key={currentIndex}
@@ -223,92 +165,17 @@ const Testimonials = () => {
                 exit="exit"
                 transition={{
                   x: { type: "spring", stiffness: 300, damping: 30 },
-                  opacity: { duration: 0.4 },
-                  scale: { duration: 0.4 },
-                  rotateY: { duration: 0.6 },
+                  opacity: { duration: 0.3 },
+                  scale: { duration: 0.3 },
                 }}
                 className="absolute inset-0"
               >
-                <div className="relative h-full glass rounded-3xl border border-border p-8 md:p-12 overflow-hidden group">
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-br from-primary/[0.08] via-accent/[0.05] to-primary/[0.08] rounded-3xl"
-                    animate={{ backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"] }}
-                    transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-                    style={{ backgroundSize: "300% 300%" }}
+                <div className="relative h-full rounded-3xl overflow-hidden border border-border shadow-2xl">
+                  <img
+                    src={proofImages[currentIndex].src}
+                    alt={proofImages[currentIndex].alt}
+                    className="w-full h-full object-contain bg-card"
                   />
-
-                  <motion.div
-                    className="absolute top-8 right-8 opacity-20"
-                    animate={{ rotate: [0, 10, 0] }}
-                    transition={{ duration: 4, repeat: Infinity }}
-                  >
-                    <Quote className="w-16 h-16 text-primary" />
-                  </motion.div>
-
-                  <div className="relative z-10 h-full flex flex-col md:flex-row items-center gap-8">
-                    {/* User Info */}
-                    <div className="flex-shrink-0 text-center md:text-left">
-                      <motion.div className="relative mb-6" whileHover={{ scale: 1.05 }} transition={{ duration: 0.3 }}>
-                        <div className="w-28 h-28 mx-auto md:mx-0 rounded-2xl overflow-hidden border-4 border-primary/20 relative shadow-lg">
-                          <img src={current.avatar} alt={current.name} className="w-full h-full object-cover" />
-                          <motion.div
-                            className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20"
-                            animate={{ opacity: [0, 0.3, 0] }}
-                            transition={{ duration: 3, repeat: Infinity }}
-                          />
-                        </div>
-                        <motion.div
-                          className="absolute inset-0 border-2 border-primary/30 rounded-2xl"
-                          animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0, 0.5] }}
-                          transition={{ duration: 2, repeat: Infinity }}
-                        />
-                      </motion.div>
-
-                      <h3 className="text-2xl font-display font-bold text-foreground mb-2">{current.name}</h3>
-                      <p className="text-primary mb-1 font-medium">{current.role}</p>
-                      <p className="text-muted-foreground mb-4">{current.company}</p>
-
-                      <div className="flex justify-center md:justify-start gap-1 mb-6">
-                        {[...Array(current.rating)].map((_, i) => (
-                          <motion.div
-                            key={i}
-                            initial={{ opacity: 0, scale: 0 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: i * 0.1, duration: 0.3 }}
-                          >
-                            <Star className="w-5 h-5 fill-primary text-primary" />
-                          </motion.div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Content */}
-                    <div className="flex-1">
-                      <motion.blockquote
-                        className="text-xl md:text-2xl text-foreground/90 leading-relaxed mb-8 font-light italic"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.3, duration: 0.8 }}
-                      >
-                        "{current.text}"
-                      </motion.blockquote>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        {current.results.map((result, i) => (
-                          <motion.div
-                            key={i}
-                            className="bg-foreground/[0.05] rounded-lg p-3 border border-border backdrop-blur-sm"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.5 + i * 0.1, duration: 0.5 }}
-                            whileHover={{ backgroundColor: "hsl(var(--primary) / 0.1)" }}
-                          >
-                            <span className="text-sm text-muted-foreground font-medium">{result}</span>
-                          </motion.div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </motion.div>
             </AnimatePresence>
@@ -317,17 +184,17 @@ const Testimonials = () => {
           {/* Navigation Controls */}
           <div className="flex justify-center items-center gap-6 mt-8">
             <motion.button
-              onClick={prevTestimonial}
+              onClick={prevSlide}
               className="p-3 rounded-full glass border border-border text-foreground hover:border-primary/40 transition-all"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
-              aria-label="Previous testimonial"
+              aria-label="Previous"
             >
               <ArrowLeft className="w-5 h-5" />
             </motion.button>
 
             <div className="flex gap-3">
-              {testimonials.map((_, index) => (
+              {proofImages.map((_, index) => (
                 <motion.button
                   key={index}
                   onClick={() => {
@@ -339,17 +206,17 @@ const Testimonials = () => {
                   }`}
                   whileHover={{ scale: 1.2 }}
                   whileTap={{ scale: 0.9 }}
-                  aria-label={`Go to testimonial ${index + 1}`}
+                  aria-label={`Go to image ${index + 1}`}
                 />
               ))}
             </div>
 
             <motion.button
-              onClick={nextTestimonial}
+              onClick={nextSlide}
               className="p-3 rounded-full glass border border-border text-foreground hover:border-primary/40 transition-all"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
-              aria-label="Next testimonial"
+              aria-label="Next"
             >
               <ArrowRight className="w-5 h-5" />
             </motion.button>
