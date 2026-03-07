@@ -1163,6 +1163,7 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
             </CardContent>
           </Card>
         </motion.div>
+      </div>
       </ParallaxSection>
 
       {/* Improvements — Full width */}
