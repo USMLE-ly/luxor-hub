@@ -30,15 +30,16 @@ serve(async (req) => {
 1. **Color Type** (Season): Determine if they are Spring, Summer, Autumn, or Winter based on their skin tone, hair color, and eye color. Also determine warm/cool undertone.
 2. **Best Colors**: List 6-8 colors that would look best on them.
 3. **Colors to Avoid**: List 3-4 colors they should avoid.
-4. **Style Archetype**: Based on their body proportions and the preferences below, create a unique Style Archetype name (e.g., "Modern Minimal Power", "Romantic Street Edge").
+4. **Style Archetype**: Based on their body proportions, psychographic profile, and preferences below, create a unique Style Archetype name (e.g., "Modern Minimal Power", "Romantic Street Edge", "Creative Bohemian Intellect"). Factor in their lifestyle, profession, and desired mood.
 5. **Style Score**: Rate their current style potential 1-100 based on proportions and features.
-6. **Key Recommendations**: 3-4 specific style tips for their body type and coloring.
+6. **Key Recommendations**: 3-4 specific style tips for their body type, coloring, AND lifestyle/profession.
 7. **Face Shape**: Determine face shape from selfie (Oval, Round, Square, Heart, Oblong, or Diamond).
 8. **Body Shape**: Determine body shape from full body photo. For women: Hourglass, Triangle, Inverted Triangle, Rectangle, or Round. For men: Rectangle, Triangle, Inverted Triangle, Oval, or Trapezoid.
 9. **Recommended Prints**: 4-6 print/pattern types that suit their style archetype and body type.
 10. **Recommended Fabrics**: 4-6 fabric/material types that complement their body and style.
 11. **Flattering Silhouettes**: 4-6 specific garment silhouettes/cuts that flatter their body type.
 12. **Color Usage Tips**: For each best color, suggest what garment type it works best for.
+13. **Style Evolution Prediction**: Based on their current preferences, lifestyle, profession, and mood goals, predict 3 style evolution stages they're likely to go through over the next 1-3 years. Each stage should have a name, timeframe, key changes, and what triggers the evolution.
 
 User preferences: ${JSON.stringify(preferences)}
 
@@ -59,7 +60,8 @@ Return JSON with this exact structure:
   "recommendedPrints": ["string"],
   "recommendedFabrics": ["string"],
   "flatteringSilhouettes": ["string"],
-  "colorUsageTips": [{"color": "string", "usage": "string"}]
+  "colorUsageTips": [{"color": "string", "usage": "string"}],
+  "styleEvolution": [{"stage": "string", "timeframe": "string", "changes": ["string"], "trigger": "string"}]
 }`
       }
     ];
@@ -105,8 +107,9 @@ Return JSON with this exact structure:
                   recommendedFabrics: { type: "array", items: { type: "string" } },
                   flatteringSilhouettes: { type: "array", items: { type: "string" } },
                   colorUsageTips: { type: "array", items: { type: "object", properties: { color: { type: "string" }, usage: { type: "string" } }, required: ["color", "usage"] } },
+                  styleEvolution: { type: "array", items: { type: "object", properties: { stage: { type: "string" }, timeframe: { type: "string" }, changes: { type: "array", items: { type: "string" } }, trigger: { type: "string" } }, required: ["stage", "timeframe", "changes", "trigger"] } },
                 },
-                required: ["colorSeason", "undertone", "bestColors", "colorsToAvoid", "archetype", "styleScore", "recommendations", "summary", "faceShape", "faceShapeDescription", "bodyShape", "bodyShapeTraits", "recommendedPrints", "recommendedFabrics", "flatteringSilhouettes", "colorUsageTips"],
+                required: ["colorSeason", "undertone", "bestColors", "colorsToAvoid", "archetype", "styleScore", "recommendations", "summary", "faceShape", "faceShapeDescription", "bodyShape", "bodyShapeTraits", "recommendedPrints", "recommendedFabrics", "flatteringSilhouettes", "colorUsageTips", "styleEvolution"],
                 additionalProperties: false,
               },
             },
