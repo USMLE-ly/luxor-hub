@@ -3,6 +3,12 @@ import { ContainerScroll } from "@/components/ui/container-scroll";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { Sparkles, TrendingUp, Palette, Calendar, ShoppingBag, BarChart3 } from "lucide-react";
 
+const outfitThumbs = [
+  { label: "Casual Friday", colors: ["bg-amber-800", "bg-stone-200", "bg-blue-900"] },
+  { label: "Date Night", colors: ["bg-black", "bg-red-900", "bg-stone-600"] },
+  { label: "Business", colors: ["bg-slate-800", "bg-white", "bg-amber-700"] },
+];
+
 const AppPreview = () => {
   const navigate = useNavigate();
   return (
@@ -41,8 +47,8 @@ const AppPreview = () => {
             </div>
           </div>
 
-          {/* Style Formula Card */}
-          <div className="rounded-2xl p-4 mb-4" style={{ background: 'linear-gradient(135deg, hsl(30 40% 95%), hsl(35 50% 92%))' }}>
+          {/* Style Formula Card — theme-aware */}
+          <div className="rounded-2xl p-4 mb-4 bg-muted/50 border border-border">
             <p className="text-xs font-sans font-semibold uppercase tracking-widest text-muted-foreground mb-3">Style Formula</p>
             <div className="grid grid-cols-3 gap-3">
               {[
@@ -50,10 +56,27 @@ const AppPreview = () => {
                 { icon: TrendingUp, label: "Style Type", value: "Modern Classic" },
                 { icon: BarChart3, label: "Body Type", value: "Inverted Triangle" },
               ].map((item, i) => (
-                <div key={i} className="flex flex-col items-center gap-1 p-2 rounded-xl bg-card/60">
+                <div key={i} className="flex flex-col items-center gap-1 p-2 rounded-xl bg-card/80 border border-border/50">
                   <item.icon className="w-4 h-4 text-primary" />
                   <span className="text-[10px] font-sans text-muted-foreground">{item.label}</span>
                   <span className="text-xs font-sans font-semibold text-foreground text-center">{item.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Outfit suggestions mini-grid */}
+          <div className="mb-4">
+            <p className="text-xs font-sans font-semibold uppercase tracking-widest text-muted-foreground mb-2">Today's Outfits</p>
+            <div className="grid grid-cols-3 gap-2">
+              {outfitThumbs.map((outfit, i) => (
+                <div key={i} className="rounded-xl border border-border bg-card p-3 flex flex-col gap-2">
+                  <div className="flex gap-1">
+                    {outfit.colors.map((c, j) => (
+                      <div key={j} className={`w-5 h-5 rounded-full ${c} border border-border/30`} />
+                    ))}
+                  </div>
+                  <span className="text-[10px] font-sans font-medium text-foreground">{outfit.label}</span>
                 </div>
               ))}
             </div>
