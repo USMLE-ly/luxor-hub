@@ -35,6 +35,7 @@ import MoodBoard from "./pages/MoodBoard";
 import VideoAnalysis from "./pages/VideoAnalysis";
 import FashionDesigner from "./pages/FashionDesigner";
 import VirtualTryOn from "./pages/VirtualTryOn";
+import CommunityGallery from "./pages/CommunityGallery";
 
 const queryClient = new QueryClient();
 
