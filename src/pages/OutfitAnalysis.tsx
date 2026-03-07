@@ -386,7 +386,7 @@ export default function OutfitAnalysis() {
 
   return (
     <AppLayout>
-      <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-8">
+      <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-8 overflow-x-hidden">
         {/* Premium Header */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
