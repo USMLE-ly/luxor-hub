@@ -1,48 +1,88 @@
+# AURELIA — Launch-Ready Roadmap
 
+> Updated: 2026-03-07 — Practical, prioritized roadmap for a reliable launch.
 
-# Upgrade Outfit Analysis to Premium
+---
 
-## Overview
-Elevate the analysis results page to match the dark luxury aesthetic shown in the reference screenshots, with richer visual polish, gold accents, and more editorial presentation.
+## P0 — Critical (Must fix before launch)
 
-## Changes to `src/pages/OutfitAnalysis.tsx`
+### 1. AI Error Handling & Fallbacks
+- [x] Chat: handles 429/402 gracefully with toasts
+- [x] Chat: streaming SSE parsing with proper buffer flush
+- [ ] OutfitAnalysis: add retry button on AI failure, show friendly error state  
+- [ ] VideoAnalysis: add timeout handling for long video processing
+- [ ] FashionDesigner: add retry on generation failure
+- [ ] All AI pages: wrap in ErrorBoundary for crash recovery
+- [ ] All edge functions: consistent 429/402 handling
 
-### 1. Premium Score Ring
-- Replace the plain `hsl(var(--primary))` circle stroke with a gold gradient using SVG `linearGradient` (gold → gold-light)
-- Add a subtle gold glow shadow behind the score ring
-- Add a gold shimmer sweep overlay on the overall score card (reuse the `gold-shimmer-sweep` animation)
+### 2. Image Upload Robustness
+- [ ] Compress images client-side before upload (target <2MB via canvas)
+- [ ] Enforce consistent size limits across all pages
+- [ ] Show file size in upload preview
+- [ ] Add privacy notice banner on all upload pages ("Images processed by AI")
+- [ ] Lazy load all gallery/product images
 
-### 2. Better Color Palette Section
-- Make color swatches larger (taller aspect ratio, like the reference screenshots)
-- Add hex code labels beneath each swatch on hover
-- Give the harmony and rating badges gold-tinted styling
+### 3. Mobile UX
+- [ ] Test sidebar collapse on small screens
+- [ ] Fix horizontal overflow in carousels (scrollbar-none + snap)
+- [ ] Ensure modals/dialogs scrollable on short viewports
+- [ ] Touch-friendly tap targets (min 44px)
+- [ ] Swipe hint: test reliability across screen sizes
 
-### 3. Elevated Card Styling
-- Add gold border glow on hover to all result cards (like the chat bubbles): `hover:shadow-[0_0_15px_-3px_hsl(var(--gold)/0.3)]` and `hover:border-[hsl(var(--gold)/0.3)]`
-- Add smooth transitions on all cards
+### 4. Auth & Security
+- [x] RLS policies on all 20+ tables
+- [x] No client-side admin checks
+- [ ] Privacy notice for AI image processing
+- [ ] Ensure all storage uploads use user-scoped paths
+- [ ] Rate limit awareness on all AI endpoints
 
-### 4. Strengths Section Upgrade
-- Replace small badge chips with full-width list items with green accent borders (matching reference screenshot style)
-- Each strength gets its own row with a checkmark icon
+---
 
-### 5. Improvements Section Upgrade
-- Give each improvement its own card-like row with better spacing
-- Show priority as a colored dot with label
-- More prominent suggestion text with the reason as subtle subtext
+## P1 — Important (Should fix for quality)
 
-### 6. Layout Refinement
-- Change the bottom grid from 3-column to 2-column: Detected Items + Strengths side by side, then Improvements full width below (matching the reference layout)
-- Add a Body Type & Silhouette section as a final card
+### 5. Shop/Products Polish
+- [ ] Consistent fallback placeholder images
+- [ ] Loading skeletons while products load
+- [ ] "No results" helpful message state
+- [ ] Test edge function with varied query formats
 
-### 7. Analyzing State
-- Add a premium skeleton/shimmer loading state while analyzing instead of just the button spinner
-- Show progress steps: "Uploading... → Analyzing style... → Generating insights..."
+### 6. Onboarding Polish
+- [ ] Clear selfie instructions with example photos
+- [ ] Swipe hint: click alternative for non-touch
+- [ ] Style DNA explanation tooltip
+- [ ] Clear step progress indicator
 
-### 8. Section Headers
-- Add subtle gold accent line before each section header icon
+### 7. AI Accuracy & Quality
+- [ ] Test outfit analysis with diverse outfits
+- [ ] Validate Style DNA with multiple skin tones
+- [ ] Wardrobe gap: no repeated suggestions
+- [ ] Cap confidence scores 0-100
 
-## Changes to `src/index.css`
-- Add a `@keyframes gold-pulse` for the score ring glow animation
+### 8. Chat Improvements
+- [ ] Test multi-turn context (5+ messages)
+- [ ] Calendar/weather: graceful fallback if denied
+- [ ] Offline suggestion cards from last Style DNA
+- [ ] Auto-save conversation periodically
 
-## No new files or dependencies needed
+---
 
+## P2 — Nice to Have (Post-launch)
+
+### 9. Performance
+- [ ] Audit bundle size, lazy-load heavy pages
+- [ ] Service worker for offline
+- [ ] Optimize 3D mannequin loading
+- [ ] Analytics tracking for feature usage
+
+### 10. Community & Social
+- [ ] Report/flag for public designs
+- [ ] Multi-store shop filtering
+- [ ] Design collaboration
+- [ ] Style challenges with prizes
+
+---
+
+## Status
+- [ ] Not started
+- [x] Complete
+- 🔧 In progress

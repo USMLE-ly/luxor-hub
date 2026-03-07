@@ -475,14 +475,38 @@ export default function OutfitAnalysis() {
                           ))}
                         </div>
                       </div>
-                      {isAnalyzing ? (
-                        <Button
-                          disabled
-                          className="gold-gradient text-primary-foreground font-semibold w-full md:w-auto gold-glow"
-                          size="lg"
-                        >
-                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />Analyzing...
-                        </Button>
+                    {isAnalyzing ? (
+                        <div className="space-y-4 w-full">
+                          <div className="space-y-3">
+                            {["Uploading image...", "Analyzing style & colors...", "Generating insights..."].map((step, i) => (
+                              <motion.div
+                                key={step}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: i * 1.2 }}
+                                className="flex items-center gap-3"
+                              >
+                                <motion.div
+                                  initial={{ scale: 0 }}
+                                  animate={{ scale: 1 }}
+                                  transition={{ delay: i * 1.2 + 0.3 }}
+                                  className="w-6 h-6 rounded-full bg-primary/15 flex items-center justify-center"
+                                >
+                                  <Sparkles className="w-3 h-3 text-primary" />
+                                </motion.div>
+                                <span className="text-sm text-muted-foreground">{step}</span>
+                              </motion.div>
+                            ))}
+                          </div>
+                          <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                            <motion.div
+                              className="h-full gold-gradient rounded-full"
+                              initial={{ width: "0%" }}
+                              animate={{ width: "85%" }}
+                              transition={{ duration: 8, ease: "easeOut" }}
+                            />
+                          </div>
+                        </div>
                       ) : (
                         <RainbowButton
                           onClick={handleAnalyze}
@@ -801,7 +825,7 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
 
   return (
     <>
-      {/* Overall Score */}
+      {/* Overall Score — Premium */}
       <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -809,21 +833,42 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
         className="relative rounded-[1.5rem] border-[0.75px] border-border p-3"
       >
         <GlowingEffect spread={60} glow={true} disabled={false} proximity={80} inactiveZone={0.01} borderWidth={3} />
-        <Card className="glass-card overflow-hidden border-0 shadow-none">
+        <Card className="glass-card overflow-hidden border-0 shadow-none relative">
+          {/* Gold shimmer sweep overlay */}
+          <motion.div
+            className="absolute inset-0 pointer-events-none z-10"
+            style={{
+              background: "linear-gradient(105deg, transparent 40%, hsl(var(--gold-light) / 0.08) 45%, hsl(var(--gold) / 0.12) 50%, hsl(var(--gold-light) / 0.08) 55%, transparent 60%)",
+              backgroundSize: "250% 100%",
+              animation: "gold-shimmer-sweep 4s ease-out forwards",
+            }}
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 0 }}
+            transition={{ delay: 3, duration: 1.5 }}
+          />
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-              <div className="relative w-28 h-28 flex-shrink-0">
+              {/* Premium Gold Score Ring */}
+              <div className="relative w-28 h-28 flex-shrink-0 gold-ring-glow">
                 <svg className="w-28 h-28 -rotate-90" viewBox="0 0 100 100">
-                  <circle cx="50" cy="50" r="42" fill="none" stroke="hsl(var(--muted))" strokeWidth="6" />
+                  <defs>
+                    <linearGradient id="gold-ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="hsl(var(--gold-dark))" />
+                      <stop offset="50%" stopColor="hsl(var(--gold))" />
+                      <stop offset="100%" stopColor="hsl(var(--gold-light))" />
+                    </linearGradient>
+                  </defs>
+                  <circle cx="50" cy="50" r="42" fill="none" stroke="hsl(var(--muted))" strokeWidth="5" />
                   <motion.circle
-                    cx="50" cy="50" r="42" fill="none" stroke="hsl(var(--primary))" strokeWidth="6" strokeLinecap="round"
+                    cx="50" cy="50" r="42" fill="none" stroke="url(#gold-ring-gradient)" strokeWidth="6" strokeLinecap="round"
                     initial={{ strokeDasharray: "0 264" }}
                     animate={{ strokeDasharray: `${(analysis.styleScore / 100) * 264} 264` }}
                     transition={{ duration: 1.5, ease: "easeOut" }}
                   />
                 </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-3xl font-bold text-foreground">{animatedScore}</span>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-3xl font-bold gold-text">{animatedScore}</span>
+                  <span className="text-[10px] text-muted-foreground -mt-0.5">/ 100</span>
                 </div>
               </div>
               <div className="flex-1">
@@ -846,9 +891,10 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          <Card className="glass-card">
+          <Card className="glass-card premium-card">
             <CardHeader className="pb-2">
               <CardTitle className="font-display flex items-center gap-2 text-foreground text-base">
+                <div className="w-0.5 h-4 gold-gradient rounded-full mr-1" />
                 <Star className="w-5 h-5 text-primary" /> Occasion Suitability
               </CardTitle>
             </CardHeader>
@@ -861,9 +907,9 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
                   <Radar
                     name="Score"
                     dataKey="score"
-                    stroke="hsl(var(--primary))"
-                    fill="hsl(var(--primary))"
-                    fillOpacity={0.25}
+                    stroke="hsl(var(--gold))"
+                    fill="hsl(var(--gold))"
+                    fillOpacity={0.2}
                     strokeWidth={2}
                     animationDuration={1200}
                   />
@@ -880,46 +926,54 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <Card className="glass-card">
+          <Card className="glass-card premium-card">
             <CardHeader className="pb-2">
               <CardTitle className="font-display flex items-center gap-2 text-foreground text-base">
+                <div className="w-0.5 h-4 gold-gradient rounded-full mr-1" />
                 <Palette className="w-5 h-5 text-primary" /> Color Analysis
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 {analysis.colorPalette.colors.map((c, i) => (
                   <motion.div
                     key={i}
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ delay: i * 0.1, type: "spring" }}
-                    className="flex-1 aspect-square rounded-lg border border-border shadow-sm hover:scale-110 transition-transform cursor-pointer"
-                    style={{ backgroundColor: c }}
-                    title={c}
-                  />
+                    className="flex-1 group relative"
+                  >
+                    <div
+                      className="aspect-[3/4] rounded-xl border border-border shadow-sm hover:scale-105 transition-transform cursor-pointer"
+                      style={{ backgroundColor: c }}
+                    />
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -bottom-5 left-1/2 -translate-x-1/2 text-[9px] text-muted-foreground font-mono whitespace-nowrap">
+                      {c}
+                    </div>
+                  </motion.div>
                 ))}
               </div>
-              <div className="flex gap-2">
-                <Badge variant="secondary">{analysis.colorPalette.harmony}</Badge>
-                <Badge variant="outline">{analysis.colorPalette.rating}</Badge>
+              <div className="flex gap-2 pt-2">
+                <Badge className="bg-primary/10 text-primary border-primary/20">{analysis.colorPalette.harmony}</Badge>
+                <Badge className="bg-primary/10 text-primary border-primary/20">{analysis.colorPalette.rating}</Badge>
               </div>
             </CardContent>
           </Card>
         </motion.div>
       </div>
 
-      {/* Detected Items + Strengths + Improvements row */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Detected Items + Strengths — 2 column */}
+      <div className="grid md:grid-cols-2 gap-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          <Card className="glass-card h-full">
+          <Card className="glass-card premium-card h-full">
             <CardHeader className="pb-2">
               <CardTitle className="font-display flex items-center gap-2 text-foreground text-base">
+                <div className="w-0.5 h-4 gold-gradient rounded-full mr-1" />
                 <Shirt className="w-5 h-5 text-primary" /> Detected Items
               </CardTitle>
             </CardHeader>
@@ -955,7 +1009,6 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
                             <p className="text-xs text-muted-foreground">Style: <span className="text-foreground">{item.style}</span></p>
                             <Badge variant="secondary" className="text-[10px]">{item.category}</Badge>
                             
-                            {/* Find Similar Button */}
                             <button
                               onClick={(e) => { e.stopPropagation(); handleFindSimilar(item, i); }}
                               disabled={findingSimilar === i}
@@ -968,7 +1021,6 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
                               )}
                             </button>
 
-                            {/* Similar Products */}
                             {similarProducts[i] && similarProducts[i].length > 0 && (
                               <div className="mt-2 space-y-2">
                                 <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Similar items found:</p>
@@ -1010,68 +1062,96 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <Card className="glass-card h-full">
+          <Card className="glass-card premium-card h-full">
             <CardHeader className="pb-2">
               <CardTitle className="font-display flex items-center gap-2 text-foreground text-base">
+                <div className="w-0.5 h-4 gold-gradient rounded-full mr-1" />
                 <ShieldCheck className="w-5 h-5 text-green-500" /> Strengths
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2">
-                {strengthChips.map((chip, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: i * 0.06 }}
-                  >
-                    <Badge variant="secondary" className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 text-xs py-1">
-                      ✓ {chip}
-                    </Badge>
-                  </motion.div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-        >
-          <Card className="glass-card h-full">
-            <CardHeader className="pb-2">
-              <CardTitle className="font-display flex items-center gap-2 text-foreground text-base">
-                <AlertTriangle className="w-5 h-5 text-yellow-500" /> Improvements
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {analysis.improvements.map((imp, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.08 }}
-                    className="flex items-start gap-2 p-2 rounded-lg bg-muted/30"
-                  >
-                    <div
-                      className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0"
-                      style={{ backgroundColor: imp.priority === "high" ? "hsl(var(--destructive))" : imp.priority === "medium" ? "hsl(45 93% 47%)" : "hsl(var(--muted-foreground))" }}
-                    />
-                    <div>
-                      <p className="text-sm text-foreground">{imp.suggestion}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{imp.reason}</p>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
+            <CardContent className="space-y-2">
+              {strengthChips.map((chip, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.06 }}
+                  className="flex items-center gap-3 p-3 rounded-lg border-l-2 border-green-500/40 bg-green-500/5"
+                >
+                  <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
+                  <span className="text-sm text-foreground">{chip}</span>
+                </motion.div>
+              ))}
             </CardContent>
           </Card>
         </motion.div>
       </div>
+
+      {/* Improvements — Full width */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+      >
+        <Card className="glass-card premium-card">
+          <CardHeader className="pb-2">
+            <CardTitle className="font-display flex items-center gap-2 text-foreground text-base">
+              <div className="w-0.5 h-4 gold-gradient rounded-full mr-1" />
+              <AlertTriangle className="w-5 h-5 text-yellow-500" /> Improvements
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {analysis.improvements.map((imp, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.08 }}
+                  className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 border border-border/50"
+                >
+                  <div
+                    className="w-2.5 h-2.5 rounded-full mt-1 flex-shrink-0"
+                    style={{ backgroundColor: imp.priority === "high" ? "hsl(var(--destructive))" : imp.priority === "medium" ? "hsl(45 93% 47%)" : "hsl(var(--muted-foreground))" }}
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <p className="text-sm font-medium text-foreground">{imp.suggestion}</p>
+                      <Badge variant="outline" className={`text-[9px] px-1.5 py-0 ${getPriorityColor(imp.priority)}`}>
+                        {imp.priority}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{imp.reason}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Body Type & Silhouette — Full width */}
+      {analysis.bodyTypeNotes && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
+          <Card className="glass-card premium-card">
+            <CardHeader className="pb-2">
+              <CardTitle className="font-display flex items-center gap-2 text-foreground text-base">
+                <div className="w-0.5 h-4 gold-gradient rounded-full mr-1" />
+                <TrendingUp className="w-5 h-5 text-primary" /> Body Type & Silhouette
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground leading-relaxed">{analysis.bodyTypeNotes}</p>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
     </>
   );
 }
