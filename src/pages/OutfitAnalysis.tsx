@@ -137,8 +137,6 @@ export default function OutfitAnalysis() {
     reader.readAsDataURL(compressed);
   };
 
-  const [analysisError, setAnalysisError] = useState<string | null>(null);
-
   const handleAnalyze = async () => {
     if (!imageFile || !user) return;
     setIsAnalyzing(true);
