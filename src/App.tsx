@@ -35,6 +35,7 @@ import MoodBoard from "./pages/MoodBoard";
 import VideoAnalysis from "./pages/VideoAnalysis";
 import FashionDesigner from "./pages/FashionDesigner";
 import VirtualTryOn from "./pages/VirtualTryOn";
+import CommunityGallery from "./pages/CommunityGallery";
 
 const queryClient = new QueryClient();
 
@@ -76,6 +77,7 @@ const App = () => (
             <Route path="/video-analysis" element={<VideoAnalysis />} />
             <Route path="/fashion-designer" element={<FashionDesigner />} />
             <Route path="/virtual-tryon" element={<VirtualTryOn />} />
+            <Route path="/community-gallery" element={<CommunityGallery />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
