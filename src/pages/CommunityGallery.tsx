@@ -208,6 +208,16 @@ export default function CommunityGallery() {
       setDesigns(prev => prev.map(d => d.id === designId ? { ...d, commentCount: d.commentCount + 1 } : d));
       setNewComment("");
       toast.success("Comment added!");
+      // Notify design owner
+      const design = designs.find(d => d.id === designId);
+      if (design && design.user_id !== user.id) {
+        await supabase.from("notifications").insert({
+          user_id: design.user_id,
+          actor_id: user.id,
+          type: "design_comment",
+          reference_id: designId,
+        });
+      }
     }
   };
 
