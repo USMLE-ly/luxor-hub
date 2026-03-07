@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { Crown, Sparkles, Star } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { CreativePricing, type PricingTier } from "@/components/ui/creative-pricing";
 
 const tiers: PricingTier[] = [
@@ -42,7 +41,6 @@ const GoldDivider = () => (
 const Pricing = () => {
   return (
     <section className="relative py-32 px-4 overflow-hidden" id="pricing">
-      {/* SVG pattern background */}
       <div
         className="absolute inset-0 opacity-[0.04] dark:opacity-[0.03] pointer-events-none"
         style={{
@@ -53,19 +51,6 @@ const Pricing = () => {
       />
 
       <div className="max-w-6xl mx-auto relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-6"
-        >
-          <p className="text-primary font-sans font-semibold text-sm tracking-widest uppercase mb-4">Invest in Style</p>
-          <h2 className="font-display text-4xl md:text-5xl font-bold">
-            Choose Your <span className="gold-text">Plan</span>
-          </h2>
-        </motion.div>
-
         <GoldDivider />
       </div>
 
@@ -73,7 +58,7 @@ const Pricing = () => {
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-80px" }}
-        transition={{ duration: 0.7, staggerChildren: 0.15 }}
+        transition={{ duration: 0.7 }}
       >
         <CreativePricing
           tag="Invest in Style"

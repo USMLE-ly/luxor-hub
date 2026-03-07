@@ -86,7 +86,10 @@ const Index = () => {
       <AppPreview />
       <BrandMarquee />
       <IntegrationHero />
-      <Testimonials />
+      {/* Dark accent band for testimonials */}
+      <div className="bg-muted/20">
+        <Testimonials />
+      </div>
       <Pricing />
       <Footer />
     </div>

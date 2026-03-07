@@ -1,110 +1,61 @@
-import { GradientButton } from "@/components/ui/gradient-button";
 import { motion } from "framer-motion";
+import { Shirt, Instagram, Palette, ShoppingBag, Smartphone, Globe } from "lucide-react";
 
-const ICONS_ROW1 = [
-  "https://cdn-icons-png.flaticon.com/512/2111/2111463.png",   // Instagram
-  "https://cdn-icons-png.flaticon.com/512/174/174863.png",     // Pinterest
-  "https://cdn-icons-png.flaticon.com/512/5968/5968830.png",   // Shopify
-  "https://cdn-icons-png.flaticon.com/512/3536/3536505.png",   // TikTok
-  "https://cdn-icons-png.flaticon.com/512/5968/5968764.png",   // Figma
-  "https://cdn-icons-png.flaticon.com/512/888/888879.png",     // Google
-  "https://cdn-icons-png.flaticon.com/512/5968/5968841.png",   // Spotify
+const platforms = [
+  { icon: Instagram, name: "Instagram" },
+  { icon: Palette, name: "Pinterest" },
+  { icon: ShoppingBag, name: "Shopify" },
+  { icon: Smartphone, name: "TikTok" },
+  { icon: Globe, name: "ASOS" },
+  { icon: Shirt, name: "Zara" },
 ];
-
-const ICONS_ROW2 = [
-  "https://cdn-icons-png.flaticon.com/512/733/733635.png",     // Twitter/X
-  "https://cdn-icons-png.flaticon.com/512/5968/5968756.png",   // Etsy
-  "https://cdn-icons-png.flaticon.com/512/174/174848.png",     // Stripe
-  "https://cdn-icons-png.flaticon.com/512/5968/5968958.png",   // Notion
-  "https://cdn-icons-png.flaticon.com/512/733/733547.png",     // Facebook
-  "https://cdn-icons-png.flaticon.com/512/3670/3670147.png",   // Canva
-  "https://cdn-icons-png.flaticon.com/512/732/732200.png",     // Snapchat
-];
-
-const repeatedIcons = (icons: string[], repeat = 4) =>
-  Array.from({ length: repeat }).flatMap(() => icons);
 
 export default function IntegrationHero() {
   return (
-    <section className="relative py-24 md:py-32 overflow-hidden bg-background">
-      {/* Dot grid background */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,hsl(var(--foreground)/0.04)_1px,transparent_1px)] [background-size:24px_24px]" />
+    <section className="relative py-16 md:py-20 overflow-hidden bg-muted/30">
+      <div className="relative max-w-5xl mx-auto px-6">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+          {/* Text */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.6 }}
+            className="text-center md:text-left"
+          >
+            <h3 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-2">
+              Connects to your <span className="gold-text">favorite platforms</span>
+            </h3>
+            <p className="text-sm text-muted-foreground font-sans max-w-sm">
+              Sync your style across Instagram, Pinterest, Shopify, and more.
+            </p>
+          </motion.div>
 
-      <div className="relative max-w-7xl mx-auto px-6 text-center">
-        <motion.span
-          initial={{ opacity: 0, y: 15 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.5 }}
-          className="inline-flex items-center gap-1.5 px-4 py-1.5 mb-5 text-sm rounded-full border border-border bg-card text-foreground font-sans font-medium"
-        >
-          ⚡ Integrations
-        </motion.span>
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="font-display text-4xl lg:text-6xl font-bold tracking-tight text-foreground"
-        >
-          Connect your favorite fashion platforms
-        </motion.h2>
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="mt-4 text-lg font-sans text-muted-foreground max-w-xl mx-auto"
-        >
-          Sync with Instagram, Pinterest, Shopify, and 250+ apps to elevate your style workflow.
-        </motion.p>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-        >
-          <GradientButton className="mt-8">
-            Get started
-          </GradientButton>
-        </motion.div>
-
-        {/* Icon Carousel */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="mt-12 overflow-hidden relative pb-2"
-        >
-          {/* Row 1 - scrolls left */}
-          <div className="flex gap-10 whitespace-nowrap animate-integration-left">
-            {repeatedIcons(ICONS_ROW1, 4).map((src, i) => (
-              <div
-                key={i}
-                className="h-16 w-16 flex-shrink-0 rounded-full bg-card shadow-md border border-border flex items-center justify-center"
+          {/* Platform icons */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="flex gap-4 flex-wrap justify-center"
+          >
+            {platforms.map((p, i) => (
+              <motion.div
+                key={p.name}
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.15 + i * 0.06, duration: 0.4 }}
+                className="flex flex-col items-center gap-1.5 group"
               >
-                <img src={src} alt="" className="h-10 w-10 object-contain" loading="lazy" />
-              </div>
+                <div className="w-14 h-14 rounded-2xl bg-card border border-border flex items-center justify-center group-hover:border-primary/40 group-hover:shadow-[0_0_16px_hsl(var(--primary)/0.1)] transition-all duration-300">
+                  <p.icon className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors duration-300" />
+                </div>
+                <span className="text-[10px] font-sans font-medium text-muted-foreground">{p.name}</span>
+              </motion.div>
             ))}
-          </div>
-
-          {/* Row 2 - scrolls right */}
-          <div className="flex gap-10 whitespace-nowrap mt-6 animate-integration-right">
-            {repeatedIcons(ICONS_ROW2, 4).map((src, i) => (
-              <div
-                key={i}
-                className="h-16 w-16 flex-shrink-0 rounded-full bg-card shadow-md border border-border flex items-center justify-center"
-              >
-                <img src={src} alt="" className="h-10 w-10 object-contain" loading="lazy" />
-              </div>
-            ))}
-          </div>
-
-          {/* Fade overlays */}
-          <div className="absolute left-0 top-0 h-full w-24 bg-gradient-to-r from-background to-transparent pointer-events-none" />
-          <div className="absolute right-0 top-0 h-full w-24 bg-gradient-to-l from-background to-transparent pointer-events-none" />
-        </motion.div>
+          </motion.div>
+        </div>
       </div>
     </section>
   );
