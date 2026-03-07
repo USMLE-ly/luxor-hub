@@ -303,10 +303,11 @@
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 768px) {
   .slide-content {
-    bottom: 42%;
+    bottom: 48%;
     left: 6%;
     right: 6%;
     max-width: none;
+    transform: none;
   }
 
   .lumina-hero-overlay {
