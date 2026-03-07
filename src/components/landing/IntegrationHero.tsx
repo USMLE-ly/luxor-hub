@@ -5,7 +5,7 @@ const platforms = [
   { name: "Pinterest", logo: "/logos/pinterest.png" },
   { name: "Shopify", logo: "/logos/shopify.png" },
   { name: "TikTok", logo: "/logos/tiktok.png" },
-  { name: "ASOS", logo: "/logos/asos.png" },
+  { name: "ASOS", textLogo: true },
   { name: "Zara", logo: "/logos/zara.png" },
 ];
 
@@ -14,7 +14,6 @@ export default function IntegrationHero() {
     <section className="relative py-16 md:py-20 overflow-hidden bg-muted/30">
       <div className="relative max-w-5xl mx-auto px-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-          {/* Text */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -30,7 +29,6 @@ export default function IntegrationHero() {
             </p>
           </motion.div>
 
-          {/* Platform logos */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -48,12 +46,18 @@ export default function IntegrationHero() {
                 className="flex flex-col items-center gap-1.5 group"
               >
                 <div className="w-14 h-14 rounded-2xl bg-card border border-border flex items-center justify-center group-hover:border-primary/40 group-hover:shadow-[0_0_16px_hsl(var(--primary)/0.1)] transition-all duration-300 p-2.5">
-                  <img
-                    src={p.logo}
-                    alt={p.name}
-                    className="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300"
-                    loading="lazy"
-                  />
+                  {'textLogo' in p && p.textLogo ? (
+                    <span className="text-sm font-bold text-muted-foreground group-hover:text-foreground transition-colors duration-300 tracking-wider">
+                      ASOS
+                    </span>
+                  ) : (
+                    <img
+                      src={p.logo}
+                      alt={p.name}
+                      className="w-full h-full object-contain"
+                      loading="lazy"
+                    />
+                  )}
                 </div>
                 <span className="text-[10px] font-sans font-medium text-muted-foreground">{p.name}</span>
               </motion.div>
