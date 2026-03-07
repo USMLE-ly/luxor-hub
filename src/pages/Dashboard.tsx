@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { useNavigate } from "react-router-dom";
+import { WeeklyCapsuleWidget } from "@/components/app/WeeklyCapsuleWidget";
 
 interface ShopProduct {
   name: string;
@@ -558,6 +559,11 @@ const Dashboard = () => {
               </Button>
             </div>
           )}
+        </motion.div>
+
+        {/* ── Weekly Capsule Plan ───────────────────────────── */}
+        <motion.div variants={fadeUp}>
+          <WeeklyCapsuleWidget />
         </motion.div>
 
         {/* ── Chat with AI Stylist ──────────────────────────── */}

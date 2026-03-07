@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Send, Sparkles, Loader2, Trash2, ArrowUp, Camera, Image, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { VoiceInput } from "@/components/app/VoiceInput";
 
 interface Message {
   id?: string;
@@ -344,6 +345,12 @@ const Chat = () => {
             >
               <Camera className="w-4 h-4" />
             </button>
+            <VoiceInput
+              onTranscript={(text) => {
+                setInput((prev) => (prev ? prev + " " + text : text));
+              }}
+              disabled={isLoading}
+            />
             <textarea
               ref={inputRef}
               value={input}
