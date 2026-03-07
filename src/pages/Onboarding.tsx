@@ -39,6 +39,7 @@ const Onboarding = () => {
   const [answers, setAnswers] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(false);
   const [aiResults, setAiResults] = useState<Record<string, any>>({});
+  const [swipeDir, setSwipeDir] = useState<1 | -1>(1);
   const { user } = useAuth();
   const navigate = useNavigate();
 
