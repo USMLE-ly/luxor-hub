@@ -98,11 +98,28 @@ serve(async (req) => {
 
   try {
     const url = new URL(req.url);
-    const category = url.searchParams.get("category") || "All";
-    const colorSeason = url.searchParams.get("colorSeason") || "";
-    const bodyShape = url.searchParams.get("bodyShape") || "";
-    const archetype = url.searchParams.get("archetype") || "";
-    const closetCategories = (url.searchParams.get("closetCategories") || "").split(",").filter(Boolean);
+    
+    // Support both GET (query params) and POST (body)
+    let category = "All", colorSeason = "", bodyShape = "", archetype = "", closetCategories: string[] = [];
+    
+    if (req.method === "POST") {
+      try {
+        const body = await req.json();
+        category = body.category || "All";
+        colorSeason = body.colorSeason || "";
+        bodyShape = body.bodyShape || "";
+        archetype = body.archetype || "";
+        closetCategories = (body.closetCategories || "").split?.(",")?.filter?.(Boolean) || [];
+      } catch { /* fallback to query params */ }
+    }
+    
+    if (!colorSeason) {
+      category = url.searchParams.get("category") || category;
+      colorSeason = url.searchParams.get("colorSeason") || "";
+      bodyShape = url.searchParams.get("bodyShape") || "";
+      archetype = url.searchParams.get("archetype") || "";
+      closetCategories = (url.searchParams.get("closetCategories") || "").split(",").filter(Boolean);
+    }
 
     let filtered = productDatabase;
     if (category && category !== "All") {
