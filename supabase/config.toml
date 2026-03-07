@@ -29,3 +29,6 @@ verify_jwt = false
 
 [functions.trend-intelligence]
 verify_jwt = false
+
+[functions.design-clothing]
+verify_jwt = false

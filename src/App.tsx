@@ -32,7 +32,8 @@ import ColorType from "./pages/ColorType";
 import Paywall from "./pages/Paywall";
 import OutfitCalendar from "./pages/OutfitCalendar";
 import MoodBoard from "./pages/MoodBoard";
-
+import VideoAnalysis from "./pages/VideoAnalysis";
+import FashionDesigner from "./pages/FashionDesigner";
 
 const queryClient = new QueryClient();
 
@@ -71,6 +72,8 @@ const App = () => (
             <Route path="/paywall" element={<Paywall />} />
             <Route path="/outfit-calendar" element={<OutfitCalendar />} />
             <Route path="/mood-board" element={<MoodBoard />} />
+            <Route path="/video-analysis" element={<VideoAnalysis />} />
+            <Route path="/fashion-designer" element={<FashionDesigner />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
