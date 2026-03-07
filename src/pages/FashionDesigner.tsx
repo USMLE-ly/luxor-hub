@@ -294,6 +294,7 @@ export default function FashionDesigner() {
                       </button>
                     ))}
                   </div>
+                  <PrivacyNotice />
                 </CardContent>
               </Card>
             </div>
