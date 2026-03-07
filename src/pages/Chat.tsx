@@ -352,7 +352,7 @@ const Chat = () => {
                         }}
                       />
                     </motion.div>
-                  )
+                  )}
                   {msg.imagePreview && (
                     <div className="mb-2 rounded-lg overflow-hidden">
                       <img src={msg.imagePreview} alt="Uploaded item" className="w-full max-h-48 object-cover rounded-lg" />
