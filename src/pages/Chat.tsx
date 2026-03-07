@@ -329,10 +329,10 @@ const Chat = () => {
                 className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 font-sans text-sm relative overflow-hidden ${
+                  className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 font-sans text-sm relative overflow-hidden transition-shadow duration-500 ease-out ${
                     msg.role === "user"
                       ? "bg-foreground text-background rounded-br-md"
-                      : "bg-card border border-border rounded-bl-md"
+                      : "bg-card border border-border rounded-bl-md hover:shadow-[0_0_15px_-3px_hsl(var(--gold)/0.35),0_0_6px_-2px_hsl(var(--gold)/0.2)] hover:border-[hsl(var(--gold)/0.4)]"
                   }`}
                 >
                   {/* Gold shimmer overlay for assistant messages */}
