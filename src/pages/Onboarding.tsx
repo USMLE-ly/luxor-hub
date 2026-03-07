@@ -209,13 +209,12 @@ const Onboarding = () => {
       {/* Content */}
       <div className="flex-1 flex items-start justify-center px-5 pt-8 pb-24 overflow-y-auto">
         <div className="w-full max-w-lg">
-          <AnimatePresence mode="wait" custom={swipeDir}>
+          <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={currentStep}
-              custom={swipeDir}
-              initial={(dir: number) => ({ opacity: 0, x: dir * 80 })}
+              initial={{ opacity: 0, x: swipeDir * 80 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={(dir: number) => ({ opacity: 0, x: dir * -80 })}
+              exit={{ opacity: 0, x: swipeDir * -80 }}
               transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               drag="x"
               dragConstraints={{ left: 0, right: 0 }}
