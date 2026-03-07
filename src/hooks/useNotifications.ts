@@ -7,7 +7,7 @@ export interface Notification {
   id: string;
   user_id: string;
   actor_id: string;
-  type: "like" | "follow";
+  type: "like" | "follow" | "design_like" | "design_comment";
   reference_id: string | null;
   read: boolean;
   created_at: string;
@@ -99,6 +99,10 @@ export function useNotifications() {
             toast(`${actorName} liked your look! ❤️`);
           } else if (newNotif.type === "follow") {
             toast(`${actorName} started following you! ✨`);
+          } else if (newNotif.type === "design_like") {
+            toast(`${actorName} liked your design! ❤️`);
+          } else if (newNotif.type === "design_comment") {
+            toast(`${actorName} commented on your design! 💬`);
           }
         }
       )
