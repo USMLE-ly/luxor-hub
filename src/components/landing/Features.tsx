@@ -1,6 +1,6 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
-import { Shirt, Brain, MessageSquare, BarChart3, ShoppingBag, Palette } from "lucide-react";
+import { Shirt, Brain, MessageSquare, BarChart3, ShoppingBag, Palette, Calendar, Sparkles, Camera, Layers } from "lucide-react";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import featureCloset from "@/assets/feature-closet-scanner.jpg";
 import featureDna from "@/assets/feature-style-dna.jpg";
@@ -30,7 +30,7 @@ const featureItems: FeatureItem[] = [
   {
     title: "Style DNA Engine",
     meta: "Your unique style profile",
-    description: "Our AI builds your unique style profile — understanding your preferences, lifestyle, and fashion goals.",
+    description: "Our AI builds your unique style profile — understanding your preferences, body shape, face shape, and fashion goals.",
     icon: <Brain className="w-4 h-4 text-primary" />,
     image: featureDna,
   },
@@ -44,8 +44,8 @@ const featureItems: FeatureItem[] = [
   },
   {
     title: "AI Stylist Chat",
-    meta: "24/7 personal stylist",
-    description: "Ask your personal AI stylist anything. It knows your closet, body, and style DNA intimately.",
+    meta: "24/7 personal stylist with animated responses",
+    description: "Ask your AI stylist anything with streaming animated responses, vanishing input effects, and smart placeholders.",
     icon: <MessageSquare className="w-4 h-4 text-primary" />,
     image: featureChat,
   },
@@ -62,6 +62,28 @@ const featureItems: FeatureItem[] = [
     meta: "Fill wardrobe gaps",
     description: "AI identifies gaps in your wardrobe and recommends the perfect pieces to complete your style.",
     icon: <ShoppingBag className="w-4 h-4 text-primary" />,
+    image: featureShopping,
+  },
+  {
+    title: "Virtual Try-On",
+    meta: "See before you buy",
+    description: "Upload a selfie and virtually try on outfits before committing. AI-powered visualization for confident decisions.",
+    icon: <Camera className="w-4 h-4 text-primary" />,
+    image: featureOutfit,
+  },
+  {
+    title: "Outfit Calendar",
+    meta: "Plan your week",
+    description: "Schedule outfits for upcoming events, meetings, and occasions. Never repeat a look unintentionally.",
+    icon: <Calendar className="w-4 h-4 text-primary" />,
+    image: featureAnalytics,
+    colSpan: 2,
+  },
+  {
+    title: "Fashion Designer AI",
+    meta: "Create custom designs",
+    description: "Dream up unique garments with AI-powered fashion design. Generate original clothing concepts from text prompts.",
+    icon: <Sparkles className="w-4 h-4 text-primary" />,
     image: featureShopping,
   },
 ];

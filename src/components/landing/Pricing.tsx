@@ -4,20 +4,20 @@ import { CreativePricing, type PricingTier } from "@/components/ui/creative-pric
 
 const tiers: PricingTier[] = [
   {
-    name: "Free",
+    name: "Starter",
     icon: <Star className="w-6 h-6" />,
-    price: 0,
-    description: "Get started with AI styling",
+    price: 9,
+    description: "Essential AI styling tools",
     color: "amber",
-    features: ["50 closet items", "1 daily outfit", "Basic style quiz", "Community access"],
+    features: ["200 closet items", "5 daily AI outfits", "Style DNA profile", "Community access", "Basic wardrobe analytics"],
   },
   {
     name: "Pro",
     icon: <Crown className="w-6 h-6" />,
-    price: 19,
+    price: 29,
     description: "For the style-conscious",
     color: "blue",
-    features: ["Unlimited closet items", "Unlimited AI outfits", "Full Style DNA profile", "AI Stylist Chat", "Wardrobe analytics", "Smart shopping AI"],
+    features: ["Unlimited closet items", "Unlimited AI outfits", "Full Style DNA profile", "AI Stylist Chat", "Advanced wardrobe analytics", "Smart shopping AI", "Virtual Try-On", "Outfit calendar"],
     popular: true,
   },
   {
@@ -26,7 +26,7 @@ const tiers: PricingTier[] = [
     price: 99,
     description: "The ultimate style experience",
     color: "purple",
-    features: ["Everything in Pro", "Priority AI processing", "Human stylist overlay", "Luxury brand partnerships", "Exclusive style reports", "VIP support"],
+    features: ["Everything in Pro", "Priority AI processing", "Human stylist overlay", "Fashion Designer AI", "Luxury brand partnerships", "Exclusive style reports", "VIP support"],
   },
 ];
 
@@ -63,7 +63,7 @@ const Pricing = () => {
         <CreativePricing
           tag="Invest in Style"
           title="Choose Your Plan"
-          description="From free styling to elite personal service"
+          description="From essential styling to elite personal service"
           tiers={tiers}
         />
       </motion.div>
