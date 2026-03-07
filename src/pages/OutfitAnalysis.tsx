@@ -21,9 +21,10 @@ import {
   Tooltip as RechartsTooltip,
 } from "recharts";
 import { StyleComparison } from "@/components/app/StyleComparison";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { RainbowButton } from "@/components/ui/rainbow-button";
+import { useCallback } from "react";
 
 interface OutfitAnalysisData {
   overallStyle: string;
