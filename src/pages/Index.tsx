@@ -9,6 +9,7 @@ import AppPreview from "@/components/landing/AppPreview";
 import BrandMarquee from "@/components/landing/BrandMarquee";
 import IntegrationHero from "@/components/landing/IntegrationHero";
 import Pricing from "@/components/landing/Pricing";
+import Testimonials from "@/components/landing/Testimonials";
 import Footer from "@/components/landing/Footer";
 
 const ScrollProgressBar = () => {
