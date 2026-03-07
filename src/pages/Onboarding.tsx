@@ -189,7 +189,7 @@ const Onboarding = () => {
       {/* Progress bar */}
       <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-sm px-4 pt-4 pb-2">
         {currentStep > 0 && (
-          <button onClick={() => setCurrentStep((s) => s - 1)} className="mb-2">
+          <button onClick={() => { triggerHaptic(); setCurrentStep((s) => s - 1); }} className="mb-2">
             <ArrowLeft className="h-5 w-5 text-foreground" />
           </button>
         )}
