@@ -32,7 +32,8 @@ import ColorType from "./pages/ColorType";
 import Paywall from "./pages/Paywall";
 import OutfitCalendar from "./pages/OutfitCalendar";
 import MoodBoard from "./pages/MoodBoard";
-
+import VideoAnalysis from "./pages/VideoAnalysis";
+import FashionDesigner from "./pages/FashionDesigner";
 
 const queryClient = new QueryClient();
 
