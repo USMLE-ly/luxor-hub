@@ -193,8 +193,9 @@ const Inspiration = () => {
                     <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" loading="lazy"
                       onError={() => setImgErrors(prev => new Set(prev).add(product.id))} />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <ShoppingBag className="w-8 h-8 text-muted-foreground" />
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-secondary to-muted/50 gap-2">
+                      <ShoppingBag className="w-8 h-8 text-muted-foreground/40" />
+                      <span className="text-[9px] font-sans text-muted-foreground/60 px-3 text-center leading-tight">{product.name}</span>
                     </div>
                   )}
 
