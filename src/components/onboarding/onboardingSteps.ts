@@ -146,6 +146,50 @@ export const sharedSteps: OnboardingStep[] = [
     subtitle: "Your wardrobe is an investment",
     options: ["$0 – $500", "$501 – $1,500", "$1,501 – $2,500", "$2,501 – $5,000", "Over $5,000"],
   },
+  // --- Psychographic steps ---
+  {
+    question: "What best describes your lifestyle?",
+    key: "lifestyle",
+    type: "radio",
+    subtitle: "Your daily life shapes your style",
+    options: [
+      "Corporate / Office-based",
+      "Creative / Freelance",
+      "Active / On-the-go",
+      "Social / Events & Nightlife",
+      "Relaxed / Work from home",
+    ],
+  },
+  {
+    question: "What's your profession or field?",
+    key: "profession",
+    type: "radio",
+    subtitle: "We'll tailor recommendations to your world",
+    options: [
+      "Business / Finance",
+      "Tech / Engineering",
+      "Creative / Design / Media",
+      "Healthcare / Science",
+      "Education / Academia",
+      "Hospitality / Retail",
+      "Student",
+      "Other",
+    ],
+  },
+  {
+    question: "How do you want your style to make you feel?",
+    key: "styleMood",
+    type: "checkbox",
+    subtitle: "Pick up to 3 that resonate most",
+    options: [
+      "Confident & powerful",
+      "Relaxed & effortless",
+      "Creative & expressive",
+      "Elegant & refined",
+      "Bold & attention-grabbing",
+      "Approachable & friendly",
+    ],
+  },
   // --- gender-specific steps inserted here via getStepsForGender ---
   {
     question: "Your height",
