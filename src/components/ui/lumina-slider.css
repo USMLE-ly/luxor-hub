@@ -86,11 +86,13 @@
 /* ── Slide Content ───────────────────────────────────────── */
 .slide-content {
   position: absolute;
-  bottom: 28%;
-  left: 5%;
+  bottom: 38%;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 10;
   max-width: 600px;
   pointer-events: none;
+  text-align: center;
 }
 
 .slide-title {
@@ -301,10 +303,11 @@
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 768px) {
   .slide-content {
-    bottom: 42%;
+    bottom: 48%;
     left: 6%;
     right: 6%;
     max-width: none;
+    transform: none;
   }
 
   .lumina-hero-overlay {
