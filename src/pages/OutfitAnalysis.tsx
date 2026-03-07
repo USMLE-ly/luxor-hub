@@ -1037,8 +1037,10 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
           </Card>
         </motion.div>
       </div>
+      </ParallaxSection>
 
       {/* Detected Items + Strengths — 2 column */}
+      <ParallaxSection offset={30}>
       <div className="grid md:grid-cols-2 gap-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
