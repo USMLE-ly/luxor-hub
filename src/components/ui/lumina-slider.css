@@ -86,11 +86,13 @@
 /* ── Slide Content ───────────────────────────────────────── */
 .slide-content {
   position: absolute;
-  bottom: 28%;
-  left: 5%;
+  bottom: 38%;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 10;
   max-width: 600px;
   pointer-events: none;
+  text-align: center;
 }
 
 .slide-title {
