@@ -1209,9 +1209,11 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
           </CardContent>
         </Card>
       </motion.div>
+      </ParallaxSection>
 
       {/* Body Type & Silhouette — Full width */}
       {analysis.bodyTypeNotes && (
+        <ParallaxSection offset={20}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -1230,6 +1232,7 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
             </CardContent>
           </Card>
         </motion.div>
+        </ParallaxSection>
       )}
     </>
   );
