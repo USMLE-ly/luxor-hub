@@ -1,4 +1,4 @@
-export type StepType = "gender" | "checkbox" | "radio" | "sizeGrid" | "bodyShape" | "faceShape" | "height" | "notification" | "selfieIntro" | "selfieGuide" | "cameraCapture" | "generating" | "detectionResult";
+export type StepType = "gender" | "checkbox" | "radio" | "sizeGrid" | "bodyShape" | "faceShape" | "height" | "notification" | "selfieIntro" | "selfieGuide" | "cameraCapture" | "generating" | "detectionResult" | "psychographic";
 
 export interface BrandLogo {
   name: string;
