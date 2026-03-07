@@ -87,6 +87,7 @@ export default function OutfitAnalysis() {
   const [minScore, setMinScore] = useState("");
   const [maxScore, setMaxScore] = useState("");
   const [dateFilter, setDateFilter] = useState("all");
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filteredHistory = history.filter((h) => {
