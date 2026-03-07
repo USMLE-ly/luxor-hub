@@ -174,7 +174,7 @@ const StyleDNA = () => {
 
   return (
     <AppLayout>
-      <div className="pb-8">
+      <div className="pb-8 overflow-x-hidden">
         {/* ===== HERO FORMULA CARD ===== */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
