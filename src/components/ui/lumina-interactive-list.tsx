@@ -437,7 +437,12 @@ export function LuminaSlider() {
       try {
         await loadScript('https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js', 'gsap');
         await loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js', 'THREE');
-      } catch (e) { console.error('Script load failed:', e); return; }
+      } catch (e) {
+        console.error('Script load failed:', e);
+        // Ensure hero is visible even if scripts fail
+        containerRef.current?.querySelector(".slider-wrapper")?.classList.add("loaded");
+        return;
+      }
       initApplication();
     })();
 

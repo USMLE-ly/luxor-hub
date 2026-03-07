@@ -27,19 +27,12 @@
   overflow: hidden;
   opacity: 0;
   transition: opacity 1s ease;
+  animation: slider-fallback-show 1s ease 1.5s forwards;
 }
 
 .slider-wrapper.loaded {
   opacity: 1;
-}
-
-/* Fallback: if slider hasn't loaded after 4s, show content anyway */
-@keyframes slider-fallback-show {
-  to { opacity: 1; }
-}
-
-.slider-wrapper {
-  animation: slider-fallback-show 0.5s ease 4s forwards;
+  animation: none;
 }
 
 /* Fallback background when WebGL isn't available */
