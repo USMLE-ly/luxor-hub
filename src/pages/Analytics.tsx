@@ -87,6 +87,16 @@ const Analytics = () => {
         throw new Error("Analysis failed");
       }
       const result = await resp.json();
+      // Deduplicate gaps by item name (case-insensitive)
+      if (result.gaps) {
+        const seen = new Set<string>();
+        result.gaps = result.gaps.filter((gap: any) => {
+          const key = gap.item.toLowerCase().trim();
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+      }
       setGapAnalysis(result);
       toast.success("Gap analysis complete!");
     } catch { toast.error("Failed to run analysis"); }

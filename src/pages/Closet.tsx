@@ -404,7 +404,7 @@ const Closet = () => {
 
   return (
     <AppLayout>
-      <div className="px-5 py-5 max-w-lg mx-auto">
+      <div className="px-4 sm:px-5 py-5 max-w-lg mx-auto overflow-x-hidden">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
           <div className="flex items-center justify-between">

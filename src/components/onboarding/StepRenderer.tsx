@@ -244,9 +244,18 @@ const SelfieIntroStep = ({ step, gender }: { step: OnboardingStep; gender?: "fem
   );
 };
 
+const selfieStepTips: Record<number, string> = {
+  1: "💡 Stand at arm's length from the camera, face centered",
+  2: "💡 Keep your chin level — don't tilt up or down",
+  3: "💡 Remove glasses and pull hair away from your face",
+  4: "💡 Stand in natural daylight, facing a window if possible",
+  5: "💡 Stand straight with arms relaxed at your sides, feet shoulder-width apart",
+};
+
 const SelfieGuideStep = ({ step, gender }: { step: OnboardingStep; gender?: "female" | "male" | null }) => {
   const images = selfieStepImages[gender || "female"];
   const stepImg = step.stepNumber ? images[step.stepNumber] : null;
+  const tip = step.stepNumber ? selfieStepTips[step.stepNumber] : null;
   return (
     <div className="flex flex-col items-center">
       <motion.div
@@ -296,7 +305,17 @@ const SelfieGuideStep = ({ step, gender }: { step: OnboardingStep; gender?: "fem
         transition={{ duration: 0.5, delay: 0.3 }}
       >
         <p className="text-[hsl(0,70%,68%)] font-sans text-sm mb-2">Step {step.stepNumber}</p>
-        <h2 className="font-display text-xl font-bold text-foreground">{step.question}</h2>
+        <h2 className="font-display text-xl font-bold text-foreground mb-2">{step.question}</h2>
+        {tip && (
+          <motion.p
+            className="text-xs font-sans text-muted-foreground bg-secondary/80 rounded-full px-4 py-1.5 inline-block"
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            {tip}
+          </motion.p>
+        )}
       </motion.div>
     </div>
   );

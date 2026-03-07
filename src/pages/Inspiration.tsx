@@ -109,7 +109,7 @@ const Inspiration = () => {
 
   return (
     <AppLayout>
-      <div className="px-5 py-5 max-w-lg mx-auto">
+      <div className="px-4 sm:px-5 py-5 max-w-lg mx-auto overflow-x-hidden">
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-5">
           <h1 className="font-display text-2xl font-bold text-foreground">My Shop</h1>
           <p className="text-muted-foreground font-sans text-xs mt-0.5">Personalized picks based on your Style DNA</p>
@@ -193,8 +193,9 @@ const Inspiration = () => {
                     <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" loading="lazy"
                       onError={() => setImgErrors(prev => new Set(prev).add(product.id))} />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <ShoppingBag className="w-8 h-8 text-muted-foreground" />
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-secondary to-muted/50 gap-2">
+                      <ShoppingBag className="w-8 h-8 text-muted-foreground/40" />
+                      <span className="text-[9px] font-sans text-muted-foreground/60 px-3 text-center leading-tight">{product.name}</span>
                     </div>
                   )}
 

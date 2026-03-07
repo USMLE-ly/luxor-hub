@@ -208,7 +208,7 @@ const Chat = () => {
 
   return (
     <AppLayout>
-      <div className="flex flex-col h-[calc(100vh-56px)] max-w-lg mx-auto">
+      <div className="flex flex-col h-[calc(100vh-56px)] max-w-lg mx-auto overflow-x-hidden">
         {/* Header */}
         <div className="px-5 pt-4 pb-2 flex items-center justify-between">
           <div className="flex items-center gap-3">
