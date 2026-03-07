@@ -162,7 +162,7 @@ const Analytics = () => {
       acc[cat] = (acc[cat] || 0) + (CO2_PER_CATEGORY[cat.toLowerCase()] || CO2_PER_CATEGORY.other);
       return acc;
     }, {})
-  ).map(([name, value]) => ({ name, value: Math.round(value * 10) / 10 }))
+  ).map(([name, value]) => ({ name, value: Math.round(Number(value) * 10) / 10 }))
    .sort((a, b) => b.value - a.value);
 
   // Utilization rate
