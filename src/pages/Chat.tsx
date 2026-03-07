@@ -348,7 +348,7 @@ const Chat = () => {
                         style={{
                           background: "linear-gradient(105deg, transparent 40%, hsl(var(--gold-light) / 0.12) 45%, hsl(var(--gold) / 0.18) 50%, hsl(var(--gold-light) / 0.12) 55%, transparent 60%)",
                           backgroundSize: "200% 100%",
-                          animation: "shimmer-slide 1.8s ease-out forwards",
+                          animation: "gold-shimmer-sweep 1.8s ease-out forwards",
                         }}
                       />
                     </motion.div>
