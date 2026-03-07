@@ -771,15 +771,24 @@ const Calibration = () => {
                   <motion.button
                     key={option.label}
                     initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
+                    animate={{
+                      opacity: 1,
+                      scale: isActive ? 1.05 : 1,
+                    }}
+                    whileTap={{ scale: 0.95 }}
                     transition={{ duration: 0.3, delay: index * 0.06, ease: [0.22, 1, 0.36, 1] }}
                     onClick={() => handleSelect(currentStepData.key, option.label)}
                     className="flex flex-col items-center gap-2"
                   >
-                    <div
-                      className={`relative w-full aspect-[3/4] rounded-xl overflow-hidden transition-all bg-secondary ${
-                        isActive ? "ring-2 ring-primary shadow-lg" : ""
+                    <motion.div
+                      className={`relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-secondary ${
+                        isActive ? "ring-2 ring-primary shadow-[0_0_20px_hsl(var(--primary)/0.3)]" : ""
                       }`}
+                      animate={{
+                        scale: isActive ? 1 : 1,
+                        boxShadow: isActive ? "0 8px 30px -8px hsl(var(--primary) / 0.4)" : "0 0 0 0 transparent",
+                      }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
                     >
                       <img
                         src={option.imageUrl}
@@ -787,21 +796,50 @@ const Calibration = () => {
                         className="w-full h-full object-cover"
                         loading="lazy"
                       />
+                      <AnimatePresence>
+                        {isActive && (
+                          <motion.div
+                            className="absolute inset-0 bg-primary/10"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                          />
+                        )}
+                      </AnimatePresence>
                       <div className="absolute bottom-2 right-2">
-                        <div
-                          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shadow-sm transition-all ${
+                        <motion.div
+                          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shadow-sm ${
                             isActive
                               ? "border-primary bg-primary"
                               : "border-white/80 bg-white/60 backdrop-blur-sm"
                           }`}
+                          animate={{ scale: isActive ? [1, 1.3, 1] : 1 }}
+                          transition={{ duration: 0.3 }}
                         >
-                          {isActive && <Check className="w-3 h-3 text-white" />}
-                        </div>
+                          {isActive && (
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                            >
+                              <Check className="w-3 h-3 text-white" />
+                            </motion.div>
+                          )}
+                        </motion.div>
                       </div>
-                    </div>
-                    <span className={`font-sans text-xs font-medium transition-colors ${isActive ? "text-primary" : "text-muted-foreground"}`}>
+                    </motion.div>
+                    <motion.span
+                      className="font-sans text-xs font-medium"
+                      animate={{
+                        color: isActive ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
+                        scale: isActive ? 1.08 : 1,
+                        fontWeight: isActive ? 700 : 500,
+                      }}
+                      transition={{ duration: 0.25 }}
+                    >
                       {option.label}
-                    </span>
+                    </motion.span>
                   </motion.button>
                 );
               })}
