@@ -27,6 +27,7 @@ interface StyleDNAData {
   recommendedFabrics?: string[];
   flatteringSilhouettes?: string[];
   colorUsageTips?: { color: string; usage: string }[];
+  styleEvolution?: { stage: string; timeframe: string; changes: string[]; trigger: string }[];
 }
 
 const colorNameToHsl: Record<string, string> = {
