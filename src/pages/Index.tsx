@@ -86,6 +86,7 @@ const Index = () => {
       <AppPreview />
       <BrandMarquee />
       <IntegrationHero />
+      <Testimonials />
       <Pricing />
       <Footer />
     </div>

@@ -1,227 +1,364 @@
-import { motion } from "framer-motion";
-import { Quote, ChevronLeft, ChevronRight } from "lucide-react";
-import { useState, useCallback, useEffect, useRef } from "react";
-import useEmblaCarousel from "embla-carousel-react";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-
-const GoldDivider = () => (
-  <div className="flex items-center gap-4 my-10 max-w-xs mx-auto">
-    <div className="flex-1 h-px bg-gradient-to-r from-transparent to-primary/40" />
-    <div className="w-1.5 h-1.5 rounded-full bg-primary/60" />
-    <div className="flex-1 h-px bg-gradient-to-l from-transparent to-primary/40" />
-  </div>
-);
+import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { Quote, Star, ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
 
 const testimonials = [
   {
-    quote: "AURELIA transformed how I approach my wardrobe. The AI suggestions are eerily accurate — it's like having a personal stylist who knows me better than I know myself.",
     name: "Sophia Chen",
-    title: "Creative Director",
-    number: "01",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&h=120&fit=crop&crop=face",
+    role: "Creative Director",
+    company: "Atelier Studio",
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
+    rating: 5,
+    text: "AURELIA transformed how I approach my wardrobe. The AI suggestions are eerily accurate — it's like having a personal stylist who knows me better than I know myself.",
+    results: ["300% faster styling", "Zero outfit repeats", "Perfect colour matches"],
   },
   {
-    quote: "I used to spend 30 minutes every morning deciding what to wear. Now it takes seconds. The outfit generator considers weather, my calendar, and my mood.",
     name: "Marcus Rivera",
-    title: "Startup Founder",
-    number: "02",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&h=120&fit=crop&crop=face",
+    role: "Startup Founder",
+    company: "NovaTech",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    rating: 5,
+    text: "I used to spend 30 minutes every morning deciding what to wear. Now it takes seconds. The outfit generator considers weather, my calendar, and my mood.",
+    results: ["30 min saved daily", "Weather-aware looks", "Calendar-synced outfits"],
   },
   {
-    quote: "The closet scanner alone is worth it. I discovered I had pieces that paired beautifully together — combinations I never would have tried on my own.",
     name: "Aisha Patel",
-    title: "Fashion Editor",
-    number: "03",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&h=120&fit=crop&crop=face",
+    role: "Fashion Editor",
+    company: "Vogue Digital",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
+    rating: 5,
+    text: "The closet scanner alone is worth it. I discovered pieces that paired beautifully together — combinations I never would have tried on my own.",
+    results: ["Hidden pairings found", "Full closet utilised", "AI-powered combos"],
   },
   {
-    quote: "As a busy professional, AURELIA saved me hours every week. The style DNA feature captured my aesthetic perfectly — I've never felt more confident.",
     name: "James Thornton",
-    title: "Investment Banker",
-    number: "04",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&h=120&fit=crop&crop=face",
+    role: "Investment Banker",
+    company: "Goldman & Co",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+    rating: 5,
+    text: "As a busy professional, AURELIA saved me hours every week. The style DNA feature captured my aesthetic perfectly — I've never felt more confident.",
+    results: ["Hours saved weekly", "Style DNA mapped", "Confidence boost"],
   },
   {
-    quote: "The community feed is incredibly inspiring. Seeing how others style similar pieces gave me so many new ideas. It's like Pinterest meets a personal stylist.",
     name: "Elena Vasquez",
-    title: "Interior Designer",
-    number: "05",
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=120&h=120&fit=crop&crop=face",
+    role: "Interior Designer",
+    company: "Maison Studio",
+    avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
+    rating: 5,
+    text: "The community feed is incredibly inspiring. Seeing how others style similar pieces gave me so many new ideas. It's like Pinterest meets a personal stylist.",
+    results: ["Endless inspiration", "Community driven", "Style evolution"],
   },
 ];
 
-const AUTOPLAY_INTERVAL = 5000;
+const slideVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 1000 : -1000,
+    opacity: 0,
+    scale: 0.8,
+    rotateY: direction > 0 ? 45 : -45,
+  }),
+  center: {
+    zIndex: 1,
+    x: 0,
+    opacity: 1,
+    scale: 1,
+    rotateY: 0,
+  },
+  exit: (direction: number) => ({
+    zIndex: 0,
+    x: direction < 0 ? 1000 : -1000,
+    opacity: 0,
+    scale: 0.8,
+    rotateY: direction < 0 ? 45 : -45,
+  }),
+};
+
+const fadeInUp = {
+  hidden: { opacity: 0, y: 60 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.8, ease: [0.23, 0.86, 0.39, 0.96] },
+  },
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1, delayChildren: 0.3 },
+  },
+};
+
+const stats = [
+  { number: "50K+", label: "Style-Confident Members" },
+  { number: "98%", label: "Satisfaction Rate" },
+  { number: "2M+", label: "Outfits Generated" },
+  { number: "30min", label: "Saved Daily" },
+];
 
 const Testimonials = () => {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: "center" });
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const progressRef = useRef<number>(0);
-  const rafRef = useRef<number>(0);
-  const startTimeRef = useRef<number>(0);
-
-  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
-  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [direction, setDirection] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!emblaApi) return;
-    const onSelect = () => {
-      setSelectedIndex(emblaApi.selectedScrollSnap());
-      // Reset progress on slide change
-      progressRef.current = 0;
-      startTimeRef.current = 0;
-      setProgress(0);
-    };
-    emblaApi.on("select", onSelect);
-    onSelect();
-    return () => { emblaApi.off("select", onSelect); };
-  }, [emblaApi]);
+    const timer = setInterval(() => {
+      setDirection(1);
+      setCurrentIndex((prev) => (prev + 1) % testimonials.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, []);
 
-  // Autoplay + progress bar animation
-  useEffect(() => {
-    if (!emblaApi || isHovered) {
-      cancelAnimationFrame(rafRef.current);
-      return;
-    }
+  const nextTestimonial = () => {
+    setDirection(1);
+    setCurrentIndex((prev) => (prev + 1) % testimonials.length);
+  };
 
-    startTimeRef.current = performance.now();
+  const prevTestimonial = () => {
+    setDirection(-1);
+    setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+  };
 
-    const tick = (now: number) => {
-      const elapsed = now - startTimeRef.current;
-      const p = Math.min(elapsed / AUTOPLAY_INTERVAL, 1);
-      progressRef.current = p;
-      setProgress(p);
-
-      if (p >= 1) {
-        emblaApi.scrollNext();
-        return; // onSelect resets and re-triggers
-      }
-      rafRef.current = requestAnimationFrame(tick);
-    };
-
-    rafRef.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [emblaApi, isHovered, selectedIndex]);
+  const current = testimonials[currentIndex];
 
   return (
-    <section className="relative py-32 px-4 overflow-hidden" id="testimonials">
-      <div
-        className="absolute inset-0 opacity-[0.04] dark:opacity-[0.03] pointer-events-none"
-        style={{
-          backgroundImage: `url('/patterns/linear-texture.svg')`,
-          backgroundSize: "400px 400px",
-          backgroundRepeat: "repeat",
-        }}
-      />
-
-      <div className="max-w-6xl mx-auto relative z-10">
+    <section
+      id="testimonials"
+      className="relative py-32 bg-gradient-to-br from-background via-accent/20 to-background text-foreground overflow-hidden"
+    >
+      {/* Background Effects */}
+      <div className="absolute inset-0">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-6"
-        >
-          <p className="text-primary font-sans font-semibold text-sm tracking-widest uppercase mb-4">
-            Voices of Style
-          </p>
-          <h2 className="font-display text-4xl md:text-5xl font-bold">
-            What Our <span className="gold-text">Members</span> Say
-          </h2>
+          className="absolute inset-0 bg-gradient-to-br from-primary/[0.08] via-accent/[0.05] to-primary/[0.08]"
+          animate={{ backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"] }}
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+          style={{ backgroundSize: "400% 400%" }}
+        />
+        <motion.div
+          className="absolute top-1/3 left-[20%] w-72 h-72 bg-primary/15 rounded-full blur-3xl"
+          animate={{ x: [0, 150, 0], y: [0, 80, 0], scale: [1, 1.2, 1] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute bottom-1/3 right-[20%] w-80 h-80 bg-accent/15 rounded-full blur-3xl"
+          animate={{ x: [0, -100, 0], y: [0, -60, 0], scale: [1, 1.3, 1] }}
+          transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+        />
+        {[...Array(12)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-1 h-1 bg-foreground/30 rounded-full"
+            style={{ left: `${15 + i * 7}%`, top: `${25 + i * 5}%` }}
+            animate={{ y: [0, -50, 0], opacity: [0.2, 1, 0.2], scale: [1, 2, 1] }}
+            transition={{ duration: 3 + i * 0.5, repeat: Infinity, ease: "easeInOut", delay: i * 0.3 }}
+          />
+        ))}
+      </div>
+
+      <motion.div
+        ref={containerRef}
+        className="relative z-10 max-w-7xl mx-auto px-6"
+        variants={staggerContainer}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-100px" }}
+      >
+        {/* Header */}
+        <motion.div className="text-center mb-20" variants={fadeInUp}>
+          <motion.div
+            className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-foreground/[0.08] border border-border backdrop-blur-sm mb-6"
+            whileHover={{ scale: 1.05 }}
+          >
+            <motion.div animate={{ rotate: 360 }} transition={{ duration: 3, repeat: Infinity, ease: "linear" }}>
+              <Sparkles className="h-4 w-4 text-primary" />
+            </motion.div>
+            <span className="text-sm font-medium text-muted-foreground">✨ Voices of Style</span>
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+          </motion.div>
+
+          <motion.h2 className="font-display text-4xl sm:text-6xl md:text-7xl font-bold mb-8 tracking-tight" variants={fadeInUp}>
+            <span className="text-foreground">What Our</span>
+            <br />
+            <motion.span
+              className="gold-text"
+              animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+              style={{ backgroundSize: "200% 200%" }}
+            >
+              Members Say
+            </motion.span>
+          </motion.h2>
+
+          <motion.p className="text-xl sm:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed" variants={fadeInUp}>
+            Join thousands already transforming their personal style with AURELIA's AI-powered wardrobe intelligence.
+          </motion.p>
         </motion.div>
 
-        <GoldDivider />
-
-        {/* Carousel */}
-        <div className="relative mt-16" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
-          <div className="overflow-hidden" ref={emblaRef}>
-            <div className="flex">
-              {testimonials.map((t, i) => (
-                <div key={i} className="flex-[0_0_100%] min-w-0 sm:flex-[0_0_50%] lg:flex-[0_0_33.333%] px-4">
+        {/* Main Testimonial Display */}
+        <div className="relative max-w-6xl mx-auto mb-16">
+          <div className="relative h-[520px] sm:h-[460px] md:h-[400px]" style={{ perspective: "1000px" }}>
+            <AnimatePresence initial={false} custom={direction}>
+              <motion.div
+                key={currentIndex}
+                custom={direction}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{
+                  x: { type: "spring", stiffness: 300, damping: 30 },
+                  opacity: { duration: 0.4 },
+                  scale: { duration: 0.4 },
+                  rotateY: { duration: 0.6 },
+                }}
+                className="absolute inset-0"
+              >
+                <div className="relative h-full glass rounded-3xl border border-border p-8 md:p-12 overflow-hidden group">
                   <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-60px" }}
-                    transition={{ duration: 0.6, delay: i * 0.1 }}
-                    className="relative group h-full"
+                    className="absolute inset-0 bg-gradient-to-br from-primary/[0.08] via-accent/[0.05] to-primary/[0.08] rounded-3xl"
+                    animate={{ backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"] }}
+                    transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                    style={{ backgroundSize: "300% 300%" }}
+                  />
+
+                  <motion.div
+                    className="absolute top-8 right-8 opacity-20"
+                    animate={{ rotate: [0, 10, 0] }}
+                    transition={{ duration: 4, repeat: Infinity }}
                   >
-                    <span className="font-display text-7xl font-bold text-primary/10 absolute -top-6 -left-2 select-none pointer-events-none">
-                      {t.number}
-                    </span>
+                    <Quote className="w-16 h-16 text-primary" />
+                  </motion.div>
 
-                    <div className="relative glass rounded-2xl p-8 pt-10 border border-border hover:border-primary/30 transition-colors h-full flex flex-col">
-                      <Quote className="w-5 h-5 text-primary/40 mb-4" />
-
-                      <p className="text-sm leading-relaxed text-muted-foreground font-sans flex-1 italic">
-                        "{t.quote}"
-                      </p>
-
-                      <div className="h-px w-12 bg-gradient-to-r from-primary/50 to-transparent my-6" />
-
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10 border-2 border-primary/20">
-                          <AvatarImage src={t.avatar} alt={t.name} />
-                          <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
-                            {t.name.split(" ").map(n => n[0]).join("")}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-display text-sm font-semibold text-foreground">{t.name}</p>
-                          <p className="text-xs text-muted-foreground font-sans tracking-wide uppercase mt-0.5">
-                            {t.title}
-                          </p>
+                  <div className="relative z-10 h-full flex flex-col md:flex-row items-center gap-8">
+                    {/* User Info */}
+                    <div className="flex-shrink-0 text-center md:text-left">
+                      <motion.div className="relative mb-6" whileHover={{ scale: 1.1 }} transition={{ duration: 0.3 }}>
+                        <div className="w-24 h-24 mx-auto md:mx-0 rounded-full overflow-hidden border-4 border-primary/20 relative">
+                          <img src={current.avatar} alt={current.name} className="w-full h-full object-cover" />
+                          <motion.div
+                            className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20"
+                            animate={{ opacity: [0, 0.3, 0] }}
+                            transition={{ duration: 3, repeat: Infinity }}
+                          />
                         </div>
+                        <motion.div
+                          className="absolute inset-0 border-2 border-primary/30 rounded-full"
+                          animate={{ scale: [1, 1.4, 1], opacity: [0.5, 0, 0.5] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                        />
+                      </motion.div>
+
+                      <h3 className="text-2xl font-display font-bold text-foreground mb-2">{current.name}</h3>
+                      <p className="text-primary mb-1 font-medium">{current.role}</p>
+                      <p className="text-muted-foreground mb-4">{current.company}</p>
+
+                      <div className="flex justify-center md:justify-start gap-1 mb-6">
+                        {[...Array(current.rating)].map((_, i) => (
+                          <motion.div
+                            key={i}
+                            initial={{ opacity: 0, scale: 0 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: i * 0.1, duration: 0.3 }}
+                          >
+                            <Star className="w-5 h-5 fill-primary text-primary" />
+                          </motion.div>
+                        ))}
                       </div>
                     </div>
-                  </motion.div>
+
+                    {/* Content */}
+                    <div className="flex-1">
+                      <motion.blockquote
+                        className="text-xl md:text-2xl text-foreground/90 leading-relaxed mb-8 font-light italic"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.3, duration: 0.8 }}
+                      >
+                        "{current.text}"
+                      </motion.blockquote>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        {current.results.map((result, i) => (
+                          <motion.div
+                            key={i}
+                            className="bg-foreground/[0.05] rounded-lg p-3 border border-border backdrop-blur-sm"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.5 + i * 0.1, duration: 0.5 }}
+                            whileHover={{ backgroundColor: "hsl(var(--primary) / 0.1)" }}
+                          >
+                            <span className="text-sm text-muted-foreground font-medium">{result}</span>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              ))}
-            </div>
+              </motion.div>
+            </AnimatePresence>
           </div>
 
-          {/* Navigation */}
-          <div className="flex items-center justify-center gap-4 mt-10">
-            <button
-              onClick={scrollPrev}
-              className="w-10 h-10 rounded-full glass border border-border hover:border-primary/40 flex items-center justify-center transition-colors"
+          {/* Navigation Controls */}
+          <div className="flex justify-center items-center gap-6 mt-8">
+            <motion.button
+              onClick={prevTestimonial}
+              className="p-3 rounded-full glass border border-border text-foreground hover:border-primary/40 transition-all"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
               aria-label="Previous testimonial"
             >
-              <ChevronLeft className="w-4 h-4 text-muted-foreground" />
-            </button>
+              <ArrowLeft className="w-5 h-5" />
+            </motion.button>
 
-            <div className="flex gap-2 items-center">
-              {testimonials.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => emblaApi?.scrollTo(i)}
-                  className="relative flex items-center"
-                  aria-label={`Go to testimonial ${i + 1}`}
-                >
-                  <div className={`h-2 rounded-full transition-all duration-300 overflow-hidden ${
-                    i === selectedIndex ? "w-8 bg-primary/20" : "w-2 bg-muted-foreground/30"
-                  }`}>
-                    {i === selectedIndex && (
-                      <div
-                        className="h-full bg-primary rounded-full transition-none"
-                        style={{ width: `${progress * 100}%` }}
-                      />
-                    )}
-                  </div>
-                </button>
+            <div className="flex gap-3">
+              {testimonials.map((_, index) => (
+                <motion.button
+                  key={index}
+                  onClick={() => {
+                    setDirection(index > currentIndex ? 1 : -1);
+                    setCurrentIndex(index);
+                  }}
+                  className={`w-3 h-3 rounded-full transition-all ${
+                    index === currentIndex ? "bg-primary scale-125" : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                  }`}
+                  whileHover={{ scale: 1.2 }}
+                  whileTap={{ scale: 0.9 }}
+                  aria-label={`Go to testimonial ${index + 1}`}
+                />
               ))}
             </div>
 
-            <button
-              onClick={scrollNext}
-              className="w-10 h-10 rounded-full glass border border-border hover:border-primary/40 flex items-center justify-center transition-colors"
+            <motion.button
+              onClick={nextTestimonial}
+              className="p-3 rounded-full glass border border-border text-foreground hover:border-primary/40 transition-all"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
               aria-label="Next testimonial"
             >
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            </button>
+              <ArrowRight className="w-5 h-5" />
+            </motion.button>
           </div>
         </div>
-      </div>
+
+        {/* Stats Section */}
+        <motion.div className="grid grid-cols-2 md:grid-cols-4 gap-8" variants={staggerContainer}>
+          {stats.map((stat, index) => (
+            <motion.div key={index} className="text-center group" variants={fadeInUp} whileHover={{ scale: 1.05 }}>
+              <motion.div
+                className="text-3xl md:text-4xl font-bold gold-text mb-2"
+                animate={{ opacity: [0.7, 1, 0.7] }}
+                transition={{ duration: 2, repeat: Infinity, delay: index * 0.5 }}
+              >
+                {stat.number}
+              </motion.div>
+              <div className="text-muted-foreground text-sm font-medium group-hover:text-foreground/80 transition-colors">
+                {stat.label}
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+      </motion.div>
     </section>
   );
 };
