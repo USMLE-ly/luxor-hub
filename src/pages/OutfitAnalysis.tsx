@@ -788,7 +788,7 @@ function triggerCelebration() {
 
 // Confetti burst component for high scores
 function ConfettiBurst() {
-  React.useEffect(() => { triggerCelebration(); }, []);
+  useEffect(() => { triggerCelebration(); }, []);
   const particles = Array.from({ length: 60 }, (_, i) => {
     const angle = (i / 60) * 360;
     const velocity = 120 + Math.random() * 180;
