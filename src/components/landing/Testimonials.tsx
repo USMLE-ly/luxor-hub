@@ -1,13 +1,19 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import { Quote, Star, ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
+import proof1 from "@/assets/proof-1.jpg";
+import proof2 from "@/assets/proof-2.jpeg";
+import proof3 from "@/assets/proof-3.jpg";
+import proof4 from "@/assets/proof-4.png";
+import proof5 from "@/assets/proof-5.jpg";
+import proof6 from "@/assets/proof-6.png";
 
 const testimonials = [
   {
     name: "Sophia Chen",
     role: "Creative Director",
     company: "Atelier Studio",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
+    avatar: proof1,
     rating: 5,
     text: "AURELIA transformed how I approach my wardrobe. The AI suggestions are eerily accurate — it's like having a personal stylist who knows me better than I know myself.",
     results: ["300% faster styling", "Zero outfit repeats", "Perfect colour matches"],
@@ -16,7 +22,7 @@ const testimonials = [
     name: "Marcus Rivera",
     role: "Startup Founder",
     company: "NovaTech",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    avatar: proof2,
     rating: 5,
     text: "I used to spend 30 minutes every morning deciding what to wear. Now it takes seconds. The outfit generator considers weather, my calendar, and my mood.",
     results: ["30 min saved daily", "Weather-aware looks", "Calendar-synced outfits"],
@@ -25,7 +31,7 @@ const testimonials = [
     name: "Aisha Patel",
     role: "Fashion Editor",
     company: "Vogue Digital",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
+    avatar: proof3,
     rating: 5,
     text: "The closet scanner alone is worth it. I discovered pieces that paired beautifully together — combinations I never would have tried on my own.",
     results: ["Hidden pairings found", "Full closet utilised", "AI-powered combos"],
@@ -34,7 +40,7 @@ const testimonials = [
     name: "James Thornton",
     role: "Investment Banker",
     company: "Goldman & Co",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+    avatar: proof4,
     rating: 5,
     text: "As a busy professional, AURELIA saved me hours every week. The style DNA feature captured my aesthetic perfectly — I've never felt more confident.",
     results: ["Hours saved weekly", "Style DNA mapped", "Confidence boost"],
@@ -43,10 +49,19 @@ const testimonials = [
     name: "Elena Vasquez",
     role: "Interior Designer",
     company: "Maison Studio",
-    avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
+    avatar: proof5,
     rating: 5,
     text: "The community feed is incredibly inspiring. Seeing how others style similar pieces gave me so many new ideas. It's like Pinterest meets a personal stylist.",
     results: ["Endless inspiration", "Community driven", "Style evolution"],
+  },
+  {
+    name: "Liam Foster",
+    role: "E-commerce Manager",
+    company: "StyleHaus",
+    avatar: proof6,
+    rating: 5,
+    text: "The analytics and outfit tracking are game-changers. I can see exactly what works, what doesn't, and how my style has evolved over time.",
+    results: ["Data-driven style", "Trend tracking", "ROI on wardrobe"],
   },
 ];
 
@@ -233,8 +248,8 @@ const Testimonials = () => {
                   <div className="relative z-10 h-full flex flex-col md:flex-row items-center gap-8">
                     {/* User Info */}
                     <div className="flex-shrink-0 text-center md:text-left">
-                      <motion.div className="relative mb-6" whileHover={{ scale: 1.1 }} transition={{ duration: 0.3 }}>
-                        <div className="w-24 h-24 mx-auto md:mx-0 rounded-full overflow-hidden border-4 border-primary/20 relative">
+                      <motion.div className="relative mb-6" whileHover={{ scale: 1.05 }} transition={{ duration: 0.3 }}>
+                        <div className="w-28 h-28 mx-auto md:mx-0 rounded-2xl overflow-hidden border-4 border-primary/20 relative shadow-lg">
                           <img src={current.avatar} alt={current.name} className="w-full h-full object-cover" />
                           <motion.div
                             className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20"
@@ -243,8 +258,8 @@ const Testimonials = () => {
                           />
                         </div>
                         <motion.div
-                          className="absolute inset-0 border-2 border-primary/30 rounded-full"
-                          animate={{ scale: [1, 1.4, 1], opacity: [0.5, 0, 0.5] }}
+                          className="absolute inset-0 border-2 border-primary/30 rounded-2xl"
+                          animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0, 0.5] }}
                           transition={{ duration: 2, repeat: Infinity }}
                         />
                       </motion.div>

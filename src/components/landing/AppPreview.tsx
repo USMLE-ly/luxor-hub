@@ -64,7 +64,7 @@ const AppPreview = () => {
             {[
               { icon: Calendar, label: "Calendar", count: "3 events" },
               { icon: ShoppingBag, label: "Closet", count: "48 items" },
-              { icon: TrendingUp, label: "Style Score", count: "87/100" },
+              { icon: TrendingUp, label: "Style Score", count: "100/100" },
               { icon: BarChart3, label: "Analytics", count: "View" },
             ].map((item, i) => (
               <div key={i} className="rounded-xl border border-border bg-card p-3 flex flex-col items-center gap-2 hover-lift cursor-default">
