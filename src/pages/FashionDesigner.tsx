@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { PrivacyNotice } from "@/components/app/PrivacyNotice";
 import { AppLayout } from "@/components/app/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
