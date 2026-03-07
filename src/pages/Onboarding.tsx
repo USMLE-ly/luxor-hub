@@ -207,8 +207,30 @@ const Onboarding = () => {
       </div>
 
       {/* Content */}
-      <div className="flex-1 flex items-start justify-center px-5 pt-8 pb-24 overflow-y-auto">
+      <div className="flex-1 flex items-start justify-center px-5 pt-8 pb-24 overflow-y-auto relative">
         <div className="w-full max-w-lg">
+          {/* Swipe hint - only on first step */}
+          <AnimatePresence>
+            {currentStep === 0 && gender && (
+              <motion.div
+                className="fixed bottom-24 left-0 right-0 flex justify-center z-30 pointer-events-none"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ delay: 0.8, duration: 0.4 }}
+              >
+                <motion.div
+                  className="flex items-center gap-2 bg-foreground/90 backdrop-blur-sm text-background px-4 py-2 rounded-full shadow-lg"
+                  animate={{ x: [0, -8, 8, 0] }}
+                  transition={{ duration: 1.8, repeat: 2, repeatDelay: 1, ease: "easeInOut" }}
+                >
+                  <motion.span className="text-xs">←</motion.span>
+                  <span className="text-xs font-sans font-medium">Swipe to navigate</span>
+                  <motion.span className="text-xs">→</motion.span>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={currentStep}
