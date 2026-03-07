@@ -7,13 +7,14 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
   BarChart3, TrendingUp, Leaf, AlertTriangle, DollarSign, Calendar,
-  Sparkles, Loader2, ShoppingBag, ChevronRight, Clock,
+  Sparkles, Loader2, ShoppingBag, ChevronRight, Clock, Recycle, Heart, PackageOpen,
 } from "lucide-react";
 import {
   PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  RadialBarChart, RadialBar,
 } from "recharts";
 import { useNavigate } from "react-router-dom";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, differenceInDays } from "date-fns";
 
 const CHART_COLORS = [
   "hsl(43, 74%, 49%)", "hsl(43, 80%, 65%)", "hsl(43, 70%, 35%)",
@@ -30,13 +31,26 @@ interface GapItem {
   shopCategory: string;
 }
 
+// CO2 estimates per fabric category (kg CO2 per garment, simplified)
+const CO2_PER_CATEGORY: Record<string, number> = {
+  tops: 5.5,
+  bottoms: 8.0,
+  outerwear: 12.0,
+  shoes: 10.0,
+  accessories: 2.0,
+  dresses: 7.0,
+  activewear: 6.0,
+  formal: 9.0,
+  other: 5.0,
+};
+
 const Analytics = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [items, setItems] = useState<any[]>([]);
   const [wearLogs, setWearLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"overview" | "gaps" | "history">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "gaps" | "history" | "sustainability">("overview");
   const [gapAnalysis, setGapAnalysis] = useState<{ overallScore: number; gaps: GapItem[]; summary: string } | null>(null);
   const [gapLoading, setGapLoading] = useState(false);
   const [styleProfile, setStyleProfile] = useState<any>(null);
@@ -120,6 +134,41 @@ const Analytics = () => {
   const sustainabilityScore = Math.min(100, Math.round(avgWears * 15 + (totalItems > 0 ? 20 : 0)));
   const totalValue = items.reduce((sum, i) => sum + (i.price || 0), 0);
 
+  // ── Sustainability calculations ──
+  const totalCO2 = items.reduce((sum, item) => {
+    const cat = item.category?.toLowerCase() || "other";
+    return sum + (CO2_PER_CATEGORY[cat] || CO2_PER_CATEGORY.other);
+  }, 0);
+
+  const co2PerWear = totalWears > 0 ? Math.round((totalCO2 / totalWears) * 100) / 100 : totalCO2;
+
+  // Items not worn in 90+ days — donation candidates
+  const now = new Date();
+  const donationCandidates = items.filter((item) => {
+    const itemLogs = wearLogs.filter((l) => l.clothing_item_id === item.id);
+    if (itemLogs.length === 0) {
+      // Never worn + owned for 30+ days
+      const ownedDays = differenceInDays(now, parseISO(item.created_at));
+      return ownedDays > 30;
+    }
+    const lastWorn = itemLogs.sort((a: any, b: any) => new Date(b.worn_at).getTime() - new Date(a.worn_at).getTime())[0];
+    return differenceInDays(now, parseISO(lastWorn.worn_at)) > 90;
+  });
+
+  // CO2 by category for chart
+  const co2ByCategory = Object.entries(
+    items.reduce((acc: Record<string, number>, item) => {
+      const cat = item.category || "other";
+      acc[cat] = (acc[cat] || 0) + (CO2_PER_CATEGORY[cat.toLowerCase()] || CO2_PER_CATEGORY.other);
+      return acc;
+    }, {})
+  ).map(([name, value]) => ({ name, value: Math.round(Number(value) * 10) / 10 }))
+   .sort((a, b) => b.value - a.value);
+
+  // Utilization rate
+  const usedItems = items.filter(item => wearLogs.some(l => l.clothing_item_id === item.id));
+  const utilizationRate = totalItems > 0 ? Math.round((usedItems.length / totalItems) * 100) : 0;
+
   const statCards = [
     { label: "Total Items", value: totalItems, icon: BarChart3, color: "text-primary" },
     { label: "Total Wears Logged", value: totalWears, icon: Calendar, color: "text-gold-light" },
@@ -154,14 +203,15 @@ const Analytics = () => {
         </motion.div>
 
         {/* Tab Switch */}
-        <div className="flex gap-1 bg-secondary rounded-xl p-1 mb-6 w-fit">
+        <div className="flex gap-1 bg-secondary rounded-xl p-1 mb-6 w-fit overflow-x-auto">
           {([
             { key: "overview" as const, label: "📊 Overview" },
-            { key: "gaps" as const, label: "🔍 Wardrobe Gaps" },
-            { key: "history" as const, label: "📅 Wear History" },
+            { key: "gaps" as const, label: "🔍 Gaps" },
+            { key: "history" as const, label: "📅 History" },
+            { key: "sustainability" as const, label: "🌱 Sustainability" },
           ]).map(tab => (
             <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-              className={`px-4 py-2 rounded-lg text-xs font-sans transition-all ${
+              className={`px-4 py-2 rounded-lg text-xs font-sans transition-all whitespace-nowrap ${
                 activeTab === tab.key ? "bg-foreground text-background font-semibold" : "text-muted-foreground hover:text-foreground"
               }`}>
               {tab.label}
@@ -270,7 +320,6 @@ const Analytics = () => {
               </div>
             ) : (
               <div className="space-y-6">
-                {/* Score */}
                 <div className="glass rounded-2xl p-6 flex items-center gap-5">
                   <div className="w-20 h-20 rounded-full border-4 border-primary flex items-center justify-center flex-shrink-0">
                     <span className="font-display text-2xl font-bold text-primary">{gapAnalysis.overallScore}%</span>
@@ -280,8 +329,6 @@ const Analytics = () => {
                     <p className="text-muted-foreground font-sans text-sm mt-1">{gapAnalysis.summary}</p>
                   </div>
                 </div>
-
-                {/* Gap Cards */}
                 <div className="space-y-3">
                   {gapAnalysis.gaps.map((gap, i) => (
                     <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
@@ -300,7 +347,6 @@ const Analytics = () => {
                     </motion.div>
                   ))}
                 </div>
-
                 <Button variant="outline" onClick={runGapAnalysis} disabled={gapLoading} className="gap-2">
                   {gapLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                   Re-analyze
@@ -320,7 +366,6 @@ const Analytics = () => {
               </div>
             ) : (
               <div className="relative">
-                {/* Timeline line */}
                 <div className="absolute left-5 top-0 bottom-0 w-px bg-border" />
                 <div className="space-y-4">
                   {wearLogs.slice(0, 50).map((log, i) => {
@@ -351,6 +396,152 @@ const Analytics = () => {
                 </div>
               </div>
             )}
+          </motion.div>
+        )}
+
+        {/* ── Sustainability Tab ── */}
+        {activeTab === "sustainability" && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+            {/* Score Hero */}
+            <div className="glass rounded-2xl p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Leaf className="w-5 h-5 text-green-500" />
+                <h3 className="font-display text-xl font-bold text-foreground">Sustainability Score</h3>
+              </div>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="text-center p-4 rounded-xl bg-green-500/5 border border-green-500/20">
+                  <p className="font-display text-3xl font-bold text-green-500">{sustainabilityScore}</p>
+                  <p className="text-[10px] text-muted-foreground font-sans mt-1">Overall Score</p>
+                </div>
+                <div className="text-center p-4 rounded-xl bg-secondary border border-border">
+                  <p className="font-display text-3xl font-bold text-foreground">{totalCO2.toFixed(1)}</p>
+                  <p className="text-[10px] text-muted-foreground font-sans mt-1">Total kg CO₂</p>
+                </div>
+                <div className="text-center p-4 rounded-xl bg-secondary border border-border">
+                  <p className="font-display text-3xl font-bold text-foreground">{co2PerWear}</p>
+                  <p className="text-[10px] text-muted-foreground font-sans mt-1">kg CO₂ / Wear</p>
+                </div>
+                <div className="text-center p-4 rounded-xl bg-secondary border border-border">
+                  <p className="font-display text-3xl font-bold text-foreground">{utilizationRate}%</p>
+                  <p className="text-[10px] text-muted-foreground font-sans mt-1">Utilization Rate</p>
+                </div>
+              </div>
+
+              {/* Tips */}
+              <div className="mt-4 p-3 rounded-xl bg-green-500/5 border border-green-500/20">
+                <p className="text-xs text-green-500 font-sans leading-relaxed">
+                  💡 {sustainabilityScore >= 70
+                    ? "Great job! You're making the most of your wardrobe. Keep logging wears to track your impact."
+                    : sustainabilityScore >= 40
+                    ? "You're on the right track. Try to wear each item at least 30 times to maximize sustainability."
+                    : "Start by logging wears for your items. The more you re-wear, the lower your environmental impact per outfit."
+                  }
+                </p>
+              </div>
+            </div>
+
+            {/* CO2 by Category */}
+            {co2ByCategory.length > 0 && (
+              <div className="glass rounded-2xl p-6">
+                <h3 className="font-display text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+                  <Recycle className="w-5 h-5 text-green-500" /> CO₂ Impact by Category
+                </h3>
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={co2ByCategory}>
+                    <XAxis dataKey="name" stroke="hsl(240, 5%, 55%)" fontSize={11} tick={{ fill: "hsl(40, 20%, 90%)" }} />
+                    <YAxis stroke="hsl(240, 5%, 55%)" fontSize={11} tick={{ fill: "hsl(40, 20%, 90%)" }} unit=" kg" />
+                    <Tooltip
+                      contentStyle={{ background: "hsl(240, 8%, 10%)", border: "1px solid hsl(240, 5%, 22%)", borderRadius: "8px", color: "hsl(40, 20%, 95%)" }}
+                      formatter={(value: number) => [`${value} kg CO₂`, "Impact"]}
+                    />
+                    <Bar dataKey="value" fill="hsl(150, 50%, 45%)" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+                <p className="text-[10px] text-muted-foreground font-sans mt-2 text-center">
+                  Estimates based on industry averages per garment category
+                </p>
+              </div>
+            )}
+
+            {/* Donation Candidates */}
+            <div className="glass rounded-2xl p-6">
+              <h3 className="font-display text-lg font-bold text-foreground mb-2 flex items-center gap-2">
+                <Heart className="w-5 h-5 text-destructive" /> Consider Donating
+              </h3>
+              <p className="text-muted-foreground font-sans text-xs mb-4">
+                Items not worn in 90+ days or never worn since adding to closet
+              </p>
+              {donationCandidates.length === 0 ? (
+                <div className="text-center py-6">
+                  <PackageOpen className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground font-sans">All your items are well-loved! 🎉</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {donationCandidates.slice(0, 15).map((item) => {
+                    const itemWears = wearLogs.filter(l => l.clothing_item_id === item.id).length;
+                    const lastLog = wearLogs.find(l => l.clothing_item_id === item.id);
+                    const daysSince = lastLog
+                      ? differenceInDays(now, parseISO(lastLog.worn_at))
+                      : differenceInDays(now, parseISO(item.created_at));
+                    return (
+                      <div key={item.id} className="flex items-center justify-between p-3 rounded-xl bg-secondary/50 border border-border">
+                        <div className="flex items-center gap-3 min-w-0">
+                          {item.photo_url ? (
+                            <img src={item.photo_url} alt="" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                              <PackageOpen className="w-4 h-4 text-muted-foreground" />
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <p className="font-sans text-sm text-foreground truncate">{item.name || "Unnamed"}</p>
+                            <p className="text-[10px] text-muted-foreground font-sans">
+                              {item.category} · {itemWears} wear{itemWears !== 1 ? "s" : ""} · {daysSince}d unused
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {item.price && (
+                            <span className="text-[10px] text-muted-foreground font-sans">${item.price}</span>
+                          )}
+                          <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ${
+                            itemWears === 0 ? "text-destructive bg-destructive/10" : "text-primary bg-primary/10"
+                          }`}>
+                            {itemWears === 0 ? "Never worn" : "Underused"}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {donationCandidates.length > 15 && (
+                    <p className="text-xs text-primary font-sans text-center pt-2">
+                      +{donationCandidates.length - 15} more items to consider
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Eco Tips */}
+            <div className="glass rounded-2xl p-6">
+              <h3 className="font-display text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+                <Leaf className="w-5 h-5 text-green-500" /> Eco Tips
+              </h3>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {[
+                  { tip: "Aim for 30+ wears per item to offset production CO₂", icon: "🔄" },
+                  { tip: "Donate or resell items you haven't worn in 3+ months", icon: "💚" },
+                  { tip: "Choose natural fabrics — cotton, linen, and wool biodegrade", icon: "🌿" },
+                  { tip: "Repair before replacing — extend the life of your favorites", icon: "🧵" },
+                ].map((t, i) => (
+                  <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-green-500/5 border border-green-500/10">
+                    <span className="text-lg">{t.icon}</span>
+                    <p className="text-xs text-foreground font-sans">{t.tip}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </motion.div>
         )}
       </div>
