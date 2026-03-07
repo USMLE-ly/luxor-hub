@@ -146,6 +146,15 @@ export default function CommunityGallery() {
     } else {
       await supabase.from("look_likes").insert({ look_id: designId, look_type: "design", user_id: user.id });
       setDesigns(prev => prev.map(d => d.id === designId ? { ...d, isLiked: true, likeCount: d.likeCount + 1 } : d));
+      // Notify design owner
+      if (design.user_id !== user.id) {
+        await supabase.from("notifications").insert({
+          user_id: design.user_id,
+          actor_id: user.id,
+          type: "design_like",
+          reference_id: designId,
+        });
+      }
     }
   };
 
