@@ -255,6 +255,7 @@ export default function VideoAnalysis() {
                   </p>
                 </motion.div>
                 <input ref={fileInputRef} type="file" accept="video/*" onChange={handleVideoSelect} className="hidden" />
+                <PrivacyNotice className="mt-4" />
               </CardContent>
             </Card>
           </div>
