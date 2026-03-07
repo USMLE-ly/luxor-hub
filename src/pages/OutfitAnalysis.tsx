@@ -1163,9 +1163,10 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
             </CardContent>
           </Card>
         </motion.div>
-      </div>
+      </ParallaxSection>
 
       {/* Improvements — Full width */}
+      <ParallaxSection offset={35}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
