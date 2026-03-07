@@ -9,12 +9,16 @@ import { toast } from "sonner";
 import { Send, Sparkles, Loader2, Trash2, ArrowUp, Camera, Image, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { VoiceInput } from "@/components/app/VoiceInput";
+import { useAnimatedText } from "@/components/ui/animated-text";
+import { PlaceholdersAndVanishInput } from "@/components/ui/placeholders-and-vanish-input";
+import { useAutoResizeTextarea } from "@/hooks/use-auto-resize-textarea";
 
 interface Message {
   id?: string;
   role: "user" | "assistant";
   content: string;
   imagePreview?: string;
+  isStreaming?: boolean;
 }
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`;
@@ -28,6 +32,27 @@ const quickPrompts = [
   { emoji: "🛍️", label: "What's missing in my closet?" },
 ];
 
+const vanishPlaceholders = [
+  "What should I wear today?",
+  "Outfit for a dinner date",
+  "Smart casual for work",
+  "Party outfit ideas",
+  "What's missing in my closet?",
+  "Style tips for my body type",
+];
+
+// Animated assistant message component
+function AnimatedAssistantMessage({ content, isStreaming }: { content: string; isStreaming?: boolean }) {
+  const animatedContent = useAnimatedText(content, " ");
+  const displayContent = isStreaming ? content : animatedContent;
+  
+  return (
+    <div className="prose prose-sm prose-invert max-w-none [&>p]:my-1 [&>ul]:my-1 [&>ol]:my-1 [&>h1]:text-base [&>h2]:text-sm [&>h3]:text-sm">
+      <ReactMarkdown>{displayContent}</ReactMarkdown>
+    </div>
+  );
+}
+
 const Chat = () => {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
@@ -38,8 +63,12 @@ const Chat = () => {
   const [closetSummary, setClosetSummary] = useState("");
   const [pendingImage, setPendingImage] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { textareaRef, adjustHeight } = useAutoResizeTextarea({
+    minHeight: 24,
+    maxHeight: 96,
+  });
 
   useEffect(() => {
     if (!user) return;
@@ -97,6 +126,7 @@ const Chat = () => {
     setInput("");
     setPendingImage(null);
     setIsLoading(true);
+    adjustHeight(true);
     saveMessage("user", imageToSend ? `[Image attached] ${userMsg.content}` : userMsg.content);
 
     let assistantSoFar = "";
@@ -151,9 +181,9 @@ const Chat = () => {
               setMessages((prev) => {
                 const last = prev[prev.length - 1];
                 if (last?.role === "assistant" && !last.id) {
-                  return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar } : m));
+                  return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar, isStreaming: true } : m));
                 }
-                return [...prev, { role: "assistant", content: assistantSoFar }];
+                return [...prev, { role: "assistant", content: assistantSoFar, isStreaming: true }];
               });
             }
           } catch {
@@ -178,12 +208,18 @@ const Chat = () => {
           setMessages((prev) => {
             const last = prev[prev.length - 1];
             if (last?.role === "assistant" && !last.id) {
-              return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar } : m));
+              return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar, isStreaming: false } : m));
             }
-            return [...prev, { role: "assistant", content: assistantSoFar }];
+            return [...prev, { role: "assistant", content: assistantSoFar, isStreaming: false }];
           });
         }
       }
+
+      // Mark streaming as done
+      setMessages((prev) =>
+        prev.map((m, i) => (i === prev.length - 1 && m.role === "assistant" ? { ...m, isStreaming: false } : m))
+      );
+
       saveMessage("assistant", assistantSoFar);
     } catch (e: any) {
       if (e.message !== "rate limited" && e.message !== "credits exhausted") {
@@ -245,6 +281,21 @@ const Chat = () => {
                 </p>
               </div>
 
+              {/* Vanish Input for empty state */}
+              <div className="mb-6">
+                <PlaceholdersAndVanishInput
+                  placeholders={vanishPlaceholders}
+                  onChange={() => {}}
+                  onSubmit={(e) => {
+                    const form = e.currentTarget;
+                    const input = form.querySelector("input");
+                    if (input?.value) {
+                      send(input.value);
+                    }
+                  }}
+                />
+              </div>
+
               {/* Quick Prompts Grid */}
               <div className="grid grid-cols-2 gap-2">
                 {quickPrompts.map((prompt) => (
@@ -290,9 +341,7 @@ const Chat = () => {
                     </div>
                   )}
                   {msg.role === "assistant" ? (
-                    <div className="prose prose-sm prose-invert max-w-none [&>p]:my-1 [&>ul]:my-1 [&>ol]:my-1 [&>h1]:text-base [&>h2]:text-sm [&>h3]:text-sm">
-                      <ReactMarkdown>{msg.content}</ReactMarkdown>
-                    </div>
+                    <AnimatedAssistantMessage content={msg.content} isStreaming={msg.isStreaming} />
                   ) : (
                     <p className="leading-relaxed">{msg.content}</p>
                   )}
@@ -303,10 +352,12 @@ const Chat = () => {
 
           {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
-              <div className="bg-card border border-border rounded-2xl rounded-bl-md px-3.5 py-2.5 flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: "0ms" }} />
-                <div className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: "150ms" }} />
-                <div className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: "300ms" }} />
+              <div className="bg-card border border-border rounded-2xl rounded-bl-md px-3.5 py-2.5 flex items-center gap-2">
+                <div
+                  className="w-3.5 h-3.5 bg-primary rounded-sm animate-spin"
+                  style={{ animationDuration: "3s" }}
+                />
+                <span className="text-xs text-muted-foreground font-sans">AI is thinking...</span>
               </div>
             </motion.div>
           )}
@@ -352,9 +403,12 @@ const Chat = () => {
               disabled={isLoading}
             />
             <textarea
-              ref={inputRef}
+              ref={textareaRef}
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => {
+                setInput(e.target.value);
+                adjustHeight();
+              }}
               onKeyDown={handleKeyDown}
               placeholder="Ask your stylist..."
               rows={1}
@@ -370,7 +424,10 @@ const Chat = () => {
               }`}
             >
               {isLoading ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <div
+                  className="w-3.5 h-3.5 bg-primary rounded-sm animate-spin"
+                  style={{ animationDuration: "3s" }}
+                />
               ) : (
                 <ArrowUp className="w-3.5 h-3.5" />
               )}
