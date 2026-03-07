@@ -492,6 +492,16 @@ export default function OutfitAnalysis() {
                           <Sparkles className="w-5 h-5 mr-2" />Analyze My Outfit
                         </RainbowButton>
                       )}
+                      {analysisError && !isAnalyzing && (
+                        <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                          <AlertTriangle className="w-4 h-4 text-destructive shrink-0" />
+                          <span className="text-sm text-destructive flex-1">{analysisError}</span>
+                          <Button variant="outline" size="sm" onClick={handleAnalyze} className="shrink-0 gap-1">
+                            <RefreshCw className="w-3 h-3" /> Retry
+                          </Button>
+                        </div>
+                      )}
+                      <PrivacyNotice />
                     </div>
                   </div>
                 </CardContent>
