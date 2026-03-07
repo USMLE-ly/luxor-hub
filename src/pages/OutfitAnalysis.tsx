@@ -21,9 +21,10 @@ import {
   Tooltip as RechartsTooltip,
 } from "recharts";
 import { StyleComparison } from "@/components/app/StyleComparison";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { RainbowButton } from "@/components/ui/rainbow-button";
+import { useCallback } from "react";
 
 interface OutfitAnalysisData {
   overallStyle: string;
@@ -761,6 +762,69 @@ function RadarTooltipContent({ active, payload }: any) {
   );
 }
 
+// Confetti burst component for high scores
+function ConfettiBurst() {
+  const particles = Array.from({ length: 60 }, (_, i) => {
+    const angle = (i / 60) * 360;
+    const velocity = 120 + Math.random() * 180;
+    const x = Math.cos((angle * Math.PI) / 180) * velocity;
+    const y = Math.sin((angle * Math.PI) / 180) * velocity - 100;
+    const colors = [
+      "hsl(43 74% 49%)", "hsl(43 80% 65%)", "hsl(43 90% 80%)",
+      "hsl(120 60% 50%)", "hsl(200 80% 60%)", "hsl(340 80% 60%)",
+    ];
+    return { x, y, color: colors[i % colors.length], size: 4 + Math.random() * 6, delay: Math.random() * 0.3, rotation: Math.random() * 720 };
+  });
+
+  return (
+    <div className="absolute inset-0 pointer-events-none z-20 overflow-hidden">
+      {particles.map((p, i) => (
+        <motion.div
+          key={i}
+          className="absolute rounded-sm"
+          style={{
+            width: p.size,
+            height: p.size * 0.6,
+            backgroundColor: p.color,
+            left: "50%",
+            top: "50%",
+          }}
+          initial={{ x: 0, y: 0, opacity: 1, scale: 1, rotate: 0 }}
+          animate={{
+            x: p.x,
+            y: p.y + 200,
+            opacity: 0,
+            scale: 0.3,
+            rotate: p.rotation,
+          }}
+          transition={{
+            duration: 1.5 + Math.random() * 0.5,
+            delay: p.delay,
+            ease: [0.25, 0.46, 0.45, 0.94],
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// Parallax section wrapper
+function ParallaxSection({ children, offset = 30, delay = 0 }: { children: React.ReactNode; offset?: number; delay?: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  });
+  const y = useTransform(scrollYProgress, [0, 0.5, 1], [offset, 0, -offset * 0.5]);
+  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.4, 1, 1, 0.8]);
+
+  return (
+    <motion.div ref={ref} style={{ y, opacity }} transition={{ delay }}>
+      {children}
+    </motion.div>
+  );
+}
+
 // Chart-based visual results component
 function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
   analysis: OutfitAnalysisData;
@@ -770,6 +834,15 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
   const [expandedItem, setExpandedItem] = useState<number | null>(null);
   const [findingSimilar, setFindingSimilar] = useState<number | null>(null);
   const [similarProducts, setSimilarProducts] = useState<Record<number, any[]>>({});
+  const [showConfetti, setShowConfetti] = useState(false);
+  const scoreRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (analysis.styleScore >= 80) {
+      const timer = setTimeout(() => setShowConfetti(true), 1200);
+      return () => clearTimeout(timer);
+    }
+  }, [analysis.styleScore]);
 
   const handleFindSimilar = async (item: any, index: number) => {
     setFindingSimilar(index);
@@ -827,11 +900,13 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
     <>
       {/* Overall Score — Premium */}
       <motion.div
+        ref={scoreRef}
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
         className="relative rounded-[1.5rem] border-[0.75px] border-border p-3"
       >
+        {showConfetti && <ConfettiBurst />}
         <GlowingEffect spread={60} glow={true} disabled={false} proximity={80} inactiveZone={0.01} borderWidth={3} />
         <Card className="glass-card overflow-hidden border-0 shadow-none relative">
           {/* Gold shimmer sweep overlay */}
@@ -884,6 +959,7 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
       </motion.div>
 
       {/* Occasion Radar + Color Palette row */}
+      <ParallaxSection offset={25}>
       <div className="grid md:grid-cols-2 gap-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -961,8 +1037,10 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
           </Card>
         </motion.div>
       </div>
+      </ParallaxSection>
 
       {/* Detected Items + Strengths — 2 column */}
+      <ParallaxSection offset={30}>
       <div className="grid md:grid-cols-2 gap-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -1086,8 +1164,10 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
           </Card>
         </motion.div>
       </div>
+      </ParallaxSection>
 
       {/* Improvements — Full width */}
+      <ParallaxSection offset={35}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -1130,9 +1210,11 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
           </CardContent>
         </Card>
       </motion.div>
+      </ParallaxSection>
 
       {/* Body Type & Silhouette — Full width */}
       {analysis.bodyTypeNotes && (
+        <ParallaxSection offset={20}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -1151,6 +1233,7 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
             </CardContent>
           </Card>
         </motion.div>
+        </ParallaxSection>
       )}
     </>
   );
