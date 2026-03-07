@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.weekly-capsule]
 verify_jwt = false
+
+[functions.trend-intelligence]
+verify_jwt = false

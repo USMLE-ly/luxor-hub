@@ -562,6 +562,11 @@ const Dashboard = () => {
           )}
         </motion.div>
 
+        {/* ── Trending Now For You ─────────────────────────── */}
+        <motion.div variants={fadeUp}>
+          <TrendIntelligenceWidget />
+        </motion.div>
+
         {/* ── Weekly Capsule Plan ───────────────────────────── */}
         <motion.div variants={fadeUp}>
           <WeeklyCapsuleWidget />
