@@ -170,6 +170,42 @@ export type Database = {
         }
         Relationships: []
       }
+      fashion_designs: {
+        Row: {
+          created_at: string
+          description: string | null
+          garment_type: string
+          id: string
+          image_url: string
+          is_favorite: boolean
+          is_public: boolean
+          prompt: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          garment_type?: string
+          id?: string
+          image_url: string
+          is_favorite?: boolean
+          is_public?: boolean
+          prompt: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          garment_type?: string
+          id?: string
+          image_url?: string
+          is_favorite?: boolean
+          is_public?: boolean
+          prompt?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       follows: {
         Row: {
           created_at: string

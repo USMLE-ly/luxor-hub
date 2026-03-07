@@ -1,14 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { AppLayout } from "@/components/app/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { Sparkles, Loader2, Download, Palette, Shirt, Wand2, RefreshCw, Save } from "lucide-react";
+import {
+  Sparkles, Loader2, Download, Palette, Shirt, Wand2, Heart, Share2, Trash2,
+  History, Image as ImageIcon, Twitter, Link, Check, Eye
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { RainbowButton } from "@/components/ui/rainbow-button";
@@ -24,6 +28,20 @@ interface DesignResult {
   prompt: string;
   garmentType: string;
   timestamp: number;
+  dbId?: string;
+  isFavorite?: boolean;
+  isPublic?: boolean;
+}
+
+interface SavedDesign {
+  id: string;
+  image_url: string;
+  prompt: string;
+  description: string | null;
+  garment_type: string;
+  is_favorite: boolean;
+  is_public: boolean;
+  created_at: string;
 }
 
 export default function FashionDesigner() {
@@ -32,9 +50,13 @@ export default function FashionDesigner() {
   const [garmentType, setGarmentType] = useState("Dress");
   const [isGenerating, setIsGenerating] = useState(false);
   const [designs, setDesigns] = useState<DesignResult[]>([]);
+  const [gallery, setGallery] = useState<SavedDesign[]>([]);
+  const [loadingGallery, setLoadingGallery] = useState(false);
   const [archetype, setArchetype] = useState<string | null>(null);
   const [colorSeason, setColorSeason] = useState<string | null>(null);
   const [bestColors, setBestColors] = useState<string[]>([]);
+  const [shareOpen, setShareOpen] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -54,7 +76,20 @@ export default function FashionDesigner() {
         else if (prefs?.bestColors) setBestColors(prefs.bestColors);
       }
     })();
+    fetchGallery();
   }, [user]);
+
+  const fetchGallery = async () => {
+    if (!user) return;
+    setLoadingGallery(true);
+    const { data } = await supabase
+      .from("fashion_designs")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+    setGallery((data as SavedDesign[]) || []);
+    setLoadingGallery(false);
+  };
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
@@ -85,12 +120,81 @@ export default function FashionDesigner() {
     }
   };
 
-  const handleDownload = (design: DesignResult) => {
+  const handleSaveDesign = async (design: DesignResult, index: number) => {
+    if (!user) return;
+    try {
+      const { data, error } = await supabase.from("fashion_designs").insert({
+        user_id: user.id,
+        image_url: design.imageUrl,
+        prompt: design.prompt,
+        description: design.description || null,
+        garment_type: design.garmentType,
+      }).select("id").single();
+      if (error) throw error;
+      
+      const updated = [...designs];
+      updated[index] = { ...updated[index], dbId: data.id };
+      setDesigns(updated);
+      toast.success("Design saved to gallery!");
+      fetchGallery();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to save");
+    }
+  };
+
+  const handleToggleFavorite = async (id: string) => {
+    const item = gallery.find((g) => g.id === id);
+    if (!item) return;
+    const { error } = await supabase
+      .from("fashion_designs")
+      .update({ is_favorite: !item.is_favorite })
+      .eq("id", id);
+    if (!error) {
+      setGallery((prev) => prev.map((g) => g.id === id ? { ...g, is_favorite: !g.is_favorite } : g));
+      toast.success(item.is_favorite ? "Removed from favorites" : "Added to favorites ❤️");
+    }
+  };
+
+  const handleTogglePublic = async (id: string) => {
+    const item = gallery.find((g) => g.id === id);
+    if (!item) return;
+    const { error } = await supabase
+      .from("fashion_designs")
+      .update({ is_public: !item.is_public })
+      .eq("id", id);
+    if (!error) {
+      setGallery((prev) => prev.map((g) => g.id === id ? { ...g, is_public: !g.is_public } : g));
+      toast.success(item.is_public ? "Design made private" : "Design shared publicly! 🌍");
+    }
+  };
+
+  const handleDeleteDesign = async (id: string) => {
+    const { error } = await supabase.from("fashion_designs").delete().eq("id", id);
+    if (!error) {
+      setGallery((prev) => prev.filter((g) => g.id !== id));
+      toast.success("Design deleted");
+    }
+  };
+
+  const handleDownload = (url: string, type: string) => {
     const link = document.createElement("a");
-    link.download = `aurelia-design-${design.garmentType.toLowerCase()}-${Date.now()}.png`;
-    link.href = design.imageUrl;
+    link.download = `aurelia-design-${type.toLowerCase()}-${Date.now()}.png`;
+    link.href = url;
     link.click();
     toast.success("Design downloaded!");
+  };
+
+  const handleCopyShareLink = (design: SavedDesign) => {
+    const text = `Check out my AI-designed ${design.garment_type}: "${design.prompt}" ✨ Created with AURELIA`;
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    toast.success("Copied to clipboard!");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleShareTwitter = (design: SavedDesign) => {
+    const text = `Check out my AI-designed ${design.garment_type}: "${design.prompt}" ✨ Created with AURELIA`;
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
   };
 
   const inspirationPrompts = [
@@ -100,6 +204,15 @@ export default function FashionDesigner() {
     "A tailored jumpsuit with architectural details",
     "A deconstructed shirt with raw-edge details",
   ];
+
+  const timeAgo = (dateStr: string) => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 60) return `${mins}m ago`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours}h ago`;
+    return `${Math.floor(hours / 24)}d ago`;
+  };
 
   return (
     <AppLayout>
@@ -126,97 +239,203 @@ export default function FashionDesigner() {
           </motion.div>
         )}
 
-        {/* Design Input */}
-        <div className="relative rounded-[1.5rem] border-[0.75px] border-border p-3">
-          <GlowingEffect spread={40} glow proximity={64} inactiveZone={0.01} borderWidth={3} />
-          <Card className="glass-card border-0 shadow-none">
-            <CardContent className="p-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="md:col-span-3">
-                  <Textarea
-                    placeholder="Describe your dream garment... e.g., 'A structured blazer with asymmetric lapels in deep burgundy'"
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    className="min-h-[100px] bg-background/50"
-                  />
-                </div>
-                <div className="space-y-3">
-                  <Select value={garmentType} onValueChange={setGarmentType}>
-                    <SelectTrigger className="bg-background/50">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {GARMENT_TYPES.map((t) => (
-                        <SelectItem key={t} value={t}>{t}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <RainbowButton onClick={handleGenerate} disabled={isGenerating || !prompt.trim()} className="w-full">
-                    {isGenerating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Wand2 className="w-4 h-4 mr-2" />}
-                    Design
-                  </RainbowButton>
-                </div>
-              </div>
+        <Tabs defaultValue="create" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted/50 backdrop-blur-sm">
+            <TabsTrigger value="create" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Wand2 className="w-4 h-4" /> Create
+            </TabsTrigger>
+            <TabsTrigger value="gallery" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground" onClick={fetchGallery}>
+              <History className="w-4 h-4" /> Gallery ({gallery.length})
+            </TabsTrigger>
+          </TabsList>
 
-              {/* Inspiration chips */}
-              <div className="flex flex-wrap gap-2">
-                <span className="text-xs text-muted-foreground">Try:</span>
-                {inspirationPrompts.map((p, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setPrompt(p)}
-                    className="text-xs px-2 py-1 rounded-full bg-muted/30 border border-border hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground"
-                  >
-                    {p.slice(0, 40)}…
-                  </button>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+          <TabsContent value="create" className="space-y-6">
+            {/* Design Input */}
+            <div className="relative rounded-[1.5rem] border-[0.75px] border-border p-3">
+              <GlowingEffect spread={40} glow proximity={64} inactiveZone={0.01} borderWidth={3} />
+              <Card className="glass-card border-0 shadow-none">
+                <CardContent className="p-6 space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="md:col-span-3">
+                      <Textarea
+                        placeholder="Describe your dream garment... e.g., 'A structured blazer with asymmetric lapels in deep burgundy'"
+                        value={prompt}
+                        onChange={(e) => setPrompt(e.target.value)}
+                        className="min-h-[100px] bg-background/50"
+                      />
+                    </div>
+                    <div className="space-y-3">
+                      <Select value={garmentType} onValueChange={setGarmentType}>
+                        <SelectTrigger className="bg-background/50">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {GARMENT_TYPES.map((t) => (
+                            <SelectItem key={t} value={t}>{t}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <RainbowButton onClick={handleGenerate} disabled={isGenerating || !prompt.trim()} className="w-full">
+                        {isGenerating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Wand2 className="w-4 h-4 mr-2" />}
+                        Design
+                      </RainbowButton>
+                    </div>
+                  </div>
 
-        {/* Generated Designs */}
-        <AnimatePresence>
-          {designs.length > 0 && (
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-foreground">Your Designs</h2>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="text-xs text-muted-foreground">Try:</span>
+                    {inspirationPrompts.map((p, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setPrompt(p)}
+                        className="text-xs px-2 py-1 rounded-full bg-muted/30 border border-border hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground"
+                      >
+                        {p.slice(0, 40)}…
+                      </button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Generated Designs */}
+            <AnimatePresence>
+              {designs.length > 0 && (
+                <div className="space-y-4">
+                  <h2 className="text-xl font-semibold text-foreground">New Designs</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {designs.map((design, i) => (
+                      <motion.div
+                        key={design.timestamp}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                      >
+                        <Card className="glass-card overflow-hidden group">
+                          <div className="relative aspect-square">
+                            <img src={design.imageUrl} alt={design.prompt} className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4 gap-2">
+                              <Button variant="secondary" size="sm" onClick={() => handleDownload(design.imageUrl, design.garmentType)}>
+                                <Download className="w-3 h-3 mr-1" /> Download
+                              </Button>
+                              {!design.dbId && (
+                                <Button variant="secondary" size="sm" onClick={() => handleSaveDesign(design, i)}>
+                                  <Heart className="w-3 h-3 mr-1" /> Save
+                                </Button>
+                              )}
+                              {design.dbId && (
+                                <Badge variant="secondary" className="text-xs"><Check className="w-3 h-3 mr-1" /> Saved</Badge>
+                              )}
+                            </div>
+                            <Badge className="absolute top-3 left-3 bg-black/60 text-white border-0">
+                              <Shirt className="w-3 h-3 mr-1" /> {design.garmentType}
+                            </Badge>
+                          </div>
+                          <CardContent className="p-4">
+                            <p className="text-sm text-foreground line-clamp-2">{design.prompt}</p>
+                            {design.description && (
+                              <p className="text-xs text-muted-foreground mt-2 line-clamp-3">{design.description}</p>
+                            )}
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </AnimatePresence>
+          </TabsContent>
+
+          <TabsContent value="gallery" className="space-y-6">
+            {loadingGallery ? (
+              <div className="flex justify-center py-12">
+                <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              </div>
+            ) : gallery.length === 0 ? (
+              <Card className="glass-card">
+                <CardContent className="p-12 text-center">
+                  <ImageIcon className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" />
+                  <p className="text-muted-foreground">No saved designs yet. Create and save your first design!</p>
+                </CardContent>
+              </Card>
+            ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {designs.map((design, i) => (
+                {gallery.map((design, i) => (
                   <motion.div
-                    key={design.timestamp}
+                    key={design.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.1 }}
+                    transition={{ delay: i * 0.05 }}
                   >
                     <Card className="glass-card overflow-hidden group">
                       <div className="relative aspect-square">
-                        <img
-                          src={design.imageUrl}
-                          alt={design.prompt}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-                          <Button variant="secondary" size="sm" onClick={() => handleDownload(design)}>
-                            <Download className="w-3 h-3 mr-1" /> Download
+                        <img src={design.image_url} alt={design.prompt} className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4 gap-2">
+                          <Button variant="secondary" size="sm" onClick={() => handleDownload(design.image_url, design.garment_type)}>
+                            <Download className="w-3 h-3" />
+                          </Button>
+                          <Button variant="secondary" size="sm" onClick={() => setShareOpen(shareOpen === design.id ? null : design.id)}>
+                            <Share2 className="w-3 h-3" />
+                          </Button>
+                          <Button variant="secondary" size="sm" onClick={() => handleDeleteDesign(design.id)}>
+                            <Trash2 className="w-3 h-3" />
                           </Button>
                         </div>
-                        <Badge className="absolute top-3 left-3 bg-black/60 text-white border-0">
-                          <Shirt className="w-3 h-3 mr-1" /> {design.garmentType}
-                        </Badge>
+                        <div className="absolute top-3 left-3 flex gap-2">
+                          <Badge className="bg-black/60 text-white border-0">
+                            <Shirt className="w-3 h-3 mr-1" /> {design.garment_type}
+                          </Badge>
+                        </div>
+                        <div className="absolute top-3 right-3 flex gap-1">
+                          <button
+                            onClick={() => handleToggleFavorite(design.id)}
+                            className="w-8 h-8 rounded-full bg-black/50 flex items-center justify-center hover:bg-black/70 transition-colors"
+                          >
+                            <Heart className={`w-4 h-4 ${design.is_favorite ? "fill-red-500 text-red-500" : "text-white"}`} />
+                          </button>
+                          <button
+                            onClick={() => handleTogglePublic(design.id)}
+                            className="w-8 h-8 rounded-full bg-black/50 flex items-center justify-center hover:bg-black/70 transition-colors"
+                          >
+                            <Eye className={`w-4 h-4 ${design.is_public ? "text-primary" : "text-white"}`} />
+                          </button>
+                        </div>
                       </div>
                       <CardContent className="p-4">
                         <p className="text-sm text-foreground line-clamp-2">{design.prompt}</p>
-                        {design.description && (
-                          <p className="text-xs text-muted-foreground mt-2 line-clamp-3">{design.description}</p>
-                        )}
+                        <div className="flex items-center gap-2 mt-2">
+                          <span className="text-[10px] text-muted-foreground">{timeAgo(design.created_at)}</span>
+                          {design.is_favorite && <Badge variant="outline" className="text-[10px] border-red-500/30 text-red-400">❤️ Favorite</Badge>}
+                          {design.is_public && <Badge variant="outline" className="text-[10px] border-primary/30 text-primary">🌍 Public</Badge>}
+                        </div>
+
+                        {/* Share dropdown */}
+                        <AnimatePresence>
+                          {shareOpen === design.id && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="mt-3 flex gap-2"
+                            >
+                              <Button variant="outline" size="sm" onClick={() => handleCopyShareLink(design)}>
+                                {copied ? <Check className="w-3 h-3 mr-1" /> : <Link className="w-3 h-3 mr-1" />}
+                                Copy
+                              </Button>
+                              <Button variant="outline" size="sm" onClick={() => handleShareTwitter(design)}>
+                                <Twitter className="w-3 h-3 mr-1" /> Tweet
+                              </Button>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </CardContent>
                     </Card>
                   </motion.div>
                 ))}
               </div>
-            </div>
-          )}
-        </AnimatePresence>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </AppLayout>
   );
