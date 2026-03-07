@@ -762,8 +762,33 @@ function RadarTooltipContent({ active, payload }: any) {
   );
 }
 
+// Celebratory sound + haptic for high scores
+function triggerCelebration() {
+  // Haptic feedback (mobile)
+  if (navigator.vibrate) {
+    navigator.vibrate([50, 30, 100, 30, 50]);
+  }
+  // Synthesized celebratory chime
+  try {
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.15, ctx.currentTime + i * 0.12);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.12 + 0.6);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(ctx.currentTime + i * 0.12);
+      osc.stop(ctx.currentTime + i * 0.12 + 0.6);
+    });
+  } catch {}
+}
+
 // Confetti burst component for high scores
 function ConfettiBurst() {
+  React.useEffect(() => { triggerCelebration(); }, []);
   const particles = Array.from({ length: 60 }, (_, i) => {
     const angle = (i / 60) * 360;
     const velocity = 120 + Math.random() * 180;
