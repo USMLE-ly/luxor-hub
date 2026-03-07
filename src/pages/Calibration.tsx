@@ -567,78 +567,149 @@ const Calibration = () => {
 
   if (phase === "progress") {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center px-6 pt-16">
-        {/* Animated checkmark */}
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 relative overflow-hidden">
+        {/* Background ambient glow */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-80 h-80 rounded-full bg-primary/5 blur-[100px]" />
+          <div className="absolute bottom-1/3 left-1/3 w-48 h-48 rounded-full bg-[hsl(142,60%,48%)]/5 blur-[80px]" />
+        </div>
+
+        {/* Success ring with animated checkmark */}
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: "spring", damping: 12, delay: 0.2 }}
-          className="w-28 h-28 mb-8 rounded-full border-4 border-primary flex items-center justify-center"
+          transition={{ type: "spring", damping: 14, delay: 0.2 }}
+          className="relative w-32 h-32 mb-10"
         >
+          {/* Outer rotating ring */}
           <motion.div
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: 1, opacity: 1 }}
-            transition={{ delay: 0.6, duration: 0.5 }}
+            animate={{ rotate: 360 }}
+            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+            className="absolute inset-0"
           >
-            <Check className="w-14 h-14 text-primary" strokeWidth={3} />
+            <svg viewBox="0 0 128 128" className="w-full h-full">
+              <circle cx="64" cy="64" r="60" fill="none" stroke="hsl(var(--primary))" strokeWidth="1" strokeDasharray="4 8" opacity="0.3" />
+            </svg>
           </motion.div>
+          {/* Inner glowing circle */}
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.4, type: "spring", damping: 12 }}
+            className="absolute inset-3 rounded-full flex items-center justify-center"
+            style={{
+              background: "linear-gradient(135deg, hsl(142,60%,48%), hsl(var(--primary)))",
+              boxShadow: "0 0 40px hsl(142,60%,48%,0.3), 0 0 80px hsl(var(--primary)/0.15)",
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.7, type: "spring", stiffness: 300 }}
+            >
+              <Check className="w-12 h-12 text-white" strokeWidth={3} />
+            </motion.div>
+          </motion.div>
+          {/* Sparkle dots */}
+          {[0, 60, 120, 180, 240, 300].map((deg, i) => (
+            <motion.div
+              key={deg}
+              className="absolute w-1.5 h-1.5 rounded-full bg-primary"
+              style={{
+                top: `${50 - 48 * Math.cos((deg * Math.PI) / 180)}%`,
+                left: `${50 + 48 * Math.sin((deg * Math.PI) / 180)}%`,
+              }}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: [0, 1.2, 0.8], opacity: [0, 1, 0.5] }}
+              transition={{ delay: 0.8 + i * 0.1, duration: 1.5, repeat: Infinity, repeatType: "reverse" }}
+            />
+          ))}
         </motion.div>
 
         <motion.h1
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="font-display text-2xl font-bold text-foreground mb-8 text-center"
+          transition={{ delay: 0.4 }}
+          className="font-display text-2xl font-bold text-foreground mb-2 text-center"
         >
-          Great! Calibration in progress!
+          Calibration in progress!
         </motion.h1>
 
+        <motion.p
+          initial={{ y: 15, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="text-muted-foreground font-sans text-sm mb-8 text-center"
+        >
+          Your style profile is taking shape
+        </motion.p>
+
+        {/* Premium progress bar */}
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="w-full max-w-sm mb-4"
+          transition={{ delay: 0.6 }}
+          className="w-full max-w-sm mb-6"
         >
-          <div className="flex items-center gap-2">
-            <div className="flex-1 h-10 rounded-full bg-secondary/80 overflow-hidden border border-border/50">
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-12 rounded-2xl bg-card/60 backdrop-blur-sm overflow-hidden border border-border/30 relative">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: "73%" }}
-                transition={{ duration: 1.2, ease: "easeOut", delay: 0.6 }}
-                className="h-full rounded-full flex items-center justify-between px-4"
+                transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1], delay: 0.8 }}
+                className="h-full rounded-2xl flex items-center justify-between px-4 relative overflow-hidden"
                 style={{
                   background: "linear-gradient(90deg, hsl(142, 60%, 48%), hsl(var(--primary)))",
                 }}
               >
-                <Check className="w-5 h-5 text-primary-foreground" />
-                <span className="text-sm font-bold text-primary-foreground">73%</span>
+                {/* Shimmer sweep */}
+                <motion.div
+                  className="absolute inset-0"
+                  style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)" }}
+                  animate={{ x: ["-100%", "200%"] }}
+                  transition={{ duration: 2, repeat: Infinity, delay: 2.5, repeatDelay: 3 }}
+                />
+                <Check className="w-5 h-5 text-white relative z-10" strokeWidth={2.5} />
+                <span className="text-sm font-bold text-white font-sans relative z-10">73%</span>
               </motion.div>
             </div>
-            <div className="w-10 h-10 rounded-full bg-primary/10 border border-border/50 flex items-center justify-center">
-              <Gift className="w-5 h-5 text-primary" />
-            </div>
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 1.5, type: "spring", stiffness: 200 }}
+              className="w-12 h-12 rounded-2xl flex items-center justify-center border border-border/30 relative overflow-hidden"
+              style={{ background: "linear-gradient(135deg, hsl(var(--card)), hsl(var(--card)/0.6))" }}
+            >
+              <Gift className="w-5 h-5 text-primary relative z-10" />
+              <motion.div
+                className="absolute inset-0 bg-primary/10"
+                animate={{ opacity: [0, 0.3, 0] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+            </motion.div>
           </div>
+        </motion.div>
+
+        {/* Milestone badge */}
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 1.8, type: "spring" }}
+          className="px-5 py-2 rounded-full border border-primary/20 bg-primary/5 backdrop-blur-sm mb-6"
+        >
+          <span className="text-sm font-semibold text-primary font-sans">🎉 73% Complete</span>
         </motion.div>
 
         <motion.p
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          className="font-sans font-bold text-foreground mb-6"
+          transition={{ delay: 0.9 }}
+          className="text-muted-foreground font-sans text-center max-w-xs leading-relaxed text-sm"
         >
-          Wow! 73% progress!
+          Discover your Style Formula. Let's continue tomorrow — the more we know you, the better the results!
         </motion.p>
 
-        <motion.p
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.7 }}
-          className="text-muted-foreground font-sans text-center max-w-xs leading-relaxed mb-12"
-        >
-          Discover your Style Formula. Let's continue tomorrow - the more we know you, the better the results!
-        </motion.p>
-
-        <div className="fixed bottom-0 inset-x-0 p-5 bg-background">
+        <div className="fixed bottom-0 inset-x-0 p-5 bg-background/80 backdrop-blur-md border-t border-border/20">
           <Button
             onClick={() => navigate("/dashboard")}
             className="w-full h-14 rounded-2xl font-semibold font-sans text-base bg-foreground text-background hover:bg-foreground/90"
