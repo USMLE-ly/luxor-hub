@@ -39,6 +39,7 @@ const Onboarding = () => {
   const [answers, setAnswers] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(false);
   const [aiResults, setAiResults] = useState<Record<string, any>>({});
+  const [swipeDir, setSwipeDir] = useState<1 | -1>(1);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -189,7 +190,7 @@ const Onboarding = () => {
       {/* Progress bar */}
       <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-sm px-4 pt-4 pb-2">
         {currentStep > 0 && (
-          <button onClick={() => { triggerHaptic(); setCurrentStep((s) => s - 1); }} className="mb-2">
+          <button onClick={() => { triggerHaptic(); setSwipeDir(-1); setCurrentStep((s) => s - 1); }} className="mb-2">
             <ArrowLeft className="h-5 w-5 text-foreground" />
           </button>
         )}
@@ -208,13 +209,28 @@ const Onboarding = () => {
       {/* Content */}
       <div className="flex-1 flex items-start justify-center px-5 pt-8 pb-24 overflow-y-auto">
         <div className="w-full max-w-lg">
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={currentStep}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              initial={{ opacity: 0, x: swipeDir * 80 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: swipeDir * -80 }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.18}
+              onDragEnd={(_, info) => {
+                const threshold = 50;
+                if (info.offset.x < -threshold && canProceed && !isGenerating) {
+                  triggerHaptic();
+                  setSwipeDir(1);
+                  setCurrentStep((s) => s + 1);
+                } else if (info.offset.x > threshold && currentStep > 0) {
+                  triggerHaptic();
+                  setSwipeDir(-1);
+                  setCurrentStep((s) => s - 1);
+                }
+              }}
             >
               {isGenderStep ? (
                 <GenderStep selected={gender} onSelect={setGender} />
@@ -236,7 +252,7 @@ const Onboarding = () => {
       {!isGenerating && (
         <div className="sticky bottom-0 z-20 bg-background/80 backdrop-blur-sm p-4">
           <Button
-            onClick={() => { triggerHaptic(); setCurrentStep((s) => s + 1); }}
+            onClick={() => { triggerHaptic(); setSwipeDir(1); setCurrentStep((s) => s + 1); }}
             disabled={!canProceed || loading}
             className={`w-full h-14 rounded-xl font-semibold font-sans text-base ${
               currentStepData && ["notification", "selfieIntro", "selfieGuide"].includes(currentStepData.type)
