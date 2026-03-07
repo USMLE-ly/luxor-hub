@@ -167,6 +167,10 @@ const StyleDNA = () => {
   const colorSeason = dna?.colorSeason || "—";
   const styleType = archetype;
   const bodyType = bodyShape || "—";
+  const lifestyle = prefs?.lifestyle?.[0] || null;
+  const profession = prefs?.profession?.[0] || null;
+  const styleMood = prefs?.styleMood || [];
+  const styleEvolution = dna?.styleEvolution || [];
 
   return (
     <AppLayout>
