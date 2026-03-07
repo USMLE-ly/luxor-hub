@@ -512,8 +512,20 @@ const Dashboard = () => {
                     className="min-w-[150px] max-w-[150px] flex-shrink-0 rounded-2xl border bg-card overflow-hidden hover:shadow-md transition-shadow snap-start"
                     style={{ borderColor: sc.border }}
                   >
-                    <div className="relative h-32 bg-secondary flex items-center justify-center">
-                      <div className="w-full h-full bg-gradient-to-br from-secondary to-muted flex items-center justify-center">
+                    <div className="relative h-32 bg-secondary flex items-center justify-center overflow-hidden">
+                      {product.imageUrl ? (
+                        <img
+                          src={product.imageUrl}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                            (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                          }}
+                        />
+                      ) : null}
+                      <div className={`w-full h-full bg-gradient-to-br from-secondary to-muted flex items-center justify-center absolute inset-0 ${product.imageUrl ? 'hidden' : ''}`}>
                         <ShoppingBag className="w-8 h-8 text-muted-foreground/20" />
                       </div>
                       <div
