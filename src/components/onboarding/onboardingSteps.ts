@@ -343,7 +343,8 @@ export const maleSteps: OnboardingStep[] = [
 export function getStepsForGender(gender: "female" | "male"): OnboardingStep[] {
   return [
     ...sharedSteps.slice(0, 9), // challenge, goal, elevate, shopping, brands, sizes, styleKnowledge, unstyledClothes, budget
+    ...sharedSteps.slice(9, 12), // lifestyle, profession, styleMood (psychographic)
     ...(gender === "female" ? femaleSteps : maleSteps), // bodyShape, faceShape, sizeRange/build
-    ...sharedSteps.slice(9), // height, age, notifications, selfie steps, camera captures
+    ...sharedSteps.slice(12), // height, age, notifications, selfie steps, camera captures
   ];
 }
