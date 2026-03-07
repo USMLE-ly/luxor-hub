@@ -329,12 +329,30 @@ const Chat = () => {
                 className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 font-sans text-sm ${
+                  className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 font-sans text-sm relative overflow-hidden ${
                     msg.role === "user"
                       ? "bg-foreground text-background rounded-br-md"
                       : "bg-card border border-border rounded-bl-md"
                   }`}
                 >
+                  {/* Gold shimmer overlay for assistant messages */}
+                  {msg.role === "assistant" && (
+                    <motion.div
+                      className="absolute inset-0 pointer-events-none"
+                      initial={{ opacity: 0.6 }}
+                      animate={{ opacity: 0 }}
+                      transition={{ duration: 2.5, ease: "easeOut" }}
+                    >
+                      <div
+                        className="absolute inset-0"
+                        style={{
+                          background: "linear-gradient(105deg, transparent 40%, hsl(var(--gold-light) / 0.12) 45%, hsl(var(--gold) / 0.18) 50%, hsl(var(--gold-light) / 0.12) 55%, transparent 60%)",
+                          backgroundSize: "200% 100%",
+                          animation: "shimmer-slide 1.8s ease-out forwards",
+                        }}
+                      />
+                    </motion.div>
+                  )
                   {msg.imagePreview && (
                     <div className="mb-2 rounded-lg overflow-hidden">
                       <img src={msg.imagePreview} alt="Uploaded item" className="w-full max-h-48 object-cover rounded-lg" />
