@@ -26,6 +26,8 @@ const navItems = [
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Inspiration", url: "/inspiration", icon: Sparkles },
   { title: "Mood Board", url: "/mood-board", icon: LayoutGrid },
+  { title: "Video Analysis", url: "/video-analysis", icon: Video },
+  { title: "Fashion Designer", url: "/fashion-designer", icon: Paintbrush },
   { title: "Leaderboard", url: "/leaderboard", icon: Trophy },
   { title: "Weekly Challenge", url: "/weekly-challenge", icon: Flame },
   { title: "Badges", url: "/badges", icon: Award },

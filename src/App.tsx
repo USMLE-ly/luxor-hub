@@ -71,6 +71,8 @@ const App = () => (
             <Route path="/paywall" element={<Paywall />} />
             <Route path="/outfit-calendar" element={<OutfitCalendar />} />
             <Route path="/mood-board" element={<MoodBoard />} />
+            <Route path="/video-analysis" element={<VideoAnalysis />} />
+            <Route path="/fashion-designer" element={<FashionDesigner />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
