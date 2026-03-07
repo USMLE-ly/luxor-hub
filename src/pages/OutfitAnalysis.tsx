@@ -900,11 +900,13 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
     <>
       {/* Overall Score — Premium */}
       <motion.div
+        ref={scoreRef}
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
         className="relative rounded-[1.5rem] border-[0.75px] border-border p-3"
       >
+        {showConfetti && <ConfettiBurst />}
         <GlowingEffect spread={60} glow={true} disabled={false} proximity={80} inactiveZone={0.01} borderWidth={3} />
         <Card className="glass-card overflow-hidden border-0 shadow-none relative">
           {/* Gold shimmer sweep overlay */}
