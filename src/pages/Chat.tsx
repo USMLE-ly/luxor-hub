@@ -352,12 +352,31 @@ const Chat = () => {
 
           {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
-              <div className="bg-card border border-border rounded-2xl rounded-bl-md px-3.5 py-2.5 flex items-center gap-2">
-                <div
-                  className="w-3.5 h-3.5 bg-primary rounded-sm animate-spin"
-                  style={{ animationDuration: "3s" }}
-                />
-                <span className="text-xs text-muted-foreground font-sans">AI is thinking...</span>
+              <div className="bg-card border border-border rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-3">
+                <div className="flex items-center gap-1">
+                  <motion.div
+                    className="w-2 h-2 rounded-full bg-primary"
+                    animate={{ scale: [1, 1.4, 1], opacity: [0.4, 1, 0.4] }}
+                    transition={{ duration: 1.2, repeat: Infinity, delay: 0 }}
+                  />
+                  <motion.div
+                    className="w-2 h-2 rounded-full bg-primary"
+                    animate={{ scale: [1, 1.4, 1], opacity: [0.4, 1, 0.4] }}
+                    transition={{ duration: 1.2, repeat: Infinity, delay: 0.2 }}
+                  />
+                  <motion.div
+                    className="w-2 h-2 rounded-full bg-primary"
+                    animate={{ scale: [1, 1.4, 1], opacity: [0.4, 1, 0.4] }}
+                    transition={{ duration: 1.2, repeat: Infinity, delay: 0.4 }}
+                  />
+                </div>
+                <motion.span
+                  className="text-xs text-muted-foreground font-sans"
+                  animate={{ opacity: [0.5, 1, 0.5] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  Styling your answer...
+                </motion.span>
               </div>
             </motion.div>
           )}
