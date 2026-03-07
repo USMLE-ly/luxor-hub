@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { useNavigate } from "react-router-dom";
 import { WeeklyCapsuleWidget } from "@/components/app/WeeklyCapsuleWidget";
+import { TrendIntelligenceWidget } from "@/components/app/TrendIntelligenceWidget";
 
 interface ShopProduct {
   name: string;
