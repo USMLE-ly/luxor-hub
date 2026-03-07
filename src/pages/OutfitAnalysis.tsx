@@ -959,6 +959,7 @@ function AnalysisResults({ analysis, getScoreColor, getPriorityColor }: {
       </motion.div>
 
       {/* Occasion Radar + Color Palette row */}
+      <ParallaxSection offset={25}>
       <div className="grid md:grid-cols-2 gap-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
