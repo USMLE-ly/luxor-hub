@@ -77,7 +77,7 @@ const Testimonials = () => {
   return (
     <section
       id="testimonials"
-      className="relative py-32 bg-background text-foreground overflow-hidden"
+      className="relative py-28 bg-background text-foreground overflow-hidden"
     >
       {/* Premium Background */}
       <div className="absolute inset-0">

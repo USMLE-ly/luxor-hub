@@ -49,13 +49,13 @@ function HeroOverlay() {
       </div>
       <div className="lumina-hero-badges">
         <span className="lumina-badge">
-          <Users className="w-3 h-3" style={{ color: 'hsl(43 74% 49%)' }} /> 10K+ Users
+          <Sparkles className="w-3 h-3" style={{ color: 'hsl(43 74% 49%)' }} /> 50K+ Outfits Generated
         </span>
         <span className="lumina-badge">
           <Zap className="w-3 h-3" style={{ color: 'hsl(43 74% 49%)' }} /> AI-Powered
         </span>
         <span className="lumina-badge">
-          <Sparkles className="w-3 h-3" style={{ color: 'hsl(43 74% 49%)' }} /> 98% Satisfaction
+          <Users className="w-3 h-3" style={{ color: 'hsl(43 74% 49%)' }} /> 4.9★ App Store
         </span>
       </div>
     </div>
