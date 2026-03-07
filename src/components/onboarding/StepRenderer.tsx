@@ -210,13 +210,36 @@ const SelfieIntroStep = ({ step, gender }: { step: OnboardingStep; gender?: "fem
   const introImg = selfieIntroImages[gender || "female"];
   return (
     <div className="flex flex-col items-center text-center pt-12">
-      <div className="w-48 h-48 mb-8 flex items-center justify-center">
-        <img src={introImg} alt="Style analysis" className="w-full h-full object-contain" />
-      </div>
-      <h2 className="font-display text-2xl lg:text-3xl font-bold text-foreground mb-3">
+      <motion.div
+        className="w-48 h-48 mb-8 flex items-center justify-center"
+        initial={{ opacity: 0, scale: 0.8, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <motion.img
+          src={introImg}
+          alt="Style analysis"
+          className="w-full h-full object-contain rounded-2xl"
+          animate={{ y: [0, -6, 0] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </motion.div>
+      <motion.h2
+        className="font-display text-2xl lg:text-3xl font-bold text-foreground mb-3"
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
         {step.question}
-      </h2>
-      <p className="text-muted-foreground font-sans">{step.description}</p>
+      </motion.h2>
+      <motion.p
+        className="text-muted-foreground font-sans"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+      >
+        {step.description}
+      </motion.p>
     </div>
   );
 };
@@ -226,9 +249,21 @@ const SelfieGuideStep = ({ step, gender }: { step: OnboardingStep; gender?: "fem
   const stepImg = step.stepNumber ? images[step.stepNumber] : null;
   return (
     <div className="flex flex-col items-center">
-      <div className="w-full aspect-[3/4] rounded-2xl bg-secondary/50 mb-6 flex items-center justify-center overflow-hidden relative">
+      <motion.div
+        className="w-full aspect-[3/4] rounded-2xl bg-secondary/50 mb-6 flex items-center justify-center overflow-hidden relative"
+        initial={{ opacity: 0, scale: 0.85, rotateX: 8 }}
+        animate={{ opacity: 1, scale: 1, rotateX: 0 }}
+        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+      >
         {stepImg ? (
-          <img src={stepImg} alt={step.question} className="w-full h-full object-contain" />
+          <motion.img
+            src={stepImg}
+            alt={step.question}
+            className="w-full h-full object-contain"
+            initial={{ scale: 1.1, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.15, ease: "easeOut" }}
+          />
         ) : (
           <div className="text-center">
             <Camera className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
@@ -236,17 +271,33 @@ const SelfieGuideStep = ({ step, gender }: { step: OnboardingStep; gender?: "fem
           </div>
         )}
         {step.stepNumber === 5 && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <motion.div
+            className="absolute inset-0 flex items-center justify-center pointer-events-none"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
             <svg viewBox="0 0 224 288" className="w-56 h-72" fill="none">
-              <ellipse cx="112" cy="144" rx="100" ry="130" stroke="hsl(120, 60%, 55%)" strokeWidth="4" strokeDasharray="8 6" fill="none" />
+              <motion.ellipse
+                cx="112" cy="144" rx="100" ry="130"
+                stroke="hsl(120, 60%, 55%)" strokeWidth="4" strokeDasharray="8 6" fill="none"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 1.2, delay: 0.5, ease: "easeInOut" }}
+              />
             </svg>
-          </div>
+          </motion.div>
         )}
-      </div>
-      <div className="text-center">
+      </motion.div>
+      <motion.div
+        className="text-center"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+      >
         <p className="text-[hsl(0,70%,68%)] font-sans text-sm mb-2">Step {step.stepNumber}</p>
         <h2 className="font-display text-xl font-bold text-foreground">{step.question}</h2>
-      </div>
+      </motion.div>
     </div>
   );
 };
