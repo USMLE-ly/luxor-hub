@@ -11,8 +11,10 @@ import { toast } from "sonner";
 import {
   Upload, Camera, Sparkles, TrendingUp, Palette, ShieldCheck, AlertTriangle,
   Star, Shirt, Loader2, History, Save, Trash2, Share2, X,
-  Twitter, Link, Check, Download, Clock, ArrowLeftRight, Users, Search, ExternalLink, ShoppingBag
+  Twitter, Link, Check, Download, Clock, ArrowLeftRight, Users, Search, ExternalLink, ShoppingBag, RefreshCw
 } from "lucide-react";
+import { compressImage, formatFileSize } from "@/lib/imageUtils";
+import { PrivacyNotice } from "@/components/app/PrivacyNotice";
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell, ResponsiveContainer,
