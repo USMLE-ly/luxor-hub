@@ -114,26 +114,35 @@ export default function OutfitAnalysis() {
 
   useEffect(() => { fetchHistory(); }, [user]);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 10 * 1024 * 1024) {
       toast.error("Image must be under 10MB");
       return;
     }
-    setImageFile(file);
+    // Compress before storing
+    const compressed = await compressImage(file);
+    if (compressed.size < file.size) {
+      toast.info(`Compressed: ${formatFileSize(file.size)} → ${formatFileSize(compressed.size)}`);
+    }
+    setImageFile(compressed);
     setAnalysis(null);
     setSaved(false);
     setImageUrl(null);
+    setAnalysisError(null);
     const reader = new FileReader();
     reader.onload = (ev) => setImagePreview(ev.target?.result as string);
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(compressed);
   };
+
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
 
   const handleAnalyze = async () => {
     if (!imageFile || !user) return;
     setIsAnalyzing(true);
     setSaved(false);
+    setAnalysisError(null);
     try {
       const ext = imageFile.name.split(".").pop();
       const path = `${user.id}/analysis-${Date.now()}.${ext}`;
@@ -157,7 +166,9 @@ export default function OutfitAnalysis() {
       toast.success("Outfit analyzed!");
     } catch (err: any) {
       console.error(err);
-      toast.error(err.message || "Analysis failed");
+      const msg = err.message || "Analysis failed";
+      setAnalysisError(msg);
+      toast.error(msg);
     } finally {
       setIsAnalyzing(false);
     }
