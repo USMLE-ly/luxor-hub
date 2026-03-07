@@ -209,13 +209,29 @@ const Onboarding = () => {
       {/* Content */}
       <div className="flex-1 flex items-start justify-center px-5 pt-8 pb-24 overflow-y-auto">
         <div className="w-full max-w-lg">
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" custom={swipeDir}>
             <motion.div
               key={currentStep}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              custom={swipeDir}
+              initial={(dir: number) => ({ opacity: 0, x: dir * 80 })}
+              animate={{ opacity: 1, x: 0 }}
+              exit={(dir: number) => ({ opacity: 0, x: dir * -80 })}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.18}
+              onDragEnd={(_, info) => {
+                const threshold = 50;
+                if (info.offset.x < -threshold && canProceed && !isGenerating) {
+                  triggerHaptic();
+                  setSwipeDir(1);
+                  setCurrentStep((s) => s + 1);
+                } else if (info.offset.x > threshold && currentStep > 0) {
+                  triggerHaptic();
+                  setSwipeDir(-1);
+                  setCurrentStep((s) => s - 1);
+                }
+              }}
             >
               {isGenderStep ? (
                 <GenderStep selected={gender} onSelect={setGender} />
