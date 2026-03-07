@@ -20,8 +20,43 @@ const slides = [
   { title: "Wardrobe Intelligence", description: "Smart insights that transform how you dress, shop, and express.", media: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&q=80" }
 ];
 
+function useCountUp(target: number, duration = 2000, suffix = "") {
+  const [count, setCount] = useState(0);
+  const [started, setStarted] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting && !started) setStarted(true); },
+      { threshold: 0.5 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [started]);
+
+  useEffect(() => {
+    if (!started) return;
+    const start = performance.now();
+    const animate = (now: number) => {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.round(eased * target));
+      if (progress < 1) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [started, target, duration]);
+
+  return { ref, display: `${count.toLocaleString()}${suffix}` };
+}
+
 function HeroOverlay() {
   const navigate = useNavigate();
+  const outfits = useCountUp(50, 1800, "K+");
+  const rating = useCountUp(49, 1600);
+
   return (
     <div className="lumina-hero-overlay">
       <div className="lumina-hero-cta">
@@ -48,14 +83,14 @@ function HeroOverlay() {
         </motion.button>
       </div>
       <div className="lumina-hero-badges">
-        <span className="lumina-badge">
-          <Sparkles className="w-3 h-3" style={{ color: 'hsl(43 74% 49%)' }} /> 50K+ Outfits Generated
+        <span className="lumina-badge" ref={outfits.ref}>
+          <Sparkles className="w-3 h-3" style={{ color: 'hsl(43 74% 49%)' }} /> {outfits.display} Outfits Generated
         </span>
         <span className="lumina-badge">
           <Zap className="w-3 h-3" style={{ color: 'hsl(43 74% 49%)' }} /> AI-Powered
         </span>
-        <span className="lumina-badge">
-          <Users className="w-3 h-3" style={{ color: 'hsl(43 74% 49%)' }} /> 4.9★ App Store
+        <span className="lumina-badge" ref={rating.ref}>
+          <Users className="w-3 h-3" style={{ color: 'hsl(43 74% 49%)' }} /> {(rating.display.replace(/,/g, '') === '49' ? '4.9' : (Number(rating.display.replace(/,/g, '')) / 10).toFixed(1))}★ App Store
         </span>
       </div>
     </div>

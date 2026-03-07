@@ -1,13 +1,12 @@
 import { motion } from "framer-motion";
-import { Shirt, Instagram, Palette, ShoppingBag, Smartphone, Globe } from "lucide-react";
 
 const platforms = [
-  { icon: Instagram, name: "Instagram" },
-  { icon: Palette, name: "Pinterest" },
-  { icon: ShoppingBag, name: "Shopify" },
-  { icon: Smartphone, name: "TikTok" },
-  { icon: Globe, name: "ASOS" },
-  { icon: Shirt, name: "Zara" },
+  { name: "Instagram", logo: "/logos/instagram.png" },
+  { name: "Pinterest", logo: "/logos/pinterest.png" },
+  { name: "Shopify", logo: "/logos/shopify.png" },
+  { name: "TikTok", logo: "/logos/tiktok.png" },
+  { name: "ASOS", logo: "/logos/asos.png" },
+  { name: "Zara", logo: "/logos/zara.png" },
 ];
 
 export default function IntegrationHero() {
@@ -31,7 +30,7 @@ export default function IntegrationHero() {
             </p>
           </motion.div>
 
-          {/* Platform icons */}
+          {/* Platform logos */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -48,8 +47,13 @@ export default function IntegrationHero() {
                 transition={{ delay: 0.15 + i * 0.06, duration: 0.4 }}
                 className="flex flex-col items-center gap-1.5 group"
               >
-                <div className="w-14 h-14 rounded-2xl bg-card border border-border flex items-center justify-center group-hover:border-primary/40 group-hover:shadow-[0_0_16px_hsl(var(--primary)/0.1)] transition-all duration-300">
-                  <p.icon className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors duration-300" />
+                <div className="w-14 h-14 rounded-2xl bg-card border border-border flex items-center justify-center group-hover:border-primary/40 group-hover:shadow-[0_0_16px_hsl(var(--primary)/0.1)] transition-all duration-300 p-2.5">
+                  <img
+                    src={p.logo}
+                    alt={p.name}
+                    className="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300"
+                    loading="lazy"
+                  />
                 </div>
                 <span className="text-[10px] font-sans font-medium text-muted-foreground">{p.name}</span>
               </motion.div>
