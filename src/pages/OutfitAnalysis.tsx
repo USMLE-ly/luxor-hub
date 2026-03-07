@@ -475,14 +475,38 @@ export default function OutfitAnalysis() {
                           ))}
                         </div>
                       </div>
-                      {isAnalyzing ? (
-                        <Button
-                          disabled
-                          className="gold-gradient text-primary-foreground font-semibold w-full md:w-auto gold-glow"
-                          size="lg"
-                        >
-                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />Analyzing...
-                        </Button>
+                    {isAnalyzing ? (
+                        <div className="space-y-4 w-full">
+                          <div className="space-y-3">
+                            {["Uploading image...", "Analyzing style & colors...", "Generating insights..."].map((step, i) => (
+                              <motion.div
+                                key={step}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: i * 1.2 }}
+                                className="flex items-center gap-3"
+                              >
+                                <motion.div
+                                  initial={{ scale: 0 }}
+                                  animate={{ scale: 1 }}
+                                  transition={{ delay: i * 1.2 + 0.3 }}
+                                  className="w-6 h-6 rounded-full bg-primary/15 flex items-center justify-center"
+                                >
+                                  <Sparkles className="w-3 h-3 text-primary" />
+                                </motion.div>
+                                <span className="text-sm text-muted-foreground">{step}</span>
+                              </motion.div>
+                            ))}
+                          </div>
+                          <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                            <motion.div
+                              className="h-full gold-gradient rounded-full"
+                              initial={{ width: "0%" }}
+                              animate={{ width: "85%" }}
+                              transition={{ duration: 8, ease: "easeOut" }}
+                            />
+                          </div>
+                        </div>
                       ) : (
                         <RainbowButton
                           onClick={handleAnalyze}
