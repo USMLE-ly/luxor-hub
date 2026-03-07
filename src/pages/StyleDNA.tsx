@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import {
   Sparkles, Palette, Star, ArrowRight, CheckCircle2, ShieldCheck,
   Scissors, Shirt, Check, Dna, User, ScanFace, Glasses, Gem, Gift,
-  Layers, Shapes, Paintbrush,
+  Layers, Shapes, Paintbrush, Briefcase, Heart, TrendingUp, ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AppLayout } from "@/components/app/AppLayout";
