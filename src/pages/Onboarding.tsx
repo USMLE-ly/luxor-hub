@@ -236,7 +236,7 @@ const Onboarding = () => {
       {!isGenerating && (
         <div className="sticky bottom-0 z-20 bg-background/80 backdrop-blur-sm p-4">
           <Button
-            onClick={() => setCurrentStep((s) => s + 1)}
+            onClick={() => { triggerHaptic(); setCurrentStep((s) => s + 1); }}
             disabled={!canProceed || loading}
             className={`w-full h-14 rounded-xl font-semibold font-sans text-base ${
               currentStepData && ["notification", "selfieIntro", "selfieGuide"].includes(currentStepData.type)
