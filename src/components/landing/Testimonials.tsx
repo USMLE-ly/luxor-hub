@@ -248,8 +248,8 @@ const Testimonials = () => {
                   <div className="relative z-10 h-full flex flex-col md:flex-row items-center gap-8">
                     {/* User Info */}
                     <div className="flex-shrink-0 text-center md:text-left">
-                      <motion.div className="relative mb-6" whileHover={{ scale: 1.1 }} transition={{ duration: 0.3 }}>
-                        <div className="w-24 h-24 mx-auto md:mx-0 rounded-full overflow-hidden border-4 border-primary/20 relative">
+                      <motion.div className="relative mb-6" whileHover={{ scale: 1.05 }} transition={{ duration: 0.3 }}>
+                        <div className="w-28 h-28 mx-auto md:mx-0 rounded-2xl overflow-hidden border-4 border-primary/20 relative shadow-lg">
                           <img src={current.avatar} alt={current.name} className="w-full h-full object-cover" />
                           <motion.div
                             className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20"
@@ -258,8 +258,8 @@ const Testimonials = () => {
                           />
                         </div>
                         <motion.div
-                          className="absolute inset-0 border-2 border-primary/30 rounded-full"
-                          animate={{ scale: [1, 1.4, 1], opacity: [0.5, 0, 0.5] }}
+                          className="absolute inset-0 border-2 border-primary/30 rounded-2xl"
+                          animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0, 0.5] }}
                           transition={{ duration: 2, repeat: Infinity }}
                         />
                       </motion.div>
