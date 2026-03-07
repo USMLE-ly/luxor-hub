@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,6 +9,29 @@ import { ArrowRight, ArrowLeft } from "lucide-react";
 import GenderStep from "@/components/onboarding/GenderStep";
 import StepRenderer from "@/components/onboarding/StepRenderer";
 import { getStepsForGender, type OnboardingStep } from "@/components/onboarding/onboardingSteps";
+
+// Haptic feedback utility
+const triggerHaptic = () => {
+  // Vibration API for mobile devices
+  if (navigator.vibrate) {
+    navigator.vibrate(12);
+  }
+  // Audio tick for all devices
+  try {
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 1800;
+    osc.type = "sine";
+    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.06);
+    setTimeout(() => ctx.close(), 100);
+  } catch {}
+};
 
 const Onboarding = () => {
   const [gender, setGender] = useState<"female" | "male" | null>(null);
