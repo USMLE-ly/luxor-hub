@@ -763,9 +763,9 @@ const Calibration = () => {
               {currentStepData.question}
             </h2>
 
-            {/* 3+1 grid layout matching reference */}
-            <div className="grid grid-cols-3 gap-3 max-w-md mx-auto">
-              {currentStepData.options.slice(0, 3).map((option, index) => {
+            {/* 2x2 grid layout */}
+            <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto">
+              {currentStepData.options.map((option, index) => {
                 const isActive = answers[currentStepData.key] === option.label;
                 return (
                   <motion.button
@@ -774,7 +774,7 @@ const Calibration = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.3, delay: index * 0.06, ease: [0.22, 1, 0.36, 1] }}
                     onClick={() => handleSelect(currentStepData.key, option.label)}
-                    className="flex flex-col items-center"
+                    className="flex flex-col items-center gap-2"
                   >
                     <div
                       className={`relative w-full aspect-[3/4] rounded-xl overflow-hidden transition-all bg-secondary ${
@@ -799,51 +799,13 @@ const Calibration = () => {
                         </div>
                       </div>
                     </div>
+                    <span className={`font-sans text-xs font-medium transition-colors ${isActive ? "text-primary" : "text-muted-foreground"}`}>
+                      {option.label}
+                    </span>
                   </motion.button>
                 );
               })}
             </div>
-            {/* 4th item centered below */}
-            {currentStepData.options[3] && (
-              <div className="flex justify-center mt-3 max-w-md mx-auto">
-                <motion.button
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
-                  onClick={() => handleSelect(currentStepData.key, currentStepData.options[3].label)}
-                  className="flex flex-col items-center"
-                  style={{ width: "calc(33.333% - 4px)" }}
-                >
-                  <div
-                    className={`relative w-full aspect-[3/4] rounded-xl overflow-hidden transition-all bg-secondary ${
-                      answers[currentStepData.key] === currentStepData.options[3].label
-                        ? "ring-2 ring-primary shadow-lg"
-                        : ""
-                    }`}
-                  >
-                    <img
-                      src={currentStepData.options[3].imageUrl}
-                      alt={currentStepData.options[3].label}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                    <div className="absolute bottom-2 right-2">
-                      <div
-                        className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shadow-sm transition-all ${
-                          answers[currentStepData.key] === currentStepData.options[3].label
-                            ? "border-primary bg-primary"
-                            : "border-white/80 bg-white/60 backdrop-blur-sm"
-                        }`}
-                      >
-                        {answers[currentStepData.key] === currentStepData.options[3].label && (
-                          <Check className="w-3 h-3 text-white" />
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </motion.button>
-              </div>
-            )}
           </motion.div>
         </AnimatePresence>
       </div>
