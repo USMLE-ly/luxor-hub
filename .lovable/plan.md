@@ -1,88 +1,50 @@
-# AURELIA — Launch-Ready Roadmap
 
-> Updated: 2026-03-07 — Practical, prioritized roadmap for a reliable launch.
 
----
+# Integrate 3 AI Chat UI Components
 
-## P0 — Critical (Must fix before launch)
+## What We're Building
+Adding three premium UI features to the AI Style Chat experience:
 
-### 1. AI Error Handling & Fallbacks
-- [x] Chat: handles 429/402 gracefully with toasts
-- [x] Chat: streaming SSE parsing with proper buffer flush
-- [ ] OutfitAnalysis: add retry button on AI failure, show friendly error state  
-- [ ] VideoAnalysis: add timeout handling for long video processing
-- [ ] FashionDesigner: add retry on generation failure
-- [ ] All AI pages: wrap in ErrorBoundary for crash recovery
-- [ ] All edge functions: consistent 429/402 handling
+1. **Animated Text** — AI responses stream in with smooth character-by-character animation using `useAnimatedText` hook
+2. **Placeholders & Vanish Input** — The chat input cycles through rotating placeholder suggestions with a particle vanish effect on submit
+3. **AI Input with Loading** — Auto-resizing textarea with a spinning cube loading indicator while AI thinks
 
-### 2. Image Upload Robustness
-- [ ] Compress images client-side before upload (target <2MB via canvas)
-- [ ] Enforce consistent size limits across all pages
-- [ ] Show file size in upload preview
-- [ ] Add privacy notice banner on all upload pages ("Images processed by AI")
-- [ ] Lazy load all gallery/product images
+## Files to Create
 
-### 3. Mobile UX
-- [ ] Test sidebar collapse on small screens
-- [ ] Fix horizontal overflow in carousels (scrollbar-none + snap)
-- [ ] Ensure modals/dialogs scrollable on short viewports
-- [ ] Touch-friendly tap targets (min 44px)
-- [ ] Swipe hint: test reliability across screen sizes
+### 1. `src/components/ui/animated-text.tsx`
+- `useAnimatedText` hook using framer-motion's `animate` function
+- Supports character, word, and chunk delimiters with different durations
 
-### 4. Auth & Security
-- [x] RLS policies on all 20+ tables
-- [x] No client-side admin checks
-- [ ] Privacy notice for AI image processing
-- [ ] Ensure all storage uploads use user-scoped paths
-- [ ] Rate limit awareness on all AI endpoints
+### 2. `src/components/ui/placeholders-and-vanish-input.tsx`
+- Rotating placeholder text with AnimatePresence transitions
+- Canvas-based particle vanish effect when text is submitted
+- Rounded pill input with animated arrow submit button
 
----
+### 3. `src/hooks/use-auto-resize-textarea.ts`
+- Auto-resize textarea hook that grows/shrinks based on content
+- Respects min/max height constraints
 
-## P1 — Important (Should fix for quality)
+### 4. `src/components/ui/ai-input-with-loading.tsx`
+- Textarea with rounded styling and auto-resize
+- Spinning cube animation during loading state
+- "AI is thinking..." status text
 
-### 5. Shop/Products Polish
-- [ ] Consistent fallback placeholder images
-- [ ] Loading skeletons while products load
-- [ ] "No results" helpful message state
-- [ ] Test edge function with varied query formats
+## File to Modify
 
-### 6. Onboarding Polish
-- [ ] Clear selfie instructions with example photos
-- [ ] Swipe hint: click alternative for non-touch
-- [ ] Style DNA explanation tooltip
-- [ ] Clear step progress indicator
+### `src/pages/Chat.tsx`
+- **Animated AI responses**: Wrap assistant message content with `useAnimatedText` to animate streaming text word-by-word as it arrives
+- **Vanish input replacement**: Replace the current plain textarea input area with `PlaceholdersAndVanishInput` for the empty state (when no messages), using fashion-relevant placeholders like "What should I wear today?", "Outfit for a dinner date", etc.
+- **Loading state**: Use the spinning cube from `AIInputWithLoading` as the loading indicator instead of the current bouncing dots
+- Keep all existing functionality intact: image upload, voice input, streaming, history
 
-### 7. AI Accuracy & Quality
-- [ ] Test outfit analysis with diverse outfits
-- [ ] Validate Style DNA with multiple skin tones
-- [ ] Wardrobe gap: no repeated suggestions
-- [ ] Cap confidence scores 0-100
+## Integration Details
+- The `useAnimatedText` hook will be applied to each assistant message's content with `" "` (word) delimiter for natural reading speed
+- The vanish input appears in the empty chat state as an alternative to quick prompts — on submit it triggers the `send()` function
+- The main input area keeps its current design but gains the auto-resize behavior from `useAutoResizeTextarea`
+- All existing features (camera upload, voice input, clear history) remain unchanged
 
-### 8. Chat Improvements
-- [ ] Test multi-turn context (5+ messages)
-- [ ] Calendar/weather: graceful fallback if denied
-- [ ] Offline suggestion cards from last Style DNA
-- [ ] Auto-save conversation periodically
+## No New Dependencies Needed
+- `framer-motion` already installed
+- `lucide-react` already installed
+- All shadcn components already exist
 
----
-
-## P2 — Nice to Have (Post-launch)
-
-### 9. Performance
-- [ ] Audit bundle size, lazy-load heavy pages
-- [ ] Service worker for offline
-- [ ] Optimize 3D mannequin loading
-- [ ] Analytics tracking for feature usage
-
-### 10. Community & Social
-- [ ] Report/flag for public designs
-- [ ] Multi-store shop filtering
-- [ ] Design collaboration
-- [ ] Style challenges with prizes
-
----
-
-## Status
-- [ ] Not started
-- [x] Complete
-- 🔧 In progress
