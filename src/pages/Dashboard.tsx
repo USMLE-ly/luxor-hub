@@ -39,6 +39,98 @@ function getScoreColor(score: number) {
   return { bg: "hsl(var(--muted))", text: "hsl(var(--muted-foreground))", border: "hsl(var(--border))" };
 }
 
+function TrendingDesigns({ navigate }: { navigate: (path: string) => void }) {
+  const [designs, setDesigns] = useState<{ id: string; image_url: string; prompt: string; garment_type: string; likeCount: number; authorName: string }[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const { data: publicDesigns } = await supabase
+        .from("fashion_designs")
+        .select("id, image_url, prompt, garment_type, user_id, created_at")
+        .eq("is_public", true)
+        .gte("created_at", weekAgo)
+        .order("created_at", { ascending: false });
+
+      if (!publicDesigns?.length) { setDesigns([]); setLoading(false); return; }
+
+      const ids = publicDesigns.map(d => d.id);
+      const userIds = [...new Set(publicDesigns.map(d => d.user_id))];
+
+      const [{ data: likes }, { data: profiles }] = await Promise.all([
+        supabase.from("look_likes").select("look_id").eq("look_type", "design").in("look_id", ids),
+        supabase.from("profiles").select("user_id, display_name").in("user_id", userIds),
+      ]);
+
+      const likeCounts = new Map<string, number>();
+      likes?.forEach(l => likeCounts.set(l.look_id, (likeCounts.get(l.look_id) || 0) + 1));
+      const profileMap = new Map(profiles?.map(p => [p.user_id, p.display_name]) || []);
+
+      const sorted = publicDesigns
+        .map(d => ({
+          id: d.id,
+          image_url: d.image_url,
+          prompt: d.prompt,
+          garment_type: d.garment_type,
+          likeCount: likeCounts.get(d.id) || 0,
+          authorName: profileMap.get(d.user_id) || "Anonymous",
+        }))
+        .sort((a, b) => b.likeCount - a.likeCount)
+        .slice(0, 6);
+
+      setDesigns(sorted);
+      setLoading(false);
+    })();
+  }, []);
+
+  if (loading) return (
+    <div className="flex gap-3 overflow-x-auto pb-2">
+      {[1, 2, 3].map(i => <div key={i} className="min-w-[150px] h-48 rounded-2xl bg-secondary animate-pulse" />)}
+    </div>
+  );
+
+  if (!designs.length) return null;
+
+  return (
+    <>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <TrendingUp className="w-5 h-5 text-foreground" />
+          <h2 className="font-display text-xl font-bold text-foreground">Trending Designs</h2>
+        </div>
+        <button onClick={() => navigate("/community-gallery")} className="text-xs font-sans text-primary hover:underline">
+          View All
+        </button>
+      </div>
+      <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-none snap-x snap-mandatory">
+        {designs.map((d, i) => (
+          <motion.button
+            key={d.id}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.05 }}
+            onClick={() => navigate("/community-gallery")}
+            className="min-w-[150px] max-w-[150px] flex-shrink-0 rounded-2xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow snap-start text-left"
+          >
+            <div className="relative h-32 bg-secondary">
+              <img src={d.image_url} alt={d.prompt} className="w-full h-full object-cover" loading="lazy" />
+              <div className="absolute top-2 right-2 flex items-center gap-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded-full">
+                <Heart className="w-2.5 h-2.5 fill-current" /> {d.likeCount}
+              </div>
+            </div>
+            <div className="p-2.5">
+              <p className="text-[10px] text-muted-foreground font-sans">{d.authorName}</p>
+              <p className="text-xs font-sans font-medium text-foreground truncate">{d.prompt.slice(0, 40)}</p>
+              <p className="text-[10px] text-primary mt-1">{d.garment_type}</p>
+            </div>
+          </motion.button>
+        ))}
+      </div>
+    </>
+  );
+}
+
 const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -565,6 +657,11 @@ const Dashboard = () => {
         {/* ── Trending Now For You ─────────────────────────── */}
         <motion.div variants={fadeUp}>
           <TrendIntelligenceWidget />
+        </motion.div>
+
+        {/* ── Trending Community Designs ────────────────────── */}
+        <motion.div variants={fadeUp}>
+          <TrendingDesigns navigate={navigate} />
         </motion.div>
 
         {/* ── Weekly Capsule Plan ───────────────────────────── */}
