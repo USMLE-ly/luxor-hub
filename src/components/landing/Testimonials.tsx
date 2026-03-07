@@ -118,7 +118,7 @@ const Testimonials = () => {
           </motion.div>
 
           <motion.h2 className="font-display text-4xl sm:text-6xl md:text-7xl font-bold mb-6 tracking-tight" variants={fadeInUp}>
-            <span className="text-foreground">Real Revenue.</span>
+            <span className="text-foreground">Our</span>
             <br />
             <motion.span
               className="gold-text"
@@ -126,7 +126,7 @@ const Testimonials = () => {
               transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
               style={{ backgroundSize: "200% 200%" }}
             >
-              Real Results.
+              Success Stories
             </motion.span>
           </motion.h2>
 
