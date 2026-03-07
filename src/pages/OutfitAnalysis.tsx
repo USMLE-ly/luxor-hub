@@ -11,8 +11,10 @@ import { toast } from "sonner";
 import {
   Upload, Camera, Sparkles, TrendingUp, Palette, ShieldCheck, AlertTriangle,
   Star, Shirt, Loader2, History, Save, Trash2, Share2, X,
-  Twitter, Link, Check, Download, Clock, ArrowLeftRight, Users, Search, ExternalLink, ShoppingBag
+  Twitter, Link, Check, Download, Clock, ArrowLeftRight, Users, Search, ExternalLink, ShoppingBag, RefreshCw
 } from "lucide-react";
+import { compressImage, formatFileSize } from "@/lib/imageUtils";
+import { PrivacyNotice } from "@/components/app/PrivacyNotice";
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell, ResponsiveContainer,
@@ -85,6 +87,7 @@ export default function OutfitAnalysis() {
   const [minScore, setMinScore] = useState("");
   const [maxScore, setMaxScore] = useState("");
   const [dateFilter, setDateFilter] = useState("all");
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filteredHistory = history.filter((h) => {
@@ -112,26 +115,33 @@ export default function OutfitAnalysis() {
 
   useEffect(() => { fetchHistory(); }, [user]);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 10 * 1024 * 1024) {
       toast.error("Image must be under 10MB");
       return;
     }
-    setImageFile(file);
+    // Compress before storing
+    const compressed = await compressImage(file);
+    if (compressed.size < file.size) {
+      toast.info(`Compressed: ${formatFileSize(file.size)} → ${formatFileSize(compressed.size)}`);
+    }
+    setImageFile(compressed);
     setAnalysis(null);
     setSaved(false);
     setImageUrl(null);
+    setAnalysisError(null);
     const reader = new FileReader();
     reader.onload = (ev) => setImagePreview(ev.target?.result as string);
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(compressed);
   };
 
   const handleAnalyze = async () => {
     if (!imageFile || !user) return;
     setIsAnalyzing(true);
     setSaved(false);
+    setAnalysisError(null);
     try {
       const ext = imageFile.name.split(".").pop();
       const path = `${user.id}/analysis-${Date.now()}.${ext}`;
@@ -155,7 +165,9 @@ export default function OutfitAnalysis() {
       toast.success("Outfit analyzed!");
     } catch (err: any) {
       console.error(err);
-      toast.error(err.message || "Analysis failed");
+      const msg = err.message || "Analysis failed";
+      setAnalysisError(msg);
+      toast.error(msg);
     } finally {
       setIsAnalyzing(false);
     }
@@ -480,6 +492,16 @@ export default function OutfitAnalysis() {
                           <Sparkles className="w-5 h-5 mr-2" />Analyze My Outfit
                         </RainbowButton>
                       )}
+                      {analysisError && !isAnalyzing && (
+                        <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                          <AlertTriangle className="w-4 h-4 text-destructive shrink-0" />
+                          <span className="text-sm text-destructive flex-1">{analysisError}</span>
+                          <Button variant="outline" size="sm" onClick={handleAnalyze} className="shrink-0 gap-1">
+                            <RefreshCw className="w-3 h-3" /> Retry
+                          </Button>
+                        </div>
+                      )}
+                      <PrivacyNotice />
                     </div>
                   </div>
                 </CardContent>

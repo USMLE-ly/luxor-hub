@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react";
+import { PrivacyNotice } from "@/components/app/PrivacyNotice";
 import { AppLayout } from "@/components/app/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -137,9 +138,13 @@ export default function VideoAnalysis() {
       setFrames([...updatedFrames]);
 
       try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 60000); // 60s timeout per frame
+        
         const { data, error } = await supabase.functions.invoke("analyze-outfit", {
           body: { imageUrl: frame.imageDataUrl },
         });
+        clearTimeout(timeout);
         if (error) throw error;
         if (data?.error) throw new Error(data.error);
 
@@ -148,7 +153,7 @@ export default function VideoAnalysis() {
         frameResults.push({
           frameIndex: frame.frameIndex,
           timestamp: frame.timestamp,
-          styleScore: data.styleScore,
+          styleScore: Math.min(100, Math.max(0, data.styleScore)), // Cap 0-100
           overallStyle: data.overallStyle,
           strengths: data.strengths || [],
           detectedItems: data.detectedItems || [],
@@ -156,6 +161,7 @@ export default function VideoAnalysis() {
       } catch (err: any) {
         console.error(`Frame ${i} error:`, err);
         frame.status = "error";
+        toast.error(`Frame ${i + 1} analysis failed: ${err.message?.includes("abort") ? "Timed out" : err.message || "Unknown error"}`);
       }
 
       setAnalysisProgress(Math.round(((i + 1) / updatedFrames.length) * 100));
@@ -254,6 +260,7 @@ export default function VideoAnalysis() {
                   </p>
                 </motion.div>
                 <input ref={fileInputRef} type="file" accept="video/*" onChange={handleVideoSelect} className="hidden" />
+                <PrivacyNotice className="mt-4" />
               </CardContent>
             </Card>
           </div>
