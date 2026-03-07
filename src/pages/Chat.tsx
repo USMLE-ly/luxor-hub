@@ -345,6 +345,12 @@ const Chat = () => {
             >
               <Camera className="w-4 h-4" />
             </button>
+            <VoiceInput
+              onTranscript={(text) => {
+                setInput((prev) => (prev ? prev + " " + text : text));
+              }}
+              disabled={isLoading}
+            />
             <textarea
               ref={inputRef}
               value={input}

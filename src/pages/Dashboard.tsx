@@ -561,6 +561,11 @@ const Dashboard = () => {
           )}
         </motion.div>
 
+        {/* ── Weekly Capsule Plan ───────────────────────────── */}
+        <motion.div variants={fadeUp}>
+          <WeeklyCapsuleWidget />
+        </motion.div>
+
         {/* ── Chat with AI Stylist ──────────────────────────── */}
         <motion.div variants={fadeUp} className="pb-8">
           <h2 className="font-display text-xl font-bold text-foreground mb-3">Chat with AI Stylist</h2>
