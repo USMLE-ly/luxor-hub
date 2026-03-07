@@ -564,6 +564,100 @@ const StyleDNA = () => {
                 </div>
               </motion.div>
 
+              {/* Psychographic Profile */}
+              {(lifestyle || profession || styleMood.length > 0) && (
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                  className="rounded-2xl border border-border bg-card p-5"
+                >
+                  <div className="flex items-center gap-2 mb-4">
+                    <Heart className="w-4 h-4 text-primary" />
+                    <h3 className="font-display text-base font-bold text-foreground">Your Style Psyche</h3>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 mb-3">
+                    {lifestyle && (
+                      <div className="p-3 rounded-xl bg-secondary/50">
+                        <p className="text-[10px] text-muted-foreground font-sans uppercase tracking-wider mb-1">Lifestyle</p>
+                        <p className="text-sm font-sans font-semibold text-foreground">{lifestyle}</p>
+                      </div>
+                    )}
+                    {profession && (
+                      <div className="p-3 rounded-xl bg-secondary/50">
+                        <p className="text-[10px] text-muted-foreground font-sans uppercase tracking-wider mb-1">Profession</p>
+                        <p className="text-sm font-sans font-semibold text-foreground">{profession}</p>
+                      </div>
+                    )}
+                  </div>
+                  {styleMood.length > 0 && (
+                    <div>
+                      <p className="text-[10px] text-muted-foreground font-sans uppercase tracking-wider mb-2">Style Mood Goals</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {styleMood.map((mood: string) => (
+                          <span key={mood} className="text-xs font-sans bg-primary/10 text-primary px-3 py-1 rounded-full">
+                            {mood}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+
+              {/* Style Evolution Prediction */}
+              {styleEvolution.length > 0 && (
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.55 }}
+                  className="rounded-2xl border border-border bg-card p-5"
+                >
+                  <div className="flex items-center gap-2 mb-4">
+                    <TrendingUp className="w-4 h-4 text-primary" />
+                    <h3 className="font-display text-base font-bold text-foreground">Your Style Evolution</h3>
+                  </div>
+                  <p className="text-xs text-muted-foreground font-sans mb-4">
+                    AI predicts how your style will evolve based on your lifestyle, goals, and personality
+                  </p>
+                  <div className="relative">
+                    {/* Timeline line */}
+                    <div className="absolute left-4 top-0 bottom-0 w-px bg-gradient-to-b from-primary via-primary/50 to-primary/10" />
+                    <div className="space-y-4">
+                      {styleEvolution.map((stage, i) => (
+                        <motion.div
+                          key={stage.stage}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.6 + i * 0.1 }}
+                          className="flex gap-4 pl-1"
+                        >
+                          <div className="w-7 h-7 rounded-full bg-primary/20 border-2 border-primary flex items-center justify-center flex-shrink-0 z-10">
+                            <span className="text-[10px] font-bold text-primary">{i + 1}</span>
+                          </div>
+                          <div className="rounded-xl border border-border bg-secondary/30 p-3 flex-1 -mt-0.5">
+                            <div className="flex items-center justify-between mb-1">
+                              <p className="text-sm font-semibold text-foreground font-sans">{stage.stage}</p>
+                              <span className="text-[10px] text-muted-foreground font-sans">{stage.timeframe}</span>
+                            </div>
+                            <div className="flex flex-wrap gap-1 mb-2">
+                              {stage.changes.map((change, j) => (
+                                <span key={j} className="text-[10px] font-sans bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                                  {change}
+                                </span>
+                              ))}
+                            </div>
+                            <p className="text-[10px] text-muted-foreground font-sans italic flex items-start gap-1">
+                              <ChevronRight className="w-3 h-3 mt-0.5 flex-shrink-0" /> {stage.trigger}
+                            </p>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
               {/* Colors to Avoid */}
               <motion.div
                 initial={{ y: 20, opacity: 0 }}
