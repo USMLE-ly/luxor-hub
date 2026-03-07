@@ -3,8 +3,8 @@ import { motion } from "framer-motion";
 const platforms = [
   { name: "Instagram", logo: "/logos/instagram.png" },
   { name: "Pinterest", logo: "/logos/pinterest.png" },
-  { name: "Shopify", logo: "/logos/shopify.png" },
-  { name: "TikTok", logo: "/logos/tiktok.png" },
+  { name: "Shopify", logo: "/logos/shopify.svg" },
+  { name: "TikTok", logo: "/logos/tiktok.svg" },
   { name: "ASOS", textLogo: true },
   { name: "Zara", logo: "/logos/zara.png" },
 ];
