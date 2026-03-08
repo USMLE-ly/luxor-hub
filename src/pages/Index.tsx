@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { ArrowUp } from "lucide-react";
+import AnnouncementBanner from "@/components/landing/AnnouncementBanner";
 import Navbar from "@/components/landing/Navbar";
 import Hero from "@/components/landing/Hero";
 import SocialProofStrip from "@/components/landing/SocialProofStrip";
@@ -40,7 +41,6 @@ const ScrollProgressBar = () => {
   );
 };
 
-/* Section reveal wrapper */
 const SectionReveal = ({ children, direction = "up" }: { children: React.ReactNode; direction?: "up" | "left" | "right" }) => {
   const variants = {
     up: { hidden: { opacity: 0, y: 60 }, visible: { opacity: 1, y: 0 } },
@@ -81,6 +81,7 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       <ScrollProgressBar />
+      <AnnouncementBanner />
       <Navbar />
       <motion.div ref={heroRef} style={{ y: heroY, opacity: heroOpacity }}>
         <Hero />
