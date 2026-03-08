@@ -92,7 +92,7 @@ const Testimonials = React.forwardRef<HTMLElement>((_, ref) => {
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
         >
-          <motion.div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-primary/[0.08] border border-primary/20 backdrop-blur-md mb-8">
+          <motion.div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-primary/[0.08] border border-primary/20 backdrop-blur-md mb-5">
             <Sparkles className="h-4 w-4 text-primary" />
             <span className="text-sm font-semibold tracking-wide text-primary">Proven Results</span>
           </motion.div>

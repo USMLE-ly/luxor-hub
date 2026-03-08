@@ -59,7 +59,7 @@ export default function IntegrationHero() {
         <div className="hidden md:flex items-center justify-center">
           <div className="relative w-[340px] h-[340px]">
             {/* SVG connection lines */}
-            <svg className="absolute inset-0 w-full h-full" viewBox="0 0 300 300">
+            <svg className="absolute inset-0 w-full h-full" viewBox="0 0 340 340">
               {platforms.map((_, i) => (
                 <ConnectionLine
                   key={i}
