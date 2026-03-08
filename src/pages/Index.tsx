@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { ArrowUp } from "lucide-react";
 import AnnouncementBanner from "@/components/landing/AnnouncementBanner";
