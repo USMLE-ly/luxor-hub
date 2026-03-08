@@ -726,6 +726,10 @@ const Closet = () => {
                 })}
               </div>
             )}
+            {/* Wardrobe Intelligence */}
+            <div className="mt-6">
+              <WardrobeIntelligence />
+            </div>
           </>
         )}
 
