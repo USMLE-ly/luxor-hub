@@ -57,7 +57,7 @@ const FAQ = () => {
           <p className="text-primary font-sans font-semibold text-sm tracking-widest uppercase mb-4">FAQ</p>
           <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground">
             <TextReveal mode="word" as="span">Common</TextReveal>{" "}
-            <span className="gold-text"><TextReveal mode="blur" as="span" delay={1}>Questions</TextReveal></span>
+            <TextReveal mode="blur" as="span" delay={1} className="gold-text">Questions</TextReveal>
           </h2>
         </motion.div>
 
