@@ -1545,55 +1545,56 @@ const StepRenderer = ({ step, answers, onSelect, gender, aiResults }: StepRender
           const logos = step.brandLogos?.[option];
           const brands = step.brandLabels?.[option];
           return (
-            <motion.button
+            <SelectionFlip
               key={option}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+              isActive={isActive}
               onClick={() => onSelect(step.key, option, isSingle)}
-              className={`flex items-center justify-between p-4 rounded-2xl transition-all text-left active:scale-[0.98] ${
+              index={index}
+              className={`w-full p-4 rounded-2xl transition-all text-left active:scale-[0.98] ${
                 isActive
                   ? "bg-secondary ring-2 ring-foreground"
                   : "bg-secondary/50"
               }`}
             >
-              <div className="flex-1 pr-2">
-                <span className="font-sans text-sm text-foreground">{option}</span>
-                {logos ? (
-                  <div className="flex items-center gap-4 mt-2">
-                    {logos.map((logo) => (
-                      <img
-                        key={logo.name}
-                        src={brandLogoMap[logo.image]}
-                        alt={logo.name}
-                        className="h-10 w-auto object-contain rounded-md bg-background border border-border shadow-sm transition-transform duration-200 hover:scale-110 active:scale-95"
-                      />
-                    ))}
+              <div className="flex items-center justify-between w-full">
+                <div className="flex-1 pr-2">
+                  <span className="font-sans text-sm text-foreground">{option}</span>
+                  {logos ? (
+                    <div className="flex items-center gap-4 mt-2">
+                      {logos.map((logo) => (
+                        <img
+                          key={logo.name}
+                          src={brandLogoMap[logo.image]}
+                          alt={logo.name}
+                          className="h-10 w-auto object-contain rounded-md bg-background border border-border shadow-sm transition-transform duration-200 hover:scale-110 active:scale-95"
+                        />
+                      ))}
+                    </div>
+                  ) : brands ? (
+                    <div className="flex flex-wrap gap-3 mt-1.5">
+                      {brands.map((brand) => (
+                        <span key={brand} className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
+                          {brand}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+                {isSingle ? (
+                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                    isActive ? "border-foreground bg-foreground" : "border-muted-foreground/30 bg-background"
+                  }`}>
+                    {isActive && <Check className="h-3.5 w-3.5 text-background" />}
                   </div>
-                ) : brands ? (
-                  <div className="flex flex-wrap gap-3 mt-1.5">
-                    {brands.map((brand) => (
-                      <span key={brand} className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
-                        {brand}
-                      </span>
-                    ))}
+                ) : (
+                  <div className={`w-5 h-5 rounded-[4px] border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                    isActive ? "border-foreground bg-foreground" : "border-muted-foreground/30 bg-background"
+                  }`}>
+                    {isActive && <Check className="h-3 w-3 text-background" />}
                   </div>
-                ) : null}
+                )}
               </div>
-              {isSingle ? (
-                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                  isActive ? "border-foreground bg-foreground" : "border-muted-foreground/30 bg-background"
-                }`}>
-                  {isActive && <Check className="h-3.5 w-3.5 text-background" />}
-                </div>
-              ) : (
-                <div className={`w-5 h-5 rounded-[4px] border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                  isActive ? "border-foreground bg-foreground" : "border-muted-foreground/30 bg-background"
-                }`}>
-                  {isActive && <Check className="h-3 w-3 text-background" />}
-                </div>
-              )}
-            </motion.button>
+            </SelectionFlip>
           );
         })}
       </div>
