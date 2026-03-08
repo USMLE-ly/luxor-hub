@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import { ErrorBoundary } from "@/components/app/ErrorBoundary";
 import StarfieldBackground from "@/components/ui/starfield-background";
 import OfflineIndicator from "@/components/app/OfflineIndicator";
+import SplashScreen from "@/components/app/SplashScreen";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Onboarding from "./pages/Onboarding";
@@ -46,6 +47,7 @@ const App = () => (
   <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
     <StarfieldBackground />
     <OfflineIndicator />
+    <SplashScreen />
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
