@@ -298,7 +298,47 @@ const Closet = () => {
     if (!user) return;
     const { error } = await supabase.from("wear_logs").insert({ user_id: user.id, clothing_item_id: itemId });
     if (error) toast.error("Failed to log wear");
-    else toast.success("Marked as worn today! 👕");
+    else {
+      // Award style points
+      await (supabase.from("style_points" as any).insert({ user_id: user.id, points: 5, reason: "Logged wear" }) as any);
+      toast.success("Marked as worn today! +5 pts 👕");
+    }
+  };
+
+  const handleReceiptScan = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    setScanningReceipt(true);
+    try {
+      const imageData = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const { data, error } = await supabase.functions.invoke("scan-receipt", { body: { imageUrl: imageData } });
+      if (error) throw error;
+      if (data?.items?.length) {
+        for (const item of data.items) {
+          await supabase.from("clothing_items").insert({
+            user_id: user.id,
+            name: item.name || null,
+            category: item.category || "other",
+            color: item.color || null,
+            brand: item.brand || null,
+            price: item.price || null,
+          });
+        }
+        toast.success(`Added ${data.items.length} items from receipt! 🧾`);
+        fetchItems();
+      } else {
+        toast.info("No clothing items found on this receipt");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Receipt scan failed");
+    } finally {
+      setScanningReceipt(false);
+    }
   };
 
   // Add closet item to mannequin and switch to mannequin tab
