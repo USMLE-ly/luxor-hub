@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { RainbowButton } from "@/components/ui/rainbow-button";
 import { useTheme } from "next-themes";
 import { Sun, Moon, Menu } from "lucide-react";
+import { MagneticCursor } from "@/components/ui/magnetic-cursor";
 import {
   Sheet,
   SheetContent,
