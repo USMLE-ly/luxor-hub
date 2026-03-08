@@ -224,7 +224,11 @@ export default function VirtualTryOn() {
                 ) : resultImage ? (
                   <div className="relative">
                     <img src={resultImage} alt="Try-on result" className="w-full aspect-[3/4] object-cover rounded-lg" />
-                    <div className="absolute bottom-3 right-3">
+                    <div className="absolute bottom-3 right-3 flex gap-2">
+                      <Button variant="secondary" size="sm" onClick={() => handleShare(resultImage)}>
+                        {shareLink === resultImage ? <Check className="w-3 h-3 mr-1" /> : <Share2 className="w-3 h-3 mr-1" />}
+                        {shareLink === resultImage ? "Copied!" : "Share"}
+                      </Button>
                       <Button variant="secondary" size="sm" onClick={() => handleDownload(resultImage)}>
                         <Download className="w-3 h-3 mr-1" /> Save
                       </Button>
