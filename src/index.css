@@ -176,6 +176,44 @@
     box-shadow: 0 0 30px -5px hsl(var(--gold) / 0.3);
   }
 
+  .gold-shimmer-text {
+    background: linear-gradient(
+      110deg,
+      hsl(var(--gold)) 0%,
+      hsl(var(--gold-light)) 40%,
+      hsl(var(--gold)) 50%,
+      hsl(var(--gold-light)) 60%,
+      hsl(var(--gold)) 100%
+    );
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer-text-sweep 4s ease-in-out infinite;
+  }
+
+  @keyframes shimmer-text-sweep {
+    0%, 100% { background-position: 100% 50%; }
+    50% { background-position: 0% 50%; }
+  }
+
+  .meteor {
+    position: absolute;
+    width: 1px;
+    height: 80px;
+    background: linear-gradient(to bottom, hsl(var(--gold) / 0.3), transparent);
+    border-radius: 999px;
+    animation: meteor-fall linear infinite;
+    opacity: 0.12;
+  }
+
+  @keyframes meteor-fall {
+    0% { transform: translateY(-100px) translateX(0) rotate(-35deg); opacity: 0; }
+    10% { opacity: 0.12; }
+    90% { opacity: 0.12; }
+    100% { transform: translateY(800px) translateX(-200px) rotate(-35deg); opacity: 0; }
+  }
+
   .text-balance {
     text-wrap: balance;
   }
