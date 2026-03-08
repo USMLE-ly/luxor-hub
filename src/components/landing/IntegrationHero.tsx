@@ -13,9 +13,9 @@ const platforms = [
 
 /* SVG line from center to each platform node */
 function ConnectionLine({ angle, delay }: { angle: number; delay: number }) {
-  const r = 120; // orbit radius
-  const x2 = 150 + Math.cos((angle * Math.PI) / 180) * r;
-  const y2 = 150 + Math.sin((angle * Math.PI) / 180) * r;
+  const r = 140;
+  const x2 = 170 + Math.cos((angle * Math.PI) / 180) * r;
+  const y2 = 170 + Math.sin((angle * Math.PI) / 180) * r;
 
   return (
     <motion.line
