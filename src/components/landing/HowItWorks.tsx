@@ -78,7 +78,8 @@ const HowItWorks = () => {
         >
           <p className="text-primary font-sans font-semibold text-sm tracking-widest uppercase mb-4">How It Works</p>
           <h2 className="font-display text-4xl md:text-5xl font-bold">
-            Four Steps to <span className="gold-text">Effortless Style</span>
+            <TextReveal mode="word" as="span">Four Steps to</TextReveal>{" "}
+            <span className="gold-text"><TextReveal mode="blur" as="span" delay={3}>Effortless Style</TextReveal></span>
           </h2>
         </motion.div>
 

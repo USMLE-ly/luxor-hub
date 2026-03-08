@@ -58,17 +58,19 @@ const Footer = () => {
           >
             Join thousands who've elevated their personal style with AI-powered intelligence.
           </motion.p>
-          <motion.button
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-            onClick={() => navigate("/auth")}
-            className="inline-flex items-center gap-2 h-12 px-8 rounded-xl gold-gradient text-primary-foreground font-sans font-semibold text-sm tracking-wide hover:opacity-90 transition-opacity shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.4)]"
-          >
-            <Sparkles className="w-4 h-4" />
-            Start Free Trial
-          </motion.button>
+          <MagneticCursor strength={0.25} radius={80}>
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              onClick={() => navigate("/auth")}
+              className="inline-flex items-center gap-2 h-12 px-8 rounded-xl gold-gradient text-primary-foreground font-sans font-semibold text-sm tracking-wide hover:opacity-90 transition-opacity shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.4)]"
+            >
+              <Sparkles className="w-4 h-4" />
+              Start Free Trial
+            </motion.button>
+          </MagneticCursor>
         </div>
       </div>
 

@@ -84,8 +84,8 @@ const Testimonials = React.forwardRef<HTMLElement>((_, ref) => {
           </motion.div>
 
           <h2 className="font-display text-4xl sm:text-6xl md:text-7xl font-bold mb-6 tracking-tight">
-            <span className="text-foreground">Our </span>
-            <span className="gold-text">Success Stories</span>
+            <span className="text-foreground"><TextReveal mode="word" as="span">Our</TextReveal> </span>
+            <span className="gold-text"><TextReveal mode="blur" as="span" delay={1}>Success Stories</TextReveal></span>
           </h2>
 
           {/* Running total counter */}
