@@ -8,6 +8,7 @@ import { ThemeProvider } from "next-themes";
 import Index from "./pages/Index";
 import { ErrorBoundary } from "@/components/app/ErrorBoundary";
 import StarfieldBackground from "@/components/ui/starfield-background";
+import OfflineIndicator from "@/components/app/OfflineIndicator";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Onboarding from "./pages/Onboarding";
