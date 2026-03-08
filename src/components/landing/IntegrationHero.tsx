@@ -19,7 +19,7 @@ function ConnectionLine({ angle, delay }: { angle: number; delay: number }) {
 
   return (
     <motion.line
-      x1="150" y1="150"
+      x1="170" y1="170"
       x2={x2} y2={y2}
       stroke="hsl(var(--primary))"
       strokeWidth="1"
