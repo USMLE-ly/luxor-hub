@@ -82,9 +82,9 @@ export default function IntegrationHero() {
             {/* Platform nodes in circle */}
             {platforms.map((p, i) => {
               const angle = (i * 60 - 90) * (Math.PI / 180);
-              const r = 120;
-              const x = 150 + Math.cos(angle) * r - 28;
-              const y = 150 + Math.sin(angle) * r - 28;
+              const r = 140;
+              const x = 170 + Math.cos(angle) * r - 30;
+              const y = 170 + Math.sin(angle) * r - 30;
 
               return (
                 <motion.div
