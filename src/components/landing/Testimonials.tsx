@@ -62,7 +62,7 @@ const Testimonials = React.forwardRef<HTMLElement>((_, ref) => {
   const nextIdx = (currentIndex + 1) % proofImages.length;
 
   return (
-    <section id="testimonials" className="relative py-28 bg-background text-foreground overflow-hidden">
+    <section id="testimonials" className="relative py-16 md:py-24 bg-background text-foreground overflow-hidden">
       {/* Premium Background */}
       <div className="absolute inset-0">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-primary/[0.06] rounded-full blur-[120px]" />
