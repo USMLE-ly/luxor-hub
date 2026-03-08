@@ -146,6 +146,7 @@ const Chat = () => {
           userId: user.id,
           styleProfile,
           closetSummary,
+          mood: currentMood || undefined,
           ...(imageToSend ? { image: imageToSend } : {}),
         }),
       });
