@@ -26,7 +26,7 @@ export function BottomNav() {
           return (
             <button
               key={tab.label}
-              onClick={() => navigate(tab.path)}
+              onClick={() => { haptic("selection"); navigate(tab.path); }}
               className="flex flex-col items-center gap-0.5 min-w-[52px] pt-1.5 pb-1 relative"
             >
               <motion.div
