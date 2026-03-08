@@ -185,31 +185,92 @@ const Onboarding = () => {
     }
   };
 
+  const progress = ((currentStep) / (totalSteps - 1)) * 100;
+
+  // Premium page transition variants
+  const pageVariants = {
+    enter: (dir: number) => ({
+      opacity: 0,
+      x: dir * 60,
+      scale: 0.96,
+      filter: "blur(4px)",
+    }),
+    center: {
+      opacity: 1,
+      x: 0,
+      scale: 1,
+      filter: "blur(0px)",
+    },
+    exit: (dir: number) => ({
+      opacity: 0,
+      x: dir * -60,
+      scale: 0.96,
+      filter: "blur(4px)",
+    }),
+  };
+
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Progress bar */}
-      <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-sm px-4 pt-4 pb-2">
-        {currentStep > 0 && (
-          <button onClick={() => { triggerHaptic(); setSwipeDir(-1); setCurrentStep((s) => s - 1); }} className="mb-2">
-            <ArrowLeft className="h-5 w-5 text-foreground" />
-          </button>
-        )}
-        <div className="flex gap-1">
-          {Array.from({ length: totalSteps }).map((_, i) => (
-            <div
-              key={i}
-              className={`h-1 flex-1 rounded-full transition-all ${
-                i <= currentStep ? "bg-foreground" : "bg-muted"
-              }`}
-            />
-          ))}
+    <div className="min-h-screen bg-background flex flex-col overflow-hidden relative">
+      {/* Ambient background glow */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <motion.div
+          className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full opacity-[0.04]"
+          style={{ background: "radial-gradient(circle, hsl(var(--primary)), transparent 70%)" }}
+          animate={{ scale: [1, 1.15, 1], opacity: [0.04, 0.07, 0.04] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
+
+      {/* Premium progress bar */}
+      <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-xl px-5 pt-5 pb-3">
+        <div className="flex items-center gap-3 mb-3">
+          <AnimatePresence mode="wait">
+            {currentStep > 0 && (
+              <motion.button
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => { triggerHaptic(); setSwipeDir(-1); setCurrentStep((s) => s - 1); }}
+                className="p-1.5 rounded-full hover:bg-secondary/60 transition-colors"
+              >
+                <ArrowLeft className="h-5 w-5 text-foreground" />
+              </motion.button>
+            )}
+          </AnimatePresence>
+          <div className="flex-1" />
+          <motion.span
+            key={currentStep}
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-xs font-sans text-muted-foreground tabular-nums"
+          >
+            {currentStep + 1} / {totalSteps}
+          </motion.span>
+        </div>
+        {/* Smooth animated progress track */}
+        <div className="relative h-1 w-full rounded-full bg-muted/50 overflow-hidden">
+          <motion.div
+            className="absolute inset-y-0 left-0 rounded-full"
+            style={{ background: "linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary) / 0.7))" }}
+            initial={false}
+            animate={{ width: `${progress}%` }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          />
+          {/* Shimmer effect on progress */}
+          <motion.div
+            className="absolute inset-y-0 w-16 rounded-full"
+            style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)" }}
+            animate={{ left: ["-10%", "110%"] }}
+            transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, ease: "easeInOut" }}
+          />
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex-1 flex items-start justify-center px-5 pt-8 pb-24 overflow-y-auto relative">
+      <div className="flex-1 flex items-start justify-center px-5 pt-6 pb-24 overflow-y-auto relative z-10">
         <div className="w-full max-w-lg">
-          {/* Swipe hint - only on first step */}
+          {/* Swipe hint */}
           <AnimatePresence>
             {currentStep === 0 && gender && (
               <motion.div
@@ -224,23 +285,30 @@ const Onboarding = () => {
                   animate={{ x: [0, -8, 8, 0] }}
                   transition={{ duration: 1.8, repeat: 2, repeatDelay: 1, ease: "easeInOut" }}
                 >
-                  <motion.span className="text-xs">←</motion.span>
+                  <span className="text-xs">←</span>
                   <span className="text-xs font-sans font-medium">Swipe to navigate</span>
-                  <motion.span className="text-xs">→</motion.span>
+                  <span className="text-xs">→</span>
                 </motion.div>
               </motion.div>
             )}
           </AnimatePresence>
-          <AnimatePresence mode="wait" initial={false}>
+
+          <AnimatePresence mode="wait" custom={swipeDir} initial={false}>
             <motion.div
               key={currentStep}
-              initial={{ opacity: 0, x: swipeDir * 80 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: swipeDir * -80 }}
-              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              custom={swipeDir}
+              variants={pageVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{
+                duration: 0.4,
+                ease: [0.22, 1, 0.36, 1],
+                filter: { duration: 0.3 },
+              }}
               drag="x"
               dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={0.18}
+              dragElastic={0.12}
               onDragEnd={(_, info) => {
                 const threshold = 50;
                 if (info.offset.x < -threshold && canProceed && !isGenerating) {
@@ -270,32 +338,52 @@ const Onboarding = () => {
         </div>
       </div>
 
-      {/* Bottom button - hide during generating */}
-      {!isGenerating && (
-        <div className="sticky bottom-0 z-20 bg-background/80 backdrop-blur-sm p-4">
-          <Button
-            onClick={() => { triggerHaptic(); setSwipeDir(1); setCurrentStep((s) => s + 1); }}
-            disabled={!canProceed || loading}
-            className={`w-full h-14 rounded-xl font-semibold font-sans text-base ${
-              currentStepData && ["notification", "selfieIntro", "selfieGuide"].includes(currentStepData.type)
-                ? "bg-[hsl(0,70%,68%)] text-white hover:bg-[hsl(0,70%,62%)]"
-                : "bg-muted text-foreground hover:bg-muted/80"
-            }`}
-            variant="ghost"
+      {/* Bottom button with premium animation */}
+      <AnimatePresence>
+        {!isGenerating && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="sticky bottom-0 z-20 bg-gradient-to-t from-background via-background/95 to-transparent p-4 pt-8"
           >
-            {loading ? (
-              <div className="w-5 h-5 border-2 border-foreground/30 border-t-foreground rounded-full animate-spin" />
-            ) : currentStepData?.type === "selfieIntro" ? (
-              "CONTINUE"
-            ) : (
-              <>
-                NEXT
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </>
-            )}
-          </Button>
-        </div>
-      )}
+            <motion.div
+              whileTap={{ scale: 0.97 }}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            >
+              <Button
+                onClick={() => { triggerHaptic(); setSwipeDir(1); setCurrentStep((s) => s + 1); }}
+                disabled={!canProceed || loading}
+                className={`w-full h-14 rounded-xl font-semibold font-sans text-base transition-all duration-300 ${
+                  canProceed
+                    ? currentStepData && ["notification", "selfieIntro", "selfieGuide"].includes(currentStepData.type)
+                      ? "bg-primary text-primary-foreground shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.5)]"
+                      : "bg-foreground text-background shadow-[0_4px_20px_-4px_hsl(var(--foreground)/0.3)]"
+                    : "bg-muted text-muted-foreground"
+                }`}
+                variant="ghost"
+              >
+                {loading ? (
+                  <div className="w-5 h-5 border-2 border-background/30 border-t-background rounded-full animate-spin" />
+                ) : currentStepData?.type === "selfieIntro" ? (
+                  "CONTINUE"
+                ) : (
+                  <span className="flex items-center gap-2">
+                    NEXT
+                    <motion.span
+                      animate={{ x: [0, 4, 0] }}
+                      transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                    >
+                      <ArrowRight className="h-4 w-4" />
+                    </motion.span>
+                  </span>
+                )}
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
