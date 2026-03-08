@@ -1,88 +1,48 @@
-# AURELIA — Launch-Ready Roadmap
 
-> Updated: 2026-03-07 — Practical, prioritized roadmap for a reliable launch.
+Goal: stop the landing page “crash/blank” behavior shown in your screenshots and make it stable on mobile + desktop.
 
----
+What I found
+- The hero slider (`LuminaSlider`) can render as a blank block because `.slider-wrapper` starts at `opacity: 0` and only becomes visible when JS marks it as `.loaded`.
+- That visibility depends on external CDN script loading (`gsap`, `three`), so on slower/blocked browsers the page looks “crashed” even when React is still running.
+- There are additional performance/warning signals (continuous scroll re-rendering + ref warnings) that can worsen perceived instability.
 
-## P0 — Critical (Must fix before launch)
+Implementation plan
+1) Make hero fail-safe visible by default
+- File: `src/components/ui/lumina-slider.css`
+- Change strategy:
+  - Remove “hidden until loaded” behavior as default.
+  - Keep enhancement hooks (`.loaded`) only for visual polish, not core visibility.
+- Expected result: no more white/blank first viewport even if external scripts fail.
 
-### 1. AI Error Handling & Fallbacks
-- [x] Chat: handles 429/402 gracefully with toasts
-- [x] Chat: streaming SSE parsing with proper buffer flush
-- [ ] OutfitAnalysis: add retry button on AI failure, show friendly error state  
-- [ ] VideoAnalysis: add timeout handling for long video processing
-- [ ] FashionDesigner: add retry on generation failure
-- [ ] All AI pages: wrap in ErrorBoundary for crash recovery
-- [ ] All edge functions: consistent 429/402 handling
+2) Make slider JS progressive (never blocking UI)
+- File: `src/components/ui/lumina-interactive-list.tsx`
+- Change strategy:
+  - Treat WebGL/GSAP as optional enhancement.
+  - If scripts are unavailable/slow, keep static hero content + CTA + fallback background active immediately.
+  - Tighten script timeout and avoid long waiting states.
+- Expected result: hero always renders; animation upgrades only when available.
 
-### 2. Image Upload Robustness
-- [ ] Compress images client-side before upload (target <2MB via canvas)
-- [ ] Enforce consistent size limits across all pages
-- [ ] Show file size in upload preview
-- [ ] Add privacy notice banner on all upload pages ("Images processed by AI")
-- [ ] Lazy load all gallery/product images
+3) Reduce crash risk on mobile/tablet
+- File: `src/components/ui/lumina-interactive-list.tsx`
+- Change strategy:
+  - Add a lightweight guard to skip heavy WebGL init on constrained/mobile environments and use fallback mode.
+  - Ensure cleanup is always safe (timers, RAF, renderer disposal).
+- Expected result: better stability on Kiwi/Android browsers like in your screenshots.
 
-### 3. Mobile UX
-- [ ] Test sidebar collapse on small screens
-- [ ] Fix horizontal overflow in carousels (scrollbar-none + snap)
-- [ ] Ensure modals/dialogs scrollable on short viewports
-- [ ] Touch-friendly tap targets (min 44px)
-- [ ] Swipe hint: test reliability across screen sizes
+4) Remove ref/warning noise that can destabilize effects over time
+- File: `src/components/ui/container-scroll.tsx`
+- Change strategy:
+  - Fix component/ref compatibility pattern (the warning currently indicates a function component is being passed a ref in the motion tree).
+- Expected result: cleaner runtime, fewer layout observer loops and fewer hidden animation side effects.
 
-### 4. Auth & Security
-- [x] RLS policies on all 20+ tables
-- [x] No client-side admin checks
-- [ ] Privacy notice for AI image processing
-- [ ] Ensure all storage uploads use user-scoped paths
-- [ ] Rate limit awareness on all AI endpoints
+5) Smooth global scroll performance
+- File: `src/pages/Index.tsx`
+- Change strategy:
+  - Replace per-frame React state updates in `ScrollProgressBar` with a transform/motion-based approach or throttled listener.
+- Expected result: less render pressure and fewer “page freezing/crashing” symptoms during scroll.
 
----
-
-## P1 — Important (Should fix for quality)
-
-### 5. Shop/Products Polish
-- [ ] Consistent fallback placeholder images
-- [ ] Loading skeletons while products load
-- [ ] "No results" helpful message state
-- [ ] Test edge function with varied query formats
-
-### 6. Onboarding Polish
-- [ ] Clear selfie instructions with example photos
-- [ ] Swipe hint: click alternative for non-touch
-- [ ] Style DNA explanation tooltip
-- [ ] Clear step progress indicator
-
-### 7. AI Accuracy & Quality
-- [ ] Test outfit analysis with diverse outfits
-- [ ] Validate Style DNA with multiple skin tones
-- [ ] Wardrobe gap: no repeated suggestions
-- [ ] Cap confidence scores 0-100
-
-### 8. Chat Improvements
-- [ ] Test multi-turn context (5+ messages)
-- [ ] Calendar/weather: graceful fallback if denied
-- [ ] Offline suggestion cards from last Style DNA
-- [ ] Auto-save conversation periodically
-
----
-
-## P2 — Nice to Have (Post-launch)
-
-### 9. Performance
-- [ ] Audit bundle size, lazy-load heavy pages
-- [ ] Service worker for offline
-- [ ] Optimize 3D mannequin loading
-- [ ] Analytics tracking for feature usage
-
-### 10. Community & Social
-- [ ] Report/flag for public designs
-- [ ] Multi-store shop filtering
-- [ ] Design collaboration
-- [ ] Style challenges with prizes
-
----
-
-## Status
-- [ ] Not started
-- [x] Complete
-- 🔧 In progress
+Validation checklist (after implementation)
+- Load homepage on mobile (Kiwi) and desktop: hero must appear instantly (no white blank area).
+- Confirm CTA/buttons visible before any 3D effect starts.
+- Scroll through “How It Works” and “Connects to your favorite platforms” without freeze.
+- Verify console: no recurring ref warnings from `ContainerScroll` path, and no repeated runtime loop errors.
