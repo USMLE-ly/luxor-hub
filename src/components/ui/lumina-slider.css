@@ -32,14 +32,19 @@
   opacity: 1;
 }
 
-/* Fallback background when WebGL isn't available */
+/* Fallback background — shows slide image on mobile, gradient on desktop until WebGL loads */
 .lumina-fallback-bg {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background:
-    linear-gradient(135deg, hsl(240 10% 8%) 0%, hsl(240 8% 14%) 50%, hsl(43 30% 15%) 100%);
+  background-color: hsl(240 10% 8%);
+  background-size: cover;
+  background-position: center;
   transition: opacity 1s ease;
+}
+
+.slider-wrapper.loaded .lumina-fallback-bg {
+  opacity: 0;
 }
 
 .slider-wrapper.loaded .lumina-fallback-bg {
