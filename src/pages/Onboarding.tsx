@@ -46,6 +46,7 @@ const Onboarding = () => {
   const [swipeTrigger, setSwipeTrigger] = useState(0);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const tilt = useGyroTilt(6);
 
   const steps: OnboardingStep[] = gender ? getStepsForGender(gender) : [];
   const totalSteps = steps.length + 1; // +1 for gender
