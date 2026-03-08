@@ -1,6 +1,83 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { Check, Camera, Smartphone, Video, User, FlipHorizontal, Shirt, Glasses, Watch, Gem, Scissors } from "lucide-react";
+
+// Haptic + audio tick for card selection
+const selectionHaptic = () => {
+  if (navigator.vibrate) navigator.vibrate(8);
+  try {
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain).connect(ctx.destination);
+    osc.frequency.value = 2200;
+    osc.type = "sine";
+    gain.gain.setValueAtTime(0.06, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.04);
+    setTimeout(() => ctx.close(), 80);
+  } catch {}
+};
+
+/**
+ * Wraps a selectable card — triggers a subtle 3D Y-axis flip on selection.
+ */
+const SelectionFlip = ({
+  children,
+  isActive,
+  onClick,
+  className,
+  index = 0,
+}: {
+  children: React.ReactNode;
+  isActive: boolean;
+  onClick: () => void;
+  className?: string;
+  index?: number;
+}) => {
+  const controls = useAnimation();
+  const prevActive = useRef(isActive);
+
+  useEffect(() => {
+    if (isActive && !prevActive.current) {
+      // Selection flip — quick Y rotation with spring settle
+      selectionHaptic();
+      controls.start({
+        rotateY: [0, 12, -4, 0],
+        scale: [1, 1.03, 0.98, 1],
+        transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] },
+      });
+    } else if (!isActive && prevActive.current) {
+      // Deselection — subtle reverse
+      controls.start({
+        rotateY: [0, -6, 0],
+        scale: [1, 0.97, 1],
+        transition: { duration: 0.3, ease: "easeOut" },
+      });
+    }
+    prevActive.current = isActive;
+  }, [isActive, controls]);
+
+  return (
+    <motion.button
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+      onClick={onClick}
+      className={className}
+      style={{ perspective: 600, transformStyle: "preserve-3d" }}
+    >
+      <motion.div
+        animate={controls}
+        style={{ transformStyle: "preserve-3d" }}
+        className="flex items-center w-full"
+      >
+        {children}
+      </motion.div>
+    </motion.button>
+  );
+};
 import type { OnboardingStep } from "./onboardingSteps";
 import FaceShapeIllustration from "@/components/app/FaceShapeIllustration";
 import BodyShapeIllustration from "@/components/app/BodyShapeIllustration";
@@ -1380,31 +1457,32 @@ const StepRenderer = ({ step, answers, onSelect, gender, aiResults }: StepRender
           {step.options.map((option, index) => {
             const isActive = selected.includes(option);
             return (
-              <motion.button
+              <SelectionFlip
                 key={option}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.35, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                isActive={isActive}
                 onClick={() => onSelect(step.key, option, true)}
-                className={`flex items-center gap-4 p-3 rounded-2xl transition-all text-left active:scale-[0.98] ${
+                index={index}
+                className={`w-full gap-4 p-3 rounded-2xl transition-all text-left active:scale-[0.98] ${
                   isActive
                     ? "bg-secondary ring-2 ring-foreground"
                     : "bg-secondary/50"
                 }`}
               >
-                <div className="w-16 h-20 flex items-center justify-center flex-shrink-0 bg-white/90 dark:bg-white/95 rounded-lg">
-                  <BodyShapeSvg shape={option} gender={genderKey as "female" | "male"} size={52} />
+                <div className="flex items-center gap-4 w-full">
+                  <div className="w-16 h-20 flex items-center justify-center flex-shrink-0 bg-white/90 dark:bg-white/95 rounded-lg">
+                    <BodyShapeSvg shape={option} gender={genderKey as "female" | "male"} size={52} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="font-sans font-medium text-foreground block">{option}</span>
+                    <span className="font-sans text-xs text-muted-foreground leading-tight block mt-0.5">{descriptions[option]}</span>
+                  </div>
+                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                    isActive ? "border-foreground bg-foreground" : "border-muted-foreground/30 bg-background"
+                  }`}>
+                    {isActive && <Check className="h-3.5 w-3.5 text-background" />}
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <span className="font-sans font-medium text-foreground block">{option}</span>
-                  <span className="font-sans text-xs text-muted-foreground leading-tight block mt-0.5">{descriptions[option]}</span>
-                </div>
-                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                  isActive ? "border-foreground bg-foreground" : "border-muted-foreground/30 bg-background"
-                }`}>
-                  {isActive && <Check className="h-3.5 w-3.5 text-background" />}
-                </div>
-              </motion.button>
+              </SelectionFlip>
             );
           })}
         </div>
@@ -1421,31 +1499,32 @@ const StepRenderer = ({ step, answers, onSelect, gender, aiResults }: StepRender
           {step.options.map((option, index) => {
             const isActive = selected.includes(option);
             return (
-              <motion.button
+              <SelectionFlip
                 key={option}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.35, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                isActive={isActive}
                 onClick={() => onSelect(step.key, option, true)}
-                className={`flex items-center gap-4 p-3 rounded-2xl transition-all text-left active:scale-[0.98] ${
+                index={index}
+                className={`w-full gap-4 p-3 rounded-2xl transition-all text-left active:scale-[0.98] ${
                   isActive
                     ? "bg-secondary ring-2 ring-foreground"
                     : "bg-secondary/50"
                 }`}
               >
-                <div className="w-14 h-16 flex items-center justify-center flex-shrink-0 bg-white/90 dark:bg-white/95 rounded-lg">
-                  <FaceShapeSvg shape={option} size={44} />
+                <div className="flex items-center gap-4 w-full">
+                  <div className="w-14 h-16 flex items-center justify-center flex-shrink-0 bg-white/90 dark:bg-white/95 rounded-lg">
+                    <FaceShapeSvg shape={option} size={44} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="font-sans font-medium text-foreground block">{option}</span>
+                    <span className="font-sans text-xs text-muted-foreground leading-tight block mt-0.5">{faceShapeDescriptions[option]}</span>
+                  </div>
+                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                    isActive ? "border-foreground bg-foreground" : "border-muted-foreground/30 bg-background"
+                  }`}>
+                    {isActive && <Check className="h-3.5 w-3.5 text-background" />}
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <span className="font-sans font-medium text-foreground block">{option}</span>
-                  <span className="font-sans text-xs text-muted-foreground leading-tight block mt-0.5">{faceShapeDescriptions[option]}</span>
-                </div>
-                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                  isActive ? "border-foreground bg-foreground" : "border-muted-foreground/30 bg-background"
-                }`}>
-                  {isActive && <Check className="h-3.5 w-3.5 text-background" />}
-                </div>
-              </motion.button>
+              </SelectionFlip>
             );
           })}
         </div>
@@ -1468,55 +1547,56 @@ const StepRenderer = ({ step, answers, onSelect, gender, aiResults }: StepRender
           const logos = step.brandLogos?.[option];
           const brands = step.brandLabels?.[option];
           return (
-            <motion.button
+            <SelectionFlip
               key={option}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+              isActive={isActive}
               onClick={() => onSelect(step.key, option, isSingle)}
-              className={`flex items-center justify-between p-4 rounded-2xl transition-all text-left active:scale-[0.98] ${
+              index={index}
+              className={`w-full p-4 rounded-2xl transition-all text-left active:scale-[0.98] ${
                 isActive
                   ? "bg-secondary ring-2 ring-foreground"
                   : "bg-secondary/50"
               }`}
             >
-              <div className="flex-1 pr-2">
-                <span className="font-sans text-sm text-foreground">{option}</span>
-                {logos ? (
-                  <div className="flex items-center gap-4 mt-2">
-                    {logos.map((logo) => (
-                      <img
-                        key={logo.name}
-                        src={brandLogoMap[logo.image]}
-                        alt={logo.name}
-                        className="h-10 w-auto object-contain rounded-md bg-background border border-border shadow-sm transition-transform duration-200 hover:scale-110 active:scale-95"
-                      />
-                    ))}
+              <div className="flex items-center justify-between w-full">
+                <div className="flex-1 pr-2">
+                  <span className="font-sans text-sm text-foreground">{option}</span>
+                  {logos ? (
+                    <div className="flex items-center gap-4 mt-2">
+                      {logos.map((logo) => (
+                        <img
+                          key={logo.name}
+                          src={brandLogoMap[logo.image]}
+                          alt={logo.name}
+                          className="h-10 w-auto object-contain rounded-md bg-background border border-border shadow-sm transition-transform duration-200 hover:scale-110 active:scale-95"
+                        />
+                      ))}
+                    </div>
+                  ) : brands ? (
+                    <div className="flex flex-wrap gap-3 mt-1.5">
+                      {brands.map((brand) => (
+                        <span key={brand} className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
+                          {brand}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+                {isSingle ? (
+                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                    isActive ? "border-foreground bg-foreground" : "border-muted-foreground/30 bg-background"
+                  }`}>
+                    {isActive && <Check className="h-3.5 w-3.5 text-background" />}
                   </div>
-                ) : brands ? (
-                  <div className="flex flex-wrap gap-3 mt-1.5">
-                    {brands.map((brand) => (
-                      <span key={brand} className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
-                        {brand}
-                      </span>
-                    ))}
+                ) : (
+                  <div className={`w-5 h-5 rounded-[4px] border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                    isActive ? "border-foreground bg-foreground" : "border-muted-foreground/30 bg-background"
+                  }`}>
+                    {isActive && <Check className="h-3 w-3 text-background" />}
                   </div>
-                ) : null}
+                )}
               </div>
-              {isSingle ? (
-                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                  isActive ? "border-foreground bg-foreground" : "border-muted-foreground/30 bg-background"
-                }`}>
-                  {isActive && <Check className="h-3.5 w-3.5 text-background" />}
-                </div>
-              ) : (
-                <div className={`w-5 h-5 rounded-[4px] border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                  isActive ? "border-foreground bg-foreground" : "border-muted-foreground/30 bg-background"
-                }`}>
-                  {isActive && <Check className="h-3 w-3 text-background" />}
-                </div>
-              )}
-            </motion.button>
+            </SelectionFlip>
           );
         })}
       </div>
