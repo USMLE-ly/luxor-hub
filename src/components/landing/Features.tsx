@@ -119,7 +119,7 @@ const Features = () => {
           <p className="text-primary font-sans font-semibold text-sm tracking-widest uppercase mb-4">Capabilities</p>
           <h2 className="font-display text-4xl md:text-5xl font-bold">
             <TextReveal mode="word" as="span">Everything You Need to</TextReveal>{" "}
-            <span className="gold-text"><TextReveal mode="blur" as="span" delay={5}>Look Incredible</TextReveal></span>
+            <TextReveal mode="blur" as="span" delay={5} className="gold-text">Look Incredible</TextReveal>
           </h2>
         </motion.div>
 
