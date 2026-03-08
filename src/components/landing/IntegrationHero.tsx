@@ -37,7 +37,7 @@ export default function IntegrationHero() {
   const isInView = useInView(ref, { once: true, margin: "-50px" });
 
   return (
-    <section ref={ref} className="relative py-24 md:py-28 overflow-hidden bg-muted/30">
+    <section ref={ref} className="relative py-20 md:py-28 overflow-hidden">
       <div className="relative max-w-5xl mx-auto px-6">
         {/* Header */}
         <motion.div
