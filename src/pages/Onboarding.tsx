@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,6 +9,7 @@ import { ArrowRight, ArrowLeft } from "lucide-react";
 import GenderStep from "@/components/onboarding/GenderStep";
 import StepRenderer from "@/components/onboarding/StepRenderer";
 import { getStepsForGender, type OnboardingStep } from "@/components/onboarding/onboardingSteps";
+import SwipeParticles from "@/components/onboarding/SwipeParticles";
 
 // Haptic feedback utility
 const triggerHaptic = () => {
