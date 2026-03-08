@@ -453,9 +453,20 @@ const Closet = () => {
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
           <div className="flex items-center justify-between">
             <h1 className="font-display text-2xl font-bold text-foreground">My Closet</h1>
-            <span className="text-xs font-sans font-semibold text-muted-foreground bg-secondary px-3 py-1 rounded-full">
-              {items.length} ITEMS
-            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => receiptInputRef.current?.click()}
+                disabled={scanningReceipt}
+                className="text-xs font-sans font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full hover:bg-primary/20 transition-colors flex items-center gap-1"
+              >
+                {scanningReceipt ? <Loader2 className="w-3 h-3 animate-spin" /> : <Receipt className="w-3 h-3" />}
+                Scan Receipt
+              </button>
+              <input ref={receiptInputRef} type="file" accept="image/*" className="hidden" onChange={handleReceiptScan} />
+              <span className="text-xs font-sans font-semibold text-muted-foreground bg-secondary px-3 py-1 rounded-full">
+                {items.length} ITEMS
+              </span>
+            </div>
           </div>
         </motion.div>
 
