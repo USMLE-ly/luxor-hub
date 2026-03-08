@@ -41,6 +41,8 @@ const Onboarding = () => {
   const [loading, setLoading] = useState(false);
   const [aiResults, setAiResults] = useState<Record<string, any>>({});
   const [swipeDir, setSwipeDir] = useState<1 | -1>(1);
+  const [swipeVelocity, setSwipeVelocity] = useState({ x: 0, y: 0 });
+  const [swipeTrigger, setSwipeTrigger] = useState(0);
   const { user } = useAuth();
   const navigate = useNavigate();
 
