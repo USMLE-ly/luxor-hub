@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { ArrowUp } from "lucide-react";
 import AnnouncementBanner from "@/components/landing/AnnouncementBanner";
@@ -19,14 +19,15 @@ import ThemeShowcase from "@/components/landing/ThemeShowcase";
 import Footer from "@/components/landing/Footer";
 
 const ScrollProgressBar = () => {
-  const [progress, setProgress] = useState(0);
+  const barRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let rafId: number;
     const update = () => {
       const scrollTop = window.scrollY;
       const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      setProgress(docHeight > 0 ? scrollTop / docHeight : 0);
+      const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      if (barRef.current) barRef.current.style.transform = `scaleX(${pct / 100})`;
       rafId = requestAnimationFrame(update);
     };
     rafId = requestAnimationFrame(update);
@@ -36,8 +37,9 @@ const ScrollProgressBar = () => {
   return (
     <div className="fixed top-0 left-0 right-0 z-[60] h-[3px] pointer-events-none">
       <div
-        className="h-full bg-gradient-to-r from-primary via-primary/80 to-primary/60"
-        style={{ width: `${progress * 100}%`, transition: "width 0.05s linear" }}
+        ref={barRef}
+        className="h-full w-full origin-left bg-gradient-to-r from-primary via-primary/80 to-primary/60"
+        style={{ transform: "scaleX(0)" }}
       />
     </div>
   );
