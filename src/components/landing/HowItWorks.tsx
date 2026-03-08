@@ -1,6 +1,7 @@
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import { Camera, User, Wand2, TrendingUp } from "lucide-react";
 import { useRef } from "react";
+import { TextReveal } from "@/components/ui/animated-text-reveal";
 
 const steps = [
   { icon: Camera, title: "Scan Closet", desc: "Upload photos and let AI catalog every item in seconds.", num: "01" },
