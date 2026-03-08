@@ -2,7 +2,7 @@
 <html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>AURELIA — AI Personal Stylist OS</title>
     <meta name="description" content="Your AI stylist that knows you better than you know yourself. Upload your wardrobe, get daily outfits, shop smarter." />
     <meta name="author" content="AURELIA" />
@@ -10,6 +10,15 @@
     <meta property="og:description" content="Your AI stylist that knows you better than you know yourself." />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- PWA Meta -->
+    <meta name="theme-color" content="#C8A951" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="AURELIA" />
+    <link rel="apple-touch-icon" href="/pwa-192.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+
     <script>
       (function(){var t=localStorage.getItem('aurelia_theme');if(t==='light'){document.documentElement.classList.remove('dark')}})();
     </script>
