@@ -1499,31 +1499,32 @@ const StepRenderer = ({ step, answers, onSelect, gender, aiResults }: StepRender
           {step.options.map((option, index) => {
             const isActive = selected.includes(option);
             return (
-              <motion.button
+              <SelectionFlip
                 key={option}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.35, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                isActive={isActive}
                 onClick={() => onSelect(step.key, option, true)}
-                className={`flex items-center gap-4 p-3 rounded-2xl transition-all text-left active:scale-[0.98] ${
+                index={index}
+                className={`w-full gap-4 p-3 rounded-2xl transition-all text-left active:scale-[0.98] ${
                   isActive
                     ? "bg-secondary ring-2 ring-foreground"
                     : "bg-secondary/50"
                 }`}
               >
-                <div className="w-14 h-16 flex items-center justify-center flex-shrink-0 bg-white/90 dark:bg-white/95 rounded-lg">
-                  <FaceShapeSvg shape={option} size={44} />
+                <div className="flex items-center gap-4 w-full">
+                  <div className="w-14 h-16 flex items-center justify-center flex-shrink-0 bg-white/90 dark:bg-white/95 rounded-lg">
+                    <FaceShapeSvg shape={option} size={44} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="font-sans font-medium text-foreground block">{option}</span>
+                    <span className="font-sans text-xs text-muted-foreground leading-tight block mt-0.5">{faceShapeDescriptions[option]}</span>
+                  </div>
+                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                    isActive ? "border-foreground bg-foreground" : "border-muted-foreground/30 bg-background"
+                  }`}>
+                    {isActive && <Check className="h-3.5 w-3.5 text-background" />}
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <span className="font-sans font-medium text-foreground block">{option}</span>
-                  <span className="font-sans text-xs text-muted-foreground leading-tight block mt-0.5">{faceShapeDescriptions[option]}</span>
-                </div>
-                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                  isActive ? "border-foreground bg-foreground" : "border-muted-foreground/30 bg-background"
-                }`}>
-                  {isActive && <Check className="h-3.5 w-3.5 text-background" />}
-                </div>
-              </motion.button>
+              </SelectionFlip>
             );
           })}
         </div>
