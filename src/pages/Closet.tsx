@@ -10,10 +10,12 @@ import { toast } from "sonner";
 import {
   Plus, Search, Shirt, Trash2, Upload, X, Loader2, Sparkles, CheckCircle, Camera, ChevronRight,
   SlidersHorizontal, Activity, Eye, User, Layers, CalendarDays, Image, Save, FolderOpen, Heart,
+  Receipt,
 } from "lucide-react";
 import Mannequin3D, { type ClothingItem as MannequinClothingItem, type BodyDNA, type PosePreset } from "@/components/app/Mannequin3D";
 import { SLOT_MAP, DRESS_REPLACES, type GarmentFit } from "@/components/app/GarmentGeometry";
 import type { FabricType } from "@/components/app/FabricMaterials";
+import { WardrobeIntelligence } from "@/components/app/WardrobeIntelligence";
 
 /* Placeholder product images for empty closet sections */
 import imgCoatBelted from "@/assets/cal-f-coat-belted.jpg";
