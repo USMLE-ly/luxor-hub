@@ -37,6 +37,7 @@ import VideoAnalysis from "./pages/VideoAnalysis";
 import FashionDesigner from "./pages/FashionDesigner";
 import VirtualTryOn from "./pages/VirtualTryOn";
 import CommunityGallery from "./pages/CommunityGallery";
+import Install from "./pages/Install";
 
 const queryClient = new QueryClient();
 
