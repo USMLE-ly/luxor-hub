@@ -62,7 +62,7 @@ const Testimonials = React.forwardRef<HTMLElement>((_, ref) => {
   const nextIdx = (currentIndex + 1) % proofImages.length;
 
   return (
-    <section id="testimonials" className="relative py-28 bg-background text-foreground overflow-hidden">
+    <section id="testimonials" className="relative py-16 md:py-24 bg-background text-foreground overflow-hidden">
       {/* Premium Background */}
       <div className="absolute inset-0">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-primary/[0.06] rounded-full blur-[120px]" />
@@ -86,13 +86,13 @@ const Testimonials = React.forwardRef<HTMLElement>((_, ref) => {
       <div className="relative z-10 max-w-7xl mx-auto px-6">
         {/* Header */}
         <motion.div
-          className="text-center mb-16"
+          className="text-center mb-10"
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
         >
-          <motion.div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-primary/[0.08] border border-primary/20 backdrop-blur-md mb-8">
+          <motion.div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-primary/[0.08] border border-primary/20 backdrop-blur-md mb-5">
             <Sparkles className="h-4 w-4 text-primary" />
             <span className="text-sm font-semibold tracking-wide text-primary">Proven Results</span>
           </motion.div>

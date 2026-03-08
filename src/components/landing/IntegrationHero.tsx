@@ -13,13 +13,13 @@ const platforms = [
 
 /* SVG line from center to each platform node */
 function ConnectionLine({ angle, delay }: { angle: number; delay: number }) {
-  const r = 120; // orbit radius
-  const x2 = 150 + Math.cos((angle * Math.PI) / 180) * r;
-  const y2 = 150 + Math.sin((angle * Math.PI) / 180) * r;
+  const r = 140;
+  const x2 = 170 + Math.cos((angle * Math.PI) / 180) * r;
+  const y2 = 170 + Math.sin((angle * Math.PI) / 180) * r;
 
   return (
     <motion.line
-      x1="150" y1="150"
+      x1="170" y1="170"
       x2={x2} y2={y2}
       stroke="hsl(var(--primary))"
       strokeWidth="1"
@@ -37,7 +37,7 @@ export default function IntegrationHero() {
   const isInView = useInView(ref, { once: true, margin: "-50px" });
 
   return (
-    <section ref={ref} className="relative py-24 md:py-28 overflow-hidden bg-muted/30">
+    <section ref={ref} className="relative py-20 md:py-28 overflow-hidden">
       <div className="relative max-w-5xl mx-auto px-6">
         {/* Header */}
         <motion.div
@@ -47,19 +47,19 @@ export default function IntegrationHero() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h3 className="font-display text-2xl md:text-4xl font-bold text-foreground mb-2">
+          <h3 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-3">
             Connects to your <span className="gold-text">favorite platforms</span>
           </h3>
-          <p className="text-sm text-muted-foreground font-sans max-w-sm mx-auto">
+          <p className="text-sm md:text-base text-muted-foreground font-sans max-w-md mx-auto">
             Sync your style across Instagram, Pinterest, Shopify, and more.
           </p>
         </motion.div>
 
         {/* Orbital Desktop */}
         <div className="hidden md:flex items-center justify-center">
-          <div className="relative w-[300px] h-[300px]">
+          <div className="relative w-[340px] h-[340px]">
             {/* SVG connection lines */}
-            <svg className="absolute inset-0 w-full h-full" viewBox="0 0 300 300">
+            <svg className="absolute inset-0 w-full h-full" viewBox="0 0 340 340">
               {platforms.map((_, i) => (
                 <ConnectionLine
                   key={i}
@@ -82,9 +82,9 @@ export default function IntegrationHero() {
             {/* Platform nodes in circle */}
             {platforms.map((p, i) => {
               const angle = (i * 60 - 90) * (Math.PI / 180);
-              const r = 120;
-              const x = 150 + Math.cos(angle) * r - 28;
-              const y = 150 + Math.sin(angle) * r - 28;
+              const r = 140;
+              const x = 170 + Math.cos(angle) * r - 30;
+              const y = 170 + Math.sin(angle) * r - 30;
 
               return (
                 <motion.div
@@ -96,7 +96,7 @@ export default function IntegrationHero() {
                   className="absolute group"
                   style={{ left: x, top: y }}
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-card border border-border flex items-center justify-center group-hover:border-primary/40 group-hover:shadow-[0_0_20px_hsl(var(--primary)/0.15)] transition-all duration-300 p-2.5">
+                  <div className="w-[60px] h-[60px] rounded-2xl bg-card border border-border flex items-center justify-center group-hover:border-primary/40 group-hover:shadow-[0_0_20px_hsl(var(--primary)/0.15)] transition-all duration-300 p-2.5">
                     {'textLogo' in p && p.textLogo ? (
                       <span className="text-sm font-bold text-muted-foreground group-hover:text-foreground transition-colors duration-300 tracking-wider">
                         ASOS
