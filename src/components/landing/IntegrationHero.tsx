@@ -1,5 +1,5 @@
 import { motion, useInView } from "framer-motion";
-import { useRef, useState, useEffect, useCallback, useMemo } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import { Sparkles } from "lucide-react";
 
 const platforms = [
@@ -11,100 +11,54 @@ const platforms = [
   { name: "Zara", logo: "/logos/zara.png" },
 ];
 
-/* ── Tiny floating particles around center ── */
-const PARTICLE_COUNT = 12;
+/* Floating particles around center — pure CSS driven */
 function CenterParticles() {
   const particles = useMemo(
     () =>
-      Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
-        id: i,
-        angle: (i / PARTICLE_COUNT) * 360,
-        distance: 36 + Math.random() * 28,
-        size: 2 + Math.random() * 2.5,
-        duration: 3 + Math.random() * 4,
-        delay: Math.random() * 3,
-      })),
+      Array.from({ length: 10 }, (_, i) => {
+        const angle = (i / 10) * 360;
+        const rad = (angle * Math.PI) / 180;
+        const dist = 34 + Math.random() * 24;
+        return {
+          id: i,
+          x: Math.cos(rad) * dist,
+          y: Math.sin(rad) * dist,
+          size: 2 + Math.random() * 2,
+          duration: 3 + Math.random() * 3,
+          delay: Math.random() * 2,
+        };
+      }),
     []
   );
 
   return (
     <div className="absolute inset-0 pointer-events-none">
-      {particles.map((p) => {
-        const rad = (p.angle * Math.PI) / 180;
-        const x = Math.cos(rad) * p.distance;
-        const y = Math.sin(rad) * p.distance;
-        return (
-          <motion.div
-            key={p.id}
-            className="absolute top-1/2 left-1/2 rounded-full bg-primary/60"
-            style={{ width: p.size, height: p.size }}
-            initial={{ x, y, opacity: 0, scale: 0 }}
-            animate={{
-              x: [x, x * 1.3, x],
-              y: [y, y * 1.3, y],
-              opacity: [0, 0.8, 0],
-              scale: [0, 1, 0],
-            }}
-            transition={{
-              duration: p.duration,
-              delay: p.delay,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-        );
-      })}
+      {particles.map((p) => (
+        <motion.div
+          key={p.id}
+          className="absolute top-1/2 left-1/2 rounded-full bg-primary/50"
+          style={{ width: p.size, height: p.size }}
+          animate={{
+            x: [p.x, p.x * 1.4, p.x],
+            y: [p.y, p.y * 1.4, p.y],
+            opacity: [0, 0.7, 0],
+            scale: [0, 1, 0],
+          }}
+          transition={{
+            duration: p.duration,
+            delay: p.delay,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
     </div>
   );
-}
-
-function useIsMd() {
-  const [isMd, setIsMd] = useState(() =>
-    typeof window !== "undefined" ? window.innerWidth >= 768 : true
-  );
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 768px)");
-    const handler = (e: MediaQueryListEvent) => setIsMd(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
-  return isMd;
 }
 
 export default function IntegrationHero() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
-  const [rotationAngle, setRotationAngle] = useState(0);
-  const [activeNode, setActiveNode] = useState<number | null>(null);
-  const isMd = useIsMd();
-
-  const radius = isMd ? 180 : 140;
-  const containerSize = isMd ? 440 : 340;
-  const center = containerSize / 2;
-
-  useEffect(() => {
-    if (!isInView) return;
-    const timer = setInterval(() => {
-      if (activeNode === null) {
-        setRotationAngle((prev) => (prev + 0.25) % 360);
-      }
-    }, 50);
-    return () => clearInterval(timer);
-  }, [isInView, activeNode]);
-
-  const getNodePosition = useCallback(
-    (index: number, total: number) => {
-      const angle = ((index / total) * 360 + rotationAngle) % 360;
-      const radian = (angle * Math.PI) / 180;
-      const x = Math.cos(radian) * radius;
-      const y = Math.sin(radian) * radius;
-      const opacity = Math.max(0.5, Math.min(1, 0.5 + 0.5 * ((1 + Math.sin(radian)) / 2)));
-      const scale = 0.85 + 0.15 * ((1 + Math.sin(radian)) / 2);
-      const zIndex = Math.round(10 + 5 * Math.cos(radian));
-      return { x, y, opacity, scale, zIndex };
-    },
-    [rotationAngle, radius]
-  );
 
   return (
     <section ref={ref} className="relative py-20 md:py-28 overflow-hidden">
@@ -125,23 +79,13 @@ export default function IntegrationHero() {
           </p>
         </motion.div>
 
-        {/* Orbital System */}
+        {/* Orbital System — CSS rotation, no JS interval */}
         <div className="flex items-center justify-center">
-          <div
-            className="relative"
-            style={{ width: containerSize, height: containerSize }}
-            onClick={() => setActiveNode(null)}
-          >
+          <div className="relative w-[320px] h-[320px] md:w-[440px] md:h-[440px]">
             {/* Orbit rings */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <div
-                className="absolute rounded-full border border-border/30"
-                style={{ width: radius * 2, height: radius * 2 }}
-              />
-              <div
-                className="absolute rounded-full border border-border/15"
-                style={{ width: radius * 1.45, height: radius * 1.45 }}
-              />
+              <div className="absolute w-[280px] h-[280px] md:w-[380px] md:h-[380px] rounded-full border border-border/30" />
+              <div className="absolute w-[200px] h-[200px] md:w-[280px] md:h-[280px] rounded-full border border-border/20" />
             </div>
 
             {/* Center pulsing node + particles */}
@@ -161,93 +105,72 @@ export default function IntegrationHero() {
                   <Sparkles className="w-4 h-4 text-primary" />
                 </div>
               </div>
-              {/* Particles */}
               <CenterParticles />
             </motion.div>
 
-            {/* Connection lines SVG */}
-            <svg
-              className="absolute inset-0 w-full h-full pointer-events-none"
-              viewBox={`0 0 ${containerSize} ${containerSize}`}
+            {/* Rotating orbit container — pure CSS animation */}
+            <div
+              className="absolute inset-0"
+              style={{ animation: "spin 60s linear infinite" }}
             >
-              {platforms.map((_, i) => {
-                const pos = getNodePosition(i, platforms.length);
+              {/* SVG connection lines */}
+              <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                {platforms.map((_, i) => {
+                  const angle = (i / platforms.length) * 360 - 90;
+                  const rad = (angle * Math.PI) / 180;
+                  // Use percentages based on viewbox
+                  const cx = "50%";
+                  const cy = "50%";
+                  const r = 44; // percent
+                  const x2 = 50 + Math.cos(rad) * r;
+                  const y2 = 50 + Math.sin(rad) * r;
+                  return (
+                    <line
+                      key={`line-${i}`}
+                      x1="50%"
+                      y1="50%"
+                      x2={`${x2}%`}
+                      y2={`${y2}%`}
+                      stroke="hsl(var(--primary))"
+                      strokeWidth="1"
+                      strokeDasharray="4 4"
+                      opacity="0.25"
+                    />
+                  );
+                })}
+              </svg>
+
+              {/* Platform nodes positioned in circle */}
+              {platforms.map((p, i) => {
+                const angle = (i / platforms.length) * 360 - 90;
+                const rad = (angle * Math.PI) / 180;
+                const rPercent = 44;
+                const left = 50 + Math.cos(rad) * rPercent;
+                const top = 50 + Math.sin(rad) * rPercent;
+
                 return (
-                  <line
-                    key={`line-${i}`}
-                    x1={center}
-                    y1={center}
-                    x2={center + pos.x}
-                    y2={center + pos.y}
-                    stroke="hsl(var(--primary))"
-                    strokeWidth="1"
-                    strokeDasharray="4 4"
-                    opacity={pos.opacity * 0.3}
-                  />
-                );
-              })}
-            </svg>
-
-            {/* Platform nodes */}
-            {platforms.map((p, i) => {
-              const pos = getNodePosition(i, platforms.length);
-              const isActive = activeNode === i;
-              const nodeSize = isMd ? 60 : 56;
-              const halfNode = nodeSize / 2;
-
-              return (
-                <motion.div
-                  key={p.name}
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={
-                    isInView
-                      ? {
-                          scale: isActive ? 1.3 : pos.scale,
-                          opacity: pos.opacity,
-                          x: pos.x,
-                          y: pos.y,
-                        }
-                      : { scale: 0, opacity: 0 }
-                  }
-                  transition={{ duration: 0.4, ease: "easeOut" }}
-                  className="absolute cursor-pointer"
-                  style={{
-                    top: center - halfNode,
-                    left: center - halfNode,
-                    zIndex: isActive ? 50 : pos.zIndex,
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveNode(isActive ? null : i);
-                  }}
-                >
-                  {/* Energy glow */}
-                  <div
-                    className="absolute rounded-full"
+                  <motion.div
+                    key={p.name}
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={isInView ? { scale: 1, opacity: 1 } : {}}
+                    transition={{ delay: 0.3 + i * 0.1, type: "spring", stiffness: 250, damping: 20 }}
+                    className="absolute -translate-x-1/2 -translate-y-1/2 group"
                     style={{
-                      background: `radial-gradient(circle, hsl(var(--primary) / 0.15) 0%, transparent 70%)`,
-                      width: nodeSize + 16,
-                      height: nodeSize + 16,
-                      left: -8,
-                      top: -8,
+                      left: `${left}%`,
+                      top: `${top}%`,
+                      /* Counter-rotate so logos stay upright */
+                      animation: "spin 60s linear infinite reverse",
                     }}
-                  />
-
-                  <div
-                    className="rounded-full flex items-center justify-center border-2 transition-all duration-300"
-                    style={{ width: nodeSize, height: nodeSize }}
                   >
+                    {/* Glow */}
                     <div
-                      className={`
-                        w-full h-full rounded-full flex items-center justify-center
-                        border-2 transition-all duration-300
-                        ${
-                          isActive
-                            ? "bg-card border-primary shadow-[0_0_20px_hsl(var(--primary)/0.3)]"
-                            : "bg-card/80 backdrop-blur-sm border-border/50 hover:border-primary/40"
-                        }
-                      `}
-                    >
+                      className="absolute -inset-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      style={{
+                        background: `radial-gradient(circle, hsl(var(--primary) / 0.2) 0%, transparent 70%)`,
+                      }}
+                    />
+
+                    <div className="w-[56px] h-[56px] md:w-[64px] md:h-[64px] rounded-full flex items-center justify-center border-2 border-border/50 bg-card/90 backdrop-blur-sm group-hover:border-primary/40 group-hover:shadow-[0_0_20px_hsl(var(--primary)/0.15)] transition-all duration-300">
                       {"textLogo" in p && p.textLogo ? (
                         <span className="text-xs font-bold text-muted-foreground tracking-wider">
                           ASOS
@@ -256,27 +179,20 @@ export default function IntegrationHero() {
                         <img
                           src={p.logo}
                           alt={p.name}
-                          className="w-8 h-8 object-contain"
+                          className="w-7 h-7 md:w-8 md:h-8 object-contain"
                           loading="lazy"
                         />
                       )}
                     </div>
-                  </div>
 
-                  {/* Name label */}
-                  <div
-                    className={`
-                      absolute -bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap
-                      text-[10px] font-sans font-semibold tracking-wider uppercase
-                      transition-all duration-300
-                      ${isActive ? "text-primary" : "text-muted-foreground/70"}
-                    `}
-                  >
-                    {p.name}
-                  </div>
-                </motion.div>
-              );
-            })}
+                    {/* Name label */}
+                    <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-sans font-semibold tracking-wider uppercase text-muted-foreground/70 group-hover:text-primary transition-colors duration-300">
+                      {p.name}
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
