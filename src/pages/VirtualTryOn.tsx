@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import {
-  Upload, Loader2, Sparkles, Camera, Download, ArrowRight, Image as ImageIcon, Shirt, X
+  Upload, Loader2, Sparkles, Camera, Download, ArrowRight, Image as ImageIcon, Shirt, X, Share2, Copy, Check
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
