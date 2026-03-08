@@ -419,6 +419,11 @@ const Chat = () => {
           </div>
         )}
 
+        {/* Mood Selector */}
+        <div className="px-4">
+          <MoodSelector selected={currentMood} onSelect={setCurrentMood} />
+        </div>
+
         {/* Input Area */}
         <div className="px-4 pb-4 pt-2">
           <div className="flex items-end gap-2 bg-card border border-border rounded-2xl px-3 py-2">
