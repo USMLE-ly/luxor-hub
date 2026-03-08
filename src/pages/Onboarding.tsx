@@ -10,6 +10,7 @@ import GenderStep from "@/components/onboarding/GenderStep";
 import StepRenderer from "@/components/onboarding/StepRenderer";
 import { getStepsForGender, type OnboardingStep } from "@/components/onboarding/onboardingSteps";
 import SwipeParticles from "@/components/onboarding/SwipeParticles";
+import { useGyroTilt } from "@/hooks/useGyroTilt";
 
 // Haptic feedback utility
 const triggerHaptic = () => {
