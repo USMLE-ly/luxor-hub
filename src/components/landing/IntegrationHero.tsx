@@ -57,7 +57,7 @@ export default function IntegrationHero() {
 
         {/* Orbital Desktop */}
         <div className="hidden md:flex items-center justify-center">
-          <div className="relative w-[300px] h-[300px]">
+          <div className="relative w-[340px] h-[340px]">
             {/* SVG connection lines */}
             <svg className="absolute inset-0 w-full h-full" viewBox="0 0 300 300">
               {platforms.map((_, i) => (
