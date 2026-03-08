@@ -1,5 +1,5 @@
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Sparkles } from "lucide-react";
 
 const platforms = [
@@ -11,30 +11,32 @@ const platforms = [
   { name: "Zara", logo: "/logos/zara.png" },
 ];
 
-/* SVG line from center to each platform node */
-function ConnectionLine({ angle, delay }: { angle: number; delay: number }) {
-  const r = 140;
-  const x2 = 170 + Math.cos((angle * Math.PI) / 180) * r;
-  const y2 = 170 + Math.sin((angle * Math.PI) / 180) * r;
-
-  return (
-    <motion.line
-      x1="170" y1="170"
-      x2={x2} y2={y2}
-      stroke="hsl(var(--primary))"
-      strokeWidth="1"
-      strokeDasharray="6 4"
-      initial={{ pathLength: 0, opacity: 0 }}
-      whileInView={{ pathLength: 1, opacity: 0.3 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.8, delay }}
-    />
-  );
-}
-
 export default function IntegrationHero() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
+  const [rotationAngle, setRotationAngle] = useState(0);
+  const [activeNode, setActiveNode] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!isInView) return;
+    const timer = setInterval(() => {
+      if (activeNode === null) {
+        setRotationAngle((prev) => (prev + 0.25) % 360);
+      }
+    }, 50);
+    return () => clearInterval(timer);
+  }, [isInView, activeNode]);
+
+  const getNodePosition = (index: number, total: number, radius: number) => {
+    const angle = ((index / total) * 360 + rotationAngle) % 360;
+    const radian = (angle * Math.PI) / 180;
+    const x = Math.cos(radian) * radius;
+    const y = Math.sin(radian) * radius;
+    const opacity = Math.max(0.5, Math.min(1, 0.5 + 0.5 * ((1 + Math.sin(radian)) / 2)));
+    const scale = 0.8 + 0.2 * ((1 + Math.sin(radian)) / 2);
+    const zIndex = Math.round(10 + 5 * Math.cos(radian));
+    return { x, y, opacity, scale, zIndex };
+  };
 
   return (
     <section ref={ref} className="relative py-20 md:py-28 overflow-hidden">
@@ -45,7 +47,7 @@ export default function IntegrationHero() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-12 md:mb-16"
         >
           <h3 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-3">
             Connects to your <span className="gold-text">favorite platforms</span>
@@ -55,88 +57,139 @@ export default function IntegrationHero() {
           </p>
         </motion.div>
 
-        {/* Orbital Desktop */}
-        <div className="hidden md:flex items-center justify-center">
-          <div className="relative w-[340px] h-[340px]">
-            {/* SVG connection lines */}
-            <svg className="absolute inset-0 w-full h-full" viewBox="0 0 340 340">
-              {platforms.map((_, i) => (
-                <ConnectionLine
-                  key={i}
-                  angle={i * 60 - 90}
-                  delay={0.2 + i * 0.08}
-                />
-              ))}
-            </svg>
+        {/* Orbital System */}
+        <div className="flex items-center justify-center">
+          <div
+            className="relative w-[320px] h-[320px] md:w-[440px] md:h-[440px]"
+            onClick={() => setActiveNode(null)}
+          >
+            {/* Orbit rings */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="absolute w-[260px] h-[260px] md:w-[360px] md:h-[360px] rounded-full border border-border/30" />
+              <div className="absolute w-[200px] h-[200px] md:w-[280px] md:h-[280px] rounded-full border border-border/15" />
+            </div>
 
-            {/* Center node */}
+            {/* Center pulsing node */}
             <motion.div
               initial={{ scale: 0, opacity: 0 }}
               animate={isInView ? { scale: 1, opacity: 1 } : {}}
               transition={{ type: "spring", stiffness: 200, damping: 20 }}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-card border-2 border-primary/40 flex items-center justify-center shadow-[0_0_30px_hsl(var(--primary)/0.2)] z-10"
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20"
             >
-              <Sparkles className="w-6 h-6 text-primary" />
+              <div className="relative w-14 h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-primary via-primary/80 to-accent flex items-center justify-center">
+                {/* Ping rings */}
+                <div className="absolute w-[72px] h-[72px] md:w-[80px] md:h-[80px] rounded-full border border-primary/20 animate-ping opacity-60" />
+                <div
+                  className="absolute w-[88px] h-[88px] md:w-[96px] md:h-[96px] rounded-full border border-primary/10 animate-ping opacity-40"
+                  style={{ animationDelay: "0.5s" }}
+                />
+                <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-primary-foreground/80 backdrop-blur-md flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                </div>
+              </div>
             </motion.div>
 
-            {/* Platform nodes in circle */}
+            {/* Connection lines SVG */}
+            <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ overflow: "visible" }}>
+              {platforms.map((_, i) => {
+                const pos = getNodePosition(i, platforms.length, window.innerWidth >= 768 ? 180 : 130);
+                const cx = (window.innerWidth >= 768 ? 220 : 160);
+                const cy = cx;
+                return (
+                  <motion.line
+                    key={`line-${i}`}
+                    x1={cx}
+                    y1={cy}
+                    x2={cx + pos.x}
+                    y2={cy + pos.y}
+                    stroke="hsl(var(--primary))"
+                    strokeWidth="1"
+                    strokeDasharray="4 4"
+                    opacity={pos.opacity * 0.3}
+                  />
+                );
+              })}
+            </svg>
+
+            {/* Platform nodes */}
             {platforms.map((p, i) => {
-              const angle = (i * 60 - 90) * (Math.PI / 180);
-              const r = 140;
-              const x = 170 + Math.cos(angle) * r - 30;
-              const y = 170 + Math.sin(angle) * r - 30;
+              const radius = typeof window !== "undefined" && window.innerWidth >= 768 ? 180 : 130;
+              const pos = getNodePosition(i, platforms.length, radius);
+              const isActive = activeNode === i;
 
               return (
                 <motion.div
                   key={p.name}
                   initial={{ scale: 0, opacity: 0 }}
-                  animate={isInView ? { scale: 1, opacity: 1 } : {}}
-                  transition={{ delay: 0.3 + i * 0.08, type: "spring", stiffness: 250, damping: 20 }}
-                  whileHover={{ scale: 1.25, zIndex: 20 }}
-                  className="absolute group"
-                  style={{ left: x, top: y }}
+                  animate={
+                    isInView
+                      ? {
+                          scale: isActive ? 1.3 : pos.scale,
+                          opacity: pos.opacity,
+                          x: pos.x,
+                          y: pos.y,
+                        }
+                      : { scale: 0, opacity: 0 }
+                  }
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  className="absolute top-1/2 left-1/2 -ml-[26px] -mt-[26px] md:-ml-[30px] md:-mt-[30px] cursor-pointer"
+                  style={{ zIndex: isActive ? 50 : pos.zIndex }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveNode(isActive ? null : i);
+                  }}
                 >
-                  <div className="w-[60px] h-[60px] rounded-2xl bg-card border border-border flex items-center justify-center group-hover:border-primary/40 group-hover:shadow-[0_0_20px_hsl(var(--primary)/0.15)] transition-all duration-300 p-2.5">
-                    {'textLogo' in p && p.textLogo ? (
-                      <span className="text-sm font-bold text-muted-foreground group-hover:text-foreground transition-colors duration-300 tracking-wider">
+                  {/* Energy glow */}
+                  <div
+                    className="absolute rounded-full"
+                    style={{
+                      background: `radial-gradient(circle, hsl(var(--primary) / 0.15) 0%, transparent 70%)`,
+                      width: "70px",
+                      height: "70px",
+                      left: "-9px",
+                      top: "-9px",
+                    }}
+                  />
+
+                  <div
+                    className={`
+                      w-[52px] h-[52px] md:w-[60px] md:h-[60px] rounded-full flex items-center justify-center
+                      border-2 transition-all duration-300
+                      ${
+                        isActive
+                          ? "bg-card border-primary shadow-[0_0_20px_hsl(var(--primary)/0.3)]"
+                          : "bg-card/80 backdrop-blur-sm border-border/50 hover:border-primary/40"
+                      }
+                    `}
+                  >
+                    {"textLogo" in p && p.textLogo ? (
+                      <span className="text-[10px] md:text-xs font-bold text-muted-foreground tracking-wider">
                         ASOS
                       </span>
                     ) : (
-                      <img src={p.logo} alt={p.name} className="w-full h-full object-contain" loading="lazy" />
+                      <img
+                        src={p.logo}
+                        alt={p.name}
+                        className="w-7 h-7 md:w-8 md:h-8 object-contain"
+                        loading="lazy"
+                      />
                     )}
                   </div>
-                  {/* Name tooltip */}
-                  <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    <span className="text-[10px] font-sans font-medium text-primary whitespace-nowrap">{p.name}</span>
+
+                  {/* Name label */}
+                  <div
+                    className={`
+                      absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap
+                      text-[10px] font-sans font-semibold tracking-wider uppercase
+                      transition-all duration-300
+                      ${isActive ? "text-primary" : "text-muted-foreground/70"}
+                    `}
+                  >
+                    {p.name}
                   </div>
                 </motion.div>
               );
             })}
-          </div>
-        </div>
-
-        {/* Mobile: horizontal scroll */}
-        <div className="md:hidden -mx-4 px-4 overflow-x-auto scrollbar-hide">
-          <div className="flex gap-4 snap-x snap-mandatory pb-4" style={{ minWidth: "min-content" }}>
-            {platforms.map((p, i) => (
-              <motion.div
-                key={p.name}
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1 + i * 0.06, duration: 0.4 }}
-                className="snap-center shrink-0 flex flex-col items-center gap-1.5"
-              >
-                <div className="w-14 h-14 rounded-2xl bg-card border border-border flex items-center justify-center p-2.5">
-                  {'textLogo' in p && p.textLogo ? (
-                    <span className="text-sm font-bold text-muted-foreground tracking-wider">ASOS</span>
-                  ) : (
-                    <img src={p.logo} alt={p.name} className="w-full h-full object-contain" loading="lazy" />
-                  )}
-                </div>
-                <span className="text-[10px] font-sans font-medium text-muted-foreground">{p.name}</span>
-              </motion.div>
-            ))}
           </div>
         </div>
       </div>
