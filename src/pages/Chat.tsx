@@ -12,6 +12,7 @@ import { VoiceInput } from "@/components/app/VoiceInput";
 import { useAnimatedText } from "@/components/ui/animated-text";
 import { PlaceholdersAndVanishInput } from "@/components/ui/placeholders-and-vanish-input";
 import { useAutoResizeTextarea } from "@/hooks/use-auto-resize-textarea";
+import { MoodSelector } from "@/components/app/MoodSelector";
 
 interface Message {
   id?: string;
