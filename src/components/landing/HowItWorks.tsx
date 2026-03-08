@@ -1,5 +1,6 @@
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import { Camera, User, Wand2, TrendingUp } from "lucide-react";
+import { useRef } from "react";
 
 const steps = [
   { icon: Camera, title: "Scan Closet", desc: "Upload photos and let AI catalog every item in seconds.", num: "01" },
@@ -16,16 +17,55 @@ const GoldDivider = () => (
   </div>
 );
 
-const HowItWorks = () => {
+function TimelineNode({ step, index }: { step: typeof steps[0]; index: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
+
   return (
-    <section className="relative py-24 px-4 overflow-hidden" id="how-it-works">
+    <div ref={ref} className="absolute left-1/2 -translate-x-1/2 z-10">
+      <motion.div
+        initial={{ scale: 0.6, opacity: 0 }}
+        animate={isInView ? { scale: 1, opacity: 1 } : {}}
+        transition={{ duration: 0.5, delay: index * 0.15, type: "spring", stiffness: 300 }}
+        className="relative"
+      >
+        <div className="w-14 h-14 rounded-full bg-card border-2 border-primary/40 flex items-center justify-center shadow-[0_0_20px_hsl(var(--primary)/0.15)] transition-shadow">
+          <motion.div
+            initial={{ rotate: -30, scale: 0.8 }}
+            animate={isInView ? { rotate: 0, scale: 1 } : {}}
+            transition={{ duration: 0.6, delay: index * 0.15 + 0.2 }}
+          >
+            <step.icon className="w-6 h-6 text-primary" />
+          </motion.div>
+        </div>
+        {/* Gold pulse ring on reveal */}
+        {isInView && (
+          <motion.div
+            className="absolute inset-0 rounded-full border border-primary/40"
+            initial={{ scale: 1, opacity: 0.8 }}
+            animate={{ scale: 2.5, opacity: 0 }}
+            transition={{ duration: 1.2, delay: index * 0.15 + 0.1 }}
+          />
+        )}
+      </motion.div>
+    </div>
+  );
+}
+
+const HowItWorks = () => {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  });
+  // Animated line that draws as user scrolls
+  const lineHeight = useTransform(scrollYProgress, [0.15, 0.75], ["0%", "100%"]);
+
+  return (
+    <section ref={sectionRef} className="relative py-24 px-4 overflow-hidden" id="how-it-works">
       <div
         className="absolute inset-0 opacity-[0.04] dark:opacity-[0.03] pointer-events-none"
-        style={{
-          backgroundImage: `url('/patterns/linear-texture.svg')`,
-          backgroundSize: "400px 400px",
-          backgroundRepeat: "repeat",
-        }}
+        style={{ backgroundImage: `url('/patterns/linear-texture.svg')`, backgroundSize: "400px 400px", backgroundRepeat: "repeat" }}
       />
       <div className="relative max-w-5xl mx-auto">
         <motion.div
@@ -45,10 +85,13 @@ const HowItWorks = () => {
 
         {/* Vertical Timeline — Desktop */}
         <div className="hidden md:block relative mt-16">
-          {/* Connecting gradient line */}
-          <div className="absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2">
-            <div className="w-full h-full bg-gradient-to-b from-primary/60 via-primary/30 to-primary/10" />
-          </div>
+          {/* Background line (dim) */}
+          <div className="absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 bg-border" />
+          {/* Animated drawing line */}
+          <motion.div
+            className="absolute left-1/2 top-0 w-px -translate-x-1/2 bg-gradient-to-b from-primary/60 via-primary/40 to-primary/20 origin-top"
+            style={{ height: lineHeight }}
+          />
 
           <div className="flex flex-col gap-0">
             {steps.map((step, i) => {
@@ -63,14 +106,8 @@ const HowItWorks = () => {
                   className="relative flex items-center"
                   style={{ minHeight: "180px" }}
                 >
-                  {/* Center node */}
-                  <div className="absolute left-1/2 -translate-x-1/2 z-10">
-                    <div className="w-14 h-14 rounded-full bg-card border-2 border-primary/40 flex items-center justify-center shadow-[0_0_20px_hsl(var(--primary)/0.15)] group-hover:shadow-[0_0_30px_hsl(var(--primary)/0.3)] transition-shadow">
-                      <step.icon className="w-6 h-6 text-primary" />
-                    </div>
-                  </div>
+                  <TimelineNode step={step} index={i} />
 
-                  {/* Content card — alternates sides */}
                   <div className={`w-[calc(50%-3.5rem)] ${isLeft ? "mr-auto pr-8" : "ml-auto pl-8"}`}>
                     <motion.div
                       className="group glass rounded-2xl p-6 border border-border hover:border-primary/30 transition-all duration-300 cursor-default"
@@ -112,6 +149,12 @@ const HowItWorks = () => {
                   <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
                 </div>
               </motion.div>
+            ))}
+          </div>
+          {/* Snap indicators */}
+          <div className="flex justify-center gap-1.5 mt-4">
+            {steps.map((_, i) => (
+              <div key={i} className="w-1.5 h-1.5 rounded-full bg-primary/30" />
             ))}
           </div>
         </div>
