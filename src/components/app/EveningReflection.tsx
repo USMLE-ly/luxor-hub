@@ -25,20 +25,20 @@ export function EveningReflection() {
     if (!user || selectedMood === null) return;
     setSubmitting(true);
     try {
-      const { error } = await supabase.from("outfit_feedback" as any).insert({
+      const { error } = await (supabase.from("outfit_feedback" as any).insert({
         user_id: user.id,
         rating: moods[selectedMood].rating,
         compliments,
         notes: note || null,
-      });
+      }) as any);
       if (error) throw error;
 
       // Award style points for reflection
-      await supabase.from("style_points" as any).insert({
+      await (supabase.from("style_points" as any).insert({
         user_id: user.id,
         points: 5,
         reason: "Evening outfit reflection",
-      });
+      }) as any);
 
       setSubmitted(true);
       toast.success("Reflection saved! +5 style points ✨");

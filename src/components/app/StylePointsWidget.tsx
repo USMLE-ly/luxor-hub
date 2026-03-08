@@ -20,12 +20,12 @@ export function StylePointsWidget() {
     if (!user) return;
     const load = async () => {
       const [totalRes, recentRes] = await Promise.all([
-        supabase.from("style_points" as any).select("points").eq("user_id", user.id),
-        supabase.from("style_points" as any).select("points, reason, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(5),
+        supabase.from("style_points" as any).select("points").eq("user_id", user.id) as any,
+        supabase.from("style_points" as any).select("points, reason, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(5) as any,
       ]);
 
       if (totalRes.data) {
-        setTotalPoints((totalRes.data as any[]).reduce((sum, r) => sum + r.points, 0));
+        setTotalPoints((totalRes.data as any[]).reduce((sum: number, r: any) => sum + r.points, 0));
       }
       if (recentRes.data) setRecentPoints(recentRes.data as PointEntry[]);
       setLoading(false);
