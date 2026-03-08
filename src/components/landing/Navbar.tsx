@@ -13,12 +13,27 @@ import {
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState("");
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+
+      // Track active section
+      const sections = ["features", "how-it-works", "pricing"];
+      let current = "";
+      for (const id of sections) {
+        const el = document.getElementById(id);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= 200) current = id;
+        }
+      }
+      setActiveSection(current);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -37,22 +52,46 @@ const Navbar = () => {
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? "glass-strong py-3" : "py-5"
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        scrolled ? "glass-strong py-2.5" : "py-5"
       }`}
     >
+      {/* Gold bottom line on scroll */}
+      {scrolled && (
+        <motion.div
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent"
+        />
+      )}
+
       <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
-        <h1
-          className="font-display text-2xl font-bold gold-text cursor-pointer transition-all duration-300 hover:drop-shadow-[0_0_8px_hsl(43,74%,49%,0.5)]"
+        <motion.h1
+          className="font-display text-2xl font-bold gold-text cursor-pointer"
           onClick={() => navigate("/")}
+          whileHover={{ letterSpacing: "0.08em" }}
+          transition={{ duration: 0.3 }}
         >
           AURELIA
-        </h1>
+        </motion.h1>
 
-        <div className="hidden md:flex items-center gap-8 text-sm font-sans text-muted-foreground">
+        <div className="hidden md:flex items-center gap-8 text-sm font-sans">
           {navLinks.map((link) => (
-            <button key={link.id} onClick={() => scrollTo(link.id)} className="hover:text-foreground transition-colors">
-              {link.label}
+            <button
+              key={link.id}
+              onClick={() => scrollTo(link.id)}
+              className="relative py-1 transition-colors hover:text-foreground"
+            >
+              <span className={activeSection === link.id ? "text-primary font-medium" : "text-muted-foreground"}>
+                {link.label}
+              </span>
+              {activeSection === link.id && (
+                <motion.div
+                  layoutId="nav-underline"
+                  className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary rounded-full"
+                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                />
+              )}
             </button>
           ))}
         </div>
@@ -69,16 +108,19 @@ const Navbar = () => {
             <span className="sr-only">Toggle theme</span>
           </Button>
 
-          {/* Desktop buttons */}
           <Button variant="ghost" size="sm" className="hidden md:inline-flex font-sans" onClick={() => navigate("/auth")}>
             Log In
           </Button>
-          <RainbowButton
-            onClick={() => navigate("/auth")}
-            className="hidden md:inline-flex h-9 px-4 text-sm font-semibold"
-          >
-            Get Started
-          </RainbowButton>
+          <div className="hidden md:block relative">
+            <RainbowButton
+              onClick={() => navigate("/auth")}
+              className="h-9 px-4 text-sm font-semibold"
+            >
+              Get Started
+            </RainbowButton>
+            {/* Pulse dot */}
+            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.6)] animate-pulse" />
+          </div>
 
           {/* Mobile hamburger */}
           <Sheet>
@@ -95,7 +137,9 @@ const Navbar = () => {
                     <button
                       key={link.id}
                       onClick={() => scrollTo(link.id)}
-                      className="text-left py-3 text-base font-sans text-muted-foreground hover:text-foreground transition-colors border-b border-primary/10"
+                      className={`text-left py-3 text-base font-sans transition-colors border-b border-primary/10 ${
+                        activeSection === link.id ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
+                      }`}
                     >
                       {link.label}
                     </button>

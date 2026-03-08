@@ -3,6 +3,7 @@ import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion"
 import { ArrowUp } from "lucide-react";
 import Navbar from "@/components/landing/Navbar";
 import Hero from "@/components/landing/Hero";
+import SocialProofStrip from "@/components/landing/SocialProofStrip";
 import HowItWorks from "@/components/landing/HowItWorks";
 import Features from "@/components/landing/Features";
 import AppPreview from "@/components/landing/AppPreview";
@@ -10,6 +11,7 @@ import BrandMarquee from "@/components/landing/BrandMarquee";
 import IntegrationHero from "@/components/landing/IntegrationHero";
 import Pricing from "@/components/landing/Pricing";
 import Testimonials from "@/components/landing/Testimonials";
+import FAQ from "@/components/landing/FAQ";
 import Footer from "@/components/landing/Footer";
 
 const ScrollProgressBar = () => {
@@ -37,32 +39,34 @@ const ScrollProgressBar = () => {
   );
 };
 
-const BackToTop = () => {
-  const [show, setShow] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setShow(window.scrollY > window.innerHeight);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+/* Section reveal wrapper */
+const SectionReveal = ({ children, direction = "up" }: { children: React.ReactNode; direction?: "up" | "left" | "right" }) => {
+  const variants = {
+    up: { hidden: { opacity: 0, y: 60 }, visible: { opacity: 1, y: 0 } },
+    left: { hidden: { opacity: 0, x: -60 }, visible: { opacity: 1, x: 0 } },
+    right: { hidden: { opacity: 0, x: 60 }, visible: { opacity: 1, x: 0 } },
+  };
 
   return (
-    <AnimatePresence>
-      {show && (
-        <motion.button
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.8 }}
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="fixed bottom-6 right-6 z-50 p-3 rounded-full bg-primary text-primary-foreground shadow-lg hover:scale-110 transition-transform"
-          aria-label="Back to top"
-        >
-          <ArrowUp className="w-5 h-5" />
-        </motion.button>
-      )}
-    </AnimatePresence>
+    <motion.div
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.7, ease: [0.23, 0.86, 0.39, 0.96] }}
+      variants={variants[direction]}
+    >
+      {children}
+    </motion.div>
   );
 };
+
+const GoldSectionDivider = () => (
+  <div className="flex items-center gap-4 py-4 max-w-xs mx-auto">
+    <div className="flex-1 h-px bg-gradient-to-r from-transparent to-primary/30" />
+    <div className="w-1 h-1 rounded-full bg-primary/40" />
+    <div className="flex-1 h-px bg-gradient-to-l from-transparent to-primary/30" />
+  </div>
+);
 
 const Index = () => {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -76,21 +80,57 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       <ScrollProgressBar />
-      <BackToTop />
       <Navbar />
       <motion.div ref={heroRef} style={{ y: heroY, opacity: heroOpacity }}>
         <Hero />
       </motion.div>
-      <HowItWorks />
-      <Features />
-      <AppPreview />
-      <BrandMarquee />
-      <IntegrationHero />
-      {/* Dark accent band for testimonials */}
-      <div className="bg-muted/20">
-        <Testimonials />
-      </div>
-      <Pricing />
+
+      <SectionReveal>
+        <SocialProofStrip />
+      </SectionReveal>
+
+      <SectionReveal direction="left">
+        <HowItWorks />
+      </SectionReveal>
+
+      <GoldSectionDivider />
+
+      <SectionReveal direction="right">
+        <Features />
+      </SectionReveal>
+
+      <SectionReveal>
+        <AppPreview />
+      </SectionReveal>
+
+      <GoldSectionDivider />
+
+      <SectionReveal>
+        <BrandMarquee />
+      </SectionReveal>
+
+      <SectionReveal direction="left">
+        <IntegrationHero />
+      </SectionReveal>
+
+      <GoldSectionDivider />
+
+      <SectionReveal direction="right">
+        <div className="bg-muted/20">
+          <Testimonials />
+        </div>
+      </SectionReveal>
+
+      <SectionReveal>
+        <Pricing />
+      </SectionReveal>
+
+      <GoldSectionDivider />
+
+      <SectionReveal>
+        <FAQ />
+      </SectionReveal>
+
       <Footer />
     </div>
   );

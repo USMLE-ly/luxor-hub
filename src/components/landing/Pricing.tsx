@@ -5,16 +5,18 @@ import { CreativePricing, type PricingTier } from "@/components/ui/creative-pric
 const tiers: PricingTier[] = [
   {
     name: "Starter",
-    icon: <Star className="w-6 h-6" />,
+    icon: <Star className="w-5 h-5" />,
     price: 9,
+    yearlyPrice: 86,
     description: "Essential AI styling tools",
     color: "amber",
     features: ["200 closet items", "5 daily AI outfits", "Style DNA profile", "Community access", "Basic wardrobe analytics"],
   },
   {
     name: "Pro",
-    icon: <Crown className="w-6 h-6" />,
+    icon: <Crown className="w-5 h-5" />,
     price: 29,
+    yearlyPrice: 278,
     description: "For the style-conscious",
     color: "blue",
     features: ["Unlimited closet items", "Unlimited AI outfits", "Full Style DNA profile", "AI Stylist Chat", "Advanced wardrobe analytics", "Smart shopping AI", "Virtual Try-On", "Outfit calendar"],
@@ -22,21 +24,14 @@ const tiers: PricingTier[] = [
   },
   {
     name: "Elite",
-    icon: <Sparkles className="w-6 h-6" />,
+    icon: <Sparkles className="w-5 h-5" />,
     price: 99,
+    yearlyPrice: 950,
     description: "The ultimate style experience",
     color: "purple",
     features: ["Everything in Pro", "Priority AI processing", "Human stylist overlay", "Fashion Designer AI", "Luxury brand partnerships", "Exclusive style reports", "VIP support"],
   },
 ];
-
-const GoldDivider = () => (
-  <div className="flex items-center gap-4 my-10 max-w-xs mx-auto">
-    <div className="flex-1 h-px bg-gradient-to-r from-transparent to-primary/40" />
-    <div className="w-1.5 h-1.5 rounded-full bg-primary/60" />
-    <div className="flex-1 h-px bg-gradient-to-l from-transparent to-primary/40" />
-  </div>
-);
 
 const Pricing = () => {
   return (
@@ -49,10 +44,6 @@ const Pricing = () => {
           backgroundRepeat: "repeat",
         }}
       />
-
-      <div className="max-w-6xl mx-auto relative z-10">
-        <GoldDivider />
-      </div>
 
       <motion.div
         initial={{ opacity: 0, y: 40 }}

@@ -1,12 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import { ContainerScroll } from "@/components/ui/container-scroll";
 import { GradientButton } from "@/components/ui/gradient-button";
-import { Sparkles, TrendingUp, Palette, Calendar, ShoppingBag, BarChart3 } from "lucide-react";
+import { motion } from "framer-motion";
+import { Sparkles, TrendingUp, Palette, Calendar, ShoppingBag, BarChart3, MessageSquare } from "lucide-react";
 
 const outfitThumbs = [
-  { label: "Casual Friday", colors: ["bg-amber-800", "bg-stone-200", "bg-blue-900"] },
-  { label: "Date Night", colors: ["bg-black", "bg-red-900", "bg-stone-600"] },
-  { label: "Business", colors: ["bg-slate-800", "bg-white", "bg-amber-700"] },
+  { label: "Casual Friday", gradient: "from-amber-700 via-stone-300 to-blue-900" },
+  { label: "Date Night", gradient: "from-zinc-900 via-rose-800 to-stone-500" },
+  { label: "Business", gradient: "from-slate-700 via-white to-amber-600" },
 ];
 
 const AppPreview = () => {
@@ -33,21 +34,19 @@ const AppPreview = () => {
         }
       >
         {/* Mock Dashboard UI */}
-        <div className="h-full w-full p-4 md:p-6 overflow-hidden bg-background rounded-xl">
+        <div className="h-full w-full p-4 md:p-6 overflow-hidden bg-background rounded-xl relative">
           {/* Top bar */}
           <div className="flex items-center justify-between mb-6">
             <div>
               <p className="text-xs font-sans text-muted-foreground uppercase tracking-widest">Welcome back</p>
               <h3 className="font-display text-xl font-bold text-foreground">Your Style DNA</h3>
             </div>
-            <div className="flex gap-2">
-              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                <Sparkles className="w-4 h-4 text-primary" />
-              </div>
+            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-primary" />
             </div>
           </div>
 
-          {/* Style Formula Card — theme-aware */}
+          {/* Style Formula Card */}
           <div className="rounded-2xl p-4 mb-4 bg-muted/50 border border-border">
             <p className="text-xs font-sans font-semibold uppercase tracking-widest text-muted-foreground mb-3">Style Formula</p>
             <div className="grid grid-cols-3 gap-3">
@@ -65,21 +64,57 @@ const AppPreview = () => {
             </div>
           </div>
 
-          {/* Outfit suggestions mini-grid */}
+          {/* Outfit suggestions with gradient swatches */}
           <div className="mb-4">
             <p className="text-xs font-sans font-semibold uppercase tracking-widest text-muted-foreground mb-2">Today's Outfits</p>
             <div className="grid grid-cols-3 gap-2">
               {outfitThumbs.map((outfit, i) => (
                 <div key={i} className="rounded-xl border border-border bg-card p-3 flex flex-col gap-2">
-                  <div className="flex gap-1">
-                    {outfit.colors.map((c, j) => (
-                      <div key={j} className={`w-5 h-5 rounded-full ${c} border border-border/30`} />
-                    ))}
-                  </div>
+                  <div className={`h-8 rounded-lg bg-gradient-to-r ${outfit.gradient}`} />
                   <span className="text-[10px] font-sans font-medium text-foreground">{outfit.label}</span>
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* AI Chat widget with typing indicator */}
+          <div className="rounded-xl border border-border bg-card p-3 mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <MessageSquare className="w-3.5 h-3.5 text-primary" />
+              <span className="text-[10px] font-sans font-semibold text-foreground">AI Stylist</span>
+            </div>
+            <div className="flex items-center gap-1.5 pl-1">
+              <motion.div className="w-1.5 h-1.5 rounded-full bg-primary/60" animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0 }} />
+              <motion.div className="w-1.5 h-1.5 rounded-full bg-primary/60" animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }} />
+              <motion.div className="w-1.5 h-1.5 rounded-full bg-primary/60" animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }} />
+              <span className="text-[10px] text-muted-foreground ml-1">Typing...</span>
+            </div>
+          </div>
+
+          {/* Analytics chart placeholder with animated line */}
+          <div className="rounded-xl border border-border bg-card p-3 mb-4">
+            <p className="text-[10px] font-sans font-semibold text-muted-foreground mb-2">Style Score Trend</p>
+            <svg viewBox="0 0 200 40" className="w-full h-10">
+              <motion.path
+                d="M0,35 Q25,30 50,25 T100,15 T150,20 T200,5"
+                fill="none"
+                stroke="hsl(var(--primary))"
+                strokeWidth="2"
+                strokeLinecap="round"
+                initial={{ pathLength: 0, opacity: 0 }}
+                whileInView={{ pathLength: 1, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 2, ease: "easeInOut" }}
+              />
+              <motion.path
+                d="M0,35 Q25,30 50,25 T100,15 T150,20 T200,5 L200,40 L0,40 Z"
+                fill="hsl(var(--primary) / 0.1)"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1, delay: 1 }}
+              />
+            </svg>
           </div>
 
           {/* Grid */}
