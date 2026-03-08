@@ -81,7 +81,7 @@ const Index = () => {
   const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0.6]);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen overflow-x-hidden">
       <CursorSpotlight />
       <ScrollProgressBar />
       <AnnouncementBanner />
