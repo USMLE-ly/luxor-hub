@@ -63,6 +63,7 @@ const Chat = () => {
   const [styleProfile, setStyleProfile] = useState<any>(null);
   const [closetSummary, setClosetSummary] = useState("");
   const [pendingImage, setPendingImage] = useState<string | null>(null);
+  const [currentMood, setCurrentMood] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
