@@ -124,7 +124,9 @@ const Closet = () => {
   const [savedOutfits, setSavedOutfits] = useState<any[]>([]);
   const [loadingSavedOutfits, setLoadingSavedOutfits] = useState(false);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [scanningReceipt, setScanningReceipt] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const receiptInputRef = useRef<HTMLInputElement>(null);
 
   const fetchItems = useCallback(async () => {
     if (!user) return;
