@@ -541,6 +541,7 @@ export function LuminaSlider() {
   }, []);
 
   useEffect(() => {
+    if (mobile) return; // Skip script loading on mobile
     const loadScript = (src: string, globalName: string) => new Promise<void>((res, rej) => {
       if ((window as any)[globalName]) { res(); return; }
       if (document.querySelector(`script[src="${src}"]`)) {
@@ -559,7 +560,6 @@ export function LuminaSlider() {
         await loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js', 'THREE');
       } catch (e) {
         console.error('Script load failed:', e);
-        // Ensure hero is visible even if scripts fail
         containerRef.current?.querySelector(".slider-wrapper")?.classList.add("loaded");
         return;
       }
@@ -567,7 +567,9 @@ export function LuminaSlider() {
     })();
 
     return () => { cleanupRef.current?.(); };
-  }, [initApplication]);
+  }, [initApplication, mobile]);
+
+  if (mobile) return <MobileHero />;
 
   return (
     <div ref={containerRef} className="lumina-hero-container">
