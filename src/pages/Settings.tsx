@@ -15,14 +15,10 @@ import { haptic } from "@/lib/haptics";
 
 const Settings = () => {
   const { user } = useAuth();
+  const { theme, setTheme } = useTheme();
   const [displayName, setDisplayName] = useState("");
   const [saving, setSaving] = useState(false);
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window !== "undefined") {
-      return document.documentElement.classList.contains("dark");
-    }
-    return true;
-  });
+  const isDark = theme === "dark";
 
   useEffect(() => {
     if (!user) return;
@@ -31,27 +27,9 @@ const Settings = () => {
     });
   }, [user]);
 
-  // Initialize theme from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem("aurelia_theme");
-    if (saved === "light") {
-      document.documentElement.classList.remove("dark");
-      setIsDark(false);
-    } else {
-      document.documentElement.classList.add("dark");
-      setIsDark(true);
-    }
-  }, []);
-
   const toggleTheme = (dark: boolean) => {
-    setIsDark(dark);
-    if (dark) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("aurelia_theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("aurelia_theme", "light");
-    }
+    haptic("medium");
+    setTheme(dark ? "dark" : "light");
   };
 
   const handleSave = async () => {
