@@ -3,6 +3,7 @@ import { Plus, Minus, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { TextReveal } from "@/components/ui/animated-text-reveal";
 
 const faqs = [
   {
@@ -55,7 +56,8 @@ const FAQ = () => {
         >
           <p className="text-primary font-sans font-semibold text-sm tracking-widest uppercase mb-4">FAQ</p>
           <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground">
-            Common <span className="gold-text">Questions</span>
+            <TextReveal mode="word" as="span">Common</TextReveal>{" "}
+            <span className="gold-text"><TextReveal mode="blur" as="span" delay={1}>Questions</TextReveal></span>
           </h2>
         </motion.div>
 

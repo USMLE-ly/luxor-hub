@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { RainbowButton } from "@/components/ui/rainbow-button";
 import { useTheme } from "next-themes";
 import { Sun, Moon, Menu } from "lucide-react";
+import { MagneticCursor } from "@/components/ui/magnetic-cursor";
 import {
   Sheet,
   SheetContent,
@@ -111,7 +112,7 @@ const Navbar = () => {
           <Button variant="ghost" size="sm" className="hidden md:inline-flex font-sans" onClick={() => navigate("/auth")}>
             Log In
           </Button>
-          <div className="hidden md:block relative">
+          <MagneticCursor className="hidden md:block relative" strength={0.3} radius={70}>
             <RainbowButton
               onClick={() => navigate("/auth")}
               className="h-9 px-4 text-sm font-semibold"
@@ -120,7 +121,7 @@ const Navbar = () => {
             </RainbowButton>
             {/* Pulse dot */}
             <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.6)] animate-pulse" />
-          </div>
+          </MagneticCursor>
 
           {/* Mobile hamburger */}
           <Sheet>

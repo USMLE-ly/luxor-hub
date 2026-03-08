@@ -1,6 +1,7 @@
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import { Camera, User, Wand2, TrendingUp } from "lucide-react";
 import { useRef } from "react";
+import { TextReveal } from "@/components/ui/animated-text-reveal";
 
 const steps = [
   { icon: Camera, title: "Scan Closet", desc: "Upload photos and let AI catalog every item in seconds.", num: "01" },
@@ -77,7 +78,8 @@ const HowItWorks = () => {
         >
           <p className="text-primary font-sans font-semibold text-sm tracking-widest uppercase mb-4">How It Works</p>
           <h2 className="font-display text-4xl md:text-5xl font-bold">
-            Four Steps to <span className="gold-text">Effortless Style</span>
+            <TextReveal mode="word" as="span">Four Steps to</TextReveal>{" "}
+            <span className="gold-text"><TextReveal mode="blur" as="span" delay={3}>Effortless Style</TextReveal></span>
           </h2>
         </motion.div>
 

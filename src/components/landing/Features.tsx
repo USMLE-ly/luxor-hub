@@ -1,5 +1,6 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useState, useCallback } from "react";
+import { TextReveal } from "@/components/ui/animated-text-reveal";
 import { Shirt, Brain, MessageSquare, BarChart3, ShoppingBag, Palette, Calendar, Sparkles, Camera } from "lucide-react";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { cn } from "@/lib/utils";
@@ -117,7 +118,8 @@ const Features = () => {
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.6 }} className="text-center mb-6">
           <p className="text-primary font-sans font-semibold text-sm tracking-widest uppercase mb-4">Capabilities</p>
           <h2 className="font-display text-4xl md:text-5xl font-bold">
-            Everything You Need to <span className="gold-text">Look Incredible</span>
+            <TextReveal mode="word" as="span">Everything You Need to</TextReveal>{" "}
+            <span className="gold-text"><TextReveal mode="blur" as="span" delay={5}>Look Incredible</TextReveal></span>
           </h2>
         </motion.div>
 
