@@ -1,5 +1,5 @@
 import { motion, AnimatePresence, useInView } from "framer-motion";
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ArrowLeft, ArrowRight, Sparkles, TrendingUp } from "lucide-react";
 import proof1 from "@/assets/proof-1.jpg";
 import proof2 from "@/assets/proof-2.jpeg";
