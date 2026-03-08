@@ -4,6 +4,8 @@ import { ArrowUp } from "lucide-react";
 import AnnouncementBanner from "@/components/landing/AnnouncementBanner";
 import Navbar from "@/components/landing/Navbar";
 import Hero from "@/components/landing/Hero";
+import CursorSpotlight from "@/components/ui/cursor-spotlight";
+import SparkleParticles from "@/components/ui/sparkle-particles";
 import SocialProofStrip from "@/components/landing/SocialProofStrip";
 import HowItWorks from "@/components/landing/HowItWorks";
 import Features from "@/components/landing/Features";
