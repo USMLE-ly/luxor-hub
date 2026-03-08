@@ -316,6 +316,8 @@ const Onboarding = () => {
               dragConstraints={{ left: 0, right: 0 }}
               dragElastic={0.12}
               onDragEnd={(_, info) => {
+                setSwipeVelocity({ x: info.velocity.x, y: info.velocity.y });
+                setSwipeTrigger((t) => t + 1);
                 const threshold = 50;
                 if (info.offset.x < -threshold && canProceed && !isGenerating) {
                   triggerHaptic();
