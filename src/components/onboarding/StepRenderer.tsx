@@ -1,6 +1,83 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { Check, Camera, Smartphone, Video, User, FlipHorizontal, Shirt, Glasses, Watch, Gem, Scissors } from "lucide-react";
+
+// Haptic + audio tick for card selection
+const selectionHaptic = () => {
+  if (navigator.vibrate) navigator.vibrate(8);
+  try {
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain).connect(ctx.destination);
+    osc.frequency.value = 2200;
+    osc.type = "sine";
+    gain.gain.setValueAtTime(0.06, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.04);
+    setTimeout(() => ctx.close(), 80);
+  } catch {}
+};
+
+/**
+ * Wraps a selectable card — triggers a subtle 3D Y-axis flip on selection.
+ */
+const SelectionFlip = ({
+  children,
+  isActive,
+  onClick,
+  className,
+  index = 0,
+}: {
+  children: React.ReactNode;
+  isActive: boolean;
+  onClick: () => void;
+  className?: string;
+  index?: number;
+}) => {
+  const controls = useAnimation();
+  const prevActive = useRef(isActive);
+
+  useEffect(() => {
+    if (isActive && !prevActive.current) {
+      // Selection flip — quick Y rotation with spring settle
+      selectionHaptic();
+      controls.start({
+        rotateY: [0, 12, -4, 0],
+        scale: [1, 1.03, 0.98, 1],
+        transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] },
+      });
+    } else if (!isActive && prevActive.current) {
+      // Deselection — subtle reverse
+      controls.start({
+        rotateY: [0, -6, 0],
+        scale: [1, 0.97, 1],
+        transition: { duration: 0.3, ease: "easeOut" },
+      });
+    }
+    prevActive.current = isActive;
+  }, [isActive, controls]);
+
+  return (
+    <motion.button
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+      onClick={onClick}
+      className={className}
+      style={{ perspective: 600, transformStyle: "preserve-3d" }}
+    >
+      <motion.div
+        animate={controls}
+        style={{ transformStyle: "preserve-3d" }}
+        className="flex items-center w-full"
+      >
+        {children}
+      </motion.div>
+    </motion.button>
+  );
+};
 import type { OnboardingStep } from "./onboardingSteps";
 import FaceShapeIllustration from "@/components/app/FaceShapeIllustration";
 import BodyShapeIllustration from "@/components/app/BodyShapeIllustration";
