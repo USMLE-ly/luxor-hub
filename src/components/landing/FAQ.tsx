@@ -3,6 +3,7 @@ import { Plus, Minus, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { TextReveal } from "@/components/ui/animated-text-reveal";
 
 const faqs = [
   {
