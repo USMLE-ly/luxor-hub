@@ -186,6 +186,9 @@ export function LuminaSlider() {
   const containerRef = useRef<HTMLDivElement>(null);
   const cleanupRef = useRef<(() => void) | null>(null);
 
+  // On mobile, render lightweight hero — skip all Three.js/GSAP
+  if (mobile) return <MobileHero />;
+
   const initApplication = useCallback(() => {
     let currentSlideIndex = 0;
     let isTransitioning = false;
