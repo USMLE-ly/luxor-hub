@@ -93,6 +93,26 @@ export default function VirtualTryOn() {
     toast.success("Image downloaded!");
   };
 
+  const [shareLink, setShareLink] = useState<string | null>(null);
+  const handleShare = async (imageUrl: string) => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: "Virtual Try-On by AURELIA",
+          text: "Check out this virtual try-on!",
+          url: imageUrl,
+        });
+      } else {
+        await navigator.clipboard.writeText(imageUrl);
+        setShareLink(imageUrl);
+        toast.success("Link copied to clipboard! Share with friends for their vote ✨");
+        setTimeout(() => setShareLink(null), 3000);
+      }
+    } catch {
+      toast.error("Share failed");
+    }
+  };
+
   return (
     <AppLayout>
       <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-8">
