@@ -47,10 +47,10 @@ export default function IntegrationHero() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h3 className="font-display text-2xl md:text-4xl font-bold text-foreground mb-2">
+          <h3 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-3">
             Connects to your <span className="gold-text">favorite platforms</span>
           </h3>
-          <p className="text-sm text-muted-foreground font-sans max-w-sm mx-auto">
+          <p className="text-sm md:text-base text-muted-foreground font-sans max-w-md mx-auto">
             Sync your style across Instagram, Pinterest, Shopify, and more.
           </p>
         </motion.div>
