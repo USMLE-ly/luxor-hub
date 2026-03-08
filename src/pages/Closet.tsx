@@ -10,10 +10,12 @@ import { toast } from "sonner";
 import {
   Plus, Search, Shirt, Trash2, Upload, X, Loader2, Sparkles, CheckCircle, Camera, ChevronRight,
   SlidersHorizontal, Activity, Eye, User, Layers, CalendarDays, Image, Save, FolderOpen, Heart,
+  Receipt,
 } from "lucide-react";
 import Mannequin3D, { type ClothingItem as MannequinClothingItem, type BodyDNA, type PosePreset } from "@/components/app/Mannequin3D";
 import { SLOT_MAP, DRESS_REPLACES, type GarmentFit } from "@/components/app/GarmentGeometry";
 import type { FabricType } from "@/components/app/FabricMaterials";
+import { WardrobeIntelligence } from "@/components/app/WardrobeIntelligence";
 
 /* Placeholder product images for empty closet sections */
 import imgCoatBelted from "@/assets/cal-f-coat-belted.jpg";
@@ -122,7 +124,9 @@ const Closet = () => {
   const [savedOutfits, setSavedOutfits] = useState<any[]>([]);
   const [loadingSavedOutfits, setLoadingSavedOutfits] = useState(false);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [scanningReceipt, setScanningReceipt] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const receiptInputRef = useRef<HTMLInputElement>(null);
 
   const fetchItems = useCallback(async () => {
     if (!user) return;
@@ -294,7 +298,47 @@ const Closet = () => {
     if (!user) return;
     const { error } = await supabase.from("wear_logs").insert({ user_id: user.id, clothing_item_id: itemId });
     if (error) toast.error("Failed to log wear");
-    else toast.success("Marked as worn today! 👕");
+    else {
+      // Award style points
+      await (supabase.from("style_points" as any).insert({ user_id: user.id, points: 5, reason: "Logged wear" }) as any);
+      toast.success("Marked as worn today! +5 pts 👕");
+    }
+  };
+
+  const handleReceiptScan = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    setScanningReceipt(true);
+    try {
+      const imageData = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const { data, error } = await supabase.functions.invoke("scan-receipt", { body: { imageUrl: imageData } });
+      if (error) throw error;
+      if (data?.items?.length) {
+        for (const item of data.items) {
+          await supabase.from("clothing_items").insert({
+            user_id: user.id,
+            name: item.name || null,
+            category: item.category || "other",
+            color: item.color || null,
+            brand: item.brand || null,
+            price: item.price || null,
+          });
+        }
+        toast.success(`Added ${data.items.length} items from receipt! 🧾`);
+        fetchItems();
+      } else {
+        toast.info("No clothing items found on this receipt");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Receipt scan failed");
+    } finally {
+      setScanningReceipt(false);
+    }
   };
 
   // Add closet item to mannequin and switch to mannequin tab
@@ -409,9 +453,20 @@ const Closet = () => {
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
           <div className="flex items-center justify-between">
             <h1 className="font-display text-2xl font-bold text-foreground">My Closet</h1>
-            <span className="text-xs font-sans font-semibold text-muted-foreground bg-secondary px-3 py-1 rounded-full">
-              {items.length} ITEMS
-            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => receiptInputRef.current?.click()}
+                disabled={scanningReceipt}
+                className="text-xs font-sans font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full hover:bg-primary/20 transition-colors flex items-center gap-1"
+              >
+                {scanningReceipt ? <Loader2 className="w-3 h-3 animate-spin" /> : <Receipt className="w-3 h-3" />}
+                Scan Receipt
+              </button>
+              <input ref={receiptInputRef} type="file" accept="image/*" className="hidden" onChange={handleReceiptScan} />
+              <span className="text-xs font-sans font-semibold text-muted-foreground bg-secondary px-3 py-1 rounded-full">
+                {items.length} ITEMS
+              </span>
+            </div>
           </div>
         </motion.div>
 
@@ -671,6 +726,10 @@ const Closet = () => {
                 })}
               </div>
             )}
+            {/* Wardrobe Intelligence */}
+            <div className="mt-6">
+              <WardrobeIntelligence />
+            </div>
           </>
         )}
 

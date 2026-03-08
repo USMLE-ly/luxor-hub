@@ -10,7 +10,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages, userId, styleProfile, closetSummary, image } = await req.json();
+    const { messages, userId, styleProfile, closetSummary, image, mood } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -82,6 +82,8 @@ serve(async (req) => {
       }
     }
 
+    const moodContext = mood ? `\nThe user's current mood is: ${mood}. Adjust your suggestions to match their emotional state.` : "";
+
     const systemPrompt = `You are AURELIA, an elite AI personal stylist. You speak with warmth, confidence, and deep fashion knowledge.
 
 ${styleProfile ? `User's Style DNA: ${styleProfile.archetype}
@@ -89,7 +91,7 @@ Color Season: ${(styleProfile.preferences as any)?.aiAnalysis?.colorSeason || "U
 Body Type: ${(styleProfile.preferences as any)?.bodyShape || "Unknown"}
 Preferences: ${JSON.stringify(styleProfile.preferences)}` : ""}
 
-${closetSummary ? `User's Closet Summary: ${closetSummary}` : ""}${memoryContext}
+${closetSummary ? `User's Closet Summary: ${closetSummary}` : ""}${memoryContext}${moodContext}
 
 Guidelines:
 - Give specific, actionable fashion advice

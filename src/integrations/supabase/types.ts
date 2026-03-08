@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_feedback: {
+        Row: {
+          accepted: boolean
+          created_at: string
+          id: string
+          suggestion_hash: string
+          user_id: string
+        }
+        Insert: {
+          accepted?: boolean
+          created_at?: string
+          id?: string
+          suggestion_hash: string
+          user_id: string
+        }
+        Update: {
+          accepted?: boolean
+          created_at?: string
+          id?: string
+          suggestion_hash?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       calendar_events: {
         Row: {
           created_at: string
@@ -126,6 +150,7 @@ export type Database = {
           color: string | null
           created_at: string
           id: string
+          last_worn_at: string | null
           name: string | null
           notes: string | null
           occasion: string | null
@@ -135,6 +160,7 @@ export type Database = {
           style: string | null
           updated_at: string
           user_id: string
+          wear_count: number
         }
         Insert: {
           brand?: string | null
@@ -142,6 +168,7 @@ export type Database = {
           color?: string | null
           created_at?: string
           id?: string
+          last_worn_at?: string | null
           name?: string | null
           notes?: string | null
           occasion?: string | null
@@ -151,6 +178,7 @@ export type Database = {
           style?: string | null
           updated_at?: string
           user_id: string
+          wear_count?: number
         }
         Update: {
           brand?: string | null
@@ -158,6 +186,7 @@ export type Database = {
           color?: string | null
           created_at?: string
           id?: string
+          last_worn_at?: string | null
           name?: string | null
           notes?: string | null
           occasion?: string | null
@@ -167,6 +196,7 @@ export type Database = {
           style?: string | null
           updated_at?: string
           user_id?: string
+          wear_count?: number
         }
         Relationships: []
       }
@@ -442,6 +472,44 @@ export type Database = {
         }
         Relationships: []
       }
+      outfit_feedback: {
+        Row: {
+          compliments: number
+          created_at: string
+          id: string
+          notes: string | null
+          outfit_id: string | null
+          rating: number
+          user_id: string
+        }
+        Insert: {
+          compliments?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          outfit_id?: string | null
+          rating?: number
+          user_id: string
+        }
+        Update: {
+          compliments?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          outfit_id?: string | null
+          rating?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outfit_feedback_outfit_id_fkey"
+            columns: ["outfit_id"]
+            isOneToOne: false
+            referencedRelation: "outfits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       outfit_items: {
         Row: {
           clothing_item_id: string
@@ -567,6 +635,30 @@ export type Database = {
           id?: string
           look_id?: string
           look_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      style_points: {
+        Row: {
+          created_at: string
+          id: string
+          points: number
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          points?: number
+          reason: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          points?: number
+          reason?: string
           user_id?: string
         }
         Relationships: []

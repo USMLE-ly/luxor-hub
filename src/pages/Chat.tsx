@@ -12,6 +12,7 @@ import { VoiceInput } from "@/components/app/VoiceInput";
 import { useAnimatedText } from "@/components/ui/animated-text";
 import { PlaceholdersAndVanishInput } from "@/components/ui/placeholders-and-vanish-input";
 import { useAutoResizeTextarea } from "@/hooks/use-auto-resize-textarea";
+import { MoodSelector } from "@/components/app/MoodSelector";
 
 interface Message {
   id?: string;
@@ -62,6 +63,7 @@ const Chat = () => {
   const [styleProfile, setStyleProfile] = useState<any>(null);
   const [closetSummary, setClosetSummary] = useState("");
   const [pendingImage, setPendingImage] = useState<string | null>(null);
+  const [currentMood, setCurrentMood] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -144,6 +146,7 @@ const Chat = () => {
           userId: user.id,
           styleProfile,
           closetSummary,
+          mood: currentMood || undefined,
           ...(imageToSend ? { image: imageToSend } : {}),
         }),
       });
@@ -415,6 +418,11 @@ const Chat = () => {
             </div>
           </div>
         )}
+
+        {/* Mood Selector */}
+        <div className="px-4">
+          <MoodSelector selected={currentMood} onSelect={setCurrentMood} />
+        </div>
 
         {/* Input Area */}
         <div className="px-4 pb-4 pt-2">

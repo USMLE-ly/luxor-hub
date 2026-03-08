@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import {
-  Trophy, Crown, Medal, Flame, Clock, Loader2, User, Sparkles, ChevronRight, History
+  Trophy, Crown, Medal, Flame, Clock, Loader2, User, Sparkles, ChevronRight, History, Swords, Target, Recycle, Shirt
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -219,12 +219,15 @@ export default function WeeklyChallenge() {
         </div>
 
         <Tabs defaultValue="current" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsList className="grid w-full grid-cols-3 mb-6">
             <TabsTrigger value="current" className="flex items-center gap-2">
               <Flame className="w-4 h-4" /> This Week
             </TabsTrigger>
+            <TabsTrigger value="challenges" className="flex items-center gap-2">
+              <Target className="w-4 h-4" /> Challenges
+            </TabsTrigger>
             <TabsTrigger value="history" className="flex items-center gap-2" onClick={fetchPastChallenges}>
-              <History className="w-4 h-4" /> Past Challenges
+              <History className="w-4 h-4" /> Past
             </TabsTrigger>
           </TabsList>
 
@@ -353,6 +356,69 @@ export default function WeeklyChallenge() {
                 </div>
               </>
             )}
+          </TabsContent>
+
+          {/* Challenges Tab - New Challenge Types */}
+          <TabsContent value="challenges" className="space-y-4">
+            {[
+              {
+                icon: <Shirt className="w-5 h-5 text-primary" />,
+                title: "7-Day Capsule Challenge",
+                description: "Create 7 unique outfits using only 10 items from your closet",
+                points: 50,
+                badge: "Capsule Master",
+              },
+              {
+                icon: <Recycle className="w-5 h-5 text-[hsl(142,60%,45%)]" />,
+                title: "Rewear 100 Challenge",
+                description: "Wear an item 100 times and track it. Sustainability wins!",
+                points: 100,
+                badge: "Eco Warrior",
+              },
+              {
+                icon: <Swords className="w-5 h-5 text-[hsl(15,80%,55%)]" />,
+                title: "Outfit Battle",
+                description: "Submit your best outfit — community votes on style, fit & creativity",
+                points: 30,
+                badge: "Battle Champion",
+              },
+              {
+                icon: <Target className="w-5 h-5 text-[hsl(270,50%,55%)]" />,
+                title: "Thrift Flip",
+                description: "Style a thrifted piece into a high-fashion look",
+                points: 40,
+                badge: "Thrift King",
+              },
+            ].map((challenge, i) => (
+              <motion.div
+                key={challenge.title}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.05 }}
+              >
+                <Card className="glass-card hover:border-primary/30 transition-colors cursor-pointer">
+                  <CardContent className="p-5">
+                    <div className="flex items-start gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center flex-shrink-0">
+                        {challenge.icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-display font-bold text-foreground text-sm mb-1">{challenge.title}</h3>
+                        <p className="text-xs text-muted-foreground font-sans mb-2">{challenge.description}</p>
+                        <div className="flex items-center gap-3">
+                          <Badge className="bg-primary/15 text-primary border-primary/30 text-[10px]">
+                            +{challenge.points} pts
+                          </Badge>
+                          <Badge variant="outline" className="text-[10px]">
+                            🏆 {challenge.badge}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
           </TabsContent>
 
           <TabsContent value="history" className="space-y-6">

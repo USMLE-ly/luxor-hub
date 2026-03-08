@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import {
-  Upload, Loader2, Sparkles, Camera, Download, ArrowRight, Image as ImageIcon, Shirt, X
+  Upload, Loader2, Sparkles, Camera, Download, ArrowRight, Image as ImageIcon, Shirt, X, Share2, Copy, Check
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
@@ -91,6 +91,26 @@ export default function VirtualTryOn() {
     link.href = url;
     link.click();
     toast.success("Image downloaded!");
+  };
+
+  const [shareLink, setShareLink] = useState<string | null>(null);
+  const handleShare = async (imageUrl: string) => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: "Virtual Try-On by AURELIA",
+          text: "Check out this virtual try-on!",
+          url: imageUrl,
+        });
+      } else {
+        await navigator.clipboard.writeText(imageUrl);
+        setShareLink(imageUrl);
+        toast.success("Link copied to clipboard! Share with friends for their vote ✨");
+        setTimeout(() => setShareLink(null), 3000);
+      }
+    } catch {
+      toast.error("Share failed");
+    }
   };
 
   return (
@@ -204,7 +224,11 @@ export default function VirtualTryOn() {
                 ) : resultImage ? (
                   <div className="relative">
                     <img src={resultImage} alt="Try-on result" className="w-full aspect-[3/4] object-cover rounded-lg" />
-                    <div className="absolute bottom-3 right-3">
+                    <div className="absolute bottom-3 right-3 flex gap-2">
+                      <Button variant="secondary" size="sm" onClick={() => handleShare(resultImage)}>
+                        {shareLink === resultImage ? <Check className="w-3 h-3 mr-1" /> : <Share2 className="w-3 h-3 mr-1" />}
+                        {shareLink === resultImage ? "Copied!" : "Share"}
+                      </Button>
                       <Button variant="secondary" size="sm" onClick={() => handleDownload(resultImage)}>
                         <Download className="w-3 h-3 mr-1" /> Save
                       </Button>
