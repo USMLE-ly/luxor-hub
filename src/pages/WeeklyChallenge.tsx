@@ -219,12 +219,15 @@ export default function WeeklyChallenge() {
         </div>
 
         <Tabs defaultValue="current" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsList className="grid w-full grid-cols-3 mb-6">
             <TabsTrigger value="current" className="flex items-center gap-2">
               <Flame className="w-4 h-4" /> This Week
             </TabsTrigger>
+            <TabsTrigger value="challenges" className="flex items-center gap-2">
+              <Target className="w-4 h-4" /> Challenges
+            </TabsTrigger>
             <TabsTrigger value="history" className="flex items-center gap-2" onClick={fetchPastChallenges}>
-              <History className="w-4 h-4" /> Past Challenges
+              <History className="w-4 h-4" /> Past
             </TabsTrigger>
           </TabsList>
 
