@@ -82,10 +82,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
+      <CursorSpotlight />
       <ScrollProgressBar />
       <AnnouncementBanner />
       <Navbar />
-      <motion.div ref={heroRef} style={{ y: heroY, opacity: heroOpacity }}>
+      <motion.div ref={heroRef} style={{ y: heroY, opacity: heroOpacity }} className="relative">
+        <SparkleParticles count={40} className="z-10" />
         <Hero />
       </motion.div>
 
