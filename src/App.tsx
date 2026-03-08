@@ -47,6 +47,7 @@ const App = () => (
   <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
     <StarfieldBackground />
     <OfflineIndicator />
+    <SplashScreen />
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
