@@ -456,11 +456,15 @@ export function LuminaSlider() {
   }, []);
 
   useEffect(() => {
+    // Skip heavy WebGL on mobile/constrained browsers
+    const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile/i.test(navigator.userAgent)
+      || window.innerWidth < 768;
+
     const loadScript = (src: string, globalName: string) => new Promise<void>((res, rej) => {
       if ((window as any)[globalName]) { res(); return; }
       if (document.querySelector(`script[src="${src}"]`)) {
         const check = setInterval(() => { if ((window as any)[globalName]) { clearInterval(check); res(); } }, 50);
-        setTimeout(() => { clearInterval(check); rej(new Error(`Timeout: ${globalName}`)); }, 10000);
+        const timeout = setTimeout(() => { clearInterval(check); rej(new Error(`Timeout: ${globalName}`)); }, 6000);
         return;
       }
       const s = document.createElement('script');
@@ -468,13 +472,18 @@ export function LuminaSlider() {
       document.head.appendChild(s);
     });
 
+    if (isMobile) {
+      // On mobile, skip WebGL entirely — show static fallback with first slide image
+      containerRef.current?.querySelector(".slider-wrapper")?.classList.add("loaded");
+      return;
+    }
+
     (async () => {
       try {
         await loadScript('https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js', 'gsap');
         await loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js', 'THREE');
       } catch (e) {
         console.error('Script load failed:', e);
-        // Ensure hero is visible even if scripts fail
         containerRef.current?.querySelector(".slider-wrapper")?.classList.add("loaded");
         return;
       }
