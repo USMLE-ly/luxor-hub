@@ -37,6 +37,7 @@ import VideoAnalysis from "./pages/VideoAnalysis";
 import FashionDesigner from "./pages/FashionDesigner";
 import VirtualTryOn from "./pages/VirtualTryOn";
 import CommunityGallery from "./pages/CommunityGallery";
+import Install from "./pages/Install";
 
 const queryClient = new QueryClient();
 
@@ -80,6 +81,7 @@ const App = () => (
             <Route path="/fashion-designer" element={<FashionDesigner />} />
             <Route path="/virtual-tryon" element={<VirtualTryOn />} />
             <Route path="/community-gallery" element={<CommunityGallery />} />
+            <Route path="/install" element={<Install />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
