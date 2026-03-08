@@ -347,6 +347,11 @@ const Dashboard = () => {
           </div>
         </motion.div>
 
+        {/* ── Morning Routine Card ─────────────────────────── */}
+        <motion.div variants={fadeUp}>
+          <MorningRoutineCard />
+        </motion.div>
+
         {/* ── My Style Formula Card ─────────────────────────── */}
         <motion.div
           variants={fadeUp}
