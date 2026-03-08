@@ -214,6 +214,9 @@ const Onboarding = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col overflow-hidden relative">
+      {/* Swipe-reactive particles */}
+      <SwipeParticles swipeVelocity={swipeVelocity} swipeTrigger={swipeTrigger} />
+
       {/* Ambient background glow */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <motion.div
