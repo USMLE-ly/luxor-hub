@@ -1,5 +1,5 @@
 import { motion, AnimatePresence, useInView } from "framer-motion";
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ArrowLeft, ArrowRight, Sparkles, TrendingUp } from "lucide-react";
 import proof1 from "@/assets/proof-1.jpg";
 import proof2 from "@/assets/proof-2.jpeg";
@@ -41,7 +41,7 @@ const slideVariants = {
   exit: (direction: number) => ({ zIndex: 0, x: direction < 0 ? 300 : -300, opacity: 0, scale: 0.92 }),
 };
 
-const Testimonials = () => {
+const Testimonials = React.forwardRef<HTMLElement>((_, ref) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const counterRef = useRef<HTMLDivElement>(null);
@@ -204,6 +204,8 @@ const Testimonials = () => {
       </div>
     </section>
   );
-};
+});
+
+Testimonials.displayName = "Testimonials";
 
 export default Testimonials;
