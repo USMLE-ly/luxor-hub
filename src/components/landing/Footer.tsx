@@ -1,6 +1,7 @@
 import { Sparkles, Instagram, Twitter, Github, ArrowRight, ArrowUp, Check } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { MagneticCursor } from "@/components/ui/magnetic-cursor";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
