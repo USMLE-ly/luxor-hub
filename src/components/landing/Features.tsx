@@ -1,5 +1,6 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useState, useCallback } from "react";
+import { TextReveal } from "@/components/ui/animated-text-reveal";
 import { Shirt, Brain, MessageSquare, BarChart3, ShoppingBag, Palette, Calendar, Sparkles, Camera } from "lucide-react";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { cn } from "@/lib/utils";
