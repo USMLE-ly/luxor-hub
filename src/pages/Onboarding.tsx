@@ -331,7 +331,19 @@ const Onboarding = () => {
                   setCurrentStep((s) => s - 1);
                 }
               }}
+              style={{
+                perspective: 800,
+                transformStyle: "preserve-3d",
+              }}
             >
+              <motion.div
+                style={{
+                  rotateX: tilt.rotateX,
+                  rotateY: tilt.rotateY,
+                  transformStyle: "preserve-3d",
+                }}
+                transition={{ type: "tween", duration: 0 }}
+              >
               {isGenderStep ? (
                 <GenderStep selected={gender} onSelect={setGender} />
               ) : currentStepData ? (
