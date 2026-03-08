@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { Home, ShoppingBag, ScanLine, Scissors, Shirt } from "lucide-react";
 import { motion } from "framer-motion";
+import { haptic } from "@/lib/haptics";
 
 const tabs = [
   { label: "DNA", icon: Home, path: "/dashboard" },
