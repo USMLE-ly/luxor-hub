@@ -97,92 +97,7 @@ function HeroOverlay() {
   );
 }
 
-function isMobileDevice() {
-  if (typeof window === 'undefined') return false;
-  return window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-}
-
-/* Lightweight mobile hero — no Three.js, no GSAP, just CSS crossfade */
-function MobileHero() {
-  const navigate = useNavigate();
-  const [currentSlide, setCurrentSlide] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 4000);
-    return () => clearInterval(timer);
-  }, []);
-
-  return (
-    <div className="lumina-hero-container" style={{ position: 'relative', overflow: 'hidden' }}>
-      <div className="lumina-aurora" />
-      <div className="lumina-bottom-gradient" />
-      <main className="slider-wrapper loaded">
-        {/* Background images with crossfade */}
-        {slides.map((slide, i) => (
-          <div
-            key={i}
-            style={{
-              position: 'absolute',
-              inset: 0,
-              backgroundImage: `url(${slide.media})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              opacity: i === currentSlide ? 1 : 0,
-              transition: 'opacity 1.5s ease-in-out',
-              zIndex: 0,
-            }}
-          />
-        ))}
-        {/* Dark overlay for readability */}
-        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 1 }} />
-
-        <span className="slide-number" style={{ position: 'relative', zIndex: 2 }}>
-          {String(currentSlide + 1).padStart(2, '0')}
-        </span>
-        <span className="slide-total" style={{ position: 'relative', zIndex: 2 }}>
-          {String(slides.length).padStart(2, '0')}
-        </span>
-
-        <div className="slide-content" style={{ position: 'relative', zIndex: 2 }}>
-          <h1 className="slide-title" style={{ opacity: 1, transform: 'none' }}>
-            {slides[currentSlide].title}
-          </h1>
-          <p className="slide-description" style={{ opacity: 1 }}>
-            {slides[currentSlide].description}
-          </p>
-        </div>
-
-        <HeroOverlay />
-
-        {/* Simple dot navigation */}
-        <nav className="slides-navigation" style={{ position: 'relative', zIndex: 2 }}>
-          {slides.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentSlide(i)}
-              className={`slide-nav-dot ${i === currentSlide ? 'active' : ''}`}
-              style={{
-                width: i === currentSlide ? 24 : 8,
-                height: 8,
-                borderRadius: 4,
-                border: 'none',
-                background: i === currentSlide ? 'hsl(43 74% 49%)' : 'rgba(255,255,255,0.3)',
-                transition: 'all 0.3s ease',
-                cursor: 'pointer',
-                margin: '0 3px',
-              }}
-            />
-          ))}
-        </nav>
-      </main>
-    </div>
-  );
-}
-
 export function LuminaSlider() {
-  const [mobile] = useState(() => isMobileDevice());
   const containerRef = useRef<HTMLDivElement>(null);
   const cleanupRef = useRef<(() => void) | null>(null);
 
@@ -541,7 +456,6 @@ export function LuminaSlider() {
   }, []);
 
   useEffect(() => {
-    if (mobile) return; // Skip script loading on mobile
     const loadScript = (src: string, globalName: string) => new Promise<void>((res, rej) => {
       if ((window as any)[globalName]) { res(); return; }
       if (document.querySelector(`script[src="${src}"]`)) {
@@ -560,6 +474,7 @@ export function LuminaSlider() {
         await loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js', 'THREE');
       } catch (e) {
         console.error('Script load failed:', e);
+        // Ensure hero is visible even if scripts fail
         containerRef.current?.querySelector(".slider-wrapper")?.classList.add("loaded");
         return;
       }
@@ -567,9 +482,7 @@ export function LuminaSlider() {
     })();
 
     return () => { cleanupRef.current?.(); };
-  }, [initApplication, mobile]);
-
-  if (mobile) return <MobileHero />;
+  }, [initApplication]);
 
   return (
     <div ref={containerRef} className="lumina-hero-container">
