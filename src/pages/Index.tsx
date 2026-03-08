@@ -12,6 +12,7 @@ import IntegrationHero from "@/components/landing/IntegrationHero";
 import Pricing from "@/components/landing/Pricing";
 import Testimonials from "@/components/landing/Testimonials";
 import FAQ from "@/components/landing/FAQ";
+import ThemeShowcase from "@/components/landing/ThemeShowcase";
 import Footer from "@/components/landing/Footer";
 
 const ScrollProgressBar = () => {
