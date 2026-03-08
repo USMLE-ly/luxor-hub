@@ -96,7 +96,7 @@ export default function IntegrationHero() {
                   className="absolute group"
                   style={{ left: x, top: y }}
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-card border border-border flex items-center justify-center group-hover:border-primary/40 group-hover:shadow-[0_0_20px_hsl(var(--primary)/0.15)] transition-all duration-300 p-2.5">
+                  <div className="w-[60px] h-[60px] rounded-2xl bg-card border border-border flex items-center justify-center group-hover:border-primary/40 group-hover:shadow-[0_0_20px_hsl(var(--primary)/0.15)] transition-all duration-300 p-2.5">
                     {'textLogo' in p && p.textLogo ? (
                       <span className="text-sm font-bold text-muted-foreground group-hover:text-foreground transition-colors duration-300 tracking-wider">
                         ASOS
