@@ -1,4 +1,6 @@
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
+import { useRef } from "react";
+import { Sparkles } from "lucide-react";
 
 const platforms = [
   { name: "Instagram", logo: "/logos/instagram.png" },
@@ -9,60 +11,133 @@ const platforms = [
   { name: "Zara", logo: "/logos/zara.png" },
 ];
 
-export default function IntegrationHero() {
-  return (
-    <section className="relative py-16 md:py-20 overflow-hidden bg-muted/30">
-      <div className="relative max-w-5xl mx-auto px-6">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.6 }}
-            className="text-center md:text-left"
-          >
-            <h3 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-2">
-              Connects to your <span className="gold-text">favorite platforms</span>
-            </h3>
-            <p className="text-sm text-muted-foreground font-sans max-w-sm">
-              Sync your style across Instagram, Pinterest, Shopify, and more.
-            </p>
-          </motion.div>
+/* SVG line from center to each platform node */
+function ConnectionLine({ angle, delay }: { angle: number; delay: number }) {
+  const r = 120; // orbit radius
+  const x2 = 150 + Math.cos((angle * Math.PI) / 180) * r;
+  const y2 = 150 + Math.sin((angle * Math.PI) / 180) * r;
 
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="flex gap-4 flex-wrap justify-center"
-          >
+  return (
+    <motion.line
+      x1="150" y1="150"
+      x2={x2} y2={y2}
+      stroke="hsl(var(--primary))"
+      strokeWidth="1"
+      strokeDasharray="6 4"
+      initial={{ pathLength: 0, opacity: 0 }}
+      whileInView={{ pathLength: 1, opacity: 0.3 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.8, delay }}
+    />
+  );
+}
+
+export default function IntegrationHero() {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
+
+  return (
+    <section ref={ref} className="relative py-24 md:py-28 overflow-hidden bg-muted/30">
+      <div className="relative max-w-5xl mx-auto px-6">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
+          <h3 className="font-display text-2xl md:text-4xl font-bold text-foreground mb-2">
+            Connects to your <span className="gold-text">favorite platforms</span>
+          </h3>
+          <p className="text-sm text-muted-foreground font-sans max-w-sm mx-auto">
+            Sync your style across Instagram, Pinterest, Shopify, and more.
+          </p>
+        </motion.div>
+
+        {/* Orbital Desktop */}
+        <div className="hidden md:flex items-center justify-center">
+          <div className="relative w-[300px] h-[300px]">
+            {/* SVG connection lines */}
+            <svg className="absolute inset-0 w-full h-full" viewBox="0 0 300 300">
+              {platforms.map((_, i) => (
+                <ConnectionLine
+                  key={i}
+                  angle={i * 60 - 90}
+                  delay={0.2 + i * 0.08}
+                />
+              ))}
+            </svg>
+
+            {/* Center node */}
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={isInView ? { scale: 1, opacity: 1 } : {}}
+              transition={{ type: "spring", stiffness: 200, damping: 20 }}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-card border-2 border-primary/40 flex items-center justify-center shadow-[0_0_30px_hsl(var(--primary)/0.2)] z-10"
+            >
+              <Sparkles className="w-6 h-6 text-primary" />
+            </motion.div>
+
+            {/* Platform nodes in circle */}
+            {platforms.map((p, i) => {
+              const angle = (i * 60 - 90) * (Math.PI / 180);
+              const r = 120;
+              const x = 150 + Math.cos(angle) * r - 28;
+              const y = 150 + Math.sin(angle) * r - 28;
+
+              return (
+                <motion.div
+                  key={p.name}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={isInView ? { scale: 1, opacity: 1 } : {}}
+                  transition={{ delay: 0.3 + i * 0.08, type: "spring", stiffness: 250, damping: 20 }}
+                  whileHover={{ scale: 1.25, zIndex: 20 }}
+                  className="absolute group"
+                  style={{ left: x, top: y }}
+                >
+                  <div className="w-14 h-14 rounded-2xl bg-card border border-border flex items-center justify-center group-hover:border-primary/40 group-hover:shadow-[0_0_20px_hsl(var(--primary)/0.15)] transition-all duration-300 p-2.5">
+                    {'textLogo' in p && p.textLogo ? (
+                      <span className="text-sm font-bold text-muted-foreground group-hover:text-foreground transition-colors duration-300 tracking-wider">
+                        ASOS
+                      </span>
+                    ) : (
+                      <img src={p.logo} alt={p.name} className="w-full h-full object-contain" loading="lazy" />
+                    )}
+                  </div>
+                  {/* Name tooltip */}
+                  <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <span className="text-[10px] font-sans font-medium text-primary whitespace-nowrap">{p.name}</span>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Mobile: horizontal scroll */}
+        <div className="md:hidden -mx-4 px-4 overflow-x-auto scrollbar-hide">
+          <div className="flex gap-4 snap-x snap-mandatory pb-4" style={{ minWidth: "min-content" }}>
             {platforms.map((p, i) => (
               <motion.div
                 key={p.name}
                 initial={{ opacity: 0, scale: 0.8 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.15 + i * 0.06, duration: 0.4 }}
-                className="flex flex-col items-center gap-1.5 group"
+                transition={{ delay: 0.1 + i * 0.06, duration: 0.4 }}
+                className="snap-center shrink-0 flex flex-col items-center gap-1.5"
               >
-                <div className="w-14 h-14 rounded-2xl bg-card border border-border flex items-center justify-center group-hover:border-primary/40 group-hover:shadow-[0_0_16px_hsl(var(--primary)/0.1)] transition-all duration-300 p-2.5">
+                <div className="w-14 h-14 rounded-2xl bg-card border border-border flex items-center justify-center p-2.5">
                   {'textLogo' in p && p.textLogo ? (
-                    <span className="text-sm font-bold text-muted-foreground group-hover:text-foreground transition-colors duration-300 tracking-wider">
-                      ASOS
-                    </span>
+                    <span className="text-sm font-bold text-muted-foreground tracking-wider">ASOS</span>
                   ) : (
-                    <img
-                      src={p.logo}
-                      alt={p.name}
-                      className="w-full h-full object-contain"
-                      loading="lazy"
-                    />
+                    <img src={p.logo} alt={p.name} className="w-full h-full object-contain" loading="lazy" />
                   )}
                 </div>
                 <span className="text-[10px] font-sans font-medium text-muted-foreground">{p.name}</span>
               </motion.div>
             ))}
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

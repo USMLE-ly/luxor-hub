@@ -1,18 +1,7 @@
 import { motion, useInView } from "framer-motion";
-import { useRef, useState } from "react";
-import { Sun, Moon, Sparkles, Star, TrendingUp, Palette } from "lucide-react";
-
-const MockCard = ({ label, icon: Icon }: { label: string; icon: React.ElementType }) => (
-  <div className="rounded-xl border border-border/60 bg-card/80 backdrop-blur-sm p-4 flex items-center gap-3">
-    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-      <Icon className="w-4 h-4 text-primary" />
-    </div>
-    <div className="min-w-0">
-      <p className="text-sm font-semibold text-foreground truncate">{label}</p>
-      <p className="text-xs text-muted-foreground">AI-powered</p>
-    </div>
-  </div>
-);
+import { useRef, useState, useCallback } from "react";
+import { GripVertical, Sparkles, Star, TrendingUp, Palette } from "lucide-react";
+import { TextReveal } from "@/components/ui/animated-text-reveal";
 
 const MockDashboard = ({ mode }: { mode: "light" | "dark" }) => {
   const isDark = mode === "dark";
@@ -21,12 +10,10 @@ const MockDashboard = ({ mode }: { mode: "light" | "dark" }) => {
   const text = isDark ? "text-[hsl(40,20%,95%)]" : "text-[hsl(30,10%,12%)]";
   const muted = isDark ? "text-[hsl(240,5%,55%)]" : "text-[hsl(30,8%,46%)]";
   const primary = "text-[hsl(43,74%,49%)]";
-  const primaryBg = isDark ? "bg-[hsl(43,74%,49%)]/10" : "bg-[hsl(43,74%,49%)]/10";
-  const border = isDark ? "border-[hsl(240,6%,16%)]" : "border-[hsl(40,18%,85%)]";
+  const primaryBg = "bg-[hsl(43,74%,49%)]/10";
 
   return (
-    <div className={`${bg} rounded-2xl ${border} border p-5 space-y-4 w-full max-w-sm shadow-2xl`}>
-      {/* Header */}
+    <div className={`${bg} p-5 space-y-4 w-full h-full`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className={`w-8 h-8 rounded-lg ${primaryBg} flex items-center justify-center`}>
@@ -37,12 +24,8 @@ const MockDashboard = ({ mode }: { mode: "light" | "dark" }) => {
             <p className={`text-[10px] ${muted}`}>Your profile</p>
           </div>
         </div>
-        <div className={`px-2.5 py-1 rounded-full text-[10px] font-semibold ${primary} ${primaryBg}`}>
-          92
-        </div>
+        <div className={`px-2.5 py-1 rounded-full text-[10px] font-semibold ${primary} ${primaryBg}`}>92</div>
       </div>
-
-      {/* Style cards */}
       <div className="space-y-2.5">
         {[
           { label: "Warm Autumn", sub: "Color Type", icon: Palette },
@@ -60,12 +43,10 @@ const MockDashboard = ({ mode }: { mode: "light" | "dark" }) => {
           </div>
         ))}
       </div>
-
-      {/* Bottom bar */}
       <div className={`${card} border rounded-xl p-3`}>
         <div className="flex items-center justify-between mb-2">
           <p className={`text-[10px] uppercase tracking-wider font-semibold ${muted}`}>Today's Outfit</p>
-          <div className={`w-1.5 h-1.5 rounded-full bg-green-400`} />
+          <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
         </div>
         <div className="flex gap-2">
           {["bg-gradient-to-br from-amber-600 to-amber-400", "bg-gradient-to-br from-slate-700 to-slate-500", "bg-gradient-to-br from-stone-600 to-stone-400"].map((g, i) => (
@@ -83,15 +64,36 @@ const MockDashboard = ({ mode }: { mode: "light" | "dark" }) => {
 const ThemeShowcase = () => {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
-  const [hoveredSide, setHoveredSide] = useState<"light" | "dark" | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [sliderPos, setSliderPos] = useState(50);
+  const [dragging, setDragging] = useState(false);
+
+  const updateSlider = useCallback((clientX: number) => {
+    const el = containerRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const pct = ((clientX - rect.left) / rect.width) * 100;
+    setSliderPos(Math.max(5, Math.min(95, pct)));
+  }, []);
+
+  const onPointerDown = useCallback((e: React.PointerEvent) => {
+    setDragging(true);
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    updateSlider(e.clientX);
+  }, [updateSlider]);
+
+  const onPointerMove = useCallback((e: React.PointerEvent) => {
+    if (!dragging) return;
+    updateSlider(e.clientX);
+  }, [dragging, updateSlider]);
+
+  const onPointerUp = useCallback(() => setDragging(false), []);
 
   return (
     <section ref={ref} className="relative py-24 md:py-32 overflow-hidden">
-      {/* Subtle bg */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-muted/10 to-transparent" />
 
       <div className="relative max-w-5xl mx-auto px-4">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -105,66 +107,66 @@ const ThemeShowcase = () => {
             Beautiful in <span className="gold-text">Every Light</span>
           </h2>
           <p className="text-muted-foreground font-sans max-w-md mx-auto">
-            A meticulously crafted design system that adapts seamlessly between light and dark themes.
+            Drag the handle to compare light and dark themes in real-time.
           </p>
         </motion.div>
 
-        {/* Comparison */}
-        <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-          {/* Light */}
-          <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="flex flex-col items-center gap-5"
-            onMouseEnter={() => setHoveredSide("light")}
-            onMouseLeave={() => setHoveredSide(null)}
+        {/* Comparison Slider */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.7, delay: 0.2 }}
+          className="relative max-w-sm mx-auto"
+        >
+          {/* Gold animated border */}
+          <div className="absolute -inset-[2px] rounded-[1.75rem] bg-gradient-to-r from-primary/20 via-primary/50 to-primary/20 animate-[spin_8s_linear_infinite] opacity-40 blur-[1px]" />
+
+          <div
+            ref={containerRef}
+            className="relative rounded-2xl overflow-hidden border border-border h-[420px] touch-none select-none cursor-col-resize bg-card"
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
           >
-            <div className="flex items-center gap-2 text-sm font-sans font-semibold text-muted-foreground">
-              <Sun className="w-4 h-4 text-primary" />
-              <span>Light Mode</span>
-            </div>
-            <motion.div
-              animate={{ scale: hoveredSide === "light" ? 1.02 : 1 }}
-              transition={{ duration: 0.3 }}
-              className="relative"
-            >
-              {/* Glow */}
-              <div className="absolute -inset-4 bg-primary/5 rounded-3xl blur-2xl" />
+            {/* Light mode (full width, behind) */}
+            <div className="absolute inset-0">
               <MockDashboard mode="light" />
-            </motion.div>
-          </motion.div>
-
-          {/* Dark */}
-          <motion.div
-            initial={{ opacity: 0, x: 40 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.7, delay: 0.35 }}
-            className="flex flex-col items-center gap-5"
-            onMouseEnter={() => setHoveredSide("dark")}
-            onMouseLeave={() => setHoveredSide(null)}
-          >
-            <div className="flex items-center gap-2 text-sm font-sans font-semibold text-muted-foreground">
-              <Moon className="w-4 h-4 text-primary" />
-              <span>Dark Mode</span>
             </div>
-            <motion.div
-              animate={{ scale: hoveredSide === "dark" ? 1.02 : 1 }}
-              transition={{ duration: 0.3 }}
-              className="relative"
-            >
-              <div className="absolute -inset-4 bg-primary/5 rounded-3xl blur-2xl" />
-              <MockDashboard mode="dark" />
-            </motion.div>
-          </motion.div>
-        </div>
 
-        {/* Bottom tagline */}
+            {/* Dark mode (clipped from right) */}
+            <div
+              className="absolute inset-0"
+              style={{ clipPath: `inset(0 0 0 ${sliderPos}%)` }}
+            >
+              <MockDashboard mode="dark" />
+            </div>
+
+            {/* Divider handle */}
+            <div
+              className="absolute top-0 bottom-0 z-20 flex items-center justify-center"
+              style={{ left: `${sliderPos}%`, transform: "translateX(-50%)" }}
+            >
+              <div className="w-px h-full bg-primary/60" />
+              <div className="absolute w-10 h-10 rounded-full bg-card/90 backdrop-blur-md border-2 border-primary shadow-[0_0_16px_hsl(var(--primary)/0.3)] flex items-center justify-center">
+                <GripVertical className="w-4 h-4 text-primary" />
+              </div>
+            </div>
+
+            {/* Labels */}
+            <div className="absolute top-3 left-3 z-10 px-2 py-0.5 rounded-md bg-card/80 backdrop-blur-sm text-[10px] font-sans font-semibold text-muted-foreground border border-border">
+              Light
+            </div>
+            <div className="absolute top-3 right-3 z-10 px-2 py-0.5 rounded-md bg-[hsl(240,10%,8%)]/80 backdrop-blur-sm text-[10px] font-sans font-semibold text-[hsl(40,20%,70%)] border border-[hsl(240,6%,16%)]">
+              Dark
+            </div>
+          </div>
+        </motion.div>
+
         <motion.p
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ duration: 0.6, delay: 0.6 }}
-          className="text-center text-xs text-muted-foreground/60 font-sans mt-12 tracking-wide"
+          className="text-center text-xs text-muted-foreground/60 font-sans mt-10 tracking-wide"
         >
           Gold-and-charcoal glassmorphic system • HSL design tokens • Consistent across themes
         </motion.p>
