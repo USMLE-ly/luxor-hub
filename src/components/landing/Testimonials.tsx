@@ -204,6 +204,8 @@ const Testimonials = React.forwardRef<HTMLElement>((_, ref) => {
       </div>
     </section>
   );
-};
+});
+
+Testimonials.displayName = "Testimonials";
 
 export default Testimonials;

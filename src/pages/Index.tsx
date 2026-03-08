@@ -132,6 +132,10 @@ const Index = () => {
         <FAQ />
       </SectionReveal>
 
+      <SectionReveal direction="right">
+        <ThemeShowcase />
+      </SectionReveal>
+
       <Footer />
     </div>
   );
