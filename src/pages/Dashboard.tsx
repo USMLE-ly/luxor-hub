@@ -677,8 +677,13 @@ const Dashboard = () => {
           <WeeklyCapsuleWidget />
         </motion.div>
 
+        {/* ── Style Points ────────────────────────────────── */}
+        <motion.div variants={fadeUp}>
+          <StylePointsWidget />
+        </motion.div>
+
         {/* ── Chat with AI Stylist ──────────────────────────── */}
-        <motion.div variants={fadeUp} className="pb-8">
+        <motion.div variants={fadeUp}>
           <h2 className="font-display text-xl font-bold text-foreground mb-3">Chat with AI Stylist</h2>
           <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-none snap-x snap-mandatory">
             {chatPrompts.map((prompt) => (
@@ -696,6 +701,11 @@ const Dashboard = () => {
               </button>
             ))}
           </div>
+        </motion.div>
+
+        {/* ── Evening Reflection ─────────────────────────────── */}
+        <motion.div variants={fadeUp} className="pb-8">
+          <EveningReflection />
         </motion.div>
       </motion.div>
       </div>
