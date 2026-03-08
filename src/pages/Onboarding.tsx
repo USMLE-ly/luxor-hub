@@ -355,6 +355,7 @@ const Onboarding = () => {
                   aiResults={aiResults}
                 />
               ) : null}
+              </motion.div>
             </motion.div>
           </AnimatePresence>
         </div>
