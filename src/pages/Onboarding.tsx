@@ -10,6 +10,7 @@ import GenderStep from "@/components/onboarding/GenderStep";
 import StepRenderer from "@/components/onboarding/StepRenderer";
 import { getStepsForGender, type OnboardingStep } from "@/components/onboarding/onboardingSteps";
 import SwipeParticles from "@/components/onboarding/SwipeParticles";
+import { useGyroTilt } from "@/hooks/useGyroTilt";
 
 // Haptic feedback utility
 const triggerHaptic = () => {
@@ -45,6 +46,7 @@ const Onboarding = () => {
   const [swipeTrigger, setSwipeTrigger] = useState(0);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const tilt = useGyroTilt(6);
 
   const steps: OnboardingStep[] = gender ? getStepsForGender(gender) : [];
   const totalSteps = steps.length + 1; // +1 for gender
@@ -329,7 +331,19 @@ const Onboarding = () => {
                   setCurrentStep((s) => s - 1);
                 }
               }}
+              style={{
+                perspective: 800,
+                transformStyle: "preserve-3d",
+              }}
             >
+              <motion.div
+                style={{
+                  rotateX: tilt.rotateX,
+                  rotateY: tilt.rotateY,
+                  transformStyle: "preserve-3d",
+                }}
+                transition={{ type: "tween", duration: 0 }}
+              >
               {isGenderStep ? (
                 <GenderStep selected={gender} onSelect={setGender} />
               ) : currentStepData ? (
@@ -341,6 +355,7 @@ const Onboarding = () => {
                   aiResults={aiResults}
                 />
               ) : null}
+              </motion.div>
             </motion.div>
           </AnimatePresence>
         </div>
