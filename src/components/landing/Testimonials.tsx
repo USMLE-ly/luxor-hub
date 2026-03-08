@@ -1,6 +1,7 @@
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import React, { useState, useEffect, useRef } from "react";
 import { ArrowLeft, ArrowRight, Sparkles, TrendingUp } from "lucide-react";
+import { TextReveal } from "@/components/ui/animated-text-reveal";
 import proof1 from "@/assets/proof-1.jpg";
 import proof2 from "@/assets/proof-2.jpeg";
 import proof3 from "@/assets/proof-3.jpg";
