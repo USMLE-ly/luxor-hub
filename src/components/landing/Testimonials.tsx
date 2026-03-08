@@ -41,7 +41,7 @@ const slideVariants = {
   exit: (direction: number) => ({ zIndex: 0, x: direction < 0 ? 300 : -300, opacity: 0, scale: 0.92 }),
 };
 
-const Testimonials = () => {
+const Testimonials = React.forwardRef<HTMLElement>((_, ref) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const counterRef = useRef<HTMLDivElement>(null);
