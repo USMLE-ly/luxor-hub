@@ -1,27 +1,37 @@
-import { motion } from "framer-motion";
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Sparkles, ArrowRight } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
 
 const Hero = () => {
   const navigate = useNavigate();
+  const ref = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
+  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
+  const bgScale = useTransform(scrollYProgress, [0, 1], [1, 1.15]);
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const contentY = useTransform(scrollYProgress, [0, 0.5], [0, -60]);
 
   return (
-    <section className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden">
-      {/* Background image with overlay */}
-      <div className="absolute inset-0">
+    <section ref={ref} className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden">
+      {/* Parallax background */}
+      <motion.div className="absolute inset-0" style={{ y: bgY, scale: bgScale }}>
         <img
           src={heroImage}
           alt=""
           className="w-full h-full object-cover"
           loading="eager"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/40 to-transparent" />
-      </div>
+      </motion.div>
+      <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background" />
+      <div className="absolute inset-0 bg-gradient-to-r from-background/40 to-transparent" />
 
-      {/* Content */}
-      <div className="relative z-10 max-w-4xl mx-auto px-4 text-center pt-20">
+      {/* Content with parallax fade */}
+      <motion.div
+        className="relative z-10 max-w-4xl mx-auto px-4 text-center pt-20"
+        style={{ opacity: contentOpacity, y: contentY }}
+      >
         {/* Badge */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -101,7 +111,7 @@ const Hero = () => {
             <span className="font-semibold text-foreground">12,000+</span> stylists trust AURELIA
           </p>
         </motion.div>
-      </div>
+      </motion.div>
 
       {/* Bottom fade */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
