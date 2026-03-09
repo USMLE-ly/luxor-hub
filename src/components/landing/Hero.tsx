@@ -268,6 +268,8 @@ const Hero = () => {
                 texturesLoaded = true; sliderEnabled = true;
                 updateShaderUniforms();
                 containerRef.current?.querySelector(".slider-wrapper")?.classList.add("loaded");
+                const preloader = containerRef.current?.querySelector(".slider-preloader") as HTMLElement;
+                if (preloader) { preloader.style.opacity = '0'; preloader.style.pointerEvents = 'none'; setTimeout(() => preloader.style.display = 'none', 700); }
                 safeStartTimer(500);
             }
             const render = () => { requestAnimationFrame(render); renderer.render(scene, camera); };
@@ -315,6 +317,14 @@ const Hero = () => {
 
   return (
     <section className="relative" ref={containerRef}>
+      {/* Preloader */}
+      <div className="slider-preloader absolute inset-0 z-[20] flex items-center justify-center bg-background transition-opacity duration-700">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+          <p className="font-sans text-sm text-muted-foreground tracking-widest uppercase">Loading AURELIA</p>
+        </div>
+      </div>
+
       <div className="slider-wrapper">
         <canvas className="hero-webgl-canvas webgl-canvas"></canvas>
         <span className="slide-number" id="heroSlideNumber">01</span>
