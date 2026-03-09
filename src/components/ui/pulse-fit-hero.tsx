@@ -171,26 +171,45 @@ export function PulseFitHero({
                 className="flex flex-col sm:flex-row items-center gap-4"
               >
                 {primaryAction && (
-                  <button
-                    onClick={primaryAction.onClick}
-                    className="flex flex-row items-center gap-2 px-8 py-4 rounded-full transition-all hover:scale-105 text-lg font-medium"
-                    style={{
-                      background: "linear-gradient(135deg, hsl(43 74% 49%) 0%, hsl(43 70% 35%) 100%)",
-                      color: "hsl(240 10% 4%)",
-                      boxShadow: "0 4px 24px hsl(43 74% 49% / 0.25), 0 0 0 1px hsl(43 74% 49% / 0.15)",
-                    }}
-                  >
-                    {primaryAction.label}
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                      <path
-                        d="M7 10H13M13 10L10 7M13 10L10 13"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
+                  <div className="relative">
+                    {/* Radial gold glow pulse */}
+                    <motion.div
+                      className="absolute inset-0 rounded-full pointer-events-none"
+                      style={{
+                        background: "radial-gradient(circle, hsl(43 74% 49% / 0.4) 0%, transparent 70%)",
+                        filter: "blur(16px)",
+                      }}
+                      animate={{
+                        scale: [1, 1.5, 1],
+                        opacity: [0.5, 0.2, 0.5],
+                      }}
+                      transition={{
+                        duration: 2.5,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
+                    />
+                    <button
+                      onClick={primaryAction.onClick}
+                      className="relative flex flex-row items-center gap-2 px-8 py-4 rounded-full transition-all hover:scale-105 text-lg font-medium"
+                      style={{
+                        background: "linear-gradient(135deg, hsl(43 74% 49%) 0%, hsl(43 70% 35%) 100%)",
+                        color: "hsl(240 10% 4%)",
+                        boxShadow: "0 4px 24px hsl(43 74% 49% / 0.25), 0 0 0 1px hsl(43 74% 49% / 0.15)",
+                      }}
+                    >
+                      {primaryAction.label}
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path
+                          d="M7 10H13M13 10L10 7M13 10L10 13"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </button>
+                  </div>
                 )}
 
                 {secondaryAction && (
