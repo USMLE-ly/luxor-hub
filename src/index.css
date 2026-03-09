@@ -323,3 +323,146 @@
 .hero-gold-shimmer {
   animation: gold-shimmer-sweep 4s ease-in-out infinite;
 }
+
+/* ── Lumina Slider ─────────────────────────────────────── */
+.slider-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+.slider-wrapper.loaded {
+  opacity: 1;
+}
+
+.webgl-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.slide-content {
+  position: absolute;
+  bottom: 12%;
+  left: 5%;
+  z-index: 10;
+  pointer-events: none;
+  max-width: 60%;
+}
+
+.slide-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1;
+  margin: 0;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+}
+
+.slide-description {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(0.85rem, 1.2vw, 1rem);
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 0.75rem;
+  max-width: 400px;
+  line-height: 1.5;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.2);
+}
+
+.slide-number {
+  position: absolute;
+  top: 2rem;
+  right: 2.5rem;
+  font-family: 'Inter', monospace;
+  font-size: clamp(10px, 1.2vw, 12px);
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.15em;
+  z-index: 10;
+}
+
+.slide-total {
+  position: absolute;
+  bottom: 2rem;
+  right: 2.5rem;
+  font-family: 'Inter', monospace;
+  font-size: clamp(10px, 1.2vw, 12px);
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.15em;
+  z-index: 10;
+}
+
+.slides-navigation {
+  position: absolute;
+  bottom: 5%;
+  right: 5%;
+  display: flex;
+  gap: 1.5rem;
+  z-index: 10;
+}
+
+.slide-nav-item {
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
+}
+
+.slide-nav-item.active {
+  opacity: 1;
+}
+
+.slide-nav-item:hover {
+  opacity: 0.8;
+}
+
+.slide-progress-line {
+  width: 40px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.slide-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: hsl(var(--gold, 43 74% 49%));
+  border-radius: 2px;
+  transition: width 0.1s ease, opacity 0.3s ease;
+}
+
+.slide-nav-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .slide-content {
+    bottom: 20%;
+    left: 6%;
+    max-width: 85%;
+  }
+  .slides-navigation {
+    bottom: 4%;
+    right: auto;
+    left: 6%;
+    gap: 1rem;
+  }
+  .slide-nav-title {
+    display: none;
+  }
+}
