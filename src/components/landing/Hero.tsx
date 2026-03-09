@@ -395,8 +395,17 @@ const Hero = () => {
         if (!isTransitioning) navigateToSlide((currentSlideIndex + 1) % slides.length);
       });
 
+      // Keyboard navigation
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (isTransitioning) return;
+        if (e.key === "ArrowLeft") navigateToSlide((currentSlideIndex - 1 + slides.length) % slides.length);
+        if (e.key === "ArrowRight") navigateToSlide((currentSlideIndex + 1) % slides.length);
+      };
+      window.addEventListener("keydown", handleKeyDown);
+
       return () => {
         window.removeEventListener("resize", handleResize);
+        window.removeEventListener("keydown", handleKeyDown);
         cancelAnimationFrame(animFrameId);
         stopAutoSlideTimer();
         renderer?.dispose();
