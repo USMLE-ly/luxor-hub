@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Sparkles, Brain, Palette, ShoppingBag, Calendar, TrendingUp } from "lucide-react";
+import { GlowingEffect } from "@/components/ui/glowing-effect";
 
 const features = [
   {
@@ -63,13 +64,23 @@ const Features = () => (
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: i * 0.08 }}
-            className={`glass rounded-2xl p-6 premium-card hover-lift ${f.span}`}
+            className={`relative glass rounded-2xl p-6 premium-card hover-lift ${f.span}`}
           >
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-              <f.icon className="w-5 h-5 text-primary" />
+            <GlowingEffect
+              spread={40}
+              glow
+              proximity={64}
+              blur={12}
+              variant="default"
+              borderWidth={1}
+            />
+            <div className="relative z-10">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                <f.icon className="w-5 h-5 text-primary" />
+              </div>
+              <h3 className="font-display text-lg font-bold text-foreground mb-1">{f.title}</h3>
+              <p className="font-sans text-sm text-muted-foreground leading-relaxed">{f.description}</p>
             </div>
-            <h3 className="font-display text-lg font-bold text-foreground mb-1">{f.title}</h3>
-            <p className="font-sans text-sm text-muted-foreground leading-relaxed">{f.description}</p>
           </motion.div>
         ))}
       </div>
