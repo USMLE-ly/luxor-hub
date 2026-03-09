@@ -46,6 +46,7 @@ const Navbar = () => {
     { label: "Features", id: "features" },
     { label: "How It Works", id: "how-it-works" },
     { label: "Pricing", id: "pricing" },
+    { label: "FAQ", id: "faq" },
   ];
 
   return (
