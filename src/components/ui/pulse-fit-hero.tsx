@@ -2,12 +2,6 @@ import React from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-interface NavigationItem {
-  label: string;
-  hasDropdown?: boolean;
-  onClick?: () => void;
-}
-
 interface ProgramCard {
   image: string;
   category: string;
@@ -17,7 +11,7 @@ interface ProgramCard {
 
 interface PulseFitHeroProps {
   logo?: string;
-  navigation?: NavigationItem[];
+  navigation?: { label: string; hasDropdown?: boolean; onClick?: () => void }[];
   ctaButton?: {
     label: string;
     onClick: () => void;
@@ -43,15 +37,6 @@ interface PulseFitHeroProps {
 }
 
 export function PulseFitHero({
-  logo = "PulseFit",
-  navigation = [
-    { label: "Features" },
-    { label: "Programs", hasDropdown: true },
-    { label: "Testimonials" },
-    { label: "Pricing" },
-    { label: "Contact" },
-  ],
-  ctaButton,
   title,
   subtitle,
   primaryAction,
@@ -65,76 +50,24 @@ export function PulseFitHero({
   return (
     <section
       className={cn(
-        "relative w-full min-h-screen flex flex-col overflow-hidden",
+        "relative w-full flex flex-col overflow-hidden",
         className
       )}
-      style={{
-        background: "linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--muted)) 50%, hsl(var(--background)) 100%)",
-      }}
       role="banner"
       aria-label="Hero section"
     >
-      {/* Header */}
-      <motion.header
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="relative z-20 flex flex-row justify-between items-center px-8 lg:px-16"
-        style={{
-          paddingTop: "32px",
-          paddingBottom: "32px",
-        }}
-      >
-        <div className="font-bold text-2xl text-foreground">
-          {logo}
-        </div>
-
-        <nav className="hidden lg:flex flex-row items-center gap-8" aria-label="Main navigation">
-          {navigation.map((item, index) => (
-            <button
-              key={index}
-              onClick={item.onClick}
-              className="flex flex-row items-center gap-1 hover:opacity-70 transition-opacity text-muted-foreground"
-            >
-              {item.label}
-              {item.hasDropdown && (
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path
-                    d="M4 6L8 10L12 6"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              )}
-            </button>
-          ))}
-        </nav>
-
-        {ctaButton && (
-          <button
-            onClick={ctaButton.onClick}
-            className="px-6 py-3 rounded-full transition-all hover:scale-105 bg-background border border-border text-foreground shadow-sm"
-          >
-            {ctaButton.label}
-          </button>
-        )}
-      </motion.header>
-
       {/* Main Content */}
       {children ? (
         <div className="relative z-10 flex-1 flex items-center justify-center w-full">
           {children}
         </div>
       ) : (
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4">
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 pt-16 pb-8 md:pt-24 md:pb-12">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="flex flex-col items-center text-center max-w-4xl"
-            style={{ gap: "32px" }}
+            className="flex flex-col items-center text-center max-w-4xl gap-8"
           >
             <h1
               className="font-bold text-foreground"
@@ -148,11 +81,10 @@ export function PulseFitHero({
             </h1>
 
             <p
-              className="text-muted-foreground"
+              className="text-muted-foreground max-w-xl"
               style={{
                 fontSize: "clamp(16px, 2vw, 20px)",
                 lineHeight: "1.6",
-                maxWidth: "600px",
               }}
             >
               {subtitle}
@@ -168,8 +100,7 @@ export function PulseFitHero({
                 {primaryAction && (
                   <button
                     onClick={primaryAction.onClick}
-                    className="flex flex-row items-center gap-2 px-8 py-4 rounded-full transition-all hover:scale-105 bg-primary text-primary-foreground shadow-lg"
-                    style={{ fontSize: "18px" }}
+                    className="flex flex-row items-center gap-2 px-8 py-4 rounded-full transition-all hover:scale-105 bg-primary text-primary-foreground shadow-lg text-lg font-medium"
                   >
                     {primaryAction.label}
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -187,8 +118,7 @@ export function PulseFitHero({
                 {secondaryAction && (
                   <button
                     onClick={secondaryAction.onClick}
-                    className="px-8 py-4 rounded-full transition-all hover:scale-105 bg-transparent border border-border text-foreground"
-                    style={{ fontSize: "18px" }}
+                    className="px-8 py-4 rounded-full transition-all hover:scale-105 bg-transparent border border-border text-foreground text-lg font-medium"
                   >
                     {secondaryAction.label}
                   </button>
@@ -239,16 +169,16 @@ export function PulseFitHero({
           initial={{ opacity: 0, y: 100 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.8 }}
-          className="relative z-10 w-full overflow-hidden py-[60px]"
+          className="relative z-10 w-full overflow-hidden py-10 md:py-16"
         >
           <div
-            className="absolute left-0 top-0 bottom-0 z-10 pointer-events-none w-[150px]"
+            className="absolute left-0 top-0 bottom-0 z-10 pointer-events-none w-[100px] md:w-[150px]"
             style={{
               background: "linear-gradient(90deg, hsl(var(--background)) 0%, transparent 100%)",
             }}
           />
           <div
-            className="absolute right-0 top-0 bottom-0 z-10 pointer-events-none w-[150px]"
+            className="absolute right-0 top-0 bottom-0 z-10 pointer-events-none w-[100px] md:w-[150px]"
             style={{
               background: "linear-gradient(270deg, hsl(var(--background)) 0%, transparent 100%)",
             }}
@@ -263,7 +193,7 @@ export function PulseFitHero({
               x: {
                 repeat: Infinity,
                 repeatType: "loop",
-                duration: programs.length * 3,
+                duration: programs.length * 4,
                 ease: "linear",
               },
             }}
@@ -284,6 +214,7 @@ export function PulseFitHero({
                   src={program.image}
                   alt={program.title}
                   className="w-full h-full object-cover"
+                  loading="lazy"
                 />
                 <div
                   className="absolute inset-0"
