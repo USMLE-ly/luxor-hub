@@ -499,11 +499,7 @@ export function LuminaSlider() {
       <div className="lumina-bottom-gradient" />
 
       <main className="slider-wrapper">
-        <div className="lumina-fallback-bg" style={{
-          backgroundImage: `url(${slides[0].media})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }} />
+        <div className="lumina-fallback-bg" />
         <canvas className="webgl-canvas" />
         <span className="slide-number" id="slideNumber">01</span>
         <span className="slide-total" id="slideTotal">10</span>
