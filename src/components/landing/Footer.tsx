@@ -5,21 +5,37 @@ import { MagneticCursor } from "@/components/ui/magnetic-cursor";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { z } from "zod";
+
+const emailSchema = z.string().trim().email("Please enter a valid email").max(255);
 
 const Footer = () => {
   const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
   const [loading, setLoading] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  const scrollTo = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    e.preventDefault();
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  };
+
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
+    setEmailError("");
+
+    const result = emailSchema.safeParse(email);
+    if (!result.success) {
+      setEmailError(result.error.errors[0].message);
+      return;
+    }
+
     setLoading(true);
     const { error } = await supabase
       .from("newsletter_subscribers" as any)
-      .insert([{ email }] as any);
+      .insert([{ email: result.data }] as any);
     setLoading(false);
     if (error) {
       if (error.code === "23505") {
@@ -88,10 +104,10 @@ const Footer = () => {
 
           <div className="flex flex-col gap-3 text-sm font-sans text-muted-foreground">
             <p className="font-semibold text-foreground mb-1">Quick Links</p>
-            <a href="#features" className="hover:text-foreground transition-colors w-fit">Features</a>
-            <a href="#how-it-works" className="hover:text-foreground transition-colors w-fit">How It Works</a>
-            <a href="#pricing" className="hover:text-foreground transition-colors w-fit">Pricing</a>
-            <a href="#faq" className="hover:text-foreground transition-colors w-fit">FAQ</a>
+            <a href="#features" onClick={(e) => scrollTo(e, "features")} className="hover:text-foreground transition-colors w-fit">Features</a>
+            <a href="#how-it-works" onClick={(e) => scrollTo(e, "how-it-works")} className="hover:text-foreground transition-colors w-fit">How It Works</a>
+            <a href="#pricing" onClick={(e) => scrollTo(e, "pricing")} className="hover:text-foreground transition-colors w-fit">Pricing</a>
+            <a href="#faq" onClick={(e) => scrollTo(e, "faq")} className="hover:text-foreground transition-colors w-fit">FAQ</a>
           </div>
 
           <div>
@@ -102,7 +118,7 @@ const Footer = () => {
                 <input
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => { setEmail(e.target.value); setEmailError(""); }}
                   placeholder="your@email.com"
                   className="w-full h-9 px-3 rounded-lg bg-muted border border-border text-sm font-sans text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                   required
@@ -134,6 +150,9 @@ const Footer = () => {
                 </AnimatePresence>
               </button>
             </form>
+            {emailError && (
+              <p className="text-xs text-destructive mt-1 font-sans">{emailError}</p>
+            )}
           </div>
         </div>
 

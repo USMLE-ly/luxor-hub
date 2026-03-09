@@ -1,5 +1,46 @@
 import { motion } from "framer-motion";
-import NumberTicker from "@/components/ui/number-ticker";
+import { useRef, useState, useEffect } from "react";
+import { useInView } from "framer-motion";
+
+interface AnimatedCounterProps {
+  target: number;
+  suffix: string;
+  duration?: number;
+}
+
+const AnimatedCounter = ({ target, suffix, duration = 2000 }: AnimatedCounterProps) => {
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!isInView) return;
+    const steps = 60;
+    const increment = target / steps;
+    let current = 0;
+    const interval = setInterval(() => {
+      current += increment;
+      if (current >= target) {
+        setCount(target);
+        clearInterval(interval);
+      } else {
+        setCount(Math.floor(current * 10) / 10);
+      }
+    }, duration / steps);
+    return () => clearInterval(interval);
+  }, [isInView, target, duration]);
+
+  const displayValue = target % 1 !== 0 
+    ? count.toFixed(1) 
+    : Math.floor(count).toLocaleString();
+
+  return (
+    <span ref={ref} className="tabular-nums">
+      {displayValue}
+      <span className="text-primary">{suffix}</span>
+    </span>
+  );
+};
 
 const stats = [
   { value: 12000, suffix: "+", label: "Active Users" },
@@ -22,8 +63,7 @@ const SocialProofStrip = () => (
             className="text-center"
           >
             <p className="font-display text-3xl md:text-4xl font-bold text-foreground">
-              <NumberTicker value={stat.value} />
-              <span className="text-primary">{stat.suffix}</span>
+              <AnimatedCounter target={stat.value} suffix={stat.suffix} />
             </p>
             <p className="font-sans text-sm text-muted-foreground mt-1">{stat.label}</p>
           </motion.div>
