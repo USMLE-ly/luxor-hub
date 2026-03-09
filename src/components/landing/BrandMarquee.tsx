@@ -12,13 +12,23 @@ const BrandMarquee = () => (
     <p className="text-center text-xs font-sans text-muted-foreground tracking-widest uppercase mb-6">
       Integrated With
     </p>
-    <div className="relative">
-      <div className="flex animate-marquee gap-12 [--duration:25s]">
-        {[...brands, ...brands].map((b, i) => (
+    <div className="relative flex overflow-hidden" style={{ ["--gap" as string]: "3rem" }}>
+      <div className="flex shrink-0 animate-marquee gap-12 [--duration:25s]">
+        {brands.map((b, i) => (
           <img
-            key={`${b.name}-${i}`}
+            key={`a-${b.name}-${i}`}
             src={b.src}
             alt={b.name}
+            className="h-8 w-auto opacity-40 hover:opacity-70 transition-opacity grayscale hover:grayscale-0 shrink-0"
+          />
+        ))}
+      </div>
+      <div className="flex shrink-0 animate-marquee gap-12 [--duration:25s]" aria-hidden="true">
+        {brands.map((b, i) => (
+          <img
+            key={`b-${b.name}-${i}`}
+            src={b.src}
+            alt=""
             className="h-8 w-auto opacity-40 hover:opacity-70 transition-opacity grayscale hover:grayscale-0 shrink-0"
           />
         ))}
