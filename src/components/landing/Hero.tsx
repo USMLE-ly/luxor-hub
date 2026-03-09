@@ -289,6 +289,24 @@ const Hero = () => {
         const handleResize = () => { if (renderer) { renderer.setSize(window.innerWidth, window.innerHeight); shaderMaterial.uniforms.uResolution.value.set(window.innerWidth, window.innerHeight); } };
         document.addEventListener("visibilitychange", handleVisibility);
         window.addEventListener("resize", handleResize);
+
+        // Touch swipe support
+        let touchStartX = 0;
+        let touchStartY = 0;
+        const SWIPE_THRESHOLD = 50;
+        const handleTouchStart = (e: TouchEvent) => { touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY; };
+        const handleTouchEnd = (e: TouchEvent) => {
+            if (isTransitioning || !sliderEnabled) return;
+            const dx = e.changedTouches[0].clientX - touchStartX;
+            const dy = e.changedTouches[0].clientY - touchStartY;
+            if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > SWIPE_THRESHOLD) {
+                if (dx < 0) navigateToSlide((currentSlideIndex + 1) % slides.length);
+                else navigateToSlide((currentSlideIndex - 1 + slides.length) % slides.length);
+            }
+        };
+        const canvas = containerRef.current?.querySelector(".hero-webgl-canvas");
+        canvas?.addEventListener("touchstart", handleTouchStart as any, { passive: true });
+        canvas?.addEventListener("touchend", handleTouchEnd as any, { passive: true });
     };
 
     loadScripts();
