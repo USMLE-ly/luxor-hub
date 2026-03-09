@@ -10,7 +10,21 @@ import Pricing from "@/components/landing/Pricing";
 import FAQ from "@/components/landing/FAQ";
 import Footer from "@/components/landing/Footer";
 import { ContainerScroll } from "@/components/ui/container-scroll";
+import { HeroSection } from "@/components/ui/feature-carousel";
 import featureAppPreview from "@/assets/feature-outfit-gen.jpg";
+import carouselApp1 from "@/assets/carousel-app-1.jpg";
+import carouselApp2 from "@/assets/carousel-app-2.jpg";
+import carouselApp3 from "@/assets/carousel-app-3.jpg";
+import carouselApp4 from "@/assets/carousel-app-4.jpg";
+import carouselApp5 from "@/assets/carousel-app-5.jpg";
+
+const appImages = [
+  { src: carouselApp1, alt: "AI Fashion outfit suggestions" },
+  { src: carouselApp2, alt: "Color analysis and skin tone matching" },
+  { src: carouselApp3, alt: "Digital wardrobe closet organizer" },
+  { src: carouselApp4, alt: "Trend radar and style scoring" },
+  { src: carouselApp5, alt: "AI stylist chat assistant" },
+];
 
 const Index = () => {
   const { scrollYProgress } = useScroll();
@@ -48,6 +62,18 @@ const Index = () => {
       </ContainerScroll>
 
       <Features />
+
+      {/* Feature Carousel */}
+      <HeroSection
+        title={
+          <>
+            Your AI Stylist, <span className="gold-text">Always On</span>
+          </>
+        }
+        subtitle="Explore AURELIA's powerful features — from outfit generation to trend intelligence, all in the palm of your hand."
+        images={appImages}
+      />
+
       <BrandMarquee />
       <Testimonials />
       <Pricing />

@@ -268,6 +268,8 @@ const Hero = () => {
                 texturesLoaded = true; sliderEnabled = true;
                 updateShaderUniforms();
                 containerRef.current?.querySelector(".slider-wrapper")?.classList.add("loaded");
+                const preloader = containerRef.current?.querySelector(".slider-preloader") as HTMLElement;
+                if (preloader) { preloader.style.opacity = '0'; preloader.style.pointerEvents = 'none'; setTimeout(() => preloader.style.display = 'none', 700); }
                 safeStartTimer(500);
             }
             const render = () => { requestAnimationFrame(render); renderer.render(scene, camera); };
