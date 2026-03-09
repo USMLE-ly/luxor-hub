@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useNavigate } from "react-router-dom";
+import { renderCanvas } from "@/components/ui/hero-designali";
 import { Sparkles, ArrowRight } from "lucide-react";
 import sliderStyleDna from "@/assets/slider-style-dna.jpg";
 import sliderOutfitGen from "@/assets/slider-outfit-gen.jpg";
@@ -312,6 +313,7 @@ const Hero = () => {
     };
 
     loadScripts();
+    renderCanvas();
     return () => {};
   }, []);
 
@@ -359,6 +361,10 @@ const Hero = () => {
 
         <nav className="slides-navigation z-[5]" id="heroSlidesNav"></nav>
       </div>
+      <canvas
+        className="pointer-events-none absolute inset-0 z-[2]"
+        id="canvas"
+      />
     </section>
   );
 };

@@ -269,7 +269,7 @@
   }
 }
 
-/* ── Gradient Button ─────────────────────────────────────── */
+/* ── Gradient Button (3D) ─────────────────────────────────────── */
 .gradient-button {
   --gradient-bg: linear-gradient(135deg, hsl(var(--gold-dark)), hsl(var(--gold)), hsl(var(--gold-light)));
   --gradient-hover: linear-gradient(135deg, hsl(var(--gold)), hsl(var(--gold-light)), hsl(var(--gold)));
@@ -281,6 +281,20 @@
   border-bottom: 4px solid hsl(var(--gold-dark));
   overflow: hidden;
   cursor: pointer;
+  transform: translateY(0);
+  box-shadow: 0 4px 0 0 hsl(var(--gold-dark) / 0.6), 0 6px 20px -4px hsl(var(--gold) / 0.3);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.gradient-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 0 hsl(var(--gold-dark) / 0.6), 0 10px 30px -4px hsl(var(--gold) / 0.4);
+}
+
+.gradient-button:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 0 hsl(var(--gold-dark) / 0.6), 0 2px 8px -2px hsl(var(--gold) / 0.2);
+  border-bottom-width: 1px;
 }
 
 .gradient-button::before {
@@ -302,16 +316,32 @@
   z-index: 1;
 }
 
-/* Variant: outlined glow */
+/* Variant: outlined glow (3D) */
 .gradient-button-variant {
   background: transparent;
   border: 1.5px solid hsl(var(--gold) / 0.4);
   border-bottom: 4px solid hsl(var(--gold) / 0.2);
   color: hsl(var(--gold));
+  box-shadow: 0 4px 0 0 hsl(var(--gold) / 0.15), 0 6px 20px -4px hsl(var(--gold) / 0.1);
+}
+
+.gradient-button-variant:hover {
+  box-shadow: 0 6px 0 0 hsl(var(--gold) / 0.2), 0 10px 30px -4px hsl(var(--gold) / 0.15);
+}
+
+.gradient-button-variant:active {
+  box-shadow: 0 1px 0 0 hsl(var(--gold) / 0.1), 0 2px 8px -2px hsl(var(--gold) / 0.05);
 }
 
 .gradient-button-variant::before {
   background: hsl(var(--gold) / 0.08);
+}
+
+/* ── Shine Pulse for ShineBorder ─────────────── */
+@keyframes shine-pulse {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+  100% { background-position: 0% 0%; }
 }
 
 /* Gold shimmer sweep for hero title */
