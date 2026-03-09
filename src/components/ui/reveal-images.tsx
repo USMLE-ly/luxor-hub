@@ -45,11 +45,11 @@ function RevealImageList() {
       text: "Style DNA",
       images: [
         {
-          src: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=200&auto=format&fit=crop&q=60",
+          src: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=200&auto=format&fit=crop&q=60",
           alt: "Style analysis",
         },
         {
-          src: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=200&auto=format&fit=crop&q=60",
+          src: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=200&auto=format&fit=crop&q=60",
           alt: "Fashion styling",
         },
       ],

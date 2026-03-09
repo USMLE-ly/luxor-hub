@@ -1,89 +1,78 @@
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Sparkles, Brain, Palette, ShoppingBag, Calendar, TrendingUp } from "lucide-react";
-import { GlowingEffect } from "@/components/ui/glowing-effect";
+import { FeatureCard } from "@/components/ui/grid-feature-cards";
 
 const features = [
   {
     icon: Brain,
     title: "Style DNA Analysis",
     description: "AI learns your unique aesthetic from selfies, preferences, and wardrobe data.",
-    span: "md:col-span-2",
   },
   {
     icon: Sparkles,
     title: "AI Outfit Generator",
     description: "Get daily outfit ideas tailored to weather, occasion, and your mood.",
-    span: "",
   },
   {
     icon: Palette,
     title: "Color Intelligence",
     description: "Discover your perfect color palette based on skin tone analysis.",
-    span: "",
   },
   {
     icon: ShoppingBag,
     title: "Smart Shopping",
     description: "Get recommendations for pieces that fill gaps in your wardrobe.",
-    span: "md:col-span-2",
   },
   {
     icon: Calendar,
     title: "Outfit Calendar",
     description: "Plan your looks ahead and never repeat outfits unintentionally.",
-    span: "",
   },
   {
     icon: TrendingUp,
     title: "Trend Radar",
     description: "Stay ahead with real-time trend intelligence matched to your style.",
-    span: "",
   },
 ];
 
+function AnimatedContainer({ className, delay = 0.1, children }: { delay?: number; className?: string; children: React.ReactNode }) {
+  const shouldReduceMotion = useReducedMotion();
+  if (shouldReduceMotion) return <>{children}</>;
+
+  return (
+    <motion.div
+      initial={{ filter: "blur(4px)", translateY: -8, opacity: 0 }}
+      whileInView={{ filter: "blur(0px)", translateY: 0, opacity: 1 }}
+      viewport={{ once: true }}
+      transition={{ delay, duration: 0.8 }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 const Features = () => (
   <section id="features" className="py-24 bg-muted/20">
-    <div className="max-w-5xl mx-auto px-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="text-center mb-16"
-      >
+    <div className="mx-auto w-full max-w-5xl space-y-8 px-4">
+      <AnimatedContainer className="mx-auto max-w-3xl text-center">
         <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase mb-3">Features</p>
-        <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground">
+        <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground tracking-wide text-balance">
           Everything You Need to <span className="gold-text">Look Your Best</span>
         </h2>
-      </motion.div>
+        <p className="text-muted-foreground mt-4 text-sm tracking-wide text-balance">
+          Six AI-powered tools that transform how you dress, shop, and express yourself.
+        </p>
+      </AnimatedContainer>
 
-      <div className="grid md:grid-cols-4 gap-4">
-        {features.map((f, i) => (
-          <motion.div
-            key={f.title}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: i * 0.08 }}
-            className={`relative glass rounded-2xl p-6 premium-card hover-lift ${f.span}`}
-          >
-            <GlowingEffect
-              spread={40}
-              glow
-              proximity={64}
-              blur={12}
-              variant="default"
-              borderWidth={1}
-            />
-            <div className="relative z-10">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-                <f.icon className="w-5 h-5 text-primary" />
-              </div>
-              <h3 className="font-display text-lg font-bold text-foreground mb-1">{f.title}</h3>
-              <p className="font-sans text-sm text-muted-foreground leading-relaxed">{f.description}</p>
-            </div>
-          </motion.div>
+      <AnimatedContainer
+        delay={0.4}
+        className="grid grid-cols-1 divide-x divide-y divide-dashed border border-dashed sm:grid-cols-2 md:grid-cols-3"
+      >
+        {features.map((feature, i) => (
+          <FeatureCard key={i} feature={feature} />
         ))}
-      </div>
+      </AnimatedContainer>
     </div>
   </section>
 );
