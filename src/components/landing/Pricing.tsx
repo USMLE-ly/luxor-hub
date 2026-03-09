@@ -1,25 +1,26 @@
 import { motion } from "framer-motion";
 import { Check, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { PricingInteraction } from "@/components/ui/pricing-interaction";
 
 const tiers = [
   {
-    name: "Free",
-    price: "$0",
-    period: "forever",
-    description: "Get started with basic styling",
-    features: ["5 outfit suggestions / week", "Closet scanner (20 items)", "Basic color analysis", "Community access"],
-    cta: "Get Started",
+    name: "Starter",
+    price: "$9",
+    period: "/month",
+    description: "Essential AI styling tools",
+    features: ["200 closet items", "Daily outfit suggestions", "Basic color analysis", "Closet scanner", "Community access"],
+    cta: "Start Now",
     highlighted: false,
   },
   {
     name: "Pro",
-    price: "$12",
+    price: "$29",
     period: "/month",
     description: "Unlock your full style potential",
     features: [
-      "Unlimited outfit suggestions",
       "Unlimited closet items",
+      "AI Stylist Chat",
       "Advanced Style DNA",
       "Shopping recommendations",
       "Outfit calendar",
@@ -30,9 +31,9 @@ const tiers = [
   },
   {
     name: "Elite",
-    price: "$29",
+    price: "$99",
     period: "/month",
-    description: "For the fashion-obsessed",
+    description: "Full concierge-level styling",
     features: [
       "Everything in Pro",
       "Virtual try-on",
@@ -51,7 +52,7 @@ const Pricing = () => {
 
   return (
     <section id="pricing" className="py-24 bg-muted/20">
-      <div className="max-w-5xl mx-auto px-4">
+      <div className="max-w-6xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -62,53 +63,71 @@ const Pricing = () => {
           <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground">
             Invest in Your <span className="gold-text">Best Self</span>
           </h2>
+          <p className="mt-4 max-w-lg mx-auto font-sans text-sm text-muted-foreground">
+            Choose the plan that fits your style journey. No free tier — because your style deserves real investment.
+          </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-6">
-          {tiers.map((tier, i) => (
-            <motion.div
-              key={tier.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.12 }}
-              className={`relative rounded-2xl p-8 premium-card ${
-                tier.highlighted
-                  ? "glass-strong border-primary/30 shadow-[0_0_30px_-8px_hsl(var(--primary)/0.2)]"
-                  : "glass"
-              }`}
-            >
-              {tier.highlighted && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full gold-gradient text-xs font-bold text-primary-foreground font-sans flex items-center gap-1">
-                  <Sparkles className="w-3 h-3" /> Most Popular
-                </div>
-              )}
-              <h3 className="font-display text-xl font-bold text-foreground">{tier.name}</h3>
-              <p className="font-sans text-sm text-muted-foreground mt-1 mb-4">{tier.description}</p>
-              <p className="font-display text-4xl font-bold text-foreground mb-1">
-                {tier.price}
-                <span className="text-base font-sans font-normal text-muted-foreground">{tier.period}</span>
-              </p>
-              <ul className="my-6 space-y-3">
-                {tier.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm font-sans text-foreground">
-                    <Check className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <button
-                onClick={() => navigate("/auth")}
-                className={`w-full h-11 rounded-xl font-sans font-semibold text-sm tracking-wide transition-opacity hover:opacity-90 ${
+        <div className="grid lg:grid-cols-2 gap-12 items-start">
+          {/* Interactive pricing selector */}
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="flex justify-center"
+          >
+            <PricingInteraction
+              starterMonth={9}
+              starterAnnual={7}
+              proMonth={29}
+              proAnnual={23}
+              eliteMonth={99}
+              eliteAnnual={79}
+              onGetStarted={() => navigate("/auth")}
+            />
+          </motion.div>
+
+          {/* Feature cards */}
+          <div className="grid gap-6">
+            {tiers.map((tier, i) => (
+              <motion.div
+                key={tier.name}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.12 }}
+                className={`relative rounded-2xl p-6 premium-card ${
                   tier.highlighted
-                    ? "gold-gradient text-primary-foreground gold-glow"
-                    : "border border-border text-foreground hover:border-primary/30"
+                    ? "glass-strong border-primary/30 shadow-[0_0_30px_-8px_hsl(var(--primary)/0.2)]"
+                    : "glass"
                 }`}
               >
-                {tier.cta}
-              </button>
-            </motion.div>
-          ))}
+                {tier.highlighted && (
+                  <div className="absolute -top-3 left-6 px-4 py-1 rounded-full gold-gradient text-xs font-bold text-primary-foreground font-sans flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" /> Most Popular
+                  </div>
+                )}
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <h3 className="font-display text-lg font-bold text-foreground">{tier.name}</h3>
+                    <p className="font-sans text-xs text-muted-foreground">{tier.description}</p>
+                  </div>
+                  <p className="font-display text-2xl font-bold text-foreground">
+                    {tier.price}
+                    <span className="text-sm font-sans font-normal text-muted-foreground">{tier.period}</span>
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {tier.features.map((f) => (
+                    <span key={f} className="inline-flex items-center gap-1 text-xs font-sans text-foreground bg-muted/50 px-2 py-1 rounded-full">
+                      <Check className="w-3 h-3 text-primary shrink-0" />
+                      {f}
+                    </span>
+                  ))}
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
