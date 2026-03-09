@@ -1,73 +1,88 @@
+# AURELIA — Launch-Ready Roadmap
 
+> Updated: 2026-03-07 — Practical, prioritized roadmap for a reliable launch.
 
-# Clean Slate Landing Page Rebuild
+---
 
-The current landing page has accumulated complexity — a broken WebGL hero, 12+ section components, and layered effects that conflict. We'll strip it down and rebuild with a clean, premium architecture that matches AURELIA's luxury AI stylist brand.
+## P0 — Critical (Must fix before launch)
 
-## Architecture
+### 1. AI Error Handling & Fallbacks
+- [x] Chat: handles 429/402 gracefully with toasts
+- [x] Chat: streaming SSE parsing with proper buffer flush
+- [ ] OutfitAnalysis: add retry button on AI failure, show friendly error state  
+- [ ] VideoAnalysis: add timeout handling for long video processing
+- [ ] FashionDesigner: add retry on generation failure
+- [ ] All AI pages: wrap in ErrorBoundary for crash recovery
+- [ ] All edge functions: consistent 429/402 handling
 
-Strip `Index.tsx` to a minimal shell. Rebuild each section as a clean, self-contained component. Keep `Navbar.tsx` and `Footer.tsx` (they work fine). Delete/replace the broken Hero and rebuild all middle sections.
+### 2. Image Upload Robustness
+- [ ] Compress images client-side before upload (target <2MB via canvas)
+- [ ] Enforce consistent size limits across all pages
+- [ ] Show file size in upload preview
+- [ ] Add privacy notice banner on all upload pages ("Images processed by AI")
+- [ ] Lazy load all gallery/product images
 
-```text
-┌─────────────────────────────┐
-│  Navbar (keep existing)     │
-├─────────────────────────────┤
-│  Hero — new, clean design   │
-│  (video/image bg + overlay  │
-│   gold typography + CTAs)   │
-├─────────────────────────────┤
-│  Social Proof Strip         │
-├─────────────────────────────┤
-│  How It Works (3 steps)     │
-├─────────────────────────────┤
-│  Features (bento grid)      │
-├─────────────────────────────┤
-│  Brand Marquee              │
-├─────────────────────────────┤
-│  Testimonials               │
-├─────────────────────────────┤
-│  Pricing                    │
-├─────────────────────────────┤
-│  FAQ                        │
-├─────────────────────────────┤
-│  Footer (keep existing)     │
-└─────────────────────────────┘
-```
+### 3. Mobile UX
+- [ ] Test sidebar collapse on small screens
+- [ ] Fix horizontal overflow in carousels (scrollbar-none + snap)
+- [ ] Ensure modals/dialogs scrollable on short viewports
+- [ ] Touch-friendly tap targets (min 44px)
+- [ ] Swipe hint: test reliability across screen sizes
 
-## File Changes
+### 4. Auth & Security
+- [x] RLS policies on all 20+ tables
+- [x] No client-side admin checks
+- [ ] Privacy notice for AI image processing
+- [ ] Ensure all storage uploads use user-scoped paths
+- [ ] Rate limit awareness on all AI endpoints
 
-### 1. `src/components/landing/Hero.tsx` — Full rewrite
-- Remove all WebGL/Three.js/GSAP/CDN script loading
-- Clean CSS-only hero with a full-bleed background image, dark gradient overlay
-- Playfair Display gold shimmer title, Inter subtitle
-- Two CTA buttons (primary gold, secondary outline)
-- Social proof avatars row
-- Framer Motion entrance animations (no external deps)
+---
 
-### 2. `src/pages/Index.tsx` — Simplify
-- Remove `ScrollProgressBar`, `SectionReveal`, `GoldSectionDivider`, parallax transforms
-- Clean sequential layout: Navbar → Hero → sections → Footer
-- Simple framer-motion `whileInView` fade-ups directly on each section
-- Remove `SparkleParticles` and `CursorSpotlight` imports (can re-add later)
+## P1 — Important (Should fix for quality)
 
-### 3. All other section components — Rebuild clean
-- **SocialProofStrip** — minimal stats bar with NumberTicker
-- **HowItWorks** — 3-step horizontal cards with icons
-- **Features** — 6-card bento grid with feature images
-- **BrandMarquee** — simple logo scroll strip
-- **Testimonials** — 3-card grid with quotes
-- **Pricing** — 3-tier cards (Free/Pro/Elite)
-- **FAQ** — accordion with 6 common questions
-- Remove `AppPreview`, `IntegrationHero`, `ThemeShowcase` from the page (files stay, just not imported)
+### 5. Shop/Products Polish
+- [ ] Consistent fallback placeholder images
+- [ ] Loading skeletons while products load
+- [ ] "No results" helpful message state
+- [ ] Test edge function with varied query formats
 
-### 4. `src/index.css` — Clean up
-- Remove `hero-gold-shimmer` animation and related WebGL styles
-- Keep the gold shimmer keyframe but simplify
+### 6. Onboarding Polish
+- [ ] Clear selfie instructions with example photos
+- [ ] Swipe hint: click alternative for non-touch
+- [ ] Style DNA explanation tooltip
+- [ ] Clear step progress indicator
 
-## Design Principles
-- No CDN script loading, no WebGL — pure React + Framer Motion + Tailwind
-- Gold (`hsl(43 74% 49%)`) as accent, charcoal backgrounds in dark mode, warm ivory in light
-- Playfair Display for headings, Inter for body
-- Glassmorphic cards with `backdrop-blur` and subtle borders
-- Every section self-contained and independently testable
+### 7. AI Accuracy & Quality
+- [ ] Test outfit analysis with diverse outfits
+- [ ] Validate Style DNA with multiple skin tones
+- [ ] Wardrobe gap: no repeated suggestions
+- [ ] Cap confidence scores 0-100
 
+### 8. Chat Improvements
+- [ ] Test multi-turn context (5+ messages)
+- [ ] Calendar/weather: graceful fallback if denied
+- [ ] Offline suggestion cards from last Style DNA
+- [ ] Auto-save conversation periodically
+
+---
+
+## P2 — Nice to Have (Post-launch)
+
+### 9. Performance
+- [ ] Audit bundle size, lazy-load heavy pages
+- [ ] Service worker for offline
+- [ ] Optimize 3D mannequin loading
+- [ ] Analytics tracking for feature usage
+
+### 10. Community & Social
+- [ ] Report/flag for public designs
+- [ ] Multi-store shop filtering
+- [ ] Design collaboration
+- [ ] Style challenges with prizes
+
+---
+
+## Status
+- [ ] Not started
+- [x] Complete
+- 🔧 In progress
