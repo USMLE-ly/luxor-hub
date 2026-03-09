@@ -7,7 +7,9 @@ import proofImg4 from "@/assets/proof-4.png";
 import styleInspo1 from "@/assets/style-inspo-1.jpg";
 import styleInspo2 from "@/assets/style-inspo-2.jpg";
 import styleInspo3 from "@/assets/style-inspo-3.jpg";
+import featureStyleDna from "@/assets/feature-style-dna.jpg";
 import featureOutfit from "@/assets/feature-outfit-gen.jpg";
+import featureCloset from "@/assets/feature-closet-scanner.jpg";
 import featureShopping from "@/assets/feature-shopping.jpg";
 
 const Hero = () => {
@@ -15,17 +17,8 @@ const Hero = () => {
 
   return (
     <PulseFitHero
-      logo="STYLIST"
-      navigation={[
-        { label: "Features", onClick: () => document.getElementById("features")?.scrollIntoView({ behavior: "smooth" }) },
-        { label: "How It Works", onClick: () => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" }) },
-        { label: "Testimonials", onClick: () => document.getElementById("testimonials")?.scrollIntoView({ behavior: "smooth" }) },
-        { label: "Pricing", hasDropdown: true, onClick: () => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" }) },
-      ]}
-      ctaButton={{
-        label: "Sign In",
-        onClick: () => navigate("/auth"),
-      }}
+      logo=""
+      navigation={[]}
       title="Your AI-powered personal stylist."
       subtitle="Get outfit recommendations tailored to your body, style, and lifestyle. Scan your closet, discover new looks, and never wonder what to wear again."
       primaryAction={{
@@ -36,36 +29,46 @@ const Hero = () => {
         label: "See how it works",
         onClick: () => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" }),
       }}
-      disclaimer="*No credit card required"
+      disclaimer="*No credit card required · Cancel anytime"
       socialProof={{
         avatars: [proofImg1, proofImg2, proofImg3, proofImg4],
         text: "Join over 10,000+ style-conscious people",
       }}
       programs={[
         {
+          image: featureStyleDna,
+          category: "STYLE DNA",
+          title: "Discover Your Unique Style Profile",
+        },
+        {
           image: styleInspo1,
-          category: "TRENDING",
-          title: "Minimalist Capsule Wardrobe",
+          category: "CAPSULE WARDROBE",
+          title: "Build a 30-Piece Capsule",
+        },
+        {
+          image: featureCloset,
+          category: "CLOSET SCAN",
+          title: "Digitize Your Wardrobe Instantly",
         },
         {
           image: styleInspo2,
-          category: "SEASONAL",
-          title: "Spring Transition Looks",
-        },
-        {
-          image: styleInspo3,
-          category: "CURATED",
-          title: "Date Night Essentials",
+          category: "COLOR ANALYSIS",
+          title: "Find Your Perfect Palette",
         },
         {
           image: featureOutfit,
-          category: "AI POWERED",
-          title: "Smart Outfit Generator",
+          category: "AI OUTFITS",
+          title: "Smart Daily Outfit Generator",
+        },
+        {
+          image: styleInspo3,
+          category: "BODY SHAPE",
+          title: "Flattering Fits For You",
         },
         {
           image: featureShopping,
-          category: "DISCOVER",
-          title: "Shop Your Style DNA",
+          category: "SHOP SMARTER",
+          title: "Curated Picks From Top Brands",
         },
       ]}
     />
