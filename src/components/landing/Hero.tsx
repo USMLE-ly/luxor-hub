@@ -67,12 +67,12 @@ const Hero = () => {
       const TRANSITION_DURATION = () => SLIDER_CONFIG.settings.transitionDuration;
 
       const slides = [
-        { title: "Ethereal Glow", description: "A soft, radiant light that illuminates the soul.", media: "https://assets.codepen.io/7558/orange-portrait-001.jpg" },
-        { title: "Rose Mirage", description: "Lost in a desert of blooming dreams and endless horizons.", media: "https://assets.codepen.io/7558/orange-portrait-002.jpg" },
-        { title: "Velvet Mystique", description: "Wrapped in the deep, luxurious embrace of the night.", media: "https://assets.codepen.io/7558/orange-portrait-003.jpg" },
-        { title: "Golden Hour", description: "That fleeting moment when the world is dipped in gold.", media: "https://assets.codepen.io/7558/orange-portrait-004.jpg" },
-        { title: "Midnight Dreams", description: "Where reality fades and imagination takes flight.", media: "https://assets.codepen.io/7558/orange-portrait-005.jpg" },
-        { title: "Silver Light", description: "A cool, metallic shimmer reflecting the urban pulse.", media: "https://assets.codepen.io/7558/orange-portrait-006.jpg" },
+        { title: "Style DNA", description: "Discover your unique style profile with AI-powered analysis.", media: "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=1920&q=80&auto=format" },
+        { title: "Capsule Wardrobe", description: "Build the perfect 30-piece wardrobe tailored to your lifestyle.", media: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1920&q=80&auto=format" },
+        { title: "Closet Scanner", description: "Digitize your entire wardrobe in seconds with AI recognition.", media: "https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?w=1920&q=80&auto=format" },
+        { title: "Golden Hour", description: "Find the perfect outfit for every occasion, every mood.", media: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1920&q=80&auto=format" },
+        { title: "Color Analysis", description: "Unlock your ideal palette with precision color matching.", media: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&q=80&auto=format" },
+        { title: "Shop Smarter", description: "Curated picks from top brands that match your style DNA.", media: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1920&q=80&auto=format" },
       ];
 
       const vertexShader = `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
