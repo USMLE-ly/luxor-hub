@@ -5,20 +5,20 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-base text-sm font-medium ring-offset-white transition-all gap-2 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-base text-sm font-medium ring-offset-white transition-all duration-100 gap-2 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:translate-y-[3px]",
   {
     variants: {
       variant: {
         default:
-          "text-mtext bg-main border-2 border-border shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none",
+          "text-mtext bg-main border-2 border-border shadow-[var(--box-shadow-x)_var(--box-shadow-y)_0_0_hsl(var(--border)),0_4px_0_0_hsl(var(--border))] hover:translate-y-[-2px] hover:shadow-[var(--box-shadow-x)_var(--box-shadow-y)_0_0_hsl(var(--border)),0_6px_0_0_hsl(var(--border))] active:shadow-[0_1px_0_0_hsl(var(--border))]",
         noShadow: "text-mtext bg-main border-2 border-border",
         neutral:
-          "bg-bw text-text border-2 border-border shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none",
+          "bg-bw text-text border-2 border-border shadow-[var(--box-shadow-x)_var(--box-shadow-y)_0_0_hsl(var(--border)),0_4px_0_0_hsl(var(--border))] hover:translate-y-[-2px] hover:shadow-[var(--box-shadow-x)_var(--box-shadow-y)_0_0_hsl(var(--border)),0_6px_0_0_hsl(var(--border))] active:shadow-[0_1px_0_0_hsl(var(--border))]",
         reverse:
-          "text-mtext bg-main border-2 border-border hover:translate-x-reverseBoxShadowX hover:translate-y-reverseBoxShadowY hover:shadow-shadow",
-        destructive: "bg-destructive text-destructive-foreground border-2 border-border shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none",
-        outline: "border-2 border-border bg-background text-foreground shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none",
-        secondary: "bg-secondary text-secondary-foreground border-2 border-border shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none",
+          "text-mtext bg-main border-2 border-border hover:translate-y-[-2px] hover:shadow-[var(--box-shadow-x)_var(--box-shadow-y)_0_0_hsl(var(--border)),0_6px_0_0_hsl(var(--border))] active:shadow-[0_1px_0_0_hsl(var(--border))]",
+        destructive: "bg-destructive text-destructive-foreground border-2 border-border shadow-[0_4px_0_0_hsl(var(--border))] hover:translate-y-[-2px] hover:shadow-[0_6px_0_0_hsl(var(--border))] active:shadow-[0_1px_0_0_hsl(var(--border))]",
+        outline: "border-2 border-border bg-background text-foreground shadow-[0_4px_0_0_hsl(var(--border))] hover:translate-y-[-2px] hover:shadow-[0_6px_0_0_hsl(var(--border))] active:shadow-[0_1px_0_0_hsl(var(--border))]",
+        secondary: "bg-secondary text-secondary-foreground border-2 border-border shadow-[0_4px_0_0_hsl(var(--border))] hover:translate-y-[-2px] hover:shadow-[0_6px_0_0_hsl(var(--border))] active:shadow-[0_1px_0_0_hsl(var(--border))]",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
       },
