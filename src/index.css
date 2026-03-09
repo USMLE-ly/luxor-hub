@@ -313,3 +313,13 @@
 .gradient-button-variant::before {
   background: hsl(var(--gold) / 0.08);
 }
+
+/* Gold shimmer sweep for hero title */
+@keyframes gold-shimmer-sweep {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+.hero-gold-shimmer {
+  animation: gold-shimmer-sweep 4s ease-in-out infinite;
+}
