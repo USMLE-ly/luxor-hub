@@ -10,7 +10,6 @@ import Pricing from "@/components/landing/Pricing";
 import FAQ from "@/components/landing/FAQ";
 import Footer from "@/components/landing/Footer";
 import CTABanner from "@/components/landing/CTABanner";
-import VideoTestimonials from "@/components/landing/VideoTestimonials";
 import { ContainerScroll } from "@/components/ui/container-scroll";
 import { HeroSection } from "@/components/ui/feature-carousel";
 import featureAppPreview from "@/assets/feature-outfit-gen.jpg";
@@ -78,7 +77,6 @@ const Index = () => {
 
       <BrandMarquee />
       <Testimonials />
-      <VideoTestimonials />
       <Pricing />
       <FAQ />
       <CTABanner />
