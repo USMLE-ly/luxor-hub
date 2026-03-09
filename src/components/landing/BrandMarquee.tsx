@@ -8,7 +8,7 @@ const brands = [
 ];
 
 const BrandMarquee = () => (
-  <section className="py-12 border-y border-border overflow-hidden">
+  <section className="py-16 border-y border-border overflow-hidden">
     <p className="text-center text-xs font-sans text-muted-foreground tracking-widest uppercase mb-6">
       Integrated With
     </p>
