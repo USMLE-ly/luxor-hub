@@ -12,8 +12,8 @@ const BrandMarquee = () => (
     <p className="text-center text-xs font-sans text-muted-foreground tracking-widest uppercase mb-6">
       Integrated With
     </p>
-    <div className="relative flex overflow-hidden" style={{ ["--gap" as string]: "3rem" }}>
-      <div className="flex shrink-0 animate-marquee gap-12 [--duration:25s]">
+    <div className="relative flex overflow-hidden" style={{ ["--gap" as string]: "5rem" }}>
+      <div className="flex shrink-0 animate-marquee gap-20 [--duration:25s]">
         {brands.map((b, i) => (
           <img
             key={`a-${b.name}-${i}`}
