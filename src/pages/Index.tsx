@@ -9,6 +9,8 @@ import Testimonials from "@/components/landing/Testimonials";
 import Pricing from "@/components/landing/Pricing";
 import FAQ from "@/components/landing/FAQ";
 import Footer from "@/components/landing/Footer";
+import { ContainerScroll } from "@/components/ui/container-scroll";
+import featureAppPreview from "@/assets/feature-outfit-gen.jpg";
 
 const Index = () => {
   const { scrollYProgress } = useScroll();
@@ -25,6 +27,26 @@ const Index = () => {
       <Hero />
       <SocialProofStrip />
       <HowItWorks />
+
+      {/* App Preview with Container Scroll */}
+      <ContainerScroll
+        titleComponent={
+          <div className="text-center">
+            <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase mb-3">App Preview</p>
+            <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground">
+              See AURELIA in <span className="gold-text">Action</span>
+            </h2>
+          </div>
+        }
+      >
+        <img
+          src={featureAppPreview}
+          alt="AURELIA app preview showing AI outfit generation"
+          className="w-full h-full object-cover rounded-2xl"
+          loading="lazy"
+        />
+      </ContainerScroll>
+
       <Features />
       <BrandMarquee />
       <Testimonials />
