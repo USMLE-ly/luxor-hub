@@ -53,43 +53,7 @@ const Footer = () => {
 
   return (
     <footer className="relative border-t border-border bg-background">
-      {/* CTA Band */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.04] via-primary/[0.08] to-primary/[0.04]" />
-        <div className="relative max-w-4xl mx-auto px-4 py-20 text-center">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="font-display text-3xl md:text-5xl font-bold text-foreground mb-4"
-          >
-            Ready to Transform Your <span className="gold-text">Style</span>?
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="text-muted-foreground font-sans text-lg mb-8 max-w-xl mx-auto"
-          >
-            Join thousands who've elevated their personal style with AI-powered intelligence.
-          </motion.p>
-          <MagneticCursor strength={0.25} radius={80}>
-            <motion.button
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              onClick={() => navigate("/auth")}
-              className="inline-flex items-center gap-2 h-12 px-8 rounded-xl gold-gradient text-primary-foreground font-sans font-semibold text-sm tracking-wide hover:opacity-90 transition-opacity shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.4)]"
-            >
-              <Sparkles className="w-4 h-4" />
-              Start Free Trial
-            </motion.button>
-          </MagneticCursor>
-        </div>
-      </div>
-
+      {/* Gold accent line */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
 
       <div className="max-w-6xl mx-auto px-4 py-16">
