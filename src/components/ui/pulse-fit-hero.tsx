@@ -1,6 +1,52 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+
+/* ── Gold floating particles ── */
+const GoldParticles = ({ count = 30 }: { count?: number }) => {
+  const particles = useMemo(() =>
+    Array.from({ length: count }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 3 + 1,
+      duration: Math.random() * 8 + 6,
+      delay: Math.random() * 4,
+      opacity: Math.random() * 0.4 + 0.1,
+    })),
+    [count]
+  );
+
+  return (
+    <div className="absolute inset-0 z-[3] pointer-events-none overflow-hidden">
+      {particles.map((p) => (
+        <motion.div
+          key={p.id}
+          className="absolute rounded-full"
+          style={{
+            left: `${p.x}%`,
+            top: `${p.y}%`,
+            width: p.size,
+            height: p.size,
+            background: `radial-gradient(circle, hsl(43 80% 65% / ${p.opacity}) 0%, transparent 70%)`,
+            boxShadow: `0 0 ${p.size * 2}px hsl(43 74% 49% / ${p.opacity * 0.5})`,
+          }}
+          animate={{
+            y: [0, -30, 0],
+            x: [0, Math.random() > 0.5 ? 10 : -10, 0],
+            opacity: [p.opacity, p.opacity * 1.8, p.opacity],
+          }}
+          transition={{
+            duration: p.duration,
+            delay: p.delay,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
+    </div>
+  );
+};
 
 interface ProgramCard {
   image: string;
