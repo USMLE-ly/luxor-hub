@@ -113,6 +113,9 @@ export function PulseFitHero({
         backgroundSize: "128px 128px",
       }} />
 
+      {/* Gold floating particles */}
+      <GoldParticles count={25} />
+
       {/* Subtle gold line accents */}
       <div className="absolute top-0 left-0 right-0 h-px z-[2]" style={{
         background: "linear-gradient(90deg, transparent 0%, hsl(43 74% 49% / 0.3) 50%, transparent 100%)"
