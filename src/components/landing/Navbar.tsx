@@ -23,7 +23,7 @@ const Navbar = () => {
       setScrolled(window.scrollY > 20);
 
       // Track active section
-      const sections = ["features", "how-it-works", "pricing"];
+      const sections = ["features", "how-it-works", "pricing", "faq"];
       let current = "";
       for (const id of sections) {
         const el = document.getElementById(id);
