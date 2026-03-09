@@ -1,6 +1,52 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+
+/* ── Gold floating particles ── */
+const GoldParticles = ({ count = 30 }: { count?: number }) => {
+  const particles = useMemo(() =>
+    Array.from({ length: count }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 3 + 1,
+      duration: Math.random() * 8 + 6,
+      delay: Math.random() * 4,
+      opacity: Math.random() * 0.4 + 0.1,
+    })),
+    [count]
+  );
+
+  return (
+    <div className="absolute inset-0 z-[3] pointer-events-none overflow-hidden">
+      {particles.map((p) => (
+        <motion.div
+          key={p.id}
+          className="absolute rounded-full"
+          style={{
+            left: `${p.x}%`,
+            top: `${p.y}%`,
+            width: p.size,
+            height: p.size,
+            background: `radial-gradient(circle, hsl(43 80% 65% / ${p.opacity}) 0%, transparent 70%)`,
+            boxShadow: `0 0 ${p.size * 2}px hsl(43 74% 49% / ${p.opacity * 0.5})`,
+          }}
+          animate={{
+            y: [0, -30, 0],
+            x: [0, Math.random() > 0.5 ? 10 : -10, 0],
+            opacity: [p.opacity, p.opacity * 1.8, p.opacity],
+          }}
+          transition={{
+            duration: p.duration,
+            delay: p.delay,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
+    </div>
+  );
+};
 
 interface ProgramCard {
   image: string;
@@ -67,6 +113,9 @@ export function PulseFitHero({
         backgroundSize: "128px 128px",
       }} />
 
+      {/* Gold floating particles */}
+      <GoldParticles count={25} />
+
       {/* Subtle gold line accents */}
       <div className="absolute top-0 left-0 right-0 h-px z-[2]" style={{
         background: "linear-gradient(90deg, transparent 0%, hsl(43 74% 49% / 0.3) 50%, transparent 100%)"
@@ -85,15 +134,16 @@ export function PulseFitHero({
             transition={{ duration: 0.8, delay: 0.2 }}
             className="flex flex-col items-center text-center max-w-4xl gap-8"
           >
-            {/* Gold shimmer title */}
+            {/* Gold shimmer sweep title */}
             <h1
-              className="font-bold"
+              className="font-bold hero-gold-shimmer"
               style={{
                 fontFamily: "'Playfair Display', serif",
                 fontSize: "clamp(36px, 6vw, 72px)",
                 lineHeight: "1.1",
                 letterSpacing: "-0.02em",
-                background: "linear-gradient(135deg, hsl(43 80% 65%) 0%, hsl(43 74% 49%) 40%, hsl(40 60% 70%) 60%, hsl(43 74% 49%) 100%)",
+                backgroundImage: "linear-gradient(105deg, hsl(43 74% 49%) 0%, hsl(43 80% 65%) 20%, hsl(40 90% 80%) 40%, hsl(43 80% 65%) 60%, hsl(43 74% 49%) 80%, hsl(43 80% 65%) 100%)",
+                backgroundSize: "200% 100%",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
