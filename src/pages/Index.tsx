@@ -3,6 +3,7 @@ import Hero from "@/components/landing/Hero";
 import SocialProofStrip from "@/components/landing/SocialProofStrip";
 import HowItWorks from "@/components/landing/HowItWorks";
 import Features from "@/components/landing/Features";
+import AppPreview from "@/components/landing/AppPreview";
 import BrandMarquee from "@/components/landing/BrandMarquee";
 import Testimonials from "@/components/landing/Testimonials";
 import Pricing from "@/components/landing/Pricing";
@@ -16,6 +17,7 @@ const Index = () => (
     <SocialProofStrip />
     <HowItWorks />
     <Features />
+    <AppPreview />
     <BrandMarquee />
     <Testimonials />
     <Pricing />
