@@ -10,6 +10,7 @@ import Pricing from "@/components/landing/Pricing";
 import FAQ from "@/components/landing/FAQ";
 import Footer from "@/components/landing/Footer";
 import CTABanner from "@/components/landing/CTABanner";
+import { RevealImageList } from "@/components/ui/reveal-images";
 import { ContainerScroll } from "@/components/ui/container-scroll";
 import { HeroSection } from "@/components/ui/feature-carousel";
 import featureAppPreview from "@/assets/feature-outfit-gen.jpg";
@@ -63,6 +64,13 @@ const Index = () => {
       </ContainerScroll>
 
       <Features />
+
+      {/* Reveal Image List */}
+      <section className="py-20">
+        <div className="max-w-4xl mx-auto px-4">
+          <RevealImageList />
+        </div>
+      </section>
 
       {/* Feature Carousel */}
       <HeroSection
