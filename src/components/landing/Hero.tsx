@@ -361,6 +361,10 @@ const Hero = () => {
 
         <nav className="slides-navigation z-[5]" id="heroSlidesNav"></nav>
       </div>
+      <canvas
+        className="pointer-events-none absolute inset-0 z-[2]"
+        id="canvas"
+      />
     </section>
   );
 };
