@@ -313,6 +313,7 @@ const Hero = () => {
     };
 
     loadScripts();
+    renderCanvas();
     return () => {};
   }, []);
 
