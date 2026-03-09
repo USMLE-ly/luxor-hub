@@ -1,24 +1,47 @@
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useRef } from "react";
 import { Sparkles, ArrowRight } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
+import CursorSpotlight from "@/components/ui/cursor-spotlight";
+import SparkleParticles from "@/components/ui/sparkle-particles";
 
 const Hero = () => {
   const navigate = useNavigate();
+  const sectionRef = useRef<HTMLElement>(null);
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  });
+
+  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "25%"]);
+  const bgScale = useTransform(scrollYProgress, [0, 1], [1, 1.15]);
 
   return (
-    <section className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden">
-      {/* Background image with overlay */}
-      <div className="absolute inset-0">
+    <section
+      ref={sectionRef}
+      className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden"
+    >
+      {/* Parallax background image */}
+      <motion.div className="absolute inset-0" style={{ y: bgY, scale: bgScale }}>
         <img
           src={heroImage}
           alt=""
           className="w-full h-full object-cover"
           loading="eager"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/40 to-transparent" />
-      </div>
+      </motion.div>
+
+      {/* Gradient overlays */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background" />
+      <div className="absolute inset-0 bg-gradient-to-r from-background/40 to-transparent" />
+
+      {/* Cursor spotlight */}
+      <CursorSpotlight />
+
+      {/* Sparkle particles */}
+      <SparkleParticles count={30} />
 
       {/* Content */}
       <div className="relative z-10 max-w-4xl mx-auto px-4 text-center pt-20">
