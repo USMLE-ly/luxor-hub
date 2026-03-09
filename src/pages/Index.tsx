@@ -65,6 +65,13 @@ const Index = () => {
 
       <Features />
 
+      {/* Reveal Image List */}
+      <section className="py-20">
+        <div className="max-w-4xl mx-auto px-4">
+          <RevealImageList />
+        </div>
+      </section>
+
       {/* Feature Carousel */}
       <HeroSection
         title={
