@@ -1,39 +1,88 @@
+# AURELIA — Launch-Ready Roadmap
 
+> Updated: 2026-03-07 — Practical, prioritized roadmap for a reliable launch.
 
-## Diagnosis
+---
 
-The screenshot shows the hero rendering as just gold text on a plain background with no WebGL slider images visible. The core issues:
+## P0 — Critical (Must fix before launch)
 
-1. **Cleanup leak**: The `useEffect` calls `loadScripts()` which calls `initApplication()`, but the cleanup function returned by `initApplication` is never captured or returned from the `useEffect`. This means on React hot-reload / re-mount, old renderers pile up and new ones may fail.
+### 1. AI Error Handling & Fallbacks
+- [x] Chat: handles 429/402 gracefully with toasts
+- [x] Chat: streaming SSE parsing with proper buffer flush
+- [ ] OutfitAnalysis: add retry button on AI failure, show friendly error state  
+- [ ] VideoAnalysis: add timeout handling for long video processing
+- [ ] FashionDesigner: add retry on generation failure
+- [ ] All AI pages: wrap in ErrorBoundary for crash recovery
+- [ ] All edge functions: consistent 429/402 handling
 
-2. **No fallback**: If THREE.js scripts load but textures fail (CORS, slow network), the canvas stays blank with no visible fallback.
+### 2. Image Upload Robustness
+- [ ] Compress images client-side before upload (target <2MB via canvas)
+- [ ] Enforce consistent size limits across all pages
+- [ ] Show file size in upload preview
+- [ ] Add privacy notice banner on all upload pages ("Images processed by AI")
+- [ ] Lazy load all gallery/product images
 
-3. **Multiple Three.js instances**: Console shows "Multiple instances of Three.js being imported" — the project already has `three` as an npm dependency, and the hero loads a CDN copy. This conflict can cause `instanceof` checks to fail silently.
+### 3. Mobile UX
+- [ ] Test sidebar collapse on small screens
+- [ ] Fix horizontal overflow in carousels (scrollbar-none + snap)
+- [ ] Ensure modals/dialogs scrollable on short viewports
+- [ ] Touch-friendly tap targets (min 44px)
+- [ ] Swipe hint: test reliability across screen sizes
 
-## Plan
+### 4. Auth & Security
+- [x] RLS policies on all 20+ tables
+- [x] No client-side admin checks
+- [ ] Privacy notice for AI image processing
+- [ ] Ensure all storage uploads use user-scoped paths
+- [ ] Rate limit awareness on all AI endpoints
 
-### 1. Fix the broken hero — use bundled Three.js instead of CDN
-- Import `three` from the npm package (already installed) instead of loading via CDN script tag. This eliminates the "multiple instances" conflict.
-- Keep GSAP as a CDN load (no npm dep), but guard it properly.
-- Restructure the `useEffect` so the cleanup function is actually returned.
-- Add a CSS fallback background image on the `<section>` so it's never blank.
+---
 
-### 2. Add Ken Burns zoom effect
-- After each slide transition completes and the new texture is set, apply a slow CSS `transform: scale(1) → scale(1.08)` on the canvas element over the slide duration using GSAP. This creates the cinematic zoom.
-- Reset scale to 1 instantly on each transition start.
+## P1 — Important (Should fix for quality)
 
-### 3. Add touch/swipe gesture support
-- Track `touchstart` and `touchend` X coordinates on the hero section.
-- If horizontal swipe distance > 50px threshold, navigate to prev/next slide.
-- Prevent vertical scroll interference by only acting on predominantly horizontal swipes.
+### 5. Shop/Products Polish
+- [ ] Consistent fallback placeholder images
+- [ ] Loading skeletons while products load
+- [ ] "No results" helpful message state
+- [ ] Test edge function with varied query formats
 
-### 4. Summary of file changes
+### 6. Onboarding Polish
+- [ ] Clear selfie instructions with example photos
+- [ ] Swipe hint: click alternative for non-touch
+- [ ] Style DNA explanation tooltip
+- [ ] Clear step progress indicator
 
-**`src/components/landing/Hero.tsx`** — single file, full rewrite of the logic:
-- Replace CDN Three.js with `import * as THREE from 'three'`
-- Fix `useEffect` cleanup chain
-- Add fallback `backgroundImage` on section element
-- Add Ken Burns scale animation via GSAP on canvas after each transition
-- Add `touchstart`/`touchend` listeners for swipe navigation
-- Keep all existing: keyboard nav, arrow buttons, slide nav bar, gold styling, CTA buttons
+### 7. AI Accuracy & Quality
+- [ ] Test outfit analysis with diverse outfits
+- [ ] Validate Style DNA with multiple skin tones
+- [ ] Wardrobe gap: no repeated suggestions
+- [ ] Cap confidence scores 0-100
 
+### 8. Chat Improvements
+- [ ] Test multi-turn context (5+ messages)
+- [ ] Calendar/weather: graceful fallback if denied
+- [ ] Offline suggestion cards from last Style DNA
+- [ ] Auto-save conversation periodically
+
+---
+
+## P2 — Nice to Have (Post-launch)
+
+### 9. Performance
+- [ ] Audit bundle size, lazy-load heavy pages
+- [ ] Service worker for offline
+- [ ] Optimize 3D mannequin loading
+- [ ] Analytics tracking for feature usage
+
+### 10. Community & Social
+- [ ] Report/flag for public designs
+- [ ] Multi-store shop filtering
+- [ ] Design collaboration
+- [ ] Style challenges with prizes
+
+---
+
+## Status
+- [ ] Not started
+- [x] Complete
+- 🔧 In progress
