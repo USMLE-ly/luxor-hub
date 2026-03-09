@@ -133,7 +133,7 @@ const Hero = () => {
              u.uEffectType.value = getEffectIndex(s.currentEffect);
         };
 
-        const splitText = (text: string) => text.split('').map(char => `<span style="display: inline-block; opacity: 0;">${char === ' ' ? '&nbsp;' : char}</span>`).join('');
+        const splitText = (text: string) => text.split(' ').map(word => `<span style="display: inline-block; opacity: 0; margin-right: 0.3em;">${word}</span>`).join('');
 
         const updateContent = (idx: number) => {
             const titleEl = document.getElementById('heroMainTitle');

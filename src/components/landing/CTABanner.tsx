@@ -24,10 +24,10 @@ const CTABanner = () => (
 
     <div className="relative z-10 max-w-3xl mx-auto px-4 text-center">
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.7 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <Sparkles className="w-10 h-10 text-primary mx-auto mb-6" />
         <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-4">
@@ -36,15 +36,25 @@ const CTABanner = () => (
         <p className="font-sans text-muted-foreground text-base md:text-lg max-w-xl mx-auto mb-8">
           Join thousands of fashion-forward individuals and businesses already using AURELIA to elevate their wardrobe and revenue.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button size="lg" className="gradient-button text-base px-8 group">
-            Get Started Free
-            <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </Button>
-          <Button size="lg" variant="outline" className="text-base px-8 border-primary/30 hover:border-primary/60">
-            Book a Demo
-          </Button>
-        </div>
+        <motion.div
+          className="flex flex-col sm:flex-row gap-4 justify-center"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
+            <Button size="lg" className="gradient-button text-base px-8 group animate-[pulse_3s_ease-in-out_infinite]">
+              Get Started Free
+              <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </Button>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
+            <Button size="lg" variant="outline" className="text-base px-8 border-primary/30 hover:border-primary/60 hover:shadow-[0_0_20px_hsl(var(--primary)/0.2)]">
+              Book a Demo
+            </Button>
+          </motion.div>
+        </motion.div>
       </motion.div>
     </div>
   </section>

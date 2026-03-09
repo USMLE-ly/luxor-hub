@@ -23,7 +23,7 @@ const BrandMarquee = () => (
           />
         ))}
       </div>
-      <div className="flex shrink-0 animate-marquee gap-12 [--duration:25s]" aria-hidden="true">
+      <div className="flex shrink-0 animate-marquee gap-20 [--duration:25s]" aria-hidden="true">
         {brands.map((b, i) => (
           <img
             key={`b-${b.name}-${i}`}
