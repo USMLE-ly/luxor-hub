@@ -359,7 +359,15 @@ const Hero = () => {
           </div>
         </div>
 
-        <nav className="slides-navigation z-[5]" id="heroSlidesNav"></nav>
+      <nav className="slides-navigation z-[5]" id="heroSlidesNav"></nav>
+
+        {/* Scroll indicator */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[6] flex flex-col items-center gap-1 animate-bounce opacity-60">
+          <span className="font-sans text-[10px] text-muted-foreground tracking-widest uppercase">Scroll</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted-foreground">
+            <path d="M7 13l5 5 5-5M7 6l5 5 5-5" />
+          </svg>
+        </div>
       </div>
       <canvas
         className="pointer-events-none absolute inset-0 z-[2]"
