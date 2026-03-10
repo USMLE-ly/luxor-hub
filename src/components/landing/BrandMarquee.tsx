@@ -10,7 +10,7 @@ const brands = [
 const BrandMarquee = () => (
   <section className="py-16 border-y border-border overflow-hidden">
     <p className="text-center text-xs font-sans text-muted-foreground tracking-widest uppercase mb-6">
-      Integrated With
+      Trusted By Leading Brands
     </p>
     <div className="relative flex overflow-hidden" style={{ ["--gap" as string]: "6rem" }}>
       <div className="flex shrink-0 animate-marquee gap-28 [--duration:30s]">

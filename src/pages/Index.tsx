@@ -10,23 +10,8 @@ import Pricing from "@/components/landing/Pricing";
 import FAQ from "@/components/landing/FAQ";
 import Footer from "@/components/landing/Footer";
 import CTABanner from "@/components/landing/CTABanner";
-import { RevealImageList } from "@/components/ui/reveal-images";
 import { ContainerScroll } from "@/components/ui/container-scroll";
-import { HeroSection } from "@/components/ui/feature-carousel";
 import featureAppPreview from "@/assets/feature-outfit-gen.jpg";
-import carouselApp1 from "@/assets/carousel-app-1.jpg";
-import carouselApp2 from "@/assets/carousel-app-2.jpg";
-import carouselApp3 from "@/assets/carousel-app-3.jpg";
-import carouselApp4 from "@/assets/carousel-app-4.jpg";
-import carouselApp5 from "@/assets/carousel-app-5.jpg";
-
-const appImages = [
-  { src: carouselApp1, alt: "AI Fashion outfit suggestions" },
-  { src: carouselApp2, alt: "Color analysis and skin tone matching" },
-  { src: carouselApp3, alt: "Digital wardrobe closet organizer" },
-  { src: carouselApp4, alt: "Trend radar and style scoring" },
-  { src: carouselApp5, alt: "AI stylist chat assistant" },
-];
 
 const Index = () => {
   const { scrollYProgress } = useScroll();
@@ -34,7 +19,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen overflow-x-hidden">
-      {/* Scroll progress bar */}
       <motion.div
         className="fixed top-0 left-0 right-0 h-[3px] z-[100] origin-left gold-gradient"
         style={{ scaleX }}
@@ -42,15 +26,16 @@ const Index = () => {
       <Navbar />
       <Hero />
       <SocialProofStrip />
+      <Features />
       <HowItWorks />
 
-      {/* App Preview with Container Scroll */}
+      {/* App Showcase */}
       <ContainerScroll
         titleComponent={
           <div className="text-center">
             <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase mb-3">App Preview</p>
             <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground">
-              See AURELIA in <span className="gold-text">Action</span>
+              Your Entire Wardrobe, <span className="gold-text">Reimagined</span>
             </h2>
           </div>
         }
@@ -62,26 +47,6 @@ const Index = () => {
           loading="lazy"
         />
       </ContainerScroll>
-
-      <Features />
-
-      {/* Reveal Image List */}
-      <section className="py-20">
-        <div className="max-w-4xl mx-auto px-4">
-          <RevealImageList />
-        </div>
-      </section>
-
-      {/* Feature Carousel */}
-      <HeroSection
-        title={
-          <>
-            Your AI Stylist, <span className="gold-text">Always On</span>
-          </>
-        }
-        subtitle="Explore AURELIA's powerful features — from outfit generation to trend intelligence, all in the palm of your hand."
-        images={appImages}
-      />
 
       <BrandMarquee />
       <Testimonials />

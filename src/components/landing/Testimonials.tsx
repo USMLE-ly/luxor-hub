@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
-import { Star, ShieldCheck, TrendingUp } from "lucide-react";
+import { Star, ShieldCheck, TrendingUp, BadgeCheck } from "lucide-react";
 import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
+import { useRef, useState, useEffect } from "react";
+import { useInView } from "framer-motion";
 import proofRevenue1 from "@/assets/proof-revenue-1.png";
 import proofRevenue2 from "@/assets/proof-revenue-2.jpg";
 import proofRevenue3 from "@/assets/proof-revenue-3.png";
@@ -8,7 +10,26 @@ import proofRevenue4 from "@/assets/proof-revenue-4.jpg";
 import proofRevenue5 from "@/assets/proof-revenue-5.jpeg";
 import proofRevenue6 from "@/assets/proof-revenue-6.jpg";
 
+const AnimatedStat = ({ value }: { value: string }) => {
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true });
+  const [visible, setVisible] = useState(false);
+  useEffect(() => { if (isInView) setVisible(true); }, [isInView]);
+  return (
+    <span ref={ref} className={`transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}>
+      {value}
+    </span>
+  );
+};
+
 const proofs = [
+  {
+    image: proofRevenue6,
+    stat: "$673,912",
+    label: "Total Sales",
+    caption: "56% revenue growth — styling agency scaled to $673K using AURELIA's intelligence.",
+    hero: true,
+  },
   {
     image: proofRevenue1,
     stat: "$10,349",
@@ -39,16 +60,49 @@ const proofs = [
     label: "Total Revenue",
     caption: "122K sessions and $81K in sales — wardrobe AI drove massive organic traffic.",
   },
-  {
-    image: proofRevenue6,
-    stat: "$673,912",
-    label: "Total Sales",
-    caption: "56% revenue growth — styling agency scaled to $673K using AURELIA's intelligence.",
-  },
 ];
 
+const ProofCard = ({ p, i, isHero }: { p: typeof proofs[0]; i: number; isHero?: boolean }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 24 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, margin: "-80px" }}
+    transition={{ delay: i * 0.08, duration: 0.5 }}
+    className={`glass rounded-2xl overflow-hidden premium-card group ${isHero ? "md:col-span-2 lg:col-span-3" : ""}`}
+  >
+    <div className="relative">
+      <img
+        src={p.image}
+        alt={`Revenue proof: ${p.stat}`}
+        className={`w-full object-cover object-top ${isHero ? "h-64 md:h-72" : "h-52"}`}
+        loading="lazy"
+      />
+      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-background to-transparent h-16" />
+      <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-500/15 backdrop-blur-sm border border-green-500/20">
+        <BadgeCheck className="w-3 h-3 text-green-400" />
+        <span className="text-[10px] font-semibold text-green-400 font-sans">Verified</span>
+      </div>
+    </div>
+    <div className="p-5">
+      <div className="flex items-center gap-2 mb-2">
+        <TrendingUp className="w-4 h-4 text-primary" />
+        <span className="font-display text-xl font-bold text-primary">
+          <AnimatedStat value={p.stat} />
+        </span>
+        <span className="font-sans text-xs text-muted-foreground">· {p.label}</span>
+      </div>
+      <div className="flex gap-0.5 mb-3">
+        {Array.from({ length: 5 }).map((_, j) => (
+          <Star key={j} className="w-3.5 h-3.5 fill-primary text-primary" />
+        ))}
+      </div>
+      <p className="font-sans text-sm text-muted-foreground leading-relaxed">{p.caption}</p>
+    </div>
+  </motion.div>
+);
+
 const Testimonials = () => (
-  <section className="relative py-24 overflow-hidden" id="proof">
+  <section className="relative py-16 md:py-24 overflow-hidden" id="proof">
     <AnimatedGradientBackground
       Breathing={true}
       animationSpeed={0.015}
@@ -72,7 +126,7 @@ const Testimonials = () => (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
+        viewport={{ once: true, margin: "-80px" }}
         className="text-center mb-16"
       >
         <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-1.5 mb-4">
@@ -87,39 +141,13 @@ const Testimonials = () => (
         </p>
       </motion.div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {proofs.map((p, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: i * 0.1, duration: 0.5 }}
-            className="glass rounded-2xl overflow-hidden premium-card group"
-          >
-            <div className="relative">
-              <img
-                src={p.image}
-                alt={`Revenue proof: ${p.stat}`}
-                className="w-full h-52 object-cover object-top"
-                loading="lazy"
-              />
-              <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-background to-transparent h-16" />
-            </div>
-            <div className="p-5">
-              <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="w-4 h-4 text-primary" />
-                <span className="font-display text-xl font-bold text-primary">{p.stat}</span>
-                <span className="font-sans text-xs text-muted-foreground">· {p.label}</span>
-              </div>
-              <div className="flex gap-0.5 mb-3">
-                {Array.from({ length: 5 }).map((_, j) => (
-                  <Star key={j} className="w-3.5 h-3.5 fill-primary text-primary" />
-                ))}
-              </div>
-              <p className="font-sans text-sm text-muted-foreground leading-relaxed">{p.caption}</p>
-            </div>
-          </motion.div>
+      {/* Hero proof card (highest revenue) */}
+      <ProofCard p={proofs[0]} i={0} isHero />
+
+      {/* Remaining cards */}
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+        {proofs.slice(1).map((p, i) => (
+          <ProofCard key={i} p={p} i={i + 1} />
         ))}
       </div>
     </div>

@@ -30,8 +30,8 @@ const AnimatedCounter = ({ target, suffix, duration = 2000 }: AnimatedCounterPro
     return () => clearInterval(interval);
   }, [isInView, target, duration]);
 
-  const displayValue = target % 1 !== 0 
-    ? count.toFixed(1) 
+  const displayValue = target % 1 !== 0
+    ? count.toFixed(1)
     : Math.floor(count).toLocaleString();
 
   return (
@@ -43,14 +43,14 @@ const AnimatedCounter = ({ target, suffix, duration = 2000 }: AnimatedCounterPro
 };
 
 const stats = [
-  { value: 12000, suffix: "+", label: "Active Users" },
-  { value: 2.4, suffix: "M", label: "Outfits Generated" },
+  { value: 12, suffix: "K+", label: "Professional Stylists" },
+  { value: 2.4, suffix: "M", label: "Revenue Generated" },
   { value: 98, suffix: "%", label: "Satisfaction Rate" },
   { value: 45, suffix: "s", label: "Avg. Outfit Time" },
 ];
 
 const SocialProofStrip = () => (
-  <section className="py-12 border-y border-border bg-muted/30">
+  <section className="py-16 border-y border-border bg-muted/30">
     <div className="max-w-5xl mx-auto px-4">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
         {stats.map((stat, i) => (
@@ -58,11 +58,13 @@ const SocialProofStrip = () => (
             key={stat.label}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: true, margin: "-80px" }}
             transition={{ delay: i * 0.1 }}
-            className="text-center"
+            className="text-center relative"
           >
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-8 bg-primary/40 rounded-full hidden md:block" />
             <p className="font-display text-3xl md:text-4xl font-bold text-foreground">
+              {stat.value === 2.4 ? "$" : ""}
               <AnimatedCounter target={stat.value} suffix={stat.suffix} />
             </p>
             <p className="font-sans text-sm text-muted-foreground mt-1">{stat.label}</p>
