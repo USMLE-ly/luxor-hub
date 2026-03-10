@@ -1,13 +1,19 @@
 import { Sparkles, Instagram, Twitter, Github, ArrowRight, ArrowUp, Check } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MagneticCursor } from "@/components/ui/magnetic-cursor";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 
 const emailSchema = z.string().trim().email("Please enter a valid email").max(255);
+
+// Simple TikTok icon
+const TikTokIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.98a8.21 8.21 0 0 0 3.76.92V6.69z" />
+  </svg>
+);
 
 const Footer = () => {
   const [email, setEmail] = useState("");
@@ -53,7 +59,6 @@ const Footer = () => {
 
   return (
     <footer className="relative border-t border-border bg-background">
-      {/* Gold accent line */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
 
       <div className="max-w-6xl mx-auto px-4 py-16">
@@ -72,6 +77,8 @@ const Footer = () => {
             <a href="#how-it-works" onClick={(e) => scrollTo(e, "how-it-works")} className="hover:text-foreground transition-colors w-fit">How It Works</a>
             <a href="#pricing" onClick={(e) => scrollTo(e, "pricing")} className="hover:text-foreground transition-colors w-fit">Pricing</a>
             <a href="#faq" onClick={(e) => scrollTo(e, "faq")} className="hover:text-foreground transition-colors w-fit">FAQ</a>
+            <a href="#" className="hover:text-foreground transition-colors w-fit">Privacy Policy</a>
+            <a href="#" className="hover:text-foreground transition-colors w-fit">Terms of Service</a>
           </div>
 
           <div>
@@ -131,6 +138,9 @@ const Footer = () => {
             </a>
             <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
               <Twitter className="w-4 h-4" />
+            </a>
+            <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+              <TikTokIcon />
             </a>
             <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
               <Github className="w-4 h-4" />

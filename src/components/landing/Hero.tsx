@@ -41,7 +41,7 @@ const Hero = () => {
     const initApplication = async () => {
         const SLIDER_CONFIG: any = {
             settings: {
-                transitionDuration: 2.5, autoSlideSpeed: 5000, currentEffect: "glass", currentEffectPreset: "Default",
+                transitionDuration: 2.5, autoSlideSpeed: 6000, currentEffect: "glass", currentEffectPreset: "Default",
                 globalIntensity: 1.0, speedMultiplier: 1.0, distortionStrength: 1.0, colorEnhancement: 1.0,
                 glassRefractionStrength: 1.0, glassChromaticAberration: 1.0, glassBubbleClarity: 1.0, glassEdgeGlow: 1.0, glassLiquidFlow: 1.0,
                 frostIntensity: 1.5, frostCrystalSize: 1.0, frostIceCoverage: 1.0, frostTemperature: 1.0, frostTexture: 1.0,
@@ -359,7 +359,15 @@ const Hero = () => {
           </div>
         </div>
 
-        <nav className="slides-navigation z-[5]" id="heroSlidesNav"></nav>
+      <nav className="slides-navigation z-[5]" id="heroSlidesNav"></nav>
+
+        {/* Scroll indicator */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[6] flex flex-col items-center gap-1 animate-bounce opacity-60">
+          <span className="font-sans text-[10px] text-muted-foreground tracking-widest uppercase">Scroll</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted-foreground">
+            <path d="M7 13l5 5 5-5M7 6l5 5 5-5" />
+          </svg>
+        </div>
       </div>
       <canvas
         className="pointer-events-none absolute inset-0 z-[2]"

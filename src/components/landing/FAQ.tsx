@@ -16,8 +16,8 @@ const faqs = [
     a: "Absolutely. Your photos and style data are encrypted and never shared. We use enterprise-grade security and you can delete your data anytime.",
   },
   {
-    q: "Can I use AURELIA for free?",
-    a: "Yes! The free plan gives you 5 outfit suggestions per week and up to 20 closet items. Upgrade to Pro for unlimited access.",
+    q: "Can I try AURELIA before committing?",
+    a: "Yes! Every plan includes a 7-day free trial so you can experience the full power of AURELIA. After that, choose the plan that fits your style journey.",
   },
   {
     q: "What body types does the AI support?",
@@ -29,17 +29,17 @@ const faqs = [
   },
   {
     q: "Can I cancel anytime?",
-    a: "Yes, you can cancel your subscription at any time with no penalties. Your data remains accessible on the free plan.",
+    a: "Yes, you can cancel your subscription at any time with no penalties. Your data remains accessible for 30 days after cancellation.",
   },
 ];
 
 const FAQ = () => (
-  <section id="faq" className="py-24 bg-background">
+  <section id="faq" className="py-16 md:py-24 bg-background">
     <div className="max-w-3xl mx-auto px-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
+        viewport={{ once: true, margin: "-80px" }}
         className="text-center mb-12"
       >
         <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase mb-3">FAQ</p>
@@ -51,7 +51,7 @@ const FAQ = () => (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
+        viewport={{ once: true, margin: "-80px" }}
       >
         <Accordion type="single" collapsible className="space-y-3">
           {faqs.map((faq, i) => (

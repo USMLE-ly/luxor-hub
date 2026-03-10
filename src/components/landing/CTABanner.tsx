@@ -8,7 +8,7 @@ const CTABanner = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="relative py-24 overflow-hidden">
+    <section className="relative py-16 md:py-24 overflow-hidden">
       <AnimatedGradientBackground
         Breathing={true}
         animationSpeed={0.02}
@@ -30,7 +30,7 @@ const CTABanner = () => {
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
+          viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
           <Sparkles className="w-10 h-10 text-primary mx-auto mb-6" />
@@ -57,7 +57,7 @@ const CTABanner = () => {
                 className="gradient-button text-base px-8 group"
                 onClick={() => navigate("/auth")}
               >
-                Get Started Free
+                Start Your Free Trial
                 <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Button>
             </motion.div>
@@ -71,6 +71,9 @@ const CTABanner = () => {
               </Button>
             </motion.div>
           </motion.div>
+          <p className="mt-6 font-sans text-xs text-muted-foreground">
+            No credit card required · Cancel anytime · 7-day free trial
+          </p>
         </motion.div>
       </div>
     </section>

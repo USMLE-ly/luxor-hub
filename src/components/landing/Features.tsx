@@ -43,7 +43,7 @@ function AnimatedContainer({ className, delay = 0.1, children }: { delay?: numbe
     <motion.div
       initial={{ filter: "blur(4px)", translateY: -8, opacity: 0 }}
       whileInView={{ filter: "blur(0px)", translateY: 0, opacity: 1 }}
-      viewport={{ once: true }}
+      viewport={{ once: true, margin: "-80px" }}
       transition={{ delay, duration: 0.8 }}
       className={className}
     >
@@ -53,9 +53,9 @@ function AnimatedContainer({ className, delay = 0.1, children }: { delay?: numbe
 }
 
 const Features = () => (
-  <section id="features" className="py-24 bg-muted/20">
+  <section id="features" className="py-16 md:py-24 bg-muted/20">
     <div className="mx-auto w-full max-w-5xl space-y-8 px-4">
-      <AnimatedContainer className="mx-auto max-w-3xl text-center">
+      <AnimatedContainer className="mx-auto max-w-2xl text-center">
         <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase mb-3">Features</p>
         <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground tracking-wide text-balance">
           Everything You Need to <span className="gold-text">Look Your Best</span>
@@ -65,14 +65,23 @@ const Features = () => (
         </p>
       </AnimatedContainer>
 
-      <AnimatedContainer
-        delay={0.4}
-        className="grid grid-cols-1 divide-x divide-y divide-dashed border border-dashed sm:grid-cols-2 md:grid-cols-3"
-      >
+      <div className="grid grid-cols-1 divide-x divide-y divide-dashed border border-dashed sm:grid-cols-2 md:grid-cols-3">
         {features.map((feature, i) => (
-          <FeatureCard key={i} feature={feature} />
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ delay: 0.2 + i * 0.05, duration: 0.6 }}
+            className="group"
+          >
+            <FeatureCard
+              feature={feature}
+              className="transition-colors duration-300 group-hover:bg-muted/40 [&_svg]:transition-transform [&_svg]:duration-300 group-hover:[&_svg]:scale-110"
+            />
+          </motion.div>
         ))}
-      </AnimatedContainer>
+      </div>
     </div>
   </section>
 );

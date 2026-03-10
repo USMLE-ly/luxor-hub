@@ -1,102 +1,88 @@
+# AURELIA — Launch-Ready Roadmap
 
-
-## Landing Page — Premium Rebuild Plan
-
-### Analysis Summary
-
-Current state has strong individual components (WebGL hero, glass shader, grid features) but suffers from **section redundancy**, **inconsistent rhythm**, **weak conversion hierarchy**, and **FAQ/pricing copy contradictions**. Three separate feature showcase sections (ContainerScroll, RevealImageList, FeatureCarousel) compete for attention instead of building a narrative arc.
+> Updated: 2026-03-07 — Practical, prioritized roadmap for a reliable launch.
 
 ---
 
-### Architecture: Section Flow Redesign
+## P0 — Critical (Must fix before launch)
 
-Current (11 sections, redundant):
-```text
-Hero → SocialProof → HowItWorks → ContainerScroll → Features → RevealList → FeatureCarousel → BrandMarquee → Proof → Pricing → FAQ → CTA → Footer
-```
+### 1. AI Error Handling & Fallbacks
+- [x] Chat: handles 429/402 gracefully with toasts
+- [x] Chat: streaming SSE parsing with proper buffer flush
+- [ ] OutfitAnalysis: add retry button on AI failure, show friendly error state  
+- [ ] VideoAnalysis: add timeout handling for long video processing
+- [ ] FashionDesigner: add retry on generation failure
+- [ ] All AI pages: wrap in ErrorBoundary for crash recovery
+- [ ] All edge functions: consistent 429/402 handling
 
-Proposed (9 sections, narrative arc):
-```text
-Hero → SocialProof → Features(grid) → HowItWorks → AppShowcase(ContainerScroll) → BrandMarquee → Proof → Pricing → FAQ → CTA → Footer
-```
+### 2. Image Upload Robustness
+- [ ] Compress images client-side before upload (target <2MB via canvas)
+- [ ] Enforce consistent size limits across all pages
+- [ ] Show file size in upload preview
+- [ ] Add privacy notice banner on all upload pages ("Images processed by AI")
+- [ ] Lazy load all gallery/product images
 
-**Removed**: RevealImageList section and FeatureCarousel section — they dilute the feature message. ContainerScroll stays as the single app showcase moment.
+### 3. Mobile UX
+- [ ] Test sidebar collapse on small screens
+- [ ] Fix horizontal overflow in carousels (scrollbar-none + snap)
+- [ ] Ensure modals/dialogs scrollable on short viewports
+- [ ] Touch-friendly tap targets (min 44px)
+- [ ] Swipe hint: test reliability across screen sizes
 
----
-
-### 1. Hero — Micro-interaction Polish
-- Add a subtle entrance stagger delay to CTA buttons (200ms after title completes)
-- Reduce slide auto-advance from 5s to 6s for breathing room
-- Add a scroll-down indicator (animated chevron) at bottom center, fading out after first scroll
-
-### 2. Social Proof Strip — Authority Upgrade
-- Replace generic "12,000+ Active Users" with specific trust signals: "Featured in Vogue", "12K+ Stylists", "$2.4M+ Revenue Generated", "98% Satisfaction"
-- Add subtle gold left-border accent to each stat for visual weight
-- Increase vertical padding from `py-12` to `py-16`
-
-### 3. Features Grid — Elevation
-- Add staggered entrance per card (50ms delay each) instead of all-at-once
-- Add hover state: card background subtly shifts, icon scales up 1.1x
-- Section title: tighten max-width for better text balance
-
-### 4. HowItWorks — No changes needed, Gallery4 is strong
-
-### 5. App Showcase (ContainerScroll) — Refinement
-- Add a subtle gold border glow to the container on scroll-in
-- Update subtitle copy to be more conversion-oriented
-
-### 6. Brand Marquee — Spacing & Trust
-- Change "Integrated With" to "Trusted By Leading Brands" for authority framing
-- Add LinkedIn logo to the brand set
-- Ensure gap remains at `6rem`+
-
-### 7. Proof Section — Hierarchy & Credibility
-- Make the top proof card (highest revenue: $673K) span full width as a "hero proof"
-- Remaining 5 cards in 2-column grid below
-- Add a subtle animated counter to each stat card (count up on scroll-in)
-- Add a "Verified ✓" micro-badge with green accent on each card
-
-### 8. Pricing — Copy Fix & Mobile
-- Fix FAQ answer that still says "free plan" — update to reflect paid-only model
-- Fix CTA copy inconsistency: "Get Started Free" in CTA banner vs paid-only pricing
-- Mobile: stack pricing selector above feature cards (already correct with `lg:grid-cols-2`)
-
-### 9. FAQ — Content Fix
-- Update Q3 ("Can I use AURELIA for free?") answer to match paid-only model: "AURELIA offers a 7-day free trial on all plans. After that, choose a plan that fits your style journey."
-- Update Q6 cancellation answer to remove "free plan" reference
-
-### 10. CTA Banner — Conversion Optimization
-- Change "Get Started Free" to "Start Your Free Trial" for consistency with paid model
-- Add a trust micro-line below CTA: "No credit card required · Cancel anytime · 7-day free trial"
-- Add subtle floating sparkle particles behind the CTA text
-
-### 11. Footer — Polish
-- Add "Privacy Policy" and "Terms of Service" links
-- Add TikTok social icon alongside existing ones
-
-### 12. Global Motion System
-- Standardize all `whileInView` animations to use `once: true` and `margin: "-80px"`
-- Standardize entrance: blur(4px) + translateY(-8px) for headings, translateY(20px) for cards
-- Add `will-change: transform` to animated elements for GPU acceleration
-
-### 13. Mobile-Specific Optimizations
-- Hero: Increase bottom padding for slide content to avoid nav overlap
-- Proof section: Single column cards on mobile with horizontal scroll option
-- Features grid: 1 column on mobile (already correct)
-- Reduce all section `py-24` to `py-16` on mobile for tighter rhythm
+### 4. Auth & Security
+- [x] RLS policies on all 20+ tables
+- [x] No client-side admin checks
+- [ ] Privacy notice for AI image processing
+- [ ] Ensure all storage uploads use user-scoped paths
+- [ ] Rate limit awareness on all AI endpoints
 
 ---
 
-### Files to Modify
-1. **src/pages/Index.tsx** — Remove RevealImageList and FeatureCarousel sections
-2. **src/components/landing/SocialProofStrip.tsx** — Authority stat upgrade + gold accents
-3. **src/components/landing/Features.tsx** — Staggered card animation + hover states
-4. **src/components/landing/BrandMarquee.tsx** — Copy change + LinkedIn logo
-5. **src/components/landing/Testimonials.tsx** — Hero proof card + animated counters + verified badges
-6. **src/components/landing/Pricing.tsx** — Copy consistency
-7. **src/components/landing/FAQ.tsx** — Fix free tier references
-8. **src/components/landing/CTABanner.tsx** — CTA copy + trust line + sparkles
-9. **src/components/landing/Footer.tsx** — Privacy/terms links + TikTok
-10. **src/components/landing/Hero.tsx** — Scroll indicator + timing tweaks
-11. **src/index.css** — Mobile responsive tweaks
+## P1 — Important (Should fix for quality)
 
+### 5. Shop/Products Polish
+- [ ] Consistent fallback placeholder images
+- [ ] Loading skeletons while products load
+- [ ] "No results" helpful message state
+- [ ] Test edge function with varied query formats
+
+### 6. Onboarding Polish
+- [ ] Clear selfie instructions with example photos
+- [ ] Swipe hint: click alternative for non-touch
+- [ ] Style DNA explanation tooltip
+- [ ] Clear step progress indicator
+
+### 7. AI Accuracy & Quality
+- [ ] Test outfit analysis with diverse outfits
+- [ ] Validate Style DNA with multiple skin tones
+- [ ] Wardrobe gap: no repeated suggestions
+- [ ] Cap confidence scores 0-100
+
+### 8. Chat Improvements
+- [ ] Test multi-turn context (5+ messages)
+- [ ] Calendar/weather: graceful fallback if denied
+- [ ] Offline suggestion cards from last Style DNA
+- [ ] Auto-save conversation periodically
+
+---
+
+## P2 — Nice to Have (Post-launch)
+
+### 9. Performance
+- [ ] Audit bundle size, lazy-load heavy pages
+- [ ] Service worker for offline
+- [ ] Optimize 3D mannequin loading
+- [ ] Analytics tracking for feature usage
+
+### 10. Community & Social
+- [ ] Report/flag for public designs
+- [ ] Multi-store shop filtering
+- [ ] Design collaboration
+- [ ] Style challenges with prizes
+
+---
+
+## Status
+- [ ] Not started
+- [x] Complete
+- 🔧 In progress
