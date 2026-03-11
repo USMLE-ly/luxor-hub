@@ -496,9 +496,18 @@
   white-space: nowrap;
 }
 
+/* Scroll hint animation — replaces animate-bounce */
+@keyframes scroll-hint {
+  0%, 100% { transform: translateY(0); opacity: 0.6; }
+  50% { transform: translateY(6px); opacity: 0.3; }
+}
+.scroll-hint-anim {
+  animation: scroll-hint 2s ease-in-out infinite;
+}
+
 @media (max-width: 768px) {
   .slide-content {
-    bottom: 22%;
+    bottom: 25%;
     left: 5%;
     right: 5%;
     max-width: 100%;
