@@ -298,6 +298,7 @@
   overflow: hidden;
   cursor: pointer;
   transform: translateY(0);
+  will-change: transform;
   box-shadow: 0 4px 0 0 hsl(var(--gold-dark) / 0.6), 0 6px 20px -4px hsl(var(--gold) / 0.3);
   transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
