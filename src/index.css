@@ -262,10 +262,26 @@
 
   .premium-card {
     transition: box-shadow 0.5s ease, border-color 0.5s ease;
+    will-change: transform;
   }
   .premium-card:hover {
     box-shadow: 0 0 20px -4px hsl(var(--gold) / 0.25), 0 0 8px -2px hsl(var(--gold) / 0.15);
     border-color: hsl(var(--gold) / 0.3);
+  }
+
+  /* Marquee fade masks */
+  .marquee-fade-mask {
+    mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+  }
+
+  /* Hide scrollbar for proof cards */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }
 
@@ -282,6 +298,7 @@
   overflow: hidden;
   cursor: pointer;
   transform: translateY(0);
+  will-change: transform;
   box-shadow: 0 4px 0 0 hsl(var(--gold-dark) / 0.6), 0 6px 20px -4px hsl(var(--gold) / 0.3);
   transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
@@ -480,9 +497,18 @@
   white-space: nowrap;
 }
 
+/* Scroll hint animation — replaces animate-bounce */
+@keyframes scroll-hint {
+  0%, 100% { transform: translateY(0); opacity: 0.6; }
+  50% { transform: translateY(6px); opacity: 0.3; }
+}
+.scroll-hint-anim {
+  animation: scroll-hint 2s ease-in-out infinite;
+}
+
 @media (max-width: 768px) {
   .slide-content {
-    bottom: 22%;
+    bottom: 25%;
     left: 5%;
     right: 5%;
     max-width: 100%;

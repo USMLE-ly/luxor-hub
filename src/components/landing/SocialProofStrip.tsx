@@ -42,6 +42,8 @@ const AnimatedCounter = ({ target, suffix, duration = 2000 }: AnimatedCounterPro
   );
 };
 
+const mediaBadges = ["Vogue", "GQ", "Forbes", "Elle"];
+
 const stats = [
   { value: 12, suffix: "K+", label: "Professional Stylists" },
   { value: 2.4, suffix: "M", label: "Revenue Generated" },
@@ -52,6 +54,19 @@ const stats = [
 const SocialProofStrip = () => (
   <section className="py-16 border-y border-border bg-muted/30">
     <div className="max-w-5xl mx-auto px-4">
+      {/* As Featured In — text badges */}
+      <div className="flex flex-wrap items-center justify-center gap-6 mb-10">
+        <span className="font-sans text-[10px] text-muted-foreground tracking-widest uppercase">As Featured In</span>
+        {mediaBadges.map((name) => (
+          <span
+            key={name}
+            className="font-display text-base md:text-lg font-bold text-muted-foreground/40 tracking-wider uppercase select-none"
+          >
+            {name}
+          </span>
+        ))}
+      </div>
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
         {stats.map((stat, i) => (
           <motion.div
@@ -63,11 +78,13 @@ const SocialProofStrip = () => (
             className="text-center relative"
           >
             <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-8 bg-primary/40 rounded-full hidden md:block" />
-            <p className="font-display text-3xl md:text-4xl font-bold text-foreground">
+            <p className="font-display text-4xl md:text-5xl font-bold text-foreground">
               {stat.value === 2.4 ? "$" : ""}
               <AnimatedCounter target={stat.value} suffix={stat.suffix} />
             </p>
-            <p className="font-sans text-sm text-muted-foreground mt-1">{stat.label}</p>
+            {/* Gold underline accent */}
+            <div className="mx-auto mt-2 w-8 h-0.5 rounded-full bg-primary/30" />
+            <p className="font-sans text-sm text-muted-foreground mt-2">{stat.label}</p>
           </motion.div>
         ))}
       </div>
