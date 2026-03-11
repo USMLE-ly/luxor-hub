@@ -1,6 +1,5 @@
 import { motion, useReducedMotion } from "framer-motion";
-import { Sparkles, Brain, Palette, ShoppingBag, Calendar, TrendingUp } from "lucide-react";
-import { FeatureCard } from "@/components/ui/grid-feature-cards";
+import { Sparkles, Brain, Palette, ShoppingBag, Calendar, TrendingUp, ArrowRight } from "lucide-react";
 
 const features = [
   {
@@ -55,7 +54,7 @@ function AnimatedContainer({ className, delay = 0.1, children }: { delay?: numbe
 const Features = () => (
   <section id="features" className="py-16 md:py-24 bg-muted/20">
     <div className="mx-auto w-full max-w-5xl space-y-8 px-4">
-      <AnimatedContainer className="mx-auto max-w-2xl text-center">
+      <AnimatedContainer className="mx-auto max-w-xl text-center">
         <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase mb-3">Features</p>
         <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground tracking-wide text-balance">
           Everything You Need to <span className="gold-text">Look Your Best</span>
@@ -65,7 +64,7 @@ const Features = () => (
         </p>
       </AnimatedContainer>
 
-      <div className="grid grid-cols-1 divide-x divide-y divide-dashed border border-dashed sm:grid-cols-2 md:grid-cols-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {features.map((feature, i) => (
           <motion.div
             key={i}
@@ -73,12 +72,21 @@ const Features = () => (
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ delay: 0.2 + i * 0.05, duration: 0.6 }}
-            className="group"
+            className="group glass rounded-2xl p-6 premium-card hover-lift will-change-transform"
           >
-            <FeatureCard
-              feature={feature}
-              className="transition-colors duration-300 group-hover:bg-muted/40 [&_svg]:transition-transform [&_svg]:duration-300 group-hover:[&_svg]:scale-110"
+            <feature.icon
+              className="text-foreground/75 size-6 transition-transform duration-300 group-hover:scale-110"
+              strokeWidth={1}
+              aria-hidden
             />
+            <h3 className="mt-6 text-sm md:text-base font-semibold text-foreground">{feature.title}</h3>
+            <p className="text-muted-foreground relative z-20 mt-2 text-xs font-light leading-relaxed">{feature.description}</p>
+            <button
+              onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
+              className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            >
+              Learn more <ArrowRight className="w-3 h-3" />
+            </button>
           </motion.div>
         ))}
       </div>

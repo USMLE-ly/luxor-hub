@@ -37,11 +37,11 @@ const CTABanner = () => {
           <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-4">
             Ready to Transform Your <span className="gold-text">Style</span>?
           </h2>
-          <p className="font-sans text-muted-foreground text-base md:text-lg max-w-xl mx-auto mb-8">
-            Join thousands of fashion-forward individuals and businesses already using AURELIA to elevate their wardrobe and revenue.
+          <p className="font-sans text-muted-foreground text-base md:text-lg max-w-xl mx-auto mb-3">
+            Join 12,000+ stylists already using AURELIA to elevate their wardrobe and revenue.
           </p>
           <motion.div
-            className="flex flex-col sm:flex-row gap-4 justify-center"
+            className="flex justify-center"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -54,20 +54,11 @@ const CTABanner = () => {
             >
               <Button
                 size="lg"
-                className="gradient-button text-base px-8 group"
+                className="gradient-button text-base px-8 group will-change-transform"
                 onClick={() => navigate("/auth")}
               >
                 Start Your Free Trial
                 <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </motion.div>
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.97 }}
-              className="rounded-xl"
-            >
-              <Button size="lg" variant="outline" className="text-base px-8 border-primary/30 hover:border-primary/60 hover:shadow-[0_0_20px_hsl(43_74%_49%/0.15)]">
-                Book a Demo
               </Button>
             </motion.div>
           </motion.div>

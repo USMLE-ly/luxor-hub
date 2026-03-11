@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Check, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { PricingInteraction } from "@/components/ui/pricing-interaction";
+import { useState } from "react";
 
 const tiers = [
   {
@@ -49,14 +50,15 @@ const tiers = [
 
 const Pricing = () => {
   const navigate = useNavigate();
+  const [hoveredTier, setHoveredTier] = useState<number | null>(null);
 
   return (
-    <section id="pricing" className="py-24 bg-muted/20">
+    <section id="pricing" className="py-16 md:py-24 bg-muted/20">
       <div className="max-w-6xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: true, margin: "-80px" }}
           className="text-center mb-16"
         >
           <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase mb-3">Pricing</p>
@@ -69,11 +71,10 @@ const Pricing = () => {
         </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-12 items-start">
-          {/* Interactive pricing selector */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: true, margin: "-80px" }}
             className="flex justify-center"
           >
             <PricingInteraction
@@ -87,20 +88,21 @@ const Pricing = () => {
             />
           </motion.div>
 
-          {/* Feature cards */}
           <div className="grid gap-6">
             {tiers.map((tier, i) => (
               <motion.div
                 key={tier.name}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                viewport={{ once: true, margin: "-80px" }}
                 transition={{ delay: i * 0.12 }}
-                className={`relative rounded-2xl p-6 premium-card ${
+                className={`relative rounded-2xl p-6 premium-card transition-opacity duration-300 ${
                   tier.highlighted
                     ? "glass-strong border-primary/30 shadow-[0_0_30px_-8px_hsl(var(--primary)/0.2)]"
                     : "glass"
-                }`}
+                } ${hoveredTier !== null && hoveredTier !== i ? "opacity-60" : "opacity-100"}`}
+                onMouseEnter={() => setHoveredTier(i)}
+                onMouseLeave={() => setHoveredTier(null)}
               >
                 {tier.highlighted && (
                   <div className="absolute -top-3 left-6 px-4 py-1 rounded-full gold-gradient text-xs font-bold text-primary-foreground font-sans flex items-center gap-1">

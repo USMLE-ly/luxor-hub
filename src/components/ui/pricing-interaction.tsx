@@ -37,6 +37,25 @@ export function PricingInteraction({
     }
   };
 
+  const savingsPercent = (monthly: number, annual: number) =>
+    Math.round(((monthly - annual) / monthly) * 100);
+
+  const tiers = [
+    { name: "Starter", price: starter, monthPrice: starterMonth, annualPrice: starterAnnual, badge: null },
+    { name: "Pro", price: pro, monthPrice: proMonth, annualPrice: proAnnual, badge: "Popular" },
+    { name: "Elite", price: elite, monthPrice: eliteMonth, annualPrice: eliteAnnual, badge: null },
+  ];
+
+  const tierRefs = React.useRef<(HTMLDivElement | null)[]>([]);
+  const [indicatorStyle, setIndicatorStyle] = React.useState<{ top: number; height: number }>({ top: 0, height: 0 });
+
+  React.useEffect(() => {
+    const el = tierRefs.current[active];
+    if (el) {
+      setIndicatorStyle({ top: el.offsetTop, height: el.offsetHeight });
+    }
+  }, [active]);
+
   return (
     <div className="border-2 border-border rounded-[32px] p-3 shadow-md max-w-sm w-full flex flex-col items-center gap-3 bg-card">
       <div className="rounded-full relative w-full bg-muted p-1.5 flex items-center">
@@ -63,117 +82,67 @@ export function PricingInteraction({
         </div>
       </div>
 
+      {period === 1 && (
+        <p className="text-xs font-medium text-primary font-sans">Save up to 20% annually</p>
+      )}
+
       <div className="w-full relative flex flex-col items-center justify-center gap-3">
-        {/* Starter */}
-        <div
-          className="w-full flex justify-between cursor-pointer border-2 border-border p-4 rounded-2xl"
-          onClick={() => setActive(0)}
-        >
-          <div className="flex flex-col items-start">
-            <p className="font-semibold text-xl text-foreground">Starter</p>
-            <p className="text-muted-foreground text-md flex">
-              <span className="text-foreground font-medium flex items-center">
-                $&nbsp;
-                <NumberFlow className="text-foreground font-medium" value={starter} />
-              </span>
-              /month
-            </p>
-          </div>
+        {tiers.map((tier, idx) => (
           <div
-            className="border-2 size-6 rounded-full mt-0.5 p-1 flex items-center justify-center"
-            style={{
-              borderColor: active === 0 ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
-              transition: "border-color 0.3s",
-            }}
+            key={tier.name}
+            ref={(el) => { tierRefs.current[idx] = el; }}
+            className="w-full flex justify-between cursor-pointer border-2 border-border p-4 rounded-2xl transition-opacity duration-300"
+            style={{ opacity: active !== idx ? 0.7 : 1 }}
+            onClick={() => setActive(idx)}
           >
+            <div className="flex flex-col items-start">
+              <p className="font-semibold text-xl flex items-center gap-2 text-foreground">
+                {tier.name}
+                {tier.badge && (
+                  <span className="py-1 px-2 block rounded-lg bg-primary/20 text-primary text-sm">
+                    {tier.badge}
+                  </span>
+                )}
+              </p>
+              <p className="text-muted-foreground text-md flex items-center gap-2">
+                <span className="text-foreground font-medium flex items-center">
+                  $&nbsp;
+                  <NumberFlow className="text-foreground font-medium" value={tier.price} />
+                </span>
+                /month
+                {period === 1 && (
+                  <span className="text-[10px] font-semibold text-green-500 bg-green-500/10 px-1.5 py-0.5 rounded-full">
+                    Save {savingsPercent(tier.monthPrice, tier.annualPrice)}%
+                  </span>
+                )}
+              </p>
+            </div>
             <div
-              className="size-3 rounded-full"
+              className="border-2 size-6 rounded-full mt-0.5 p-1 flex items-center justify-center"
               style={{
-                backgroundColor: "hsl(var(--primary))",
-                opacity: active === 0 ? 1 : 0,
-                transition: "opacity 0.3s",
+                borderColor: active === idx ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
+                transition: "border-color 0.3s",
               }}
-            />
+            >
+              <div
+                className="size-3 rounded-full"
+                style={{
+                  backgroundColor: "hsl(var(--primary))",
+                  opacity: active === idx ? 1 : 0,
+                  transition: "opacity 0.3s",
+                }}
+              />
+            </div>
           </div>
-        </div>
+        ))}
 
-        {/* Pro */}
+        {/* Dynamic selection indicator */}
         <div
-          className="w-full flex justify-between cursor-pointer border-2 border-border p-4 rounded-2xl"
-          onClick={() => setActive(1)}
-        >
-          <div className="flex flex-col items-start">
-            <p className="font-semibold text-xl flex items-center gap-2 text-foreground">
-              Pro
-              <span className="py-1 px-2 block rounded-lg bg-primary/20 text-primary text-sm">
-                Popular
-              </span>
-            </p>
-            <p className="text-muted-foreground text-md flex">
-              <span className="text-foreground font-medium flex items-center">
-                $&nbsp;
-                <NumberFlow className="text-foreground font-medium" value={pro} />
-              </span>
-              /month
-            </p>
-          </div>
-          <div
-            className="border-2 size-6 rounded-full mt-0.5 p-1 flex items-center justify-center"
-            style={{
-              borderColor: active === 1 ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
-              transition: "border-color 0.3s",
-            }}
-          >
-            <div
-              className="size-3 rounded-full"
-              style={{
-                backgroundColor: "hsl(var(--primary))",
-                opacity: active === 1 ? 1 : 0,
-                transition: "opacity 0.3s",
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Elite */}
-        <div
-          className="w-full flex justify-between cursor-pointer border-2 border-border p-4 rounded-2xl"
-          onClick={() => setActive(2)}
-        >
-          <div className="flex flex-col items-start">
-            <p className="font-semibold text-xl text-foreground">Elite</p>
-            <p className="text-muted-foreground text-md flex">
-              <span className="text-foreground font-medium flex items-center">
-                $&nbsp;
-                <NumberFlow className="text-foreground font-medium" value={elite} />
-              </span>
-              /month
-            </p>
-          </div>
-          <div
-            className="border-2 size-6 rounded-full mt-0.5 p-1 flex items-center justify-center"
-            style={{
-              borderColor: active === 2 ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
-              transition: "border-color 0.3s",
-            }}
-          >
-            <div
-              className="size-3 rounded-full"
-              style={{
-                backgroundColor: "hsl(var(--primary))",
-                opacity: active === 2 ? 1 : 0,
-                transition: "opacity 0.3s",
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Selection indicator */}
-        <div
-          className="w-full h-[88px] absolute top-0 border-[3px] border-primary rounded-2xl pointer-events-none"
+          className="w-full absolute border-[3px] border-primary rounded-2xl pointer-events-none"
           style={{
-            transform: `translateY(${active * 88 + 12 * active}px)`,
-            transition: "transform 0.3s",
+            top: indicatorStyle.top,
+            height: indicatorStyle.height,
+            transition: "top 0.3s, height 0.3s",
           }}
         />
       </div>

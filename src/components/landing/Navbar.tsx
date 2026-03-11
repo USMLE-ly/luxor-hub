@@ -4,17 +4,19 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { RainbowButton } from "@/components/ui/rainbow-button";
 import { useTheme } from "next-themes";
-import { Sun, Moon, Menu } from "lucide-react";
+import { Sun, Moon, Menu, Diamond } from "lucide-react";
 import { MagneticCursor } from "@/components/ui/magnetic-cursor";
 import {
   Sheet,
   SheetContent,
   SheetTrigger,
+  SheetClose,
 } from "@/components/ui/sheet";
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("");
+  const [sheetOpen, setSheetOpen] = useState(false);
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
 
@@ -22,7 +24,6 @@ const Navbar = () => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
 
-      // Track active section
       const sections = ["features", "how-it-works", "pricing", "faq"];
       let current = "";
       for (const id of sections) {
@@ -39,6 +40,7 @@ const Navbar = () => {
   }, []);
 
   const scrollTo = (id: string) => {
+    setSheetOpen(false);
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
@@ -58,7 +60,6 @@ const Navbar = () => {
         scrolled ? "glass-strong py-2.5" : "py-5"
       }`}
     >
-      {/* Gold bottom line on scroll */}
       {scrolled && (
         <motion.div
           initial={{ scaleX: 0 }}
@@ -69,11 +70,12 @@ const Navbar = () => {
 
       <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
         <motion.h1
-          className="font-display text-2xl font-bold gold-text cursor-pointer"
+          className="font-display text-2xl font-bold gold-text cursor-pointer flex items-center gap-1.5"
           onClick={() => navigate("/")}
           whileHover={{ letterSpacing: "0.08em" }}
           transition={{ duration: 0.3 }}
         >
+          <Diamond className="w-5 h-5 text-primary fill-primary/20" />
           AURELIA
         </motion.h1>
 
@@ -90,7 +92,7 @@ const Navbar = () => {
               {activeSection === link.id && (
                 <motion.div
                   layoutId="nav-underline"
-                  className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary rounded-full"
+                  className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary rounded-full will-change-transform"
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
               )}
@@ -110,8 +112,13 @@ const Navbar = () => {
             <span className="sr-only">Toggle theme</span>
           </Button>
 
-          <Button variant="ghost" size="sm" className="hidden md:inline-flex font-sans" onClick={() => navigate("/auth")}>
-            Log In
+          <Button
+            variant="ghost"
+            size="sm"
+            className="hidden md:inline-flex font-sans"
+            onClick={() => scrollTo("pricing")}
+          >
+            View Plans
           </Button>
           <MagneticCursor className="hidden md:block relative" strength={0.3} radius={70}>
             <RainbowButton
@@ -120,12 +127,11 @@ const Navbar = () => {
             >
               Get Started
             </RainbowButton>
-            {/* Pulse dot */}
             <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.6)] animate-pulse" />
           </MagneticCursor>
 
           {/* Mobile hamburger */}
-          <Sheet>
+          <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden h-9 w-9">
                 <Menu className="h-5 w-5" />
@@ -151,11 +157,11 @@ const Navbar = () => {
                 <div className="h-px w-full bg-gradient-to-r from-primary/40 to-transparent my-6" />
 
                 <div className="flex flex-col gap-3">
-                  <Button variant="outline" className="w-full font-sans" onClick={() => navigate("/auth")}>
+                  <Button variant="outline" className="w-full font-sans" onClick={() => { setSheetOpen(false); navigate("/auth"); }}>
                     Log In
                   </Button>
                   <RainbowButton
-                    onClick={() => navigate("/auth")}
+                    onClick={() => { setSheetOpen(false); navigate("/auth"); }}
                     className="w-full h-10 text-sm font-semibold"
                   >
                     Get Started

@@ -68,15 +68,19 @@ const ProofCard = ({ p, i, isHero }: { p: typeof proofs[0]; i: number; isHero?: 
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true, margin: "-80px" }}
     transition={{ delay: i * 0.08, duration: 0.5 }}
-    className={`glass rounded-2xl overflow-hidden premium-card group ${isHero ? "md:col-span-2 lg:col-span-3" : ""}`}
+    className={`glass rounded-2xl overflow-hidden premium-card group transition-transform duration-300 hover:rotate-[0.5deg] ${isHero ? "md:col-span-2 lg:col-span-3" : "snap-center shrink-0 w-[85vw] sm:w-auto"}`}
   >
     <div className="relative">
       <img
         src={p.image}
         alt={`Revenue proof: ${p.stat}`}
-        className={`w-full object-cover object-top ${isHero ? "h-64 md:h-72" : "h-52"}`}
+        className={`w-full object-cover object-top ${isHero ? "h-72 md:h-80" : "h-52"}`}
         loading="lazy"
       />
+      {/* Gold gradient overlay on hero card */}
+      {isHero && (
+        <div className="absolute inset-0 bg-gradient-to-t from-primary/10 via-transparent to-transparent" />
+      )}
       <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-background to-transparent h-16" />
       <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-500/15 backdrop-blur-sm border border-green-500/20">
         <BadgeCheck className="w-3 h-3 text-green-400" />
@@ -141,11 +145,11 @@ const Testimonials = () => (
         </p>
       </motion.div>
 
-      {/* Hero proof card (highest revenue) */}
+      {/* Hero proof card */}
       <ProofCard p={proofs[0]} i={0} isHero />
 
-      {/* Remaining cards */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+      {/* Remaining cards — horizontal scroll on mobile */}
+      <div className="flex gap-6 mt-6 overflow-x-auto snap-x snap-mandatory pb-4 md:grid md:grid-cols-2 lg:grid-cols-3 md:overflow-visible md:snap-none md:pb-0 scrollbar-hide">
         {proofs.slice(1).map((p, i) => (
           <ProofCard key={i} p={p} i={i + 1} />
         ))}

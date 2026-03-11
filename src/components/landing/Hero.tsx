@@ -336,22 +336,24 @@ const Hero = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent z-[1]" />
         <div className="absolute inset-0 bg-gradient-to-r from-background/50 to-transparent z-[1]" />
 
-        <div className="slide-content z-[5]">
+        <div className="slide-content z-[5]" style={{ pointerEvents: 'none' }}>
           <h1 className="slide-title font-display gold-shimmer-text" id="heroMainTitle"></h1>
           <p className="slide-description" id="heroMainDesc"></p>
           
-          {/* CTA buttons */}
-          <div className="flex flex-col sm:flex-row items-start gap-3 mt-6">
+          {/* CTA buttons — staggered entrance */}
+          <div className="flex flex-col sm:flex-row items-start gap-3 mt-6" style={{ pointerEvents: 'auto' }}>
             <button
               onClick={() => navigate("/auth")}
-              className="gradient-button h-11 px-7 rounded-xl font-sans font-semibold text-sm tracking-wide flex items-center gap-2 gold-glow pointer-events-auto"
+              className="gradient-button h-11 px-7 rounded-xl font-sans font-semibold text-sm tracking-wide flex items-center gap-2 gold-glow will-change-transform"
+              style={{ animationDelay: '0ms' }}
             >
               <Sparkles className="w-4 h-4" />
               <span>Start Free Trial</span>
             </button>
             <button
               onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
-              className="gradient-button gradient-button-variant h-11 px-7 rounded-xl font-sans font-semibold text-sm tracking-wide flex items-center gap-2 pointer-events-auto"
+              className="gradient-button gradient-button-variant h-11 px-7 rounded-xl font-sans font-semibold text-sm tracking-wide flex items-center gap-2 will-change-transform"
+              style={{ animationDelay: '200ms' }}
             >
               <span>How It Works</span>
               <ArrowRight className="w-4 h-4" />
@@ -361,8 +363,8 @@ const Hero = () => {
 
       <nav className="slides-navigation z-[5]" id="heroSlidesNav"></nav>
 
-        {/* Scroll indicator */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[6] flex flex-col items-center gap-1 animate-bounce opacity-60">
+        {/* Scroll indicator — smooth custom animation */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[6] flex flex-col items-center gap-1 scroll-hint-anim">
           <span className="font-sans text-[10px] text-muted-foreground tracking-widest uppercase">Scroll</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted-foreground">
             <path d="M7 13l5 5 5-5M7 6l5 5 5-5" />

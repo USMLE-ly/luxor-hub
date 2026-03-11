@@ -12,7 +12,7 @@ const BrandMarquee = () => (
     <p className="text-center text-xs font-sans text-muted-foreground tracking-widest uppercase mb-6">
       Trusted By Leading Brands
     </p>
-    <div className="relative flex overflow-hidden" style={{ ["--gap" as string]: "6rem" }}>
+    <div className="relative flex overflow-hidden marquee-fade-mask" style={{ ["--gap" as string]: "6rem" }}>
       <div className="flex shrink-0 animate-marquee gap-28 [--duration:30s]">
         {brands.map((b, i) => (
           <img
