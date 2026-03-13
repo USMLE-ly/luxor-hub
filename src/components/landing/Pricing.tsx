@@ -85,7 +85,10 @@ const Pricing = () => {
               proAnnual={23}
               eliteMonth={99}
               eliteAnnual={79}
-              onGetStarted={() => navigate("/auth")}
+              onGetStarted={() => {
+                trackEvent("InitiateCheckout", { content_name: "AURELIA Pricing" });
+                navigate("/auth");
+              }}
             />
           </motion.div>
 
