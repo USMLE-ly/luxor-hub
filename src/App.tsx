@@ -1,10 +1,12 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "next-themes";
+import { pageview } from "@/lib/fbPixel";
 import Index from "./pages/Index";
 import { ErrorBoundary } from "@/components/app/ErrorBoundary";
 import StarfieldBackground from "@/components/ui/starfield-background";
@@ -41,6 +43,15 @@ import VirtualTryOn from "./pages/VirtualTryOn";
 import CommunityGallery from "./pages/CommunityGallery";
 import Install from "./pages/Install";
 
+// Tracks route changes for Facebook Pixel
+const RouteTracker = () => {
+  const location = useLocation();
+  useEffect(() => {
+    pageview();
+  }, [location.pathname]);
+  return null;
+};
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -53,6 +64,7 @@ const App = () => (
         <Toaster />
         <Sonner />
       <BrowserRouter>
+        <RouteTracker />
         <AuthProvider>
           <ErrorBoundary>
           <Routes>

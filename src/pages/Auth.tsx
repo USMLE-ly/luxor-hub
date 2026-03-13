@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
 import { ArrowLeft, Mail, Lock, User, Sparkles } from "lucide-react";
+import { trackEvent } from "@/lib/fbPixel";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -38,6 +39,7 @@ const Auth = () => {
           },
         });
         if (error) throw error;
+        trackEvent("CompleteRegistration", { content_name: "AURELIA Signup" });
         toast.success("Account created! Welcome to AURELIA!");
         navigate("/dashboard");
       }

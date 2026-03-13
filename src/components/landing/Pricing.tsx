@@ -3,6 +3,7 @@ import { Check, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { PricingInteraction } from "@/components/ui/pricing-interaction";
 import { useState } from "react";
+import { trackEvent } from "@/lib/fbPixel";
 
 const tiers = [
   {

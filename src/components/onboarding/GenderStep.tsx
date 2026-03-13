@@ -22,20 +22,27 @@ const GenderStep = ({ selected, onSelect }: GenderStepProps) => (
           key={value}
           whileTap={{ scale: 0.97 }}
           onClick={() => onSelect(value)}
-          className={`rounded-2xl border-2 overflow-hidden transition-all ${
+          className={`rounded-2xl overflow-hidden transition-all ${
             selected === value
-              ? "border-foreground shadow-lg"
-              : "border-border bg-secondary/30 hover:border-muted-foreground/40"
+              ? "shadow-[0_0_0_3px_hsl(43,74%,49%),0_0_24px_-4px_hsl(43,74%,49%,0.4)]"
+              : "border-2 border-border bg-secondary/30 hover:border-muted-foreground/40"
           }`}
         >
-          <div className="aspect-square overflow-hidden bg-muted">
+          <div className="aspect-square overflow-hidden bg-muted relative">
             <img src={img} alt={label} className="w-full h-full object-cover" />
+            {/* Frosted glass overlay */}
+            <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/60 via-black/20 to-transparent backdrop-blur-[2px]" />
+            <span className="absolute bottom-3 left-0 right-0 text-center text-white font-sans font-semibold text-sm tracking-wide">
+              {label}
+            </span>
           </div>
           <div className="flex items-center gap-2 p-3 justify-center">
             <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-              selected === value ? "border-foreground bg-foreground" : "border-muted-foreground/40"
+              selected === value
+                ? "border-primary bg-primary"
+                : "border-muted-foreground/40"
             }`}>
-              {selected === value && <Check className="h-3.5 w-3.5 text-background" />}
+              {selected === value && <Check className="h-3.5 w-3.5 text-primary-foreground" />}
             </div>
             <span className="font-sans font-medium text-foreground">{label}</span>
           </div>
