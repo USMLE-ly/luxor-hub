@@ -3,6 +3,7 @@ import { Check, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { PricingInteraction } from "@/components/ui/pricing-interaction";
 import { useState } from "react";
+import { trackEvent } from "@/lib/fbPixel";
 
 const tiers = [
   {
@@ -84,7 +85,10 @@ const Pricing = () => {
               proAnnual={23}
               eliteMonth={99}
               eliteAnnual={79}
-              onGetStarted={() => navigate("/auth")}
+              onGetStarted={() => {
+                trackEvent("InitiateCheckout", { content_name: "AURELIA Pricing" });
+                navigate("/auth");
+              }}
             />
           </motion.div>
 

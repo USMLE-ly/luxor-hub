@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -11,14 +11,13 @@ import StepRenderer from "@/components/onboarding/StepRenderer";
 import { getStepsForGender, type OnboardingStep } from "@/components/onboarding/onboardingSteps";
 import SwipeParticles from "@/components/onboarding/SwipeParticles";
 import { useGyroTilt } from "@/hooks/useGyroTilt";
+import { trackEvent } from "@/lib/fbPixel";
 
 // Haptic feedback utility
 const triggerHaptic = () => {
-  // Vibration API for mobile devices
   if (navigator.vibrate) {
     navigator.vibrate(12);
   }
-  // Audio tick for all devices
   try {
     const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
     const osc = ctx.createOscillator();
@@ -35,27 +34,83 @@ const triggerHaptic = () => {
   } catch {}
 };
 
+// Phase definitions for segmented progress
+const PHASES = [
+  { name: "Preferences", icon: "✦" },
+  { name: "Profile", icon: "◆" },
+  { name: "Analysis", icon: "◎" },
+  { name: "Style DNA", icon: "★" },
+];
+
+// Phase interstitial messages
+const PHASE_MESSAGES: Record<number, string> = {
+  1: "Great choices! Now let's build your profile.",
+  2: "Almost there! Time for the fun part.",
+  3: "Let's discover your unique Style DNA.",
+};
+
+function getPhaseForStep(stepIndex: number, totalSteps: number): number {
+  if (stepIndex <= 0) return 0; // gender
+  const ratio = (stepIndex - 1) / Math.max(totalSteps - 2, 1);
+  if (ratio < 0.3) return 0;
+  if (ratio < 0.55) return 1;
+  if (ratio < 0.8) return 2;
+  return 3;
+}
+
+function getCtaText(step: OnboardingStep | null, progress: number): string {
+  if (!step) return "NEXT";
+  if (step.type === "selfieIntro" || step.type === "selfieGuide") return "CONTINUE";
+  if (step.type === "cameraCapture") return "NEXT";
+  if (step.type === "detectionResult") return "CONTINUE";
+  if (step.type === "generating") return "GENERATING...";
+  if (progress > 90) return "GENERATE";
+  if (progress > 60) return "ANALYZE";
+  return "NEXT";
+}
+
+function getStepCategory(step: OnboardingStep | null): string | null {
+  if (!step) return null;
+  const t = step.type;
+  if (["checkbox", "radio", "psychographic"].includes(t)) {
+    if (["styleChallenge", "styleGoal", "elevateStyle", "shoppingExperience", "brands", "styleKnowledge", "unstyledClothes", "budget"].includes(step.key)) return "Style Preferences";
+    if (["lifestyle", "profession", "styleMood"].includes(step.key)) return "Lifestyle";
+    if (["bodyShape", "faceShape", "sizeRange", "ageRange"].includes(step.key)) return "Body Profile";
+  }
+  if (t === "height" || t === "sizeGrid") return "Body Profile";
+  if (t === "selfieIntro" || t === "selfieGuide" || t === "cameraCapture") return "Photo Analysis";
+  if (t === "detectionResult") return "AI Results";
+  if (t === "notification") return "Notifications";
+  return null;
+}
+
 const Onboarding = () => {
   const [gender, setGender] = useState<"female" | "male" | null>(null);
-  const [currentStep, setCurrentStep] = useState(0); // 0 = gender step
+  const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(false);
   const [aiResults, setAiResults] = useState<Record<string, any>>({});
   const [swipeDir, setSwipeDir] = useState<1 | -1>(1);
   const [swipeVelocity, setSwipeVelocity] = useState({ x: 0, y: 0 });
   const [swipeTrigger, setSwipeTrigger] = useState(0);
+  const [showInterstitial, setShowInterstitial] = useState(false);
+  const [interstitialMessage, setInterstitialMessage] = useState("");
+  const prevPhaseRef = useRef(0);
   const { user } = useAuth();
   const navigate = useNavigate();
   const tilt = useGyroTilt(6);
 
   const steps: OnboardingStep[] = gender ? getStepsForGender(gender) : [];
-  const totalSteps = steps.length + 1; // +1 for gender
+  const totalSteps = steps.length + 1;
   const isGenderStep = currentStep === 0;
   const stepIndex = currentStep - 1;
   const currentStepData = !isGenderStep ? steps[stepIndex] : null;
-  
 
   const isGenerating = currentStepData?.type === "generating";
+  const progress = ((currentStep) / (totalSteps - 1)) * 100;
+  const currentPhase = getPhaseForStep(currentStep, totalSteps);
+  const category = getStepCategory(currentStepData);
+  const ctaText = getCtaText(currentStepData, progress);
 
   const canProceed = isGenderStep
     ? !!gender
@@ -73,7 +128,18 @@ const Onboarding = () => {
                 : (answers[currentStepData.key] || []).length > 0
       : false;
 
-  // Auto-trigger completion when generating step is reached
+  // Phase transition interstitial
+  useEffect(() => {
+    if (currentPhase !== prevPhaseRef.current && currentPhase > 0 && PHASE_MESSAGES[currentPhase]) {
+      setInterstitialMessage(PHASE_MESSAGES[currentPhase]);
+      setShowInterstitial(true);
+      const timer = setTimeout(() => setShowInterstitial(false), 1500);
+      prevPhaseRef.current = currentPhase;
+      return () => clearTimeout(timer);
+    }
+    prevPhaseRef.current = currentPhase;
+  }, [currentPhase]);
+
   useEffect(() => {
     if (isGenerating) {
       const timer = setTimeout(() => {
@@ -83,13 +149,10 @@ const Onboarding = () => {
     }
   }, [isGenerating]);
 
-  // Trigger AI analysis when moving to a detection result step
   useEffect(() => {
     if (!currentStepData || currentStepData.type !== "detectionResult") return;
     const mode = currentStepData.detectionMode;
     if (!mode) return;
-
-    // Skip if already have results for this mode
     if (aiResults[mode]) return;
 
     const runAnalysis = async () => {
@@ -137,10 +200,8 @@ const Onboarding = () => {
       const selfieImage = answers.selfieCapture?.[0] || null;
       const fullBodyImage = answers.fullBodyCapture?.[0] || null;
       const prefsForAI = { ...answers, gender };
-      // Remove base64 images from preferences to keep DB clean
       const { selfieCapture, fullBodyCapture, ...cleanPrefs } = prefsForAI as any;
 
-      // Include previously collected AI face/body results
       const faceShapeData = aiResults.face ? {
         faceShape: aiResults.face.faceShape,
         faceShapeDescription: aiResults.face.faceShapeDescription,
@@ -154,7 +215,6 @@ const Onboarding = () => {
       let styleScore = 25;
       let aiAnalysis = null;
 
-      // Try AI analysis if we have photos
       if (selfieImage || fullBodyImage) {
         try {
           const { data: fnData, error: fnError } = await supabase.functions.invoke("analyze-style-dna", {
@@ -181,6 +241,7 @@ const Onboarding = () => {
         .eq("user_id", user.id);
 
       if (error) throw error;
+      trackEvent("Lead", { content_name: "Onboarding Complete" });
       toast.success("Your Style DNA has been created!");
       navigate("/calibration");
     } catch (err: any) {
@@ -190,9 +251,6 @@ const Onboarding = () => {
     }
   };
 
-  const progress = ((currentStep) / (totalSteps - 1)) * 100;
-
-  // Premium page transition variants
   const pageVariants = {
     enter: (dir: number) => ({
       opacity: 0,
@@ -216,7 +274,6 @@ const Onboarding = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col overflow-hidden relative">
-      {/* Swipe-reactive particles */}
       <SwipeParticles swipeVelocity={swipeVelocity} swipeTrigger={swipeTrigger} />
 
       {/* Ambient background glow */}
@@ -229,9 +286,38 @@ const Onboarding = () => {
         />
       </div>
 
-      {/* Premium progress bar */}
+      {/* Phase interstitial overlay */}
+      <AnimatePresence>
+        {showInterstitial && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-background/90 backdrop-blur-xl flex items-center justify-center"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: -10 }}
+              className="text-center px-8"
+            >
+              <motion.div
+                className="w-12 h-12 rounded-full gold-gradient flex items-center justify-center mx-auto mb-4"
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 1, repeat: Infinity }}
+              >
+                <span className="text-primary-foreground text-lg">{PHASES[currentPhase]?.icon}</span>
+              </motion.div>
+              <p className="font-display text-xl font-bold text-foreground mb-2">{interstitialMessage}</p>
+              <p className="text-xs text-muted-foreground font-sans">Phase {currentPhase + 1} of {PHASES.length} — {PHASES[currentPhase]?.name}</p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Premium segmented progress bar */}
       <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-xl px-5 pt-5 pb-3">
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex items-center gap-3 mb-2">
           <AnimatePresence mode="wait">
             {currentStep > 0 && (
               <motion.button
@@ -248,30 +334,43 @@ const Onboarding = () => {
           </AnimatePresence>
           <div className="flex-1" />
           <motion.span
-            key={currentStep}
+            key={currentPhase}
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-xs font-sans text-muted-foreground tabular-nums"
+            className="text-[10px] font-sans text-primary font-semibold tracking-widest uppercase"
           >
-            {currentStep + 1} / {totalSteps}
+            {PHASES[currentPhase]?.name}
           </motion.span>
+          <span className="text-[10px] font-sans text-muted-foreground">
+            {Math.round(progress)}%
+          </span>
         </div>
-        {/* Smooth animated progress track */}
-        <div className="relative h-1 w-full rounded-full bg-muted/50 overflow-hidden">
-          <motion.div
-            className="absolute inset-y-0 left-0 rounded-full"
-            style={{ background: "linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary) / 0.7))" }}
-            initial={false}
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          />
-          {/* Shimmer effect on progress */}
-          <motion.div
-            className="absolute inset-y-0 w-16 rounded-full"
-            style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)" }}
-            animate={{ left: ["-10%", "110%"] }}
-            transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, ease: "easeInOut" }}
-          />
+
+        {/* Segmented progress */}
+        <div className="flex gap-1.5">
+          {PHASES.map((phase, i) => (
+            <div key={i} className="flex-1 h-1 rounded-full bg-muted/50 overflow-hidden relative">
+              <motion.div
+                className="absolute inset-y-0 left-0 rounded-full"
+                style={{ background: i <= currentPhase ? "linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary) / 0.7))" : "transparent" }}
+                initial={false}
+                animate={{
+                  width: i < currentPhase ? "100%" : i === currentPhase
+                    ? `${Math.min(100, ((currentStep - (i * (totalSteps / 4))) / (totalSteps / 4)) * 100)}%`
+                    : "0%"
+                }}
+                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              />
+              {i === currentPhase && (
+                <motion.div
+                  className="absolute inset-y-0 w-8 rounded-full"
+                  style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)" }}
+                  animate={{ left: ["-10%", "110%"] }}
+                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, ease: "easeInOut" }}
+                />
+              )}
+            </div>
+          ))}
         </div>
       </div>
 
@@ -344,24 +443,37 @@ const Onboarding = () => {
                 }}
                 transition={{ type: "tween", duration: 0 }}
               >
-              {isGenderStep ? (
-                <GenderStep selected={gender} onSelect={setGender} />
-              ) : currentStepData ? (
-                <StepRenderer
-                  step={currentStepData}
-                  answers={answers}
-                  onSelect={handleSelect}
-                  gender={gender}
-                  aiResults={aiResults}
-                />
-              ) : null}
+                {/* Step category chip */}
+                {category && !isGenderStep && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex justify-center mb-3"
+                  >
+                    <span className="text-[10px] font-sans font-semibold tracking-widest uppercase text-primary bg-primary/10 px-3 py-1 rounded-full">
+                      {category}
+                    </span>
+                  </motion.div>
+                )}
+
+                {isGenderStep ? (
+                  <GenderStep selected={gender} onSelect={setGender} />
+                ) : currentStepData ? (
+                  <StepRenderer
+                    step={currentStepData}
+                    answers={answers}
+                    onSelect={handleSelect}
+                    gender={gender}
+                    aiResults={aiResults}
+                  />
+                ) : null}
               </motion.div>
             </motion.div>
           </AnimatePresence>
         </div>
       </div>
 
-      {/* Bottom button with premium animation */}
+      {/* Bottom button with contextual text + pulse */}
       <AnimatePresence>
         {!isGenerating && (
           <motion.div
@@ -389,13 +501,11 @@ const Onboarding = () => {
               >
                 {loading ? (
                   <div className="w-5 h-5 border-2 border-background/30 border-t-background rounded-full animate-spin" />
-                ) : currentStepData?.type === "selfieIntro" ? (
-                  "CONTINUE"
                 ) : (
                   <span className="flex items-center gap-2">
-                    NEXT
+                    {ctaText}
                     <motion.span
-                      animate={{ x: [0, 4, 0] }}
+                      animate={canProceed ? { x: [0, 4, 0] } : {}}
                       transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                     >
                       <ArrowRight className="h-4 w-4" />

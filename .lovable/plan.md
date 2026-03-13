@@ -1,72 +1,88 @@
+# AURELIA — Launch-Ready Roadmap
 
+> Updated: 2026-03-07 — Practical, prioritized roadmap for a reliable launch.
 
-## Premium Upgrade: Facebook Pixel + Onboarding + Splash Screen
+---
 
-### 1. Facebook Pixel Integration
+## P0 — Critical (Must fix before launch)
 
-Add the Meta Pixel to `index.html` via the standard `<script>` snippet in `<head>`. Then create a reusable `src/lib/fbPixel.ts` utility that exposes `trackEvent(eventName, params?)` for calling `fbq('track', ...)` safely. Fire standard events:
-- **PageView**: on every route change (add to `App.tsx` via a `useEffect` in a `<RouteTracker>` component inside `<BrowserRouter>`)
-- **CompleteRegistration**: in `Auth.tsx` after successful signup
-- **Lead**: in `Onboarding.tsx` after completing onboarding (`handleComplete`)
-- **InitiateCheckout**: in `Pricing.tsx` when user clicks a plan CTA
-- **ViewContent**: on landing page load
+### 1. AI Error Handling & Fallbacks
+- [x] Chat: handles 429/402 gracefully with toasts
+- [x] Chat: streaming SSE parsing with proper buffer flush
+- [ ] OutfitAnalysis: add retry button on AI failure, show friendly error state  
+- [ ] VideoAnalysis: add timeout handling for long video processing
+- [ ] FashionDesigner: add retry on generation failure
+- [ ] All AI pages: wrap in ErrorBoundary for crash recovery
+- [ ] All edge functions: consistent 429/402 handling
 
-User will need to provide their Pixel ID — I'll use a placeholder `YOUR_PIXEL_ID` that they replace, or store it as a secret.
+### 2. Image Upload Robustness
+- [ ] Compress images client-side before upload (target <2MB via canvas)
+- [ ] Enforce consistent size limits across all pages
+- [ ] Show file size in upload preview
+- [ ] Add privacy notice banner on all upload pages ("Images processed by AI")
+- [ ] Lazy load all gallery/product images
 
-### 2. Splash Screen — Premium Rebuild
+### 3. Mobile UX
+- [ ] Test sidebar collapse on small screens
+- [ ] Fix horizontal overflow in carousels (scrollbar-none + snap)
+- [ ] Ensure modals/dialogs scrollable on short viewports
+- [ ] Touch-friendly tap targets (min 44px)
+- [ ] Swipe hint: test reliability across screen sizes
 
-Current splash is functional but minimal. Upgrades:
+### 4. Auth & Security
+- [x] RLS policies on all 20+ tables
+- [x] No client-side admin checks
+- [ ] Privacy notice for AI image processing
+- [ ] Ensure all storage uploads use user-scoped paths
+- [ ] Rate limit awareness on all AI endpoints
 
-- **Dual-ring gold spinner** replacing the flat loading bar — two concentric rotating rings with opposing rotation directions and gold gradient strokes
-- **Staggered letter reveal** for "AURELIA" — each letter fades in with 50ms delay and slight Y offset
-- **Particle field** — 20 small gold dots floating upward behind the logo with varying speeds and opacities
-- **Tagline typewriter effect** — characters appear one at a time after logo animation completes
-- **Extend duration** slightly to 3s for the full animation sequence to breathe
-- **Add version number** micro-text at bottom: "v2.0" in muted text
+---
 
-### 3. Onboarding Page — Top 1% Execution
+## P1 — Important (Should fix for quality)
 
-Current onboarding is strong but has these weaknesses:
-- Progress bar lacks step labels/milestones
-- Gender step cards lack premium depth
-- No section grouping — 30+ steps feel like an endless stream
-- Bottom CTA button is generic across all step types
-- No motivational micro-copy between sections
+### 5. Shop/Products Polish
+- [ ] Consistent fallback placeholder images
+- [ ] Loading skeletons while products load
+- [ ] "No results" helpful message state
+- [ ] Test edge function with varied query formats
 
-Upgrades:
+### 6. Onboarding Polish
+- [ ] Clear selfie instructions with example photos
+- [ ] Swipe hint: click alternative for non-touch
+- [ ] Style DNA explanation tooltip
+- [ ] Clear step progress indicator
 
-**A. Progress System Overhaul**
-- Replace linear progress bar with a **segmented progress** showing phase names: "Preferences" → "Profile" → "Analysis" → "Style DNA"
-- Add phase label above progress: e.g., "Phase 1 of 4 — Preferences"
-- Animate phase transitions with a gold pulse when entering a new phase
+### 7. AI Accuracy & Quality
+- [ ] Test outfit analysis with diverse outfits
+- [ ] Validate Style DNA with multiple skin tones
+- [ ] Wardrobe gap: no repeated suggestions
+- [ ] Cap confidence scores 0-100
 
-**B. Gender Step Premium Treatment**
-- Add a frosted glass overlay on each image with the label
-- Add subtle parallax shift on the images based on gyro tilt
-- Gold ring border on selected card instead of plain border
+### 8. Chat Improvements
+- [ ] Test multi-turn context (5+ messages)
+- [ ] Calendar/weather: graceful fallback if denied
+- [ ] Offline suggestion cards from last Style DNA
+- [ ] Auto-save conversation periodically
 
-**C. Step Transitions & Micro-copy**
-- Add motivational interstitial cards between phases: "Great choices! Now let's learn about you." (appears for 1.5s between phase transitions)
-- Add step category chips below the question title: e.g., "Style Preferences", "Body Profile"
+---
 
-**D. Bottom CTA Contextual Upgrade**
-- Change button text dynamically: "NEXT" → "CONTINUE" → "ANALYZE" → "GENERATE" based on step type
-- Add subtle progress percentage next to button text
-- Pulse animation on the button when `canProceed` becomes true
+## P2 — Nice to Have (Post-launch)
 
-**E. Camera Steps Polish**
-- Add countdown timer (3, 2, 1) before capture with animated numbers
-- Add shutter flash effect (white overlay flash) on capture
+### 9. Performance
+- [ ] Audit bundle size, lazy-load heavy pages
+- [ ] Service worker for offline
+- [ ] Optimize 3D mannequin loading
+- [ ] Analytics tracking for feature usage
 
-### Files to Modify
+### 10. Community & Social
+- [ ] Report/flag for public designs
+- [ ] Multi-store shop filtering
+- [ ] Design collaboration
+- [ ] Style challenges with prizes
 
-1. **`index.html`** — Add Meta Pixel base script
-2. **`src/lib/fbPixel.ts`** — New: pixel utility functions
-3. **`src/App.tsx`** — Add RouteTracker component for PageView events
-4. **`src/pages/Auth.tsx`** — Fire CompleteRegistration on signup
-5. **`src/pages/Onboarding.tsx`** — Fire Lead on complete; progress system overhaul; contextual CTA; phase interstitials
-6. **`src/components/app/SplashScreen.tsx`** — Premium rebuild with dual-ring spinner, letter reveal, particles, typewriter tagline
-7. **`src/components/onboarding/GenderStep.tsx`** — Gold ring selection, frosted overlay
-8. **`src/components/onboarding/StepRenderer.tsx`** — Camera countdown + shutter flash; step category chips
-9. **`src/components/landing/Pricing.tsx`** — Fire InitiateCheckout pixel event
+---
 
+## Status
+- [ ] Not started
+- [x] Complete
+- 🔧 In progress
