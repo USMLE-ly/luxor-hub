@@ -3,8 +3,8 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   Brain, Sparkles, Palette, ShoppingBag, Calendar, TrendingUp,
   Scan, Shirt, Wand2, BarChart3, Users, Zap,
-  Check
 } from "lucide-react";
+import { FeatureCard } from "@/components/ui/grid-feature-cards";
 
 const tabs = [
   {
@@ -126,29 +126,13 @@ const TabbedFeatures = () => {
               <p className="text-muted-foreground text-sm mt-2 max-w-lg mx-auto">{active.description}</p>
             </div>
 
-            {/* Feature grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {active.features.map((feat, i) => (
-                <motion.div
+            {/* Feature grid — dashed border grid cards */}
+            <div className="grid grid-cols-1 divide-x divide-y divide-dashed border border-dashed sm:grid-cols-2">
+              {active.features.map((feat) => (
+                <FeatureCard
                   key={feat.title}
-                  initial={shouldReduceMotion ? {} : { opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.08, duration: 0.4 }}
-                  className="group glass rounded-2xl p-5 premium-card hover-lift will-change-transform"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                      <feat.icon className="w-5 h-5 text-primary" strokeWidth={1.5} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                        {feat.title}
-                        <Check className="w-3.5 h-3.5 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </h4>
-                      <p className="text-muted-foreground text-xs leading-relaxed mt-1.5">{feat.detail}</p>
-                    </div>
-                  </div>
-                </motion.div>
+                  feature={{ title: feat.title, icon: feat.icon, description: feat.detail }}
+                />
               ))}
             </div>
           </motion.div>
