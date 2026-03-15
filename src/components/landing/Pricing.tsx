@@ -135,6 +135,38 @@ const Pricing = () => {
             ))}
           </div>
         </div>
+        {/* Trust Badges & Urgency */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ delay: 0.3 }}
+          className="mt-12 flex flex-col items-center gap-5"
+        >
+          {/* Payment icons */}
+          <div className="flex items-center gap-4">
+            {["Visa", "Mastercard", "Apple Pay", "Google Pay", "PayPal"].map((name) => (
+              <span
+                key={name}
+                className="payment-badge text-[10px] font-sans font-medium text-muted-foreground border border-border rounded-md px-2.5 py-1.5 select-none"
+              >
+                {name}
+              </span>
+            ))}
+          </div>
+
+          {/* Urgency micro-copy */}
+          <p className="text-xs font-sans text-muted-foreground flex items-center gap-1.5">
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary urgency-pulse" />
+            <span className="font-medium text-foreground">127 stylists</span> signed up this week
+          </p>
+
+          {/* Guarantee badge */}
+          <div className="flex items-center gap-2 text-xs font-sans text-muted-foreground">
+            <Shield className="w-4 h-4 text-primary" />
+            <span>30-day money-back guarantee</span>
+          </div>
+        </motion.div>
       </div>
     </section>
   );

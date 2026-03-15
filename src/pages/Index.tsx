@@ -55,9 +55,11 @@ const Index = () => {
       <BrandMarquee />
       <Testimonials />
       <Pricing />
+      <ComparisonTable />
       <FAQ />
       <CTABanner />
       <Footer />
+      <StickyPricingBar />
     </div>
   );
 };

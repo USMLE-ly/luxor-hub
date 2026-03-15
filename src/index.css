@@ -506,6 +506,35 @@
   animation: scroll-hint 2s ease-in-out infinite;
 }
 
+/* Countdown colon pulse */
+@keyframes colon-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+.countdown-colon {
+  animation: colon-pulse 1s step-end infinite;
+}
+
+/* Payment badge grayscale → color on hover */
+.payment-badge {
+  filter: grayscale(1);
+  opacity: 0.6;
+  transition: filter 0.3s ease, opacity 0.3s ease;
+}
+.payment-badge:hover {
+  filter: grayscale(0);
+  opacity: 1;
+}
+
+/* Urgency pulse dot */
+@keyframes urgency-dot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.6); opacity: 0.4; }
+}
+.urgency-pulse {
+  animation: urgency-dot 2s ease-in-out infinite;
+}
+
 @media (max-width: 768px) {
   .slide-content {
     bottom: 25%;
