@@ -557,21 +557,43 @@ const CameraCaptureStep = ({ step, answers, onSelect }: { step: OnboardingStep; 
     setShowFlash(true);
     setTimeout(() => setShowFlash(false), 200);
     
-    // Shutter sound
+    // DSLR shutter sound — two-curtain mechanical simulation
     try {
       const actx = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const osc = actx.createOscillator();
-      const gain = actx.createGain();
-      osc.connect(gain).connect(actx.destination);
-      osc.frequency.value = 4400;
-      osc.type = "sine";
-      gain.gain.setValueAtTime(0.1, actx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + 0.08);
-      osc.start(actx.currentTime);
-      osc.stop(actx.currentTime + 0.08);
-      setTimeout(() => actx.close(), 150);
+      // First curtain click (sharp attack)
+      const osc1 = actx.createOscillator();
+      const gain1 = actx.createGain();
+      osc1.connect(gain1).connect(actx.destination);
+      osc1.frequency.value = 6000;
+      osc1.type = "square";
+      gain1.gain.setValueAtTime(0.12, actx.currentTime);
+      gain1.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + 0.03);
+      osc1.start(actx.currentTime);
+      osc1.stop(actx.currentTime + 0.03);
+      // Mirror slap (mid-frequency thump)
+      const osc2 = actx.createOscillator();
+      const gain2 = actx.createGain();
+      osc2.connect(gain2).connect(actx.destination);
+      osc2.frequency.value = 800;
+      osc2.type = "triangle";
+      gain2.gain.setValueAtTime(0.08, actx.currentTime + 0.02);
+      gain2.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + 0.06);
+      osc2.start(actx.currentTime + 0.02);
+      osc2.stop(actx.currentTime + 0.06);
+      // Second curtain click (delayed)
+      const osc3 = actx.createOscillator();
+      const gain3 = actx.createGain();
+      osc3.connect(gain3).connect(actx.destination);
+      osc3.frequency.value = 5200;
+      osc3.type = "square";
+      gain3.gain.setValueAtTime(0.09, actx.currentTime + 0.07);
+      gain3.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + 0.1);
+      osc3.start(actx.currentTime + 0.07);
+      osc3.stop(actx.currentTime + 0.1);
+      setTimeout(() => actx.close(), 200);
     } catch {}
-    if (navigator.vibrate) navigator.vibrate(15);
+    // DSLR shutter haptic — two-curtain vibration pattern: click-pause-slap-pause-click
+    if (navigator.vibrate) navigator.vibrate([12, 25, 8, 35, 10]);
 
     const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
     setCapturedImage(dataUrl);
