@@ -32,6 +32,7 @@ const Index = () => {
       <Hero />
       <SocialProofStrip />
       <Features />
+      <TabbedFeatures />
       <HowItWorks />
 
       {/* App Showcase */}
