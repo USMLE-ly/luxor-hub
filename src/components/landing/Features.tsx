@@ -6,33 +6,49 @@ const features = [
     icon: Brain,
     title: "Style DNA Analysis",
     description: "AI learns your unique aesthetic from selfies, preferences, and wardrobe data.",
+    tab: "ai",
   },
   {
     icon: Sparkles,
     title: "AI Outfit Generator",
     description: "Get daily outfit ideas tailored to weather, occasion, and your mood.",
+    tab: "ai",
   },
   {
     icon: Palette,
     title: "Color Intelligence",
     description: "Discover your perfect color palette based on skin tone analysis.",
+    tab: "ai",
   },
   {
     icon: ShoppingBag,
     title: "Smart Shopping",
     description: "Get recommendations for pieces that fill gaps in your wardrobe.",
+    tab: "shopping",
   },
   {
     icon: Calendar,
     title: "Outfit Calendar",
     description: "Plan your looks ahead and never repeat outfits unintentionally.",
+    tab: "wardrobe",
   },
   {
     icon: TrendingUp,
     title: "Trend Radar",
     description: "Stay ahead with real-time trend intelligence matched to your style.",
+    tab: "shopping",
   },
 ];
+
+const scrollToTab = (tabId: string) => {
+  const section = document.getElementById("tabbed-features");
+  if (!section) return;
+  section.scrollIntoView({ behavior: "smooth" });
+  // Dispatch custom event to switch tab after scroll completes
+  setTimeout(() => {
+    window.dispatchEvent(new CustomEvent("aurelia:switch-tab", { detail: tabId }));
+  }, 600);
+};
 
 function AnimatedContainer({ className, delay = 0.1, children }: { delay?: number; className?: string; children: React.ReactNode }) {
   const shouldReduceMotion = useReducedMotion();
@@ -82,7 +98,7 @@ const Features = () => (
             <h3 className="mt-6 text-sm md:text-base font-semibold text-foreground">{feature.title}</h3>
             <p className="text-muted-foreground relative z-20 mt-2 text-xs font-light leading-relaxed">{feature.description}</p>
             <button
-              onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
+              onClick={() => scrollToTab(feature.tab)}
               className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300"
             >
               Learn more <ArrowRight className="w-3 h-3" />
