@@ -103,7 +103,8 @@ const Gallery4 = ({
                       className="absolute h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
                       loading="lazy"
                     />
-                    <div className="absolute inset-0 h-full bg-[linear-gradient(hsl(var(--primary)/0),hsl(var(--primary)/0.4),hsl(var(--primary)/0.8)_100%)] mix-blend-multiply" />
+                    {/* Luxurious gradient overlay — covers bottom 40% with rich depth */}
+                    <div className="absolute inset-0 h-full bg-[linear-gradient(to_top,hsl(var(--primary)/0.95)_0%,hsl(var(--primary)/0.85)_15%,hsl(var(--primary)/0.6)_30%,hsl(var(--primary)/0.2)_45%,transparent_60%)]" />
                     <div className="absolute inset-x-0 bottom-0 flex flex-col items-start p-6 text-primary-foreground md:p-8">
                       <div className="mb-2 pt-4 text-xl font-display font-semibold md:mb-3 md:pt-4 lg:pt-4">
                         {item.title}
