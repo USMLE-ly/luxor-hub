@@ -33,7 +33,7 @@ const CTABanner = () => {
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <Sparkles className="w-10 h-10 text-primary mx-auto mb-6" />
+          
           <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-4">
             Ready to Transform Your <span className="gold-text">Style</span>?
           </h2>
