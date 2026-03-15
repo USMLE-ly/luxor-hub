@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
@@ -33,7 +33,7 @@ const CTABanner = () => {
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <Sparkles className="w-10 h-10 text-primary mx-auto mb-6" />
+          
           <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-4">
             Ready to Transform Your <span className="gold-text">Style</span>?
           </h2>
