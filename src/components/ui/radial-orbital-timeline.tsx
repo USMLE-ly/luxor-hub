@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { ArrowRight, Link, Zap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -95,9 +95,21 @@ export default function RadialOrbitalTimeline({
     setRotationAngle(270 - targetAngle);
   };
 
+  const getRadius = useCallback(() => {
+    if (typeof window === "undefined") return 200;
+    return window.innerWidth < 480 ? 120 : window.innerWidth < 768 ? 160 : 200;
+  }, []);
+
+  const [radius, setRadius] = useState(getRadius);
+
+  useEffect(() => {
+    const onResize = () => setRadius(getRadius());
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [getRadius]);
+
   const calculateNodePosition = (index: number, total: number) => {
     const angle = ((index / total) * 360 + rotationAngle) % 360;
-    const radius = 200;
     const radian = (angle * Math.PI) / 180;
     const x = radius * Math.cos(radian) + centerOffset.x;
     const y = radius * Math.sin(radian) + centerOffset.y;
@@ -145,16 +157,40 @@ export default function RadialOrbitalTimeline({
             transform: `translate(${centerOffset.x}px, ${centerOffset.y}px)`,
           }}
         >
-          <div className="absolute w-16 h-16 rounded-full bg-gradient-to-br from-primary via-accent to-primary/60 animate-pulse flex items-center justify-center z-10">
-            <div className="absolute w-20 h-20 rounded-full border border-border animate-ping opacity-70"></div>
+          {/* Center core */}
+          <div className="absolute w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-primary via-accent to-primary/60 animate-pulse flex items-center justify-center z-10">
+            <div className="absolute w-16 h-16 sm:w-20 sm:h-20 rounded-full border border-primary/30 animate-ping opacity-70"></div>
             <div
-              className="absolute w-24 h-24 rounded-full border border-border/50 animate-ping opacity-50"
+              className="absolute w-20 h-20 sm:w-24 sm:h-24 rounded-full border border-primary/20 animate-ping opacity-50"
               style={{ animationDelay: "0.5s" }}
             ></div>
-            <div className="w-8 h-8 rounded-full bg-card/80 backdrop-blur-md"></div>
+            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-card/80 backdrop-blur-md"></div>
           </div>
 
-          <div className="absolute w-96 h-96 rounded-full border border-border/30"></div>
+          {/* Orbit ring with gold glow trail */}
+          <div
+            className="absolute rounded-full border border-primary/20"
+            style={{
+              width: `${radius * 2}px`,
+              height: `${radius * 2}px`,
+              boxShadow: `
+                0 0 20px hsl(var(--primary) / 0.08),
+                0 0 40px hsl(var(--primary) / 0.04),
+                inset 0 0 20px hsl(var(--primary) / 0.05)
+              `,
+            }}
+          />
+          {/* Rotating glow accent on orbit */}
+          <div
+            className="absolute rounded-full pointer-events-none"
+            style={{
+              width: `${radius * 2}px`,
+              height: `${radius * 2}px`,
+              background: `conic-gradient(from ${rotationAngle}deg, transparent 0%, hsl(var(--primary) / 0.15) 15%, hsl(var(--primary) / 0.3) 25%, transparent 40%, transparent 100%)`,
+              mask: `radial-gradient(circle, transparent ${radius - 8}px, black ${radius - 6}px, black ${radius + 6}px, transparent ${radius + 8}px)`,
+              WebkitMask: `radial-gradient(circle, transparent ${radius - 8}px, black ${radius - 6}px, black ${radius + 6}px, transparent ${radius + 8}px)`,
+            }}
+          />
 
           {timelineData.map((item, index) => {
             const position = calculateNodePosition(index, timelineData.length);
@@ -193,12 +229,12 @@ export default function RadialOrbitalTimeline({
 
                 <div
                   className={`
-                  w-10 h-10 rounded-full flex items-center justify-center
+                  w-11 h-11 sm:w-10 sm:h-10 rounded-full flex items-center justify-center
                   ${isExpanded ? "bg-primary text-primary-foreground" : isRelated ? "bg-primary/50 text-primary-foreground" : "bg-card text-foreground"}
                   border-2 
-                  ${isExpanded ? "border-primary shadow-lg" : isRelated ? "border-primary animate-pulse" : "border-border"}
+                  ${isExpanded ? "border-primary shadow-lg shadow-primary/30" : isRelated ? "border-primary animate-pulse" : "border-border"}
                   transition-all duration-300 transform
-                  ${isExpanded ? "scale-150" : ""}
+                  ${isExpanded ? "scale-[1.3] sm:scale-150" : ""}
                 `}
                 >
                   <Icon size={16} />
@@ -216,7 +252,7 @@ export default function RadialOrbitalTimeline({
                 </div>
 
                 {isExpanded && (
-                  <Card className="absolute top-20 left-1/2 -translate-x-1/2 w-64 bg-card/90 backdrop-blur-lg border-border shadow-xl overflow-visible">
+                  <Card className="absolute top-20 left-1/2 -translate-x-1/2 w-56 sm:w-64 bg-card/90 backdrop-blur-lg border-border shadow-xl overflow-visible">
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-px h-3 bg-border"></div>
                     <CardHeader className="pb-2">
                       <div className="flex justify-between items-center">
