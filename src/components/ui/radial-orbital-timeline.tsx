@@ -95,9 +95,21 @@ export default function RadialOrbitalTimeline({
     setRotationAngle(270 - targetAngle);
   };
 
+  const getRadius = useCallback(() => {
+    if (typeof window === "undefined") return 200;
+    return window.innerWidth < 480 ? 120 : window.innerWidth < 768 ? 160 : 200;
+  }, []);
+
+  const [radius, setRadius] = useState(getRadius);
+
+  useEffect(() => {
+    const onResize = () => setRadius(getRadius());
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [getRadius]);
+
   const calculateNodePosition = (index: number, total: number) => {
     const angle = ((index / total) * 360 + rotationAngle) % 360;
-    const radius = 200;
     const radian = (angle * Math.PI) / 180;
     const x = radius * Math.cos(radian) + centerOffset.x;
     const y = radius * Math.sin(radian) + centerOffset.y;
