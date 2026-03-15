@@ -229,12 +229,12 @@ export default function RadialOrbitalTimeline({
 
                 <div
                   className={`
-                  w-10 h-10 rounded-full flex items-center justify-center
+                  w-11 h-11 sm:w-10 sm:h-10 rounded-full flex items-center justify-center
                   ${isExpanded ? "bg-primary text-primary-foreground" : isRelated ? "bg-primary/50 text-primary-foreground" : "bg-card text-foreground"}
                   border-2 
-                  ${isExpanded ? "border-primary shadow-lg" : isRelated ? "border-primary animate-pulse" : "border-border"}
+                  ${isExpanded ? "border-primary shadow-lg shadow-primary/30" : isRelated ? "border-primary animate-pulse" : "border-border"}
                   transition-all duration-300 transform
-                  ${isExpanded ? "scale-150" : ""}
+                  ${isExpanded ? "scale-[1.3] sm:scale-150" : ""}
                 `}
                 >
                   <Icon size={16} />
