@@ -587,15 +587,20 @@ const CameraCaptureStep = ({ step, answers, onSelect }: { step: OnboardingStep; 
   const handleCapture = () => {
     // Start 3-2-1 countdown
     setCountdown(3);
+    if (navigator.vibrate) navigator.vibrate([15, 40, 15]);
     let count = 3;
     const interval = setInterval(() => {
       count--;
       if (count > 0) {
         setCountdown(count);
-        if (navigator.vibrate) navigator.vibrate(8);
+        // Escalating haptic intensity as countdown progresses
+        const intensity = count === 2 ? [20, 30, 20] : [30, 20, 30, 20, 30];
+        if (navigator.vibrate) navigator.vibrate(intensity);
       } else {
         clearInterval(interval);
         setCountdown(null);
+        // Heavy haptic on capture
+        if (navigator.vibrate) navigator.vibrate([50, 30, 80]);
         doCapture();
       }
     }, 800);
