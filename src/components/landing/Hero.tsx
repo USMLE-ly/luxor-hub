@@ -366,7 +366,7 @@ const Hero = () => {
               className="gradient-button h-11 px-7 rounded-xl font-sans font-semibold text-sm tracking-wide flex items-center gap-2 gold-glow will-change-transform"
               style={{ animationDelay: '0ms' }}
             >
-              <Sparkles className="w-4 h-4" />
+              
               <span>Start Free Trial</span>
             </button>
             <button
