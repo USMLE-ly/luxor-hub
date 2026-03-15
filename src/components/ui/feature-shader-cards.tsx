@@ -43,7 +43,7 @@ const shaderConfigs = [
   },
   {
     proportion: 0.42, softness: 1.0, distortion: 0.19, swirl: 0.75, swirlIterations: 9,
-    shape: "dots" as const, shapeScale: 0.13,
+    shape: "stripes" as const, shapeScale: 0.13,
     colors: ["hsl(43, 74%, 25%)", "hsl(30, 80%, 50%)", "hsl(35, 90%, 35%)", "hsl(45, 100%, 65%)"],
   },
 ]
