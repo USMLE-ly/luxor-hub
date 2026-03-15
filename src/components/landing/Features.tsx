@@ -1,39 +1,40 @@
 import { motion, useReducedMotion } from "framer-motion";
-import { Sparkles, Brain, Palette, ShoppingBag, Calendar, TrendingUp, ArrowRight } from "lucide-react";
+import { Brain, Palette, ShoppingBag, Calendar, TrendingUp, Wand2 } from "lucide-react";
+import FeatureShaderCards from "@/components/ui/feature-shader-cards";
 
 const features = [
   {
-    icon: Brain,
+    icon: <Brain className="size-10" strokeWidth={1.2} />,
     title: "Style DNA Analysis",
     description: "AI learns your unique aesthetic from selfies, preferences, and wardrobe data.",
     tab: "ai",
   },
   {
-    icon: Sparkles,
+    icon: <Wand2 className="size-10" strokeWidth={1.2} />,
     title: "AI Outfit Generator",
     description: "Get daily outfit ideas tailored to weather, occasion, and your mood.",
     tab: "ai",
   },
   {
-    icon: Palette,
+    icon: <Palette className="size-10" strokeWidth={1.2} />,
     title: "Color Intelligence",
     description: "Discover your perfect color palette based on skin tone analysis.",
     tab: "ai",
   },
   {
-    icon: ShoppingBag,
+    icon: <ShoppingBag className="size-10" strokeWidth={1.2} />,
     title: "Smart Shopping",
     description: "Get recommendations for pieces that fill gaps in your wardrobe.",
     tab: "shopping",
   },
   {
-    icon: Calendar,
+    icon: <Calendar className="size-10" strokeWidth={1.2} />,
     title: "Outfit Calendar",
     description: "Plan your looks ahead and never repeat outfits unintentionally.",
     tab: "wardrobe",
   },
   {
-    icon: TrendingUp,
+    icon: <TrendingUp className="size-10" strokeWidth={1.2} />,
     title: "Trend Radar",
     description: "Stay ahead with real-time trend intelligence matched to your style.",
     tab: "shopping",
@@ -44,7 +45,6 @@ const scrollToTab = (tabId: string) => {
   const section = document.getElementById("tabbed-features");
   if (!section) return;
   section.scrollIntoView({ behavior: "smooth" });
-  // Dispatch custom event to switch tab after scroll completes
   setTimeout(() => {
     window.dispatchEvent(new CustomEvent("aurelia:switch-tab", { detail: tabId }));
   }, 600);
@@ -69,7 +69,7 @@ function AnimatedContainer({ className, delay = 0.1, children }: { delay?: numbe
 
 const Features = () => (
   <section id="features" className="py-16 md:py-24 bg-muted/20">
-    <div className="mx-auto w-full max-w-5xl space-y-8 px-4">
+    <div className="mx-auto w-full max-w-6xl space-y-10 px-4">
       <AnimatedContainer className="mx-auto max-w-xl text-center">
         <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase mb-3">Features</p>
         <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground tracking-wide text-balance">
@@ -80,32 +80,14 @@ const Features = () => (
         </p>
       </AnimatedContainer>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {features.map((feature, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
-            transition={{ delay: 0.2 + i * 0.05, duration: 0.6 }}
-            className="group glass rounded-2xl p-6 premium-card hover-lift will-change-transform"
-          >
-            <feature.icon
-              className="text-foreground/75 size-6 transition-transform duration-300 group-hover:scale-110"
-              strokeWidth={1}
-              aria-hidden
-            />
-            <h3 className="mt-6 text-sm md:text-base font-semibold text-foreground">{feature.title}</h3>
-            <p className="text-muted-foreground relative z-20 mt-2 text-xs font-light leading-relaxed">{feature.description}</p>
-            <button
-              onClick={() => scrollToTab(feature.tab)}
-              className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-            >
-              Learn more <ArrowRight className="w-3 h-3" />
-            </button>
-          </motion.div>
-        ))}
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ delay: 0.2, duration: 0.7 }}
+      >
+        <FeatureShaderCards features={features} onLearnMore={scrollToTab} />
+      </motion.div>
     </div>
   </section>
 );
