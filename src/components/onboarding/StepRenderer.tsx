@@ -503,6 +503,8 @@ const CameraCaptureStep = ({ step, answers, onSelect }: { step: OnboardingStep; 
   const [capturedImage, setCapturedImage] = useState<string | null>(answers[step.key]?.[0] || null);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const [showFlash, setShowFlash] = useState(false);
   const [facingMode, setFacingMode] = useState<"user" | "environment">(
     step.cameraMode === "selfie" ? "user" : "environment"
   );
@@ -536,7 +538,7 @@ const CameraCaptureStep = ({ step, answers, onSelect }: { step: OnboardingStep; 
     };
   }, [facingMode]);
 
-  const handleCapture = () => {
+  const doCapture = useCallback(() => {
     if (!videoRef.current || !canvasRef.current) return;
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -551,16 +553,52 @@ const CameraCaptureStep = ({ step, answers, onSelect }: { step: OnboardingStep; 
     }
     ctx.drawImage(video, 0, 0);
     
+    // Shutter flash
+    setShowFlash(true);
+    setTimeout(() => setShowFlash(false), 200);
+    
+    // Shutter sound
+    try {
+      const actx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = actx.createOscillator();
+      const gain = actx.createGain();
+      osc.connect(gain).connect(actx.destination);
+      osc.frequency.value = 4400;
+      osc.type = "sine";
+      gain.gain.setValueAtTime(0.1, actx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + 0.08);
+      osc.start(actx.currentTime);
+      osc.stop(actx.currentTime + 0.08);
+      setTimeout(() => actx.close(), 150);
+    } catch {}
+    if (navigator.vibrate) navigator.vibrate(15);
+
     const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
     setCapturedImage(dataUrl);
     setIsAnalyzing(true);
     stream?.getTracks().forEach((t) => t.stop());
 
-    // Simulate analysis then save
     setTimeout(() => {
       setIsAnalyzing(false);
       onSelect(step.key, dataUrl, true);
     }, 3000);
+  }, [facingMode, stream, step.key, onSelect]);
+
+  const handleCapture = () => {
+    // Start 3-2-1 countdown
+    setCountdown(3);
+    let count = 3;
+    const interval = setInterval(() => {
+      count--;
+      if (count > 0) {
+        setCountdown(count);
+        if (navigator.vibrate) navigator.vibrate(8);
+      } else {
+        clearInterval(interval);
+        setCountdown(null);
+        doCapture();
+      }
+    }, 800);
   };
 
   const handleRetake = () => {
@@ -610,29 +648,22 @@ const CameraCaptureStep = ({ step, answers, onSelect }: { step: OnboardingStep; 
               muted
               className={`w-full h-full object-cover ${facingMode === "user" ? "scale-x-[-1]" : ""}`}
             />
-            {/* Lighting quality indicator */}
             <LightingIndicator />
-            {/* Guide overlay */}
             {isSelfie && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                {/* Professional face scanning frame */}
                 <div className="relative w-56 h-72">
-                  {/* Corner brackets */}
                   <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-white/70 rounded-tl-2xl" />
                   <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-white/70 rounded-tr-2xl" />
                   <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-white/70 rounded-bl-2xl" />
                   <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-white/70 rounded-br-2xl" />
-                  {/* Subtle oval guide */}
                   <svg viewBox="0 0 224 288" className="w-full h-full" fill="none">
                     <ellipse cx="112" cy="144" rx="90" ry="120" stroke="white" strokeWidth="1" strokeDasharray="6 4" opacity="0.35" />
                   </svg>
-                  {/* Center crosshair */}
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                     <div className="w-4 h-[1px] bg-white/40" />
                     <div className="w-[1px] h-4 bg-white/40 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
                   </div>
                 </div>
-                {/* Instruction text */}
                 <div className="absolute bottom-6 left-0 right-0 flex justify-center">
                   <span className="text-white/80 text-xs font-sans tracking-wide bg-black/30 backdrop-blur-sm px-3 py-1 rounded-full">Position your face within the frame</span>
                 </div>
@@ -640,20 +671,16 @@ const CameraCaptureStep = ({ step, answers, onSelect }: { step: OnboardingStep; 
             )}
             {!isSelfie && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                {/* Professional body scanning frame */}
                 <div className="relative w-44 h-[22rem]">
-                  {/* Corner brackets */}
                   <div className="absolute top-0 left-0 w-10 h-10 border-t-2 border-l-2 border-white/70 rounded-tl-xl" />
                   <div className="absolute top-0 right-0 w-10 h-10 border-t-2 border-r-2 border-white/70 rounded-tr-xl" />
                   <div className="absolute bottom-0 left-0 w-10 h-10 border-b-2 border-l-2 border-white/70 rounded-bl-xl" />
                   <div className="absolute bottom-0 right-0 w-10 h-10 border-b-2 border-r-2 border-white/70 rounded-br-xl" />
-                  {/* Subtle body silhouette guide */}
                   <svg viewBox="0 0 176 352" className="w-full h-full" fill="none">
                     <path d="M88,30 C88,30 70,30 70,50 C70,65 75,70 65,100 C55,130 50,140 50,170 C50,200 55,220 55,250 C55,280 50,310 50,330 M88,30 C88,30 106,30 106,50 C106,65 101,70 111,100 C121,130 126,140 126,170 C126,200 121,220 121,250 C121,280 126,310 126,330" stroke="white" strokeWidth="1" strokeDasharray="6 4" opacity="0.25" />
                     <circle cx="88" cy="18" r="12" stroke="white" strokeWidth="1" strokeDasharray="4 3" opacity="0.25" />
                   </svg>
                 </div>
-                {/* Instruction text */}
                 <div className="absolute bottom-6 left-0 right-0 flex justify-center">
                   <span className="text-white/80 text-xs font-sans tracking-wide bg-black/30 backdrop-blur-sm px-3 py-1 rounded-full">Stand back and fit your full body</span>
                 </div>
@@ -661,6 +688,46 @@ const CameraCaptureStep = ({ step, answers, onSelect }: { step: OnboardingStep; 
             )}
           </>
         )}
+
+        {/* Countdown overlay */}
+        <AnimatePresence>
+          {countdown !== null && (
+            <motion.div
+              key="countdown"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-20 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+            >
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={countdown}
+                  initial={{ scale: 2, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.5, opacity: 0 }}
+                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                  className="font-display text-8xl font-bold text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.5)]"
+                >
+                  {countdown}
+                </motion.span>
+              </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Shutter flash */}
+        <AnimatePresence>
+          {showFlash && (
+            <motion.div
+              key="flash"
+              initial={{ opacity: 1 }}
+              animate={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="absolute inset-0 z-30 bg-white"
+            />
+          )}
+        </AnimatePresence>
+
         <canvas ref={canvasRef} className="hidden" />
       </div>
 
@@ -672,7 +739,7 @@ const CameraCaptureStep = ({ step, answers, onSelect }: { step: OnboardingStep; 
           >
             Retake
           </button>
-        ) : !capturedImage ? (
+        ) : !capturedImage && countdown === null ? (
           <>
             <button
               onClick={toggleCamera}
