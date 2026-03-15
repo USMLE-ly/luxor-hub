@@ -321,7 +321,21 @@ const Hero = () => {
     <section className="relative" ref={containerRef}>
       {/* Premium Preloader */}
       <div className="slider-preloader absolute inset-0 z-[20] flex items-center justify-center bg-background transition-opacity duration-700">
-        <div className="flex flex-col items-center gap-6">
+        {/* Floating gold particle field */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {Array.from({ length: 24 }).map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1 h-1 rounded-full bg-primary/40"
+              style={{
+                left: `${8 + (i * 37) % 84}%`,
+                top: `${5 + (i * 53) % 90}%`,
+                animation: `preloader-particle ${3 + (i % 4) * 1.2}s ease-in-out ${(i % 6) * 0.5}s infinite alternate`,
+              }}
+            />
+          ))}
+        </div>
+        <div className="flex flex-col items-center gap-6 relative z-10">
           {/* Dual-ring spinner */}
           <div className="relative w-16 h-16">
             <div className="absolute inset-0 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
@@ -366,7 +380,7 @@ const Hero = () => {
               className="gradient-button h-11 px-7 rounded-xl font-sans font-semibold text-sm tracking-wide flex items-center gap-2 gold-glow will-change-transform"
               style={{ animationDelay: '0ms' }}
             >
-              <Sparkles className="w-4 h-4" />
+              
               <span>Start Free Trial</span>
             </button>
             <button
