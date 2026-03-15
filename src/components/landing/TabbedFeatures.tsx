@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   Brain, Sparkles, Palette, ShoppingBag, Calendar, TrendingUp,
