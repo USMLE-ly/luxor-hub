@@ -10,6 +10,9 @@ import Pricing from "@/components/landing/Pricing";
 import FAQ from "@/components/landing/FAQ";
 import Footer from "@/components/landing/Footer";
 import CTABanner from "@/components/landing/CTABanner";
+import AnnouncementBanner from "@/components/landing/AnnouncementBanner";
+import ComparisonTable from "@/components/landing/ComparisonTable";
+import StickyPricingBar from "@/components/landing/StickyPricingBar";
 import { ContainerScroll } from "@/components/ui/container-scroll";
 import featureAppPreview from "@/assets/feature-outfit-gen.jpg";
 
