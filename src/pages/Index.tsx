@@ -10,6 +10,9 @@ import Pricing from "@/components/landing/Pricing";
 import FAQ from "@/components/landing/FAQ";
 import Footer from "@/components/landing/Footer";
 import CTABanner from "@/components/landing/CTABanner";
+import AnnouncementBanner from "@/components/landing/AnnouncementBanner";
+import ComparisonTable from "@/components/landing/ComparisonTable";
+import StickyPricingBar from "@/components/landing/StickyPricingBar";
 import { ContainerScroll } from "@/components/ui/container-scroll";
 import featureAppPreview from "@/assets/feature-outfit-gen.jpg";
 
@@ -23,6 +26,7 @@ const Index = () => {
         className="fixed top-0 left-0 right-0 h-[3px] z-[100] origin-left gold-gradient"
         style={{ scaleX }}
       />
+      <AnnouncementBanner />
       <Navbar />
       <Hero />
       <SocialProofStrip />
@@ -51,9 +55,11 @@ const Index = () => {
       <BrandMarquee />
       <Testimonials />
       <Pricing />
+      <ComparisonTable />
       <FAQ />
       <CTABanner />
       <Footer />
+      <StickyPricingBar />
     </div>
   );
 };
