@@ -157,16 +157,40 @@ export default function RadialOrbitalTimeline({
             transform: `translate(${centerOffset.x}px, ${centerOffset.y}px)`,
           }}
         >
-          <div className="absolute w-16 h-16 rounded-full bg-gradient-to-br from-primary via-accent to-primary/60 animate-pulse flex items-center justify-center z-10">
-            <div className="absolute w-20 h-20 rounded-full border border-border animate-ping opacity-70"></div>
+          {/* Center core */}
+          <div className="absolute w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-primary via-accent to-primary/60 animate-pulse flex items-center justify-center z-10">
+            <div className="absolute w-16 h-16 sm:w-20 sm:h-20 rounded-full border border-primary/30 animate-ping opacity-70"></div>
             <div
-              className="absolute w-24 h-24 rounded-full border border-border/50 animate-ping opacity-50"
+              className="absolute w-20 h-20 sm:w-24 sm:h-24 rounded-full border border-primary/20 animate-ping opacity-50"
               style={{ animationDelay: "0.5s" }}
             ></div>
-            <div className="w-8 h-8 rounded-full bg-card/80 backdrop-blur-md"></div>
+            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-card/80 backdrop-blur-md"></div>
           </div>
 
-          <div className="absolute w-96 h-96 rounded-full border border-border/30"></div>
+          {/* Orbit ring with gold glow trail */}
+          <div
+            className="absolute rounded-full border border-primary/20"
+            style={{
+              width: `${radius * 2}px`,
+              height: `${radius * 2}px`,
+              boxShadow: `
+                0 0 20px hsl(var(--primary) / 0.08),
+                0 0 40px hsl(var(--primary) / 0.04),
+                inset 0 0 20px hsl(var(--primary) / 0.05)
+              `,
+            }}
+          />
+          {/* Rotating glow accent on orbit */}
+          <div
+            className="absolute rounded-full pointer-events-none"
+            style={{
+              width: `${radius * 2}px`,
+              height: `${radius * 2}px`,
+              background: `conic-gradient(from ${rotationAngle}deg, transparent 0%, hsl(var(--primary) / 0.15) 15%, hsl(var(--primary) / 0.3) 25%, transparent 40%, transparent 100%)`,
+              mask: `radial-gradient(circle, transparent ${radius - 8}px, black ${radius - 6}px, black ${radius + 6}px, transparent ${radius + 8}px)`,
+              WebkitMask: `radial-gradient(circle, transparent ${radius - 8}px, black ${radius - 6}px, black ${radius + 6}px, transparent ${radius + 8}px)`,
+            }}
+          />
 
           {timelineData.map((item, index) => {
             const position = calculateNodePosition(index, timelineData.length);
