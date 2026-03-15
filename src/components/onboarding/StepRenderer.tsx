@@ -587,15 +587,20 @@ const CameraCaptureStep = ({ step, answers, onSelect }: { step: OnboardingStep; 
   const handleCapture = () => {
     // Start 3-2-1 countdown
     setCountdown(3);
+    if (navigator.vibrate) navigator.vibrate([15, 40, 15]);
     let count = 3;
     const interval = setInterval(() => {
       count--;
       if (count > 0) {
         setCountdown(count);
-        if (navigator.vibrate) navigator.vibrate(8);
+        // Escalating haptic intensity as countdown progresses
+        const intensity = count === 2 ? [20, 30, 20] : [30, 20, 30, 20, 30];
+        if (navigator.vibrate) navigator.vibrate(intensity);
       } else {
         clearInterval(interval);
         setCountdown(null);
+        // Heavy haptic on capture
+        if (navigator.vibrate) navigator.vibrate([50, 30, 80]);
         doCapture();
       }
     }, 800);
@@ -702,13 +707,22 @@ const CameraCaptureStep = ({ step, answers, onSelect }: { step: OnboardingStep; 
               <AnimatePresence mode="wait">
                 <motion.span
                   key={countdown}
-                  initial={{ scale: 2, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.5, opacity: 0 }}
-                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                  className="font-display text-8xl font-bold text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.5)]"
+                  initial={{ scale: 2.5, opacity: 0 }}
+                  animate={{ scale: [1, 1.15, 1], opacity: 1 }}
+                  exit={{ scale: 0.3, opacity: 0 }}
+                  transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], scale: { times: [0, 0.6, 1] } }}
+                  className="font-display text-8xl font-bold text-white drop-shadow-[0_0_40px_rgba(255,255,255,0.6)] relative"
                 >
                   {countdown}
+                  {/* Expanding pulse ring */}
+                  <motion.span
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                    initial={{ scale: 0.8, opacity: 0.8 }}
+                    animate={{ scale: 2.5, opacity: 0 }}
+                    transition={{ duration: 0.7, ease: "easeOut" }}
+                  >
+                    <span className="w-24 h-24 rounded-full border-2 border-white/60" />
+                  </motion.span>
                 </motion.span>
               </AnimatePresence>
             </motion.div>
