@@ -26,6 +26,7 @@ const Index = () => {
         className="fixed top-0 left-0 right-0 h-[3px] z-[100] origin-left gold-gradient"
         style={{ scaleX }}
       />
+      <AnnouncementBanner />
       <Navbar />
       <Hero />
       <SocialProofStrip />
