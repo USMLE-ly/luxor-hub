@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   Brain, Sparkles, Palette, ShoppingBag, Calendar, TrendingUp,
@@ -53,8 +53,18 @@ const TabbedFeatures = () => {
   const shouldReduceMotion = useReducedMotion();
   const active = tabs.find((t) => t.id === activeTab)!;
 
+  // Listen for tab-switch events from feature cards
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const tabId = (e as CustomEvent).detail;
+      if (tabs.some((t) => t.id === tabId)) setActiveTab(tabId);
+    };
+    window.addEventListener("aurelia:switch-tab", handler);
+    return () => window.removeEventListener("aurelia:switch-tab", handler);
+  }, []);
+
   return (
-    <section className="py-16 md:py-24 bg-background">
+    <section id="tabbed-features" className="py-16 md:py-24 bg-background">
       <div className="mx-auto w-full max-w-5xl px-4 space-y-8">
         <motion.div
           initial={{ opacity: 0, y: -8 }}

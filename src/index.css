@@ -506,6 +506,13 @@
   animation: scroll-hint 2s ease-in-out infinite;
 }
 
+/* Loading bar animation */
+@keyframes loading-bar {
+  0% { width: 0; }
+  50% { width: 100%; }
+  100% { width: 0; margin-left: 100%; }
+}
+
 /* Countdown colon pulse */
 @keyframes colon-pulse {
   0%, 100% { opacity: 1; }

@@ -319,11 +319,30 @@ const Hero = () => {
 
   return (
     <section className="relative" ref={containerRef}>
-      {/* Preloader */}
+      {/* Premium Preloader */}
       <div className="slider-preloader absolute inset-0 z-[20] flex items-center justify-center bg-background transition-opacity duration-700">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-          <p className="font-sans text-sm text-muted-foreground tracking-widest uppercase">Loading AURELIA</p>
+        <div className="flex flex-col items-center gap-6">
+          {/* Dual-ring spinner */}
+          <div className="relative w-16 h-16">
+            <div className="absolute inset-0 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+            <div className="absolute inset-2 rounded-full border-2 border-primary/10 border-b-primary animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
+          </div>
+          {/* Staggered letter reveal */}
+          <div className="flex items-center gap-[2px]">
+            {'AURELIA'.split('').map((letter, i) => (
+              <span
+                key={i}
+                className="font-display text-lg tracking-[0.3em] gold-text inline-block animate-fade-in"
+                style={{ animationDelay: `${i * 120}ms`, animationFillMode: 'backwards' }}
+              >
+                {letter}
+              </span>
+            ))}
+          </div>
+          {/* Loading bar */}
+          <div className="w-32 h-[2px] bg-muted/30 rounded-full overflow-hidden">
+            <div className="h-full gold-gradient rounded-full animate-[loading-bar_2s_ease-in-out_infinite]" />
+          </div>
         </div>
       </div>
 
