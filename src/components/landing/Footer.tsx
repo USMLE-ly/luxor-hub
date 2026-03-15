@@ -69,9 +69,7 @@ const Footer = () => {
           <div>
             <h3 className="font-display text-2xl font-bold gold-text mb-2">AURELIA</h3>
             <p className="text-sm text-muted-foreground font-sans mb-4">AI Personal Stylist OS</p>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full glass text-xs font-sans text-muted-foreground">
-              <Sparkles className="w-3 h-3 text-primary" /> Built with AI
-            </div>
+            
           </div>
 
           <div className="flex flex-col gap-3 text-sm font-sans text-muted-foreground">
