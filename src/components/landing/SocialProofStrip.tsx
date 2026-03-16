@@ -55,14 +55,16 @@ const SocialProofStrip = () => (
   <section className="py-16 border-y border-border bg-muted/30">
     <div className="max-w-5xl mx-auto px-4">
       {/* As Featured In — text badges */}
-      <div className="flex flex-wrap items-center justify-center gap-6 mb-10">
+      <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8 mb-10">
         <span className="font-sans text-[10px] text-muted-foreground tracking-widest uppercase">As Featured In</span>
-        {mediaBadges.map((name) => (
-          <span
-            key={name}
-            className="font-display text-base md:text-lg font-bold text-muted-foreground/40 tracking-wider uppercase select-none"
-          >
-            {name}
+        {mediaBadges.map((name, i) => (
+          <span key={name} className="flex items-center gap-4 md:gap-8">
+            <span className="font-display text-lg md:text-xl font-bold text-muted-foreground/50 tracking-[0.2em] uppercase select-none">
+              {name}
+            </span>
+            {i < mediaBadges.length - 1 && (
+              <span className="hidden md:block w-px h-5 bg-border" />
+            )}
           </span>
         ))}
       </div>

@@ -100,9 +100,9 @@ const Pricing = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-80px" }}
                 transition={{ delay: i * 0.12 }}
-                className={`relative rounded-2xl p-6 premium-card transition-opacity duration-300 ${
+                className={`relative rounded-2xl p-6 premium-card transition-all duration-300 ${
                   tier.highlighted
-                    ? "glass-strong border-primary/30 shadow-[0_0_30px_-8px_hsl(var(--primary)/0.2)]"
+                    ? "glass-strong border-primary/30 shadow-[0_0_30px_-8px_hsl(var(--primary)/0.2)] scale-[1.02] border-2"
                     : "glass"
                 } ${hoveredTier !== null && hoveredTier !== i ? "opacity-60" : "opacity-100"}`}
                 onMouseEnter={() => setHoveredTier(i)}

@@ -137,7 +137,7 @@ export default function ComparisonTable() {
                   <div
                     key={row.name}
                     className={cn(
-                      "grid grid-cols-4 gap-0 px-4 py-3 border-b border-border/50 text-center",
+                      "grid grid-cols-4 gap-0 px-4 py-3 border-b border-border/50 text-center min-w-[480px]",
                       i % 2 === 0 ? "bg-transparent" : "bg-muted/10"
                     )}
                   >

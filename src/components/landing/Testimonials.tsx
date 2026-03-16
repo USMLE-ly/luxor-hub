@@ -102,7 +102,7 @@ const ProofCard = ({ p, i, isHero }: { p: typeof proofs[0]; i: number; isHero?: 
 );
 
 const Testimonials = () => (
-  <section className="relative py-16 md:py-24 overflow-hidden" id="proof">
+  <section className="relative py-20 md:py-32 overflow-hidden" id="proof">
     <AnimatedGradientBackground
       Breathing={true}
       animationSpeed={0.015}
