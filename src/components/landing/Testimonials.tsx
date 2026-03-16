@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Star, ShieldCheck, TrendingUp, BadgeCheck } from "lucide-react";
+import { ShieldCheck, TrendingUp, BadgeCheck } from "lucide-react";
 import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
 import { useRef, useState, useEffect } from "react";
 import { useInView } from "framer-motion";
