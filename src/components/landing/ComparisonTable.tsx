@@ -92,7 +92,7 @@ export default function ComparisonTable() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
-          className="glass rounded-2xl overflow-hidden"
+          className="glass rounded-2xl overflow-x-auto"
         >
           {/* Header row */}
           <div className="grid grid-cols-4 gap-0 border-b border-border px-4 py-4">
