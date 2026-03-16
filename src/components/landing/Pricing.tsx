@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Check, Sparkles, Shield, CreditCard } from "lucide-react";
+import { Check, Crown, Shield, CreditCard } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { PricingInteraction } from "@/components/ui/pricing-interaction";
 import { useState } from "react";
