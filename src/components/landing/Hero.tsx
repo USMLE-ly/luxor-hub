@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useNavigate } from "react-router-dom";
 import { renderCanvas } from "@/components/ui/hero-designali";
-import { Sparkles, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import sliderStyleDna from "@/assets/slider-style-dna.jpg";
 import sliderOutfitGen from "@/assets/slider-outfit-gen.jpg";
 import sliderColorIntel from "@/assets/slider-color-intel.jpg";

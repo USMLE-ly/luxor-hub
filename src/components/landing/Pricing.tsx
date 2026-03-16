@@ -110,7 +110,7 @@ const Pricing = () => {
               >
                 {tier.highlighted && (
                   <div className="absolute -top-3 left-6 px-4 py-1 rounded-full gold-gradient text-xs font-bold text-primary-foreground font-sans flex items-center gap-1">
-                    <Sparkles className="w-3 h-3" /> Most Popular
+                    <Crown className="w-3 h-3" /> Most Popular
                   </div>
                 )}
                 <div className="flex items-start justify-between mb-3">

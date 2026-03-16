@@ -15,7 +15,7 @@ const tabs = [
     description: "Advanced machine learning that understands your body, preferences, and lifestyle to deliver hyper-personalized style guidance.",
     features: [
       { icon: Brain, title: "Style DNA Analysis", detail: "Deep learning maps your unique aesthetic from selfies, wardrobe data, and quiz responses into a multi-dimensional style profile." },
-      { icon: Sparkles, title: "AI Outfit Generator", detail: "Generates daily outfit combinations factoring in weather, calendar events, mood, and pieces you haven't worn recently." },
+      { icon: Wand2Icon, title: "AI Outfit Generator", detail: "Generates daily outfit combinations factoring in weather, calendar events, mood, and pieces you haven't worn recently." },
       { icon: Palette, title: "Color Intelligence", detail: "Skin-tone analysis using computer vision determines your ideal color palette across all four seasons." },
       { icon: Wand2, title: "Virtual Try-On", detail: "See how new pieces look on your body type before buying, powered by generative AI." },
     ],

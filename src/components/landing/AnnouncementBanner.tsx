@@ -88,7 +88,7 @@ export default function AnnouncementBanner() {
 
           <div className="relative h-10 flex items-center justify-center px-10 gap-3">
             <div className="flex items-center gap-2 text-xs font-sans font-medium">
-              <Sparkles className="w-3 h-3 text-primary shrink-0" />
+              <Diamond className="w-3 h-3 text-primary shrink-0" />
               <span className="gold-text font-semibold">Early Access</span>
 
               {/* Countdown timer */}

@@ -1,4 +1,4 @@
-import { Sparkles, Instagram, Twitter, Github, Linkedin, ArrowRight, ArrowUp, Check } from "lucide-react";
+import { Instagram, Twitter, Github, Linkedin, ArrowRight, ArrowUp, Check } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
