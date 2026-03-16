@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { ContainerScroll } from "@/components/ui/container-scroll";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { motion } from "framer-motion";
-import { Sparkles, TrendingUp, Palette, Calendar, ShoppingBag, BarChart3, MessageSquare } from "lucide-react";
+import { Diamond, TrendingUp, Palette, Calendar, ShoppingBag, BarChart3, MessageSquare } from "lucide-react";
 
 const outfitThumbs = [
   { label: "Casual Friday", gradient: "from-amber-700 via-stone-300 to-blue-900" },
@@ -18,7 +18,7 @@ const AppPreview = () => {
         titleComponent={
           <div className="flex flex-col items-center gap-4">
             <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-sans font-medium tracking-wide">
-              <Sparkles className="w-4 h-4" /> App Preview
+              <Diamond className="w-4 h-4" /> App Preview
             </span>
             <h2 className="font-display text-4xl md:text-6xl font-bold text-foreground leading-tight">
               Your Style Command Center
@@ -27,7 +27,7 @@ const AppPreview = () => {
               Everything you need to master your personal style — powered by AI, designed for you.
             </p>
             <GradientButton onClick={() => navigate("/auth")} className="mt-2">
-              <Sparkles className="w-4 h-4 mr-2" />
+              <Diamond className="w-4 h-4 mr-2" />
               Try It Free
             </GradientButton>
           </div>
@@ -42,7 +42,7 @@ const AppPreview = () => {
               <h3 className="font-display text-xl font-bold text-foreground">Your Style DNA</h3>
             </div>
             <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-primary" />
+              <Diamond className="w-4 h-4 text-primary" />
             </div>
           </div>
 

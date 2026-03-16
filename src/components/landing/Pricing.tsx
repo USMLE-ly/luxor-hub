@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Check, Sparkles, Shield, CreditCard } from "lucide-react";
+import { Check, Crown, Shield, CreditCard } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { PricingInteraction } from "@/components/ui/pricing-interaction";
 import { useState } from "react";
@@ -54,7 +54,7 @@ const Pricing = () => {
   const [hoveredTier, setHoveredTier] = useState<number | null>(null);
 
   return (
-    <section id="pricing" className="py-16 md:py-24 bg-muted/20">
+    <section id="pricing" className="py-20 md:py-32 bg-muted/20">
       <div className="max-w-6xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -100,9 +100,9 @@ const Pricing = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-80px" }}
                 transition={{ delay: i * 0.12 }}
-                className={`relative rounded-2xl p-6 premium-card transition-opacity duration-300 ${
+                className={`relative rounded-2xl p-6 premium-card transition-all duration-300 ${
                   tier.highlighted
-                    ? "glass-strong border-primary/30 shadow-[0_0_30px_-8px_hsl(var(--primary)/0.2)]"
+                    ? "glass-strong border-primary/30 shadow-[0_0_30px_-8px_hsl(var(--primary)/0.2)] scale-[1.02] border-2"
                     : "glass"
                 } ${hoveredTier !== null && hoveredTier !== i ? "opacity-60" : "opacity-100"}`}
                 onMouseEnter={() => setHoveredTier(i)}
@@ -110,7 +110,7 @@ const Pricing = () => {
               >
                 {tier.highlighted && (
                   <div className="absolute -top-3 left-6 px-4 py-1 rounded-full gold-gradient text-xs font-bold text-primary-foreground font-sans flex items-center gap-1">
-                    <Sparkles className="w-3 h-3" /> Most Popular
+                    <Crown className="w-3 h-3" /> Most Popular
                   </div>
                 )}
                 <div className="flex items-start justify-between mb-3">

@@ -1,6 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect, useMemo } from "react";
-import { Sparkles } from "lucide-react";
+import { Diamond } from "lucide-react";
 
 const platforms = [
   { name: "Instagram", logo: "/logos/instagram.png" },
@@ -102,7 +102,7 @@ export default function IntegrationHero() {
                   style={{ animationDelay: "0.5s" }}
                 />
                 <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-primary-foreground/80 backdrop-blur-md flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-primary" />
+                  <Diamond className="w-4 h-4 text-primary" />
                 </div>
               </div>
               <CenterParticles />

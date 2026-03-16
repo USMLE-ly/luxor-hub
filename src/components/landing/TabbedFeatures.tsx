@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
-  Brain, Sparkles, Palette, ShoppingBag, Calendar, TrendingUp,
+  Brain, Wand2 as Wand2Icon, Palette, ShoppingBag, Calendar, TrendingUp,
   Scan, Shirt, Wand2, BarChart3, Users, Zap,
 } from "lucide-react";
 import { FeatureCard } from "@/components/ui/grid-feature-cards";
@@ -15,7 +15,7 @@ const tabs = [
     description: "Advanced machine learning that understands your body, preferences, and lifestyle to deliver hyper-personalized style guidance.",
     features: [
       { icon: Brain, title: "Style DNA Analysis", detail: "Deep learning maps your unique aesthetic from selfies, wardrobe data, and quiz responses into a multi-dimensional style profile." },
-      { icon: Sparkles, title: "AI Outfit Generator", detail: "Generates daily outfit combinations factoring in weather, calendar events, mood, and pieces you haven't worn recently." },
+      { icon: Wand2Icon, title: "AI Outfit Generator", detail: "Generates daily outfit combinations factoring in weather, calendar events, mood, and pieces you haven't worn recently." },
       { icon: Palette, title: "Color Intelligence", detail: "Skin-tone analysis using computer vision determines your ideal color palette across all four seasons." },
       { icon: Wand2, title: "Virtual Try-On", detail: "See how new pieces look on your body type before buying, powered by generative AI." },
     ],
@@ -64,7 +64,7 @@ const TabbedFeatures = () => {
   }, []);
 
   return (
-    <section id="tabbed-features" className="py-16 md:py-24 bg-background">
+    <section id="tabbed-features" className="py-12 md:py-20 bg-background">
       <div className="mx-auto w-full max-w-5xl px-4 space-y-8">
         <motion.div
           initial={{ opacity: 0, y: -8 }}

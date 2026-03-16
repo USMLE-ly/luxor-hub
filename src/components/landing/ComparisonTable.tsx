@@ -72,7 +72,7 @@ export default function ComparisonTable() {
     setOpen((prev) => ({ ...prev, [label]: !prev[label] }));
 
   return (
-    <section className="py-16 md:py-24 bg-background">
+    <section className="py-12 md:py-20 bg-background">
       <div className="max-w-4xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -92,10 +92,10 @@ export default function ComparisonTable() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
-          className="glass rounded-2xl overflow-hidden"
+          className="glass rounded-2xl overflow-x-auto"
         >
           {/* Header row */}
-          <div className="grid grid-cols-4 gap-0 border-b border-border px-4 py-4">
+          <div className="grid grid-cols-4 gap-0 border-b border-border px-4 py-4 min-w-[480px]">
             <div className="font-sans text-xs text-muted-foreground uppercase tracking-wider">Feature</div>
             {plans.map((p) => (
               <div key={p} className="text-center">
@@ -114,7 +114,7 @@ export default function ComparisonTable() {
             <div key={cat.label}>
               <button
                 onClick={() => toggle(cat.label)}
-                className="w-full grid grid-cols-4 gap-0 px-4 py-3 bg-muted/30 hover:bg-muted/50 transition-colors border-b border-border"
+                className="w-full grid grid-cols-4 gap-0 px-4 py-3 bg-muted/30 hover:bg-muted/50 transition-colors border-b border-border min-w-[480px]"
               >
                 <span className="font-sans text-xs font-bold text-foreground flex items-center gap-2 col-span-4">
                   <ChevronDown
@@ -137,7 +137,7 @@ export default function ComparisonTable() {
                   <div
                     key={row.name}
                     className={cn(
-                      "grid grid-cols-4 gap-0 px-4 py-3 border-b border-border/50 text-center",
+                      "grid grid-cols-4 gap-0 px-4 py-3 border-b border-border/50 text-center min-w-[480px]",
                       i % 2 === 0 ? "bg-transparent" : "bg-muted/10"
                     )}
                   >

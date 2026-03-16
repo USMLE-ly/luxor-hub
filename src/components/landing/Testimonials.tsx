@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Star, ShieldCheck, TrendingUp, BadgeCheck } from "lucide-react";
+import { ShieldCheck, TrendingUp, BadgeCheck } from "lucide-react";
 import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
 import { useRef, useState, useEffect } from "react";
 import { useInView } from "framer-motion";
@@ -95,18 +95,14 @@ const ProofCard = ({ p, i, isHero }: { p: typeof proofs[0]; i: number; isHero?: 
         </span>
         <span className="font-sans text-xs text-muted-foreground">· {p.label}</span>
       </div>
-      <div className="flex gap-0.5 mb-3">
-        {Array.from({ length: 5 }).map((_, j) => (
-          <Star key={j} className="w-3.5 h-3.5 fill-primary text-primary" />
-        ))}
-      </div>
+      <div className="w-12 h-0.5 rounded-full bg-primary/40 mb-3" />
       <p className="font-sans text-sm text-muted-foreground leading-relaxed">{p.caption}</p>
     </div>
   </motion.div>
 );
 
 const Testimonials = () => (
-  <section className="relative py-16 md:py-24 overflow-hidden" id="proof">
+  <section className="relative py-20 md:py-32 overflow-hidden" id="proof">
     <AnimatedGradientBackground
       Breathing={true}
       animationSpeed={0.015}

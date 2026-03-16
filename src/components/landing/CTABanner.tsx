@@ -62,7 +62,11 @@ const CTABanner = () => {
               </Button>
             </motion.div>
           </motion.div>
-          <p className="mt-6 font-sans text-xs text-muted-foreground">
+          <p className="mt-4 font-sans text-xs text-muted-foreground flex items-center justify-center gap-1.5">
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+            <span className="font-medium text-foreground">847 stylists</span> joined this month
+          </p>
+          <p className="mt-2 font-sans text-xs text-muted-foreground">
             No credit card required · Cancel anytime · 7-day free trial
           </p>
         </motion.div>
