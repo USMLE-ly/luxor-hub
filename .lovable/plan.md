@@ -1,88 +1,46 @@
-# AURELIA — Launch-Ready Roadmap
 
-> Updated: 2026-03-07 — Practical, prioritized roadmap for a reliable launch.
 
----
+## Audit Summary & Implementation Plan
 
-## P0 — Critical (Must fix before launch)
+### 1. Sparkles Icon Purge (Landing Page)
 
-### 1. AI Error Handling & Fallbacks
-- [x] Chat: handles 429/402 gracefully with toasts
-- [x] Chat: streaming SSE parsing with proper buffer flush
-- [ ] OutfitAnalysis: add retry button on AI failure, show friendly error state  
-- [ ] VideoAnalysis: add timeout handling for long video processing
-- [ ] FashionDesigner: add retry on generation failure
-- [ ] All AI pages: wrap in ErrorBoundary for crash recovery
-- [ ] All edge functions: consistent 429/402 handling
+Found in 4 landing files:
+- **AnnouncementBanner.tsx** line 91: `<Sparkles>` before "Early Access" — replace with `Diamond` (brand icon)
+- **Hero.tsx** line 4: unused import — remove
+- **Pricing.tsx** line 113: `<Sparkles>` in "Most Popular" badge — replace with `Crown`
+- **TabbedFeatures.tsx** lines 4, 18: used as `AI Outfit Generator` icon — replace with `Wand2`
+- **Footer.tsx** line 1: unused import — remove
 
-### 2. Image Upload Robustness
-- [ ] Compress images client-side before upload (target <2MB via canvas)
-- [ ] Enforce consistent size limits across all pages
-- [ ] Show file size in upload preview
-- [ ] Add privacy notice banner on all upload pages ("Images processed by AI")
-- [ ] Lazy load all gallery/product images
+### 2. Critical Design Weaknesses Identified
 
-### 3. Mobile UX
-- [ ] Test sidebar collapse on small screens
-- [ ] Fix horizontal overflow in carousels (scrollbar-none + snap)
-- [ ] Ensure modals/dialogs scrollable on short viewports
-- [ ] Touch-friendly tap targets (min 44px)
-- [ ] Swipe hint: test reliability across screen sizes
+**A. Section pacing is monotone** — Every section uses identical `py-16 md:py-24` vertical rhythm. No breathing room variation creates visual fatigue. Fix: alternate between `py-20 md:py-32` (hero-weight sections) and `py-12 md:py-20` (transitional sections like BrandMarquee).
 
-### 4. Auth & Security
-- [x] RLS policies on all 20+ tables
-- [x] No client-side admin checks
-- [ ] Privacy notice for AI image processing
-- [ ] Ensure all storage uploads use user-scoped paths
-- [ ] Rate limit awareness on all AI endpoints
+**B. Testimonials 5-star rows are generic** — Star ratings look templated. Replace with a single gold accent bar or remove entirely since "Verified" badges already establish trust.
 
----
+**C. Social Proof Strip lacks visual weight** — Media badges (Vogue, GQ) are just plain text. Upgrade to letter-spaced, slightly larger type with a subtle separator line between each.
 
-## P1 — Important (Should fix for quality)
+**D. CTA Banner missing urgency** — Has "no credit card required" but no live urgency element. Add a live member count or connect to the announcement banner timer.
 
-### 5. Shop/Products Polish
-- [ ] Consistent fallback placeholder images
-- [ ] Loading skeletons while products load
-- [ ] "No results" helpful message state
-- [ ] Test edge function with varied query formats
+**E. Footer has dead social links** — All `href="#"` — these hurt trust. Add `aria-disabled` styling and "Coming Soon" tooltip, or remove.
 
-### 6. Onboarding Polish
-- [ ] Clear selfie instructions with example photos
-- [ ] Swipe hint: click alternative for non-touch
-- [ ] Style DNA explanation tooltip
-- [ ] Clear step progress indicator
+**F. FAQ section has no visual anchor** — Accordion items float without hierarchy. Add a subtle left gold border on the active item.
 
-### 7. AI Accuracy & Quality
-- [ ] Test outfit analysis with diverse outfits
-- [ ] Validate Style DNA with multiple skin tones
-- [ ] Wardrobe gap: no repeated suggestions
-- [ ] Cap confidence scores 0-100
+**G. Pricing cards lack tier differentiation** — All three cards look identical except the "Most Popular" badge. The Pro card needs stronger visual weight (thicker border, slight scale bump).
 
-### 8. Chat Improvements
-- [ ] Test multi-turn context (5+ messages)
-- [ ] Calendar/weather: graceful fallback if denied
-- [ ] Offline suggestion cards from last Style DNA
-- [ ] Auto-save conversation periodically
+**H. Comparison Table mobile UX** — 4-column grid at `grid-cols-4` is cramped on 375px. Feature names get truncated. Needs horizontal scroll or a mobile-specific stacked layout.
 
----
+### 3. Implementation Scope
 
-## P2 — Nice to Have (Post-launch)
+Files to modify:
+- `AnnouncementBanner.tsx` — swap Sparkles → Diamond
+- `Hero.tsx` — remove unused Sparkles import  
+- `Pricing.tsx` — swap Sparkles → Crown, enhance Pro card visual weight
+- `TabbedFeatures.tsx` — swap Sparkles → Wand2
+- `Footer.tsx` — remove unused Sparkles import, style dead links
+- `Testimonials.tsx` — remove 5-star rows, replace with gold accent
+- `SocialProofStrip.tsx` — enhance media badge typography
+- `FAQ.tsx` — add active-item gold border accent
+- `ComparisonTable.tsx` — add mobile horizontal scroll wrapper
+- `CTABanner.tsx` — add live urgency micro-copy
+- `Index.tsx` — vary section spacing rhythm
 
-### 9. Performance
-- [ ] Audit bundle size, lazy-load heavy pages
-- [ ] Service worker for offline
-- [ ] Optimize 3D mannequin loading
-- [ ] Analytics tracking for feature usage
-
-### 10. Community & Social
-- [ ] Report/flag for public designs
-- [ ] Multi-store shop filtering
-- [ ] Design collaboration
-- [ ] Style challenges with prizes
-
----
-
-## Status
-- [ ] Not started
-- [x] Complete
-- 🔧 In progress
