@@ -54,7 +54,7 @@ const Pricing = () => {
   const [hoveredTier, setHoveredTier] = useState<number | null>(null);
 
   return (
-    <section id="pricing" className="py-16 md:py-24 bg-muted/20">
+    <section id="pricing" className="py-20 md:py-32 bg-muted/20">
       <div className="max-w-6xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
