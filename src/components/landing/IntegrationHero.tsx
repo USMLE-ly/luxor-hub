@@ -1,6 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect, useMemo } from "react";
-import { Sparkles } from "lucide-react";
+import { Diamond } from "lucide-react";
 
 const platforms = [
   { name: "Instagram", logo: "/logos/instagram.png" },
