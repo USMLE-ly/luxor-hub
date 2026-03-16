@@ -72,7 +72,7 @@ export default function ComparisonTable() {
     setOpen((prev) => ({ ...prev, [label]: !prev[label] }));
 
   return (
-    <section className="py-16 md:py-24 bg-background">
+    <section className="py-12 md:py-20 bg-background">
       <div className="max-w-4xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
