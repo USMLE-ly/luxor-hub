@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { X, Sparkles } from "lucide-react";
+import { X, Diamond } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const DISMISSED_KEY = "aurelia-banner-dismissed";
