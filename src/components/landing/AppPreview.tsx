@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { ContainerScroll } from "@/components/ui/container-scroll";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { motion } from "framer-motion";
-import { Sparkles, TrendingUp, Palette, Calendar, ShoppingBag, BarChart3, MessageSquare } from "lucide-react";
+import { Diamond, TrendingUp, Palette, Calendar, ShoppingBag, BarChart3, MessageSquare } from "lucide-react";
 
 const outfitThumbs = [
   { label: "Casual Friday", gradient: "from-amber-700 via-stone-300 to-blue-900" },
