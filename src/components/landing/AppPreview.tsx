@@ -27,7 +27,7 @@ const AppPreview = () => {
               Everything you need to master your personal style — powered by AI, designed for you.
             </p>
             <GradientButton onClick={() => navigate("/auth")} className="mt-2">
-              <Sparkles className="w-4 h-4 mr-2" />
+              <Diamond className="w-4 h-4 mr-2" />
               Try It Free
             </GradientButton>
           </div>
