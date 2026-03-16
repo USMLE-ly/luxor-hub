@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
-  Brain, Sparkles, Palette, ShoppingBag, Calendar, TrendingUp,
+  Brain, Wand2 as Wand2Icon, Palette, ShoppingBag, Calendar, TrendingUp,
   Scan, Shirt, Wand2, BarChart3, Users, Zap,
 } from "lucide-react";
 import { FeatureCard } from "@/components/ui/grid-feature-cards";
