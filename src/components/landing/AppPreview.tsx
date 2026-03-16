@@ -42,7 +42,7 @@ const AppPreview = () => {
               <h3 className="font-display text-xl font-bold text-foreground">Your Style DNA</h3>
             </div>
             <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-primary" />
+              <Diamond className="w-4 h-4 text-primary" />
             </div>
           </div>
 

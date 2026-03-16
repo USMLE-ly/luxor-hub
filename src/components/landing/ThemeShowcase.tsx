@@ -17,7 +17,7 @@ const MockDashboard = ({ mode }: { mode: "light" | "dark" }) => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className={`w-8 h-8 rounded-lg ${primaryBg} flex items-center justify-center`}>
-            <Sparkles className={`w-4 h-4 ${primary}`} />
+            <Diamond className={`w-4 h-4 ${primary}`} />
           </div>
           <div>
             <p className={`text-sm font-display font-bold ${text}`}>Style DNA</p>
