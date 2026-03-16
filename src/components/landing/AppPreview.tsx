@@ -18,7 +18,7 @@ const AppPreview = () => {
         titleComponent={
           <div className="flex flex-col items-center gap-4">
             <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-sans font-medium tracking-wide">
-              <Sparkles className="w-4 h-4" /> App Preview
+              <Diamond className="w-4 h-4" /> App Preview
             </span>
             <h2 className="font-display text-4xl md:text-6xl font-bold text-foreground leading-tight">
               Your Style Command Center
