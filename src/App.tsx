@@ -42,6 +42,7 @@ import FashionDesigner from "./pages/FashionDesigner";
 import VirtualTryOn from "./pages/VirtualTryOn";
 import CommunityGallery from "./pages/CommunityGallery";
 import Install from "./pages/Install";
+import Council from "./pages/Council";
 
 // Tracks route changes for Facebook Pixel
 const RouteTracker = () => {
@@ -98,6 +99,7 @@ const App = () => (
             <Route path="/virtual-tryon" element={<VirtualTryOn />} />
             <Route path="/community-gallery" element={<CommunityGallery />} />
             <Route path="/install" element={<Install />} />
+            <Route path="/council" element={<Council />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
