@@ -99,6 +99,7 @@ const App = () => (
             <Route path="/virtual-tryon" element={<VirtualTryOn />} />
             <Route path="/community-gallery" element={<CommunityGallery />} />
             <Route path="/install" element={<Install />} />
+            <Route path="/council" element={<Council />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

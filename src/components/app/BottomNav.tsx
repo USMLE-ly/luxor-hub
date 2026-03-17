@@ -8,6 +8,7 @@ const tabs = [
   { label: "My Shop", icon: ShoppingBag, path: "/inspiration" },
   { label: "Analysis", icon: ScanLine, path: "/outfit-analysis" },
   { label: "AI Stylist", icon: Scissors, path: "/chat" },
+  { label: "Council", icon: Users, path: "/council" },
   { label: "Closet", icon: Shirt, path: "/closet" },
 ];
 
