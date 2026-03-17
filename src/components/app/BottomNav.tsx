@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home, ShoppingBag, ScanLine, Scissors, Shirt } from "lucide-react";
+import { Home, ShoppingBag, ScanLine, Scissors, Shirt, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { haptic } from "@/lib/haptics";
 
