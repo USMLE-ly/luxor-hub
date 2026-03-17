@@ -42,6 +42,7 @@ import FashionDesigner from "./pages/FashionDesigner";
 import VirtualTryOn from "./pages/VirtualTryOn";
 import CommunityGallery from "./pages/CommunityGallery";
 import Install from "./pages/Install";
+import Council from "./pages/Council";
 
 // Tracks route changes for Facebook Pixel
 const RouteTracker = () => {
