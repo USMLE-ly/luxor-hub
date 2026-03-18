@@ -1,11 +1,11 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home, ShoppingBag, ScanLine, Scissors, Shirt } from "lucide-react";
+import { Home, CalendarDays, ScanLine, Scissors, Shirt } from "lucide-react";
 import { motion } from "framer-motion";
 import { haptic } from "@/lib/haptics";
 
 const tabs = [
   { label: "DNA", icon: Home, path: "/dashboard" },
-  { label: "My Shop", icon: ShoppingBag, path: "/inspiration" },
+  { label: "Schedule", icon: CalendarDays, path: "/outfit-calendar" },
   { label: "Analysis", icon: ScanLine, path: "/outfit-analysis" },
   { label: "AI Stylist", icon: Scissors, path: "/chat" },
   { label: "Closet", icon: Shirt, path: "/closet" },
