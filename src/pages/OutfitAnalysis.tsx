@@ -90,6 +90,10 @@ export default function OutfitAnalysis() {
   const [maxScore, setMaxScore] = useState("");
   const [dateFilter, setDateFilter] = useState("all");
   const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [flatLayImage, setFlatLayImage] = useState<string | null>(null);
+  const [flatLayItems, setFlatLayItems] = useState<any[]>([]);
+  const [isGeneratingFlatLay, setIsGeneratingFlatLay] = useState(false);
+  const [flatLayError, setFlatLayError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filteredHistory = history.filter((h) => {
