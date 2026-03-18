@@ -431,6 +431,27 @@ export default function OutfitAnalysis() {
     return icons[cat] || "👔";
   };
 
+  const handleAddToCloset = async (item: any, idx: number) => {
+    if (!user || addedToCloset.has(idx)) return;
+    setAddingToCloset(idx);
+    try {
+      const { error } = await supabase.from("clothing_items").insert({
+        user_id: user.id,
+        name: item.name,
+        category: item.category || "other",
+        color: item.color || null,
+        style: item.style || null,
+      });
+      if (error) throw error;
+      setAddedToCloset(prev => new Set(prev).add(idx));
+      toast.success(`Added "${item.name}" to closet!`);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to add to closet");
+    } finally {
+      setAddingToCloset(null);
+    }
+  };
+
   const handleSaveFlatLay = async () => {
     if (!flatLayImage || !user) return;
     setIsSavingFlatLay(true);
