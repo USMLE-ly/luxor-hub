@@ -2,6 +2,7 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
+import { haptic } from "@/lib/haptics"
 
 const gradientButtonVariants = cva(
   [
@@ -34,7 +35,7 @@ export interface GradientButtonProps
 }
 
 const GradientButton = React.forwardRef<HTMLButtonElement, GradientButtonProps>(
-  ({ className, variant, asChild = false, ...props }, ref) => {
+  ({ className, variant, asChild = false, onClick, ...props }, ref) => {
     const shadowColor = variant === "variant"
       ? "rgba(255,255,255,0.08)"
       : "hsl(43 74% 32%)"
@@ -56,6 +57,10 @@ const GradientButton = React.forwardRef<HTMLButtonElement, GradientButtonProps>(
           transition: { duration: 0.08 },
         }}
         transition={{ type: "spring", stiffness: 400, damping: 20 }}
+        onClick={(e: any) => {
+          haptic("medium");
+          onClick?.(e);
+        }}
         {...(props as any)}
       />
     )

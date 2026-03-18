@@ -8,8 +8,14 @@ import { toast } from "sonner";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Wand2, Loader2, Heart, RefreshCw, Sparkles, Shirt } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Wand2, Loader2, Heart, Sparkles, Shirt, CalendarPlus, CalendarDays } from "lucide-react";
 import { ShareButton } from "@/components/app/ShareCard";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface OutfitSuggestion {
   name: string;
@@ -31,6 +37,9 @@ const Outfits = () => {
   const [outfits, setOutfits] = useState<OutfitSuggestion[]>([]);
   const [generating, setGenerating] = useState(false);
   const [savedOutfits, setSavedOutfits] = useState<any[]>([]);
+  const [scheduleOutfit, setScheduleOutfit] = useState<OutfitSuggestion | null>(null);
+  const [scheduleDate, setScheduleDate] = useState<Date | undefined>();
+  const [scheduleNotes, setScheduleNotes] = useState("");
 
   useEffect(() => {
     if (!user) return;
@@ -52,7 +61,6 @@ const Outfits = () => {
     }
     setGenerating(true);
     try {
-      // Fetch upcoming events to factor into outfit suggestions
       let upcomingEvents: any[] = [];
       if (user) {
         const today = new Date().toISOString().split("T")[0];
@@ -104,7 +112,6 @@ const Outfits = () => {
 
       if (error) throw error;
 
-      // Map item names to IDs and save outfit_items
       const matchedItems = closetItems.filter((ci) =>
         outfit.items.some((name) => ci.name?.toLowerCase().includes(name.toLowerCase()) || name.toLowerCase().includes(ci.name?.toLowerCase() || ""))
       );
@@ -115,6 +122,27 @@ const Outfits = () => {
       }
 
       toast.success(`"${outfit.name}" saved!`);
+    } catch (e: any) {
+      toast.error(e.message);
+    }
+  };
+
+  const addToSchedule = async () => {
+    if (!user || !scheduleOutfit || !scheduleDate) return;
+    try {
+      const { error } = await supabase.from("calendar_events").insert({
+        user_id: user.id,
+        title: scheduleOutfit.name,
+        event_date: format(scheduleDate, "yyyy-MM-dd"),
+        occasion: occasion.charAt(0).toUpperCase() + occasion.slice(1),
+        notes: scheduleNotes || `AI-generated: ${scheduleOutfit.description}`,
+        outfit_items: scheduleOutfit.items,
+      });
+      if (error) throw error;
+      toast.success(`"${scheduleOutfit.name}" scheduled for ${format(scheduleDate, "MMM d")}!`);
+      setScheduleOutfit(null);
+      setScheduleDate(undefined);
+      setScheduleNotes("");
     } catch (e: any) {
       toast.error(e.message);
     }
@@ -195,6 +223,15 @@ const Outfits = () => {
                     <Button variant="ghost" size="icon" onClick={() => saveOutfit(outfit)} className="text-muted-foreground hover:text-primary">
                       <Heart className="h-4 w-4" />
                     </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setScheduleOutfit(outfit)}
+                      className="text-muted-foreground hover:text-primary"
+                      title="Add to Schedule"
+                    >
+                      <CalendarPlus className="h-4 w-4" />
+                    </Button>
                     <ShareButton outfit={outfit} />
                   </div>
                 </div>
@@ -212,6 +249,54 @@ const Outfits = () => {
             ))}
           </AnimatePresence>
         </div>
+
+        {/* Schedule Outfit Dialog */}
+        <Dialog open={!!scheduleOutfit} onOpenChange={(open) => { if (!open) setScheduleOutfit(null); }}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="font-display flex items-center gap-2">
+                <CalendarDays className="h-5 w-5 text-primary" /> Schedule Outfit
+              </DialogTitle>
+            </DialogHeader>
+            {scheduleOutfit && (
+              <div className="space-y-4 pt-2">
+                <div className="glass rounded-xl p-3">
+                  <p className="font-sans text-sm font-semibold text-foreground">{scheduleOutfit.name}</p>
+                  <p className="font-sans text-xs text-muted-foreground mt-0.5">{scheduleOutfit.description}</p>
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground font-sans mb-1.5 block">Pick a date</label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !scheduleDate && "text-muted-foreground")}>
+                        <CalendarDays className="h-4 w-4 mr-2" />
+                        {scheduleDate ? format(scheduleDate, "PPP") : "Select date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={scheduleDate}
+                        onSelect={setScheduleDate}
+                        disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <Input
+                  placeholder="Notes (optional)"
+                  value={scheduleNotes}
+                  onChange={(e) => setScheduleNotes(e.target.value)}
+                />
+                <Button onClick={addToSchedule} disabled={!scheduleDate} className="w-full gold-gradient text-primary-foreground font-sans">
+                  <CalendarPlus className="h-4 w-4 mr-2" /> Add to Schedule
+                </Button>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </AppLayout>
   );
