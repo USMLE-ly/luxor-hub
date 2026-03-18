@@ -429,6 +429,63 @@ export default function OutfitAnalysis() {
     return icons[cat] || "👔";
   };
 
+  const handleSaveFlatLay = async () => {
+    if (!flatLayImage || !user) return;
+    setIsSavingFlatLay(true);
+    try {
+      // Convert base64 to blob and upload to storage
+      const response = await fetch(flatLayImage);
+      const blob = await response.blob();
+      const path = `${user.id}/flatlay-result-${Date.now()}.png`;
+      const { error: uploadError } = await supabase.storage.from("clothing-photos").upload(path, blob, { contentType: "image/png" });
+      if (uploadError) throw uploadError;
+      setFlatLaySaved(true);
+      toast.success("Flat-lay saved to your storage!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to save flat-lay");
+    } finally {
+      setIsSavingFlatLay(false);
+    }
+  };
+
+  const handleShareFlatLay = async () => {
+    if (!flatLayImage || !user) return;
+    setIsPostingFlatLay(true);
+    try {
+      // Upload flat-lay image to get a public URL
+      const response = await fetch(flatLayImage);
+      const blob = await response.blob();
+      const path = `${user.id}/flatlay-shared-${Date.now()}.png`;
+      const { error: uploadError } = await supabase.storage.from("look-photos").upload(path, blob, { contentType: "image/png" });
+      if (uploadError) throw uploadError;
+      const { data: urlData } = supabase.storage.from("look-photos").getPublicUrl(path);
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("display_name")
+        .eq("user_id", user.id)
+        .single();
+
+      const itemNames = flatLayItems.map((i: any) => `${i.name} (${i.color})`);
+
+      const { error } = await supabase.from("user_looks").insert({
+        user_id: user.id,
+        title: `Flat-Lay Breakdown — ${flatLayItems.length} pieces`,
+        description: `AI-generated flat-lay breakdown featuring ${flatLayItems.map((i: any) => i.name).join(", ")}`,
+        items: itemNames,
+        photo_url: urlData.publicUrl,
+        is_public: true,
+        author_name: profile?.display_name || user.email || "Stylist",
+      });
+      if (error) throw error;
+      toast.success("Flat-lay posted to community feed! 🎉");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to share");
+    } finally {
+      setIsPostingFlatLay(false);
+    }
+  };
+
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-green-500";
     if (score >= 60) return "text-yellow-500";
