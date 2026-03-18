@@ -795,6 +795,40 @@ const OutfitCalendar = () => {
           </motion.div>
         )}
 
+        {/* Calendar Stats Bar */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          className="rounded-2xl p-4 grid grid-cols-3 gap-3 mb-5"
+          style={{
+            background: "hsl(var(--card))",
+            border: "1px solid hsl(var(--border))",
+          }}
+        >
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <CalendarDays className="w-3.5 h-3.5 text-primary" />
+            </div>
+            <p className="font-display text-lg font-bold text-foreground">{calendarStats.planned}</p>
+            <p className="text-[9px] font-sans text-muted-foreground">Outfits Planned</p>
+          </div>
+          <div className="text-center border-x border-border/40">
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <Flame className="w-3.5 h-3.5 text-orange-400" />
+            </div>
+            <p className="font-display text-lg font-bold text-foreground">{calendarStats.streak}</p>
+            <p className="text-[9px] font-sans text-muted-foreground">Day Streak</p>
+          </div>
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <BarChart3 className="w-3.5 h-3.5 text-primary" />
+            </div>
+            <p className="font-display text-sm font-bold text-foreground capitalize">{calendarStats.topCategory}</p>
+            <p className="text-[9px] font-sans text-muted-foreground">Top Category</p>
+          </div>
+        </motion.div>
+
         {/* Add Event Dialog */}
         <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
           <DialogContent className="max-w-sm">
