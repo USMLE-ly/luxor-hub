@@ -363,6 +363,36 @@ const OutfitCalendar = () => {
   const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   const todayWeather = getWeatherForDate(new Date());
 
+  // Calendar Stats
+  const calendarStats = useMemo(() => {
+    const monthEvents = events;
+    const planned = monthEvents.length;
+    
+    // Day streak: count consecutive days with events from today backwards
+    let streak = 0;
+    let checkDate = new Date();
+    while (true) {
+      const dateStr = format(checkDate, "yyyy-MM-dd");
+      if (monthEvents.some(e => e.event_date === dateStr)) {
+        streak++;
+        checkDate = addDays(checkDate, -1);
+      } else break;
+    }
+
+    // Most worn category from outfit items
+    const categoryCounts: Record<string, number> = {};
+    monthEvents.forEach(ev => {
+      const items = Array.isArray(ev.outfit_items) ? ev.outfit_items : [];
+      items.forEach((item: any) => {
+        const cat = item?.category || item?.type || "other";
+        categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+      });
+    });
+    const topCategory = Object.entries(categoryCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "—";
+
+    return { planned, streak, topCategory };
+  }, [events]);
+
   return (
     <AppLayout>
       <div className="p-5 max-w-2xl mx-auto pb-28">
