@@ -464,9 +464,12 @@ export default function OutfitAnalysis() {
         </motion.div>
 
         <Tabs defaultValue="analyze" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6 bg-muted/50 backdrop-blur-sm">
+          <TabsList className="grid w-full grid-cols-4 mb-6 bg-muted/50 backdrop-blur-sm">
             <TabsTrigger value="analyze" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Sparkles className="w-4 h-4" /> Analyze
+            </TabsTrigger>
+            <TabsTrigger value="flat-lay" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Layers className="w-4 h-4" /> Flat-Lay
             </TabsTrigger>
             <TabsTrigger value="history" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground" onClick={fetchHistory}>
               <History className="w-4 h-4" /> History
