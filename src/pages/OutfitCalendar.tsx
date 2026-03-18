@@ -543,11 +543,54 @@ const OutfitCalendar = () => {
                   )}
                   {dayEvents.length > 0 && (
                     <div className="mt-0.5 space-y-0.5">
-                      {dayEvents.slice(0, 2).map(ev => (
-                        <div key={ev.id} className="rounded px-1 py-[2px] truncate" style={{ background: "hsl(var(--primary) / 0.15)" }}>
-                          <span className="text-[7px] font-sans text-primary font-semibold tracking-wide">{ev.title}</span>
-                        </div>
-                      ))}
+                      {(() => {
+                        // Mini flat-lay stacks: show tiny thumbnails if outfit has photos
+                        const allPhotos: string[] = [];
+                        let hasMannequin = false;
+                        let mannequinUrl = "";
+                        dayEvents.forEach(ev => {
+                          if (ev.mannequin_image_url) { hasMannequin = true; mannequinUrl = ev.mannequin_image_url; }
+                          const items = Array.isArray(ev.outfit_items) ? ev.outfit_items : [];
+                          items.forEach((item: any) => {
+                            const url = item?.photo_url || item?.photoUrl || item?.image_url || item?.imageUrl;
+                            if (url) allPhotos.push(url);
+                          });
+                        });
+
+                        if (hasMannequin) {
+                          return (
+                            <div className="flex justify-center">
+                              <img src={mannequinUrl} alt="" className="w-7 h-7 rounded-full object-cover border border-border/40" />
+                            </div>
+                          );
+                        }
+
+                        if (allPhotos.length > 0) {
+                          return (
+                            <div className="flex flex-col items-center gap-[1px]">
+                              {allPhotos.slice(0, 3).map((url, pi) => (
+                                <img
+                                  key={pi}
+                                  src={url}
+                                  alt=""
+                                  className="w-4 h-5 rounded-sm object-cover"
+                                  style={{ 
+                                    mixBlendMode: "multiply",
+                                    border: "0.5px solid hsl(var(--border) / 0.3)",
+                                  }}
+                                />
+                              ))}
+                            </div>
+                          );
+                        }
+
+                        // Fallback: text labels
+                        return dayEvents.slice(0, 2).map(ev => (
+                          <div key={ev.id} className="rounded px-1 py-[2px] truncate" style={{ background: "hsl(var(--primary) / 0.15)" }}>
+                            <span className="text-[7px] font-sans text-primary font-semibold tracking-wide">{ev.title}</span>
+                          </div>
+                        ));
+                      })()}
                       {dayEvents.length > 2 && (
                         <span className="text-[7px] text-muted-foreground font-sans">+{dayEvents.length - 2}</span>
                       )}
