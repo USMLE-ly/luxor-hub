@@ -94,6 +94,9 @@ export default function OutfitAnalysis() {
   const [flatLayItems, setFlatLayItems] = useState<any[]>([]);
   const [isGeneratingFlatLay, setIsGeneratingFlatLay] = useState(false);
   const [flatLayError, setFlatLayError] = useState<string | null>(null);
+  const [isSavingFlatLay, setIsSavingFlatLay] = useState(false);
+  const [flatLaySaved, setFlatLaySaved] = useState(false);
+  const [isPostingFlatLay, setIsPostingFlatLay] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filteredHistory = history.filter((h) => {
@@ -424,6 +427,63 @@ export default function OutfitAnalysis() {
       accessory: "⌚", bag: "👜", jewelry: "💍", hat: "🎩", eyewear: "🕶️",
     };
     return icons[cat] || "👔";
+  };
+
+  const handleSaveFlatLay = async () => {
+    if (!flatLayImage || !user) return;
+    setIsSavingFlatLay(true);
+    try {
+      // Convert base64 to blob and upload to storage
+      const response = await fetch(flatLayImage);
+      const blob = await response.blob();
+      const path = `${user.id}/flatlay-result-${Date.now()}.png`;
+      const { error: uploadError } = await supabase.storage.from("clothing-photos").upload(path, blob, { contentType: "image/png" });
+      if (uploadError) throw uploadError;
+      setFlatLaySaved(true);
+      toast.success("Flat-lay saved to your storage!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to save flat-lay");
+    } finally {
+      setIsSavingFlatLay(false);
+    }
+  };
+
+  const handleShareFlatLay = async () => {
+    if (!flatLayImage || !user) return;
+    setIsPostingFlatLay(true);
+    try {
+      // Upload flat-lay image to get a public URL
+      const response = await fetch(flatLayImage);
+      const blob = await response.blob();
+      const path = `${user.id}/flatlay-shared-${Date.now()}.png`;
+      const { error: uploadError } = await supabase.storage.from("look-photos").upload(path, blob, { contentType: "image/png" });
+      if (uploadError) throw uploadError;
+      const { data: urlData } = supabase.storage.from("look-photos").getPublicUrl(path);
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("display_name")
+        .eq("user_id", user.id)
+        .single();
+
+      const itemNames = flatLayItems.map((i: any) => `${i.name} (${i.color})`);
+
+      const { error } = await supabase.from("user_looks").insert({
+        user_id: user.id,
+        title: `Flat-Lay Breakdown — ${flatLayItems.length} pieces`,
+        description: `AI-generated flat-lay breakdown featuring ${flatLayItems.map((i: any) => i.name).join(", ")}`,
+        items: itemNames,
+        photo_url: urlData.publicUrl,
+        is_public: true,
+        author_name: profile?.display_name || user.email || "Stylist",
+      });
+      if (error) throw error;
+      toast.success("Flat-lay posted to community feed! 🎉");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to share");
+    } finally {
+      setIsPostingFlatLay(false);
+    }
   };
 
   const getScoreColor = (score: number) => {
@@ -774,6 +834,30 @@ export default function OutfitAnalysis() {
                         }}
                       >
                         <Download className="h-4 w-4 mr-2" /> Download
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={handleSaveFlatLay}
+                        disabled={isSavingFlatLay || flatLaySaved}
+                      >
+                        {isSavingFlatLay ? (
+                          <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Saving...</>
+                        ) : flatLaySaved ? (
+                          <><Check className="h-4 w-4 mr-2" /> Saved</>
+                        ) : (
+                          <><Save className="h-4 w-4 mr-2" /> Save</>
+                        )}
+                      </Button>
+                      <Button
+                        className="gold-gradient text-primary-foreground"
+                        onClick={handleShareFlatLay}
+                        disabled={isPostingFlatLay}
+                      >
+                        {isPostingFlatLay ? (
+                          <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Posting...</>
+                        ) : (
+                          <><Share2 className="h-4 w-4 mr-2" /> Share to Feed</>
+                        )}
                       </Button>
                     </div>
                   </motion.div>
