@@ -835,6 +835,30 @@ export default function OutfitAnalysis() {
                       >
                         <Download className="h-4 w-4 mr-2" /> Download
                       </Button>
+                      <Button
+                        variant="outline"
+                        onClick={handleSaveFlatLay}
+                        disabled={isSavingFlatLay || flatLaySaved}
+                      >
+                        {isSavingFlatLay ? (
+                          <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Saving...</>
+                        ) : flatLaySaved ? (
+                          <><Check className="h-4 w-4 mr-2" /> Saved</>
+                        ) : (
+                          <><Save className="h-4 w-4 mr-2" /> Save</>
+                        )}
+                      </Button>
+                      <Button
+                        className="gold-gradient text-primary-foreground"
+                        onClick={handleShareFlatLay}
+                        disabled={isPostingFlatLay}
+                      >
+                        {isPostingFlatLay ? (
+                          <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Posting...</>
+                        ) : (
+                          <><Share2 className="h-4 w-4 mr-2" /> Share to Feed</>
+                        )}
+                      </Button>
                     </div>
                   </motion.div>
                 )}
