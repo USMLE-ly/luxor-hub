@@ -138,6 +138,9 @@ export default function OutfitAnalysis() {
     setSaved(false);
     setImageUrl(null);
     setAnalysisError(null);
+    setFlatLayImage(null);
+    setFlatLayItems([]);
+    setFlatLayError(null);
     const reader = new FileReader();
     reader.onload = (ev) => setImagePreview(ev.target?.result as string);
     reader.readAsDataURL(compressed);
