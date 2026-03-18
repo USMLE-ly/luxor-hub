@@ -41,3 +41,6 @@ verify_jwt = false
 
 [functions.outfit-flat-lay]
 verify_jwt = false
+
+[functions.remove-bg]
+verify_jwt = false
