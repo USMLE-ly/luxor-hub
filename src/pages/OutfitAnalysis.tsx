@@ -11,7 +11,8 @@ import { toast } from "sonner";
 import {
   Upload, Camera, Sparkles, TrendingUp, Palette, ShieldCheck, AlertTriangle,
   Star, Shirt, Loader2, History, Save, Trash2, Share2, X,
-  Twitter, Link, Check, Download, Clock, ArrowLeftRight, Users, Search, ExternalLink, ShoppingBag, RefreshCw
+  Twitter, Link, Check, Download, Clock, ArrowLeftRight, Users, Search, ExternalLink, ShoppingBag, RefreshCw,
+  Layers, Eye
 } from "lucide-react";
 import { compressImage, formatFileSize } from "@/lib/imageUtils";
 import { PrivacyNotice } from "@/components/app/PrivacyNotice";
@@ -89,6 +90,10 @@ export default function OutfitAnalysis() {
   const [maxScore, setMaxScore] = useState("");
   const [dateFilter, setDateFilter] = useState("all");
   const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [flatLayImage, setFlatLayImage] = useState<string | null>(null);
+  const [flatLayItems, setFlatLayItems] = useState<any[]>([]);
+  const [isGeneratingFlatLay, setIsGeneratingFlatLay] = useState(false);
+  const [flatLayError, setFlatLayError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filteredHistory = history.filter((h) => {
@@ -133,6 +138,9 @@ export default function OutfitAnalysis() {
     setSaved(false);
     setImageUrl(null);
     setAnalysisError(null);
+    setFlatLayImage(null);
+    setFlatLayItems([]);
+    setFlatLayError(null);
     const reader = new FileReader();
     reader.onload = (ev) => setImagePreview(ev.target?.result as string);
     reader.readAsDataURL(compressed);
@@ -364,6 +372,60 @@ export default function OutfitAnalysis() {
     toast.success("Analysis card downloaded!");
   };
 
+  const handleGenerateFlatLay = async () => {
+    if (!imagePreview && !imageUrl) {
+      toast.error("Upload an image first");
+      return;
+    }
+    setIsGeneratingFlatLay(true);
+    setFlatLayError(null);
+    setFlatLayImage(null);
+    setFlatLayItems([]);
+    try {
+      // If we don't have a public URL yet, upload the image first
+      let publicUrl = imageUrl;
+      if (!publicUrl && imageFile && user) {
+        const ext = imageFile.name.split(".").pop();
+        const path = `${user.id}/flatlay-${Date.now()}.${ext}`;
+        const { error: uploadError } = await supabase.storage.from("clothing-photos").upload(path, imageFile);
+        if (uploadError) throw uploadError;
+        const { data: urlData } = supabase.storage.from("clothing-photos").getPublicUrl(path);
+        publicUrl = urlData.publicUrl;
+        setImageUrl(publicUrl);
+      }
+      if (!publicUrl) throw new Error("No image available");
+
+      const { data, error } = await supabase.functions.invoke("outfit-flat-lay", {
+        body: { imageUrl: publicUrl },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      setFlatLayImage(data.flatLayImage || null);
+      setFlatLayItems(data.items || []);
+      if (data.flatLayImage) {
+        toast.success("Flat-lay generated!");
+      } else {
+        toast.error("Could not generate flat-lay image");
+      }
+    } catch (err: any) {
+      console.error(err);
+      const msg = err.message || "Flat-lay generation failed";
+      setFlatLayError(msg);
+      toast.error(msg);
+    } finally {
+      setIsGeneratingFlatLay(false);
+    }
+  };
+
+  const categoryIcon = (cat: string) => {
+    const icons: Record<string, string> = {
+      top: "👕", bottom: "👖", outerwear: "🧥", shoes: "👟",
+      accessory: "⌚", bag: "👜", jewelry: "💍", hat: "🎩", eyewear: "🕶️",
+    };
+    return icons[cat] || "👔";
+  };
+
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-green-500";
     if (score >= 60) return "text-yellow-500";
@@ -402,9 +464,12 @@ export default function OutfitAnalysis() {
         </motion.div>
 
         <Tabs defaultValue="analyze" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6 bg-muted/50 backdrop-blur-sm">
+          <TabsList className="grid w-full grid-cols-4 mb-6 bg-muted/50 backdrop-blur-sm">
             <TabsTrigger value="analyze" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Sparkles className="w-4 h-4" /> Analyze
+            </TabsTrigger>
+            <TabsTrigger value="flat-lay" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Layers className="w-4 h-4" /> Flat-Lay
             </TabsTrigger>
             <TabsTrigger value="history" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground" onClick={fetchHistory}>
               <History className="w-4 h-4" /> History
@@ -569,6 +634,152 @@ export default function OutfitAnalysis() {
                 </motion.div>
               )}
             </AnimatePresence>
+          </TabsContent>
+
+          {/* Flat-Lay Tab */}
+          <TabsContent value="flat-lay" className="space-y-6">
+            {!imagePreview ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center py-16"
+              >
+                <Layers className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="font-display text-xl text-foreground mb-2">Upload an outfit photo</h3>
+                <p className="text-muted-foreground text-sm mb-4">
+                  Switch to the Analyze tab to upload a photo, then come back here to generate a flat-lay
+                </p>
+              </motion.div>
+            ) : (
+              <div className="space-y-6">
+                {/* Generate Button */}
+                {!flatLayImage && !isGeneratingFlatLay && !flatLayError && (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center space-y-4">
+                    <div className="max-w-xs mx-auto">
+                      <img src={imagePreview} alt="Outfit" className="w-full rounded-2xl border border-border shadow-lg" />
+                    </div>
+                    <Button
+                      onClick={handleGenerateFlatLay}
+                      className="gold-gradient text-primary-foreground font-sans px-8 py-3 text-base"
+                    >
+                      <Layers className="h-5 w-5 mr-2" /> Generate Flat-Lay Breakdown
+                    </Button>
+                    <p className="text-xs text-muted-foreground">AI will separate each garment into a magazine-style flat-lay</p>
+                  </motion.div>
+                )}
+
+                {/* Loading State */}
+                {isGeneratingFlatLay && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-center py-16 space-y-4"
+                  >
+                    <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
+                    <p className="font-display text-lg text-foreground">Separating garments...</p>
+                    <p className="text-sm text-muted-foreground">Creating your flat-lay breakdown</p>
+                    <div className="max-w-xs mx-auto space-y-2">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="h-3 rounded-full bg-muted animate-pulse" style={{ width: `${100 - i * 20}%`, animationDelay: `${i * 0.2}s` }} />
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Error State */}
+                {flatLayError && !isGeneratingFlatLay && (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-8 space-y-3">
+                    <AlertTriangle className="h-10 w-10 text-destructive mx-auto" />
+                    <p className="text-sm text-destructive">{flatLayError}</p>
+                    <Button variant="outline" onClick={handleGenerateFlatLay}>
+                      <RefreshCw className="h-4 w-4 mr-2" /> Try Again
+                    </Button>
+                  </motion.div>
+                )}
+
+                {/* Result: Split View */}
+                {flatLayImage && (
+                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                          <Eye className="w-3.5 h-3.5" /> Original
+                        </p>
+                        <div className="rounded-2xl overflow-hidden border border-border shadow-lg">
+                          <img src={imagePreview} alt="Original outfit" className="w-full object-cover" />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                          <Layers className="w-3.5 h-3.5" /> Flat-Lay Breakdown
+                        </p>
+                        <div className="rounded-2xl overflow-hidden border border-border shadow-lg bg-muted/20">
+                          <img src={flatLayImage} alt="Flat-lay breakdown" className="w-full object-cover" />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Detected Items Grid */}
+                    {flatLayItems.length > 0 && (
+                      <Card className="glass-card">
+                        <CardHeader className="pb-3">
+                          <CardTitle className="font-display flex items-center gap-2 text-foreground text-base">
+                            <div className="w-0.5 h-4 gold-gradient rounded-full mr-1" />
+                            <Shirt className="w-5 h-5 text-primary" /> Detected Items ({flatLayItems.length})
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {flatLayItems.map((item: any, idx: number) => (
+                              <motion.div
+                                key={idx}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: idx * 0.05 }}
+                                className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card hover:bg-muted/40 transition-colors"
+                              >
+                                <span className="text-2xl">{categoryIcon(item.category)}</span>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium text-foreground truncate">{item.name}</p>
+                                  <div className="flex items-center gap-2 mt-0.5">
+                                    <div
+                                      className="w-3 h-3 rounded-full border border-border flex-shrink-0"
+                                      style={{ backgroundColor: item.color?.toLowerCase() }}
+                                    />
+                                    <span className="text-xs text-muted-foreground truncate">{item.color} · {item.style}</span>
+                                  </div>
+                                </div>
+                                <Badge variant="secondary" className="text-[10px] flex-shrink-0">{item.category}</Badge>
+                              </motion.div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Actions */}
+                    <div className="flex flex-wrap gap-3 justify-center">
+                      <Button variant="outline" onClick={handleGenerateFlatLay}>
+                        <RefreshCw className="h-4 w-4 mr-2" /> Regenerate
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          if (!flatLayImage) return;
+                          const link = document.createElement("a");
+                          link.download = `aurelia-flatlay-${Date.now()}.png`;
+                          link.href = flatLayImage;
+                          link.click();
+                          toast.success("Flat-lay downloaded!");
+                        }}
+                      >
+                        <Download className="h-4 w-4 mr-2" /> Download
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="history" className="space-y-4">
