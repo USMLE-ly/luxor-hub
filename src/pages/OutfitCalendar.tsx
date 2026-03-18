@@ -90,13 +90,20 @@ const OutfitCalendar = () => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(
     typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted"
   );
+  const userLocation = useUserLocation();
 
   useEffect(() => {
     if (!user) return;
     fetchEvents();
     fetchOutfits();
-    fetchWeatherForecast();
   }, [user, currentMonth]);
+
+  // Fetch weather when location resolves
+  useEffect(() => {
+    if (!userLocation.loading) {
+      fetchWeatherForecast();
+    }
+  }, [userLocation.loading]);
 
   // Schedule push reminders for tomorrow's events
   const scheduleReminders = useCallback((evts: CalendarEvent[]) => {
