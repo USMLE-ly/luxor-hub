@@ -584,41 +584,90 @@ const OutfitCalendar = () => {
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: idx * 0.05 }}
-                      className="flex items-center gap-3 p-3.5 rounded-xl transition-colors hover:bg-secondary/30"
+                      className="rounded-xl transition-colors hover:bg-secondary/30 overflow-hidden"
                       style={{ border: "1px solid hsl(var(--border) / 0.5)" }}
                     >
-                      <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                        style={{ background: "linear-gradient(135deg, hsl(var(--primary) / 0.15), hsl(var(--primary) / 0.05))" }}
-                      >
-                        <Shirt className="w-5 h-5 text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-sans text-sm font-semibold text-foreground truncate">{ev.title}</p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          {ev.occasion && (
-                            <span className="px-2 py-0.5 rounded-full text-[9px] font-sans font-medium bg-primary/10 text-primary">
-                              {ev.occasion}
-                            </span>
-                          )}
-                          {ev.notes && (
-                            <p className="font-sans text-[10px] text-muted-foreground/70 truncate">{ev.notes}</p>
-                          )}
+                      <div className="flex items-center gap-3 p-3.5">
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                          style={{ background: "linear-gradient(135deg, hsl(var(--primary) / 0.15), hsl(var(--primary) / 0.05))" }}
+                        >
+                          <Shirt className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-sans text-sm font-semibold text-foreground truncate">{ev.title}</p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            {ev.occasion && (
+                              <span className="px-2 py-0.5 rounded-full text-[9px] font-sans font-medium bg-primary/10 text-primary">
+                                {ev.occasion}
+                              </span>
+                            )}
+                            {ev.notes && (
+                              <p className="font-sans text-[10px] text-muted-foreground/70 truncate">{ev.notes}</p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => openEditDialog(ev)}
+                            className="text-muted-foreground/50 hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => deleteEvent(ev.id)}
+                            className="text-muted-foreground/40 hover:text-destructive p-1.5 rounded-lg hover:bg-destructive/10 transition-colors"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => openEditDialog(ev)}
-                          className="text-muted-foreground/50 hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors"
-                        >
-                          <Pencil className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => deleteEvent(ev.id)}
-                          className="text-muted-foreground/40 hover:text-destructive p-1.5 rounded-lg hover:bg-destructive/10 transition-colors"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
+                      {/* Outfit photo thumbnails */}
+                      {(() => {
+                        const items = Array.isArray(ev.outfit_items) ? ev.outfit_items : [];
+                        const photos: string[] = items
+                          .map((item: any) => item?.photo_url || item?.photoUrl || item?.image_url || item?.imageUrl)
+                          .filter((url: string | undefined): url is string => !!url)
+                          .slice(0, 5);
+
+                        if (ev.mannequin_image_url) {
+                          return (
+                            <div className="px-3.5 pb-3">
+                              <img
+                                src={ev.mannequin_image_url}
+                                alt="Outfit preview"
+                                className="w-full h-28 object-cover rounded-lg"
+                                style={{ border: "1px solid hsl(var(--border) / 0.3)" }}
+                              />
+                            </div>
+                          );
+                        }
+
+                        if (photos.length === 0) return null;
+
+                        return (
+                          <div className="px-3.5 pb-3">
+                            <div className="flex gap-1.5 overflow-x-auto">
+                              {photos.map((url, pi) => (
+                                <img
+                                  key={pi}
+                                  src={url}
+                                  alt={`Item ${pi + 1}`}
+                                  className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
+                                  style={{
+                                    border: "1px solid hsl(var(--border) / 0.3)",
+                                    boxShadow: "0 2px 8px -2px hsl(var(--foreground) / 0.08)",
+                                  }}
+                                />
+                              ))}
+                              {items.length > 5 && (
+                                <div className="w-14 h-14 rounded-lg flex-shrink-0 flex items-center justify-center bg-secondary/60 text-[10px] font-sans font-semibold text-muted-foreground">
+                                  +{items.length - 5}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </motion.div>
                   ))}
                 </div>
