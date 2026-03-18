@@ -59,6 +59,20 @@ serve(async (req) => {
       tip += " Don't forget a waterproof layer!";
     }
 
+    // Reverse geocode to get city name
+    let city = "Your area";
+    let country = "";
+    try {
+      const geoResp = await fetch(
+        `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat || 40.7128}&longitude=${lon || -74.006}&localityLanguage=en`
+      );
+      if (geoResp.ok) {
+        const geoData = await geoResp.json();
+        city = geoData.city || geoData.locality || geoData.principalSubdivision || "Your area";
+        country = geoData.countryName || "";
+      }
+    } catch { /* silently fail */ }
+
     return new Response(JSON.stringify({
       temp: Math.round(temp),
       description: weather.desc,
@@ -66,6 +80,8 @@ serve(async (req) => {
       humidity: current.relativehumidity_2m,
       wind: Math.round(current.windspeed_10m),
       outfitTip: tip,
+      city,
+      country,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
