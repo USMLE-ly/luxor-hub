@@ -853,8 +853,6 @@ export default function OutfitAnalysis() {
                                     )}
                                   </button>
                                 </div>
-                                </div>
-                                <Badge variant="secondary" className="text-[10px] flex-shrink-0">{item.category}</Badge>
                               </motion.div>
                             ))}
                           </div>
