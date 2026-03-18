@@ -307,6 +307,55 @@ const Outfits = () => {
             )}
           </DialogContent>
         </Dialog>
+        {/* Flat-Lay View Dialog */}
+        <Dialog open={!!flatLayOutfit} onOpenChange={(open) => { if (!open) setFlatLayOutfit(null); }}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="font-display flex items-center gap-2">
+                <Layers className="h-5 w-5 text-primary" /> Flat-Lay View
+              </DialogTitle>
+            </DialogHeader>
+            {flatLayOutfit && (
+              <div className="space-y-4 pt-2">
+                <p className="text-sm text-muted-foreground">{flatLayOutfit.name}</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {flatLayOutfit.items.map((itemName, idx) => {
+                    const matchedItem = closetItems.find((ci) =>
+                      ci.name?.toLowerCase().includes(itemName.toLowerCase()) || itemName.toLowerCase().includes(ci.name?.toLowerCase() || "")
+                    );
+                    return (
+                      <motion.div
+                        key={idx}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: idx * 0.08 }}
+                        className="rounded-xl border border-border bg-card overflow-hidden"
+                      >
+                        {matchedItem?.photo_url ? (
+                          <img src={matchedItem.photo_url} alt={itemName} className="w-full aspect-square object-cover" />
+                        ) : (
+                          <div className="w-full aspect-square bg-muted/40 flex items-center justify-center">
+                            <Shirt className="h-8 w-8 text-muted-foreground/40" />
+                          </div>
+                        )}
+                        <div className="p-2">
+                          <p className="text-xs font-medium text-foreground truncate">{itemName}</p>
+                          {matchedItem?.color && (
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <div className="w-2 h-2 rounded-full border border-border" style={{ backgroundColor: matchedItem.color }} />
+                              <span className="text-[10px] text-muted-foreground">{matchedItem.color}</span>
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+                <p className="text-xs text-muted-foreground italic text-center">"{flatLayOutfit.explanation}"</p>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </AppLayout>
   );
