@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home, ShoppingBag, ScanLine, Scissors, Shirt, Users } from "lucide-react";
+import { Home, ShoppingBag, ScanLine, Scissors, Shirt } from "lucide-react";
 import { motion } from "framer-motion";
 import { haptic } from "@/lib/haptics";
 
@@ -8,7 +8,6 @@ const tabs = [
   { label: "My Shop", icon: ShoppingBag, path: "/inspiration" },
   { label: "Analysis", icon: ScanLine, path: "/outfit-analysis" },
   { label: "AI Stylist", icon: Scissors, path: "/chat" },
-  { label: "Council", icon: Users, path: "/council" },
   { label: "Closet", icon: Shirt, path: "/closet" },
 ];
 

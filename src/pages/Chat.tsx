@@ -1,12 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Send, Sparkles, Loader2, Trash2, ArrowUp, Camera, Image, X } from "lucide-react";
+import { Sparkles, Trash2, ArrowUp, Camera, X, Users } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { VoiceInput } from "@/components/app/VoiceInput";
 import { useAnimatedText } from "@/components/ui/animated-text";
@@ -42,11 +41,9 @@ const vanishPlaceholders = [
   "Style tips for my body type",
 ];
 
-// Animated assistant message component
 function AnimatedAssistantMessage({ content, isStreaming }: { content: string; isStreaming?: boolean }) {
   const animatedContent = useAnimatedText(content, " ");
   const displayContent = isStreaming ? content : animatedContent;
-  
   return (
     <div className="prose prose-sm prose-invert max-w-none [&>p]:my-1 [&>ul]:my-1 [&>ol]:my-1 [&>h1]:text-base [&>h2]:text-sm [&>h3]:text-sm">
       <ReactMarkdown>{displayContent}</ReactMarkdown>
@@ -56,6 +53,7 @@ function AnimatedAssistantMessage({ content, isStreaming }: { content: string; i
 
 const Chat = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -85,12 +83,9 @@ const Chat = () => {
     });
   }, [user]);
 
-  // Handle pre-filled context from navigation (e.g., from Inspiration page)
   useEffect(() => {
     const prefill = searchParams.get("prefill");
-    if (prefill) {
-      setInput(prefill);
-    }
+    if (prefill) setInput(prefill);
   }, [searchParams]);
 
   useEffect(() => {
@@ -105,16 +100,11 @@ const Chat = () => {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Image must be under 5MB");
-      return;
-    }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Image must be under 5MB"); return; }
     const reader = new FileReader();
     reader.onload = () => {
       setPendingImage(reader.result as string);
-      if (!input.trim()) {
-        setInput("Check if this item matches my style DNA");
-      }
+      if (!input.trim()) setInput("Check if this item matches my style DNA");
     };
     reader.readAsDataURL(file);
   };
@@ -154,7 +144,7 @@ const Chat = () => {
       if (!resp.ok) {
         const err = await resp.json().catch(() => ({}));
         if (resp.status === 429) { toast.error("Rate limited. Please wait a moment."); throw new Error("rate limited"); }
-        if (resp.status === 402) { toast.error("AI credits exhausted. Please add credits."); throw new Error("credits exhausted"); }
+        if (resp.status === 402) { toast.error("AI credits exhausted."); throw new Error("credits exhausted"); }
         throw new Error(err.error || "Failed to get response");
       }
 
@@ -218,7 +208,6 @@ const Chat = () => {
         }
       }
 
-      // Mark streaming as done
       setMessages((prev) =>
         prev.map((m, i) => (i === prev.length - 1 && m.role === "assistant" ? { ...m, isStreaming: false } : m))
       );
@@ -248,7 +237,7 @@ const Chat = () => {
   return (
     <AppLayout>
       <div className="flex flex-col h-[calc(100vh-56px)] max-w-lg mx-auto overflow-x-hidden">
-        {/* Header */}
+        {/* Header with mode toggle */}
         <div className="px-5 pt-4 pb-2 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
@@ -259,21 +248,28 @@ const Chat = () => {
               <p className="text-muted-foreground font-sans text-[10px]">Your personal fashion advisor</p>
             </div>
           </div>
-          {messages.length > 0 && (
-            <button onClick={clearHistory} className="text-muted-foreground hover:text-destructive transition-colors p-1.5">
-              <Trash2 className="h-4 w-4" />
+          <div className="flex items-center gap-1.5">
+            {/* Mode toggle */}
+            <button
+              onClick={() => navigate("/council")}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border bg-card hover:border-primary/40 transition-colors"
+              title="Switch to Council mode"
+            >
+              <Users className="w-3.5 h-3.5 text-muted-foreground" />
+              <span className="text-[10px] font-sans font-medium text-muted-foreground">Council</span>
             </button>
-          )}
+            {messages.length > 0 && (
+              <button onClick={clearHistory} className="text-muted-foreground hover:text-destructive transition-colors p-1.5">
+                <Trash2 className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto px-5 space-y-3 pb-3">
           {messages.length === 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="pt-8 pb-4"
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="pt-8 pb-4">
               <div className="text-center mb-8">
                 <div className="w-16 h-16 rounded-2xl bg-primary/10 mx-auto mb-4 flex items-center justify-center">
                   <Sparkles className="w-7 h-7 text-primary" />
@@ -284,7 +280,6 @@ const Chat = () => {
                 </p>
               </div>
 
-              {/* Vanish Input for empty state */}
               <div className="mb-6">
                 <PlaceholdersAndVanishInput
                   placeholders={vanishPlaceholders}
@@ -292,14 +287,11 @@ const Chat = () => {
                   onSubmit={(e) => {
                     const form = e.currentTarget;
                     const input = form.querySelector("input");
-                    if (input?.value) {
-                      send(input.value);
-                    }
+                    if (input?.value) send(input.value);
                   }}
                 />
               </div>
 
-              {/* Quick Prompts Grid */}
               <div className="grid grid-cols-2 gap-2">
                 {quickPrompts.map((prompt) => (
                   <button
@@ -338,7 +330,6 @@ const Chat = () => {
                       : "bg-card border border-border rounded-bl-md hover:shadow-[0_0_15px_-3px_hsl(var(--gold)/0.35),0_0_6px_-2px_hsl(var(--gold)/0.2)] hover:border-[hsl(var(--gold)/0.4)]"
                   }`}
                 >
-                  {/* Gold shimmer overlay for assistant messages */}
                   {msg.role === "assistant" && (
                     <motion.div
                       className="absolute inset-0 pointer-events-none"
@@ -375,21 +366,14 @@ const Chat = () => {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
               <div className="bg-card border border-border rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-3">
                 <div className="flex items-center gap-1">
-                  <motion.div
-                    className="w-2 h-2 rounded-full bg-primary"
-                    animate={{ scale: [1, 1.4, 1], opacity: [0.4, 1, 0.4] }}
-                    transition={{ duration: 1.2, repeat: Infinity, delay: 0 }}
-                  />
-                  <motion.div
-                    className="w-2 h-2 rounded-full bg-primary"
-                    animate={{ scale: [1, 1.4, 1], opacity: [0.4, 1, 0.4] }}
-                    transition={{ duration: 1.2, repeat: Infinity, delay: 0.2 }}
-                  />
-                  <motion.div
-                    className="w-2 h-2 rounded-full bg-primary"
-                    animate={{ scale: [1, 1.4, 1], opacity: [0.4, 1, 0.4] }}
-                    transition={{ duration: 1.2, repeat: Infinity, delay: 0.4 }}
-                  />
+                  {[0, 0.2, 0.4].map((delay, i) => (
+                    <motion.div
+                      key={i}
+                      className="w-2 h-2 rounded-full bg-primary"
+                      animate={{ scale: [1, 1.4, 1], opacity: [0.4, 1, 0.4] }}
+                      transition={{ duration: 1.2, repeat: Infinity, delay }}
+                    />
+                  ))}
                 </div>
                 <motion.span
                   className="text-xs text-muted-foreground font-sans"
@@ -404,15 +388,12 @@ const Chat = () => {
           <div ref={bottomRef} />
         </div>
 
-        {/* Pending Image Preview */}
+        {/* Pending Image */}
         {pendingImage && (
           <div className="px-4 pt-2">
             <div className="relative inline-block">
               <img src={pendingImage} alt="To upload" className="h-20 w-20 object-cover rounded-xl border border-border" />
-              <button
-                onClick={() => setPendingImage(null)}
-                className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
-              >
+              <button onClick={() => setPendingImage(null)} className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center">
                 <X className="w-3 h-3" />
               </button>
             </div>
@@ -427,33 +408,19 @@ const Chat = () => {
         {/* Input Area */}
         <div className="px-4 pb-4 pt-2">
           <div className="flex items-end gap-2 bg-card border border-border rounded-2xl px-3 py-2">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleImageUpload}
-            />
+            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
             <button
               onClick={() => fileInputRef.current?.click()}
               className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-muted-foreground hover:text-primary transition-colors"
-              title="Upload image for compatibility check"
+              title="Upload image"
             >
               <Camera className="w-4 h-4" />
             </button>
-            <VoiceInput
-              onTranscript={(text) => {
-                setInput((prev) => (prev ? prev + " " + text : text));
-              }}
-              disabled={isLoading}
-            />
+            <VoiceInput onTranscript={(text) => setInput((prev) => (prev ? prev + " " + text : text))} disabled={isLoading} />
             <textarea
               ref={textareaRef}
               value={input}
-              onChange={(e) => {
-                setInput(e.target.value);
-                adjustHeight();
-              }}
+              onChange={(e) => { setInput(e.target.value); adjustHeight(); }}
               onKeyDown={handleKeyDown}
               placeholder="Ask your stylist..."
               rows={1}
@@ -463,16 +430,11 @@ const Chat = () => {
               onClick={() => send()}
               disabled={isLoading || (!input.trim() && !pendingImage)}
               className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
-                (input.trim() || pendingImage) && !isLoading
-                  ? "bg-foreground text-background"
-                  : "bg-secondary text-muted-foreground"
+                (input.trim() || pendingImage) && !isLoading ? "bg-foreground text-background" : "bg-secondary text-muted-foreground"
               }`}
             >
               {isLoading ? (
-                <div
-                  className="w-3.5 h-3.5 bg-primary rounded-sm animate-spin"
-                  style={{ animationDuration: "3s" }}
-                />
+                <div className="w-3.5 h-3.5 bg-primary rounded-sm animate-spin" style={{ animationDuration: "3s" }} />
               ) : (
                 <ArrowUp className="w-3.5 h-3.5" />
               )}

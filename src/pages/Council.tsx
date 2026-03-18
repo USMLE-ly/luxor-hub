@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Users, Trash2, ArrowUp, Camera, X } from "lucide-react";
+import { Users, Trash2, ArrowUp, Camera, X, Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { VoiceInput } from "@/components/app/VoiceInput";
 import { MoodSelector } from "@/components/app/MoodSelector";
@@ -52,7 +53,9 @@ const vanishPlaceholders = [
 
 const Council = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<CouncilMessage[]>([]);
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [styleProfile, setStyleProfile] = useState<any>(null);
@@ -82,6 +85,34 @@ const Council = () => {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, currentStage, liveStage1, liveRankings]);
+
+  // Save conversation to database
+  const saveConversation = async (msgs: CouncilMessage[], title?: string) => {
+    if (!user) return;
+    const serializable = msgs.map(m => ({
+      role: m.role,
+      content: m.content,
+      stage1: m.stage1 || null,
+      rankings: m.rankings || null,
+      synthesis: m.synthesis || null,
+    }));
+
+    const autoTitle = title || msgs.find(m => m.role === "user")?.content?.slice(0, 60) || "New Council Session";
+
+    if (conversationId) {
+      await supabase
+        .from("council_conversations")
+        .update({ messages: serializable as any, title: autoTitle })
+        .eq("id", conversationId);
+    } else {
+      const { data } = await supabase
+        .from("council_conversations")
+        .insert({ user_id: user.id, messages: serializable as any, title: autoTitle })
+        .select("id")
+        .single();
+      if (data) setConversationId(data.id);
+    }
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -205,16 +236,29 @@ const Council = () => {
       }
 
       // Final message update with all council data
+      let finalMessages: CouncilMessage[] = [];
       setMessages(prev => {
         const last = prev[prev.length - 1];
         if (last?.role === "assistant") {
-          return prev.map((m, i) => i === prev.length - 1 ? { ...m, stage1: stage1Data, rankings: rankingsData, synthesis } : m);
+          finalMessages = prev.map((m, i) => i === prev.length - 1 ? { ...m, stage1: stage1Data, rankings: rankingsData, synthesis } : m);
+        } else if (synthesis) {
+          finalMessages = [...prev, { role: "assistant", content: synthesis, synthesis, stage1: stage1Data, rankings: rankingsData }];
+        } else {
+          finalMessages = prev;
         }
-        if (synthesis) {
-          return [...prev, { role: "assistant", content: synthesis, synthesis, stage1: stage1Data, rankings: rankingsData }];
-        }
-        return prev;
+        return finalMessages;
       });
+
+      // Save to database
+      if (synthesis) {
+        // Use a timeout to ensure state is updated
+        setTimeout(() => {
+          setMessages(current => {
+            saveConversation(current);
+            return current;
+          });
+        }, 100);
+      }
     } catch (e: any) {
       if (e.message !== "rate limited" && e.message !== "credits exhausted") {
         toast.error(e.message || "Council deliberation failed");
@@ -228,6 +272,7 @@ const Council = () => {
 
   const clearHistory = () => {
     setMessages([]);
+    setConversationId(null);
     toast.success("Council history cleared");
   };
 
@@ -238,7 +283,7 @@ const Council = () => {
   return (
     <AppLayout>
       <div className="flex flex-col h-[calc(100vh-56px)] max-w-lg mx-auto overflow-x-hidden">
-        {/* Header */}
+        {/* Header with mode toggle */}
         <div className="px-5 pt-4 pb-2 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
@@ -249,11 +294,22 @@ const Council = () => {
               <p className="text-muted-foreground font-sans text-[10px]">3 AI stylists deliberate for you</p>
             </div>
           </div>
-          {messages.length > 0 && (
-            <button onClick={clearHistory} className="text-muted-foreground hover:text-destructive transition-colors p-1.5">
-              <Trash2 className="h-4 w-4" />
+          <div className="flex items-center gap-1.5">
+            {/* Mode toggle back to Quick Chat */}
+            <button
+              onClick={() => navigate("/chat")}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border bg-card hover:border-primary/40 transition-colors"
+              title="Switch to Quick Chat"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-muted-foreground" />
+              <span className="text-[10px] font-sans font-medium text-muted-foreground">Quick</span>
             </button>
-          )}
+            {messages.length > 0 && (
+              <button onClick={clearHistory} className="text-muted-foreground hover:text-destructive transition-colors p-1.5">
+                <Trash2 className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Messages */}
@@ -318,7 +374,6 @@ const Council = () => {
                   </div>
                 ) : (
                   <div className="max-w-[95%] w-full space-y-2">
-                    {/* Stage 1 model responses */}
                     {msg.stage1?.length ? (
                       <div className="space-y-1.5">
                         <p className="text-[10px] font-sans text-muted-foreground font-medium uppercase tracking-wider">Council Responses</p>
@@ -326,19 +381,12 @@ const Council = () => {
                           const ranking = msg.rankings?.find(r => r.model === s.model);
                           const rank = msg.rankings ? msg.rankings.findIndex(r => r.model === s.model) + 1 : undefined;
                           return (
-                            <CouncilResponseCard
-                              key={j}
-                              model={s.model}
-                              response={s.response}
-                              ranking={ranking}
-                              rank={rank}
-                            />
+                            <CouncilResponseCard key={j} model={s.model} response={s.response} ranking={ranking} rank={rank} />
                           );
                         })}
                       </div>
                     ) : null}
 
-                    {/* Final synthesis */}
                     {msg.synthesis && (
                       <div className="rounded-2xl px-3.5 py-2.5 bg-card border-2 border-primary/30 rounded-bl-md relative overflow-hidden">
                         <motion.div
@@ -373,7 +421,6 @@ const Council = () => {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-2">
               <CouncilStageProgress currentStage={currentStage} stageStatus={stageStatus} />
 
-              {/* Live stage 1 results */}
               {liveStage1.length > 0 && currentStage >= 2 && (
                 <div className="space-y-1.5">
                   <p className="text-[10px] font-sans text-muted-foreground font-medium uppercase tracking-wider">Council Responses</p>
