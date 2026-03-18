@@ -726,10 +726,11 @@ const OutfitCalendar = () => {
                                   key={pi}
                                   src={url}
                                   alt={`Item ${pi + 1}`}
-                                  className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
+                                  className="w-14 h-14 rounded-lg object-contain flex-shrink-0 bg-white"
                                   style={{
                                     border: "1px solid hsl(var(--border) / 0.3)",
                                     boxShadow: "0 2px 8px -2px hsl(var(--foreground) / 0.08)",
+                                    mixBlendMode: "multiply",
                                   }}
                                 />
                               ))}
