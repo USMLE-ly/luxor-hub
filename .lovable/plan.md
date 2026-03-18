@@ -1,20 +1,69 @@
+# AURELIA — Launch-Ready Roadmap
 
+> Updated: 2026-03-07 — Practical, prioritized roadmap for a reliable launch.
 
-# Plan: Update `.lovable/plan.md` with Googolplex Flat-Lay Upgrade + Weather Location
+---
 
-Add two new sections to the roadmap between the existing P1 and P2 sections:
+## P0 — Critical (Must fix before launch)
 
-1. **Googolplex Flat-Lay Upgrade** — covering all 8 items (calendar visual thumbnails, background-removed display, one-tap add to closet, outfit generator clean backgrounds, remove-bg edge function, closet flat-lay view, calendar stats bar, flat-lay in calendar event cards)
+### 1. AI Error Handling & Fallbacks
+- [x] Chat: handles 429/402 gracefully with toasts
+- [x] Chat: streaming SSE parsing with proper buffer flush
+- [ ] OutfitAnalysis: add retry button on AI failure, show friendly error state  
+- [ ] VideoAnalysis: add timeout handling for long video processing
+- [ ] FashionDesigner: add retry on generation failure
+- [ ] All AI pages: wrap in ErrorBoundary for crash recovery
+- [ ] All edge functions: consistent 429/402 handling
 
-2. **Location-Based Weather** — shared `useUserLocation` hook, updated `get-weather` edge function with reverse geocoding, wired into MorningRoutineCard and OutfitCalendar with city name display
+### 2. Image Upload Robustness
+- [ ] Compress images client-side before upload (target <2MB via canvas)
+- [ ] Enforce consistent size limits across all pages
+- [ ] Show file size in upload preview
+- [ ] Add privacy notice banner on all upload pages ("Images processed by AI")
+- [ ] Lazy load all gallery/product images
 
-### What changes in the file
+### 3. Mobile UX
+- [ ] Test sidebar collapse on small screens
+- [ ] Fix horizontal overflow in carousels (scrollbar-none + snap)
+- [ ] Ensure modals/dialogs scrollable on short viewports
+- [ ] Touch-friendly tap targets (min 44px)
+- [ ] Swipe hint: test reliability across screen sizes
 
-**File: `.lovable/plan.md`**
+### 4. Auth & Security
+- [x] RLS policies on all 20+ tables
+- [x] No client-side admin checks
+- [ ] Privacy notice for AI image processing
+- [ ] Ensure all storage uploads use user-scoped paths
+- [ ] Rate limit awareness on all AI endpoints
 
-Insert after line 67 (end of P1 section), before P2:
+---
 
-```markdown
+## P1 — Important (Should fix for quality)
+
+### 5. Shop/Products Polish
+- [ ] Consistent fallback placeholder images
+- [ ] Loading skeletons while products load
+- [ ] "No results" helpful message state
+- [ ] Test edge function with varied query formats
+
+### 6. Onboarding Polish
+- [ ] Clear selfie instructions with example photos
+- [ ] Swipe hint: click alternative for non-touch
+- [ ] Style DNA explanation tooltip
+- [ ] Clear step progress indicator
+
+### 7. AI Accuracy & Quality
+- [ ] Test outfit analysis with diverse outfits
+- [ ] Validate Style DNA with multiple skin tones
+- [ ] Wardrobe gap: no repeated suggestions
+- [ ] Cap confidence scores 0-100
+
+### 8. Chat Improvements
+- [ ] Test multi-turn context (5+ messages)
+- [ ] Calendar/weather: graceful fallback if denied
+- [ ] Offline suggestion cards from last Style DNA
+- [ ] Auto-save conversation periodically
+
 ---
 
 ## Googolplex — Flat-Lay & Visual Upgrade
@@ -61,7 +110,26 @@ Insert after line 67 (end of P1 section), before P2:
 | Modify | `supabase/functions/get-weather/index.ts` |
 | Modify | `src/components/app/MorningRoutineCard.tsx` |
 | Modify | `src/pages/OutfitCalendar.tsx` |
-```
 
-No other files change. This is a plan file update only.
+---
 
+## P2 — Nice to Have (Post-launch)
+
+### 9. Performance
+- [ ] Audit bundle size, lazy-load heavy pages
+- [ ] Service worker for offline
+- [ ] Optimize 3D mannequin loading
+- [ ] Analytics tracking for feature usage
+
+### 10. Community & Social
+- [ ] Report/flag for public designs
+- [ ] Multi-store shop filtering
+- [ ] Design collaboration
+- [ ] Style challenges with prizes
+
+---
+
+## Status
+- [ ] Not started
+- [x] Complete
+- 🔧 In progress
