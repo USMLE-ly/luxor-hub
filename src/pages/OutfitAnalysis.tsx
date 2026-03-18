@@ -94,6 +94,9 @@ export default function OutfitAnalysis() {
   const [flatLayItems, setFlatLayItems] = useState<any[]>([]);
   const [isGeneratingFlatLay, setIsGeneratingFlatLay] = useState(false);
   const [flatLayError, setFlatLayError] = useState<string | null>(null);
+  const [isSavingFlatLay, setIsSavingFlatLay] = useState(false);
+  const [flatLaySaved, setFlatLaySaved] = useState(false);
+  const [isPostingFlatLay, setIsPostingFlatLay] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filteredHistory = history.filter((h) => {
