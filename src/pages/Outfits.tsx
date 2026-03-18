@@ -40,6 +40,7 @@ const Outfits = () => {
   const [scheduleOutfit, setScheduleOutfit] = useState<OutfitSuggestion | null>(null);
   const [scheduleDate, setScheduleDate] = useState<Date | undefined>();
   const [scheduleNotes, setScheduleNotes] = useState("");
+  const [flatLayOutfit, setFlatLayOutfit] = useState<OutfitSuggestion | null>(null);
 
   useEffect(() => {
     if (!user) return;
