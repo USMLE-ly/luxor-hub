@@ -372,6 +372,60 @@ export default function OutfitAnalysis() {
     toast.success("Analysis card downloaded!");
   };
 
+  const handleGenerateFlatLay = async () => {
+    if (!imagePreview && !imageUrl) {
+      toast.error("Upload an image first");
+      return;
+    }
+    setIsGeneratingFlatLay(true);
+    setFlatLayError(null);
+    setFlatLayImage(null);
+    setFlatLayItems([]);
+    try {
+      // If we don't have a public URL yet, upload the image first
+      let publicUrl = imageUrl;
+      if (!publicUrl && imageFile && user) {
+        const ext = imageFile.name.split(".").pop();
+        const path = `${user.id}/flatlay-${Date.now()}.${ext}`;
+        const { error: uploadError } = await supabase.storage.from("clothing-photos").upload(path, imageFile);
+        if (uploadError) throw uploadError;
+        const { data: urlData } = supabase.storage.from("clothing-photos").getPublicUrl(path);
+        publicUrl = urlData.publicUrl;
+        setImageUrl(publicUrl);
+      }
+      if (!publicUrl) throw new Error("No image available");
+
+      const { data, error } = await supabase.functions.invoke("outfit-flat-lay", {
+        body: { imageUrl: publicUrl },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      setFlatLayImage(data.flatLayImage || null);
+      setFlatLayItems(data.items || []);
+      if (data.flatLayImage) {
+        toast.success("Flat-lay generated!");
+      } else {
+        toast.error("Could not generate flat-lay image");
+      }
+    } catch (err: any) {
+      console.error(err);
+      const msg = err.message || "Flat-lay generation failed";
+      setFlatLayError(msg);
+      toast.error(msg);
+    } finally {
+      setIsGeneratingFlatLay(false);
+    }
+  };
+
+  const categoryIcon = (cat: string) => {
+    const icons: Record<string, string> = {
+      top: "👕", bottom: "👖", outerwear: "🧥", shoes: "👟",
+      accessory: "⌚", bag: "👜", jewelry: "💍", hat: "🎩", eyewear: "🕶️",
+    };
+    return icons[cat] || "👔";
+  };
+
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-green-500";
     if (score >= 60) return "text-yellow-500";
