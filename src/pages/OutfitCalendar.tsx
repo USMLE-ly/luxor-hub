@@ -145,16 +145,8 @@ const OutfitCalendar = () => {
 
   const fetchWeatherForecast = async () => {
     try {
-      let lat = 40.7128, lon = -74.006;
-      if (navigator.geolocation) {
-        try {
-          const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
-            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 })
-          );
-          lat = pos.coords.latitude;
-          lon = pos.coords.longitude;
-        } catch { /* use default */ }
-      }
+      const lat = userLocation.lat;
+      const lon = userLocation.lon;
       const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,weathercode,precipitation_probability_max&temperature_unit=celsius&forecast_days=14`;
       const resp = await fetch(url);
       if (!resp.ok) return;
