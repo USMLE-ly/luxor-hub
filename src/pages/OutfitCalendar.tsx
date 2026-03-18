@@ -762,9 +762,16 @@ const OutfitCalendar = () => {
               border: "1px solid hsl(var(--border))",
             }}
           >
-            <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.15em] mb-3">
-              7-Day Forecast
-            </p>
+            <div className="flex items-center gap-2 mb-3">
+              <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.15em]">
+                7-Day Forecast
+              </p>
+              {userLocation.city && (
+                <span className="flex items-center gap-0.5 text-[10px] font-sans text-muted-foreground/60">
+                  <MapPin className="w-2.5 h-2.5" /> {userLocation.city}
+                </span>
+              )}
+            </div>
             <div className="flex gap-1 overflow-x-auto pb-1">
               {weatherData.slice(0, 7).map((w) => {
                 const d = new Date(w.date + "T00:00:00");
