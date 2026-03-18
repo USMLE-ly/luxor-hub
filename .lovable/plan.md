@@ -70,16 +70,16 @@
 
 ### Upgrades to Existing Features
 
-- [ ] Calendar day cells: mini flat-lay thumbnail stacks (2-3 items) replacing text labels
-- [ ] Calendar selected date panel: `mix-blend-mode: multiply` for floating item display
-- [ ] OutfitAnalysis flat-lay items: one-tap "Add to Closet" button per detected item
+- [x] Calendar day cells: mini flat-lay thumbnail stacks (2-3 items) replacing text labels
+- [x] Calendar selected date panel: `mix-blend-mode: multiply` for floating item display
+- [x] OutfitAnalysis flat-lay items: one-tap "Add to Closet" button per detected item
 - [ ] Outfits.tsx flat-lay dialog: clean background treatment with cream/linen backdrop
 
 ### New Features
 
-- [ ] Edge function `remove-bg`: AI background removal via Gemini for clothing photos
+- [x] Edge function `remove-bg`: AI background removal via Gemini for clothing photos
 - [ ] Closet page: flat-lay view toggle with magazine-style grid layout
-- [ ] Calendar stats bar: outfits planned, day streak, most worn category
+- [x] Calendar stats bar: outfits planned, day streak, most worn category
 - [ ] Calendar event cards: Layers button → flat-lay composition dialog
 
 ### Files
@@ -96,11 +96,11 @@
 
 ## Googolplex — Location-Based Weather
 
-- [ ] Create shared `useUserLocation` hook (geolocation + localStorage cache + IP fallback)
-- [ ] Update `get-weather` edge function: accept lat/lon, reverse geocode to city name
-- [ ] MorningRoutineCard: use location hook, pass real coords, display city name
-- [ ] OutfitCalendar: replace inline geolocation with shared hook, show city in forecast strip
-- [ ] Auto-Fill Week: AI suggestions based on actual local weather
+- [x] Create shared `useUserLocation` hook (geolocation + localStorage cache + IP fallback)
+- [x] Update `get-weather` edge function: accept lat/lon, reverse geocode to city name
+- [x] MorningRoutineCard: use location hook, pass real coords, display city name
+- [x] OutfitCalendar: replace inline geolocation with shared hook, show city in forecast strip
+- [x] Auto-Fill Week: AI suggestions based on actual local weather
 
 ### Files
 

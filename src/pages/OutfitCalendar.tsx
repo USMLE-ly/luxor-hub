@@ -1,12 +1,14 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useUserLocation } from "@/hooks/useUserLocation";
 import {
   CalendarDays, ChevronLeft, ChevronRight, Plus, X, Shirt, Sparkles, Loader2,
   Cloud, Sun, CloudRain, Snowflake, Wind, Droplets, Thermometer, Pencil, Bell, BellOff,
+  MapPin, TrendingUp, Flame, BarChart3,
 } from "lucide-react";
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, addMonths, subMonths, isSameMonth, isSameDay, isToday, differenceInMilliseconds, set as setDate } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -88,13 +90,20 @@ const OutfitCalendar = () => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(
     typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted"
   );
+  const userLocation = useUserLocation();
 
   useEffect(() => {
     if (!user) return;
     fetchEvents();
     fetchOutfits();
-    fetchWeatherForecast();
   }, [user, currentMonth]);
+
+  // Fetch weather when location resolves
+  useEffect(() => {
+    if (!userLocation.loading) {
+      fetchWeatherForecast();
+    }
+  }, [userLocation.loading]);
 
   // Schedule push reminders for tomorrow's events
   const scheduleReminders = useCallback((evts: CalendarEvent[]) => {
@@ -136,16 +145,8 @@ const OutfitCalendar = () => {
 
   const fetchWeatherForecast = async () => {
     try {
-      let lat = 40.7128, lon = -74.006;
-      if (navigator.geolocation) {
-        try {
-          const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
-            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 })
-          );
-          lat = pos.coords.latitude;
-          lon = pos.coords.longitude;
-        } catch { /* use default */ }
-      }
+      const lat = userLocation.lat;
+      const lon = userLocation.lon;
       const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,weathercode,precipitation_probability_max&temperature_unit=celsius&forecast_days=14`;
       const resp = await fetch(url);
       if (!resp.ok) return;
@@ -362,6 +363,36 @@ const OutfitCalendar = () => {
   const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   const todayWeather = getWeatherForDate(new Date());
 
+  // Calendar Stats
+  const calendarStats = useMemo(() => {
+    const monthEvents = events;
+    const planned = monthEvents.length;
+    
+    // Day streak: count consecutive days with events from today backwards
+    let streak = 0;
+    let checkDate = new Date();
+    while (true) {
+      const dateStr = format(checkDate, "yyyy-MM-dd");
+      if (monthEvents.some(e => e.event_date === dateStr)) {
+        streak++;
+        checkDate = addDays(checkDate, -1);
+      } else break;
+    }
+
+    // Most worn category from outfit items
+    const categoryCounts: Record<string, number> = {};
+    monthEvents.forEach(ev => {
+      const items = Array.isArray(ev.outfit_items) ? ev.outfit_items : [];
+      items.forEach((item: any) => {
+        const cat = item?.category || item?.type || "other";
+        categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+      });
+    });
+    const topCategory = Object.entries(categoryCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "—";
+
+    return { planned, streak, topCategory };
+  }, [events]);
+
   return (
     <AppLayout>
       <div className="p-5 max-w-2xl mx-auto pb-28">
@@ -512,11 +543,54 @@ const OutfitCalendar = () => {
                   )}
                   {dayEvents.length > 0 && (
                     <div className="mt-0.5 space-y-0.5">
-                      {dayEvents.slice(0, 2).map(ev => (
-                        <div key={ev.id} className="rounded px-1 py-[2px] truncate" style={{ background: "hsl(var(--primary) / 0.15)" }}>
-                          <span className="text-[7px] font-sans text-primary font-semibold tracking-wide">{ev.title}</span>
-                        </div>
-                      ))}
+                      {(() => {
+                        // Mini flat-lay stacks: show tiny thumbnails if outfit has photos
+                        const allPhotos: string[] = [];
+                        let hasMannequin = false;
+                        let mannequinUrl = "";
+                        dayEvents.forEach(ev => {
+                          if (ev.mannequin_image_url) { hasMannequin = true; mannequinUrl = ev.mannequin_image_url; }
+                          const items = Array.isArray(ev.outfit_items) ? ev.outfit_items : [];
+                          items.forEach((item: any) => {
+                            const url = item?.photo_url || item?.photoUrl || item?.image_url || item?.imageUrl;
+                            if (url) allPhotos.push(url);
+                          });
+                        });
+
+                        if (hasMannequin) {
+                          return (
+                            <div className="flex justify-center">
+                              <img src={mannequinUrl} alt="" className="w-7 h-7 rounded-full object-cover border border-border/40" />
+                            </div>
+                          );
+                        }
+
+                        if (allPhotos.length > 0) {
+                          return (
+                            <div className="flex flex-col items-center gap-[1px]">
+                              {allPhotos.slice(0, 3).map((url, pi) => (
+                                <img
+                                  key={pi}
+                                  src={url}
+                                  alt=""
+                                  className="w-4 h-5 rounded-sm object-cover"
+                                  style={{ 
+                                    mixBlendMode: "multiply",
+                                    border: "0.5px solid hsl(var(--border) / 0.3)",
+                                  }}
+                                />
+                              ))}
+                            </div>
+                          );
+                        }
+
+                        // Fallback: text labels
+                        return dayEvents.slice(0, 2).map(ev => (
+                          <div key={ev.id} className="rounded px-1 py-[2px] truncate" style={{ background: "hsl(var(--primary) / 0.15)" }}>
+                            <span className="text-[7px] font-sans text-primary font-semibold tracking-wide">{ev.title}</span>
+                          </div>
+                        ));
+                      })()}
                       {dayEvents.length > 2 && (
                         <span className="text-[7px] text-muted-foreground font-sans">+{dayEvents.length - 2}</span>
                       )}
@@ -652,10 +726,11 @@ const OutfitCalendar = () => {
                                   key={pi}
                                   src={url}
                                   alt={`Item ${pi + 1}`}
-                                  className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
+                                  className="w-14 h-14 rounded-lg object-contain flex-shrink-0 bg-white"
                                   style={{
                                     border: "1px solid hsl(var(--border) / 0.3)",
                                     boxShadow: "0 2px 8px -2px hsl(var(--foreground) / 0.08)",
+                                    mixBlendMode: "multiply",
                                   }}
                                 />
                               ))}
@@ -688,9 +763,16 @@ const OutfitCalendar = () => {
               border: "1px solid hsl(var(--border))",
             }}
           >
-            <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.15em] mb-3">
-              7-Day Forecast
-            </p>
+            <div className="flex items-center gap-2 mb-3">
+              <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.15em]">
+                7-Day Forecast
+              </p>
+              {userLocation.city && (
+                <span className="flex items-center gap-0.5 text-[10px] font-sans text-muted-foreground/60">
+                  <MapPin className="w-2.5 h-2.5" /> {userLocation.city}
+                </span>
+              )}
+            </div>
             <div className="flex gap-1 overflow-x-auto pb-1">
               {weatherData.slice(0, 7).map((w) => {
                 const d = new Date(w.date + "T00:00:00");
@@ -713,6 +795,40 @@ const OutfitCalendar = () => {
             </div>
           </motion.div>
         )}
+
+        {/* Calendar Stats Bar */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          className="rounded-2xl p-4 grid grid-cols-3 gap-3 mb-5"
+          style={{
+            background: "hsl(var(--card))",
+            border: "1px solid hsl(var(--border))",
+          }}
+        >
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <CalendarDays className="w-3.5 h-3.5 text-primary" />
+            </div>
+            <p className="font-display text-lg font-bold text-foreground">{calendarStats.planned}</p>
+            <p className="text-[9px] font-sans text-muted-foreground">Outfits Planned</p>
+          </div>
+          <div className="text-center border-x border-border/40">
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <Flame className="w-3.5 h-3.5 text-orange-400" />
+            </div>
+            <p className="font-display text-lg font-bold text-foreground">{calendarStats.streak}</p>
+            <p className="text-[9px] font-sans text-muted-foreground">Day Streak</p>
+          </div>
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <BarChart3 className="w-3.5 h-3.5 text-primary" />
+            </div>
+            <p className="font-display text-sm font-bold text-foreground capitalize">{calendarStats.topCategory}</p>
+            <p className="text-[9px] font-sans text-muted-foreground">Top Category</p>
+          </div>
+        </motion.div>
 
         {/* Add Event Dialog */}
         <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>

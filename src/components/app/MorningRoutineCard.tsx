@@ -3,7 +3,8 @@ import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { Sun, Cloud, CloudRain, Snowflake, Wind, Thermometer, Calendar, Sparkles, ChevronRight, Timer, RefreshCw } from "lucide-react";
+import { useUserLocation } from "@/hooks/useUserLocation";
+import { Sun, Cloud, CloudRain, Snowflake, Wind, Thermometer, Calendar, Sparkles, ChevronRight, Timer, RefreshCw, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GradientButton } from "@/components/ui/gradient-button";
 
@@ -38,38 +39,46 @@ function getWeatherIcon(condition: string) {
 export function MorningRoutineCard() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const userLocation = useUserLocation();
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [suggestions, setSuggestions] = useState<OutfitSuggestion[]>([]);
   const [activeSuggestion, setActiveSuggestion] = useState(0);
   const [loading, setLoading] = useState(true);
   const [timerActive, setTimerActive] = useState(false);
-  const [timerSeconds, setTimerSeconds] = useState(600); // 10 min
+  const [timerSeconds, setTimerSeconds] = useState(600);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || userLocation.loading) return;
     const load = async () => {
       const today = new Date().toISOString().split("T")[0];
 
-      // Fetch weather, calendar events, and generate suggestions in parallel
       const [weatherRes, eventsRes] = await Promise.all([
-        supabase.functions.invoke("get-weather", { body: { location: "auto" } }).catch(() => ({ data: null })),
+        supabase.functions.invoke("get-weather", { 
+          body: { lat: userLocation.lat, lon: userLocation.lon } 
+        }).catch(() => ({ data: null })),
         supabase.from("calendar_events").select("title, occasion, event_time").eq("user_id", user.id).eq("event_date", today).order("event_time"),
       ]);
 
       if (weatherRes.data) {
         setWeather({
           temperature: weatherRes.data.temperature ?? weatherRes.data.temp ?? 20,
-          condition: weatherRes.data.condition ?? weatherRes.data.weather ?? "Clear",
-          location: weatherRes.data.location ?? weatherRes.data.city ?? "Your area",
+          condition: weatherRes.data.condition ?? weatherRes.data.description ?? "Clear",
+          location: weatherRes.data.city || userLocation.city || "Your area",
+        });
+      } else {
+        // Even without weather API data, show city from location
+        setWeather({
+          temperature: 20,
+          condition: "Clear",
+          location: userLocation.city || "Your area",
         });
       }
 
       if (eventsRes.data) setEvents(eventsRes.data as CalendarEvent[]);
 
-      // Generate quick outfit suggestions based on context
       const occasion = eventsRes.data?.[0]?.occasion || "everyday";
-      const temp = weatherRes.data?.temperature ?? 20;
+      const temp = weatherRes.data?.temp ?? 20;
       const mockSuggestions: OutfitSuggestion[] = [
         {
           name: temp < 15 ? "Layered & Warm" : "Light & Fresh",
@@ -94,7 +103,7 @@ export function MorningRoutineCard() {
       setLoading(false);
     };
     load();
-  }, [user]);
+  }, [user, userLocation.loading]);
 
   // Timer effect
   useEffect(() => {
@@ -105,7 +114,7 @@ export function MorningRoutineCard() {
 
   const formatTime = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 
-  if (loading) {
+  if (loading || userLocation.loading) {
     return (
       <div className="rounded-2xl border border-border bg-card p-5 animate-pulse">
         <div className="h-6 w-40 bg-secondary rounded mb-3" />
@@ -122,7 +131,6 @@ export function MorningRoutineCard() {
       animate={{ opacity: 1, y: 0 }}
       className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-xl overflow-hidden relative"
     >
-      {/* Subtle morning gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-[hsl(40,80%,95%,0.08)] to-transparent pointer-events-none" />
 
       <div className="p-5 relative z-10">
@@ -139,6 +147,15 @@ export function MorningRoutineCard() {
             </div>
           )}
         </div>
+
+        {/* City & Weather Location */}
+        {weather?.location && (
+          <div className="flex items-center gap-1 mb-3 text-[10px] font-sans text-muted-foreground/70">
+            <MapPin className="w-3 h-3" />
+            <span>{weather.location}</span>
+            {weather.condition && <span className="ml-1">· {weather.condition}</span>}
+          </div>
+        )}
 
         {/* Today's Events */}
         {events.length > 0 && (

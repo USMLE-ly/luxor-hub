@@ -12,7 +12,7 @@ import {
   Upload, Camera, Sparkles, TrendingUp, Palette, ShieldCheck, AlertTriangle,
   Star, Shirt, Loader2, History, Save, Trash2, Share2, X,
   Twitter, Link, Check, Download, Clock, ArrowLeftRight, Users, Search, ExternalLink, ShoppingBag, RefreshCw,
-  Layers, Eye
+  Layers, Eye, Plus
 } from "lucide-react";
 import { compressImage, formatFileSize } from "@/lib/imageUtils";
 import { PrivacyNotice } from "@/components/app/PrivacyNotice";
@@ -97,6 +97,8 @@ export default function OutfitAnalysis() {
   const [isSavingFlatLay, setIsSavingFlatLay] = useState(false);
   const [flatLaySaved, setFlatLaySaved] = useState(false);
   const [isPostingFlatLay, setIsPostingFlatLay] = useState(false);
+  const [addedToCloset, setAddedToCloset] = useState<Set<number>>(new Set());
+  const [addingToCloset, setAddingToCloset] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filteredHistory = history.filter((h) => {
@@ -427,6 +429,27 @@ export default function OutfitAnalysis() {
       accessory: "⌚", bag: "👜", jewelry: "💍", hat: "🎩", eyewear: "🕶️",
     };
     return icons[cat] || "👔";
+  };
+
+  const handleAddToCloset = async (item: any, idx: number) => {
+    if (!user || addedToCloset.has(idx)) return;
+    setAddingToCloset(idx);
+    try {
+      const { error } = await supabase.from("clothing_items").insert({
+        user_id: user.id,
+        name: item.name,
+        category: item.category || "other",
+        color: item.color || null,
+        style: item.style || null,
+      });
+      if (error) throw error;
+      setAddedToCloset(prev => new Set(prev).add(idx));
+      toast.success(`Added "${item.name}" to closet!`);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to add to closet");
+    } finally {
+      setAddingToCloset(null);
+    }
   };
 
   const handleSaveFlatLay = async () => {
@@ -809,7 +832,27 @@ export default function OutfitAnalysis() {
                                     <span className="text-xs text-muted-foreground truncate">{item.color} · {item.style}</span>
                                   </div>
                                 </div>
-                                <Badge variant="secondary" className="text-[10px] flex-shrink-0">{item.category}</Badge>
+                                <div className="flex items-center gap-1.5 flex-shrink-0">
+                                  <Badge variant="secondary" className="text-[10px]">{item.category}</Badge>
+                                  <button
+                                    onClick={() => handleAddToCloset(item, idx)}
+                                    disabled={addedToCloset.has(idx) || addingToCloset === idx}
+                                    className={`p-1.5 rounded-lg transition-colors ${
+                                      addedToCloset.has(idx) 
+                                        ? "bg-green-500/15 text-green-500" 
+                                        : "hover:bg-primary/10 text-muted-foreground hover:text-primary"
+                                    }`}
+                                    title={addedToCloset.has(idx) ? "Added to closet" : "Add to closet"}
+                                  >
+                                    {addingToCloset === idx ? (
+                                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    ) : addedToCloset.has(idx) ? (
+                                      <Check className="w-3.5 h-3.5" />
+                                    ) : (
+                                      <Plus className="w-3.5 h-3.5" />
+                                    )}
+                                  </button>
+                                </div>
                               </motion.div>
                             ))}
                           </div>
