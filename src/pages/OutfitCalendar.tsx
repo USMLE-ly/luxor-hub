@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
@@ -6,9 +6,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   CalendarDays, ChevronLeft, ChevronRight, Plus, X, Shirt, Sparkles, Loader2,
-  Cloud, Sun, CloudRain, Snowflake, Wind, Droplets, Thermometer,
+  Cloud, Sun, CloudRain, Snowflake, Wind, Droplets, Thermometer, Pencil, Bell, BellOff,
 } from "lucide-react";
-import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, addMonths, subMonths, isSameMonth, isSameDay, isToday } from "date-fns";
+import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, addMonths, subMonths, isSameMonth, isSameDay, isToday, differenceInMilliseconds, set as setDate } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,6 +48,29 @@ const weatherCodeToIcon = (code: number) => {
   return <Cloud className="w-4 h-4 text-muted-foreground" />;
 };
 
+// Push notification helpers
+const requestNotificationPermission = async (): Promise<boolean> => {
+  if (!("Notification" in window)) return false;
+  if (Notification.permission === "granted") return true;
+  if (Notification.permission === "denied") return false;
+  const result = await Notification.requestPermission();
+  return result === "granted";
+};
+
+const scheduleNotification = (title: string, body: string, delayMs: number) => {
+  if (delayMs <= 0) return;
+  setTimeout(() => {
+    if (Notification.permission === "granted") {
+      new Notification(title, {
+        body,
+        icon: "/pwa-192.png",
+        badge: "/pwa-192.png",
+        tag: `outfit-reminder-${Date.now()}`,
+      });
+    }
+  }, delayMs);
+};
+
 const OutfitCalendar = () => {
   const { user } = useAuth();
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -55,10 +78,16 @@ const OutfitCalendar = () => {
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
   const [savedOutfits, setSavedOutfits] = useState<any[]>([]);
   const [newEvent, setNewEvent] = useState({ title: "", occasion: "Casual", notes: "", outfitId: "" });
+  const [editEvent, setEditEvent] = useState({ title: "", occasion: "Casual", notes: "", outfitId: "" });
   const [autoFilling, setAutoFilling] = useState(false);
   const [weatherData, setWeatherData] = useState<WeatherDay[]>([]);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(
+    typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted"
+  );
 
   useEffect(() => {
     if (!user) return;
@@ -67,25 +96,60 @@ const OutfitCalendar = () => {
     fetchWeatherForecast();
   }, [user, currentMonth]);
 
+  // Schedule push reminders for tomorrow's events
+  const scheduleReminders = useCallback((evts: CalendarEvent[]) => {
+    if (!notificationsEnabled) return;
+    const now = new Date();
+    const tonight = setDate(now, { hours: 20, minutes: 0, seconds: 0, milliseconds: 0 });
+    const tomorrow = format(addDays(now, 1), "yyyy-MM-dd");
+
+    const tomorrowEvents = evts.filter(e => e.event_date === tomorrow);
+    if (tomorrowEvents.length === 0) return;
+
+    const delayMs = differenceInMilliseconds(tonight, now);
+    if (delayMs <= 0) return;
+
+    tomorrowEvents.forEach(ev => {
+      scheduleNotification(
+        "👔 Outfit Reminder",
+        `Prepare your outfit for tomorrow: ${ev.title}${ev.occasion ? ` (${ev.occasion})` : ""}`,
+        delayMs
+      );
+    });
+  }, [notificationsEnabled]);
+
+  const toggleNotifications = async () => {
+    if (notificationsEnabled) {
+      setNotificationsEnabled(false);
+      toast.success("Reminders turned off");
+      return;
+    }
+    const granted = await requestNotificationPermission();
+    if (granted) {
+      setNotificationsEnabled(true);
+      toast.success("Outfit reminders enabled! You'll be reminded at 8 PM the night before.");
+      scheduleReminders(events);
+    } else {
+      toast.error("Notification permission denied. Enable it in your browser settings.");
+    }
+  };
+
   const fetchWeatherForecast = async () => {
     try {
-      // Get user location or default to NYC
       let lat = 40.7128, lon = -74.006;
       if (navigator.geolocation) {
         try {
-          const pos = await new Promise<GeolocationPosition>((resolve, reject) => 
+          const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
             navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 })
           );
           lat = pos.coords.latitude;
           lon = pos.coords.longitude;
         } catch { /* use default */ }
       }
-
       const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,weathercode,precipitation_probability_max&temperature_unit=celsius&forecast_days=14`;
       const resp = await fetch(url);
       if (!resp.ok) return;
       const data = await resp.json();
-      
       const weatherMap: Record<number, string> = {
         0: "Clear", 1: "Mostly clear", 2: "Partly cloudy", 3: "Overcast",
         45: "Foggy", 48: "Rime fog", 51: "Light drizzle", 53: "Drizzle",
@@ -93,7 +157,6 @@ const OutfitCalendar = () => {
         71: "Light snow", 73: "Snow", 75: "Heavy snow", 80: "Rain showers",
         95: "Thunderstorm",
       };
-
       const days: WeatherDay[] = data.daily.time.map((date: string, i: number) => ({
         date,
         temp: Math.round((data.daily.temperature_2m_max[i] + data.daily.temperature_2m_min[i]) / 2),
@@ -124,7 +187,10 @@ const OutfitCalendar = () => {
       .gte("event_date", start)
       .lte("event_date", end)
       .order("event_date");
-    if (data) setEvents(data);
+    if (data) {
+      setEvents(data);
+      scheduleReminders(data);
+    }
     setLoading(false);
   };
 
@@ -159,6 +225,41 @@ const OutfitCalendar = () => {
     }
   };
 
+  const openEditDialog = (ev: CalendarEvent) => {
+    setEditingEvent(ev);
+    setEditEvent({
+      title: ev.title,
+      occasion: ev.occasion || "Casual",
+      notes: ev.notes || "",
+      outfitId: "",
+    });
+    setShowEditDialog(true);
+  };
+
+  const updateEvent = async () => {
+    if (!editingEvent || !editEvent.title.trim()) return;
+    const outfit = editEvent.outfitId ? savedOutfits.find(o => o.id === editEvent.outfitId) : null;
+    const updateData: any = {
+      title: editEvent.title.trim(),
+      occasion: editEvent.occasion,
+      notes: editEvent.notes || null,
+    };
+    if (outfit) updateData.outfit_items = outfit.mannequin_items || [];
+
+    const { error } = await supabase
+      .from("calendar_events")
+      .update(updateData)
+      .eq("id", editingEvent.id);
+
+    if (error) toast.error("Failed to update event");
+    else {
+      toast.success("Event updated!");
+      setShowEditDialog(false);
+      setEditingEvent(null);
+      fetchEvents();
+    }
+  };
+
   const deleteEvent = async (id: string) => {
     const { error } = await supabase.from("calendar_events").delete().eq("id", id);
     if (error) toast.error("Failed to delete");
@@ -174,14 +275,12 @@ const OutfitCalendar = () => {
         supabase.from("style_profiles").select("archetype, preferences").eq("user_id", user.id).single(),
         supabase.from("calendar_events").select("event_date").eq("user_id", user.id),
       ]);
-
       const closetItems = itemsRes.data || [];
       if (closetItems.length < 2) {
         toast.error("Add at least 2 items to your closet first");
         setAutoFilling(false);
         return;
       }
-
       const existingDates = new Set((existingEventsRes.data || []).map((e: any) => e.event_date));
       const today = new Date();
       const daysToFill: Date[] = [];
@@ -190,14 +289,11 @@ const OutfitCalendar = () => {
         const dateStr = format(d, "yyyy-MM-dd");
         if (!existingDates.has(dateStr)) daysToFill.push(d);
       }
-
       if (daysToFill.length === 0) {
         toast.info("Your upcoming week is already fully scheduled!");
         setAutoFilling(false);
         return;
       }
-
-      // Build weather forecast for the days to fill
       const weatherForecast = daysToFill.map(d => {
         const w = getWeatherForDate(d);
         return w ? { date: format(d, "yyyy-MM-dd"), temp: w.temp, description: w.description, rain: w.rain } : null;
@@ -219,16 +315,13 @@ const OutfitCalendar = () => {
           count: daysToFill.length,
         }),
       });
-
       if (!resp.ok) throw new Error("Failed to generate outfits");
       const data = await resp.json();
       const generatedOutfits = data.outfits || [];
-
       const occasionMap: Record<string, string> = {
         Monday: "Work", Tuesday: "Work", Wednesday: "Work",
         Thursday: "Work", Friday: "Casual", Saturday: "Casual", Sunday: "Casual",
       };
-
       const eventsToInsert = daysToFill.map((d, i) => {
         const outfit = generatedOutfits[i % generatedOutfits.length];
         const dayName = format(d, "EEEE");
@@ -243,10 +336,8 @@ const OutfitCalendar = () => {
           outfit_items: outfit?.items || [],
         };
       });
-
       const { error } = await supabase.from("calendar_events").insert(eventsToInsert);
       if (error) throw error;
-
       toast.success(`Scheduled ${eventsToInsert.length} weather-smart outfits!`);
       fetchEvents();
     } catch (e: any) {
@@ -268,10 +359,7 @@ const OutfitCalendar = () => {
   const days: Date[] = [];
   let day = calStart;
   while (day <= calEnd) { days.push(day); day = addDays(day, 1); }
-
   const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
-  // Today's weather summary
   const todayWeather = getWeatherForDate(new Date());
 
   return (
@@ -288,16 +376,31 @@ const OutfitCalendar = () => {
                 Your curated weekly wardrobe — powered by AI & weather
               </p>
             </div>
-            <motion.button
-              onClick={autoFillWeek}
-              disabled={autoFilling}
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-sans font-semibold gold-gradient text-primary-foreground shadow-[0_4px_12px_-2px_hsl(var(--gold)/0.4)] disabled:opacity-50"
-            >
-              {autoFilling ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-              {autoFilling ? "Generating..." : "Auto-Fill Week"}
-            </motion.button>
+            <div className="flex items-center gap-2">
+              <motion.button
+                onClick={toggleNotifications}
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.92 }}
+                className={`p-2.5 rounded-xl transition-colors ${
+                  notificationsEnabled
+                    ? "bg-primary/15 text-primary"
+                    : "bg-secondary text-muted-foreground"
+                }`}
+                title={notificationsEnabled ? "Reminders on" : "Enable reminders"}
+              >
+                {notificationsEnabled ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
+              </motion.button>
+              <motion.button
+                onClick={autoFillWeek}
+                disabled={autoFilling}
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-sans font-semibold gold-gradient text-primary-foreground shadow-[0_4px_12px_-2px_hsl(var(--gold)/0.4)] disabled:opacity-50"
+              >
+                {autoFilling ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                {autoFilling ? "Generating..." : "Auto-Fill Week"}
+              </motion.button>
+            </div>
           </div>
         </motion.div>
 
@@ -313,7 +416,6 @@ const OutfitCalendar = () => {
               border: "1px solid hsl(var(--border))",
             }}
           >
-            {/* Subtle gold accent line */}
             <div className="absolute top-0 left-0 right-0 h-[2px] gold-gradient opacity-60" />
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -441,7 +543,6 @@ const OutfitCalendar = () => {
                 boxShadow: "0 8px 32px -8px hsl(var(--foreground) / 0.06)",
               }}
             >
-              {/* Gold accent */}
               <div className="absolute top-0 left-0 w-1 h-full gold-gradient rounded-r" />
 
               <div className="flex items-center justify-between mb-4 pl-3">
@@ -504,12 +605,20 @@ const OutfitCalendar = () => {
                           )}
                         </div>
                       </div>
-                      <button
-                        onClick={() => deleteEvent(ev.id)}
-                        className="text-muted-foreground/40 hover:text-destructive p-1.5 rounded-lg hover:bg-destructive/10 transition-colors"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => openEditDialog(ev)}
+                          className="text-muted-foreground/50 hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => deleteEvent(ev.id)}
+                          className="text-muted-foreground/40 hover:text-destructive p-1.5 rounded-lg hover:bg-destructive/10 transition-colors"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </motion.div>
                   ))}
                 </div>
@@ -534,7 +643,7 @@ const OutfitCalendar = () => {
               7-Day Forecast
             </p>
             <div className="flex gap-1 overflow-x-auto pb-1">
-              {weatherData.slice(0, 7).map((w, i) => {
+              {weatherData.slice(0, 7).map((w) => {
                 const d = new Date(w.date + "T00:00:00");
                 return (
                   <button
@@ -594,6 +703,38 @@ const OutfitCalendar = () => {
               <Input placeholder="Notes (optional)" value={newEvent.notes} onChange={e => setNewEvent(p => ({ ...p, notes: e.target.value }))} />
               <Button onClick={addEvent} disabled={!newEvent.title.trim()} className="w-full gold-gradient text-primary-foreground font-sans">
                 Save to Calendar
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Event Dialog */}
+        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="font-display flex items-center gap-2">
+                <Pencil className="h-5 w-5 text-primary" /> Edit Outfit
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-2">
+              <Input placeholder="Event name" value={editEvent.title} onChange={e => setEditEvent(p => ({ ...p, title: e.target.value }))} />
+              <Select value={editEvent.occasion} onValueChange={v => setEditEvent(p => ({ ...p, occasion: v }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {occasions.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              {savedOutfits.length > 0 && (
+                <Select value={editEvent.outfitId} onValueChange={v => setEditEvent(p => ({ ...p, outfitId: v }))}>
+                  <SelectTrigger><SelectValue placeholder="Change outfit (optional)" /></SelectTrigger>
+                  <SelectContent>
+                    {savedOutfits.map(o => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              )}
+              <Input placeholder="Notes (optional)" value={editEvent.notes} onChange={e => setEditEvent(p => ({ ...p, notes: e.target.value }))} />
+              <Button onClick={updateEvent} disabled={!editEvent.title.trim()} className="w-full gold-gradient text-primary-foreground font-sans">
+                Update Event
               </Button>
             </div>
           </DialogContent>
