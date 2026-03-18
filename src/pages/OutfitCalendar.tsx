@@ -1,12 +1,14 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useUserLocation } from "@/hooks/useUserLocation";
 import {
   CalendarDays, ChevronLeft, ChevronRight, Plus, X, Shirt, Sparkles, Loader2,
   Cloud, Sun, CloudRain, Snowflake, Wind, Droplets, Thermometer, Pencil, Bell, BellOff,
+  MapPin, TrendingUp, Flame, BarChart3,
 } from "lucide-react";
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, addMonths, subMonths, isSameMonth, isSameDay, isToday, differenceInMilliseconds, set as setDate } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
