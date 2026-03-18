@@ -832,6 +832,28 @@ export default function OutfitAnalysis() {
                                     <span className="text-xs text-muted-foreground truncate">{item.color} · {item.style}</span>
                                   </div>
                                 </div>
+                                <div className="flex items-center gap-1.5 flex-shrink-0">
+                                  <Badge variant="secondary" className="text-[10px]">{item.category}</Badge>
+                                  <button
+                                    onClick={() => handleAddToCloset(item, idx)}
+                                    disabled={addedToCloset.has(idx) || addingToCloset === idx}
+                                    className={`p-1.5 rounded-lg transition-colors ${
+                                      addedToCloset.has(idx) 
+                                        ? "bg-green-500/15 text-green-500" 
+                                        : "hover:bg-primary/10 text-muted-foreground hover:text-primary"
+                                    }`}
+                                    title={addedToCloset.has(idx) ? "Added to closet" : "Add to closet"}
+                                  >
+                                    {addingToCloset === idx ? (
+                                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    ) : addedToCloset.has(idx) ? (
+                                      <Check className="w-3.5 h-3.5" />
+                                    ) : (
+                                      <Plus className="w-3.5 h-3.5" />
+                                    )}
+                                  </button>
+                                </div>
+                                </div>
                                 <Badge variant="secondary" className="text-[10px] flex-shrink-0">{item.category}</Badge>
                               </motion.div>
                             ))}
