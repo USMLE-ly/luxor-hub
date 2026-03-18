@@ -227,6 +227,15 @@ const Outfits = () => {
                     <Button
                       variant="ghost"
                       size="icon"
+                      onClick={() => setFlatLayOutfit(outfit)}
+                      className="text-muted-foreground hover:text-primary"
+                      title="Flat-Lay View"
+                    >
+                      <Layers className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => setScheduleOutfit(outfit)}
                       className="text-muted-foreground hover:text-primary"
                       title="Add to Schedule"
