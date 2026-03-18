@@ -66,6 +66,53 @@
 
 ---
 
+## Googolplex — Flat-Lay & Visual Upgrade
+
+### Upgrades to Existing Features
+
+- [ ] Calendar day cells: mini flat-lay thumbnail stacks (2-3 items) replacing text labels
+- [ ] Calendar selected date panel: `mix-blend-mode: multiply` for floating item display
+- [ ] OutfitAnalysis flat-lay items: one-tap "Add to Closet" button per detected item
+- [ ] Outfits.tsx flat-lay dialog: clean background treatment with cream/linen backdrop
+
+### New Features
+
+- [ ] Edge function `remove-bg`: AI background removal via Gemini for clothing photos
+- [ ] Closet page: flat-lay view toggle with magazine-style grid layout
+- [ ] Calendar stats bar: outfits planned, day streak, most worn category
+- [ ] Calendar event cards: Layers button → flat-lay composition dialog
+
+### Files
+
+| Action | File |
+|--------|------|
+| Create | `supabase/functions/remove-bg/index.ts` |
+| Modify | `src/pages/OutfitAnalysis.tsx` |
+| Modify | `src/pages/OutfitCalendar.tsx` |
+| Modify | `src/pages/Outfits.tsx` |
+| Modify | `src/pages/Closet.tsx` |
+
+---
+
+## Googolplex — Location-Based Weather
+
+- [ ] Create shared `useUserLocation` hook (geolocation + localStorage cache + IP fallback)
+- [ ] Update `get-weather` edge function: accept lat/lon, reverse geocode to city name
+- [ ] MorningRoutineCard: use location hook, pass real coords, display city name
+- [ ] OutfitCalendar: replace inline geolocation with shared hook, show city in forecast strip
+- [ ] Auto-Fill Week: AI suggestions based on actual local weather
+
+### Files
+
+| Action | File |
+|--------|------|
+| Create | `src/hooks/useUserLocation.ts` |
+| Modify | `supabase/functions/get-weather/index.ts` |
+| Modify | `src/components/app/MorningRoutineCard.tsx` |
+| Modify | `src/pages/OutfitCalendar.tsx` |
+
+---
+
 ## P2 — Nice to Have (Post-launch)
 
 ### 9. Performance
