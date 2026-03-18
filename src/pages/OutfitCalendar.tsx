@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
-  CalendarDays, ChevronLeft, ChevronRight, Plus, X, Shirt, Cloud,
+  CalendarDays, ChevronLeft, ChevronRight, Plus, X, Shirt, Sparkles, Loader2,
 } from "lucide-react";
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, addMonths, subMonths, isSameMonth, isSameDay, isToday } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -36,7 +36,7 @@ const OutfitCalendar = () => {
   const [savedOutfits, setSavedOutfits] = useState<any[]>([]);
   const [newEvent, setNewEvent] = useState({ title: "", occasion: "Casual", notes: "", outfitId: "" });
   const [viewMode, setViewMode] = useState<"month" | "week">("month");
-  const [weather, setWeather] = useState<Record<string, { temp: number; icon: string }>>({});
+  const [autoFilling, setAutoFilling] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -64,7 +64,7 @@ const OutfitCalendar = () => {
     if (!user) return;
     const { data } = await supabase
       .from("outfits")
-      .select("id, name, mannequin_items")
+      .select("id, name, mannequin_items, occasion, mood")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(20);
@@ -97,6 +97,94 @@ const OutfitCalendar = () => {
     else { toast.success("Event removed"); fetchEvents(); }
   };
 
+  const autoFillWeek = async () => {
+    if (!user) return;
+    setAutoFilling(true);
+    try {
+      // Get user's closet and style profile
+      const [itemsRes, styleRes, existingEventsRes] = await Promise.all([
+        supabase.from("clothing_items").select("*").eq("user_id", user.id),
+        supabase.from("style_profiles").select("archetype, preferences").eq("user_id", user.id).single(),
+        supabase.from("calendar_events").select("event_date").eq("user_id", user.id),
+      ]);
+
+      const closetItems = itemsRes.data || [];
+      if (closetItems.length < 2) {
+        toast.error("Add at least 2 items to your closet first");
+        setAutoFilling(false);
+        return;
+      }
+
+      const existingDates = new Set((existingEventsRes.data || []).map((e: any) => e.event_date));
+
+      // Get next 7 days that don't already have events
+      const today = new Date();
+      const daysToFill: Date[] = [];
+      for (let i = 0; i < 14 && daysToFill.length < 7; i++) {
+        const d = addDays(today, i);
+        const dateStr = format(d, "yyyy-MM-dd");
+        if (!existingDates.has(dateStr)) {
+          daysToFill.push(d);
+        }
+      }
+
+      if (daysToFill.length === 0) {
+        toast.info("Your upcoming week is already fully scheduled!");
+        setAutoFilling(false);
+        return;
+      }
+
+      // Generate outfits via edge function
+      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-outfits`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          closetItems,
+          occasion: "everyday",
+          mood: "confident",
+          styleProfile: styleRes.data,
+          upcomingEvents: [],
+          count: daysToFill.length,
+        }),
+      });
+
+      if (!resp.ok) throw new Error("Failed to generate outfits");
+      const data = await resp.json();
+      const generatedOutfits = data.outfits || [];
+
+      // Create calendar events for each day
+      const eventsToInsert = daysToFill.map((d, i) => {
+        const outfit = generatedOutfits[i % generatedOutfits.length];
+        const dayName = format(d, "EEEE");
+        const occasionMap: Record<string, string> = {
+          Monday: "Work", Tuesday: "Work", Wednesday: "Work",
+          Thursday: "Work", Friday: "Casual", Saturday: "Casual", Sunday: "Casual",
+        };
+        return {
+          user_id: user.id,
+          title: outfit?.name || `${dayName} Outfit`,
+          event_date: format(d, "yyyy-MM-dd"),
+          occasion: occasionMap[dayName] || "Casual",
+          notes: outfit?.explanation || "AI-suggested outfit",
+          outfit_items: outfit?.items || [],
+        };
+      });
+
+      const { error } = await supabase.from("calendar_events").insert(eventsToInsert);
+      if (error) throw error;
+
+      toast.success(`Scheduled ${eventsToInsert.length} outfits for the upcoming week!`);
+      fetchEvents();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to auto-fill schedule");
+    } finally {
+      setAutoFilling(false);
+    }
+  };
+
   const getEventsForDate = (date: Date) => {
     const dateStr = format(date, "yyyy-MM-dd");
     return events.filter(e => e.event_date === dateStr);
@@ -117,10 +205,21 @@ const OutfitCalendar = () => {
     <AppLayout>
       <div className="p-5 max-w-2xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="font-display text-2xl font-bold text-foreground flex items-center gap-2 mb-1">
-            <CalendarDays className="h-6 w-6 text-primary" /> Outfit Calendar
-          </h1>
-          <p className="text-muted-foreground font-sans text-xs mb-5">Plan your outfits ahead</p>
+          <div className="flex items-center justify-between mb-1">
+            <h1 className="font-display text-2xl font-bold text-foreground flex items-center gap-2">
+              <CalendarDays className="h-6 w-6 text-primary" /> Outfit Schedule
+            </h1>
+            <Button
+              onClick={autoFillWeek}
+              disabled={autoFilling}
+              size="sm"
+              className="gold-gradient text-primary-foreground font-sans text-xs gap-1.5"
+            >
+              {autoFilling ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+              {autoFilling ? "Generating..." : "Auto-Fill Week"}
+            </Button>
+          </div>
+          <p className="text-muted-foreground font-sans text-xs mb-5">Plan your outfits ahead — or let AI do it for you</p>
         </motion.div>
 
         {/* Month Nav */}
@@ -209,6 +308,7 @@ const OutfitCalendar = () => {
                     <div className="flex-1 min-w-0">
                       <p className="font-sans text-sm font-medium text-foreground truncate">{ev.title}</p>
                       {ev.occasion && <p className="font-sans text-[10px] text-muted-foreground">{ev.occasion}</p>}
+                      {ev.notes && <p className="font-sans text-[10px] text-muted-foreground/70 truncate">{ev.notes}</p>}
                     </div>
                     <button onClick={() => deleteEvent(ev.id)} className="text-muted-foreground hover:text-destructive p-1">
                       <X className="w-4 h-4" />
