@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Wand2, Loader2, Heart, Sparkles, Shirt, CalendarPlus, CalendarDays } from "lucide-react";
+import { Wand2, Loader2, Heart, Sparkles, Shirt, CalendarPlus, CalendarDays, Layers, X } from "lucide-react";
 import { ShareButton } from "@/components/app/ShareCard";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
