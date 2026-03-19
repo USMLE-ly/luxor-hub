@@ -558,14 +558,14 @@ const OutfitCalendar = () => {
                         if (hasMannequin) {
                           return (
                             <div className="flex-1 flex items-center justify-center w-full">
-                              <img src={mannequinUrl} alt="" className="max-h-[68px] w-auto object-contain" style={{ mixBlendMode: "multiply" }} />
+                              <img src={mannequinUrl} alt="" className="max-h-[68px] w-auto object-contain transition-transform duration-200 group-hover:scale-105" style={{ mixBlendMode: "multiply", filter: "drop-shadow(0 2px 3px rgba(0,0,0,0.08))" }} />
                             </div>
                           );
                         }
 
                         if (allPhotos.length > 0) {
                           return (
-                            <div className="flex flex-col items-center justify-center flex-1">
+                            <div className="flex flex-col items-center justify-center flex-1 transition-transform duration-200 group-hover:scale-105">
                               {allPhotos.slice(0, 4).map((url, pi) => (
                                 <img
                                   key={pi}
@@ -575,6 +575,7 @@ const OutfitCalendar = () => {
                                   style={{
                                     mixBlendMode: "multiply",
                                     marginTop: pi > 0 ? "-4px" : "0",
+                                    filter: "drop-shadow(0 2px 3px rgba(0,0,0,0.08))",
                                   }}
                                 />
                               ))}
