@@ -1083,13 +1083,39 @@ const OutfitCalendar = () => {
               {!editEvent.outfitId && closetItems.length > 0 && (
                 <div className="space-y-2">
                   <p className="text-xs font-sans font-medium text-muted-foreground">Or pick items from your closet:</p>
-                  <div className="max-h-40 overflow-y-auto rounded-xl border border-border/50 p-2 space-y-1">
-                    {clothingCategories.map(cat => {
-                      const catItems = closetItems.filter(c => c.category.toLowerCase() === cat);
+                  {/* Mini Outfit Preview */}
+                  {editEvent.manualItems.length > 0 && (
+                    <div className="flex gap-2 overflow-x-auto pb-1">
+                      {editEvent.manualItems.map(itemId => {
+                        const ci = closetItems.find(c => c.id === itemId);
+                        if (!ci) return null;
+                        return (
+                          <button
+                            key={ci.id}
+                            type="button"
+                            onClick={() => setEditEvent(p => ({ ...p, manualItems: p.manualItems.filter(id => id !== ci.id) }))}
+                            className="relative w-12 h-14 rounded-lg bg-white/95 dark:bg-white/90 flex-shrink-0 flex items-center justify-center overflow-hidden ring-1 ring-primary/20 group"
+                          >
+                            {ci.photo_url ? (
+                              <img src={ci.photo_url} alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "multiply" }} />
+                            ) : (
+                              <Shirt className="w-5 h-5 text-muted-foreground/30" />
+                            )}
+                            <div className="absolute inset-0 bg-destructive/0 group-hover:bg-destructive/20 transition-colors flex items-center justify-center">
+                              <X className="w-3 h-3 text-destructive opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                  <div className="max-h-48 overflow-y-auto rounded-xl border border-border/50 p-2 space-y-2">
+                    {Object.entries(closetCategoryMap).map(([label, cats]) => {
+                      const catItems = closetItems.filter(c => cats.includes(c.category.toLowerCase()));
                       if (catItems.length === 0) return null;
                       return (
-                        <div key={cat}>
-                          <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-wider mb-1 mt-1">{cat}</p>
+                        <div key={label}>
+                          <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-wider mb-1 mt-1">{label}</p>
                           <div className="flex flex-wrap gap-1.5">
                             {catItems.map(ci => {
                               const isSelected = editEvent.manualItems.includes(ci.id);
@@ -1112,7 +1138,7 @@ const OutfitCalendar = () => {
                                   {ci.photo_url && (
                                     <img src={ci.photo_url} alt="" className="w-5 h-5 rounded object-contain bg-white" style={{ mixBlendMode: "multiply" }} />
                                   )}
-                                  <span className="truncate max-w-[80px]">{ci.name || cat}</span>
+                                  <span className="truncate max-w-[80px]">{ci.name || label}</span>
                                 </button>
                               );
                             })}
@@ -1121,9 +1147,6 @@ const OutfitCalendar = () => {
                       );
                     })}
                   </div>
-                  {editEvent.manualItems.length > 0 && (
-                    <p className="text-[10px] font-sans text-primary">{editEvent.manualItems.length} item{editEvent.manualItems.length > 1 ? "s" : ""} selected</p>
-                  )}
                 </div>
               )}
               <Input placeholder="Notes (optional)" value={editEvent.notes} onChange={e => setEditEvent(p => ({ ...p, notes: e.target.value }))} />
