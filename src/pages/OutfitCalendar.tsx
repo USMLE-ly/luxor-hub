@@ -106,6 +106,7 @@ const OutfitCalendar = () => {
   const [autoFilling, setAutoFilling] = useState(false);
   const [flatLayEvent, setFlatLayEvent] = useState<CalendarEvent | null>(null);
   const [weatherData, setWeatherData] = useState<WeatherDay[]>([]);
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [closetMap, setClosetMap] = useState<Map<string, string>>(new Map());
   const [notificationsEnabled, setNotificationsEnabled] = useState(
     typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted"
