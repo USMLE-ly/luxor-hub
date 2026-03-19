@@ -94,6 +94,7 @@ const scheduleNotification = (title: string, body: string, delayMs: number) => {
 
 const OutfitCalendar = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
