@@ -300,6 +300,54 @@ const Council = () => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
   };
 
+  // Mood-responsive tint
+  const moodTint = useMemo(() => {
+    const tints: Record<string, string> = {
+      confident: "hsl(40 80% 55% / 0.06)",
+      relaxed: "hsl(200 60% 55% / 0.06)",
+      bold: "hsl(350 70% 55% / 0.06)",
+      elegant: "hsl(270 50% 55% / 0.06)",
+      creative: "hsl(160 60% 50% / 0.06)",
+      cozy: "hsl(30 70% 55% / 0.06)",
+    };
+    return currentMood ? tints[currentMood] || "transparent" : "transparent";
+  }, [currentMood]);
+
+  // Quick action handlers
+  const handleQuickAction = async (action: string, msg: CouncilMessage) => {
+    if (!user) return;
+    if (action === "Save as Outfit") {
+      const items = msg.mentionedItems || [];
+      const { error } = await supabase.from("outfits").insert({
+        user_id: user.id,
+        name: `Council: ${messages.find(m => m.role === "user")?.content?.slice(0, 40) || "Suggestion"}`,
+        description: msg.synthesis?.slice(0, 100) || "",
+        ai_generated: true,
+        ai_explanation: msg.synthesis?.slice(0, 300),
+      });
+      if (error) toast.error("Failed to save");
+      else toast.success("Outfit saved from council synthesis!");
+    } else if (action === "Add to Calendar") {
+      const today = format(new Date(), "yyyy-MM-dd");
+      const { error } = await supabase.from("calendar_events").insert({
+        user_id: user.id,
+        title: `Council: ${messages.find(m => m.role === "user")?.content?.slice(0, 40) || "Suggestion"}`,
+        event_date: today,
+        occasion: "Casual",
+        notes: msg.synthesis?.slice(0, 200),
+      });
+      if (error) toast.error("Failed to add");
+      else toast.success("Added to today's calendar!");
+    } else if (action === "Share") {
+      if (navigator.share) {
+        navigator.share({ title: "Style Council Advice", text: msg.synthesis?.slice(0, 300) || "" }).catch(() => {});
+      } else {
+        await navigator.clipboard.writeText(msg.synthesis || "");
+        toast.success("Copied to clipboard!");
+      }
+    }
+  };
+
   return (
     <AppLayout>
       <div className="flex flex-col h-[calc(100vh-56px)] max-w-lg mx-auto overflow-x-hidden">
