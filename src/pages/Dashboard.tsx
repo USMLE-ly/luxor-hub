@@ -159,13 +159,14 @@ const Dashboard = () => {
   useEffect(() => {
     if (!user) return;
     const fetchData = async () => {
-      const [itemsRes, outfitsRes, profileRes, styleRes, closetRes, outfitsListRes] = await Promise.all([
+      const [itemsRes, outfitsRes, profileRes, styleRes, closetRes, outfitsListRes, allItemsRes] = await Promise.all([
         supabase.from("clothing_items").select("id", { count: "exact", head: true }).eq("user_id", user.id),
         supabase.from("outfits").select("id", { count: "exact", head: true }).eq("user_id", user.id),
         supabase.from("profiles").select("display_name").eq("user_id", user.id).single(),
         supabase.from("style_profiles").select("onboarding_completed, archetype, style_score, preferences").eq("user_id", user.id).single(),
         supabase.from("clothing_items").select("id, photo_url, name, category, color").eq("user_id", user.id).order("created_at", { ascending: false }).limit(12),
         supabase.from("outfits").select("id, name, occasion").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
+        supabase.from("clothing_items").select("category, color").eq("user_id", user.id),
       ]);
       setStats({
         items: itemsRes.count || 0,
