@@ -1296,22 +1296,46 @@ const OutfitCalendar = () => {
                               </p>
                             );
                           })()}
-                          {/* Outfit Repeat Warning */}
                           {(() => {
                             const repeat = detectRepeat(ev);
                             if (!repeat.isRepeat) return null;
                             const matchStr = repeat.matchDate
                               ? format(new Date(repeat.matchDate + "T00:00:00"), "MMM d")
                               : "recently";
+                            const suggestions = getUnderusedSuggestions(ev);
                             return (
-                              <div className="flex items-center gap-1.5 mt-1.5 px-2 py-1 rounded-lg text-[10px] font-sans"
-                                style={{
-                                  background: "hsl(35 90% 55% / 0.12)",
-                                  color: "hsl(35 90% 40%)",
-                                  border: "1px solid hsl(35 90% 55% / 0.2)",
-                                }}>
-                                <RefreshCw className="w-3 h-3" />
-                                <span>Same combo worn on {matchStr} — try mixing it up!</span>
+                              <div className="mt-1.5 space-y-1.5">
+                                <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] font-sans"
+                                  style={{
+                                    background: "hsl(35 90% 55% / 0.12)",
+                                    color: "hsl(35 90% 40%)",
+                                    border: "1px solid hsl(35 90% 55% / 0.2)",
+                                  }}>
+                                  <RefreshCw className="w-3 h-3" />
+                                  <span>Same combo worn on {matchStr} — try mixing it up!</span>
+                                </div>
+                                {suggestions.length > 0 && (
+                                  <div className="flex items-start gap-1.5 px-2 py-1.5 rounded-lg text-[10px] font-sans"
+                                    style={{
+                                      background: "hsl(var(--primary) / 0.08)",
+                                      border: "1px solid hsl(var(--primary) / 0.15)",
+                                      color: "hsl(var(--primary))",
+                                    }}>
+                                    <Lightbulb className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                                    <div>
+                                      <span className="font-medium">Try swapping in:</span>
+                                      <div className="flex gap-1.5 mt-1 flex-wrap">
+                                        {suggestions.map(s => (
+                                          <span key={s.id} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md"
+                                            style={{ background: "hsl(var(--primary) / 0.12)" }}>
+                                            {s.photo_url && <img src={s.photo_url} alt="" className="w-4 h-4 rounded object-contain bg-white" style={{ mixBlendMode: "multiply" }} />}
+                                            {s.name || s.category}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             );
                           })()}
