@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +10,7 @@ import {
   CalendarDays, ChevronLeft, ChevronRight, Plus, X, Shirt, Sparkles, Loader2,
   Cloud, Sun, CloudRain, Snowflake, Wind, Droplets, Thermometer, Pencil, Bell, BellOff,
   MapPin, TrendingUp, Flame, BarChart3, Layers, Copy, Palette, Star, Share2, Umbrella, ThermometerSnowflake, AlertTriangle,
-  Award, Trophy, Zap, Target, Crown, RefreshCw,
+  Award, Trophy, Zap, Target, Crown, RefreshCw, Lightbulb,
 } from "lucide-react";
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, addMonths, subMonths, subDays, isSameMonth, isSameDay, isToday, isSunday, differenceInMilliseconds, set as setDate } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -93,6 +94,7 @@ const scheduleNotification = (title: string, body: string, delayMs: number) => {
 
 const OutfitCalendar = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -246,6 +248,32 @@ const OutfitCalendar = () => {
       }
     }
     return { isRepeat: false, matchDate: null };
+  };
+
+  // Smart suggestion: recommend underused closet items when repeat detected
+  const getUnderusedSuggestions = (ev: CalendarEvent): ClosetItem[] => {
+    const items = Array.isArray(ev.outfit_items) ? ev.outfit_items : [];
+    if (items.length === 0) return [];
+    const usedCats = new Set(items.map((i: any) => (i?.category || "").toLowerCase()));
+    const itemUsage = new Map<string, number>();
+    recentEvents.forEach(re => {
+      const reItems = Array.isArray(re.outfit_items) ? re.outfit_items : [];
+      reItems.forEach((i: any) => {
+        const name = (typeof i === "string" ? i : i?.name || "").toLowerCase();
+        if (name) itemUsage.set(name, (itemUsage.get(name) || 0) + 1);
+      });
+    });
+    return closetItems
+      .filter(ci => {
+        if (!usedCats.has(ci.category.toLowerCase())) return false;
+        const alreadyInOutfit = items.some((i: any) => {
+          const n = (typeof i === "string" ? i : i?.name || "").toLowerCase();
+          return n === (ci.name || "").toLowerCase();
+        });
+        return !alreadyInOutfit;
+      })
+      .sort((a, b) => (itemUsage.get((a.name || "").toLowerCase()) || 0) - (itemUsage.get((b.name || "").toLowerCase()) || 0))
+      .slice(0, 3);
   };
 
   const toggleNotifications = async () => {
@@ -1270,22 +1298,46 @@ const OutfitCalendar = () => {
                               </p>
                             );
                           })()}
-                          {/* Outfit Repeat Warning */}
                           {(() => {
                             const repeat = detectRepeat(ev);
                             if (!repeat.isRepeat) return null;
                             const matchStr = repeat.matchDate
                               ? format(new Date(repeat.matchDate + "T00:00:00"), "MMM d")
                               : "recently";
+                            const suggestions = getUnderusedSuggestions(ev);
                             return (
-                              <div className="flex items-center gap-1.5 mt-1.5 px-2 py-1 rounded-lg text-[10px] font-sans"
-                                style={{
-                                  background: "hsl(35 90% 55% / 0.12)",
-                                  color: "hsl(35 90% 40%)",
-                                  border: "1px solid hsl(35 90% 55% / 0.2)",
-                                }}>
-                                <RefreshCw className="w-3 h-3" />
-                                <span>Same combo worn on {matchStr} — try mixing it up!</span>
+                              <div className="mt-1.5 space-y-1.5">
+                                <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] font-sans"
+                                  style={{
+                                    background: "hsl(35 90% 55% / 0.12)",
+                                    color: "hsl(35 90% 40%)",
+                                    border: "1px solid hsl(35 90% 55% / 0.2)",
+                                  }}>
+                                  <RefreshCw className="w-3 h-3" />
+                                  <span>Same combo worn on {matchStr} — try mixing it up!</span>
+                                </div>
+                                {suggestions.length > 0 && (
+                                  <div className="flex items-start gap-1.5 px-2 py-1.5 rounded-lg text-[10px] font-sans"
+                                    style={{
+                                      background: "hsl(var(--primary) / 0.08)",
+                                      border: "1px solid hsl(var(--primary) / 0.15)",
+                                      color: "hsl(var(--primary))",
+                                    }}>
+                                    <Lightbulb className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                                    <div>
+                                      <span className="font-medium">Try swapping in:</span>
+                                      <div className="flex gap-1.5 mt-1 flex-wrap">
+                                        {suggestions.map(s => (
+                                          <span key={s.id} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md"
+                                            style={{ background: "hsl(var(--primary) / 0.12)" }}>
+                                            {s.photo_url && <img src={s.photo_url} alt="" className="w-4 h-4 rounded object-contain bg-white" style={{ mixBlendMode: "multiply" }} />}
+                                            {s.name || s.category}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             );
                           })()}
@@ -1437,7 +1489,28 @@ const OutfitCalendar = () => {
           </div>
         </motion.div>
 
-        {/* Streak Rewards Widget */}
+        {/* View Monthly Report Link */}
+        <motion.button
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.38 }}
+          onClick={() => navigate("/monthly-report")}
+          className="w-full rounded-2xl p-3.5 flex items-center justify-between mb-5 group transition-colors hover:bg-secondary/60"
+          style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
+        >
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "hsl(var(--primary) / 0.12)" }}>
+              <BarChart3 className="w-4 h-4 text-primary" />
+            </div>
+            <div className="text-left">
+              <p className="text-xs font-sans font-semibold text-foreground">Monthly Style Report</p>
+              <p className="text-[10px] font-sans text-muted-foreground">Variety score, color stats & more</p>
+            </div>
+          </div>
+          <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+        </motion.button>
+
+
         {streakRewards.streak > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}

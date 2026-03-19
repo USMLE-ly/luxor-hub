@@ -32,14 +32,14 @@ import calJeansSlim from "@/assets/cal-jeans-slim.jpg";
 import calJeansStraight from "@/assets/cal-jeans-straight.jpg";
 import calJeansWide from "@/assets/cal-jeans-wide.jpg";
 import calJeansSkinny from "@/assets/cal-jeans-skinny.jpg";
-import calShoeLoafers from "@/assets/cal-shoe-loafers.jpg";
-import calShoeChelsea from "@/assets/cal-shoe-chelsea.jpg";
-import calShoeSneakers from "@/assets/cal-shoe-sneakers.jpg";
-import calShoeDerby from "@/assets/cal-shoe-derby.jpg";
-import calSunglassesAviator from "@/assets/cal-sunglasses-aviator.jpg";
-import calSunglassesWayfarer from "@/assets/cal-sunglasses-wayfarer.jpg";
-import calSunglassesRound from "@/assets/cal-sunglasses-round.jpg";
-import calSunglassesSport from "@/assets/cal-sunglasses-sport.jpg";
+import calShoeLoafers from "@/assets/cal-shoe-loafers-v2.jpg";
+import calShoeChelsea from "@/assets/cal-shoe-chelsea-v2.jpg";
+import calShoeSneakers from "@/assets/cal-shoe-sneakers-v2.jpg";
+import calShoeDerby from "@/assets/cal-shoe-derby-v2.jpg";
+import calSunglassesAviator from "@/assets/cal-sunglasses-aviator-v2.jpg";
+import calSunglassesWayfarer from "@/assets/cal-sunglasses-wayfarer-v2.jpg";
+import calSunglassesRound from "@/assets/cal-sunglasses-round-v2.jpg";
+import calSunglassesSport from "@/assets/cal-sunglasses-sport-v2.jpg";
 
 // Female calibration images
 import calFJeansWide from "@/assets/cal-f-jeans-wide.jpg";
