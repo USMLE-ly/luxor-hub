@@ -683,6 +683,7 @@ const OutfitCalendar = () => {
                 boxShadow: "0 8px 32px -8px hsl(var(--foreground) / 0.06)",
               }}
             >
+              <div className="p-5">
               <div className="absolute top-0 left-0 w-1 h-full gold-gradient rounded-r" />
 
               <div className="flex items-center justify-between mb-4 pl-3">
