@@ -1100,6 +1100,13 @@ const OutfitCalendar = () => {
                         </div>
                         <div className="flex items-center gap-1">
                           <button
+                            onClick={() => shareOutfitCard(ev)}
+                            className="text-muted-foreground/50 hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors"
+                            title="Share outfit"
+                          >
+                            <Share2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
                             onClick={() => setFlatLayEvent(ev)}
                             className="text-muted-foreground/50 hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors"
                             title="Flat-Lay View"
