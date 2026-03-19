@@ -645,17 +645,28 @@ const Closet = () => {
             </div>
 
             {/* Category Pills */}
-            <div className="flex gap-2 overflow-x-auto pb-3 mb-4 scrollbar-none">
-              {filterPills.map((pill) => (
-                <button key={pill} onClick={() => setActiveFilter(pill)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-sans whitespace-nowrap transition-all ${
-                    activeFilter === pill
-                      ? "bg-foreground text-background font-semibold"
-                      : "bg-secondary text-muted-foreground hover:text-foreground"
-                  }`}>
-                  {pill}
-                </button>
-              ))}
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none flex-1">
+                {filterPills.map((pill) => (
+                  <button key={pill} onClick={() => setActiveFilter(pill)}
+                    className={`px-4 py-1.5 rounded-full text-xs font-sans whitespace-nowrap transition-all ${
+                      activeFilter === pill
+                        ? "bg-foreground text-background font-semibold"
+                        : "bg-secondary text-muted-foreground hover:text-foreground"
+                    }`}>
+                    {pill}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => setFlatLayView(!flatLayView)}
+                className={`p-2 rounded-xl transition-colors flex-shrink-0 ${
+                  flatLayView ? "bg-primary/15 text-primary" : "bg-secondary text-muted-foreground hover:text-foreground"
+                }`}
+                title="Flat-Lay View"
+              >
+                <Layers className="w-4 h-4" />
+              </button>
             </div>
 
             {/* Items */}
