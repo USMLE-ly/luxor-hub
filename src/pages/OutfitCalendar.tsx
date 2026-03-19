@@ -1270,6 +1270,25 @@ const OutfitCalendar = () => {
                               </p>
                             );
                           })()}
+                          {/* Outfit Repeat Warning */}
+                          {(() => {
+                            const repeat = detectRepeat(ev);
+                            if (!repeat.isRepeat) return null;
+                            const matchStr = repeat.matchDate
+                              ? format(new Date(repeat.matchDate + "T00:00:00"), "MMM d")
+                              : "recently";
+                            return (
+                              <div className="flex items-center gap-1.5 mt-1.5 px-2 py-1 rounded-lg text-[10px] font-sans"
+                                style={{
+                                  background: "hsl(35 90% 55% / 0.12)",
+                                  color: "hsl(35 90% 40%)",
+                                  border: "1px solid hsl(35 90% 55% / 0.2)",
+                                }}>
+                                <RefreshCw className="w-3 h-3" />
+                                <span>Same combo worn on {matchStr} — try mixing it up!</span>
+                              </div>
+                            );
+                          })()}
                         </div>
                         <div className="flex items-center gap-1">
                           <button
