@@ -771,15 +771,37 @@ const OutfitCalendar = () => {
                         }
 
                         if (photos.length > 0) {
+                          const handleDragStart = (idx: number) => setDragIdx(idx);
+                          const handleDragOver = (e: React.DragEvent) => e.preventDefault();
+                          const handleDrop = async (targetIdx: number) => {
+                            if (dragIdx === null || dragIdx === targetIdx) return;
+                            const newItems = [...items];
+                            const [moved] = newItems.splice(dragIdx, 1);
+                            newItems.splice(targetIdx, 0, moved);
+                            setDragIdx(null);
+                            // Optimistic update
+                            const updatedEvents = events.map(e => e.id === ev.id ? { ...e, outfit_items: newItems } : e);
+                            setEvents(updatedEvents);
+                            await supabase.from("calendar_events").update({ outfit_items: newItems as any }).eq("id", ev.id);
+                          };
                           return (
                             <div className="p-3 pb-0">
                               <div className="flex gap-2 overflow-x-auto">
                                 {photos.map((url, pi) => (
-                                  <div key={pi} className="w-16 h-16 rounded-lg bg-white/95 dark:bg-white/90 flex-shrink-0 flex items-center justify-center overflow-hidden">
+                                  <div
+                                    key={pi}
+                                    draggable
+                                    onDragStart={() => handleDragStart(pi)}
+                                    onDragOver={handleDragOver}
+                                    onDrop={() => handleDrop(pi)}
+                                    className={`w-16 h-16 rounded-lg bg-white/95 dark:bg-white/90 flex-shrink-0 flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing transition-all ${
+                                      dragIdx === pi ? "opacity-50 scale-95" : "hover:ring-2 hover:ring-primary/30"
+                                    }`}
+                                  >
                                     <img
                                       src={url}
                                       alt={`Item ${pi + 1}`}
-                                      className="w-full h-full object-contain"
+                                      className="w-full h-full object-contain pointer-events-none"
                                       style={{ mixBlendMode: "multiply" }}
                                     />
                                   </div>
