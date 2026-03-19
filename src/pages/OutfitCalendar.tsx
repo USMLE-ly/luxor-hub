@@ -667,15 +667,16 @@ const OutfitCalendar = () => {
           </div>
         </motion.div>
 
-        {/* Selected Date Panel */}
+        {/* Selected Date Panel — smooth expand/collapse */}
         <AnimatePresence mode="wait">
           {selectedDate && (
             <motion.div
               key={format(selectedDate, "yyyy-MM-dd")}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              className="rounded-2xl p-5 mb-5 relative overflow-hidden"
+              initial={{ opacity: 0, height: 0, scale: 0.97 }}
+              animate={{ opacity: 1, height: "auto", scale: 1 }}
+              exit={{ opacity: 0, height: 0, scale: 0.97 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30, mass: 0.8 }}
+              className="rounded-2xl mb-5 relative overflow-hidden"
               style={{
                 background: "hsl(var(--card))",
                 border: "1px solid hsl(var(--border))",
