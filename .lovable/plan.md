@@ -1,44 +1,34 @@
 
 
-# Fix: Calendar Day Cells Showing White Boxes Instead of Clothes
+# Upgrade Schedule Calendar to Premium Stylebook-Quality Layout
 
-## Problem
-The `outfit_items` in calendar events are stored as **string arrays** (e.g., `["Turbo Love Graphic T-Shirt", "Blue Carpenter Jeans"]`), not objects with photo URLs. The current code tries to access `item?.photo_url` on these strings, finds nothing, and falls through to the dot fallback. The white boxes come from `bg-[#fefdfb]` applied to event cells — they stand out against the dark theme with no actual images inside.
+## Current Issues (from user's screenshot)
+- White `bg-[#fefdfb]` cells clash harshly against the dark luxury theme
+- Item thumbnails are tiny (32×32px) and cramped
+- No visual hierarchy — cells with outfits don't feel premium
+- Weather icons crowd the date number row
 
-## Fix — `src/pages/OutfitCalendar.tsx`
+## Changes — `src/pages/OutfitCalendar.tsx`
 
-1. **Fetch the user's `clothing_items`** from the database (just `name` and `photo_url` columns) alongside existing data fetches. Store in a `closetMap` — a `Map<string, string>` mapping lowercased item name → photo_url.
+### 1. Fix cell background for dark theme
+Replace the hard-coded `bg-[#fefdfb]` white with a subtle elevated dark surface: `bg-card/80` with a faint inner glow border, so outfit cells "pop" without the jarring white box.
 
-2. **Update the day cell rendering** (lines 546-584): Instead of treating `outfit_items` as objects, treat them as strings and look up each name in `closetMap` to get the photo URL.
+### 2. Larger, better-spaced item thumbnails
+- Increase item images from `w-8 h-8` to `w-10 h-12` (closer to the Stylebook reference proportions)
+- Reduce overlap from `-4px` to `-2px` for breathing room
+- Cap at 3 items visible + a `+N` badge if more exist
+- Use `drop-shadow(0 1px 4px rgba(0,0,0,0.25))` for depth on dark bg (instead of the light-mode 0.08 opacity)
 
-3. **Only apply white background** (`bg-[#fefdfb]`) when at least one photo is actually found — otherwise keep the default cell background so there are no empty white boxes.
+### 3. Mannequin images fill the cell better
+- Increase `max-h-[68px]` → `max-h-[80px]` for mannequin images so they dominate the cell like in the reference
 
-4. **Keep dot fallback** for items with no matching photos, but style them with the item's occasion color instead of plain primary.
+### 4. Refined cell styling
+- Add a subtle inner rounded container (`rounded-lg bg-secondary/20 p-0.5`) inside cells with outfits, giving a "card within grid" feel matching the premium Stylebook aesthetic
+- Weather icon: make smaller (`w-3 h-3`) and more transparent to not compete with outfit visuals
+- Today badge: keep gold circle but ensure it sits above the flat-lay
 
-### Technical Detail
+### 5. Cell min-height bump
+- `min-h-[100px]` → `min-h-[110px]` to give more vertical room for the flat-lay composition
 
-```
-// New state alongside existing ones
-const [closetMap, setClosetMap] = useState<Map<string, string>>(new Map());
-
-// Fetch in the existing useEffect or a new one
-const { data: clothingData } = await supabase
-  .from("clothing_items")
-  .select("name, photo_url")
-  .eq("user_id", user.id)
-  .not("photo_url", "is", null);
-
-// Build lookup map (lowercase for fuzzy matching)
-const map = new Map();
-clothingData?.forEach(item => map.set(item.name.toLowerCase(), item.photo_url));
-
-// In day cell: resolve photos from string names
-const allPhotos = [];
-items.forEach((itemName: string) => {
-  const url = closetMap.get(itemName.toLowerCase());
-  if (url) allPhotos.push(url);
-});
-```
-
-Cell background conditional: `${allPhotos.length > 0 ? "bg-[#fefdfb]" : ""}` instead of checking `dayEvents.length`.
+### No other files change — purely visual refinement to the calendar grid cells.
 
