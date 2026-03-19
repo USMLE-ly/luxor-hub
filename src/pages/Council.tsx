@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Users, Trash2, ArrowUp, Camera, X, Sparkles, ChevronDown, ChevronUp, Brain, CalendarPlus, Heart, Share2, Shirt } from "lucide-react";
+import { haptic } from "@/lib/haptics";
 import ReactMarkdown from "react-markdown";
 import { VoiceInput } from "@/components/app/VoiceInput";
 import { MoodSelector } from "@/components/app/MoodSelector";

@@ -658,15 +658,19 @@ const Closet = () => {
                   </button>
                 ))}
               </div>
-              <button
-                onClick={() => setFlatLayView(!flatLayView)}
+              <motion.button
+                onClick={() => {
+                  haptic(flatLayView ? "light" : "medium");
+                  setFlatLayView(!flatLayView);
+                }}
+                whileTap={{ scale: 0.9 }}
                 className={`p-2 rounded-xl transition-colors flex-shrink-0 ${
                   flatLayView ? "bg-primary/15 text-primary" : "bg-secondary text-muted-foreground hover:text-foreground"
                 }`}
                 title="Flat-Lay View"
               >
                 <Layers className="w-4 h-4" />
-              </button>
+              </motion.button>
             </div>
 
             {/* Items */}
