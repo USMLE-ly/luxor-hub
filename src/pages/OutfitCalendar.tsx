@@ -86,6 +86,7 @@ const OutfitCalendar = () => {
   const [newEvent, setNewEvent] = useState({ title: "", occasion: "Casual", notes: "", outfitId: "" });
   const [editEvent, setEditEvent] = useState({ title: "", occasion: "Casual", notes: "", outfitId: "" });
   const [autoFilling, setAutoFilling] = useState(false);
+  const [flatLayEvent, setFlatLayEvent] = useState<CalendarEvent | null>(null);
   const [weatherData, setWeatherData] = useState<WeatherDay[]>([]);
   const [notificationsEnabled, setNotificationsEnabled] = useState(
     typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted"
