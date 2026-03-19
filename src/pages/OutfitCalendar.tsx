@@ -624,6 +624,11 @@ const OutfitCalendar = () => {
                     </div>
                   )}
                 </button>
+              );
+            })}
+          </div>
+        </motion.div>
+
         {/* Selected Date Panel */}
         <AnimatePresence mode="wait">
           {selectedDate && (
