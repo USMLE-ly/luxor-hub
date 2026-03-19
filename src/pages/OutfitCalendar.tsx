@@ -579,8 +579,8 @@ const OutfitCalendar = () => {
 
                         if (hasMannequin) {
                           return (
-                            <div className="flex-1 flex items-center justify-center w-full rounded-lg bg-secondary/20 p-0.5">
-                              <img src={mannequinUrl} alt="" className="max-h-[80px] w-auto object-contain transition-transform duration-200 group-hover:scale-105" style={{ filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.25))" }} />
+                            <div className="flex-1 flex items-center justify-center w-full rounded-lg bg-white/95 dark:bg-white/90 p-0.5 overflow-hidden">
+                              <img src={mannequinUrl} alt="" className="max-h-[80px] w-auto object-contain transition-transform duration-200 group-hover:scale-105" style={{ mixBlendMode: "multiply" }} />
                             </div>
                           );
                         }
