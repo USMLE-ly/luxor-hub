@@ -36,6 +36,8 @@ interface CouncilMessage {
   stage1?: Stage1Response[];
   rankings?: Ranking[];
   synthesis?: string;
+  mentionedItems?: { name: string; photo_url?: string; category?: string }[];
+  actionSuggestions?: string[];
 }
 
 const quickPrompts = [
