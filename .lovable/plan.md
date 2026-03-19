@@ -1,34 +1,36 @@
 
 
-# Upgrade Schedule Calendar to Premium Stylebook-Quality Layout
+# Fix Item Photo Backgrounds & Upgrade Selected Date Panel
 
-## Current Issues (from user's screenshot)
-- White `bg-[#fefdfb]` cells clash harshly against the dark luxury theme
-- Item thumbnails are tiny (32×32px) and cramped
-- No visual hierarchy — cells with outfits don't feel premium
-- Weather icons crowd the date number row
+## Problem
+1. **White photo backgrounds visible**: Item photos have white backgrounds that show as ugly white rectangles on the dark theme. The reference images show clean cutout-style items floating seamlessly.
+2. **Selected date panel thumbnails**: Don't resolve string item names via `closetMap` (same bug as the grid cells had), and the card layout is basic.
 
 ## Changes — `src/pages/OutfitCalendar.tsx`
 
-### 1. Fix cell background for dark theme
-Replace the hard-coded `bg-[#fefdfb]` white with a subtle elevated dark surface: `bg-card/80` with a faint inner glow border, so outfit cells "pop" without the jarring white box.
+### 1. Remove white backgrounds from day cell item photos (lines 588-609)
+- Add `bg-white rounded-md` to each item image container and apply `mix-blend-mode: multiply` — this makes the white photo background disappear into the white container, then the container blends into the dark cell
+- Actually simpler: wrap the flat-lay stack in a `bg-white/90 rounded-lg` container so the multiply blend mode works cleanly (white × white = white, dark clothing stays dark), matching the Stylebook reference where items float on a light surface
 
-### 2. Larger, better-spaced item thumbnails
-- Increase item images from `w-8 h-8` to `w-10 h-12` (closer to the Stylebook reference proportions)
-- Reduce overlap from `-4px` to `-2px` for breathing room
-- Cap at 3 items visible + a `+N` badge if more exist
-- Use `drop-shadow(0 1px 4px rgba(0,0,0,0.25))` for depth on dark bg (instead of the light-mode 0.08 opacity)
+### 2. Fix selected date panel thumbnail resolution (lines 733-778)
+- Same as the grid fix: resolve string item names through `closetMap` to get photo URLs
+- Currently it only checks `item?.photo_url` on string values, which returns nothing
 
-### 3. Mannequin images fill the cell better
-- Increase `max-h-[68px]` → `max-h-[80px]` for mannequin images so they dominate the cell like in the reference
+### 3. Upgrade selected date panel card design (lines 682-780)
+- Replace the simple `Shirt` icon placeholder with a **mini flat-lay preview** showing actual item photos (resolved from closetMap)
+- Use a glassmorphic card with subtle gold-gradient left border accent
+- Item thumbnails: larger (`w-16 h-16`), `bg-white rounded-lg` with `mix-blend-mode: multiply`, horizontal scroll strip
+- Add mannequin image as a bigger hero preview if available
+- Occasion badge gets a gold-tinted pill style
 
-### 4. Refined cell styling
-- Add a subtle inner rounded container (`rounded-lg bg-secondary/20 p-0.5`) inside cells with outfits, giving a "card within grid" feel matching the premium Stylebook aesthetic
-- Weather icon: make smaller (`w-3 h-3`) and more transparent to not compete with outfit visuals
-- Today badge: keep gold circle but ensure it sits above the flat-lay
+### 4. Day cell flat-lay container styling
+- Change `bg-secondary/20` to `bg-white/95 dark:bg-white/90` so multiply blend works
+- This gives the "items floating on a clean surface" look from the reference
+- Add `rounded-lg overflow-hidden` for clean edges
 
-### 5. Cell min-height bump
-- `min-h-[100px]` → `min-h-[110px]` to give more vertical room for the flat-lay composition
-
-### No other files change — purely visual refinement to the calendar grid cells.
+### Technical summary
+- Lines ~588-609: wrap item images in white container, add `mixBlendMode: "multiply"` to images
+- Lines ~733-778: resolve string names via closetMap, apply same white-bg + multiply treatment
+- Lines ~691-696: replace Shirt icon with mini photo preview from resolved items
+- All changes in one file only
 
