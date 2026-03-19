@@ -40,6 +40,10 @@ import calSunglassesAviator from "@/assets/cal-sunglasses-aviator-v2.jpg";
 import calSunglassesWayfarer from "@/assets/cal-sunglasses-wayfarer-v2.jpg";
 import calSunglassesRound from "@/assets/cal-sunglasses-round-v2.jpg";
 import calSunglassesSport from "@/assets/cal-sunglasses-sport-v2.jpg";
+import calHatFedora from "@/assets/cal-hat-fedora.jpg";
+import calHatBeanie from "@/assets/cal-hat-beanie.jpg";
+import calHatCap from "@/assets/cal-hat-cap.jpg";
+import calHatPanama from "@/assets/cal-hat-panama.jpg";
 
 // Female calibration images
 import calFJeansWide from "@/assets/cal-f-jeans-wide.jpg";
