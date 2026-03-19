@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
+import { haptic } from "@/lib/haptics";
 import {
   Plus, Search, Shirt, Trash2, Upload, X, Loader2, Sparkles, CheckCircle, Camera, ChevronRight,
   SlidersHorizontal, Activity, Eye, User, Layers, CalendarDays, Image, Save, FolderOpen, Heart,
@@ -126,6 +127,8 @@ const Closet = () => {
   const [loadingSavedOutfits, setLoadingSavedOutfits] = useState(false);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [scanningReceipt, setScanningReceipt] = useState(false);
+  const [cleanBgUrls, setCleanBgUrls] = useState<Record<string, string>>({});
+  const cleanBgRequested = useRef<Set<string>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const receiptInputRef = useRef<HTMLInputElement>(null);
 
@@ -143,6 +146,25 @@ const Closet = () => {
   }, [user]);
 
   useEffect(() => { fetchItems(); }, [fetchItems]);
+
+  // Auto-remove backgrounds when flat-lay view is active
+  useEffect(() => {
+    if (!flatLayView) return;
+    const itemsWithPhotos = items.filter((i) => i.photo_url && !cleanBgUrls[i.id] && !cleanBgRequested.current.has(i.id));
+    itemsWithPhotos.slice(0, 4).forEach(async (item) => {
+      cleanBgRequested.current.add(item.id);
+      try {
+        const { data, error } = await supabase.functions.invoke("remove-bg", {
+          body: { imageUrl: item.photo_url },
+        });
+        if (!error && data?.image) {
+          setCleanBgUrls((prev) => ({ ...prev, [item.id]: data.image }));
+        }
+      } catch {
+        // silently fail — show original photo
+      }
+    });
+  }, [flatLayView, items]);
 
   // localStorage persistence for mannequin clothing
   const STORAGE_KEY = user ? `mannequin-outfit-${user.id}` : null;
@@ -658,15 +680,19 @@ const Closet = () => {
                   </button>
                 ))}
               </div>
-              <button
-                onClick={() => setFlatLayView(!flatLayView)}
+              <motion.button
+                onClick={() => {
+                  haptic(flatLayView ? "light" : "medium");
+                  setFlatLayView(!flatLayView);
+                }}
+                whileTap={{ scale: 0.9 }}
                 className={`p-2 rounded-xl transition-colors flex-shrink-0 ${
                   flatLayView ? "bg-primary/15 text-primary" : "bg-secondary text-muted-foreground hover:text-foreground"
                 }`}
                 title="Flat-Lay View"
               >
                 <Layers className="w-4 h-4" />
-              </button>
+              </motion.button>
             </div>
 
             {/* Items */}
@@ -720,9 +746,9 @@ const Closet = () => {
                             <div className="aspect-[3/4] relative flex items-center justify-center p-4">
                               {item.photo_url ? (
                                 <img
-                                  src={item.photo_url}
+                                  src={cleanBgUrls[item.id] || item.photo_url}
                                   alt={item.name || ""}
-                                  className="w-full h-full object-contain"
+                                  className="w-full h-full object-contain transition-opacity duration-500"
                                   style={{ mixBlendMode: "multiply" }}
                                 />
                               ) : (
