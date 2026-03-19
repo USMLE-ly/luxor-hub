@@ -507,6 +507,176 @@ const OutfitCalendar = () => {
     return { score, label: "Needs More", color: "hsl(var(--muted-foreground))" };
   };
 
+  // Weather-based outfit recommendations
+  const getWeatherRecommendations = (date: Date, outfitItems: any[]): { icon: React.ReactNode; text: string; severity: "warn" | "info" }[] => {
+    const w = getWeatherForDate(date);
+    if (!w) return [];
+    const recs: { icon: React.ReactNode; text: string; severity: "warn" | "info" }[] = [];
+    const items = Array.isArray(outfitItems) ? outfitItems : [];
+    const cats = new Set(items.map((i: any) => (i?.category || "").toLowerCase()));
+    const hasOuterwear = cats.has("outerwear");
+
+    if (w.rain) {
+      recs.push({
+        icon: <Umbrella className="w-3.5 h-3.5" />,
+        text: hasOuterwear ? "Rain expected — make sure your outerwear is waterproof" : "Rain expected — consider adding a waterproof jacket",
+        severity: "warn",
+      });
+    }
+    if (w.tempMin <= 5) {
+      recs.push({
+        icon: <Snowflake className="w-3.5 h-3.5" />,
+        text: hasOuterwear ? "Cold day — layer up with warm accessories" : "Cold day (≤5°C) — add a warm coat or layers",
+        severity: "warn",
+      });
+    } else if (w.tempMin <= 12 && !hasOuterwear) {
+      recs.push({
+        icon: <ThermometerSnowflake className="w-3.5 h-3.5" />,
+        text: "Cool weather — consider adding a light jacket",
+        severity: "info",
+      });
+    }
+    if (w.tempMax >= 30) {
+      recs.push({
+        icon: <Sun className="w-3.5 h-3.5" />,
+        text: "Hot day — opt for breathable fabrics and light colors",
+        severity: "info",
+      });
+    }
+    return recs;
+  };
+
+  // Share outfit as styled card image
+  const shareOutfitCard = async (ev: CalendarEvent) => {
+    const items = Array.isArray(ev.outfit_items) ? ev.outfit_items : [];
+    const photos: string[] = [];
+    items.forEach((item: any) => {
+      if (typeof item === "string") {
+        const url = closetMap.get(item.toLowerCase());
+        if (url) photos.push(url);
+      } else {
+        const url = item?.photo_url || item?.photoUrl || item?.image_url || item?.imageUrl;
+        if (url) photos.push(url);
+      }
+    });
+
+    const canvas = document.createElement("canvas");
+    canvas.width = 600;
+    canvas.height = 800;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Background gradient
+    const grad = ctx.createLinearGradient(0, 0, 0, 800);
+    grad.addColorStop(0, "#1a1a2e");
+    grad.addColorStop(1, "#16213e");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 600, 800);
+
+    // Gold accent bar
+    const goldGrad = ctx.createLinearGradient(0, 0, 600, 0);
+    goldGrad.addColorStop(0, "#c5a355");
+    goldGrad.addColorStop(1, "#e8d48b");
+    ctx.fillStyle = goldGrad;
+    ctx.fillRect(0, 0, 600, 4);
+
+    // Title
+    ctx.fillStyle = "#e8d48b";
+    ctx.font = "bold 14px sans-serif";
+    ctx.fillText("AURELIA • OUTFIT SCHEDULE", 30, 40);
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 28px sans-serif";
+    ctx.fillText(ev.title, 30, 80);
+
+    ctx.fillStyle = "#999999";
+    ctx.font = "14px sans-serif";
+    const dateStr = format(new Date(ev.event_date + "T00:00:00"), "EEEE, MMMM d");
+    ctx.fillText(`${dateStr}${ev.occasion ? ` • ${ev.occasion}` : ""}`, 30, 108);
+
+    // Load and draw item photos in a grid
+    const visiblePhotos = photos.slice(0, 4);
+    if (visiblePhotos.length > 0) {
+      const cols = visiblePhotos.length >= 4 ? 2 : visiblePhotos.length;
+      const rows = Math.ceil(visiblePhotos.length / cols);
+      const cellW = (540 / cols);
+      const cellH = Math.min(280, 560 / rows);
+      const startY = 140;
+
+      // White card background for photos
+      ctx.fillStyle = "#ffffff";
+      const cardW = cols * cellW;
+      const cardH = rows * cellH;
+      ctx.beginPath();
+      ctx.roundRect(30, startY - 10, cardW, cardH + 20, 16);
+      ctx.fill();
+
+      const loadImg = (src: string): Promise<HTMLImageElement> => new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = src;
+      });
+
+      try {
+        const imgs = await Promise.all(visiblePhotos.map(loadImg));
+        imgs.forEach((img, i) => {
+          const col = i % cols;
+          const row = Math.floor(i / cols);
+          const x = 30 + col * cellW + 10;
+          const y = startY + row * cellH + 10;
+          const w = cellW - 20;
+          const h = cellH - 20;
+          // Fit image
+          const scale = Math.min(w / img.width, h / img.height);
+          const drawW = img.width * scale;
+          const drawH = img.height * scale;
+          ctx.drawImage(img, x + (w - drawW) / 2, y + (h - drawH) / 2, drawW, drawH);
+        });
+      } catch {
+        // If images fail to load, just show text
+        ctx.fillStyle = "#666";
+        ctx.font = "16px sans-serif";
+        ctx.fillText(`${items.length} items in this outfit`, 30, 200);
+      }
+    }
+
+    // Notes footer
+    if (ev.notes) {
+      ctx.fillStyle = "#888888";
+      ctx.font = "italic 13px sans-serif";
+      ctx.fillText(`"${ev.notes}"`, 30, 740);
+    }
+
+    // Watermark
+    ctx.fillStyle = "#555555";
+    ctx.font = "11px sans-serif";
+    ctx.fillText("Styled with AURELIA", 30, 780);
+
+    canvas.toBlob(async (blob) => {
+      if (!blob) return;
+      const file = new File([blob], `outfit-${ev.event_date}.png`, { type: "image/png" });
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        try {
+          await navigator.share({
+            title: ev.title,
+            text: `Check out my outfit for ${dateStr}!`,
+            files: [file],
+          });
+        } catch { /* user cancelled */ }
+      } else {
+        // Fallback: download
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `outfit-${ev.event_date}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast.success("Outfit card downloaded!");
+      }
+    }, "image/png");
+  };
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
   const calStart = startOfWeek(monthStart, { weekStartsOn: 1 });
