@@ -274,7 +274,7 @@ const OutfitCalendar = () => {
       .slice(0, 3);
   };
 
-
+  const toggleNotifications = async () => {
     if (notificationsEnabled) {
       setNotificationsEnabled(false);
       toast.success("Reminders turned off");
