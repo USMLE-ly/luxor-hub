@@ -746,9 +746,9 @@ const Closet = () => {
                             <div className="aspect-[3/4] relative flex items-center justify-center p-4">
                               {item.photo_url ? (
                                 <img
-                                  src={item.photo_url}
+                                  src={cleanBgUrls[item.id] || item.photo_url}
                                   alt={item.name || ""}
-                                  className="w-full h-full object-contain"
+                                  className="w-full h-full object-contain transition-opacity duration-500"
                                   style={{ mixBlendMode: "multiply" }}
                                 />
                               ) : (
