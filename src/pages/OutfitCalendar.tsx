@@ -584,46 +584,7 @@ const OutfitCalendar = () => {
     return null;
   };
 
-  // Planning streak milestones & rewards
-  const streakRewards = useMemo(() => {
-    const streak = calendarStats.streak;
-    const milestones = [
-      { days: 3, name: "Getting Started", icon: "🔥", badge: "streak_3" },
-      { days: 7, name: "Week Warrior", icon: "⚡", badge: "streak_7" },
-      { days: 14, name: "Style Streak", icon: "💎", badge: "streak_14" },
-      { days: 30, name: "Fashion Devotee", icon: "👑", badge: "streak_30" },
-    ];
-    const current = milestones.filter(m => streak >= m.days);
-    const next = milestones.find(m => streak < m.days);
-    const progress = next ? Math.round((streak / next.days) * 100) : 100;
-    return { current, next, progress, streak };
-  }, [calendarStats.streak]);
-
-  // Award streak badges
-  useEffect(() => {
-    if (!user || streakRewards.current.length === 0) return;
-    const awardBadges = async () => {
-      for (const milestone of streakRewards.current) {
-        const { data: existing } = await supabase
-          .from("user_badges")
-          .select("id")
-          .eq("user_id", user.id)
-          .eq("badge_key", milestone.badge)
-          .maybeSingle();
-        if (!existing) {
-          await supabase.from("user_badges").insert({
-            user_id: user.id,
-            badge_key: milestone.badge,
-            badge_name: milestone.name,
-            badge_description: `Planned outfits for ${milestone.days} consecutive days`,
-            badge_icon: "flame",
-          });
-          toast.success(`🏆 Badge unlocked: ${milestone.name}!`);
-        }
-      }
-    };
-    awardBadges();
-  }, [user, streakRewards.current.length]);
+  // streakRewards + badge awarding are after calendarStats below
 
   // Share outfit as styled card image
   const shareOutfitCard = async (ev: CalendarEvent) => {
