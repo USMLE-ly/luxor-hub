@@ -248,7 +248,33 @@ const OutfitCalendar = () => {
     return { isRepeat: false, matchDate: null };
   };
 
-  const toggleNotifications = async () => {
+  // Smart suggestion: recommend underused closet items when repeat detected
+  const getUnderusedSuggestions = (ev: CalendarEvent): ClosetItem[] => {
+    const items = Array.isArray(ev.outfit_items) ? ev.outfit_items : [];
+    if (items.length === 0) return [];
+    const usedCats = new Set(items.map((i: any) => (i?.category || "").toLowerCase()));
+    const itemUsage = new Map<string, number>();
+    recentEvents.forEach(re => {
+      const reItems = Array.isArray(re.outfit_items) ? re.outfit_items : [];
+      reItems.forEach((i: any) => {
+        const name = (typeof i === "string" ? i : i?.name || "").toLowerCase();
+        if (name) itemUsage.set(name, (itemUsage.get(name) || 0) + 1);
+      });
+    });
+    return closetItems
+      .filter(ci => {
+        if (!usedCats.has(ci.category.toLowerCase())) return false;
+        const alreadyInOutfit = items.some((i: any) => {
+          const n = (typeof i === "string" ? i : i?.name || "").toLowerCase();
+          return n === (ci.name || "").toLowerCase();
+        });
+        return !alreadyInOutfit;
+      })
+      .sort((a, b) => (itemUsage.get((a.name || "").toLowerCase()) || 0) - (itemUsage.get((b.name || "").toLowerCase()) || 0))
+      .slice(0, 3);
+  };
+
+
     if (notificationsEnabled) {
       setNotificationsEnabled(false);
       toast.success("Reminders turned off");
