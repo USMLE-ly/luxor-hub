@@ -63,12 +63,15 @@ const Council = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [styleProfile, setStyleProfile] = useState<any>(null);
   const [closetSummary, setClosetSummary] = useState("");
+  const [closetItems, setClosetItems] = useState<any[]>([]);
   const [pendingImage, setPendingImage] = useState<string | null>(null);
   const [currentMood, setCurrentMood] = useState<string | null>(null);
   const [currentStage, setCurrentStage] = useState(0);
   const [stageStatus, setStageStatus] = useState<"idle" | "start" | "complete">("idle");
   const [liveStage1, setLiveStage1] = useState<Stage1Response[]>([]);
   const [liveRankings, setLiveRankings] = useState<Ranking[]>([]);
+  const [showWardrobePanel, setShowWardrobePanel] = useState(false);
+  const [memoryCount, setMemoryCount] = useState(0);
   const bottomRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
