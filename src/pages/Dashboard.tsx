@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Shirt, Wand2, ArrowRight, Heart, Sparkles, Palette, Scissors,
   ShoppingBag, ExternalLink, Check, Gift, Calendar, Briefcase, PartyPopper, Sun, ChevronRight,
-  TrendingUp, Snowflake, Dumbbell,
+  TrendingUp, Snowflake, Dumbbell, AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GradientButton } from "@/components/ui/gradient-button";
@@ -146,6 +146,7 @@ const Dashboard = () => {
   }>({ onboarding_completed: null, archetype: null, preferences: null });
   const [shopProducts, setShopProducts] = useState<ShopProduct[]>([]);
   const [shopLoading, setShopLoading] = useState(false);
+  const [wardrobeItems, setWardrobeItems] = useState<{ category: string; color: string | null }[]>([]);
   const [closetItems, setClosetItems] = useState<{ id: string; photo_url: string | null; name: string | null; category: string }[]>([]);
   const [outfitsList, setOutfitsList] = useState<{ id: string; name: string; occasion: string | null; items: string[] }[]>([]);
   const [activeOccasion, setActiveOccasion] = useState<string | null>(null);
@@ -158,13 +159,14 @@ const Dashboard = () => {
   useEffect(() => {
     if (!user) return;
     const fetchData = async () => {
-      const [itemsRes, outfitsRes, profileRes, styleRes, closetRes, outfitsListRes] = await Promise.all([
+      const [itemsRes, outfitsRes, profileRes, styleRes, closetRes, outfitsListRes, allItemsRes] = await Promise.all([
         supabase.from("clothing_items").select("id", { count: "exact", head: true }).eq("user_id", user.id),
         supabase.from("outfits").select("id", { count: "exact", head: true }).eq("user_id", user.id),
         supabase.from("profiles").select("display_name").eq("user_id", user.id).single(),
         supabase.from("style_profiles").select("onboarding_completed, archetype, style_score, preferences").eq("user_id", user.id).single(),
-        supabase.from("clothing_items").select("id, photo_url, name, category").eq("user_id", user.id).order("created_at", { ascending: false }).limit(12),
+        supabase.from("clothing_items").select("id, photo_url, name, category, color").eq("user_id", user.id).order("created_at", { ascending: false }).limit(12),
         supabase.from("outfits").select("id, name, occasion").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
+        supabase.from("clothing_items").select("category, color").eq("user_id", user.id),
       ]);
       setStats({
         items: itemsRes.count || 0,
@@ -173,7 +175,8 @@ const Dashboard = () => {
       });
       if (profileRes.data) setProfile(profileRes.data);
       if (styleRes.data) setStyleProfile(styleRes.data as any);
-      if (closetRes.data) setClosetItems(closetRes.data);
+      if (closetRes.data) setClosetItems(closetRes.data as any);
+      if (allItemsRes.data) setWardrobeItems(allItemsRes.data);
 
       if (outfitsListRes.data && outfitsListRes.data.length > 0) {
         const outfitsWithItems = await Promise.all(
@@ -276,6 +279,35 @@ const Dashboard = () => {
   const colorType = styleProfile.preferences?.aiAnalysis?.colorSeason || "—";
   const styleType = styleProfile.archetype || "—";
   const bodyType = styleProfile.preferences?.bodyShape || "—";
+
+  // Wardrobe completeness analysis
+  const ESSENTIAL_CATS = ["top", "bottom", "outerwear", "shoes", "dress", "accessory"];
+  const CORE_COLORS = ["black", "white", "navy", "gray", "grey", "beige", "brown", "blue"];
+  const ACCENT_COLORS = ["red", "green", "yellow", "pink", "orange", "purple", "burgundy"];
+
+  const wardrobeCompleteness = useMemo(() => {
+    if (!wardrobeItems.length) return null;
+    const catCounts = new Map<string, number>();
+    const colorSet = new Set<string>();
+    wardrobeItems.forEach((i) => {
+      catCounts.set(i.category, (catCounts.get(i.category) || 0) + 1);
+      if (i.color) colorSet.add(i.color.toLowerCase().trim());
+    });
+    const coveredCats = ESSENTIAL_CATS.filter((c) => (catCounts.get(c) || 0) >= 3).length;
+    const catScore = coveredCats / ESSENTIAL_CATS.length;
+    const coveredNeutrals = CORE_COLORS.filter((c) => colorSet.has(c)).length;
+    const hasAccent = ACCENT_COLORS.some((c) => colorSet.has(c));
+    const colorScore = (coveredNeutrals / CORE_COLORS.length) * 0.8 + (hasAccent ? 0.2 : 0);
+    const overall = Math.round((catScore * 0.6 + colorScore * 0.4) * 100);
+    const missingCats = ESSENTIAL_CATS.filter((c) => !catCounts.has(c) || (catCounts.get(c) || 0) === 0);
+    const weakCats = ESSENTIAL_CATS.filter((c) => { const n = catCounts.get(c) || 0; return n > 0 && n < 3; });
+    const gaps: string[] = [];
+    missingCats.slice(0, 2).forEach((c) => gaps.push(`Add ${c}s`));
+    weakCats.slice(0, 2).forEach((c) => gaps.push(`More ${c}s`));
+    if (coveredNeutrals < 4) gaps.push("Add neutral basics");
+    if (!hasAccent) gaps.push("Add accent color");
+    return { overall, gaps: gaps.slice(0, 3) };
+  }, [wardrobeItems]);
 
   const occasionTabs = [
     { label: "All", icon: <Sparkles className="w-4 h-4" />, color: "hsl(var(--primary))", value: null },
@@ -454,6 +486,59 @@ const Dashboard = () => {
             </div>
           </div>
         </motion.div>
+
+        {/* ── Wardrobe Completeness Widget ──────────────────── */}
+        {wardrobeCompleteness && (
+          <motion.div variants={fadeUp} className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-xl p-5">
+            <div className="flex items-center gap-4">
+              {/* SVG Ring */}
+              <div className="relative w-20 h-20 flex-shrink-0">
+                <svg viewBox="0 0 80 80" className="w-full h-full -rotate-90">
+                  <circle cx="40" cy="40" r="34" fill="none" stroke="hsl(var(--muted))" strokeWidth="5" />
+                  <motion.circle
+                    cx="40" cy="40" r="34" fill="none"
+                    strokeWidth="5"
+                    strokeLinecap="round"
+                    stroke="url(#completenessGrad)"
+                    strokeDasharray={`${2 * Math.PI * 34}`}
+                    initial={{ strokeDashoffset: 2 * Math.PI * 34 }}
+                    animate={{ strokeDashoffset: 2 * Math.PI * 34 * (1 - wardrobeCompleteness.overall / 100) }}
+                    transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
+                  />
+                  <defs>
+                    <linearGradient id="completenessGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="hsl(142, 60%, 48%)" />
+                      <stop offset="100%" stopColor="hsl(var(--primary))" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-lg font-bold font-sans text-foreground">{wardrobeCompleteness.overall}%</span>
+                </div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-display text-base font-bold text-foreground mb-1">Wardrobe Readiness</h3>
+                <p className="text-[10px] font-sans text-muted-foreground mb-2">Category coverage & color diversity</p>
+                <div className="space-y-1">
+                  {wardrobeCompleteness.gaps.map((gap, i) => (
+                    <div key={i} className="flex items-center gap-1.5">
+                      <AlertCircle className="w-3 h-3 text-primary flex-shrink-0" />
+                      <span className="text-[11px] font-sans text-foreground">{gap}</span>
+                    </div>
+                  ))}
+                </div>
+                {wardrobeCompleteness.gaps.length > 0 && (
+                  <button
+                    onClick={() => navigate("/inspiration")}
+                    className="text-[10px] font-sans text-primary font-semibold mt-2 flex items-center gap-1 hover:underline"
+                  >
+                    Shop to fill gaps <ArrowRight className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {/* ── My Closet Outfits ─────────────────────────────── */}
         <motion.div variants={fadeUp}>

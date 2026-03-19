@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Heart, ExternalLink, ShoppingBag, Sparkles, ChevronRight, Loader2, Camera, ArrowUpDown } from "lucide-react";
+import { Heart, ExternalLink, ShoppingBag, Sparkles, ChevronRight, Loader2, Camera, ArrowUpDown, AlertCircle, ArrowRight } from "lucide-react";
 
 interface Product {
   id: string;
@@ -30,6 +30,14 @@ const brandLogos = [
   { name: "Nike", emoji: "👟" },
 ];
 
+const ESSENTIAL_CATS = ["top", "bottom", "outerwear", "shoes", "dress", "accessory"];
+const CORE_COLORS = ["black", "white", "navy", "gray", "grey", "beige", "brown", "blue"];
+const ACCENT_COLORS = ["red", "green", "yellow", "pink", "orange", "purple", "burgundy"];
+
+const catToShopMap: Record<string, string> = {
+  top: "Tops", bottom: "Bottoms", outerwear: "Outerwear", shoes: "Shoes", dress: "Tops", accessory: "Accessories",
+};
+
 const Inspiration = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -41,6 +49,7 @@ const Inspiration = () => {
   const [bodyShape, setBodyShape] = useState("");
   const [archetype, setArchetype] = useState("");
   const [closetCategories, setClosetCategories] = useState<string[]>([]);
+  const [closetColors, setClosetColors] = useState<string[]>([]);
   const [imgErrors, setImgErrors] = useState<Set<string>>(new Set());
   const [sortByMatch, setSortByMatch] = useState(true);
   const [profileLoaded, setProfileLoaded] = useState(false);
@@ -49,16 +58,40 @@ const Inspiration = () => {
     if (!user) return;
     Promise.all([
       supabase.from("style_profiles").select("archetype, preferences").eq("user_id", user.id).single(),
-      supabase.from("clothing_items").select("category").eq("user_id", user.id),
+      supabase.from("clothing_items").select("category, color").eq("user_id", user.id),
     ]).then(([styleRes, closetRes]) => {
       const prefs = (styleRes.data?.preferences as any) || {};
       setColorSeason(prefs?.aiAnalysis?.colorSeason || "");
       setBodyShape(prefs?.bodyShape || "");
       setArchetype(styleRes.data?.archetype || "");
-      if (closetRes.data) setClosetCategories(closetRes.data.map(i => i.category));
+      if (closetRes.data) {
+        setClosetCategories(closetRes.data.map(i => i.category));
+        setClosetColors(closetRes.data.map(i => i.color).filter(Boolean) as string[]);
+      }
       setProfileLoaded(true);
     });
   }, [user]);
+
+  // Compute wardrobe gaps
+  const gaps = useMemo(() => {
+    if (!closetCategories.length) return { missingCats: [], missingColors: [], suggestions: [] };
+    const catCounts = new Map<string, number>();
+    closetCategories.forEach((c) => catCounts.set(c, (catCounts.get(c) || 0) + 1));
+    const colorSet = new Set(closetColors.map(c => c.toLowerCase().trim()));
+    
+    const missingCats = ESSENTIAL_CATS.filter((c) => !catCounts.has(c) || (catCounts.get(c) || 0) === 0);
+    const weakCats = ESSENTIAL_CATS.filter((c) => { const n = catCounts.get(c) || 0; return n > 0 && n < 3; });
+    const missingNeutrals = CORE_COLORS.filter(c => !colorSet.has(c));
+    const hasAccent = ACCENT_COLORS.some(c => colorSet.has(c));
+
+    const suggestions: string[] = [];
+    missingCats.forEach(c => suggestions.push(`Add ${c}s to your closet`));
+    weakCats.forEach(c => suggestions.push(`Expand your ${c}s collection`));
+    if (missingNeutrals.length > 2) suggestions.push(`Get neutral basics: ${missingNeutrals.slice(0, 3).join(", ")}`);
+    if (!hasAccent) suggestions.push("Add a pop of color");
+
+    return { missingCats: [...missingCats, ...weakCats], missingColors: missingNeutrals, suggestions: suggestions.slice(0, 3) };
+  }, [closetCategories, closetColors]);
 
   useEffect(() => {
     if (!profileLoaded) return;
@@ -97,9 +130,23 @@ const Inspiration = () => {
     });
   };
 
+  // Tag products that fill gaps
+  const taggedProducts = useMemo(() => {
+    const gapShopCats = new Set(gaps.missingCats.map(c => catToShopMap[c] || "").filter(Boolean));
+    return products.map(p => ({
+      ...p,
+      fillsGap: gapShopCats.has(p.category),
+    }));
+  }, [products, gaps.missingCats]);
+
   const sortedProducts = sortByMatch
-    ? [...products].sort((a, b) => b.matchScore - a.matchScore)
-    : products;
+    ? [...taggedProducts].sort((a, b) => {
+        // Boost gap-filling items
+        if (a.fillsGap && !b.fillsGap) return -1;
+        if (!a.fillsGap && b.fillsGap) return 1;
+        return b.matchScore - a.matchScore;
+      })
+    : taggedProducts;
 
   const getScoreColor = (score: number) => {
     if (score >= 85) return "text-green-400 bg-green-500/20";
@@ -114,6 +161,33 @@ const Inspiration = () => {
           <h1 className="font-display text-2xl font-bold text-foreground">My Shop</h1>
           <p className="text-muted-foreground font-sans text-xs mt-0.5">Personalized picks based on your Style DNA</p>
         </motion.div>
+
+        {/* Wardrobe Gaps Banner */}
+        {gaps.suggestions.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.02 }}
+            className="rounded-2xl border border-primary/20 bg-primary/5 p-4 mb-5"
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <AlertCircle className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <p className="font-sans font-semibold text-foreground text-sm">Fill Your Wardrobe Gaps</p>
+                <p className="text-[10px] text-muted-foreground font-sans">Items tagged below will complete your closet</p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {gaps.suggestions.map((s, i) => (
+                <span key={i} className="text-[10px] font-sans px-2.5 py-1 rounded-full border border-primary/20 bg-primary/5 text-primary font-medium">
+                  {s}
+                </span>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* Check Match CTA */}
         <motion.button
@@ -199,11 +273,18 @@ const Inspiration = () => {
                     </div>
                   )}
 
-                  {/* Match score with color coding */}
+                  {/* Match score */}
                   <div className={`absolute top-2 left-2 backdrop-blur-sm rounded-full px-2 py-0.5 flex items-center gap-1 ${getScoreColor(product.matchScore)}`}>
                     <Sparkles className="w-2.5 h-2.5" />
                     <span className="text-[10px] font-bold font-sans">{product.matchScore}%</span>
                   </div>
+
+                  {/* Fills Gap badge */}
+                  {product.fillsGap && (
+                    <div className="absolute top-2 left-[52px] backdrop-blur-sm rounded-full px-2 py-0.5 bg-primary/80 text-primary-foreground">
+                      <span className="text-[9px] font-bold font-sans">Fills Gap</span>
+                    </div>
+                  )}
 
                   <button onClick={(e) => { e.stopPropagation(); toggleLike(product.id); }}
                     className="absolute top-2 right-2 w-7 h-7 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center">

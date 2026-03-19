@@ -413,7 +413,7 @@ const Onboarding = () => {
                 ease: [0.22, 1, 0.36, 1],
                 filter: { duration: 0.3 },
               }}
-              drag="x"
+              drag={currentStep > 0 ? "x" : false}
               dragConstraints={{ left: 0, right: 0 }}
               dragElastic={0.12}
               onDragEnd={(_, info) => {
