@@ -116,15 +116,17 @@ const OutfitCalendar = () => {
     if (!user) return;
     const { data } = await supabase
       .from("clothing_items")
-      .select("name, photo_url")
-      .eq("user_id", user.id)
-      .not("photo_url", "is", null);
+      .select("id, name, photo_url, category, color")
+      .eq("user_id", user.id);
     if (data) {
       const map = new Map<string, string>();
+      const items: ClosetItem[] = [];
       data.forEach(item => {
-        if (item.name) map.set(item.name.toLowerCase(), item.photo_url!);
+        if (item.name && item.photo_url) map.set(item.name.toLowerCase(), item.photo_url);
+        items.push(item as ClosetItem);
       });
       setClosetMap(map);
+      setClosetItems(items);
     }
   };
 
