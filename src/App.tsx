@@ -43,6 +43,7 @@ import VirtualTryOn from "./pages/VirtualTryOn";
 import CommunityGallery from "./pages/CommunityGallery";
 import Install from "./pages/Install";
 import Council from "./pages/Council";
+import MonthlyReport from "./pages/MonthlyReport";
 
 // Tracks route changes for Facebook Pixel
 const RouteTracker = () => {
