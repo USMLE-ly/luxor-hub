@@ -519,33 +519,30 @@ const OutfitCalendar = () => {
                 <button
                   key={i}
                   onClick={() => setSelectedDate(d)}
-                  className={`min-h-[76px] p-1.5 border-b border-r border-border/30 text-left transition-all relative group
+                  className={`min-h-[100px] p-1 border-b border-r border-border/30 text-left transition-all relative group flex flex-col
                     ${!inMonth ? "opacity-20" : ""}
-                    ${selected ? "bg-primary/8 ring-1 ring-primary/30 ring-inset" : "hover:bg-secondary/40"}
-                    ${todayFlag ? "bg-primary/5" : ""}
+                    ${selected ? "ring-1 ring-primary/30 ring-inset" : "hover:bg-secondary/40"}
+                    ${todayFlag && !dayEvents.length ? "bg-primary/5" : ""}
+                    ${dayEvents.length > 0 && inMonth ? "bg-[#fefdfb]" : ""}
                   `}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className={`text-[11px] font-sans leading-none ${
+                  <div className="flex items-center justify-between w-full shrink-0">
+                    <span className={`text-[10px] font-sans leading-none ${
                       todayFlag
                         ? "w-5 h-5 rounded-full gold-gradient text-primary-foreground flex items-center justify-center font-bold text-[10px]"
-                        : "text-foreground"
+                        : "text-muted-foreground"
                     }`}>
                       {format(d, "d")}
                     </span>
                     {weather && inMonth && (
-                      <span className="opacity-60 group-hover:opacity-100 transition-opacity">
+                      <span className="opacity-50 text-[10px]">
                         {weatherCodeToIcon(weather.code)}
                       </span>
                     )}
                   </div>
-                  {weather && inMonth && (
-                    <p className="text-[8px] font-sans text-muted-foreground/60 mt-0.5">{weather.tempMax}°</p>
-                  )}
                   {dayEvents.length > 0 && (
-                    <div className="mt-0.5 space-y-0.5">
+                    <div className="flex-1 flex flex-col items-center justify-center w-full mt-0.5 min-h-0">
                       {(() => {
-                        // Mini flat-lay stacks: show tiny thumbnails if outfit has photos
                         const allPhotos: string[] = [];
                         let hasMannequin = false;
                         let mannequinUrl = "";
@@ -560,24 +557,24 @@ const OutfitCalendar = () => {
 
                         if (hasMannequin) {
                           return (
-                            <div className="flex justify-center">
-                              <img src={mannequinUrl} alt="" className="w-7 h-7 rounded-full object-cover border border-border/40" />
+                            <div className="flex-1 flex items-center justify-center w-full">
+                              <img src={mannequinUrl} alt="" className="max-h-[68px] w-auto object-contain" style={{ mixBlendMode: "multiply" }} />
                             </div>
                           );
                         }
 
                         if (allPhotos.length > 0) {
                           return (
-                            <div className="flex flex-col items-center gap-[1px]">
-                              {allPhotos.slice(0, 3).map((url, pi) => (
+                            <div className="flex flex-col items-center justify-center flex-1">
+                              {allPhotos.slice(0, 4).map((url, pi) => (
                                 <img
                                   key={pi}
                                   src={url}
                                   alt=""
-                                  className="w-4 h-5 rounded-sm object-cover"
-                                  style={{ 
+                                  className="w-8 h-8 object-contain"
+                                  style={{
                                     mixBlendMode: "multiply",
-                                    border: "0.5px solid hsl(var(--border) / 0.3)",
+                                    marginTop: pi > 0 ? "-4px" : "0",
                                   }}
                                 />
                               ))}
@@ -585,15 +582,17 @@ const OutfitCalendar = () => {
                           );
                         }
 
-                        // Fallback: text labels
-                        return dayEvents.slice(0, 2).map(ev => (
-                          <div key={ev.id} className="rounded px-1 py-[2px] truncate" style={{ background: "hsl(var(--primary) / 0.15)" }}>
-                            <span className="text-[7px] font-sans text-primary font-semibold tracking-wide">{ev.title}</span>
+                        // Fallback: small dot indicator
+                        return (
+                          <div className="flex gap-0.5 items-center justify-center mt-1">
+                            {dayEvents.slice(0, 3).map(ev => (
+                              <div key={ev.id} className="w-1.5 h-1.5 rounded-full" style={{ background: "hsl(var(--primary))" }} />
+                            ))}
                           </div>
-                        ));
+                        );
                       })()}
-                      {dayEvents.length > 2 && (
-                        <span className="text-[7px] text-muted-foreground font-sans">+{dayEvents.length - 2}</span>
+                      {dayEvents.length > 1 && (
+                        <span className="text-[7px] text-muted-foreground/50 font-sans mt-0.5">{dayEvents.length}</span>
                       )}
                     </div>
                   )}
