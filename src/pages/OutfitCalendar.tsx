@@ -35,7 +35,14 @@ interface ClosetItem {
   color: string | null;
 }
 
-const clothingCategories = ["tops", "bottoms", "shoes", "outerwear", "accessories", "other"];
+const closetCategoryMap: Record<string, string[]> = {
+  "Upper Body": ["top", "outerwear"],
+  "Lower Body": ["bottom"],
+  "Dresses": ["dress"],
+  "Shoes": ["shoes"],
+  "Accessories": ["accessory"],
+  "Other": ["other"],
+};
 
 interface WeatherDay {
   date: string;
