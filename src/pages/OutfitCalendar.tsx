@@ -88,6 +88,7 @@ const OutfitCalendar = () => {
   const [autoFilling, setAutoFilling] = useState(false);
   const [flatLayEvent, setFlatLayEvent] = useState<CalendarEvent | null>(null);
   const [weatherData, setWeatherData] = useState<WeatherDay[]>([]);
+  const [closetMap, setClosetMap] = useState<Map<string, string>>(new Map());
   const [notificationsEnabled, setNotificationsEnabled] = useState(
     typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted"
   );
@@ -97,7 +98,24 @@ const OutfitCalendar = () => {
     if (!user) return;
     fetchEvents();
     fetchOutfits();
+    fetchClosetMap();
   }, [user, currentMonth]);
+
+  const fetchClosetMap = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("clothing_items")
+      .select("name, photo_url")
+      .eq("user_id", user.id)
+      .not("photo_url", "is", null);
+    if (data) {
+      const map = new Map<string, string>();
+      data.forEach(item => {
+        if (item.name) map.set(item.name.toLowerCase(), item.photo_url!);
+      });
+      setClosetMap(map);
+    }
+  };
 
   // Fetch weather when location resolves
   useEffect(() => {
@@ -523,7 +541,7 @@ const OutfitCalendar = () => {
                     ${!inMonth ? "opacity-20" : ""}
                     ${selected ? "ring-1 ring-primary/30 ring-inset" : "hover:bg-secondary/40"}
                     ${todayFlag && !dayEvents.length ? "bg-primary/5" : ""}
-                    ${dayEvents.length > 0 && inMonth ? "bg-[#fefdfb]" : ""}
+                    ${dayEvents.length > 0 && inMonth && (dayEvents.some(ev => ev.mannequin_image_url) || dayEvents.some(ev => Array.isArray(ev.outfit_items) && ev.outfit_items.some((item: any) => typeof item === "string" ? closetMap.has(item.toLowerCase()) : !!(item?.photo_url || item?.photoUrl || item?.image_url || item?.imageUrl)))) ? "bg-[#fefdfb]" : ""}
                   `}
                 >
                   <div className="flex items-center justify-between w-full shrink-0">
@@ -550,8 +568,14 @@ const OutfitCalendar = () => {
                           if (ev.mannequin_image_url) { hasMannequin = true; mannequinUrl = ev.mannequin_image_url; }
                           const items = Array.isArray(ev.outfit_items) ? ev.outfit_items : [];
                           items.forEach((item: any) => {
-                            const url = item?.photo_url || item?.photoUrl || item?.image_url || item?.imageUrl;
-                            if (url) allPhotos.push(url);
+                            // item could be a string name or an object with photo_url
+                            if (typeof item === "string") {
+                              const url = closetMap.get(item.toLowerCase());
+                              if (url) allPhotos.push(url);
+                            } else {
+                              const url = item?.photo_url || item?.photoUrl || item?.image_url || item?.imageUrl;
+                              if (url) allPhotos.push(url);
+                            }
                           });
                         });
 
