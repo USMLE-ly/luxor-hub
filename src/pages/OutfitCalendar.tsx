@@ -8,7 +8,7 @@ import { useUserLocation } from "@/hooks/useUserLocation";
 import {
   CalendarDays, ChevronLeft, ChevronRight, Plus, X, Shirt, Sparkles, Loader2,
   Cloud, Sun, CloudRain, Snowflake, Wind, Droplets, Thermometer, Pencil, Bell, BellOff,
-  MapPin, TrendingUp, Flame, BarChart3, Layers,
+  MapPin, TrendingUp, Flame, BarChart3, Layers, Copy, Palette, Star,
 } from "lucide-react";
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, addMonths, subMonths, isSameMonth, isSameDay, isToday, differenceInMilliseconds, set as setDate } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -418,6 +418,95 @@ const OutfitCalendar = () => {
     return events.filter(e => e.event_date === dateStr);
   };
 
+  // Duplicate yesterday's outfit to selected date
+  const duplicateYesterday = async () => {
+    if (!user || !selectedDate) return;
+    const yesterday = addDays(selectedDate, -1);
+    const yesterdayEvents = getEventsForDate(yesterday);
+    if (yesterdayEvents.length === 0) {
+      toast.error("No outfit found for the previous day");
+      return;
+    }
+    const source = yesterdayEvents[0];
+    const { error } = await supabase.from("calendar_events").insert({
+      user_id: user.id,
+      title: source.title + " (copy)",
+      event_date: format(selectedDate, "yyyy-MM-dd"),
+      occasion: source.occasion,
+      notes: source.notes,
+      outfit_items: source.outfit_items,
+      mannequin_image_url: source.mannequin_image_url,
+    });
+    if (error) toast.error("Failed to duplicate");
+    else { toast.success("Yesterday's outfit duplicated!"); fetchEvents(); }
+  };
+
+  // Live outfit score based on color harmony + occasion match + category coverage
+  const computeOutfitScore = (itemIds: string[], occasion: string): { score: number; label: string; color: string } => {
+    if (itemIds.length === 0) return { score: 0, label: "", color: "" };
+    const items = itemIds.map(id => closetItems.find(c => c.id === id)).filter(Boolean) as ClosetItem[];
+    if (items.length === 0) return { score: 0, label: "", color: "" };
+
+    let score = 0;
+    
+    // Category coverage (max 40): tops+bottoms+shoes = perfect base
+    const cats = new Set(items.map(i => i.category.toLowerCase()));
+    const hasTop = cats.has("top") || cats.has("outerwear") || cats.has("dress");
+    const hasBottom = cats.has("bottom") || cats.has("dress");
+    const hasShoes = cats.has("shoes");
+    if (hasTop) score += 15;
+    if (hasBottom) score += 15;
+    if (hasShoes) score += 10;
+    
+    // Color harmony (max 35): complementary/analogous colors score higher
+    const colorMap: Record<string, number> = {
+      black: 0, white: 0, gray: 0, grey: 0, navy: 240, blue: 240, red: 0, 
+      green: 120, yellow: 60, orange: 30, pink: 330, purple: 270, brown: 30,
+      beige: 40, cream: 45, tan: 35, burgundy: 345, maroon: 345, olive: 80,
+    };
+    const hues = items.map(i => {
+      const c = (i.color || "").toLowerCase().trim();
+      return colorMap[c] !== undefined ? colorMap[c] : -1;
+    }).filter(h => h >= 0);
+    
+    if (hues.length >= 2) {
+      // Neutral-heavy = safe = good
+      const neutrals = items.filter(i => ["black", "white", "gray", "grey", "navy", "beige", "cream"].includes((i.color || "").toLowerCase().trim()));
+      const neutralRatio = neutrals.length / items.length;
+      if (neutralRatio >= 0.5) score += 30;
+      else {
+        // Check if chromatic colors are analogous (within 60deg)
+        const chromatic = hues.filter(h => h > 0);
+        if (chromatic.length >= 2) {
+          const spread = Math.max(...chromatic) - Math.min(...chromatic);
+          if (spread <= 60 || spread >= 300) score += 30;
+          else if (spread <= 120) score += 20;
+          else score += 10;
+        } else score += 25;
+      }
+    } else score += 20; // single item or no color data
+    
+    // Occasion match (max 25)
+    const occasionCatBonus: Record<string, string[]> = {
+      "Work": ["top", "bottom", "shoes"],
+      "Formal": ["top", "bottom", "shoes", "accessory"],
+      "Casual": ["top", "bottom"],
+      "Date Night": ["dress", "shoes", "accessory"],
+      "Party": ["dress", "shoes", "accessory"],
+      "Travel": ["top", "bottom", "shoes", "outerwear"],
+      "Workout": ["top", "bottom", "shoes"],
+    };
+    const wanted = occasionCatBonus[occasion] || [];
+    const matched = wanted.filter(w => cats.has(w));
+    score += Math.round((matched.length / Math.max(wanted.length, 1)) * 25);
+
+    score = Math.min(score, 100);
+    
+    if (score >= 80) return { score, label: "Great Match", color: "hsl(var(--primary))" };
+    if (score >= 55) return { score, label: "Good", color: "hsl(45 90% 50%)" };
+    return { score, label: "Needs More", color: "hsl(var(--muted-foreground))" };
+  };
+
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
   const calStart = startOfWeek(monthStart, { weekStartsOn: 1 });
@@ -711,6 +800,9 @@ const OutfitCalendar = () => {
                       </div>
                     );
                   })()}
+                  <Button size="sm" variant="outline" onClick={duplicateYesterday} className="gap-1 rounded-xl text-xs" title="Copy yesterday's outfit">
+                    <Copy className="w-3 h-3" />
+                  </Button>
                   <Button size="sm" onClick={() => setShowAddDialog(true)} className="gap-1.5 rounded-xl">
                     <Plus className="w-3.5 h-3.5" /> Add
                   </Button>
@@ -779,14 +871,18 @@ const OutfitCalendar = () => {
                             const [moved] = newItems.splice(dragIdx, 1);
                             newItems.splice(targetIdx, 0, moved);
                             setDragIdx(null);
-                            // Optimistic update
                             const updatedEvents = events.map(e => e.id === ev.id ? { ...e, outfit_items: newItems } : e);
                             setEvents(updatedEvents);
                             await supabase.from("calendar_events").update({ outfit_items: newItems as any }).eq("id", ev.id);
                           };
+                          // Flat-lay grid: 2-col for ≥4 items, else row
+                          const useGrid = photos.length >= 4;
                           return (
-                            <div className="p-3 pb-0">
-                              <div className="flex gap-2 overflow-x-auto">
+                            <div className="p-3 pb-1">
+                              <div className={useGrid
+                                ? "grid grid-cols-2 gap-1.5 rounded-xl bg-white/95 dark:bg-white/90 p-2 overflow-hidden"
+                                : "flex gap-2 overflow-x-auto"
+                              }>
                                 {photos.map((url, pi) => (
                                   <div
                                     key={pi}
@@ -794,7 +890,7 @@ const OutfitCalendar = () => {
                                     onDragStart={() => handleDragStart(pi)}
                                     onDragOver={handleDragOver}
                                     onDrop={() => handleDrop(pi)}
-                                    className={`w-16 h-16 rounded-lg bg-white/95 dark:bg-white/90 flex-shrink-0 flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing transition-all ${
+                                    className={`${useGrid ? "aspect-square" : "w-16 h-16 flex-shrink-0"} rounded-lg ${!useGrid ? "bg-white/95 dark:bg-white/90" : ""} flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing transition-all ${
                                       dragIdx === pi ? "opacity-50 scale-95" : "hover:ring-2 hover:ring-primary/30"
                                     }`}
                                   >
@@ -807,7 +903,7 @@ const OutfitCalendar = () => {
                                   </div>
                                 ))}
                                 {items.length > 5 && (
-                                  <div className="w-16 h-16 rounded-lg flex-shrink-0 flex items-center justify-center bg-secondary/60 text-[10px] font-sans font-semibold text-muted-foreground">
+                                  <div className={`${useGrid ? "aspect-square" : "w-16 h-16 flex-shrink-0"} rounded-lg flex items-center justify-center bg-secondary/60 text-[10px] font-sans font-semibold text-muted-foreground`}>
                                     +{items.length - 5}
                                   </div>
                                 )}
@@ -1036,6 +1132,33 @@ const OutfitCalendar = () => {
                   </div>
                 </div>
               )}
+              {/* Live Outfit Score */}
+              {newEvent.manualItems.length >= 2 && (() => {
+                const scoreData = computeOutfitScore(newEvent.manualItems, newEvent.occasion);
+                return (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex items-center gap-3 p-3 rounded-xl"
+                    style={{ background: "hsl(var(--secondary) / 0.6)", border: "1px solid hsl(var(--border) / 0.5)" }}
+                  >
+                    <div className="relative w-10 h-10 flex-shrink-0">
+                      <svg viewBox="0 0 36 36" className="w-10 h-10 -rotate-90">
+                        <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--muted))" strokeWidth="3" />
+                        <circle cx="18" cy="18" r="15.5" fill="none" stroke={scoreData.color} strokeWidth="3"
+                          strokeDasharray={`${scoreData.score * 0.975} 100`} strokeLinecap="round" />
+                      </svg>
+                      <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold" style={{ color: scoreData.color }}>
+                        {scoreData.score}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-xs font-sans font-semibold" style={{ color: scoreData.color }}>{scoreData.label}</p>
+                      <p className="text-[10px] font-sans text-muted-foreground">Color harmony • Category coverage • Occasion fit</p>
+                    </div>
+                  </motion.div>
+                );
+              })()}
               {(() => {
                 const w = selectedDate ? getWeatherForDate(selectedDate) : null;
                 if (!w) return null;
