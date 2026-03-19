@@ -1131,6 +1131,36 @@ const OutfitCalendar = () => {
                   ))}
                 </div>
               )}
+
+              {/* Weather Recommendations */}
+              {selectedDate && getEventsForDate(selectedDate).length > 0 && (() => {
+                const allItems = getEventsForDate(selectedDate).flatMap(ev => Array.isArray(ev.outfit_items) ? ev.outfit_items : []);
+                const recs = getWeatherRecommendations(selectedDate, allItems);
+                if (recs.length === 0) return null;
+                return (
+                  <div className="mt-3 space-y-1.5 pl-3">
+                    {recs.map((rec, ri) => (
+                      <motion.div
+                        key={ri}
+                        initial={{ opacity: 0, x: -5 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: ri * 0.08 }}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[11px] font-sans"
+                        style={{
+                          background: rec.severity === "warn"
+                            ? "hsl(var(--destructive) / 0.08)"
+                            : "hsl(var(--primary) / 0.08)",
+                          border: `1px solid ${rec.severity === "warn" ? "hsl(var(--destructive) / 0.15)" : "hsl(var(--primary) / 0.15)"}`,
+                          color: rec.severity === "warn" ? "hsl(var(--destructive))" : "hsl(var(--primary))",
+                        }}
+                      >
+                        {rec.icon}
+                        <span>{rec.text}</span>
+                      </motion.div>
+                    ))}
+                  </div>
+                );
+              })()}
               </div>
             </motion.div>
           )}
