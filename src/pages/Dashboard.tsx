@@ -146,6 +146,7 @@ const Dashboard = () => {
   }>({ onboarding_completed: null, archetype: null, preferences: null });
   const [shopProducts, setShopProducts] = useState<ShopProduct[]>([]);
   const [shopLoading, setShopLoading] = useState(false);
+  const [wardrobeItems, setWardrobeItems] = useState<{ category: string; color: string | null }[]>([]);
   const [closetItems, setClosetItems] = useState<{ id: string; photo_url: string | null; name: string | null; category: string }[]>([]);
   const [outfitsList, setOutfitsList] = useState<{ id: string; name: string; occasion: string | null; items: string[] }[]>([]);
   const [activeOccasion, setActiveOccasion] = useState<string | null>(null);
