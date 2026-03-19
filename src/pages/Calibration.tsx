@@ -200,6 +200,8 @@ const maleCalibrationSteps: CalibrationStep[] = [
     ],
   },
 ];
+
+const femaleCalibrationSteps: CalibrationStep[] = [
   {
     question: "Which Jeans style do you prefer the most?",
     key: "jeansStyle",
