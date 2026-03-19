@@ -27,6 +27,16 @@ interface CalendarEvent {
   mannequin_image_url: string | null;
 }
 
+interface ClosetItem {
+  id: string;
+  name: string | null;
+  category: string;
+  photo_url: string | null;
+  color: string | null;
+}
+
+const clothingCategories = ["tops", "bottoms", "shoes", "outerwear", "accessories", "other"];
+
 interface WeatherDay {
   date: string;
   temp: number;
