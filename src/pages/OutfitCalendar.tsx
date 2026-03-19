@@ -584,7 +584,7 @@ const OutfitCalendar = () => {
     return null;
   };
 
-  // streakRewards + badge awarding are after calendarStats below
+  
 
   // Share outfit as styled card image
   const shareOutfitCard = async (ev: CalendarEvent) => {
