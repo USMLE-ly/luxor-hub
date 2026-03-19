@@ -1,62 +1,29 @@
 
 
-# Plan: Closet Flat-Lay View, Outfits Clean BG, Calendar Layers Button & Council Upgrade
+# Plan: Stylebook-Style Visual Calendar with Outfit Pictures in Day Cells
 
-## 1. Closet Flat-Lay View Toggle
+## What Changes
 
-**File: `src/pages/Closet.tsx`**
+**File: `src/pages/OutfitCalendar.tsx`** — Lines 518-601 (the day cell rendering)
 
-Add a `flatLayView` boolean state. Place a `Layers` toggle button next to the category filter pills (line ~647). When active:
-- Replace the 3-column grid with a 2-column magazine-style layout
-- Each item card: larger aspect-ratio (3:4), cream/warm background (`bg-[#faf7f2]`), `mix-blend-mode: multiply` on photos, `object-fit: contain`
-- Category section dividers: elegant thin line with category name centered
-- Items without photos show the standard Shirt icon placeholder
+The current day cells are `min-h-[76px]` with tiny 16×20px thumbnails stacked vertically. The reference images show each day cell as a taller cell where clothing items are arranged as a styled flat-lay composition filling most of the cell space.
 
-## 2. Outfits.tsx Flat-Lay Dialog — Clean Background Treatment
+### Changes to the day cell:
 
-**File: `src/pages/Outfits.tsx`** (lines 310-358)
+1. **Increase cell height**: Change `min-h-[76px]` → `min-h-[100px]` to give more room for outfit visuals
+2. **Replace tiny thumbnail stack with a proper flat-lay composition**:
+   - If mannequin image exists: show it as a nearly-full-cell image (centered, ~80% of cell height)
+   - If individual item photos exist: arrange them in a **vertical flat-lay stack** — top garment at top, bottoms in middle, shoes at bottom — each item sized ~28×32px with `object-contain`, `mix-blend-mode: multiply`, on a white/cream micro-background, overlapping slightly for the editorial look from the reference images
+   - Items positioned with slight negative margins to create the "styled on a surface" look
+3. **Move the date number**: Keep it small in the top-left corner, weather icon top-right (same as now)
+4. **Remove text fallback prominence**: Text labels become a tiny dot indicator instead of a colored pill, since the visual emphasis is on pictures
+5. **White/light cell background** for cells with outfits to make the `mix-blend-mode: multiply` work like the reference (items float on white)
 
-Update the flat-lay dialog grid items:
-- Wrap each item thumbnail in a cream background div (`bg-[#faf7f2]`)
-- Add `mix-blend-mode: multiply` and `object-fit: contain` to the `<img>` tags (line 335)
-- Add subtle drop shadow for "floating" effect
-- Slight padding around images so garments don't touch edges
+### Visual Details (matching reference):
+- Each item photo uses `object-fit: contain` so garment shape is preserved
+- Items stack vertically: top → bottom → shoes → accessories
+- Slight overlap between items (negative margin -4px) for compact editorial feel
+- Cell background stays white/neutral for the multiply blend to work cleanly
 
-## 3. Calendar Event Cards — Layers Button → Flat-Lay Dialog
-
-**File: `src/pages/OutfitCalendar.tsx`** (lines 655-746)
-
-Add a `Layers` icon button in each event card's action buttons (next to Edit/Delete). On tap:
-- Set a new `flatLayEvent` state with the event data
-- Open a Dialog/Sheet showing the outfit items in a flat-lay composition grid
-- Same cream background + `mix-blend-mode: multiply` treatment
-- If event has `mannequin_image_url`, show it large; otherwise show individual item thumbnails in a 2×2 or 3-col grid
-
-New state: `flatLayEvent: CalendarEvent | null`
-
-## 4. Council "Googolplex" Upgrade
-
-**File: `src/pages/Council.tsx`**
-
-Currently the Council is a 3-model deliberation chat. A "Googolplex-dollar" upgrade would add:
-
-- **Visual Wardrobe Context Panel**: Show a collapsible sidebar/strip at the top with the user's closet summary as visual thumbnail chips (not just text), so council models see what you own
-- **Outfit Visualization in Responses**: When council synthesis mentions specific items, render them as mini visual cards (photo + name) inline, matched from closet data
-- **Council Memory Indicator**: Show a small badge "Memory: 12 past analyses" so users know the council remembers their history
-- **Quick Action Buttons on Synthesis**: After each council response, add action buttons: "Save as Outfit", "Add to Calendar", "Share" — executing directly from the synthesis
-- **Mood-Responsive UI**: When a mood is selected, tint the council header/background to match (warm tones for confident, cool for relaxed, etc.)
-
-**File: `supabase/functions/council-chat/index.ts`**
-- Add structured output parsing: when synthesis mentions closet items, return them as structured `mentionedItems[]` alongside the text
-- Add `actionSuggestions[]` field to synthesis response for quick action buttons
-
-## Files Summary
-
-| Action | File | What |
-|--------|------|------|
-| Modify | `src/pages/Closet.tsx` | Flat-lay view toggle with magazine grid |
-| Modify | `src/pages/Outfits.tsx` | Cream bg + mix-blend-mode on flat-lay dialog |
-| Modify | `src/pages/OutfitCalendar.tsx` | Layers button on event cards + flat-lay dialog |
-| Modify | `src/pages/Council.tsx` | Visual wardrobe context, inline item cards, quick actions, mood tint |
-| Modify | `supabase/functions/council-chat/index.ts` | Structured mentioned items + action suggestions |
+### No other files change — this is purely a visual layout update to the calendar grid cells.
 
