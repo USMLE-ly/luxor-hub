@@ -91,6 +91,7 @@ type MannequinPanel = "dna" | "pose" | "trace" | "measure" | null;
 
 const Closet = () => {
   const { user } = useAuth();
+  const [flatLayView, setFlatLayView] = useState(false);
   const [items, setItems] = useState<ClothingItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
