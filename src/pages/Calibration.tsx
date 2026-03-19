@@ -189,9 +189,17 @@ const maleCalibrationSteps: CalibrationStep[] = [
       { label: "Sport", imageUrl: calSunglassesSport, style: "Casual" },
     ],
   },
+  {
+    question: "Which Hat style do you prefer the most?",
+    key: "hatStyle",
+    options: [
+      { label: "Fedora", imageUrl: calHatFedora, style: "Formal" },
+      { label: "Beanie", imageUrl: calHatBeanie, style: "Casual" },
+      { label: "Baseball cap", imageUrl: calHatCap, style: "Casual" },
+      { label: "Panama", imageUrl: calHatPanama, style: "Formal" },
+    ],
+  },
 ];
-
-const femaleCalibrationSteps: CalibrationStep[] = [
   {
     question: "Which Jeans style do you prefer the most?",
     key: "jeansStyle",
