@@ -487,6 +487,59 @@ const Dashboard = () => {
           </div>
         </motion.div>
 
+        {/* ── Wardrobe Completeness Widget ──────────────────── */}
+        {wardrobeCompleteness && (
+          <motion.div variants={fadeUp} className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-xl p-5">
+            <div className="flex items-center gap-4">
+              {/* SVG Ring */}
+              <div className="relative w-20 h-20 flex-shrink-0">
+                <svg viewBox="0 0 80 80" className="w-full h-full -rotate-90">
+                  <circle cx="40" cy="40" r="34" fill="none" stroke="hsl(var(--muted))" strokeWidth="5" />
+                  <motion.circle
+                    cx="40" cy="40" r="34" fill="none"
+                    strokeWidth="5"
+                    strokeLinecap="round"
+                    stroke="url(#completenessGrad)"
+                    strokeDasharray={`${2 * Math.PI * 34}`}
+                    initial={{ strokeDashoffset: 2 * Math.PI * 34 }}
+                    animate={{ strokeDashoffset: 2 * Math.PI * 34 * (1 - wardrobeCompleteness.overall / 100) }}
+                    transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
+                  />
+                  <defs>
+                    <linearGradient id="completenessGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="hsl(142, 60%, 48%)" />
+                      <stop offset="100%" stopColor="hsl(var(--primary))" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-lg font-bold font-sans text-foreground">{wardrobeCompleteness.overall}%</span>
+                </div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-display text-base font-bold text-foreground mb-1">Wardrobe Readiness</h3>
+                <p className="text-[10px] font-sans text-muted-foreground mb-2">Category coverage & color diversity</p>
+                <div className="space-y-1">
+                  {wardrobeCompleteness.gaps.map((gap, i) => (
+                    <div key={i} className="flex items-center gap-1.5">
+                      <AlertCircle className="w-3 h-3 text-primary flex-shrink-0" />
+                      <span className="text-[11px] font-sans text-foreground">{gap}</span>
+                    </div>
+                  ))}
+                </div>
+                {wardrobeCompleteness.gaps.length > 0 && (
+                  <button
+                    onClick={() => navigate("/inspiration")}
+                    className="text-[10px] font-sans text-primary font-semibold mt-2 flex items-center gap-1 hover:underline"
+                  >
+                    Shop to fill gaps <ArrowRight className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         {/* ── My Closet Outfits ─────────────────────────────── */}
         <motion.div variants={fadeUp}>
           <div className="flex items-center justify-between mb-3">
