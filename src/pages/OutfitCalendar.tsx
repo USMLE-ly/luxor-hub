@@ -113,6 +113,7 @@ const OutfitCalendar = () => {
     typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted"
   );
   const userLocation = useUserLocation();
+  const [recentEvents, setRecentEvents] = useState<CalendarEvent[]>([]);
 
   useEffect(() => {
     if (!user) return;
