@@ -127,6 +127,8 @@ const Closet = () => {
   const [loadingSavedOutfits, setLoadingSavedOutfits] = useState(false);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [scanningReceipt, setScanningReceipt] = useState(false);
+  const [cleanBgUrls, setCleanBgUrls] = useState<Record<string, string>>({});
+  const cleanBgRequested = useRef<Set<string>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const receiptInputRef = useRef<HTMLInputElement>(null);
 
