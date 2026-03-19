@@ -569,7 +569,7 @@ const Council = () => {
                                 >
                                   {icons[action]}
                                   {action}
-                                </button>
+                                </motion.button>
                               );
                             })}
                           </div>
