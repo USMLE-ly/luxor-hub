@@ -280,6 +280,35 @@ const Dashboard = () => {
   const styleType = styleProfile.archetype || "—";
   const bodyType = styleProfile.preferences?.bodyShape || "—";
 
+  // Wardrobe completeness analysis
+  const ESSENTIAL_CATS = ["top", "bottom", "outerwear", "shoes", "dress", "accessory"];
+  const CORE_COLORS = ["black", "white", "navy", "gray", "grey", "beige", "brown", "blue"];
+  const ACCENT_COLORS = ["red", "green", "yellow", "pink", "orange", "purple", "burgundy"];
+
+  const wardrobeCompleteness = useMemo(() => {
+    if (!wardrobeItems.length) return null;
+    const catCounts = new Map<string, number>();
+    const colorSet = new Set<string>();
+    wardrobeItems.forEach((i) => {
+      catCounts.set(i.category, (catCounts.get(i.category) || 0) + 1);
+      if (i.color) colorSet.add(i.color.toLowerCase().trim());
+    });
+    const coveredCats = ESSENTIAL_CATS.filter((c) => (catCounts.get(c) || 0) >= 3).length;
+    const catScore = coveredCats / ESSENTIAL_CATS.length;
+    const coveredNeutrals = CORE_COLORS.filter((c) => colorSet.has(c)).length;
+    const hasAccent = ACCENT_COLORS.some((c) => colorSet.has(c));
+    const colorScore = (coveredNeutrals / CORE_COLORS.length) * 0.8 + (hasAccent ? 0.2 : 0);
+    const overall = Math.round((catScore * 0.6 + colorScore * 0.4) * 100);
+    const missingCats = ESSENTIAL_CATS.filter((c) => !catCounts.has(c) || (catCounts.get(c) || 0) === 0);
+    const weakCats = ESSENTIAL_CATS.filter((c) => { const n = catCounts.get(c) || 0; return n > 0 && n < 3; });
+    const gaps: string[] = [];
+    missingCats.slice(0, 2).forEach((c) => gaps.push(`Add ${c}s`));
+    weakCats.slice(0, 2).forEach((c) => gaps.push(`More ${c}s`));
+    if (coveredNeutrals < 4) gaps.push("Add neutral basics");
+    if (!hasAccent) gaps.push("Add accent color");
+    return { overall, gaps: gaps.slice(0, 3) };
+  }, [wardrobeItems]);
+
   const occasionTabs = [
     { label: "All", icon: <Sparkles className="w-4 h-4" />, color: "hsl(var(--primary))", value: null },
     { label: "Everyday", icon: <Sun className="w-4 h-4" />, color: "hsl(142, 60%, 45%)", value: "everyday" },
