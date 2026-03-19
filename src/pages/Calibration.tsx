@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { ArrowRight, ArrowLeft, Check, Eye, Gift } from "lucide-react";
-import { SwipeParticles } from "@/components/onboarding/SwipeParticles";
+import SwipeParticles from "@/components/onboarding/SwipeParticles";
 import { useGyroTilt } from "@/hooks/useGyroTilt";
 import { haptic } from "@/lib/haptics";
 
