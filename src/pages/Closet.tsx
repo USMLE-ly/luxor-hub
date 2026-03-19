@@ -17,6 +17,7 @@ import Mannequin3D, { type ClothingItem as MannequinClothingItem, type BodyDNA, 
 import { SLOT_MAP, DRESS_REPLACES, type GarmentFit } from "@/components/app/GarmentGeometry";
 import type { FabricType } from "@/components/app/FabricMaterials";
 import { WardrobeIntelligence } from "@/components/app/WardrobeIntelligence";
+import { WardrobeGapAnalysis } from "@/components/app/WardrobeGapAnalysis";
 
 /* Placeholder product images for empty closet sections */
 import imgCoatBelted from "@/assets/cal-f-coat-belted.jpg";
@@ -836,7 +837,8 @@ const Closet = () => {
               </div>
             )}
             {/* Wardrobe Intelligence */}
-            <div className="mt-6">
+            <div className="mt-6 space-y-4">
+              <WardrobeGapAnalysis />
               <WardrobeIntelligence />
             </div>
           </>

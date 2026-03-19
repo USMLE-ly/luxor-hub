@@ -40,6 +40,10 @@ import calSunglassesAviator from "@/assets/cal-sunglasses-aviator-v2.jpg";
 import calSunglassesWayfarer from "@/assets/cal-sunglasses-wayfarer-v2.jpg";
 import calSunglassesRound from "@/assets/cal-sunglasses-round-v2.jpg";
 import calSunglassesSport from "@/assets/cal-sunglasses-sport-v2.jpg";
+import calHatFedora from "@/assets/cal-hat-fedora.jpg";
+import calHatBeanie from "@/assets/cal-hat-beanie.jpg";
+import calHatCap from "@/assets/cal-hat-cap.jpg";
+import calHatPanama from "@/assets/cal-hat-panama.jpg";
 
 // Female calibration images
 import calFJeansWide from "@/assets/cal-f-jeans-wide.jpg";
@@ -183,6 +187,16 @@ const maleCalibrationSteps: CalibrationStep[] = [
       { label: "Wayfarer", imageUrl: calSunglassesWayfarer, style: "Casual" },
       { label: "Round", imageUrl: calSunglassesRound, style: "Casual" },
       { label: "Sport", imageUrl: calSunglassesSport, style: "Casual" },
+    ],
+  },
+  {
+    question: "Which Hat style do you prefer the most?",
+    key: "hatStyle",
+    options: [
+      { label: "Fedora", imageUrl: calHatFedora, style: "Formal" },
+      { label: "Beanie", imageUrl: calHatBeanie, style: "Casual" },
+      { label: "Baseball cap", imageUrl: calHatCap, style: "Casual" },
+      { label: "Panama", imageUrl: calHatPanama, style: "Formal" },
     ],
   },
 ];
