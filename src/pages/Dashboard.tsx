@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Shirt, Wand2, ArrowRight, Heart, Sparkles, Palette, Scissors,
   ShoppingBag, ExternalLink, Check, Gift, Calendar, Briefcase, PartyPopper, Sun, ChevronRight,
-  TrendingUp, Snowflake, Dumbbell,
+  TrendingUp, Snowflake, Dumbbell, AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GradientButton } from "@/components/ui/gradient-button";
