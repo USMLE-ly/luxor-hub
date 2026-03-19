@@ -589,7 +589,7 @@ const OutfitCalendar = () => {
                           const visible = allPhotos.slice(0, 3);
                           const extra = allPhotos.length - 3;
                           return (
-                            <div className="flex flex-col items-center justify-center flex-1 rounded-lg bg-secondary/20 p-0.5 w-full transition-transform duration-200 group-hover:scale-105">
+                            <div className="flex flex-col items-center justify-center flex-1 rounded-lg bg-white/95 dark:bg-white/90 p-0.5 w-full transition-transform duration-200 group-hover:scale-105 overflow-hidden">
                               {visible.map((url, pi) => (
                                 <img
                                   key={pi}
@@ -598,7 +598,7 @@ const OutfitCalendar = () => {
                                   className="w-10 h-12 object-contain"
                                   style={{
                                     marginTop: pi > 0 ? "-2px" : "0",
-                                    filter: "drop-shadow(0 1px 4px rgba(0,0,0,0.25))",
+                                    mixBlendMode: "multiply",
                                   }}
                                 />
                               ))}
