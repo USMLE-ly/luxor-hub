@@ -836,7 +836,8 @@ const Closet = () => {
               </div>
             )}
             {/* Wardrobe Intelligence */}
-            <div className="mt-6">
+            <div className="mt-6 space-y-4">
+              <WardrobeGapAnalysis />
               <WardrobeIntelligence />
             </div>
           </>
