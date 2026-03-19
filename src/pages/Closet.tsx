@@ -689,6 +689,77 @@ const Closet = () => {
                   </Button>
                 )}
               </motion.div>
+            ) : flatLayView ? (
+              /* ═══ FLAT-LAY MAGAZINE VIEW ═══ */
+              <div className="space-y-8">
+                {Object.entries(categoryMap).map(([section, { categories }], si) => {
+                  const sectionItems = filtered.filter((item) => categories.includes(item.category));
+                  if (sectionItems.length === 0) return null;
+                  return (
+                    <motion.div key={section} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: si * 0.08 }}>
+                      {/* Section divider */}
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="flex-1 h-px bg-border/60" />
+                        <span className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.2em]">{section}</span>
+                        <div className="flex-1 h-px bg-border/60" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        {sectionItems.map((item, i) => (
+                          <motion.div
+                            key={item.id}
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: i * 0.05 }}
+                            className="rounded-2xl overflow-hidden group"
+                            style={{
+                              background: "hsl(40 30% 96%)",
+                              border: "1px solid hsl(var(--border) / 0.4)",
+                              boxShadow: "0 4px 16px -4px hsl(var(--foreground) / 0.06)",
+                            }}
+                          >
+                            <div className="aspect-[3/4] relative flex items-center justify-center p-4">
+                              {item.photo_url ? (
+                                <img
+                                  src={item.photo_url}
+                                  alt={item.name || ""}
+                                  className="w-full h-full object-contain"
+                                  style={{ mixBlendMode: "multiply" }}
+                                />
+                              ) : (
+                                <Shirt className="w-12 h-12 text-muted-foreground/30" />
+                              )}
+                              {/* Hover actions */}
+                              <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/5 transition-colors flex items-end justify-center opacity-0 group-hover:opacity-100 pb-3 gap-1.5">
+                                <button
+                                  onClick={() => quickTryOn(item)}
+                                  className="px-2.5 py-1 rounded-full text-[9px] font-sans font-semibold bg-foreground/90 text-background"
+                                >
+                                  Try On
+                                </button>
+                                <button
+                                  onClick={() => handleDelete(item.id)}
+                                  className="p-1.5 rounded-full bg-destructive/90 text-destructive-foreground"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
+                              </div>
+                            </div>
+                            <div className="px-3 pb-3">
+                              <p className="text-xs font-sans font-semibold text-foreground truncate">{item.name || item.category}</p>
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                {item.color && (
+                                  <div className="w-2.5 h-2.5 rounded-full border border-border/60" style={{ backgroundColor: item.color }} />
+                                )}
+                                {item.brand && <span className="text-[10px] font-sans text-muted-foreground">{item.brand}</span>}
+                              </div>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
             ) : activeFilter !== "All" ? (
               <div className="grid grid-cols-3 gap-2">
                 <AnimatePresence>
@@ -737,7 +808,7 @@ const Closet = () => {
                   );
                 })}
               </div>
-            )}
+            )
             {/* Wardrobe Intelligence */}
             <div className="mt-6">
               <WardrobeIntelligence />
