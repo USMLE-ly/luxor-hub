@@ -88,6 +88,7 @@ const OutfitCalendar = () => {
   const [autoFilling, setAutoFilling] = useState(false);
   const [flatLayEvent, setFlatLayEvent] = useState<CalendarEvent | null>(null);
   const [weatherData, setWeatherData] = useState<WeatherDay[]>([]);
+  const [closetMap, setClosetMap] = useState<Map<string, string>>(new Map());
   const [notificationsEnabled, setNotificationsEnabled] = useState(
     typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted"
   );
@@ -97,7 +98,24 @@ const OutfitCalendar = () => {
     if (!user) return;
     fetchEvents();
     fetchOutfits();
+    fetchClosetMap();
   }, [user, currentMonth]);
+
+  const fetchClosetMap = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("clothing_items")
+      .select("name, photo_url")
+      .eq("user_id", user.id)
+      .not("photo_url", "is", null);
+    if (data) {
+      const map = new Map<string, string>();
+      data.forEach(item => {
+        if (item.name) map.set(item.name.toLowerCase(), item.photo_url!);
+      });
+      setClosetMap(map);
+    }
+  };
 
   // Fetch weather when location resolves
   useEffect(() => {
