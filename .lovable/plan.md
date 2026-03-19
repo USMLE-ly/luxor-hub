@@ -1,135 +1,62 @@
-# AURELIA — Launch-Ready Roadmap
 
-> Updated: 2026-03-07 — Practical, prioritized roadmap for a reliable launch.
 
----
+# Plan: Closet Flat-Lay View, Outfits Clean BG, Calendar Layers Button & Council Upgrade
 
-## P0 — Critical (Must fix before launch)
+## 1. Closet Flat-Lay View Toggle
 
-### 1. AI Error Handling & Fallbacks
-- [x] Chat: handles 429/402 gracefully with toasts
-- [x] Chat: streaming SSE parsing with proper buffer flush
-- [ ] OutfitAnalysis: add retry button on AI failure, show friendly error state  
-- [ ] VideoAnalysis: add timeout handling for long video processing
-- [ ] FashionDesigner: add retry on generation failure
-- [ ] All AI pages: wrap in ErrorBoundary for crash recovery
-- [ ] All edge functions: consistent 429/402 handling
+**File: `src/pages/Closet.tsx`**
 
-### 2. Image Upload Robustness
-- [ ] Compress images client-side before upload (target <2MB via canvas)
-- [ ] Enforce consistent size limits across all pages
-- [ ] Show file size in upload preview
-- [ ] Add privacy notice banner on all upload pages ("Images processed by AI")
-- [ ] Lazy load all gallery/product images
+Add a `flatLayView` boolean state. Place a `Layers` toggle button next to the category filter pills (line ~647). When active:
+- Replace the 3-column grid with a 2-column magazine-style layout
+- Each item card: larger aspect-ratio (3:4), cream/warm background (`bg-[#faf7f2]`), `mix-blend-mode: multiply` on photos, `object-fit: contain`
+- Category section dividers: elegant thin line with category name centered
+- Items without photos show the standard Shirt icon placeholder
 
-### 3. Mobile UX
-- [ ] Test sidebar collapse on small screens
-- [ ] Fix horizontal overflow in carousels (scrollbar-none + snap)
-- [ ] Ensure modals/dialogs scrollable on short viewports
-- [ ] Touch-friendly tap targets (min 44px)
-- [ ] Swipe hint: test reliability across screen sizes
+## 2. Outfits.tsx Flat-Lay Dialog — Clean Background Treatment
 
-### 4. Auth & Security
-- [x] RLS policies on all 20+ tables
-- [x] No client-side admin checks
-- [ ] Privacy notice for AI image processing
-- [ ] Ensure all storage uploads use user-scoped paths
-- [ ] Rate limit awareness on all AI endpoints
+**File: `src/pages/Outfits.tsx`** (lines 310-358)
 
----
+Update the flat-lay dialog grid items:
+- Wrap each item thumbnail in a cream background div (`bg-[#faf7f2]`)
+- Add `mix-blend-mode: multiply` and `object-fit: contain` to the `<img>` tags (line 335)
+- Add subtle drop shadow for "floating" effect
+- Slight padding around images so garments don't touch edges
 
-## P1 — Important (Should fix for quality)
+## 3. Calendar Event Cards — Layers Button → Flat-Lay Dialog
 
-### 5. Shop/Products Polish
-- [ ] Consistent fallback placeholder images
-- [ ] Loading skeletons while products load
-- [ ] "No results" helpful message state
-- [ ] Test edge function with varied query formats
+**File: `src/pages/OutfitCalendar.tsx`** (lines 655-746)
 
-### 6. Onboarding Polish
-- [ ] Clear selfie instructions with example photos
-- [ ] Swipe hint: click alternative for non-touch
-- [ ] Style DNA explanation tooltip
-- [ ] Clear step progress indicator
+Add a `Layers` icon button in each event card's action buttons (next to Edit/Delete). On tap:
+- Set a new `flatLayEvent` state with the event data
+- Open a Dialog/Sheet showing the outfit items in a flat-lay composition grid
+- Same cream background + `mix-blend-mode: multiply` treatment
+- If event has `mannequin_image_url`, show it large; otherwise show individual item thumbnails in a 2×2 or 3-col grid
 
-### 7. AI Accuracy & Quality
-- [ ] Test outfit analysis with diverse outfits
-- [ ] Validate Style DNA with multiple skin tones
-- [ ] Wardrobe gap: no repeated suggestions
-- [ ] Cap confidence scores 0-100
+New state: `flatLayEvent: CalendarEvent | null`
 
-### 8. Chat Improvements
-- [ ] Test multi-turn context (5+ messages)
-- [ ] Calendar/weather: graceful fallback if denied
-- [ ] Offline suggestion cards from last Style DNA
-- [ ] Auto-save conversation periodically
+## 4. Council "Googolplex" Upgrade
 
----
+**File: `src/pages/Council.tsx`**
 
-## Googolplex — Flat-Lay & Visual Upgrade
+Currently the Council is a 3-model deliberation chat. A "Googolplex-dollar" upgrade would add:
 
-### Upgrades to Existing Features
+- **Visual Wardrobe Context Panel**: Show a collapsible sidebar/strip at the top with the user's closet summary as visual thumbnail chips (not just text), so council models see what you own
+- **Outfit Visualization in Responses**: When council synthesis mentions specific items, render them as mini visual cards (photo + name) inline, matched from closet data
+- **Council Memory Indicator**: Show a small badge "Memory: 12 past analyses" so users know the council remembers their history
+- **Quick Action Buttons on Synthesis**: After each council response, add action buttons: "Save as Outfit", "Add to Calendar", "Share" — executing directly from the synthesis
+- **Mood-Responsive UI**: When a mood is selected, tint the council header/background to match (warm tones for confident, cool for relaxed, etc.)
 
-- [x] Calendar day cells: mini flat-lay thumbnail stacks (2-3 items) replacing text labels
-- [x] Calendar selected date panel: `mix-blend-mode: multiply` for floating item display
-- [x] OutfitAnalysis flat-lay items: one-tap "Add to Closet" button per detected item
-- [ ] Outfits.tsx flat-lay dialog: clean background treatment with cream/linen backdrop
+**File: `supabase/functions/council-chat/index.ts`**
+- Add structured output parsing: when synthesis mentions closet items, return them as structured `mentionedItems[]` alongside the text
+- Add `actionSuggestions[]` field to synthesis response for quick action buttons
 
-### New Features
+## Files Summary
 
-- [x] Edge function `remove-bg`: AI background removal via Gemini for clothing photos
-- [ ] Closet page: flat-lay view toggle with magazine-style grid layout
-- [x] Calendar stats bar: outfits planned, day streak, most worn category
-- [ ] Calendar event cards: Layers button → flat-lay composition dialog
+| Action | File | What |
+|--------|------|------|
+| Modify | `src/pages/Closet.tsx` | Flat-lay view toggle with magazine grid |
+| Modify | `src/pages/Outfits.tsx` | Cream bg + mix-blend-mode on flat-lay dialog |
+| Modify | `src/pages/OutfitCalendar.tsx` | Layers button on event cards + flat-lay dialog |
+| Modify | `src/pages/Council.tsx` | Visual wardrobe context, inline item cards, quick actions, mood tint |
+| Modify | `supabase/functions/council-chat/index.ts` | Structured mentioned items + action suggestions |
 
-### Files
-
-| Action | File |
-|--------|------|
-| Create | `supabase/functions/remove-bg/index.ts` |
-| Modify | `src/pages/OutfitAnalysis.tsx` |
-| Modify | `src/pages/OutfitCalendar.tsx` |
-| Modify | `src/pages/Outfits.tsx` |
-| Modify | `src/pages/Closet.tsx` |
-
----
-
-## Googolplex — Location-Based Weather
-
-- [x] Create shared `useUserLocation` hook (geolocation + localStorage cache + IP fallback)
-- [x] Update `get-weather` edge function: accept lat/lon, reverse geocode to city name
-- [x] MorningRoutineCard: use location hook, pass real coords, display city name
-- [x] OutfitCalendar: replace inline geolocation with shared hook, show city in forecast strip
-- [x] Auto-Fill Week: AI suggestions based on actual local weather
-
-### Files
-
-| Action | File |
-|--------|------|
-| Create | `src/hooks/useUserLocation.ts` |
-| Modify | `supabase/functions/get-weather/index.ts` |
-| Modify | `src/components/app/MorningRoutineCard.tsx` |
-| Modify | `src/pages/OutfitCalendar.tsx` |
-
----
-
-## P2 — Nice to Have (Post-launch)
-
-### 9. Performance
-- [ ] Audit bundle size, lazy-load heavy pages
-- [ ] Service worker for offline
-- [ ] Optimize 3D mannequin loading
-- [ ] Analytics tracking for feature usage
-
-### 10. Community & Social
-- [ ] Report/flag for public designs
-- [ ] Multi-store shop filtering
-- [ ] Design collaboration
-- [ ] Style challenges with prizes
-
----
-
-## Status
-- [ ] Not started
-- [x] Complete
-- 🔧 In progress
