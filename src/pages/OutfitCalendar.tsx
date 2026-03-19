@@ -9,6 +9,7 @@ import {
   CalendarDays, ChevronLeft, ChevronRight, Plus, X, Shirt, Sparkles, Loader2,
   Cloud, Sun, CloudRain, Snowflake, Wind, Droplets, Thermometer, Pencil, Bell, BellOff,
   MapPin, TrendingUp, Flame, BarChart3, Layers, Copy, Palette, Star, Share2, Umbrella, ThermometerSnowflake, AlertTriangle,
+  Award, Trophy, Zap, Target, Crown,
 } from "lucide-react";
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, addMonths, subMonths, isSameMonth, isSameDay, isToday, differenceInMilliseconds, set as setDate } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -546,6 +547,45 @@ const OutfitCalendar = () => {
     return recs;
   };
 
+  // AI-powered style tip based on weather + occasion combo
+  const getStyleTip = (occasion: string | null, weather: WeatherDay | undefined): string | null => {
+    if (!occasion && !weather) return null;
+    const occ = (occasion || "casual").toLowerCase();
+    const isRain = weather?.rain;
+    const temp = weather?.temp ?? 20;
+    const isCold = temp <= 10;
+    const isHot = temp >= 28;
+    const isCool = temp > 10 && temp <= 18;
+
+    // Weather + occasion combos
+    if (occ === "formal" && isRain) return "✨ Pair a structured trench with oxfords — rainy elegance";
+    if (occ === "formal" && isCold) return "✨ Layer a cashmere scarf over your blazer for warmth with polish";
+    if (occ === "formal" && isHot) return "✨ Opt for linen suiting in light tones — breathable yet sharp";
+    if (occ === "work" && isRain) return "✨ Dark-wash denim + waterproof Chelsea boots = rain-proof smart-casual";
+    if (occ === "work" && isCold) return "✨ Turtleneck under a structured coat keeps it sleek and warm";
+    if (occ === "work" && isHot) return "✨ Linen camp collar shirt + tailored shorts = summer-office approved";
+    if (occ === "date night" && isRain) return "✨ All-black with a sleek umbrella — mysterious and rain-ready";
+    if (occ === "date night" && isCold) return "✨ Oversized coat over a fitted outfit creates effortless contrast";
+    if (occ === "date night" && isHot) return "✨ Silk cami + wide-leg pants — breezy romance";
+    if (occ === "casual" && isRain) return "✨ Waterproof sneakers + oversized hoodie = cozy rain vibes";
+    if (occ === "casual" && isCold) return "✨ Layer a puffer over a knit — street-style warmth";
+    if (occ === "casual" && isHot) return "✨ Light cotton tee + shorts — let the accessories do the talking";
+    if (occ === "party" && isCold) return "✨ Faux-fur jacket over your party outfit = head-turning entrance";
+    if (occ === "party") return "✨ Statement piece + minimal everything else = maximum impact";
+    if (occ === "travel" && isRain) return "✨ Quick-dry layers + waterproof bag — travel smart in rain";
+    if (occ === "travel") return "✨ Neutral capsule pieces that mix & match = pack light, look great";
+    if (occ === "workout") return "✨ Moisture-wicking layers — performance meets style";
+    
+    // Fallback weather-only tips
+    if (isRain) return "✨ Waterproof layers + dark tones hide splash marks";
+    if (isCold) return "✨ Thermals underneath keep you stylish without bulk";
+    if (isCool) return "✨ Light layers you can peel off as the day warms";
+    if (isHot) return "✨ Breathable fabrics in light colors keep you cool";
+    return null;
+  };
+
+  
+
   // Share outfit as styled card image
   const shareOutfitCard = async (ev: CalendarEvent) => {
     const items = Array.isArray(ev.outfit_items) ? ev.outfit_items : [];
@@ -716,6 +756,47 @@ const OutfitCalendar = () => {
 
     return { planned, streak, topCategory };
   }, [events]);
+
+  // Planning streak milestones & rewards
+  const streakRewards = useMemo(() => {
+    const streak = calendarStats.streak;
+    const milestones = [
+      { days: 3, name: "Getting Started", icon: "🔥", badge: "streak_3" },
+      { days: 7, name: "Week Warrior", icon: "⚡", badge: "streak_7" },
+      { days: 14, name: "Style Streak", icon: "💎", badge: "streak_14" },
+      { days: 30, name: "Fashion Devotee", icon: "👑", badge: "streak_30" },
+    ];
+    const current = milestones.filter(m => streak >= m.days);
+    const next = milestones.find(m => streak < m.days);
+    const progress = next ? Math.round((streak / next.days) * 100) : 100;
+    return { current, next, progress, streak };
+  }, [calendarStats.streak]);
+
+  // Award streak badges automatically
+  useEffect(() => {
+    if (!user || streakRewards.current.length === 0) return;
+    const awardBadges = async () => {
+      for (const milestone of streakRewards.current) {
+        const { data: existing } = await supabase
+          .from("user_badges")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("badge_key", milestone.badge)
+          .maybeSingle();
+        if (!existing) {
+          await supabase.from("user_badges").insert({
+            user_id: user.id,
+            badge_key: milestone.badge,
+            badge_name: milestone.name,
+            badge_description: `Planned outfits for ${milestone.days} consecutive days`,
+            badge_icon: "flame",
+          });
+          toast.success(`🏆 Badge unlocked: ${milestone.name}!`);
+        }
+      }
+    };
+    awardBadges();
+  }, [user, streakRewards.current.length]);
 
   return (
     <AppLayout>
@@ -1097,6 +1178,18 @@ const OutfitCalendar = () => {
                               <p className="font-sans text-[10px] text-muted-foreground/70 truncate">{ev.notes}</p>
                             )}
                           </div>
+                          {/* AI Style Tip */}
+                          {(() => {
+                            const w = selectedDate ? getWeatherForDate(selectedDate) : undefined;
+                            const tip = getStyleTip(ev.occasion, w);
+                            if (!tip) return null;
+                            return (
+                              <p className="mt-1.5 text-[10px] font-sans italic px-0.5"
+                                style={{ color: "hsl(var(--primary) / 0.8)" }}>
+                                {tip}
+                              </p>
+                            );
+                          })()}
                         </div>
                         <div className="flex items-center gap-1">
                           <button
@@ -1244,6 +1337,74 @@ const OutfitCalendar = () => {
             <p className="text-[9px] font-sans text-muted-foreground">Top Category</p>
           </div>
         </motion.div>
+
+        {/* Streak Rewards Widget */}
+        {streakRewards.streak > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="rounded-2xl p-4 mb-5"
+            style={{
+              background: "hsl(var(--card))",
+              border: "1px solid hsl(var(--border))",
+            }}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <Trophy className="w-4 h-4 text-primary" />
+              <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.15em]">
+                Planning Streak
+              </p>
+            </div>
+            {/* Progress to next milestone */}
+            {streakRewards.next && (
+              <div className="mb-3">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs font-sans font-medium text-foreground">
+                    {streakRewards.next.icon} {streakRewards.next.name}
+                  </span>
+                  <span className="text-[10px] font-sans text-muted-foreground">
+                    {streakRewards.streak}/{streakRewards.next.days} days
+                  </span>
+                </div>
+                <div className="h-2 rounded-full overflow-hidden" style={{ background: "hsl(var(--muted))" }}>
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${streakRewards.progress}%` }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    className="h-full rounded-full gold-gradient"
+                  />
+                </div>
+              </div>
+            )}
+            {/* Earned badges */}
+            {streakRewards.current.length > 0 && (
+              <div className="flex gap-2 flex-wrap">
+                {streakRewards.current.map(m => (
+                  <motion.div
+                    key={m.badge}
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-sans font-medium"
+                    style={{
+                      background: "hsl(var(--primary) / 0.12)",
+                      color: "hsl(var(--primary))",
+                      border: "1px solid hsl(var(--primary) / 0.2)",
+                    }}
+                  >
+                    <span>{m.icon}</span>
+                    <span>{m.name}</span>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+            {!streakRewards.next && (
+              <p className="text-xs font-sans text-primary font-medium flex items-center gap-1.5">
+                <Crown className="w-3.5 h-3.5" /> All milestones achieved — legendary streak!
+              </p>
+            )}
+          </motion.div>
+        )}
 
         {/* Add Event Dialog */}
         <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
