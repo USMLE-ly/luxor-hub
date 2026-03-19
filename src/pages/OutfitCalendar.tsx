@@ -537,23 +537,22 @@ const OutfitCalendar = () => {
                 <button
                   key={i}
                   onClick={() => setSelectedDate(d)}
-                  className={`min-h-[100px] p-1 border-b border-r border-border/30 text-left transition-all relative group flex flex-col
+                  className={`min-h-[110px] p-1.5 border-b border-r border-border/30 text-left transition-all relative group flex flex-col
                     ${!inMonth ? "opacity-20" : ""}
                     ${selected ? "ring-1 ring-primary/30 ring-inset" : "hover:bg-secondary/40"}
                     ${todayFlag && !dayEvents.length ? "bg-primary/5" : ""}
-                    ${dayEvents.length > 0 && inMonth && (dayEvents.some(ev => ev.mannequin_image_url) || dayEvents.some(ev => Array.isArray(ev.outfit_items) && ev.outfit_items.some((item: any) => typeof item === "string" ? closetMap.has(item.toLowerCase()) : !!(item?.photo_url || item?.photoUrl || item?.image_url || item?.imageUrl)))) ? "bg-[#fefdfb]" : ""}
                   `}
                 >
                   <div className="flex items-center justify-between w-full shrink-0">
                     <span className={`text-[10px] font-sans leading-none ${
                       todayFlag
-                        ? "w-5 h-5 rounded-full gold-gradient text-primary-foreground flex items-center justify-center font-bold text-[10px]"
+                        ? "w-5 h-5 rounded-full gold-gradient text-primary-foreground flex items-center justify-center font-bold text-[10px] z-10"
                         : "text-muted-foreground"
                     }`}>
                       {format(d, "d")}
                     </span>
                     {weather && inMonth && (
-                      <span className="opacity-50 text-[10px]">
+                      <span className="opacity-30 text-[8px]">
                         {weatherCodeToIcon(weather.code)}
                       </span>
                     )}
@@ -568,7 +567,6 @@ const OutfitCalendar = () => {
                           if (ev.mannequin_image_url) { hasMannequin = true; mannequinUrl = ev.mannequin_image_url; }
                           const items = Array.isArray(ev.outfit_items) ? ev.outfit_items : [];
                           items.forEach((item: any) => {
-                            // item could be a string name or an object with photo_url
                             if (typeof item === "string") {
                               const url = closetMap.get(item.toLowerCase());
                               if (url) allPhotos.push(url);
@@ -581,37 +579,41 @@ const OutfitCalendar = () => {
 
                         if (hasMannequin) {
                           return (
-                            <div className="flex-1 flex items-center justify-center w-full">
-                              <img src={mannequinUrl} alt="" className="max-h-[68px] w-auto object-contain transition-transform duration-200 group-hover:scale-105" style={{ mixBlendMode: "multiply", filter: "drop-shadow(0 2px 3px rgba(0,0,0,0.08))" }} />
+                            <div className="flex-1 flex items-center justify-center w-full rounded-lg bg-secondary/20 p-0.5">
+                              <img src={mannequinUrl} alt="" className="max-h-[80px] w-auto object-contain transition-transform duration-200 group-hover:scale-105" style={{ filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.25))" }} />
                             </div>
                           );
                         }
 
                         if (allPhotos.length > 0) {
+                          const visible = allPhotos.slice(0, 3);
+                          const extra = allPhotos.length - 3;
                           return (
-                            <div className="flex flex-col items-center justify-center flex-1 transition-transform duration-200 group-hover:scale-105">
-                              {allPhotos.slice(0, 4).map((url, pi) => (
+                            <div className="flex flex-col items-center justify-center flex-1 rounded-lg bg-secondary/20 p-0.5 w-full transition-transform duration-200 group-hover:scale-105">
+                              {visible.map((url, pi) => (
                                 <img
                                   key={pi}
                                   src={url}
                                   alt=""
-                                  className="w-8 h-8 object-contain"
+                                  className="w-10 h-12 object-contain"
                                   style={{
-                                    mixBlendMode: "multiply",
-                                    marginTop: pi > 0 ? "-4px" : "0",
-                                    filter: "drop-shadow(0 2px 3px rgba(0,0,0,0.08))",
+                                    marginTop: pi > 0 ? "-2px" : "0",
+                                    filter: "drop-shadow(0 1px 4px rgba(0,0,0,0.25))",
                                   }}
                                 />
                               ))}
+                              {extra > 0 && (
+                                <span className="text-[7px] font-sans font-semibold text-muted-foreground/70 mt-0.5">+{extra}</span>
+                              )}
                             </div>
                           );
                         }
 
-                        // Fallback: small dot indicator
+                        // Fallback: small dot indicator with occasion color
                         return (
                           <div className="flex gap-0.5 items-center justify-center mt-1">
                             {dayEvents.slice(0, 3).map(ev => (
-                              <div key={ev.id} className="w-1.5 h-1.5 rounded-full" style={{ background: "hsl(var(--primary))" }} />
+                              <div key={ev.id} className="w-1.5 h-1.5 rounded-full bg-primary" />
                             ))}
                           </div>
                         );
@@ -622,11 +624,6 @@ const OutfitCalendar = () => {
                     </div>
                   )}
                 </button>
-              );
-            })}
-          </div>
-        </motion.div>
-
         {/* Selected Date Panel */}
         <AnimatePresence mode="wait">
           {selectedDate && (
