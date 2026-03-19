@@ -509,26 +509,69 @@ const Council = () => {
                     ) : null}
 
                     {msg.synthesis && (
-                      <div className="rounded-2xl px-3.5 py-2.5 bg-card border-2 border-primary/30 rounded-bl-md relative overflow-hidden">
-                        <motion.div
-                          className="absolute inset-0 pointer-events-none"
-                          initial={{ opacity: 0.6 }}
-                          animate={{ opacity: 0 }}
-                          transition={{ duration: 2.5, ease: "easeOut" }}
-                        >
-                          <div
-                            className="absolute inset-0"
-                            style={{
-                              background: "linear-gradient(105deg, transparent 40%, hsl(var(--gold-light) / 0.12) 45%, hsl(var(--gold) / 0.18) 50%, hsl(var(--gold-light) / 0.12) 55%, transparent 60%)",
-                              backgroundSize: "200% 100%",
-                              animation: "gold-shimmer-sweep 1.8s ease-out forwards",
-                            }}
-                          />
-                        </motion.div>
-                        <p className="text-[10px] font-sans text-primary font-semibold uppercase tracking-wider mb-1.5">✨ Council Synthesis</p>
-                        <div className="prose prose-sm prose-invert max-w-none [&>p]:my-1 [&>ul]:my-1 font-sans text-sm">
-                          <ReactMarkdown>{msg.synthesis}</ReactMarkdown>
+                      <div className="space-y-2">
+                        <div className="rounded-2xl px-3.5 py-2.5 bg-card border-2 border-primary/30 rounded-bl-md relative overflow-hidden">
+                          <motion.div
+                            className="absolute inset-0 pointer-events-none"
+                            initial={{ opacity: 0.6 }}
+                            animate={{ opacity: 0 }}
+                            transition={{ duration: 2.5, ease: "easeOut" }}
+                          >
+                            <div
+                              className="absolute inset-0"
+                              style={{
+                                background: "linear-gradient(105deg, transparent 40%, hsl(var(--gold-light) / 0.12) 45%, hsl(var(--gold) / 0.18) 50%, hsl(var(--gold-light) / 0.12) 55%, transparent 60%)",
+                                backgroundSize: "200% 100%",
+                                animation: "gold-shimmer-sweep 1.8s ease-out forwards",
+                              }}
+                            />
+                          </motion.div>
+                          <p className="text-[10px] font-sans text-primary font-semibold uppercase tracking-wider mb-1.5">✨ Council Synthesis</p>
+                          <div className="prose prose-sm prose-invert max-w-none [&>p]:my-1 [&>ul]:my-1 font-sans text-sm">
+                            <ReactMarkdown>{msg.synthesis}</ReactMarkdown>
+                          </div>
                         </div>
+
+                        {/* Mentioned Items from Closet */}
+                        {msg.mentionedItems && msg.mentionedItems.length > 0 && (
+                          <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                            {msg.mentionedItems.map((item, mi) => (
+                              <div key={mi} className="flex-shrink-0 rounded-lg overflow-hidden" style={{ background: "hsl(40 30% 96%)", border: "1px solid hsl(var(--border) / 0.4)" }}>
+                                {item.photo_url ? (
+                                  <img src={item.photo_url} alt={item.name || ""} className="w-12 h-12 object-contain p-1" style={{ mixBlendMode: "multiply" }} />
+                                ) : (
+                                  <div className="w-12 h-12 flex items-center justify-center">
+                                    <Shirt className="w-5 h-5 text-muted-foreground/30" />
+                                  </div>
+                                )}
+                                <p className="text-[7px] font-sans text-muted-foreground text-center truncate px-1 pb-1 max-w-[48px]">{item.name}</p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Quick Action Buttons */}
+                        {msg.actionSuggestions && msg.actionSuggestions.length > 0 && !isLoading && (
+                          <div className="flex gap-1.5 flex-wrap">
+                            {msg.actionSuggestions.map((action) => {
+                              const icons: Record<string, React.ReactNode> = {
+                                "Save as Outfit": <Heart className="w-3 h-3" />,
+                                "Add to Calendar": <CalendarPlus className="w-3 h-3" />,
+                                "Share": <Share2 className="w-3 h-3" />,
+                              };
+                              return (
+                                <button
+                                  key={action}
+                                  onClick={() => handleQuickAction(action, msg)}
+                                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-sans font-medium border border-border bg-card text-muted-foreground hover:border-primary/40 hover:text-primary transition-colors"
+                                >
+                                  {icons[action]}
+                                  {action}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
