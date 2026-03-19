@@ -120,6 +120,7 @@ const OutfitCalendar = () => {
     fetchEvents();
     fetchOutfits();
     fetchClosetMap();
+    fetchRecentEvents();
   }, [user, currentMonth]);
 
   const fetchClosetMap = async () => {
