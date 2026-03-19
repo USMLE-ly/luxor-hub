@@ -685,20 +685,75 @@ const OutfitCalendar = () => {
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: idx * 0.05 }}
-                      className="rounded-xl transition-colors hover:bg-secondary/30 overflow-hidden"
-                      style={{ border: "1px solid hsl(var(--border) / 0.5)" }}
+                      className="rounded-xl overflow-hidden backdrop-blur-sm"
+                      style={{
+                        background: "hsl(var(--card) / 0.6)",
+                        border: "1px solid hsl(var(--border) / 0.5)",
+                        borderLeft: "3px solid hsl(var(--primary))",
+                      }}
                     >
+                      {/* Outfit photo thumbnails / mannequin hero */}
+                      {(() => {
+                        const items = Array.isArray(ev.outfit_items) ? ev.outfit_items : [];
+                        const resolvedPhotos: string[] = [];
+                        items.forEach((item: any) => {
+                          if (typeof item === "string") {
+                            const url = closetMap.get(item.toLowerCase());
+                            if (url) resolvedPhotos.push(url);
+                          } else {
+                            const url = item?.photo_url || item?.photoUrl || item?.image_url || item?.imageUrl;
+                            if (url) resolvedPhotos.push(url);
+                          }
+                        });
+                        const photos = resolvedPhotos.slice(0, 5);
+
+                        if (ev.mannequin_image_url) {
+                          return (
+                            <div className="p-3 pb-0">
+                              <div className="rounded-lg bg-white/95 dark:bg-white/90 overflow-hidden flex items-center justify-center" style={{ minHeight: "120px" }}>
+                                <img
+                                  src={ev.mannequin_image_url}
+                                  alt="Outfit preview"
+                                  className="w-full h-32 object-contain"
+                                  style={{ mixBlendMode: "multiply" }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        }
+
+                        if (photos.length > 0) {
+                          return (
+                            <div className="p-3 pb-0">
+                              <div className="flex gap-2 overflow-x-auto">
+                                {photos.map((url, pi) => (
+                                  <div key={pi} className="w-16 h-16 rounded-lg bg-white/95 dark:bg-white/90 flex-shrink-0 flex items-center justify-center overflow-hidden">
+                                    <img
+                                      src={url}
+                                      alt={`Item ${pi + 1}`}
+                                      className="w-full h-full object-contain"
+                                      style={{ mixBlendMode: "multiply" }}
+                                    />
+                                  </div>
+                                ))}
+                                {items.length > 5 && (
+                                  <div className="w-16 h-16 rounded-lg flex-shrink-0 flex items-center justify-center bg-secondary/60 text-[10px] font-sans font-semibold text-muted-foreground">
+                                    +{items.length - 5}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
                       <div className="flex items-center gap-3 p-3.5">
-                        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                          style={{ background: "linear-gradient(135deg, hsl(var(--primary) / 0.15), hsl(var(--primary) / 0.05))" }}
-                        >
-                          <Shirt className="w-5 h-5 text-primary" />
-                        </div>
                         <div className="flex-1 min-w-0">
                           <p className="font-sans text-sm font-semibold text-foreground truncate">{ev.title}</p>
                           <div className="flex items-center gap-2 mt-0.5">
                             {ev.occasion && (
-                              <span className="px-2 py-0.5 rounded-full text-[9px] font-sans font-medium bg-primary/10 text-primary">
+                              <span className="px-2 py-0.5 rounded-full text-[9px] font-sans font-medium"
+                                style={{ background: "hsl(var(--primary) / 0.15)", color: "hsl(var(--primary))" }}>
                                 {ev.occasion}
                               </span>
                             )}
@@ -729,54 +784,6 @@ const OutfitCalendar = () => {
                           </button>
                         </div>
                       </div>
-                      {/* Outfit photo thumbnails */}
-                      {(() => {
-                        const items = Array.isArray(ev.outfit_items) ? ev.outfit_items : [];
-                        const photos: string[] = items
-                          .map((item: any) => item?.photo_url || item?.photoUrl || item?.image_url || item?.imageUrl)
-                          .filter((url: string | undefined): url is string => !!url)
-                          .slice(0, 5);
-
-                        if (ev.mannequin_image_url) {
-                          return (
-                            <div className="px-3.5 pb-3">
-                              <img
-                                src={ev.mannequin_image_url}
-                                alt="Outfit preview"
-                                className="w-full h-28 object-cover rounded-lg"
-                                style={{ border: "1px solid hsl(var(--border) / 0.3)" }}
-                              />
-                            </div>
-                          );
-                        }
-
-                        if (photos.length === 0) return null;
-
-                        return (
-                          <div className="px-3.5 pb-3">
-                            <div className="flex gap-1.5 overflow-x-auto">
-                              {photos.map((url, pi) => (
-                                <img
-                                  key={pi}
-                                  src={url}
-                                  alt={`Item ${pi + 1}`}
-                                  className="w-14 h-14 rounded-lg object-contain flex-shrink-0 bg-white"
-                                  style={{
-                                    border: "1px solid hsl(var(--border) / 0.3)",
-                                    boxShadow: "0 2px 8px -2px hsl(var(--foreground) / 0.08)",
-                                    mixBlendMode: "multiply",
-                                  }}
-                                />
-                              ))}
-                              {items.length > 5 && (
-                                <div className="w-14 h-14 rounded-lg flex-shrink-0 flex items-center justify-center bg-secondary/60 text-[10px] font-sans font-semibold text-muted-foreground">
-                                  +{items.length - 5}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })()}
                     </motion.div>
                   ))}
                 </div>
