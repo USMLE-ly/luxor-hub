@@ -568,8 +568,14 @@ const OutfitCalendar = () => {
                           if (ev.mannequin_image_url) { hasMannequin = true; mannequinUrl = ev.mannequin_image_url; }
                           const items = Array.isArray(ev.outfit_items) ? ev.outfit_items : [];
                           items.forEach((item: any) => {
-                            const url = item?.photo_url || item?.photoUrl || item?.image_url || item?.imageUrl;
-                            if (url) allPhotos.push(url);
+                            // item could be a string name or an object with photo_url
+                            if (typeof item === "string") {
+                              const url = closetMap.get(item.toLowerCase());
+                              if (url) allPhotos.push(url);
+                            } else {
+                              const url = item?.photo_url || item?.photoUrl || item?.image_url || item?.imageUrl;
+                              if (url) allPhotos.push(url);
+                            }
                           });
                         });
 
