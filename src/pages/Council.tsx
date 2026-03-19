@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Users, Trash2, ArrowUp, Camera, X, Sparkles } from "lucide-react";
+import { Users, Trash2, ArrowUp, Camera, X, Sparkles, ChevronDown, ChevronUp, Brain, CalendarPlus, Heart, Share2, Shirt } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { VoiceInput } from "@/components/app/VoiceInput";
 import { MoodSelector } from "@/components/app/MoodSelector";
@@ -13,6 +13,7 @@ import { CouncilStageProgress } from "@/components/app/CouncilStageProgress";
 import { CouncilResponseCard } from "@/components/app/CouncilResponseCard";
 import { useAutoResizeTextarea } from "@/hooks/use-auto-resize-textarea";
 import { PlaceholdersAndVanishInput } from "@/components/ui/placeholders-and-vanish-input";
+import { format } from "date-fns";
 
 const COUNCIL_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/council-chat`;
 
@@ -35,6 +36,8 @@ interface CouncilMessage {
   stage1?: Stage1Response[];
   rankings?: Ranking[];
   synthesis?: string;
+  mentionedItems?: { name: string; photo_url?: string; category?: string }[];
+  actionSuggestions?: string[];
 }
 
 const quickPrompts = [
@@ -60,12 +63,15 @@ const Council = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [styleProfile, setStyleProfile] = useState<any>(null);
   const [closetSummary, setClosetSummary] = useState("");
+  const [closetItems, setClosetItems] = useState<any[]>([]);
   const [pendingImage, setPendingImage] = useState<string | null>(null);
   const [currentMood, setCurrentMood] = useState<string | null>(null);
   const [currentStage, setCurrentStage] = useState(0);
   const [stageStatus, setStageStatus] = useState<"idle" | "start" | "complete">("idle");
   const [liveStage1, setLiveStage1] = useState<Stage1Response[]>([]);
   const [liveRankings, setLiveRankings] = useState<Ranking[]>([]);
+  const [showWardrobePanel, setShowWardrobePanel] = useState(false);
+  const [memoryCount, setMemoryCount] = useState(0);
   const bottomRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -75,10 +81,15 @@ const Council = () => {
     if (!user) return;
     Promise.all([
       supabase.from("style_profiles").select("archetype, preferences").eq("user_id", user.id).single(),
-      supabase.from("clothing_items").select("name, category, color, style").eq("user_id", user.id),
-    ]).then(([styleRes, closetRes]) => {
+      supabase.from("clothing_items").select("id, name, category, color, style, photo_url").eq("user_id", user.id),
+      supabase.from("outfit_analyses").select("id").eq("user_id", user.id),
+    ]).then(([styleRes, closetRes, analysesRes]) => {
       if (styleRes.data) setStyleProfile(styleRes.data);
-      if (closetRes.data) setClosetSummary(closetRes.data.map(i => `${i.name || "Unnamed"} (${i.category}, ${i.color || ""})`).join("; "));
+      if (closetRes.data) {
+        setClosetItems(closetRes.data);
+        setClosetSummary(closetRes.data.map(i => `${i.name || "Unnamed"} (${i.category}, ${i.color || ""})`).join("; "));
+      }
+      if (analysesRes.data) setMemoryCount(analysesRes.data.length);
     });
   }, [user]);
 
@@ -235,14 +246,23 @@ const Council = () => {
         }
       }
 
+      // Match mentioned closet items from synthesis text
+      const matchItems = (text: string) => {
+        return closetItems.filter(ci => {
+          const name = (ci.name || "").toLowerCase();
+          return name.length > 2 && text.toLowerCase().includes(name);
+        }).slice(0, 6).map(ci => ({ name: ci.name, photo_url: ci.photo_url, category: ci.category }));
+      };
+
       // Final message update with all council data
       let finalMessages: CouncilMessage[] = [];
       setMessages(prev => {
+        const mentioned = matchItems(synthesis);
         const last = prev[prev.length - 1];
         if (last?.role === "assistant") {
-          finalMessages = prev.map((m, i) => i === prev.length - 1 ? { ...m, stage1: stage1Data, rankings: rankingsData, synthesis } : m);
+          finalMessages = prev.map((m, i) => i === prev.length - 1 ? { ...m, stage1: stage1Data, rankings: rankingsData, synthesis, mentionedItems: mentioned, actionSuggestions: ["Save as Outfit", "Add to Calendar", "Share"] } : m);
         } else if (synthesis) {
-          finalMessages = [...prev, { role: "assistant", content: synthesis, synthesis, stage1: stage1Data, rankings: rankingsData }];
+          finalMessages = [...prev, { role: "assistant", content: synthesis, synthesis, stage1: stage1Data, rankings: rankingsData, mentionedItems: mentioned, actionSuggestions: ["Save as Outfit", "Add to Calendar", "Share"] }];
         } else {
           finalMessages = prev;
         }
@@ -280,22 +300,88 @@ const Council = () => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
   };
 
+  // Mood-responsive tint
+  const moodTint = useMemo(() => {
+    const tints: Record<string, string> = {
+      confident: "hsl(40 80% 55% / 0.06)",
+      relaxed: "hsl(200 60% 55% / 0.06)",
+      bold: "hsl(350 70% 55% / 0.06)",
+      elegant: "hsl(270 50% 55% / 0.06)",
+      creative: "hsl(160 60% 50% / 0.06)",
+      cozy: "hsl(30 70% 55% / 0.06)",
+    };
+    return currentMood ? tints[currentMood] || "transparent" : "transparent";
+  }, [currentMood]);
+
+  // Quick action handlers
+  const handleQuickAction = async (action: string, msg: CouncilMessage) => {
+    if (!user) return;
+    if (action === "Save as Outfit") {
+      const items = msg.mentionedItems || [];
+      const { error } = await supabase.from("outfits").insert({
+        user_id: user.id,
+        name: `Council: ${messages.find(m => m.role === "user")?.content?.slice(0, 40) || "Suggestion"}`,
+        description: msg.synthesis?.slice(0, 100) || "",
+        ai_generated: true,
+        ai_explanation: msg.synthesis?.slice(0, 300),
+      });
+      if (error) toast.error("Failed to save");
+      else toast.success("Outfit saved from council synthesis!");
+    } else if (action === "Add to Calendar") {
+      const today = format(new Date(), "yyyy-MM-dd");
+      const { error } = await supabase.from("calendar_events").insert({
+        user_id: user.id,
+        title: `Council: ${messages.find(m => m.role === "user")?.content?.slice(0, 40) || "Suggestion"}`,
+        event_date: today,
+        occasion: "Casual",
+        notes: msg.synthesis?.slice(0, 200),
+      });
+      if (error) toast.error("Failed to add");
+      else toast.success("Added to today's calendar!");
+    } else if (action === "Share") {
+      if (navigator.share) {
+        navigator.share({ title: "Style Council Advice", text: msg.synthesis?.slice(0, 300) || "" }).catch(() => {});
+      } else {
+        await navigator.clipboard.writeText(msg.synthesis || "");
+        toast.success("Copied to clipboard!");
+      }
+    }
+  };
+
   return (
     <AppLayout>
-      <div className="flex flex-col h-[calc(100vh-56px)] max-w-lg mx-auto overflow-x-hidden">
+      <div className="flex flex-col h-[calc(100vh-56px)] max-w-lg mx-auto overflow-x-hidden" style={{ background: moodTint }}>
         {/* Header with mode toggle */}
-        <div className="px-5 pt-4 pb-2 flex items-center justify-between">
+        <div className="px-5 pt-4 pb-2 flex items-center justify-between" style={{ background: moodTint }}>
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
               <Users className="w-4.5 h-4.5 text-primary" />
             </div>
             <div>
               <h1 className="font-sans font-semibold text-foreground text-sm">Style Council</h1>
-              <p className="text-muted-foreground font-sans text-[10px]">3 AI stylists deliberate for you</p>
+              <div className="flex items-center gap-2">
+                <p className="text-muted-foreground font-sans text-[10px]">3 AI stylists deliberate for you</p>
+                {memoryCount > 0 && (
+                  <span className="flex items-center gap-0.5 text-[9px] font-sans text-primary/70 bg-primary/8 px-1.5 py-0.5 rounded-full">
+                    <Brain className="w-2.5 h-2.5" /> {memoryCount} memories
+                  </span>
+                )}
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-1.5">
-            {/* Mode toggle back to Quick Chat */}
+            {closetItems.length > 0 && (
+              <button
+                onClick={() => setShowWardrobePanel(!showWardrobePanel)}
+                className={`flex items-center gap-1 px-2 py-1.5 rounded-lg border transition-colors ${
+                  showWardrobePanel ? "border-primary/40 bg-primary/5" : "border-border bg-card hover:border-primary/40"
+                }`}
+                title="Your Wardrobe"
+              >
+                <Shirt className="w-3.5 h-3.5 text-muted-foreground" />
+                <span className="text-[10px] font-sans font-medium text-muted-foreground">{closetItems.length}</span>
+              </button>
+            )}
             <button
               onClick={() => navigate("/chat")}
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border bg-card hover:border-primary/40 transition-colors"
@@ -311,6 +397,41 @@ const Council = () => {
             )}
           </div>
         </div>
+
+        {/* Collapsible Wardrobe Context Panel */}
+        <AnimatePresence>
+          {showWardrobePanel && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden border-b border-border/50"
+            >
+              <div className="px-5 py-3">
+                <p className="text-[9px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.15em] mb-2">Your Wardrobe</p>
+                <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                  {closetItems.slice(0, 12).map((item) => (
+                    <div key={item.id} className="flex-shrink-0 flex flex-col items-center gap-0.5">
+                      {item.photo_url ? (
+                        <img src={item.photo_url} alt={item.name || ""} className="w-10 h-10 rounded-lg object-cover border border-border/40" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center border border-border/40">
+                          <Shirt className="w-4 h-4 text-muted-foreground/40" />
+                        </div>
+                      )}
+                      <span className="text-[8px] font-sans text-muted-foreground truncate max-w-[40px]">{item.name || item.category}</span>
+                    </div>
+                  ))}
+                  {closetItems.length > 12 && (
+                    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-secondary/60 flex items-center justify-center text-[9px] font-sans font-semibold text-muted-foreground">
+                      +{closetItems.length - 12}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto px-5 space-y-3 pb-3">
@@ -388,26 +509,69 @@ const Council = () => {
                     ) : null}
 
                     {msg.synthesis && (
-                      <div className="rounded-2xl px-3.5 py-2.5 bg-card border-2 border-primary/30 rounded-bl-md relative overflow-hidden">
-                        <motion.div
-                          className="absolute inset-0 pointer-events-none"
-                          initial={{ opacity: 0.6 }}
-                          animate={{ opacity: 0 }}
-                          transition={{ duration: 2.5, ease: "easeOut" }}
-                        >
-                          <div
-                            className="absolute inset-0"
-                            style={{
-                              background: "linear-gradient(105deg, transparent 40%, hsl(var(--gold-light) / 0.12) 45%, hsl(var(--gold) / 0.18) 50%, hsl(var(--gold-light) / 0.12) 55%, transparent 60%)",
-                              backgroundSize: "200% 100%",
-                              animation: "gold-shimmer-sweep 1.8s ease-out forwards",
-                            }}
-                          />
-                        </motion.div>
-                        <p className="text-[10px] font-sans text-primary font-semibold uppercase tracking-wider mb-1.5">✨ Council Synthesis</p>
-                        <div className="prose prose-sm prose-invert max-w-none [&>p]:my-1 [&>ul]:my-1 font-sans text-sm">
-                          <ReactMarkdown>{msg.synthesis}</ReactMarkdown>
+                      <div className="space-y-2">
+                        <div className="rounded-2xl px-3.5 py-2.5 bg-card border-2 border-primary/30 rounded-bl-md relative overflow-hidden">
+                          <motion.div
+                            className="absolute inset-0 pointer-events-none"
+                            initial={{ opacity: 0.6 }}
+                            animate={{ opacity: 0 }}
+                            transition={{ duration: 2.5, ease: "easeOut" }}
+                          >
+                            <div
+                              className="absolute inset-0"
+                              style={{
+                                background: "linear-gradient(105deg, transparent 40%, hsl(var(--gold-light) / 0.12) 45%, hsl(var(--gold) / 0.18) 50%, hsl(var(--gold-light) / 0.12) 55%, transparent 60%)",
+                                backgroundSize: "200% 100%",
+                                animation: "gold-shimmer-sweep 1.8s ease-out forwards",
+                              }}
+                            />
+                          </motion.div>
+                          <p className="text-[10px] font-sans text-primary font-semibold uppercase tracking-wider mb-1.5">✨ Council Synthesis</p>
+                          <div className="prose prose-sm prose-invert max-w-none [&>p]:my-1 [&>ul]:my-1 font-sans text-sm">
+                            <ReactMarkdown>{msg.synthesis}</ReactMarkdown>
+                          </div>
                         </div>
+
+                        {/* Mentioned Items from Closet */}
+                        {msg.mentionedItems && msg.mentionedItems.length > 0 && (
+                          <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                            {msg.mentionedItems.map((item, mi) => (
+                              <div key={mi} className="flex-shrink-0 rounded-lg overflow-hidden" style={{ background: "hsl(40 30% 96%)", border: "1px solid hsl(var(--border) / 0.4)" }}>
+                                {item.photo_url ? (
+                                  <img src={item.photo_url} alt={item.name || ""} className="w-12 h-12 object-contain p-1" style={{ mixBlendMode: "multiply" }} />
+                                ) : (
+                                  <div className="w-12 h-12 flex items-center justify-center">
+                                    <Shirt className="w-5 h-5 text-muted-foreground/30" />
+                                  </div>
+                                )}
+                                <p className="text-[7px] font-sans text-muted-foreground text-center truncate px-1 pb-1 max-w-[48px]">{item.name}</p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Quick Action Buttons */}
+                        {msg.actionSuggestions && msg.actionSuggestions.length > 0 && !isLoading && (
+                          <div className="flex gap-1.5 flex-wrap">
+                            {msg.actionSuggestions.map((action) => {
+                              const icons: Record<string, React.ReactNode> = {
+                                "Save as Outfit": <Heart className="w-3 h-3" />,
+                                "Add to Calendar": <CalendarPlus className="w-3 h-3" />,
+                                "Share": <Share2 className="w-3 h-3" />,
+                              };
+                              return (
+                                <button
+                                  key={action}
+                                  onClick={() => handleQuickAction(action, msg)}
+                                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-sans font-medium border border-border bg-card text-muted-foreground hover:border-primary/40 hover:text-primary transition-colors"
+                                >
+                                  {icons[action]}
+                                  {action}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

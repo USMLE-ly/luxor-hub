@@ -8,7 +8,7 @@ import { useUserLocation } from "@/hooks/useUserLocation";
 import {
   CalendarDays, ChevronLeft, ChevronRight, Plus, X, Shirt, Sparkles, Loader2,
   Cloud, Sun, CloudRain, Snowflake, Wind, Droplets, Thermometer, Pencil, Bell, BellOff,
-  MapPin, TrendingUp, Flame, BarChart3,
+  MapPin, TrendingUp, Flame, BarChart3, Layers,
 } from "lucide-react";
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, addMonths, subMonths, isSameMonth, isSameDay, isToday, differenceInMilliseconds, set as setDate } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -86,6 +86,7 @@ const OutfitCalendar = () => {
   const [newEvent, setNewEvent] = useState({ title: "", occasion: "Casual", notes: "", outfitId: "" });
   const [editEvent, setEditEvent] = useState({ title: "", occasion: "Casual", notes: "", outfitId: "" });
   const [autoFilling, setAutoFilling] = useState(false);
+  const [flatLayEvent, setFlatLayEvent] = useState<CalendarEvent | null>(null);
   const [weatherData, setWeatherData] = useState<WeatherDay[]>([]);
   const [notificationsEnabled, setNotificationsEnabled] = useState(
     typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted"
@@ -682,6 +683,13 @@ const OutfitCalendar = () => {
                         </div>
                         <div className="flex items-center gap-1">
                           <button
+                            onClick={() => setFlatLayEvent(ev)}
+                            className="text-muted-foreground/50 hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors"
+                            title="Flat-Lay View"
+                          >
+                            <Layers className="w-3.5 h-3.5" />
+                          </button>
+                          <button
                             onClick={() => openEditDialog(ev)}
                             className="text-muted-foreground/50 hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors"
                           >
@@ -902,6 +910,76 @@ const OutfitCalendar = () => {
                 Update Event
               </Button>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Flat-Lay Composition Dialog */}
+        <Dialog open={!!flatLayEvent} onOpenChange={(open) => { if (!open) setFlatLayEvent(null); }}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="font-display flex items-center gap-2">
+                <Layers className="h-5 w-5 text-primary" /> Flat-Lay View
+              </DialogTitle>
+            </DialogHeader>
+            {flatLayEvent && (
+              <div className="space-y-4 pt-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-sans text-sm font-semibold text-foreground">{flatLayEvent.title}</p>
+                    <p className="text-xs font-sans text-muted-foreground">{flatLayEvent.occasion} • {format(new Date(flatLayEvent.event_date + "T00:00:00"), "MMM d")}</p>
+                  </div>
+                </div>
+
+                {flatLayEvent.mannequin_image_url ? (
+                  <div className="rounded-xl overflow-hidden" style={{ background: "hsl(40 30% 96%)", border: "1px solid hsl(var(--border) / 0.4)" }}>
+                    <img
+                      src={flatLayEvent.mannequin_image_url}
+                      alt="Outfit"
+                      className="w-full h-64 object-contain p-4"
+                      style={{ mixBlendMode: "multiply" }}
+                    />
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3">
+                    {(Array.isArray(flatLayEvent.outfit_items) ? flatLayEvent.outfit_items : []).map((item: any, idx: number) => {
+                      const photoUrl = item?.photo_url || item?.photoUrl || item?.image_url || item?.imageUrl;
+                      const itemName = item?.name || item?.category || `Item ${idx + 1}`;
+                      return (
+                        <motion.div
+                          key={idx}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: idx * 0.06 }}
+                          className="rounded-xl overflow-hidden"
+                          style={{
+                            background: "hsl(40 30% 96%)",
+                            border: "1px solid hsl(var(--border) / 0.4)",
+                            boxShadow: "0 3px 12px -3px hsl(var(--foreground) / 0.08)",
+                          }}
+                        >
+                          {photoUrl ? (
+                            <div className="p-3">
+                              <img src={photoUrl} alt={itemName} className="w-full aspect-square object-contain" style={{ mixBlendMode: "multiply" }} />
+                            </div>
+                          ) : (
+                            <div className="w-full aspect-square flex items-center justify-center" style={{ background: "hsl(var(--muted) / 0.2)" }}>
+                              <Shirt className="w-8 h-8 text-muted-foreground/30" />
+                            </div>
+                          )}
+                          <div className="px-3 pb-2.5">
+                            <p className="text-xs font-medium text-foreground truncate">{itemName}</p>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {flatLayEvent.notes && (
+                  <p className="text-xs text-muted-foreground italic text-center">"{flatLayEvent.notes}"</p>
+                )}
+              </div>
+            )}
           </DialogContent>
         </Dialog>
       </div>

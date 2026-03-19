@@ -329,20 +329,32 @@ const Outfits = () => {
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: idx * 0.08 }}
-                        className="rounded-xl border border-border bg-card overflow-hidden"
+                        className="rounded-xl overflow-hidden"
+                        style={{
+                          background: "hsl(40 30% 96%)",
+                          border: "1px solid hsl(var(--border) / 0.4)",
+                          boxShadow: "0 3px 12px -3px hsl(var(--foreground) / 0.08)",
+                        }}
                       >
                         {matchedItem?.photo_url ? (
-                          <img src={matchedItem.photo_url} alt={itemName} className="w-full aspect-square object-cover" />
+                          <div className="p-3">
+                            <img
+                              src={matchedItem.photo_url}
+                              alt={itemName}
+                              className="w-full aspect-square object-contain"
+                              style={{ mixBlendMode: "multiply" }}
+                            />
+                          </div>
                         ) : (
-                          <div className="w-full aspect-square bg-muted/40 flex items-center justify-center">
+                          <div className="w-full aspect-square flex items-center justify-center" style={{ background: "hsl(var(--muted) / 0.2)" }}>
                             <Shirt className="h-8 w-8 text-muted-foreground/40" />
                           </div>
                         )}
-                        <div className="p-2">
+                        <div className="px-3 pb-2.5">
                           <p className="text-xs font-medium text-foreground truncate">{itemName}</p>
                           {matchedItem?.color && (
                             <div className="flex items-center gap-1 mt-0.5">
-                              <div className="w-2 h-2 rounded-full border border-border" style={{ backgroundColor: matchedItem.color }} />
+                              <div className="w-2 h-2 rounded-full border border-border/60" style={{ backgroundColor: matchedItem.color }} />
                               <span className="text-[10px] text-muted-foreground">{matchedItem.color}</span>
                             </div>
                           )}
