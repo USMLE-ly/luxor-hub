@@ -1026,6 +1026,53 @@ const OutfitCalendar = () => {
                   </SelectContent>
                 </Select>
               )}
+              {/* Manual Clothing Picker for Edit */}
+              {!editEvent.outfitId && closetItems.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-sans font-medium text-muted-foreground">Or pick items from your closet:</p>
+                  <div className="max-h-40 overflow-y-auto rounded-xl border border-border/50 p-2 space-y-1">
+                    {clothingCategories.map(cat => {
+                      const catItems = closetItems.filter(c => c.category.toLowerCase() === cat);
+                      if (catItems.length === 0) return null;
+                      return (
+                        <div key={cat}>
+                          <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-wider mb-1 mt-1">{cat}</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {catItems.map(ci => {
+                              const isSelected = editEvent.manualItems.includes(ci.id);
+                              return (
+                                <button
+                                  key={ci.id}
+                                  type="button"
+                                  onClick={() => setEditEvent(p => ({
+                                    ...p,
+                                    manualItems: isSelected
+                                      ? p.manualItems.filter(id => id !== ci.id)
+                                      : [...p.manualItems, ci.id]
+                                  }))}
+                                  className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-[11px] font-sans transition-all ${
+                                    isSelected
+                                      ? "bg-primary/15 text-primary ring-1 ring-primary/30"
+                                      : "bg-secondary/50 text-muted-foreground hover:bg-secondary"
+                                  }`}
+                                >
+                                  {ci.photo_url && (
+                                    <img src={ci.photo_url} alt="" className="w-5 h-5 rounded object-contain bg-white" style={{ mixBlendMode: "multiply" }} />
+                                  )}
+                                  <span className="truncate max-w-[80px]">{ci.name || cat}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {editEvent.manualItems.length > 0 && (
+                    <p className="text-[10px] font-sans text-primary">{editEvent.manualItems.length} item{editEvent.manualItems.length > 1 ? "s" : ""} selected</p>
+                  )}
+                </div>
+              )}
               <Input placeholder="Notes (optional)" value={editEvent.notes} onChange={e => setEditEvent(p => ({ ...p, notes: e.target.value }))} />
               <Button onClick={updateEvent} disabled={!editEvent.title.trim()} className="w-full gold-gradient text-primary-foreground font-sans">
                 Update Event
