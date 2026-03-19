@@ -418,6 +418,95 @@ const OutfitCalendar = () => {
     return events.filter(e => e.event_date === dateStr);
   };
 
+  // Duplicate yesterday's outfit to selected date
+  const duplicateYesterday = async () => {
+    if (!user || !selectedDate) return;
+    const yesterday = addDays(selectedDate, -1);
+    const yesterdayEvents = getEventsForDate(yesterday);
+    if (yesterdayEvents.length === 0) {
+      toast.error("No outfit found for the previous day");
+      return;
+    }
+    const source = yesterdayEvents[0];
+    const { error } = await supabase.from("calendar_events").insert({
+      user_id: user.id,
+      title: source.title + " (copy)",
+      event_date: format(selectedDate, "yyyy-MM-dd"),
+      occasion: source.occasion,
+      notes: source.notes,
+      outfit_items: source.outfit_items,
+      mannequin_image_url: source.mannequin_image_url,
+    });
+    if (error) toast.error("Failed to duplicate");
+    else { toast.success("Yesterday's outfit duplicated!"); fetchEvents(); }
+  };
+
+  // Live outfit score based on color harmony + occasion match + category coverage
+  const computeOutfitScore = (itemIds: string[], occasion: string): { score: number; label: string; color: string } => {
+    if (itemIds.length === 0) return { score: 0, label: "", color: "" };
+    const items = itemIds.map(id => closetItems.find(c => c.id === id)).filter(Boolean) as ClosetItem[];
+    if (items.length === 0) return { score: 0, label: "", color: "" };
+
+    let score = 0;
+    
+    // Category coverage (max 40): tops+bottoms+shoes = perfect base
+    const cats = new Set(items.map(i => i.category.toLowerCase()));
+    const hasTop = cats.has("top") || cats.has("outerwear") || cats.has("dress");
+    const hasBottom = cats.has("bottom") || cats.has("dress");
+    const hasShoes = cats.has("shoes");
+    if (hasTop) score += 15;
+    if (hasBottom) score += 15;
+    if (hasShoes) score += 10;
+    
+    // Color harmony (max 35): complementary/analogous colors score higher
+    const colorMap: Record<string, number> = {
+      black: 0, white: 0, gray: 0, grey: 0, navy: 240, blue: 240, red: 0, 
+      green: 120, yellow: 60, orange: 30, pink: 330, purple: 270, brown: 30,
+      beige: 40, cream: 45, tan: 35, burgundy: 345, maroon: 345, olive: 80,
+    };
+    const hues = items.map(i => {
+      const c = (i.color || "").toLowerCase().trim();
+      return colorMap[c] !== undefined ? colorMap[c] : -1;
+    }).filter(h => h >= 0);
+    
+    if (hues.length >= 2) {
+      // Neutral-heavy = safe = good
+      const neutrals = items.filter(i => ["black", "white", "gray", "grey", "navy", "beige", "cream"].includes((i.color || "").toLowerCase().trim()));
+      const neutralRatio = neutrals.length / items.length;
+      if (neutralRatio >= 0.5) score += 30;
+      else {
+        // Check if chromatic colors are analogous (within 60deg)
+        const chromatic = hues.filter(h => h > 0);
+        if (chromatic.length >= 2) {
+          const spread = Math.max(...chromatic) - Math.min(...chromatic);
+          if (spread <= 60 || spread >= 300) score += 30;
+          else if (spread <= 120) score += 20;
+          else score += 10;
+        } else score += 25;
+      }
+    } else score += 20; // single item or no color data
+    
+    // Occasion match (max 25)
+    const occasionCatBonus: Record<string, string[]> = {
+      "Work": ["top", "bottom", "shoes"],
+      "Formal": ["top", "bottom", "shoes", "accessory"],
+      "Casual": ["top", "bottom"],
+      "Date Night": ["dress", "shoes", "accessory"],
+      "Party": ["dress", "shoes", "accessory"],
+      "Travel": ["top", "bottom", "shoes", "outerwear"],
+      "Workout": ["top", "bottom", "shoes"],
+    };
+    const wanted = occasionCatBonus[occasion] || [];
+    const matched = wanted.filter(w => cats.has(w));
+    score += Math.round((matched.length / Math.max(wanted.length, 1)) * 25);
+
+    score = Math.min(score, 100);
+    
+    if (score >= 80) return { score, label: "Great Match", color: "hsl(var(--primary))" };
+    if (score >= 55) return { score, label: "Good", color: "hsl(45 90% 50%)" };
+    return { score, label: "Needs More", color: "hsl(var(--muted-foreground))" };
+  };
+
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
   const calStart = startOfWeek(monthStart, { weekStartsOn: 1 });
