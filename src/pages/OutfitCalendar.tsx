@@ -27,6 +27,16 @@ interface CalendarEvent {
   mannequin_image_url: string | null;
 }
 
+interface ClosetItem {
+  id: string;
+  name: string | null;
+  category: string;
+  photo_url: string | null;
+  color: string | null;
+}
+
+const clothingCategories = ["tops", "bottoms", "shoes", "outerwear", "accessories", "other"];
+
 interface WeatherDay {
   date: string;
   temp: number;
@@ -83,8 +93,9 @@ const OutfitCalendar = () => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
   const [savedOutfits, setSavedOutfits] = useState<any[]>([]);
-  const [newEvent, setNewEvent] = useState({ title: "", occasion: "Casual", notes: "", outfitId: "" });
-  const [editEvent, setEditEvent] = useState({ title: "", occasion: "Casual", notes: "", outfitId: "" });
+  const [closetItems, setClosetItems] = useState<ClosetItem[]>([]);
+  const [newEvent, setNewEvent] = useState({ title: "", occasion: "Casual", notes: "", outfitId: "", manualItems: [] as string[] });
+  const [editEvent, setEditEvent] = useState({ title: "", occasion: "Casual", notes: "", outfitId: "", manualItems: [] as string[] });
   const [autoFilling, setAutoFilling] = useState(false);
   const [flatLayEvent, setFlatLayEvent] = useState<CalendarEvent | null>(null);
   const [weatherData, setWeatherData] = useState<WeatherDay[]>([]);
@@ -105,15 +116,17 @@ const OutfitCalendar = () => {
     if (!user) return;
     const { data } = await supabase
       .from("clothing_items")
-      .select("name, photo_url")
-      .eq("user_id", user.id)
-      .not("photo_url", "is", null);
+      .select("id, name, photo_url, category, color")
+      .eq("user_id", user.id);
     if (data) {
       const map = new Map<string, string>();
+      const items: ClosetItem[] = [];
       data.forEach(item => {
-        if (item.name) map.set(item.name.toLowerCase(), item.photo_url!);
+        if (item.name && item.photo_url) map.set(item.name.toLowerCase(), item.photo_url);
+        items.push(item as ClosetItem);
       });
       setClosetMap(map);
+      setClosetItems(items);
     }
   };
 
@@ -228,30 +241,48 @@ const OutfitCalendar = () => {
   const addEvent = async () => {
     if (!user || !selectedDate || !newEvent.title.trim()) return;
     const outfit = savedOutfits.find(o => o.id === newEvent.outfitId);
+    // Build outfit_items from saved outfit OR manually picked closet items
+    let outfitItems: any[] = outfit?.mannequin_items || [];
+    if (!outfit && newEvent.manualItems.length > 0) {
+      outfitItems = newEvent.manualItems.map(itemId => {
+        const ci = closetItems.find(c => c.id === itemId);
+        return ci ? { name: ci.name, category: ci.category, photo_url: ci.photo_url, color: ci.color } : null;
+      }).filter(Boolean);
+    }
     const { error } = await supabase.from("calendar_events").insert({
       user_id: user.id,
       title: newEvent.title.trim(),
       event_date: format(selectedDate, "yyyy-MM-dd"),
       occasion: newEvent.occasion,
       notes: newEvent.notes || null,
-      outfit_items: outfit?.mannequin_items || [],
+      outfit_items: outfitItems,
     });
     if (error) toast.error("Failed to add event");
     else {
       toast.success("Event added!");
       setShowAddDialog(false);
-      setNewEvent({ title: "", occasion: "Casual", notes: "", outfitId: "" });
+      setNewEvent({ title: "", occasion: "Casual", notes: "", outfitId: "", manualItems: [] });
       fetchEvents();
     }
   };
 
   const openEditDialog = (ev: CalendarEvent) => {
     setEditingEvent(ev);
+    // Extract existing manual item IDs from outfit_items if possible
+    const existingItemIds: string[] = [];
+    const items = Array.isArray(ev.outfit_items) ? ev.outfit_items : [];
+    items.forEach((item: any) => {
+      if (typeof item === "object" && item?.name) {
+        const match = closetItems.find(c => c.name?.toLowerCase() === item.name?.toLowerCase());
+        if (match) existingItemIds.push(match.id);
+      }
+    });
     setEditEvent({
       title: ev.title,
       occasion: ev.occasion || "Casual",
       notes: ev.notes || "",
       outfitId: "",
+      manualItems: existingItemIds,
     });
     setShowEditDialog(true);
   };
@@ -264,7 +295,14 @@ const OutfitCalendar = () => {
       occasion: editEvent.occasion,
       notes: editEvent.notes || null,
     };
-    if (outfit) updateData.outfit_items = outfit.mannequin_items || [];
+    if (outfit) {
+      updateData.outfit_items = outfit.mannequin_items || [];
+    } else if (editEvent.manualItems.length > 0) {
+      updateData.outfit_items = editEvent.manualItems.map(itemId => {
+        const ci = closetItems.find(c => c.id === itemId);
+        return ci ? { name: ci.name, category: ci.category, photo_url: ci.photo_url, color: ci.color } : null;
+      }).filter(Boolean);
+    }
 
     const { error } = await supabase
       .from("calendar_events")
@@ -629,21 +667,23 @@ const OutfitCalendar = () => {
           </div>
         </motion.div>
 
-        {/* Selected Date Panel */}
+        {/* Selected Date Panel — smooth expand/collapse */}
         <AnimatePresence mode="wait">
           {selectedDate && (
             <motion.div
               key={format(selectedDate, "yyyy-MM-dd")}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              className="rounded-2xl p-5 mb-5 relative overflow-hidden"
+              initial={{ opacity: 0, height: 0, scale: 0.97 }}
+              animate={{ opacity: 1, height: "auto", scale: 1 }}
+              exit={{ opacity: 0, height: 0, scale: 0.97 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30, mass: 0.8 }}
+              className="rounded-2xl mb-5 relative overflow-hidden"
               style={{
                 background: "hsl(var(--card))",
                 border: "1px solid hsl(var(--border))",
                 boxShadow: "0 8px 32px -8px hsl(var(--foreground) / 0.06)",
               }}
             >
+              <div className="p-5">
               <div className="absolute top-0 left-0 w-1 h-full gold-gradient rounded-r" />
 
               <div className="flex items-center justify-between mb-4 pl-3">
@@ -788,6 +828,7 @@ const OutfitCalendar = () => {
                   ))}
                 </div>
               )}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -895,6 +936,53 @@ const OutfitCalendar = () => {
                   </SelectContent>
                 </Select>
               )}
+              {/* Manual Clothing Picker */}
+              {!newEvent.outfitId && closetItems.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-sans font-medium text-muted-foreground">Or pick items from your closet:</p>
+                  <div className="max-h-40 overflow-y-auto rounded-xl border border-border/50 p-2 space-y-1">
+                    {clothingCategories.map(cat => {
+                      const catItems = closetItems.filter(c => c.category.toLowerCase() === cat);
+                      if (catItems.length === 0) return null;
+                      return (
+                        <div key={cat}>
+                          <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-wider mb-1 mt-1">{cat}</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {catItems.map(ci => {
+                              const isSelected = newEvent.manualItems.includes(ci.id);
+                              return (
+                                <button
+                                  key={ci.id}
+                                  type="button"
+                                  onClick={() => setNewEvent(p => ({
+                                    ...p,
+                                    manualItems: isSelected
+                                      ? p.manualItems.filter(id => id !== ci.id)
+                                      : [...p.manualItems, ci.id]
+                                  }))}
+                                  className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-[11px] font-sans transition-all ${
+                                    isSelected
+                                      ? "bg-primary/15 text-primary ring-1 ring-primary/30"
+                                      : "bg-secondary/50 text-muted-foreground hover:bg-secondary"
+                                  }`}
+                                >
+                                  {ci.photo_url && (
+                                    <img src={ci.photo_url} alt="" className="w-5 h-5 rounded object-contain bg-white" style={{ mixBlendMode: "multiply" }} />
+                                  )}
+                                  <span className="truncate max-w-[80px]">{ci.name || cat}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {newEvent.manualItems.length > 0 && (
+                    <p className="text-[10px] font-sans text-primary">{newEvent.manualItems.length} item{newEvent.manualItems.length > 1 ? "s" : ""} selected</p>
+                  )}
+                </div>
+              )}
               {(() => {
                 const w = selectedDate ? getWeatherForDate(selectedDate) : null;
                 if (!w) return null;
@@ -937,6 +1025,53 @@ const OutfitCalendar = () => {
                     {savedOutfits.map(o => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
+              )}
+              {/* Manual Clothing Picker for Edit */}
+              {!editEvent.outfitId && closetItems.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-sans font-medium text-muted-foreground">Or pick items from your closet:</p>
+                  <div className="max-h-40 overflow-y-auto rounded-xl border border-border/50 p-2 space-y-1">
+                    {clothingCategories.map(cat => {
+                      const catItems = closetItems.filter(c => c.category.toLowerCase() === cat);
+                      if (catItems.length === 0) return null;
+                      return (
+                        <div key={cat}>
+                          <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-wider mb-1 mt-1">{cat}</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {catItems.map(ci => {
+                              const isSelected = editEvent.manualItems.includes(ci.id);
+                              return (
+                                <button
+                                  key={ci.id}
+                                  type="button"
+                                  onClick={() => setEditEvent(p => ({
+                                    ...p,
+                                    manualItems: isSelected
+                                      ? p.manualItems.filter(id => id !== ci.id)
+                                      : [...p.manualItems, ci.id]
+                                  }))}
+                                  className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-[11px] font-sans transition-all ${
+                                    isSelected
+                                      ? "bg-primary/15 text-primary ring-1 ring-primary/30"
+                                      : "bg-secondary/50 text-muted-foreground hover:bg-secondary"
+                                  }`}
+                                >
+                                  {ci.photo_url && (
+                                    <img src={ci.photo_url} alt="" className="w-5 h-5 rounded object-contain bg-white" style={{ mixBlendMode: "multiply" }} />
+                                  )}
+                                  <span className="truncate max-w-[80px]">{ci.name || cat}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {editEvent.manualItems.length > 0 && (
+                    <p className="text-[10px] font-sans text-primary">{editEvent.manualItems.length} item{editEvent.manualItems.length > 1 ? "s" : ""} selected</p>
+                  )}
+                </div>
               )}
               <Input placeholder="Notes (optional)" value={editEvent.notes} onChange={e => setEditEvent(p => ({ ...p, notes: e.target.value }))} />
               <Button onClick={updateEvent} disabled={!editEvent.title.trim()} className="w-full gold-gradient text-primary-foreground font-sans">
