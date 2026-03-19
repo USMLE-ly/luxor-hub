@@ -5,9 +5,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import {
   BarChart3, Palette, TrendingUp, Shirt, CalendarDays, ChevronLeft, ChevronRight,
-  Award, Flame, Star, Loader2, PieChart,
+  Award, Flame, Star, Loader2, PieChart, DollarSign, Snowflake, Sun, Leaf, CloudRain,
+  ArrowUpRight, ArrowDownRight,
 } from "lucide-react";
-import { format, startOfMonth, endOfMonth, addMonths, subMonths, eachDayOfInterval, isSameDay } from "date-fns";
+import { format, startOfMonth, endOfMonth, addMonths, subMonths, eachDayOfInterval } from "date-fns";
 import { Progress } from "@/components/ui/progress";
 
 interface CalendarEvent {
@@ -25,7 +26,33 @@ interface ClothingItem {
   color: string | null;
   photo_url: string | null;
   wear_count: number;
+  price: number | null;
+  season: string | null;
 }
+
+const getCurrentSeason = (): string => {
+  const m = new Date().getMonth();
+  if (m >= 2 && m <= 4) return "spring";
+  if (m >= 5 && m <= 7) return "summer";
+  if (m >= 8 && m <= 10) return "fall";
+  return "winter";
+};
+
+const getNextSeason = (): string => {
+  const order = ["spring", "summer", "fall", "winter"];
+  const idx = order.indexOf(getCurrentSeason());
+  return order[(idx + 1) % 4];
+};
+
+const seasonIcon = (s: string) => {
+  switch (s) {
+    case "spring": return <Leaf className="w-3.5 h-3.5 text-emerald-500" />;
+    case "summer": return <Sun className="w-3.5 h-3.5 text-amber-400" />;
+    case "fall": return <CloudRain className="w-3.5 h-3.5 text-orange-400" />;
+    case "winter": return <Snowflake className="w-3.5 h-3.5 text-blue-300" />;
+    default: return <Star className="w-3.5 h-3.5 text-muted-foreground" />;
+  }
+};
 
 const MonthlyReport = () => {
   const { user } = useAuth();
@@ -49,7 +76,7 @@ const MonthlyReport = () => {
       supabase.from("clothing_items").select("*").eq("user_id", user.id),
     ]);
     if (evRes.data) setEvents(evRes.data);
-    if (itemsRes.data) setClosetItems(itemsRes.data);
+    if (itemsRes.data) setClosetItems(itemsRes.data as ClothingItem[]);
     setLoading(false);
   };
 
@@ -58,7 +85,6 @@ const MonthlyReport = () => {
     const plannedDays = new Set(events.map(e => e.event_date));
     const planningConsistency = Math.round((plannedDays.size / daysInMonth.length) * 100);
 
-    // Unique outfits (by fingerprint)
     const fingerprints = new Set<string>();
     events.forEach(ev => {
       const items = Array.isArray(ev.outfit_items) ? ev.outfit_items : [];
@@ -68,7 +94,6 @@ const MonthlyReport = () => {
     const uniqueOutfits = fingerprints.size;
     const varietyScore = events.length > 0 ? Math.round((uniqueOutfits / events.length) * 100) : 0;
 
-    // Most worn items
     const itemCounts = new Map<string, { count: number; name: string; photo_url: string | null; category: string }>();
     events.forEach(ev => {
       const items = Array.isArray(ev.outfit_items) ? ev.outfit_items : [];
@@ -84,7 +109,6 @@ const MonthlyReport = () => {
     });
     const mostWorn = Array.from(itemCounts.values()).sort((a, b) => b.count - a.count).slice(0, 6);
 
-    // Color distribution
     const colorCounts = new Map<string, number>();
     events.forEach(ev => {
       const items = Array.isArray(ev.outfit_items) ? ev.outfit_items : [];
@@ -93,13 +117,9 @@ const MonthlyReport = () => {
         if (color) colorCounts.set(color, (colorCounts.get(color) || 0) + 1);
       });
     });
-    // Also check closet items for colors used in the month
-    const colorDist = Array.from(colorCounts.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 8);
+    const colorDist = Array.from(colorCounts.entries()).sort((a, b) => b[1] - a[1]).slice(0, 8);
     const totalColors = colorDist.reduce((sum, [, c]) => sum + c, 0);
 
-    // Occasion breakdown
     const occasionCounts = new Map<string, number>();
     events.forEach(ev => {
       const occ = ev.occasion || "Unset";
@@ -107,7 +127,6 @@ const MonthlyReport = () => {
     });
     const occasions = Array.from(occasionCounts.entries()).sort((a, b) => b[1] - a[1]);
 
-    // Streak calc
     let streak = 0;
     const sortedDates = Array.from(plannedDays).sort().reverse();
     const today = format(new Date(), "yyyy-MM-dd");
@@ -120,19 +139,61 @@ const MonthlyReport = () => {
     }
 
     return {
-      totalOutfits: events.length,
-      uniqueOutfits,
-      varietyScore,
-      planningConsistency,
-      plannedDays: plannedDays.size,
-      totalDays: daysInMonth.length,
-      mostWorn,
-      colorDist,
-      totalColors,
-      occasions,
-      streak,
+      totalOutfits: events.length, uniqueOutfits, varietyScore, planningConsistency,
+      plannedDays: plannedDays.size, totalDays: daysInMonth.length, mostWorn, colorDist,
+      totalColors, occasions, streak,
     };
   }, [events, currentMonth]);
+
+  // Cost-per-wear analytics
+  const cpwAnalytics = useMemo(() => {
+    const withPrice = closetItems.filter(i => i.price && Number(i.price) > 0);
+    if (withPrice.length === 0) return null;
+
+    const totalInvested = withPrice.reduce((s, i) => s + Number(i.price), 0);
+    const totalWears = withPrice.reduce((s, i) => s + (i.wear_count || 0), 0);
+    const avgCpw = totalWears > 0 ? totalInvested / totalWears : totalInvested;
+
+    const items = withPrice.map(i => {
+      const price = Number(i.price);
+      const wears = i.wear_count || 0;
+      const cpw = wears > 0 ? Math.round((price / wears) * 100) / 100 : price;
+      return { ...i, cpw, wears, priceNum: price, paidOff: cpw < 2 };
+    });
+
+    const bestValue = [...items].filter(i => i.wears > 0).sort((a, b) => a.cpw - b.cpw).slice(0, 5);
+    const worstValue = [...items].filter(i => i.wears > 0).sort((a, b) => b.cpw - a.cpw).slice(0, 5);
+    const neverWorn = items.filter(i => i.wears === 0).sort((a, b) => b.priceNum - a.priceNum).slice(0, 5);
+    const neverWornTotal = items.filter(i => i.wears === 0).reduce((s, i) => s + i.priceNum, 0);
+
+    return { totalInvested, totalWears, avgCpw: Math.round(avgCpw * 100) / 100, bestValue, worstValue, neverWorn, neverWornTotal };
+  }, [closetItems]);
+
+  // Seasonal wardrobe analysis
+  const seasonalAnalysis = useMemo(() => {
+    const current = getCurrentSeason();
+    const next = getNextSeason();
+
+    const rotateIn: ClothingItem[] = [];
+    const rotateOut: ClothingItem[] = [];
+    const allSeason: ClothingItem[] = [];
+
+    closetItems.forEach(item => {
+      const s = (item.season || "").toLowerCase().trim();
+      if (!s || s === "all" || s === "all-season" || s === "all season") {
+        allSeason.push(item);
+        return;
+      }
+      const seasons = s.split(/[,\/&]+/).map(x => x.trim().toLowerCase());
+      const fitsCurrent = seasons.includes(current);
+      const fitsNext = seasons.includes(next);
+
+      if (!fitsCurrent && fitsNext) rotateIn.push(item);
+      if (fitsCurrent && !fitsNext) rotateOut.push(item);
+    });
+
+    return { current, next, rotateIn: rotateIn.slice(0, 6), rotateOut: rotateOut.slice(0, 6), allSeason: allSeason.length };
+  }, [closetItems]);
 
   const colorHexMap: Record<string, string> = {
     black: "#1a1a1a", white: "#f5f5f5", gray: "#888", grey: "#888",
@@ -177,8 +238,7 @@ const MonthlyReport = () => {
                 { icon: <TrendingUp className="w-4 h-4 text-primary" />, value: stats.uniqueOutfits, label: "Unique Combos" },
               ].map((card, i) => (
                 <motion.div key={i} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 + i * 0.05 }}
-                  className="rounded-2xl p-4 text-center"
-                  style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}>
+                  className="rounded-2xl border border-border bg-card p-4 text-center">
                   <div className="flex justify-center mb-2">{card.icon}</div>
                   <p className="font-display text-xl font-bold text-foreground">{card.value}</p>
                   <p className="text-[10px] font-sans text-muted-foreground mt-0.5">{card.label}</p>
@@ -188,14 +248,14 @@ const MonthlyReport = () => {
 
             {/* Planning Consistency */}
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-              className="rounded-2xl p-4" style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}>
+              className="rounded-2xl border border-border bg-card p-4">
               <div className="flex items-center gap-2 mb-3">
                 <BarChart3 className="w-4 h-4 text-primary" />
                 <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.15em]">Planning Consistency</p>
               </div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-sans text-foreground font-medium">{stats.plannedDays} of {stats.totalDays} days planned</span>
-                <span className="text-xs font-sans font-bold" style={{ color: "hsl(var(--primary))" }}>{stats.planningConsistency}%</span>
+                <span className="text-xs font-sans font-bold text-primary">{stats.planningConsistency}%</span>
               </div>
               <Progress value={stats.planningConsistency} className="h-2.5" />
               <p className="text-[10px] font-sans text-muted-foreground mt-2">
@@ -205,10 +265,161 @@ const MonthlyReport = () => {
               </p>
             </motion.div>
 
+            {/* Cost-Per-Wear Analytics */}
+            {cpwAnalytics && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }}
+                className="rounded-2xl border border-border bg-card p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <DollarSign className="w-4 h-4 text-emerald-500" />
+                  <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.15em]">Cost-Per-Wear Analytics</p>
+                </div>
+                {/* Summary row */}
+                <div className="grid grid-cols-3 gap-2 mb-4">
+                  {[
+                    { label: "Invested", value: `$${Math.round(cpwAnalytics.totalInvested).toLocaleString()}` },
+                    { label: "Total Wears", value: cpwAnalytics.totalWears.toString() },
+                    { label: "Avg CPW", value: `$${cpwAnalytics.avgCpw}` },
+                  ].map((s, i) => (
+                    <div key={i} className="rounded-xl bg-secondary/50 p-2.5 text-center">
+                      <p className="font-display text-sm font-bold text-foreground">{s.value}</p>
+                      <p className="text-[9px] font-sans text-muted-foreground">{s.label}</p>
+                    </div>
+                  ))}
+                </div>
+                {/* Best value */}
+                {cpwAnalytics.bestValue.length > 0 && (
+                  <div className="mb-3">
+                    <p className="text-[10px] font-sans font-semibold text-muted-foreground mb-2 flex items-center gap-1">
+                      <ArrowDownRight className="w-3 h-3 text-emerald-500" /> Best Value
+                    </p>
+                    <div className="space-y-1.5">
+                      {cpwAnalytics.bestValue.map((item, i) => (
+                        <div key={i} className="flex items-center gap-2.5">
+                          {item.photo_url ? (
+                            <div className="w-8 h-8 rounded-lg bg-white/90 dark:bg-white/80 overflow-hidden flex-shrink-0">
+                              <img src={item.photo_url} alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "multiply" }} />
+                            </div>
+                          ) : (
+                            <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
+                              <Shirt className="w-3.5 h-3.5 text-muted-foreground/40" />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-sans text-foreground truncate capitalize">{item.name || item.category}</p>
+                            <p className="text-[9px] text-muted-foreground font-sans">{item.wears} wears · ${item.priceNum}</p>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            {item.paidOff && <Award className="w-3 h-3 text-amber-400" />}
+                            <span className={`text-xs font-sans font-bold ${item.cpw < 5 ? "text-emerald-500" : "text-foreground"}`}>${item.cpw}</span>
+                            <span className="text-[8px] text-muted-foreground">/wear</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {/* Worst value */}
+                {cpwAnalytics.worstValue.length > 0 && (
+                  <div className="mb-3">
+                    <p className="text-[10px] font-sans font-semibold text-muted-foreground mb-2 flex items-center gap-1">
+                      <ArrowUpRight className="w-3 h-3 text-red-400" /> Needs More Wear
+                    </p>
+                    <div className="space-y-1.5">
+                      {cpwAnalytics.worstValue.map((item, i) => (
+                        <div key={i} className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
+                            <Shirt className="w-3.5 h-3.5 text-muted-foreground/40" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-sans text-foreground truncate capitalize">{item.name || item.category}</p>
+                            <p className="text-[9px] text-muted-foreground font-sans">{item.wears} wears · ${item.priceNum}</p>
+                          </div>
+                          <span className="text-xs font-sans font-bold text-red-400">${item.cpw}<span className="text-[8px] text-muted-foreground">/wear</span></span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {/* Never worn */}
+                {cpwAnalytics.neverWorn.length > 0 && (
+                  <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3">
+                    <p className="text-[10px] font-sans font-semibold text-amber-600 dark:text-amber-400 mb-1">
+                      💸 ${Math.round(cpwAnalytics.neverWornTotal)} sitting unworn
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {cpwAnalytics.neverWorn.map((item, i) => (
+                        <span key={i} className="text-[10px] font-sans px-2 py-0.5 rounded-full bg-secondary text-muted-foreground capitalize">
+                          {item.name || item.category} · ${item.priceNum}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {/* Seasonal Wardrobe Analysis */}
+            {(seasonalAnalysis.rotateIn.length > 0 || seasonalAnalysis.rotateOut.length > 0) && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24 }}
+                className="rounded-2xl border border-border bg-card p-4">
+                <div className="flex items-center gap-2 mb-1">
+                  {seasonIcon(seasonalAnalysis.next)}
+                  <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.15em]">Seasonal Rotation</p>
+                </div>
+                <p className="text-[10px] font-sans text-muted-foreground mb-3">
+                  Preparing for <span className="capitalize font-medium text-foreground">{seasonalAnalysis.next}</span> — {seasonalAnalysis.allSeason} all-season items ready
+                </p>
+
+                {seasonalAnalysis.rotateIn.length > 0 && (
+                  <div className="mb-3">
+                    <p className="text-[10px] font-sans font-semibold text-emerald-500 mb-2 flex items-center gap-1">
+                      <ArrowUpRight className="w-3 h-3" /> Rotate In for {seasonalAnalysis.next}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {seasonalAnalysis.rotateIn.map((item, i) => (
+                        <div key={i} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                          {item.photo_url ? (
+                            <div className="w-6 h-6 rounded bg-white/90 dark:bg-white/80 overflow-hidden flex-shrink-0">
+                              <img src={item.photo_url} alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "multiply" }} />
+                            </div>
+                          ) : (
+                            <Shirt className="w-3.5 h-3.5 text-emerald-500/60" />
+                          )}
+                          <span className="text-[10px] font-sans text-foreground capitalize">{item.name || item.category}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {seasonalAnalysis.rotateOut.length > 0 && (
+                  <div>
+                    <p className="text-[10px] font-sans font-semibold text-orange-400 mb-2 flex items-center gap-1">
+                      <ArrowDownRight className="w-3 h-3" /> Store Away ({seasonalAnalysis.current})
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {seasonalAnalysis.rotateOut.map((item, i) => (
+                        <div key={i} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-orange-500/10 border border-orange-500/20">
+                          {item.photo_url ? (
+                            <div className="w-6 h-6 rounded bg-white/90 dark:bg-white/80 overflow-hidden flex-shrink-0">
+                              <img src={item.photo_url} alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "multiply" }} />
+                            </div>
+                          ) : (
+                            <Shirt className="w-3.5 h-3.5 text-orange-400/60" />
+                          )}
+                          <span className="text-[10px] font-sans text-foreground capitalize">{item.name || item.category}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            )}
+
             {/* Most Worn Items */}
             {stats.mostWorn.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
-                className="rounded-2xl p-4" style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}>
+                className="rounded-2xl border border-border bg-card p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Shirt className="w-4 h-4 text-primary" />
                   <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.15em]">Most Worn Items</p>
@@ -222,7 +433,7 @@ const MonthlyReport = () => {
                           <img src={item.photo_url} alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "multiply" }} />
                         </div>
                       ) : (
-                        <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "hsl(var(--secondary))" }}>
+                        <div className="w-9 h-9 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
                           <Shirt className="w-4 h-4 text-muted-foreground/40" />
                         </div>
                       )}
@@ -240,7 +451,7 @@ const MonthlyReport = () => {
             {/* Color Distribution */}
             {stats.colorDist.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                className="rounded-2xl p-4" style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}>
+                className="rounded-2xl border border-border bg-card p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Palette className="w-4 h-4 text-primary" />
                   <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.15em]">Color Distribution</p>
@@ -254,7 +465,7 @@ const MonthlyReport = () => {
                         <div className="w-5 h-5 rounded-full flex-shrink-0 ring-1 ring-border/30" style={{ backgroundColor: hex }} />
                         <span className="text-xs font-sans text-foreground capitalize w-16 truncate">{color}</span>
                         <div className="flex-1">
-                          <div className="h-2 rounded-full overflow-hidden" style={{ background: "hsl(var(--muted))" }}>
+                          <div className="h-2 rounded-full overflow-hidden bg-muted">
                             <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: `${pct}%` }}
@@ -275,7 +486,7 @@ const MonthlyReport = () => {
             {/* Occasion Breakdown */}
             {stats.occasions.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
-                className="rounded-2xl p-4" style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}>
+                className="rounded-2xl border border-border bg-card p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <PieChart className="w-4 h-4 text-primary" />
                   <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.15em]">Occasion Breakdown</p>
@@ -283,8 +494,7 @@ const MonthlyReport = () => {
                 <div className="flex flex-wrap gap-2">
                   {stats.occasions.map(([occ, count], i) => (
                     <motion.div key={i} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.35 + i * 0.04 }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-sans"
-                      style={{ background: "hsl(var(--primary) / 0.1)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary) / 0.2)" }}>
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-sans bg-primary/10 text-primary border border-primary/20">
                       <span className="font-medium">{occ}</span>
                       <span className="font-bold">{count}</span>
                     </motion.div>
@@ -294,9 +504,9 @@ const MonthlyReport = () => {
             )}
 
             {/* Empty state */}
-            {events.length === 0 && (
+            {events.length === 0 && !cpwAnalytics && seasonalAnalysis.rotateIn.length === 0 && seasonalAnalysis.rotateOut.length === 0 && (
               <div className="text-center py-12">
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3" style={{ background: "hsl(var(--secondary))" }}>
+                <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mx-auto mb-3">
                   <BarChart3 className="w-7 h-7 text-muted-foreground/40" />
                 </div>
                 <p className="text-muted-foreground font-sans text-sm">No outfits planned this month</p>
