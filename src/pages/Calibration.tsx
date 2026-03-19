@@ -796,7 +796,7 @@ const Calibration = () => {
       </div>
 
       {/* Swipe particles canvas */}
-      <SwipeParticles velocity={swipeVelocity} trigger={swipeTrigger} />
+      <SwipeParticles swipeVelocity={swipeVelocity} swipeTrigger={swipeTrigger} />
 
       {/* Header */}
       <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-md px-4 pt-4 pb-3">
