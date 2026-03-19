@@ -871,14 +871,18 @@ const OutfitCalendar = () => {
                             const [moved] = newItems.splice(dragIdx, 1);
                             newItems.splice(targetIdx, 0, moved);
                             setDragIdx(null);
-                            // Optimistic update
                             const updatedEvents = events.map(e => e.id === ev.id ? { ...e, outfit_items: newItems } : e);
                             setEvents(updatedEvents);
                             await supabase.from("calendar_events").update({ outfit_items: newItems as any }).eq("id", ev.id);
                           };
+                          // Flat-lay grid: 2-col for ≥4 items, else row
+                          const useGrid = photos.length >= 4;
                           return (
-                            <div className="p-3 pb-0">
-                              <div className="flex gap-2 overflow-x-auto">
+                            <div className="p-3 pb-1">
+                              <div className={useGrid
+                                ? "grid grid-cols-2 gap-1.5 rounded-xl bg-white/95 dark:bg-white/90 p-2 overflow-hidden"
+                                : "flex gap-2 overflow-x-auto"
+                              }>
                                 {photos.map((url, pi) => (
                                   <div
                                     key={pi}
@@ -886,7 +890,7 @@ const OutfitCalendar = () => {
                                     onDragStart={() => handleDragStart(pi)}
                                     onDragOver={handleDragOver}
                                     onDrop={() => handleDrop(pi)}
-                                    className={`w-16 h-16 rounded-lg bg-white/95 dark:bg-white/90 flex-shrink-0 flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing transition-all ${
+                                    className={`${useGrid ? "aspect-square" : "w-16 h-16 flex-shrink-0"} rounded-lg ${!useGrid ? "bg-white/95 dark:bg-white/90" : ""} flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing transition-all ${
                                       dragIdx === pi ? "opacity-50 scale-95" : "hover:ring-2 hover:ring-primary/30"
                                     }`}
                                   >
@@ -899,7 +903,7 @@ const OutfitCalendar = () => {
                                   </div>
                                 ))}
                                 {items.length > 5 && (
-                                  <div className="w-16 h-16 rounded-lg flex-shrink-0 flex items-center justify-center bg-secondary/60 text-[10px] font-sans font-semibold text-muted-foreground">
+                                  <div className={`${useGrid ? "aspect-square" : "w-16 h-16 flex-shrink-0"} rounded-lg flex items-center justify-center bg-secondary/60 text-[10px] font-sans font-semibold text-muted-foreground`}>
                                     +{items.length - 5}
                                   </div>
                                 )}
