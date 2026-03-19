@@ -175,7 +175,8 @@ const Dashboard = () => {
       });
       if (profileRes.data) setProfile(profileRes.data);
       if (styleRes.data) setStyleProfile(styleRes.data as any);
-      if (closetRes.data) setClosetItems(closetRes.data);
+      if (closetRes.data) setClosetItems(closetRes.data as any);
+      if (allItemsRes.data) setWardrobeItems(allItemsRes.data);
 
       if (outfitsListRes.data && outfitsListRes.data.length > 0) {
         const outfitsWithItems = await Promise.all(
