@@ -246,14 +246,23 @@ const Council = () => {
         }
       }
 
+      // Match mentioned closet items from synthesis text
+      const matchItems = (text: string) => {
+        return closetItems.filter(ci => {
+          const name = (ci.name || "").toLowerCase();
+          return name.length > 2 && text.toLowerCase().includes(name);
+        }).slice(0, 6).map(ci => ({ name: ci.name, photo_url: ci.photo_url, category: ci.category }));
+      };
+
       // Final message update with all council data
       let finalMessages: CouncilMessage[] = [];
       setMessages(prev => {
+        const mentioned = matchItems(synthesis);
         const last = prev[prev.length - 1];
         if (last?.role === "assistant") {
-          finalMessages = prev.map((m, i) => i === prev.length - 1 ? { ...m, stage1: stage1Data, rankings: rankingsData, synthesis } : m);
+          finalMessages = prev.map((m, i) => i === prev.length - 1 ? { ...m, stage1: stage1Data, rankings: rankingsData, synthesis, mentionedItems: mentioned, actionSuggestions: ["Save as Outfit", "Add to Calendar", "Share"] } : m);
         } else if (synthesis) {
-          finalMessages = [...prev, { role: "assistant", content: synthesis, synthesis, stage1: stage1Data, rankings: rankingsData }];
+          finalMessages = [...prev, { role: "assistant", content: synthesis, synthesis, stage1: stage1Data, rankings: rankingsData, mentionedItems: mentioned, actionSuggestions: ["Save as Outfit", "Add to Calendar", "Share"] }];
         } else {
           finalMessages = prev;
         }
