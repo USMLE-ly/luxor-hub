@@ -147,6 +147,25 @@ const Closet = () => {
 
   useEffect(() => { fetchItems(); }, [fetchItems]);
 
+  // Auto-remove backgrounds when flat-lay view is active
+  useEffect(() => {
+    if (!flatLayView) return;
+    const itemsWithPhotos = items.filter((i) => i.photo_url && !cleanBgUrls[i.id] && !cleanBgRequested.current.has(i.id));
+    itemsWithPhotos.slice(0, 4).forEach(async (item) => {
+      cleanBgRequested.current.add(item.id);
+      try {
+        const { data, error } = await supabase.functions.invoke("remove-bg", {
+          body: { imageUrl: item.photo_url },
+        });
+        if (!error && data?.image) {
+          setCleanBgUrls((prev) => ({ ...prev, [item.id]: data.image }));
+        }
+      } catch {
+        // silently fail — show original photo
+      }
+    });
+  }, [flatLayView, items]);
+
   // localStorage persistence for mannequin clothing
   const STORAGE_KEY = user ? `mannequin-outfit-${user.id}` : null;
 
