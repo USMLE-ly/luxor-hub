@@ -1178,6 +1178,18 @@ const OutfitCalendar = () => {
                               <p className="font-sans text-[10px] text-muted-foreground/70 truncate">{ev.notes}</p>
                             )}
                           </div>
+                          {/* AI Style Tip */}
+                          {(() => {
+                            const w = selectedDate ? getWeatherForDate(selectedDate) : undefined;
+                            const tip = getStyleTip(ev.occasion, w);
+                            if (!tip) return null;
+                            return (
+                              <p className="mt-1.5 text-[10px] font-sans italic px-0.5"
+                                style={{ color: "hsl(var(--primary) / 0.8)" }}>
+                                {tip}
+                              </p>
+                            );
+                          })()}
                         </div>
                         <div className="flex items-center gap-1">
                           <button
