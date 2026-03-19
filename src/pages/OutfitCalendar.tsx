@@ -286,14 +286,6 @@ const OutfitCalendar = () => {
     });
     setShowEditDialog(true);
   };
-    setEditEvent({
-      title: ev.title,
-      occasion: ev.occasion || "Casual",
-      notes: ev.notes || "",
-      outfitId: "",
-    });
-    setShowEditDialog(true);
-  };
 
   const updateEvent = async () => {
     if (!editingEvent || !editEvent.title.trim()) return;
@@ -303,7 +295,14 @@ const OutfitCalendar = () => {
       occasion: editEvent.occasion,
       notes: editEvent.notes || null,
     };
-    if (outfit) updateData.outfit_items = outfit.mannequin_items || [];
+    if (outfit) {
+      updateData.outfit_items = outfit.mannequin_items || [];
+    } else if (editEvent.manualItems.length > 0) {
+      updateData.outfit_items = editEvent.manualItems.map(itemId => {
+        const ci = closetItems.find(c => c.id === itemId);
+        return ci ? { name: ci.name, category: ci.category, photo_url: ci.photo_url, color: ci.color } : null;
+      }).filter(Boolean);
+    }
 
     const { error } = await supabase
       .from("calendar_events")
