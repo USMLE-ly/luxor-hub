@@ -8,7 +8,7 @@ import { useUserLocation } from "@/hooks/useUserLocation";
 import {
   CalendarDays, ChevronLeft, ChevronRight, Plus, X, Shirt, Sparkles, Loader2,
   Cloud, Sun, CloudRain, Snowflake, Wind, Droplets, Thermometer, Pencil, Bell, BellOff,
-  MapPin, TrendingUp, Flame, BarChart3, Layers, Copy, Palette, Star,
+  MapPin, TrendingUp, Flame, BarChart3, Layers, Copy, Palette, Star, Share2, Umbrella, ThermometerSnowflake, AlertTriangle,
 } from "lucide-react";
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, addMonths, subMonths, isSameMonth, isSameDay, isToday, differenceInMilliseconds, set as setDate } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
