@@ -541,7 +541,7 @@ const OutfitCalendar = () => {
                     ${!inMonth ? "opacity-20" : ""}
                     ${selected ? "ring-1 ring-primary/30 ring-inset" : "hover:bg-secondary/40"}
                     ${todayFlag && !dayEvents.length ? "bg-primary/5" : ""}
-                    ${dayEvents.length > 0 && inMonth ? "bg-[#fefdfb]" : ""}
+                    ${dayEvents.length > 0 && inMonth && (dayEvents.some(ev => ev.mannequin_image_url) || dayEvents.some(ev => Array.isArray(ev.outfit_items) && ev.outfit_items.some((item: any) => typeof item === "string" ? closetMap.has(item.toLowerCase()) : !!(item?.photo_url || item?.photoUrl || item?.image_url || item?.imageUrl)))) ? "bg-[#fefdfb]" : ""}
                   `}
                 >
                   <div className="flex items-center justify-between w-full shrink-0">
