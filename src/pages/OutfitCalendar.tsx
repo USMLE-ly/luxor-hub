@@ -9,9 +9,9 @@ import {
   CalendarDays, ChevronLeft, ChevronRight, Plus, X, Shirt, Sparkles, Loader2,
   Cloud, Sun, CloudRain, Snowflake, Wind, Droplets, Thermometer, Pencil, Bell, BellOff,
   MapPin, TrendingUp, Flame, BarChart3, Layers, Copy, Palette, Star, Share2, Umbrella, ThermometerSnowflake, AlertTriangle,
-  Award, Trophy, Zap, Target, Crown,
+  Award, Trophy, Zap, Target, Crown, RefreshCw,
 } from "lucide-react";
-import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, addMonths, subMonths, isSameMonth, isSameDay, isToday, differenceInMilliseconds, set as setDate } from "date-fns";
+import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, addMonths, subMonths, subDays, isSameMonth, isSameDay, isToday, isSunday, differenceInMilliseconds, set as setDate } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -113,12 +113,14 @@ const OutfitCalendar = () => {
     typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted"
   );
   const userLocation = useUserLocation();
+  const [recentEvents, setRecentEvents] = useState<CalendarEvent[]>([]);
 
   useEffect(() => {
     if (!user) return;
     fetchEvents();
     fetchOutfits();
     fetchClosetMap();
+    fetchRecentEvents();
   }, [user, currentMonth]);
 
   const fetchClosetMap = async () => {
@@ -167,6 +169,84 @@ const OutfitCalendar = () => {
       );
     });
   }, [notificationsEnabled]);
+
+  // Fetch last 14 days of events for repeat detection
+  const fetchRecentEvents = async () => {
+    if (!user) return;
+    const twoWeeksAgo = format(subDays(new Date(), 14), "yyyy-MM-dd");
+    const today = format(new Date(), "yyyy-MM-dd");
+    const { data } = await supabase
+      .from("calendar_events")
+      .select("*")
+      .eq("user_id", user.id)
+      .gte("event_date", twoWeeksAgo)
+      .lte("event_date", today)
+      .order("event_date", { ascending: false });
+    if (data) setRecentEvents(data);
+  };
+
+  // Weekly digest: schedule Sunday 6 PM notification summarizing next week
+  const scheduleWeeklyDigest = useCallback((allEvents: CalendarEvent[]) => {
+    if (!notificationsEnabled) return;
+    const now = new Date();
+    if (!isSunday(now)) return;
+    const sundayEvening = setDate(now, { hours: 18, minutes: 0, seconds: 0, milliseconds: 0 });
+    const delayMs = differenceInMilliseconds(sundayEvening, now);
+    if (delayMs <= 0 || delayMs > 24 * 60 * 60 * 1000) return;
+
+    // Gather next 7 days
+    const nextWeekDates: string[] = [];
+    for (let i = 1; i <= 7; i++) {
+      nextWeekDates.push(format(addDays(now, i), "yyyy-MM-dd"));
+    }
+    const nextWeekEvents = allEvents.filter(e => nextWeekDates.includes(e.event_date));
+    const planned = nextWeekEvents.length;
+    const unplanned = 7 - planned;
+
+    let body = `📋 ${planned} outfit${planned !== 1 ? "s" : ""} planned for next week.`;
+    if (unplanned > 0) body += ` ${unplanned} day${unplanned !== 1 ? "s" : ""} still open — tap to fill them!`;
+    if (planned > 0) {
+      const titles = nextWeekEvents.slice(0, 3).map(e => e.title).join(", ");
+      body += `\nUp next: ${titles}${nextWeekEvents.length > 3 ? "…" : ""}`;
+    }
+
+    scheduleNotification("📅 Weekly Style Digest", body, delayMs);
+  }, [notificationsEnabled]);
+
+  // Also schedule weekly digest when events load
+  useEffect(() => {
+    if (events.length > 0) scheduleWeeklyDigest(events);
+  }, [events, scheduleWeeklyDigest]);
+
+  // Outfit repeat detector: fingerprint items and compare
+  const getOutfitFingerprint = (items: any[]): string => {
+    if (!Array.isArray(items) || items.length === 0) return "";
+    const names = items
+      .map((item: any) => {
+        if (typeof item === "string") return item.toLowerCase();
+        return (item?.name || item?.category || "").toLowerCase();
+      })
+      .filter(Boolean)
+      .sort();
+    return names.join("|");
+  };
+
+  const detectRepeat = (ev: CalendarEvent): { isRepeat: boolean; matchDate: string | null } => {
+    const items = Array.isArray(ev.outfit_items) ? ev.outfit_items : [];
+    if (items.length < 2) return { isRepeat: false, matchDate: null };
+    const fp = getOutfitFingerprint(items);
+    if (!fp) return { isRepeat: false, matchDate: null };
+
+    for (const recent of recentEvents) {
+      if (recent.id === ev.id) continue;
+      const recentItems = Array.isArray(recent.outfit_items) ? recent.outfit_items : [];
+      const recentFp = getOutfitFingerprint(recentItems);
+      if (recentFp === fp) {
+        return { isRepeat: true, matchDate: recent.event_date };
+      }
+    }
+    return { isRepeat: false, matchDate: null };
+  };
 
   const toggleNotifications = async () => {
     if (notificationsEnabled) {
@@ -1188,6 +1268,25 @@ const OutfitCalendar = () => {
                                 style={{ color: "hsl(var(--primary) / 0.8)" }}>
                                 {tip}
                               </p>
+                            );
+                          })()}
+                          {/* Outfit Repeat Warning */}
+                          {(() => {
+                            const repeat = detectRepeat(ev);
+                            if (!repeat.isRepeat) return null;
+                            const matchStr = repeat.matchDate
+                              ? format(new Date(repeat.matchDate + "T00:00:00"), "MMM d")
+                              : "recently";
+                            return (
+                              <div className="flex items-center gap-1.5 mt-1.5 px-2 py-1 rounded-lg text-[10px] font-sans"
+                                style={{
+                                  background: "hsl(35 90% 55% / 0.12)",
+                                  color: "hsl(35 90% 40%)",
+                                  border: "1px solid hsl(35 90% 55% / 0.2)",
+                                }}>
+                                <RefreshCw className="w-3 h-3" />
+                                <span>Same combo worn on {matchStr} — try mixing it up!</span>
+                              </div>
                             );
                           })()}
                         </div>
