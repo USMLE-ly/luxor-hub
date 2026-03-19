@@ -1489,7 +1489,28 @@ const OutfitCalendar = () => {
           </div>
         </motion.div>
 
-        {/* Streak Rewards Widget */}
+        {/* View Monthly Report Link */}
+        <motion.button
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.38 }}
+          onClick={() => navigate("/monthly-report")}
+          className="w-full rounded-2xl p-3.5 flex items-center justify-between mb-5 group transition-colors hover:bg-secondary/60"
+          style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
+        >
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "hsl(var(--primary) / 0.12)" }}>
+              <BarChart3 className="w-4 h-4 text-primary" />
+            </div>
+            <div className="text-left">
+              <p className="text-xs font-sans font-semibold text-foreground">Monthly Style Report</p>
+              <p className="text-[10px] font-sans text-muted-foreground">Variety score, color stats & more</p>
+            </div>
+          </div>
+          <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+        </motion.button>
+
+
         {streakRewards.streak > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
