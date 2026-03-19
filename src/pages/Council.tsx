@@ -350,20 +350,38 @@ const Council = () => {
 
   return (
     <AppLayout>
-      <div className="flex flex-col h-[calc(100vh-56px)] max-w-lg mx-auto overflow-x-hidden">
+      <div className="flex flex-col h-[calc(100vh-56px)] max-w-lg mx-auto overflow-x-hidden" style={{ background: moodTint }}>
         {/* Header with mode toggle */}
-        <div className="px-5 pt-4 pb-2 flex items-center justify-between">
+        <div className="px-5 pt-4 pb-2 flex items-center justify-between" style={{ background: moodTint }}>
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
               <Users className="w-4.5 h-4.5 text-primary" />
             </div>
             <div>
               <h1 className="font-sans font-semibold text-foreground text-sm">Style Council</h1>
-              <p className="text-muted-foreground font-sans text-[10px]">3 AI stylists deliberate for you</p>
+              <div className="flex items-center gap-2">
+                <p className="text-muted-foreground font-sans text-[10px]">3 AI stylists deliberate for you</p>
+                {memoryCount > 0 && (
+                  <span className="flex items-center gap-0.5 text-[9px] font-sans text-primary/70 bg-primary/8 px-1.5 py-0.5 rounded-full">
+                    <Brain className="w-2.5 h-2.5" /> {memoryCount} memories
+                  </span>
+                )}
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-1.5">
-            {/* Mode toggle back to Quick Chat */}
+            {closetItems.length > 0 && (
+              <button
+                onClick={() => setShowWardrobePanel(!showWardrobePanel)}
+                className={`flex items-center gap-1 px-2 py-1.5 rounded-lg border transition-colors ${
+                  showWardrobePanel ? "border-primary/40 bg-primary/5" : "border-border bg-card hover:border-primary/40"
+                }`}
+                title="Your Wardrobe"
+              >
+                <Shirt className="w-3.5 h-3.5 text-muted-foreground" />
+                <span className="text-[10px] font-sans font-medium text-muted-foreground">{closetItems.length}</span>
+              </button>
+            )}
             <button
               onClick={() => navigate("/chat")}
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border bg-card hover:border-primary/40 transition-colors"
@@ -379,6 +397,41 @@ const Council = () => {
             )}
           </div>
         </div>
+
+        {/* Collapsible Wardrobe Context Panel */}
+        <AnimatePresence>
+          {showWardrobePanel && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden border-b border-border/50"
+            >
+              <div className="px-5 py-3">
+                <p className="text-[9px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.15em] mb-2">Your Wardrobe</p>
+                <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                  {closetItems.slice(0, 12).map((item) => (
+                    <div key={item.id} className="flex-shrink-0 flex flex-col items-center gap-0.5">
+                      {item.photo_url ? (
+                        <img src={item.photo_url} alt={item.name || ""} className="w-10 h-10 rounded-lg object-cover border border-border/40" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center border border-border/40">
+                          <Shirt className="w-4 h-4 text-muted-foreground/40" />
+                        </div>
+                      )}
+                      <span className="text-[8px] font-sans text-muted-foreground truncate max-w-[40px]">{item.name || item.category}</span>
+                    </div>
+                  ))}
+                  {closetItems.length > 12 && (
+                    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-secondary/60 flex items-center justify-center text-[9px] font-sans font-semibold text-muted-foreground">
+                      +{closetItems.length - 12}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto px-5 space-y-3 pb-3">
