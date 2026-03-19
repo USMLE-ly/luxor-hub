@@ -561,9 +561,10 @@ const Council = () => {
                                 "Share": <Share2 className="w-3 h-3" />,
                               };
                               return (
-                                <button
+                                <motion.button
                                   key={action}
-                                  onClick={() => handleQuickAction(action, msg)}
+                                  whileTap={{ scale: 0.92 }}
+                                  onClick={() => { haptic("medium"); handleQuickAction(action, msg); }}
                                   className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-sans font-medium border border-border bg-card text-muted-foreground hover:border-primary/40 hover:text-primary transition-colors"
                                 >
                                   {icons[action]}
