@@ -1,29 +1,44 @@
 
 
-# Plan: Stylebook-Style Visual Calendar with Outfit Pictures in Day Cells
+# Fix: Calendar Day Cells Showing White Boxes Instead of Clothes
 
-## What Changes
+## Problem
+The `outfit_items` in calendar events are stored as **string arrays** (e.g., `["Turbo Love Graphic T-Shirt", "Blue Carpenter Jeans"]`), not objects with photo URLs. The current code tries to access `item?.photo_url` on these strings, finds nothing, and falls through to the dot fallback. The white boxes come from `bg-[#fefdfb]` applied to event cells — they stand out against the dark theme with no actual images inside.
 
-**File: `src/pages/OutfitCalendar.tsx`** — Lines 518-601 (the day cell rendering)
+## Fix — `src/pages/OutfitCalendar.tsx`
 
-The current day cells are `min-h-[76px]` with tiny 16×20px thumbnails stacked vertically. The reference images show each day cell as a taller cell where clothing items are arranged as a styled flat-lay composition filling most of the cell space.
+1. **Fetch the user's `clothing_items`** from the database (just `name` and `photo_url` columns) alongside existing data fetches. Store in a `closetMap` — a `Map<string, string>` mapping lowercased item name → photo_url.
 
-### Changes to the day cell:
+2. **Update the day cell rendering** (lines 546-584): Instead of treating `outfit_items` as objects, treat them as strings and look up each name in `closetMap` to get the photo URL.
 
-1. **Increase cell height**: Change `min-h-[76px]` → `min-h-[100px]` to give more room for outfit visuals
-2. **Replace tiny thumbnail stack with a proper flat-lay composition**:
-   - If mannequin image exists: show it as a nearly-full-cell image (centered, ~80% of cell height)
-   - If individual item photos exist: arrange them in a **vertical flat-lay stack** — top garment at top, bottoms in middle, shoes at bottom — each item sized ~28×32px with `object-contain`, `mix-blend-mode: multiply`, on a white/cream micro-background, overlapping slightly for the editorial look from the reference images
-   - Items positioned with slight negative margins to create the "styled on a surface" look
-3. **Move the date number**: Keep it small in the top-left corner, weather icon top-right (same as now)
-4. **Remove text fallback prominence**: Text labels become a tiny dot indicator instead of a colored pill, since the visual emphasis is on pictures
-5. **White/light cell background** for cells with outfits to make the `mix-blend-mode: multiply` work like the reference (items float on white)
+3. **Only apply white background** (`bg-[#fefdfb]`) when at least one photo is actually found — otherwise keep the default cell background so there are no empty white boxes.
 
-### Visual Details (matching reference):
-- Each item photo uses `object-fit: contain` so garment shape is preserved
-- Items stack vertically: top → bottom → shoes → accessories
-- Slight overlap between items (negative margin -4px) for compact editorial feel
-- Cell background stays white/neutral for the multiply blend to work cleanly
+4. **Keep dot fallback** for items with no matching photos, but style them with the item's occasion color instead of plain primary.
 
-### No other files change — this is purely a visual layout update to the calendar grid cells.
+### Technical Detail
+
+```
+// New state alongside existing ones
+const [closetMap, setClosetMap] = useState<Map<string, string>>(new Map());
+
+// Fetch in the existing useEffect or a new one
+const { data: clothingData } = await supabase
+  .from("clothing_items")
+  .select("name, photo_url")
+  .eq("user_id", user.id)
+  .not("photo_url", "is", null);
+
+// Build lookup map (lowercase for fuzzy matching)
+const map = new Map();
+clothingData?.forEach(item => map.set(item.name.toLowerCase(), item.photo_url));
+
+// In day cell: resolve photos from string names
+const allPhotos = [];
+items.forEach((itemName: string) => {
+  const url = closetMap.get(itemName.toLowerCase());
+  if (url) allPhotos.push(url);
+});
+```
+
+Cell background conditional: `${allPhotos.length > 0 ? "bg-[#fefdfb]" : ""}` instead of checking `dayEvents.length`.
 
