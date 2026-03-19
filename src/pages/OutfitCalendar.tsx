@@ -241,25 +241,51 @@ const OutfitCalendar = () => {
   const addEvent = async () => {
     if (!user || !selectedDate || !newEvent.title.trim()) return;
     const outfit = savedOutfits.find(o => o.id === newEvent.outfitId);
+    // Build outfit_items from saved outfit OR manually picked closet items
+    let outfitItems: any[] = outfit?.mannequin_items || [];
+    if (!outfit && newEvent.manualItems.length > 0) {
+      outfitItems = newEvent.manualItems.map(itemId => {
+        const ci = closetItems.find(c => c.id === itemId);
+        return ci ? { name: ci.name, category: ci.category, photo_url: ci.photo_url, color: ci.color } : null;
+      }).filter(Boolean);
+    }
     const { error } = await supabase.from("calendar_events").insert({
       user_id: user.id,
       title: newEvent.title.trim(),
       event_date: format(selectedDate, "yyyy-MM-dd"),
       occasion: newEvent.occasion,
       notes: newEvent.notes || null,
-      outfit_items: outfit?.mannequin_items || [],
+      outfit_items: outfitItems,
     });
     if (error) toast.error("Failed to add event");
     else {
       toast.success("Event added!");
       setShowAddDialog(false);
-      setNewEvent({ title: "", occasion: "Casual", notes: "", outfitId: "" });
+      setNewEvent({ title: "", occasion: "Casual", notes: "", outfitId: "", manualItems: [] });
       fetchEvents();
     }
   };
 
   const openEditDialog = (ev: CalendarEvent) => {
     setEditingEvent(ev);
+    // Extract existing manual item IDs from outfit_items if possible
+    const existingItemIds: string[] = [];
+    const items = Array.isArray(ev.outfit_items) ? ev.outfit_items : [];
+    items.forEach((item: any) => {
+      if (typeof item === "object" && item?.name) {
+        const match = closetItems.find(c => c.name?.toLowerCase() === item.name?.toLowerCase());
+        if (match) existingItemIds.push(match.id);
+      }
+    });
+    setEditEvent({
+      title: ev.title,
+      occasion: ev.occasion || "Casual",
+      notes: ev.notes || "",
+      outfitId: "",
+      manualItems: existingItemIds,
+    });
+    setShowEditDialog(true);
+  };
     setEditEvent({
       title: ev.title,
       occasion: ev.occasion || "Casual",
