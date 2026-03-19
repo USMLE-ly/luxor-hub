@@ -1132,6 +1132,33 @@ const OutfitCalendar = () => {
                   </div>
                 </div>
               )}
+              {/* Live Outfit Score */}
+              {newEvent.manualItems.length >= 2 && (() => {
+                const scoreData = computeOutfitScore(newEvent.manualItems, newEvent.occasion);
+                return (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex items-center gap-3 p-3 rounded-xl"
+                    style={{ background: "hsl(var(--secondary) / 0.6)", border: "1px solid hsl(var(--border) / 0.5)" }}
+                  >
+                    <div className="relative w-10 h-10 flex-shrink-0">
+                      <svg viewBox="0 0 36 36" className="w-10 h-10 -rotate-90">
+                        <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--muted))" strokeWidth="3" />
+                        <circle cx="18" cy="18" r="15.5" fill="none" stroke={scoreData.color} strokeWidth="3"
+                          strokeDasharray={`${scoreData.score * 0.975} 100`} strokeLinecap="round" />
+                      </svg>
+                      <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold" style={{ color: scoreData.color }}>
+                        {scoreData.score}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-xs font-sans font-semibold" style={{ color: scoreData.color }}>{scoreData.label}</p>
+                      <p className="text-[10px] font-sans text-muted-foreground">Color harmony • Category coverage • Occasion fit</p>
+                    </div>
+                  </motion.div>
+                );
+              })()}
               {(() => {
                 const w = selectedDate ? getWeatherForDate(selectedDate) : null;
                 if (!w) return null;
