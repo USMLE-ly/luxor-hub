@@ -828,6 +828,7 @@ const OutfitCalendar = () => {
                   ))}
                 </div>
               )}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
