@@ -93,8 +93,9 @@ const OutfitCalendar = () => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
   const [savedOutfits, setSavedOutfits] = useState<any[]>([]);
-  const [newEvent, setNewEvent] = useState({ title: "", occasion: "Casual", notes: "", outfitId: "" });
-  const [editEvent, setEditEvent] = useState({ title: "", occasion: "Casual", notes: "", outfitId: "" });
+  const [closetItems, setClosetItems] = useState<ClosetItem[]>([]);
+  const [newEvent, setNewEvent] = useState({ title: "", occasion: "Casual", notes: "", outfitId: "", manualItems: [] as string[] });
+  const [editEvent, setEditEvent] = useState({ title: "", occasion: "Casual", notes: "", outfitId: "", manualItems: [] as string[] });
   const [autoFilling, setAutoFilling] = useState(false);
   const [flatLayEvent, setFlatLayEvent] = useState<CalendarEvent | null>(null);
   const [weatherData, setWeatherData] = useState<WeatherDay[]>([]);
