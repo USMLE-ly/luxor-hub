@@ -1338,6 +1338,74 @@ const OutfitCalendar = () => {
           </div>
         </motion.div>
 
+        {/* Streak Rewards Widget */}
+        {streakRewards.streak > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="rounded-2xl p-4 mb-5"
+            style={{
+              background: "hsl(var(--card))",
+              border: "1px solid hsl(var(--border))",
+            }}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <Trophy className="w-4 h-4 text-primary" />
+              <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.15em]">
+                Planning Streak
+              </p>
+            </div>
+            {/* Progress to next milestone */}
+            {streakRewards.next && (
+              <div className="mb-3">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs font-sans font-medium text-foreground">
+                    {streakRewards.next.icon} {streakRewards.next.name}
+                  </span>
+                  <span className="text-[10px] font-sans text-muted-foreground">
+                    {streakRewards.streak}/{streakRewards.next.days} days
+                  </span>
+                </div>
+                <div className="h-2 rounded-full overflow-hidden" style={{ background: "hsl(var(--muted))" }}>
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${streakRewards.progress}%` }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    className="h-full rounded-full gold-gradient"
+                  />
+                </div>
+              </div>
+            )}
+            {/* Earned badges */}
+            {streakRewards.current.length > 0 && (
+              <div className="flex gap-2 flex-wrap">
+                {streakRewards.current.map(m => (
+                  <motion.div
+                    key={m.badge}
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-sans font-medium"
+                    style={{
+                      background: "hsl(var(--primary) / 0.12)",
+                      color: "hsl(var(--primary))",
+                      border: "1px solid hsl(var(--primary) / 0.2)",
+                    }}
+                  >
+                    <span>{m.icon}</span>
+                    <span>{m.name}</span>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+            {!streakRewards.next && (
+              <p className="text-xs font-sans text-primary font-medium flex items-center gap-1.5">
+                <Crown className="w-3.5 h-3.5" /> All milestones achieved — legendary streak!
+              </p>
+            )}
+          </motion.div>
+        )}
+
         {/* Add Event Dialog */}
         <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
           <DialogContent className="max-w-sm">
