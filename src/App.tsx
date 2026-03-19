@@ -101,6 +101,7 @@ const App = () => (
             <Route path="/community-gallery" element={<CommunityGallery />} />
             <Route path="/install" element={<Install />} />
             <Route path="/council" element={<Council />} />
+            <Route path="/monthly-report" element={<MonthlyReport />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
