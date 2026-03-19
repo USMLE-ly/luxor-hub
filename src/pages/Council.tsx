@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Users, Trash2, ArrowUp, Camera, X, Sparkles } from "lucide-react";
+import { Users, Trash2, ArrowUp, Camera, X, Sparkles, ChevronDown, ChevronUp, Brain, CalendarPlus, Heart, Share2, Shirt } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { VoiceInput } from "@/components/app/VoiceInput";
 import { MoodSelector } from "@/components/app/MoodSelector";
@@ -13,6 +13,7 @@ import { CouncilStageProgress } from "@/components/app/CouncilStageProgress";
 import { CouncilResponseCard } from "@/components/app/CouncilResponseCard";
 import { useAutoResizeTextarea } from "@/hooks/use-auto-resize-textarea";
 import { PlaceholdersAndVanishInput } from "@/components/ui/placeholders-and-vanish-input";
+import { format } from "date-fns";
 
 const COUNCIL_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/council-chat`;
 
