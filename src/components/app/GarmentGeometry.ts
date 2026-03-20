@@ -17,9 +17,11 @@ export type GarmentSubtype =
   | "sneakers" | "boots" | "loafers" | "derby"
   // Hats
   | "cap" | "beanie" | "fedora"
+  // Bags
+  | "bag-handbag" | "bag-tote" | "bag-clutch"
   // Generic fallbacks
   | "generic-top" | "generic-bottom" | "generic-outerwear" | "generic-shoe" | "generic-hat"
-  | "generic-skirt" | "generic-dress";
+  | "generic-skirt" | "generic-dress" | "generic-bag";
 
 // =============================================
 // LAYER SYSTEM — controls rendering order & radial offsets
