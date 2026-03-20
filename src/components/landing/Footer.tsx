@@ -131,7 +131,7 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-8 border-t border-border">
           <p className="text-xs text-muted-foreground font-sans">© 2026 AURELIA. All rights reserved.</p>
           <div className="flex items-center gap-2 text-xs text-muted-foreground font-sans">
-            <span className="gold-shimmer">Made with ♥ and AI</span>
+            <span className="gold-shimmer">Made with ❤️ for you</span>
           </div>
           <div className="flex items-center gap-4">
             {[
