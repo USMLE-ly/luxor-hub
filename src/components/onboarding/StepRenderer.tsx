@@ -1370,65 +1370,103 @@ const DetectionResultStep = ({ step, answers, gender, aiResults }: { step: Onboa
         {isLoading ? "Our AI is studying your body proportions" : step.description}
       </motion.p>
 
-      {/* Body photo + illustration side by side */}
+      {/* Body photo + illustration comparison */}
       <motion.div
-        className="relative flex items-center justify-center gap-6 mb-8 w-full"
+        className="relative w-full mb-8"
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       >
-        {/* Photo */}
-        <div className="relative w-28 h-44 rounded-2xl overflow-hidden ring-2 ring-primary/20 shadow-lg shadow-primary/5">
-          {capturedImage ? (
-            <img src={capturedImage} alt="Your body" className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full bg-secondary flex items-center justify-center">
-              <User className="w-10 h-10 text-muted-foreground" />
+        {isLoading ? (
+          /* Loading: centered photo with scan overlay */
+          <div className="flex flex-col items-center">
+            <div className="relative w-36 h-56 rounded-2xl overflow-hidden ring-2 ring-primary/20 shadow-xl shadow-primary/5">
+              {capturedImage ? (
+                <img src={capturedImage} alt="Your body" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full bg-secondary flex items-center justify-center">
+                  <User className="w-12 h-12 text-muted-foreground" />
+                </div>
+              )}
+              <div className="absolute inset-0 bg-black/20" />
+              <motion.div
+                className="absolute left-0 right-0 h-[2px]"
+                style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary)), transparent)" }}
+                animate={{ top: ["8%", "92%", "8%"] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              </div>
             </div>
-          )}
-          {isLoading && (
-            <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-              <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            </div>
-          )}
-          {/* Scanning line overlay */}
-          {isLoading && (
+          </div>
+        ) : revealed ? (
+          /* Revealed: side-by-side with elegant connector */
+          <div className="flex items-center justify-center gap-3">
+            {/* Photo card */}
             <motion.div
-              className="absolute left-0 right-0 h-[2px]"
-              style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary)), transparent)" }}
-              animate={{ top: ["10%", "90%", "10%"] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            />
-          )}
-        </div>
+              className="relative w-28 h-44 rounded-2xl overflow-hidden shadow-xl border border-border/30"
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.1, duration: 0.5 }}
+            >
+              {capturedImage ? (
+                <img src={capturedImage} alt="Your body" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full bg-secondary flex items-center justify-center">
+                  <User className="w-10 h-10 text-muted-foreground" />
+                </div>
+              )}
+              <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-black/60 to-transparent" />
+              <span className="absolute bottom-1.5 left-0 right-0 text-center text-[9px] font-sans text-white/70 uppercase tracking-widest">You</span>
+            </motion.div>
 
-        {/* Arrow + illustration when revealed */}
-        {revealed && !isLoading && (
-          <>
+            {/* Connector arrow */}
             <motion.div
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-              className="text-primary"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
+              initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.4, type: "spring", stiffness: 200 }}
-              className="relative"
+              transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+              className="flex flex-col items-center gap-1"
             >
-              <div className="absolute -inset-3 rounded-full bg-primary/5 blur-xl" />
-              <BodyShapeIllustration shape={detectedBodyShape.label} size={130} />
+              <div className="w-8 h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--primary))" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-60"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              <div className="w-8 h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
             </motion.div>
-          </>
+
+            {/* Body illustration card */}
+            <motion.div
+              initial={{ x: 20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+              className="relative flex items-center justify-center w-32 h-44 rounded-2xl bg-secondary/30 border border-primary/15 shadow-xl overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/3" />
+              <div className="relative">
+                <BodyShapeIllustration shape={detectedBodyShape.label} size={140} />
+              </div>
+              <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-background/80 to-transparent" />
+              <span className="absolute bottom-1.5 left-0 right-0 text-center text-[9px] font-sans text-primary/70 uppercase tracking-widest font-semibold">Match</span>
+            </motion.div>
+          </div>
+        ) : (
+          /* Pre-reveal: just the photo */
+          <div className="flex justify-center">
+            <div className="relative w-36 h-56 rounded-2xl overflow-hidden ring-2 ring-primary/20 shadow-xl">
+              {capturedImage ? (
+                <img src={capturedImage} alt="Your body" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full bg-secondary flex items-center justify-center">
+                  <User className="w-12 h-12 text-muted-foreground" />
+                </div>
+              )}
+            </div>
+          </div>
         )}
       </motion.div>
 
       {/* Morphing body illustration during analysis */}
       {isLoading && (
-        <BodyShapeIllustration shape="rectangle" size={120} morphing className="mb-4" />
+        <BodyShapeIllustration shape="rectangle" size={130} morphing className="mb-4" />
       )}
 
       {/* Detected body shape badge */}
