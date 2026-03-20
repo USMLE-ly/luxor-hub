@@ -173,9 +173,26 @@ const Paywall = () => {
           ))}
         </motion.div>
 
-        <p className="text-center text-[10px] text-muted-foreground/60 font-sans">
+        <p className="text-center text-[10px] text-muted-foreground/60 font-sans mb-4">
           Secure payment processing. Your data is encrypted.
         </p>
+
+        {/* Restore Purchase */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.55 }}
+          className="flex justify-center"
+        >
+          <button
+            onClick={handleRestore}
+            disabled={restoring}
+            className="flex items-center gap-1.5 text-xs font-sans text-muted-foreground hover:text-primary transition-colors active:scale-95"
+          >
+            <RotateCcw className={`w-3.5 h-3.5 ${restoring ? "animate-spin" : ""}`} />
+            Restore previous purchase
+          </button>
+        </motion.div>
       </div>
     </div>
   );
