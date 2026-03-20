@@ -1,22 +1,46 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Wraps app routes behind a paywall check.
- * Users must be authenticated AND have "paid" to access protected content.
- * For now, payment status is stored in localStorage as a UI-only gate.
+ * Users must be authenticated AND have an active subscription to access protected content.
  */
 const PaywallGate = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
 
-  if (loading) return null;
+  const { data: hasSubscription, isLoading: subLoading } = useQuery({
+    queryKey: ["subscription-check", user?.id],
+    queryFn: async () => {
+      if (!user) return false;
 
-  // Not logged in → auth page
+      // Check localStorage first for quick gate
+      if (localStorage.getItem("luxor_paid") === "true") return true;
+
+      const { data } = await supabase
+        .from("subscriptions")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .limit(1)
+        .maybeSingle();
+
+      if (data) {
+        localStorage.setItem("luxor_paid", "true");
+        return true;
+      }
+      return false;
+    },
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  if (loading || subLoading) return null;
+
   if (!user) return <Navigate to="/auth" replace />;
 
-  // Not paid → paywall
-  const hasPaid = localStorage.getItem("luxor_paid") === "true";
-  if (!hasPaid) return <Navigate to="/paywall" replace />;
+  if (!hasSubscription) return <Navigate to="/paywall" replace />;
 
   return <>{children}</>;
 };
