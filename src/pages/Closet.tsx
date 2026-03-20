@@ -382,7 +382,7 @@ const Closet = () => {
 
   // Quick try-on: instantly add to mannequin with defaults and switch tab (with replacement)
   const quickTryOn = (item: ClothingItem) => {
-    const mappedCat = closetToMannequinCategory[item.category] || "tops";
+    const mappedCat = getMannequinCategory(item.category, item.name);
     const mapped: MannequinClothingItem = {
       category: mappedCat,
       color: item.color || "navy",
