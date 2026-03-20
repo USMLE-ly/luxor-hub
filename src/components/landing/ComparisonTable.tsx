@@ -141,7 +141,7 @@ export default function ComparisonTable() {
                       i % 2 === 0 ? "bg-transparent" : "bg-muted/10"
                     )}
                   >
-                    <span className="text-left text-xs font-sans text-muted-foreground">
+                    <span className="text-left text-[10px] sm:text-xs font-sans text-muted-foreground">
                       {row.name}
                     </span>
                     <CellValue value={row.starter} />
