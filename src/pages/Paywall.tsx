@@ -20,6 +20,7 @@ const Paywall = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [activating, setActivating] = useState(false);
+  const [restoring, setRestoring] = useState(false);
 
   const handleGetStarted = async () => {
     if (!user) {
