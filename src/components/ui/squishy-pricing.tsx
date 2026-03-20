@@ -38,7 +38,7 @@ export const SquishyPricingCard = ({
           initial={{ scale: 0.85 }}
           variants={{ hover: { scale: 1 } }}
           transition={{ duration: 1, ease: "backInOut" }}
-          className="my-2 block origin-top-left font-mono text-6xl font-black leading-[1.2]"
+          className="my-2 block origin-top-left font-mono text-5xl sm:text-6xl font-black leading-[1.2]"
         >
           ${monthlyPrice}/<br />Month
         </motion.span>
