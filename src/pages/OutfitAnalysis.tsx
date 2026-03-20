@@ -541,9 +541,9 @@ export default function OutfitAnalysis() {
         >
           <div className="absolute -top-4 -left-4 w-32 h-32 bg-primary/10 rounded-full blur-[60px]" />
           <h1 className="font-display text-4xl font-bold text-foreground relative">
-            AI Outfit <span className="gold-text">Analysis</span>
+            See What the World <span className="gold-text">Sees</span>
           </h1>
-          <p className="text-muted-foreground mt-2 text-lg">Upload a photo and get comprehensive styling feedback powered by AI</p>
+          <p className="text-muted-foreground mt-2 text-lg">Upload your outfit. The AI scores it, finds the strengths, and tells you exactly what to fix.</p>
         </motion.div>
 
         <Tabs defaultValue="analyze" className="w-full">
