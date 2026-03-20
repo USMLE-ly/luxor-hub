@@ -102,6 +102,7 @@ const Paywall = () => {
           status: "active",
         });
         if (error) throw error;
+        trackEvent("Subscribe", { value: tier === "starter" ? "9.00" : tier === "pro" ? "29.00" : "59.00", currency: "USD", content_name: `LEXOR® ${tier}` });
         localStorage.setItem("luxor_paid", "true");
         toast.success("Welcome to Lexor! Your style journey begins now.");
         navigate("/dashboard");
