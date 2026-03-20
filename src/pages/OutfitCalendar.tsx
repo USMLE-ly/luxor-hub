@@ -285,7 +285,7 @@ const OutfitCalendar = () => {
     const granted = await requestNotificationPermission();
     if (granted) {
       setNotificationsEnabled(true);
-      toast.success("Outfit reminders enabled! You'll be reminded at 8 PM the night before.");
+      toast.success("Reminders on. You'll get a nudge at 8 PM the night before.");
       scheduleReminders(events);
     } else {
       toast.error("Notification permission denied. Enable it in your browser settings.");
