@@ -102,7 +102,7 @@ const Pricing = () => {
         });
         if (error) throw error;
         localStorage.setItem("luxor_paid", "true");
-        toast.success("Welcome to Luxor! Your style journey begins now.");
+        toast.success("Welcome to Lexor! Your style journey begins now.");
         navigate("/dashboard");
       } catch {
         toast.error("Something went wrong saving your subscription.");
@@ -125,7 +125,7 @@ const Pricing = () => {
             What's Looking Incredible Actually <span className="gold-text">Worth to You</span>?
           </h2>
           <p className="mt-4 max-w-lg mx-auto font-sans text-sm text-muted-foreground">
-            The average person wastes $1,200/year on clothes they barely wear. LUXOR pays for itself in the first month.
+            The average person wastes $1,200/year on clothes they barely wear. LEXOR® pays for itself in the first month.
           </p>
         </motion.div>
 

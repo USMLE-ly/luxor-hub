@@ -9,7 +9,7 @@ const videoTestimonials = [
     role: "Fashion Influencer · 240K Followers",
     thumbnail: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=300&fit=crop",
     videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    quote: "LUXOR's AI understood my aesthetic instantly. My followers noticed the upgrade before I even told them.",
+    quote: "LEXOR®'s AI understood my aesthetic instantly. My followers noticed the upgrade before I even told them.",
     rating: 5,
   },
   {
@@ -25,7 +25,7 @@ const videoTestimonials = [
     role: "Boutique Owner · Lagos & London",
     thumbnail: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=300&fit=crop",
     videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    quote: "My boutique revenue jumped 340% after integrating LUXOR's recommendations into our styling service.",
+    quote: "My boutique revenue jumped 340% after integrating LEXOR®'s recommendations into our styling service.",
     rating: 5,
   },
 ];
@@ -66,7 +66,7 @@ const VideoTestimonials = () => {
             Hear It From <span className="gold-text">Our Users</span>
           </h2>
           <p className="mt-4 max-w-lg mx-auto font-sans text-sm text-muted-foreground">
-            Real people, real transformations. Watch how LUXOR changed their style and their business.
+            Real people, real transformations. Watch how LEXOR® changed their style and their business.
           </p>
         </motion.div>
 

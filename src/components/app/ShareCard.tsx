@@ -23,7 +23,7 @@ export function ShareCard({ outfit, onClose }: ShareCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
 
-  const shareText = `Check out my outfit "${outfit.name}" styled by LUXOR AI! 🌟\n${outfit.items.join(" • ")}\n${outfit.description}`;
+  const shareText = `Check out my outfit "${outfit.name}" styled by LEXOR® AI! 🌟\n${outfit.items.join(" • ")}\n${outfit.description}`;
   const shareUrl = window.location.origin;
 
   const handleCopyLink = () => {
@@ -97,7 +97,7 @@ export function ShareCard({ outfit, onClose }: ShareCardProps) {
       // Branding
       ctx.fillStyle = "#C6A55C";
       ctx.font = "bold 18px serif";
-      ctx.fillText("LUXOR", 40, 375);
+      ctx.fillText("LEXOR®", 40, 375);
       ctx.fillStyle = "#606070";
       ctx.font = "12px sans-serif";
       ctx.fillText("AI-Powered Style", 140, 375);
@@ -116,7 +116,7 @@ export function ShareCard({ outfit, onClose }: ShareCardProps) {
   const handleNativeShare = async () => {
     if (navigator.share) {
       try {
-        await navigator.share({ title: `LUXOR: ${outfit.name}`, text: shareText, url: shareUrl });
+        await navigator.share({ title: `LEXOR®: ${outfit.name}`, text: shareText, url: shareUrl });
       } catch (e) {
         // User cancelled
       }
@@ -166,7 +166,7 @@ export function ShareCard({ outfit, onClose }: ShareCardProps) {
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="font-display text-lg font-bold" style={{ color: "#C6A55C" }}>LUXOR</span>
+              <span className="font-display text-lg font-bold" style={{ color: "#C6A55C" }}>LEXOR®</span>
               <span className="text-xs" style={{ color: "#606070" }}>AI-Powered Style</span>
             </div>
             {outfit.confidence && (

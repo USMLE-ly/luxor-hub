@@ -11,7 +11,7 @@ const howItWorksItems = [
     id: "scan-closet",
     title: "Photograph Your Closet",
     description:
-      "Open your wardrobe, snap a few photos. LUXOR identifies every piece, tags colors and fabrics, and builds your digital closet in under two minutes.",
+      "Open your wardrobe, snap a few photos. LEXOR® identifies every piece, tags colors and fabrics, and builds your digital closet in under two minutes.",
     href: "#features",
     image: featureClosetScanner,
   },
@@ -19,7 +19,7 @@ const howItWorksItems = [
     id: "style-dna",
     title: "Let the AI Learn You",
     description:
-      "LUXOR studies your body shape, color season, lifestyle, and taste. Within hours it knows what flatters you better than most personal stylists.",
+      "LEXOR® studies your body shape, color season, lifestyle, and taste. Within hours it knows what flatters you better than most personal stylists.",
     href: "#features",
     image: featureStyleDna,
   },
@@ -35,7 +35,7 @@ const howItWorksItems = [
     id: "ai-stylist",
     title: "Ask Anything",
     description:
-      "\"What do I wear to a rooftop dinner?\" \"Does this jacket work with these shoes?\" LUXOR answers in seconds, with outfit mockups attached.",
+      "\"What do I wear to a rooftop dinner?\" \"Does this jacket work with these shoes?\" LEXOR® answers in seconds, with outfit mockups attached.",
     href: "#features",
     image: featureAiChat,
   },
@@ -43,7 +43,7 @@ const howItWorksItems = [
     id: "smart-shopping",
     title: "Buy Only What You Need",
     description:
-      "LUXOR tells you the exact pieces missing from your wardrobe. Every recommendation fills a gap. No impulse buys, no regret purchases.",
+      "LEXOR® tells you the exact pieces missing from your wardrobe. Every recommendation fills a gap. No impulse buys, no regret purchases.",
     href: "#features",
     image: featureShopping,
   },

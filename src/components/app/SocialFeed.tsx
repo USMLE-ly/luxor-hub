@@ -299,7 +299,7 @@ export const SocialFeed = () => {
                   </button>
                   <button
                     onClick={() => {
-                      navigator.clipboard.writeText(`Check out "${look.title}" on Luxor!`);
+                      navigator.clipboard.writeText(`Check out "${look.title}" on Lexor!`);
                       toast.success("Link copied!");
                     }}
                     className="flex items-center gap-1.5 text-xs font-sans text-muted-foreground hover:text-foreground transition-colors"
