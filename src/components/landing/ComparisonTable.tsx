@@ -95,12 +95,12 @@ export default function ComparisonTable() {
           className="glass rounded-2xl overflow-x-auto"
         >
           {/* Header row */}
-          <div className="grid grid-cols-4 gap-0 border-b border-border px-4 py-4 min-w-[480px]">
-            <div className="font-sans text-xs text-muted-foreground uppercase tracking-wider">Feature</div>
+          <div className="grid grid-cols-[1.4fr_1fr_1fr_1fr] gap-0 border-b border-border px-3 sm:px-4 py-4">
+            <div className="font-sans text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider">Feature</div>
             {plans.map((p) => (
               <div key={p} className="text-center">
                 <span className={cn(
-                  "font-sans text-sm font-bold",
+                  "font-sans text-[11px] sm:text-sm font-bold",
                   p === "Pro" ? "gold-text" : "text-foreground"
                 )}>
                   {p}
