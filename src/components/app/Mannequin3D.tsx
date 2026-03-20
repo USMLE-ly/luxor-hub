@@ -11,6 +11,7 @@ import {
   createOuterwearGeometry,
   createShoeGeometry,
   createHatGeometry,
+  createBagGeometry,
   resolveSubtype,
   LAYER_ORDER,
   LAYER_RADIAL_OFFSET,
