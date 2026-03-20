@@ -589,7 +589,7 @@ const Closet = () => {
                     </div>
                     <Button variant="outline" onClick={analyzeWithAI} disabled={analyzing || (!previewUrl && !newItem.name)} className="w-full border-primary/30 text-primary hover:bg-primary/10 font-sans">
                       {analyzing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
-                      {analyzing ? "Analyzing..." : "Auto-detect with AI"}
+                      {analyzing ? "Analyzing..." : "Let AI fill the details"}
                     </Button>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
