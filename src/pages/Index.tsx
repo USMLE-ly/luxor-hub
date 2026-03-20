@@ -22,7 +22,7 @@ const Index = () => {
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
 
   return (
-    <div className="min-h-screen overflow-x-hidden">
+    <div className="min-h-screen overflow-x-hidden dark">
       <motion.div
         className="fixed top-0 left-0 right-0 h-[3px] z-[100] origin-left gold-gradient"
         style={{ scaleX }}
