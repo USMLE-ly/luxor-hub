@@ -334,7 +334,7 @@ const Closet = () => {
     else {
       // Award style points
       await (supabase.from("style_points" as any).insert({ user_id: user.id, points: 5, reason: "Logged wear" }) as any);
-      toast.success("Marked as worn today! +5 pts 👕");
+      toast.success("Logged. +5 style points.");
     }
   };
 
