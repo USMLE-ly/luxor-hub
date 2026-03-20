@@ -465,7 +465,7 @@ const OutfitCalendar = () => {
         if (!existingDates.has(dateStr)) daysToFill.push(d);
       }
       if (daysToFill.length === 0) {
-        toast.info("Your upcoming week is already fully scheduled!");
+        toast.info("Your week is fully booked. You're ahead of everyone.");
         setAutoFilling(false);
         return;
       }
