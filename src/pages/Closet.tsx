@@ -582,7 +582,7 @@ const Closet = () => {
                       ) : (
                         <label className="mt-2 flex flex-col items-center justify-center h-32 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/50 transition-colors">
                           <Upload className="h-6 w-6 text-muted-foreground mb-2" />
-                          <span className="text-sm text-muted-foreground font-sans">Upload photo</span>
+                          <span className="text-sm text-muted-foreground font-sans">Snap or upload</span>
                           <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
                         </label>
                       )}
