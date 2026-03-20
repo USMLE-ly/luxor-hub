@@ -274,9 +274,9 @@ const Chat = () => {
                 <div className="w-16 h-16 rounded-2xl bg-primary/10 mx-auto mb-4 flex items-center justify-center">
                   <Sparkles className="w-7 h-7 text-primary" />
                 </div>
-                <h2 className="font-display text-xl font-bold text-foreground mb-1.5">Hi! I'm your AI Stylist</h2>
+                <h2 className="font-display text-xl font-bold text-foreground mb-1.5">What are we wearing today?</h2>
                 <p className="text-muted-foreground font-sans text-xs max-w-xs mx-auto leading-relaxed">
-                  I know your closet, your style DNA, and the latest trends. Ask me anything about fashion!
+                  I have your entire closet memorized, I know your colors, and I track what's trending. Let's build something good.
                 </p>
               </div>
 
