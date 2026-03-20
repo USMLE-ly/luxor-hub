@@ -390,7 +390,7 @@ const StyleDNA = () => {
             >
               <div className="flex items-center gap-2 mb-4">
                 <Gem className="w-5 h-5 text-[hsl(270,40%,65%)]" />
-                <h3 className="font-display text-base font-bold text-foreground">Tips for {bodyShape} Body</h3>
+                <h3 className="font-display text-base font-bold text-foreground">Dressing Your {bodyShape} Frame</h3>
               </div>
               <div className="space-y-3">
                 {getBodyShapeTips(bodyShape).map((tip, i) => (
