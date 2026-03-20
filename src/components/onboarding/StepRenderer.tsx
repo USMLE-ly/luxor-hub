@@ -1603,9 +1603,10 @@ const StepRenderer = ({ step, answers, onSelect, gender, aiResults }: StepRender
     const descriptions = bodyShapeDescriptions[genderKey] || {};
     return (
       <div>
-        <h2 className="font-display text-2xl lg:text-3xl font-bold text-foreground text-center mb-6">
+        <h2 className="font-display text-2xl lg:text-3xl font-bold text-foreground text-center mb-2">
           {step.question}
         </h2>
+        <p className="text-muted-foreground font-sans text-xs text-center mb-6">Tap the shape closest to yours</p>
         <div className="flex flex-col gap-3">
           {step.options.map((option, index) => {
             const isActive = selected.includes(option);
@@ -1615,26 +1616,66 @@ const StepRenderer = ({ step, answers, onSelect, gender, aiResults }: StepRender
                 isActive={isActive}
                 onClick={() => onSelect(step.key, option, true)}
                 index={index}
-                className={`w-full gap-4 p-3 rounded-2xl transition-all text-left active:scale-[0.98] ${
+                className={`w-full rounded-2xl transition-all text-left active:scale-[0.98] overflow-hidden ${
                   isActive
-                    ? "bg-secondary ring-2 ring-foreground"
-                    : "bg-secondary/50"
+                    ? "ring-2 ring-primary shadow-lg shadow-primary/10"
+                    : "ring-1 ring-border/40 hover:ring-border/60"
                 }`}
               >
-                <div className="flex items-center gap-4 w-full">
-                  <div className="w-16 h-20 flex items-center justify-center flex-shrink-0 bg-white/90 dark:bg-white/95 rounded-lg">
-                    <BodyShapeSvg shape={option} gender={genderKey as "female" | "male"} size={52} />
+                <div className="flex items-center gap-4 w-full p-3">
+                  {/* Illustration container with gradient bg */}
+                  <div className="relative w-16 h-20 flex items-center justify-center flex-shrink-0 rounded-xl overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/95 to-white/80 dark:from-white/90 dark:to-white/75" />
+                    <div className="relative z-10">
+                      <BodyShapeSvg shape={option} gender={genderKey as "female" | "male"} size={52} />
+                    </div>
+                    {isActive && (
+                      <motion.div
+                        className="absolute inset-0 bg-primary/5"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.3 }}
+                      />
+                    )}
                   </div>
+                  
+                  {/* Text content */}
                   <div className="flex-1 min-w-0">
-                    <span className="font-sans font-medium text-foreground block">{option}</span>
-                    <span className="font-sans text-xs text-muted-foreground leading-tight block mt-0.5">{descriptions[option]}</span>
+                    <span className={`font-sans font-semibold block transition-colors ${isActive ? "text-primary" : "text-foreground"}`}>
+                      {option}
+                    </span>
+                    <span className="font-sans text-xs text-muted-foreground leading-relaxed block mt-0.5">
+                      {descriptions[option]}
+                    </span>
                   </div>
-                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                    isActive ? "border-foreground bg-foreground" : "border-muted-foreground/30 bg-background"
+                  
+                  {/* Selection indicator */}
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
+                    isActive 
+                      ? "bg-primary shadow-md shadow-primary/30" 
+                      : "border-2 border-muted-foreground/20 bg-transparent"
                   }`}>
-                    {isActive && <Check className="h-3.5 w-3.5 text-background" />}
+                    {isActive && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                      >
+                        <Check className="h-3.5 w-3.5 text-primary-foreground" />
+                      </motion.div>
+                    )}
                   </div>
                 </div>
+                
+                {/* Bottom accent bar when active */}
+                {isActive && (
+                  <motion.div
+                    className="h-[2px] w-full bg-gradient-to-r from-transparent via-primary to-transparent"
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                  />
+                )}
               </SelectionFlip>
             );
           })}
