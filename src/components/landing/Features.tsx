@@ -96,10 +96,10 @@ const Features = () => (
       <AnimatedContainer className="mx-auto max-w-xl text-center">
         <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase mb-3">Features</p>
         <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground tracking-wide text-balance">
-          Everything You Need to <span className="gold-text">Look Your Best</span>
+          What Happens When AI Understands Your Body <span className="gold-text">Better Than You Do</span>
         </h2>
         <p className="text-muted-foreground mt-4 text-sm tracking-wide text-balance">
-          Six AI-powered tools that transform how you dress, shop, and express yourself. Click any node to explore.
+          Six tools that eliminate the guesswork from getting dressed, shopping, and building a wardrobe you actually use.
         </p>
       </AnimatedContainer>
     </div>

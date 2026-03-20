@@ -75,10 +75,10 @@ const TabbedFeatures = () => {
         >
           <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase mb-3">Deep Dive</p>
           <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground tracking-wide text-balance">
-            Explore Every <span className="gold-text">Capability</span>
+            Three Ways AURELIA Changes <span className="gold-text">Your Morning</span>
           </h2>
           <p className="text-muted-foreground mt-4 text-sm tracking-wide text-balance">
-            Three pillars of intelligent fashion — each packed with features that work together seamlessly.
+            AI styling, a smarter closet, and shopping that actually makes sense. Pick a tab and see what changes.
           </p>
         </motion.div>
 

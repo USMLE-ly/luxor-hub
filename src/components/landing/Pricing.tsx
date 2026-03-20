@@ -158,7 +158,7 @@ const Pricing = () => {
           {/* Urgency micro-copy */}
           <p className="text-xs font-sans text-muted-foreground flex items-center gap-1.5">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary urgency-pulse" />
-            <span className="font-medium text-foreground">127 stylists</span> signed up this week
+            This price won't last. <span className="font-medium text-foreground">237 founding spots</span> remain.
           </p>
 
           {/* Guarantee badge */}

@@ -41,7 +41,7 @@ const Index = () => {
           <div className="text-center">
             <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase mb-3">App Preview</p>
             <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground">
-              Your Entire Wardrobe, <span className="gold-text">Reimagined</span>
+              This Is What Tomorrow Morning <span className="gold-text">Looks Like</span>
             </h2>
           </div>
         }

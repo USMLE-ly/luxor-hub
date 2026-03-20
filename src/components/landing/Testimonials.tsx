@@ -134,10 +134,10 @@ const Testimonials = () => (
           <span className="font-sans text-xs font-semibold text-primary tracking-wider uppercase">Verified Results</span>
         </div>
         <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground">
-          Real Revenue, <span className="gold-text">Real Proof</span>
+          They Didn't Believe It <span className="gold-text">Either</span>
         </h2>
         <p className="mt-4 max-w-lg mx-auto font-sans text-sm text-muted-foreground">
-          We don't make empty promises. Here are real revenue screenshots from businesses powered by AURELIA — unedited and verified.
+          Unedited screenshots. Real numbers. Actual businesses that switched to AURELIA and watched the revenue follow.
         </p>
       </motion.div>
 

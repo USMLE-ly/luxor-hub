@@ -68,7 +68,7 @@ export default function StickyPricingBar() {
                 onClick={handleCTA}
                 className="gradient-button rounded-full px-5 py-2 text-xs font-sans font-bold flex items-center gap-1.5"
               >
-                <span>Try Free</span>
+                <span>Get Started</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
               <button

@@ -381,7 +381,7 @@ const Hero = () => {
               style={{ animationDelay: '0ms' }}
             >
               
-              <span>Start Free Trial</span>
+              <span>Claim Your Spot</span>
             </button>
             <button
               onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
