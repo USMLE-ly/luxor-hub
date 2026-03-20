@@ -82,6 +82,7 @@ const Navbar = () => {
             <button
               key={link.id}
               onClick={() => scrollTo(link.id)}
+              aria-current={activeSection === link.id ? "page" : undefined}
               className="relative py-1 transition-colors hover:text-foreground"
             >
               <span className={activeSection === link.id ? "text-primary font-medium" : "text-muted-foreground"}>
