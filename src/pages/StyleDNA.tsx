@@ -665,7 +665,7 @@ const StyleDNA = () => {
                 transition={{ delay: 0.5 }}
                 className="rounded-2xl border border-border bg-card p-5"
               >
-                <p className="text-xs font-sans uppercase tracking-widest text-muted-foreground mb-3">Colors to Avoid</p>
+                <p className="text-xs font-sans uppercase tracking-widest text-muted-foreground mb-3">Colors Working Against You</p>
                 <div className="flex flex-wrap gap-2">
                   {dna.colorsToAvoid.map((color) => (
                     <div key={color} className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-destructive/10">
