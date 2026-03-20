@@ -84,6 +84,15 @@ const closetToMannequinCategory: Record<string, string> = {
   other: "tops",
 };
 
+// Detect bags by name and override category mapping
+function getMannequinCategory(category: string, name: string | null): string {
+  const nm = (name || "").toLowerCase();
+  if (category === "accessory" && (nm.includes("bag") || nm.includes("handbag") || nm.includes("purse") || nm.includes("tote"))) {
+    return "bag";
+  }
+  return closetToMannequinCategory[category] || "tops";
+}
+
 const filterPills = ["All", "Upper Body", "Lower Body", "Shoes", "Accessories", "Dresses"];
 const uploadCategories = ["top", "bottom", "shoes", "accessory", "outerwear", "dress", "other"];
 const seasons = ["spring", "summer", "fall", "winter", "all-season"];
