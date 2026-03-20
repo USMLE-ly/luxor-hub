@@ -367,7 +367,7 @@ const StyleDNA = () => {
             >
               <div className="flex items-center gap-2 mb-4">
                 <Glasses className="w-5 h-5 text-[hsl(200,50%,60%)]" />
-                <h3 className="font-display text-base font-bold text-foreground">Tips for {faceShape} Face</h3>
+                <h3 className="font-display text-base font-bold text-foreground">How to Work Your {faceShape} Face</h3>
               </div>
               <div className="space-y-3">
                 {getFaceShapeTips(faceShape).map((tip, i) => (
