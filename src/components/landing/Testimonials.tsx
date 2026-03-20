@@ -41,14 +41,73 @@ const AnimatedCounter = ({ target, prefix = "", suffix = "" }: { target: number;
   );
 };
 
-const secondaryScreenshots = [
-  { src: sales673k, label: "$673,912 Total Sales", growth: "+56%" },
-  { src: sales105k, label: "$105,525 in 90 Days", growth: "+1,300%" },
-  { src: grossSales390k, label: "€390,033 Gross Sales", growth: "+198K%" },
-  { src: sales81k, label: "$81,452 in 5 Months", growth: "" },
-  { src: sales10k, label: "$10,349 Early Stage", growth: "+1.88%" },
-  { src: stripePayout, label: "€48,579 Stripe Payout", growth: "" },
+const shuffleScreenshots = [
+  { id: 1, src: sales673k, label: "$673,912 Total Sales", growth: "+56%" },
+  { id: 2, src: sales105k, label: "$105,525 in 90 Days", growth: "+1,300%" },
+  { id: 3, src: grossSales390k, label: "€390,033 Gross Sales", growth: "+198K%" },
+  { id: 4, src: sales81k, label: "$81,452 in 5 Months", growth: "" },
+  { id: 5, src: sales10k, label: "$10,349 Early Stage", growth: "+1.88%" },
+  { id: 6, src: stripePayout, label: "€48,579 Stripe Payout", growth: "" },
 ];
+
+const positionStyles: Record<string, string> = {
+  front: "z-30 scale-100 translate-y-0 opacity-100",
+  middle: "z-20 scale-[0.95] translate-y-4 opacity-80",
+  back: "z-10 scale-[0.90] translate-y-8 opacity-60",
+};
+
+const ShuffleCard = ({
+  src, label, growth, position, handleShuffle,
+}: {
+  src: string; label: string; growth: string; position: string; handleShuffle: () => void;
+}) => (
+  <motion.div
+    onClick={handleShuffle}
+    className={`absolute inset-0 cursor-pointer transition-all duration-500 ease-out ${positionStyles[position]}`}
+    style={{ transformOrigin: "bottom center" }}
+    whileTap={{ scale: 0.97 }}
+  >
+    <div className="glass rounded-2xl overflow-hidden border border-white/[0.08] h-full">
+      <div className="relative h-full">
+        <img src={src} alt={label} className="w-full h-full object-cover" loading="lazy" />
+        <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/80 to-transparent" />
+        <div className="absolute bottom-3 left-3.5 right-3.5">
+          <p className="font-sans text-xs md:text-sm font-semibold text-white">{label}</p>
+          {growth && (
+            <span className="inline-flex items-center gap-0.5 text-emerald-400 text-[10px] font-bold mt-0.5">
+              <ArrowUpRight className="w-2.5 h-2.5" />
+              {growth}
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  </motion.div>
+);
+
+const ShuffleSection = () => {
+  const [positions, setPositions] = useState(["front", "middle", "back"]);
+  const [startIdx, setStartIdx] = useState(0);
+
+  const handleShuffle = () => {
+    setPositions((prev) => {
+      const n = [...prev];
+      n.unshift(n.pop()!);
+      return n;
+    });
+    setStartIdx((prev) => (prev + 1) % shuffleScreenshots.length);
+  };
+
+  const visible = [0, 1, 2].map((offset) => shuffleScreenshots[(startIdx + offset) % shuffleScreenshots.length]);
+
+  return (
+    <div className="relative h-[360px] w-[300px] md:h-[420px] md:w-[350px] mx-auto">
+      {visible.map((s, i) => (
+        <ShuffleCard key={s.id} src={s.src} label={s.label} growth={s.growth} position={positions[i]} handleShuffle={handleShuffle} />
+      ))}
+    </div>
+  );
+};
 
 const milestones = [
   { label: "Total Revenue", value: 673912, prefix: "$", suffix: "" },
@@ -108,10 +167,7 @@ const Testimonials = () => (
         className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-10"
       >
         {milestones.map((m) => (
-          <div
-            key={m.label}
-            className="glass rounded-xl p-4 md:p-5 text-center border border-white/[0.06] hover:border-primary/20 transition-colors duration-300"
-          >
+          <div key={m.label} className="glass rounded-xl p-4 md:p-5 text-center border border-white/[0.06] hover:border-primary/20 transition-colors duration-300">
             <div className="font-display text-2xl md:text-3xl font-bold text-foreground">
               <AnimatedCounter target={m.value} prefix={m.prefix} suffix={m.suffix} />
             </div>
@@ -120,7 +176,7 @@ const Testimonials = () => (
         ))}
       </motion.div>
 
-      {/* Hero screenshot — the main composite image */}
+      {/* Hero screenshot */}
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -128,7 +184,7 @@ const Testimonials = () => (
         transition={{ duration: 0.6, delay: 0.15 }}
         className="mb-10"
       >
-        <div className="glass rounded-2xl overflow-hidden border border-white/[0.08] hover:border-primary/20 transition-all duration-500 group">
+        <div className="glass rounded-2xl overflow-hidden border border-white/[0.08] hover:border-primary/20 transition-all duration-500">
           <div className="relative">
             <img
               src={statsMain}
@@ -136,7 +192,6 @@ const Testimonials = () => (
               className="w-full h-auto rounded-t-2xl"
               loading="lazy"
             />
-            {/* Gradient overlay at bottom for text */}
             <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/80 to-transparent" />
             <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between">
               <div>
@@ -152,40 +207,19 @@ const Testimonials = () => (
         </div>
       </motion.div>
 
-      {/* Secondary screenshots grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
-        {secondaryScreenshots.map((shot, i) => (
-          <motion.div
-            key={shot.label}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.5, delay: i * 0.08 }}
-            className="glass rounded-xl overflow-hidden border border-white/[0.06] hover:border-primary/15 transition-all duration-300 group"
-          >
-            <div className="relative">
-              <img
-                src={shot.src}
-                alt={shot.label}
-                className="w-full h-auto object-cover"
-                loading="lazy"
-              />
-              <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/80 to-transparent" />
-              <div className="absolute bottom-2 left-2.5 right-2.5">
-                <p className="font-sans text-[10px] md:text-xs font-semibold text-white truncate">{shot.label}</p>
-                {shot.growth && (
-                  <span className="inline-flex items-center gap-0.5 text-emerald-400 text-[9px] md:text-[10px] font-bold mt-0.5">
-                    <ArrowUpRight className="w-2.5 h-2.5" />
-                    {shot.growth}
-                  </span>
-                )}
-              </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+      {/* Shuffle stack */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
+        <ShuffleSection />
+        <p className="text-center mt-6 text-xs text-muted-foreground/60 font-sans">
+          Tap to see more screenshots →
+        </p>
+      </motion.div>
 
-      {/* Bottom note */}
       <motion.p
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
