@@ -243,7 +243,7 @@ const Onboarding = () => {
       if (error) throw error;
       trackEvent("Lead", { content_name: "Onboarding Complete" });
       toast.success("Your Style DNA has been created!");
-      navigate("/calibration");
+      navigate("/paywall");
     } catch (err: any) {
       toast.error(err.message);
     } finally {
