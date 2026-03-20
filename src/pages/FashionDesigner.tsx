@@ -179,14 +179,14 @@ export default function FashionDesigner() {
 
   const handleDownload = (url: string, type: string) => {
     const link = document.createElement("a");
-    link.download = `luxor-design-${type.toLowerCase()}-${Date.now()}.png`;
+    link.download = `lexor-design-${type.toLowerCase()}-${Date.now()}.png`;
     link.href = url;
     link.click();
     toast.success("Design downloaded!");
   };
 
   const handleCopyShareLink = (design: SavedDesign) => {
-    const text = `Check out my AI-designed ${design.garment_type}: "${design.prompt}" ✨ Created with LUXOR`;
+    const text = `Check out my AI-designed ${design.garment_type}: "${design.prompt}" ✨ Created with LEXOR®`;
     navigator.clipboard.writeText(text);
     setCopied(true);
     toast.success("Copied to clipboard!");
@@ -194,7 +194,7 @@ export default function FashionDesigner() {
   };
 
   const handleShareTwitter = (design: SavedDesign) => {
-    const text = `Check out my AI-designed ${design.garment_type}: "${design.prompt}" ✨ Created with LUXOR`;
+    const text = `Check out my AI-designed ${design.garment_type}: "${design.prompt}" ✨ Created with LEXOR®`;
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
   };
 

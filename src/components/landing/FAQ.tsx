@@ -9,7 +9,7 @@ import {
 const faqs = [
   {
     q: "How does the AI learn my style?",
-    a: "You upload wardrobe photos and a selfie. LUXOR maps your body proportions, color season, and aesthetic preferences into a Style DNA profile. The more you use it, the sharper it gets. Most users say it 'clicks' within the first week.",
+    a: "You upload wardrobe photos and a selfie. LEXOR® maps your body proportions, color season, and aesthetic preferences into a Style DNA profile. The more you use it, the sharper it gets. Most users say it 'clicks' within the first week.",
   },
   {
     q: "Is my data private and secure?",
@@ -17,15 +17,15 @@ const faqs = [
   },
   {
     q: "What if it doesn't work for me?",
-    a: "Every plan comes with a 30-day money-back guarantee. If LUXOR doesn't change how you get dressed, we'll refund every penny. No questions, no hoops.",
+    a: "Every plan comes with a 30-day money-back guarantee. If LEXOR® doesn't change how you get dressed, we'll refund every penny. No questions, no hoops.",
   },
   {
     q: "What body types does the AI support?",
-    a: "All of them. LUXOR's AI is trained on diverse body shapes, sizes, and proportions. The styling suggestions adapt to your specific measurements, not a generic mannequin.",
+    a: "All of them. LEXOR®'s AI is trained on diverse body shapes, sizes, and proportions. The styling suggestions adapt to your specific measurements, not a generic mannequin.",
   },
   {
     q: "Does it work with my existing wardrobe?",
-    a: "That's the whole point. Scan what you already own. LUXOR creates new outfit combinations from your existing pieces before recommending anything new. Most users discover 30+ outfits they never considered.",
+    a: "That's the whole point. Scan what you already own. LEXOR® creates new outfit combinations from your existing pieces before recommending anything new. Most users discover 30+ outfits they never considered.",
   },
   {
     q: "Can I cancel anytime?",

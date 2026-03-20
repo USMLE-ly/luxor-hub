@@ -35,8 +35,8 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       manifest: {
-        name: "LUXOR — AI-Powered Style Intelligence",
-        short_name: "LUXOR",
+        name: "LEXOR® — AI-Powered Style Intelligence",
+        short_name: "LEXOR®",
         description: "The AI style platform that turns your wardrobe into revenue. Smart outfit curation, trend forecasting, and personal styling.",
         theme_color: "#C8A951",
         background_color: "#0A0A0B",

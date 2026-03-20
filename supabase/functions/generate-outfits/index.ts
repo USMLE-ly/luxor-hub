@@ -29,7 +29,7 @@ serve(async (req) => {
       weatherContext = `\n\nWeather forecast for upcoming days (factor temperature and conditions into outfit choices):\n${weatherForecast.map((w: any) => `- ${w.date}: ${w.temp}°C, ${w.description}${w.rain ? ', rain expected' : ''}`).join("\n")}`;
     }
 
-    const systemPrompt = `You are LUXOR, an elite AI stylist. Generate exactly ${outfitCount} complete outfit combinations from the user's closet items.
+    const systemPrompt = `You are LEXOR®, an elite AI stylist. Generate exactly ${outfitCount} complete outfit combinations from the user's closet items.
 
 User's closet items:
 ${itemsList}

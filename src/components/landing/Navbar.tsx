@@ -74,7 +74,7 @@ const Navbar = () => {
           whileHover={{ letterSpacing: "0.08em" }}
           transition={{ duration: 0.3 }}
         >
-          LUXOR
+          LEXOR®
         </motion.h1>
 
         <div className="hidden md:flex items-center gap-8 text-sm font-sans">

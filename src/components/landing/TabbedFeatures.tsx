@@ -12,7 +12,7 @@ const tabs = [
     label: "AI Styling",
     icon: Brain,
     headline: "Imagine Never Second-Guessing an Outfit Again",
-    description: "LUXOR learns your body, your taste, and your schedule. Then it does the hard part for you.",
+    description: "LEXOR® learns your body, your taste, and your schedule. Then it does the hard part for you.",
     features: [
       { icon: Brain, title: "Style DNA Analysis", detail: "Upload a selfie. The AI maps your proportions, coloring, and aesthetic preferences into a profile that gets sharper every day." },
       { icon: Wand2Icon, title: "AI Outfit Generator", detail: "Open the app, see today's outfit. It already factored in the rain, your 2 PM meeting, and the shirt you wore yesterday." },
@@ -25,7 +25,7 @@ const tabs = [
     label: "Wardrobe",
     icon: Shirt,
     headline: "Stop Buying Clothes You'll Never Wear",
-    description: "Most people use 20% of their closet. LUXOR puts the other 80% back to work.",
+    description: "Most people use 20% of their closet. LEXOR® puts the other 80% back to work.",
     features: [
       { icon: Scan, title: "Closet Scanner", detail: "Photograph your clothes. AI tags the color, brand, fabric, and occasion in seconds. Your entire wardrobe, digitized." },
       { icon: Calendar, title: "Outfit Calendar", detail: "Plan Monday through Friday on Sunday night. Track repeats. End the morning scramble." },
@@ -40,9 +40,9 @@ const tabs = [
     headline: "Every Purchase Becomes Your Best Purchase",
     description: "No more impulse buys that sit in the closet with tags on. Every recommendation fills a real gap.",
     features: [
-      { icon: ShoppingBag, title: "Gap Analysis", detail: "LUXOR scans your wardrobe and tells you exactly what's missing. That's the only thing worth buying next." },
+      { icon: ShoppingBag, title: "Gap Analysis", detail: "LEXOR® scans your wardrobe and tells you exactly what's missing. That's the only thing worth buying next." },
       { icon: TrendingUp, title: "Trend Radar", detail: "Live trends filtered through your style profile and budget. You see what matters. Everything else is noise." },
-      { icon: Zap, title: "Price Alerts", detail: "Wishlist a piece and forget about it. LUXOR pings you the moment it drops in price at any partnered retailer." },
+      { icon: Zap, title: "Price Alerts", detail: "Wishlist a piece and forget about it. LEXOR® pings you the moment it drops in price at any partnered retailer." },
       { icon: Users, title: "Style Community", detail: "Browse real outfits from people with your body type and taste. Inspiration that actually applies to you." },
     ],
   },
@@ -75,7 +75,7 @@ const TabbedFeatures = () => {
         >
           <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase mb-3">Deep Dive</p>
           <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground tracking-wide text-balance">
-            Three Ways LUXOR Changes <span className="gold-text">Your Morning</span>
+            Three Ways LEXOR® Changes <span className="gold-text">Your Morning</span>
           </h2>
           <p className="text-muted-foreground mt-4 text-sm tracking-wide text-balance">
             AI styling, a smarter closet, and shopping that actually makes sense. Pick a tab and see what changes.

@@ -74,7 +74,7 @@ const Auth = () => {
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        toast.success("Welcome back to LUXOR!");
+        toast.success("Welcome back to LEXOR®!");
         const { data: profile } = await supabase
           .from("style_profiles")
           .select("onboarding_completed")
@@ -91,8 +91,8 @@ const Auth = () => {
           },
         });
         if (error) throw error;
-        trackEvent("CompleteRegistration", { content_name: "LUXOR Signup" });
-        toast.success("Account created! Welcome to LUXOR!");
+        trackEvent("CompleteRegistration", { content_name: "LEXOR® Signup" });
+        toast.success("Account created! Welcome to LEXOR®!");
         navigate("/onboarding");
       }
     } catch (error: any) {
@@ -136,7 +136,7 @@ const Auth = () => {
 
         <div className="glass rounded-2xl p-8 gold-glow">
           <div className="text-center mb-8">
-            <h1 className="font-display text-3xl font-bold gold-text mb-2">LUXOR</h1>
+            <h1 className="font-display text-3xl font-bold gold-text mb-2">LEXOR®</h1>
             <p className="text-muted-foreground font-sans text-sm">
               {isLogin ? "Welcome back. Your style awaits." : "Begin your style journey."}
             </p>

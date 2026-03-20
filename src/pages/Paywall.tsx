@@ -102,7 +102,7 @@ const Paywall = () => {
         });
         if (error) throw error;
         localStorage.setItem("luxor_paid", "true");
-        toast.success("Welcome to Luxor! Your style journey begins now.");
+        toast.success("Welcome to Lexor! Your style journey begins now.");
         navigate("/dashboard");
       } catch {
         toast.error("Something went wrong saving your subscription.");
@@ -127,7 +127,7 @@ const Paywall = () => {
         .maybeSingle();
       if (data) {
         localStorage.setItem("luxor_paid", "true");
-        toast.success("Purchase restored! Welcome back to Luxor.");
+        toast.success("Purchase restored! Welcome back to Lexor.");
         navigate("/dashboard");
       } else {
         toast.info("No previous purchase found for this account.");
@@ -142,7 +142,7 @@ const Paywall = () => {
   return (
     <div className="min-h-screen bg-background dark flex flex-col">
       <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-lg px-4 py-3 flex items-center justify-center border-b border-border/50">
-        <h1 className="font-display font-bold text-foreground text-lg tracking-wide gold-text">LUXOR</h1>
+        <h1 className="font-display font-bold text-foreground text-lg tracking-wide gold-text">LEXOR®</h1>
       </div>
 
       <div className="flex-1 px-5 pb-10 overflow-y-auto">
@@ -152,7 +152,7 @@ const Paywall = () => {
           </div>
           <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-2">Your Style Awaits</h2>
           <p className="text-muted-foreground font-sans text-sm leading-relaxed max-w-xs mx-auto">
-            Choose a plan to unlock the full Luxor experience.
+            Choose a plan to unlock the full Lexor experience.
           </p>
         </motion.div>
 

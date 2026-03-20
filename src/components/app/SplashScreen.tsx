@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const LETTERS = "LUXOR".split("");
+const LETTERS = "LEXOR®".split("");
 const TAGLINE = "Your AI Style Intelligence";
 
 const GoldParticle = ({ index }: { index: number }) => {

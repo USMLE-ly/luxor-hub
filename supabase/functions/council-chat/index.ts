@@ -55,7 +55,7 @@ async function extractContent(resp: Response): Promise<string> {
 
 function buildSystemPrompt(styleProfile: any, closetSummary: string, memoryContext: string, mood: string | null) {
   const moodContext = mood ? `\nThe user's current mood is: ${mood}. Adjust your suggestions to match their emotional state.` : "";
-  return `You are LUXOR, an elite AI personal stylist. You speak with warmth, confidence, and deep fashion knowledge.
+  return `You are LEXOR®, an elite AI personal stylist. You speak with warmth, confidence, and deep fashion knowledge.
 
 ${styleProfile ? `User's Style DNA: ${styleProfile.archetype}
 Color Season: ${(styleProfile.preferences as any)?.aiAnalysis?.colorSeason || "Unknown"}
@@ -295,7 +295,7 @@ serve(async (req) => {
             return `### #${i + 1} (Score: ${r.avgScore}/10) — Response ${r.label}\n${stage1Data[idx]?.response || ""}`;
           }).join("\n\n---\n\n");
 
-          const synthesisPrompt = `You are LUXOR's Chairman Synthesizer. Multiple AI stylists have answered the user's question and been ranked by quality. Synthesize the BEST final answer using the top-ranked insights.
+          const synthesisPrompt = `You are LEXOR®'s Chairman Synthesizer. Multiple AI stylists have answered the user's question and been ranked by quality. Synthesize the BEST final answer using the top-ranked insights.
 
 Ranked responses (best first):
 ${rankedResponses}
@@ -303,7 +303,7 @@ ${rankedResponses}
 Instructions:
 - Combine the strongest insights from all responses
 - Resolve any contradictions by favoring higher-ranked advice
-- Maintain LUXOR's warm, confident voice
+- Maintain LEXOR®'s warm, confident voice
 - Use markdown formatting
 - Be specific and actionable
 - Do NOT mention that multiple models were consulted`;

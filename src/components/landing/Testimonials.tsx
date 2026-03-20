@@ -159,7 +159,7 @@ const Testimonials = () => (
           <div className="relative">
             <img
               src={statsMain}
-              alt="LUXOR revenue dashboard showing €758K total sales, $689K total sales, campaign performance, and conversion summary"
+              alt="LEXOR® revenue dashboard showing €758K total sales, $689K total sales, campaign performance, and conversion summary"
               className="w-full h-auto rounded-t-2xl"
               loading="lazy"
             />

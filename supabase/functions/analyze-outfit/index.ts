@@ -26,7 +26,7 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are LUXOR, an elite AI fashion analyst. You provide comprehensive, detailed outfit analysis. Be specific, insightful, and constructive. Use a warm but professional tone.`,
+            content: `You are LEXOR®, an elite AI fashion analyst. You provide comprehensive, detailed outfit analysis. Be specific, insightful, and constructive. Use a warm but professional tone.`,
           },
           {
             role: "user",

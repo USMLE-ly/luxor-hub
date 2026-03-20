@@ -57,7 +57,7 @@ const CTABanner = () => {
                 className="gradient-button text-base px-8 group will-change-transform"
                 onClick={() => navigate("/auth")}
               >
-                Join LUXOR Now
+                Join LEXOR® Now
                 <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Button>
             </motion.div>

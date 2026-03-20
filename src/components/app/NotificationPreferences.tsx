@@ -36,7 +36,7 @@ const eveningPrompts = [
   "How did today's outfit feel? Rate it to help the AI learn your preferences.",
   "Time for your evening reflection — did you get any compliments today?",
   "Quick check-in: was today's outfit comfortable for everything you did?",
-  "Before bed, tell LUXOR how your style went today. 30 seconds = smarter outfits.",
+  "Before bed, tell LEXOR® how your style went today. 30 seconds = smarter outfits.",
   "Evening reflection time ✨ Your feedback makes tomorrow's outfit even better.",
 ];
 
@@ -144,9 +144,9 @@ export function NotificationPreferences() {
     const tip = morningTips[Math.floor(Math.random() * morningTips.length)];
     let body = `☀️ ${tip}`;
     if (settings.weatherBased) {
-      body += "\nOpen LUXOR for weather-matched outfit suggestions.";
+      body += "\nOpen LEXOR® for weather-matched outfit suggestions.";
     }
-    new Notification("LUXOR — Good Morning! 👗", {
+    new Notification("LEXOR® — Good Morning! 👗", {
       body,
       icon: "/favicon.ico",
       tag: "morning-outfit",
@@ -155,7 +155,7 @@ export function NotificationPreferences() {
 
   const sendEveningNotification = () => {
     const prompt = eveningPrompts[Math.floor(Math.random() * eveningPrompts.length)];
-    new Notification("LUXOR — Evening Reflection 🌙", {
+    new Notification("LEXOR® — Evening Reflection 🌙", {
       body: prompt,
       icon: "/favicon.ico",
       tag: "evening-reflection",
