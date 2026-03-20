@@ -244,8 +244,8 @@ const Chat = () => {
               <Sparkles className="w-4.5 h-4.5 text-primary" />
             </div>
             <div>
-              <h1 className="font-sans font-semibold text-foreground text-sm">AI Stylist</h1>
-              <p className="text-muted-foreground font-sans text-[10px]">Your personal fashion advisor</p>
+              <h1 className="font-sans font-semibold text-foreground text-sm">Your Stylist</h1>
+              <p className="text-muted-foreground font-sans text-[10px]">Knows your closet. Knows your body. Ask anything.</p>
             </div>
           </div>
           <div className="flex items-center gap-1.5">
