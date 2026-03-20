@@ -1,8 +1,16 @@
 import { motion } from "framer-motion";
-import { DollarSign, TrendingUp, ArrowUpRight, Wallet, BarChart3, Zap } from "lucide-react";
+import { BarChart3, ArrowUpRight } from "lucide-react";
 import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
 import { useRef, useState, useEffect } from "react";
 import { useInView } from "framer-motion";
+
+import statsMain from "@/assets/revenue/stats-main.png";
+import sales10k from "@/assets/revenue/sales-10k.png";
+import grossSales390k from "@/assets/revenue/gross-sales-390k.jpg";
+import sales105k from "@/assets/revenue/sales-105k.png";
+import stripePayout from "@/assets/revenue/stripe-payout.jpg";
+import sales81k from "@/assets/revenue/sales-81k.jpeg";
+import sales673k from "@/assets/revenue/sales-673k.jpg";
 
 const AnimatedCounter = ({ target, prefix = "", suffix = "" }: { target: number; prefix?: string; suffix?: string }) => {
   const ref = useRef<HTMLSpanElement>(null);
@@ -33,37 +41,13 @@ const AnimatedCounter = ({ target, prefix = "", suffix = "" }: { target: number;
   );
 };
 
-const revenueStories = [
-  {
-    id: 1,
-    month: "March 2026",
-    revenue: "$47,832",
-    growth: "+214%",
-    source: "Subscription Revenue",
-    description: "Our Pro and Elite plans drove a 214% increase in recurring revenue. Members who upgraded from Starter stayed 3.2× longer.",
-    icon: Wallet,
-    accent: "from-primary/20 to-primary/5",
-  },
-  {
-    id: 2,
-    month: "February 2026",
-    revenue: "$31,450",
-    growth: "+178%",
-    source: "Elite Tier Upsells",
-    description: "Virtual Try-On and Trend Intelligence became the top reasons members upgraded to Elite. Average revenue per user hit $34.",
-    icon: TrendingUp,
-    accent: "from-emerald-500/15 to-emerald-500/5",
-  },
-  {
-    id: 3,
-    month: "January 2026",
-    revenue: "$22,190",
-    growth: "+96%",
-    source: "New Member Signups",
-    description: "Holiday campaign brought 847 new paid members in 30 days. Zero free trials — identity-based selling converted at 12.3%.",
-    icon: Zap,
-    accent: "from-amber-400/15 to-amber-400/5",
-  },
+const secondaryScreenshots = [
+  { src: sales673k, label: "$673,912 Total Sales", growth: "+56%" },
+  { src: sales105k, label: "$105,525 in 90 Days", growth: "+1,300%" },
+  { src: grossSales390k, label: "€390,033 Gross Sales", growth: "+198K%" },
+  { src: sales81k, label: "$81,452 in 5 Months", growth: "" },
+  { src: sales10k, label: "$10,349 Early Stage", growth: "+1.88%" },
+  { src: stripePayout, label: "€48,579 Stripe Payout", growth: "" },
 ];
 
 const milestones = [
@@ -101,7 +85,7 @@ const Testimonials = () => (
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 0.6 }}
-        className="text-center mb-16"
+        className="text-center mb-12"
       >
         <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-1.5 mb-4">
           <BarChart3 className="w-4 h-4 text-primary" />
@@ -121,7 +105,7 @@ const Testimonials = () => (
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-12"
+        className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-10"
       >
         {milestones.map((m) => (
           <div
@@ -136,39 +120,65 @@ const Testimonials = () => (
         ))}
       </motion.div>
 
-      {/* Revenue story cards */}
-      <div className="space-y-4">
-        {revenueStories.map((story, i) => (
+      {/* Hero screenshot — the main composite image */}
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.6, delay: 0.15 }}
+        className="mb-10"
+      >
+        <div className="glass rounded-2xl overflow-hidden border border-white/[0.08] hover:border-primary/20 transition-all duration-500 group">
+          <div className="relative">
+            <img
+              src={statsMain}
+              alt="LUXOR revenue dashboard showing €758K total sales, $689K total sales, campaign performance, and conversion summary"
+              className="w-full h-auto rounded-t-2xl"
+              loading="lazy"
+            />
+            {/* Gradient overlay at bottom for text */}
+            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/80 to-transparent" />
+            <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between">
+              <div>
+                <p className="font-display text-lg md:text-xl font-bold text-white">Revenue Overview</p>
+                <p className="font-sans text-xs text-white/60 mt-0.5">Multi-platform earnings across all channels</p>
+              </div>
+              <span className="inline-flex items-center gap-1 bg-emerald-500/20 backdrop-blur-sm text-emerald-400 text-xs font-bold px-2.5 py-1 rounded-full border border-emerald-500/20">
+                <ArrowUpRight className="w-3 h-3" />
+                Live
+              </span>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Secondary screenshots grid */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+        {secondaryScreenshots.map((shot, i) => (
           <motion.div
-            key={story.id}
+            key={shot.label}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.5, delay: i * 0.1 }}
-            className="glass rounded-2xl overflow-hidden border border-white/[0.06] hover:border-primary/15 transition-all duration-300 group"
+            transition={{ duration: 0.5, delay: i * 0.08 }}
+            className="glass rounded-xl overflow-hidden border border-white/[0.06] hover:border-primary/15 transition-all duration-300 group"
           >
-            <div className="p-5 md:p-7 flex flex-col md:flex-row md:items-center gap-5">
-              {/* Left: Icon + Revenue */}
-              <div className="flex items-center gap-4 md:min-w-[240px]">
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${story.accent} border border-white/[0.08] flex items-center justify-center shrink-0`}>
-                  <story.icon className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <div className="font-display text-2xl md:text-3xl font-bold text-foreground tracking-tight">{story.revenue}</div>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className="font-sans text-[10px] text-muted-foreground uppercase tracking-wider">{story.month}</span>
-                    <span className="inline-flex items-center gap-0.5 bg-emerald-500/15 text-emerald-400 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                      <ArrowUpRight className="w-2.5 h-2.5" />
-                      {story.growth}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right: Description */}
-              <div className="flex-1">
-                <div className="font-sans text-xs font-semibold text-primary/80 uppercase tracking-wider mb-1.5">{story.source}</div>
-                <p className="font-sans text-sm text-muted-foreground leading-relaxed">{story.description}</p>
+            <div className="relative">
+              <img
+                src={shot.src}
+                alt={shot.label}
+                className="w-full h-auto object-cover"
+                loading="lazy"
+              />
+              <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/80 to-transparent" />
+              <div className="absolute bottom-2 left-2.5 right-2.5">
+                <p className="font-sans text-[10px] md:text-xs font-semibold text-white truncate">{shot.label}</p>
+                {shot.growth && (
+                  <span className="inline-flex items-center gap-0.5 text-emerald-400 text-[9px] md:text-[10px] font-bold mt-0.5">
+                    <ArrowUpRight className="w-2.5 h-2.5" />
+                    {shot.growth}
+                  </span>
+                )}
               </div>
             </div>
           </motion.div>
@@ -183,7 +193,7 @@ const Testimonials = () => (
         transition={{ delay: 0.4 }}
         className="text-center mt-8 text-[11px] text-muted-foreground/50 font-sans"
       >
-        Revenue figures are from LUXOR's internal analytics. Updated monthly.
+        Revenue figures from internal analytics. Updated monthly.
       </motion.p>
     </div>
   </section>
