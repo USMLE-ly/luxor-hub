@@ -56,10 +56,10 @@ export default function StickyPricingBar() {
           <div className="max-w-2xl mx-auto pointer-events-auto glass-strong rounded-2xl px-5 py-3 flex items-center justify-between gap-4 shadow-[0_-4px_30px_-8px_hsl(var(--gold)/0.2)]">
             <div className="flex flex-col min-w-0">
               <span className="font-display text-sm font-bold text-foreground truncate">
-                Start Your Free Trial
+                Join AURELIA Now
               </span>
               <span className="text-[11px] font-sans text-muted-foreground">
-                7 days free · Cancel anytime
+                Founding member pricing — limited spots
               </span>
             </div>
 
@@ -68,7 +68,7 @@ export default function StickyPricingBar() {
                 onClick={handleCTA}
                 className="gradient-button rounded-full px-5 py-2 text-xs font-sans font-bold flex items-center gap-1.5"
               >
-                <span>Try Free</span>
+                <span>Get Started</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
               <button

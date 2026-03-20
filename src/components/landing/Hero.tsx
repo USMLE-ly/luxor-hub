@@ -65,12 +65,12 @@ const Hero = () => {
         const TRANSITION_DURATION = () => SLIDER_CONFIG.settings.transitionDuration;
 
         const slides = [
-            { title: "Your Style, Perfected", description: "AURELIA's AI analyzes your wardrobe, body, and preferences to create your unique Style DNA.", media: sliderStyleDna },
-            { title: "AI Outfit Generator", description: "Get personalized outfit suggestions every morning — weather-aware and occasion-ready.", media: sliderOutfitGen },
-            { title: "Color Intelligence", description: "Discover your perfect color palette based on advanced skin tone analysis.", media: sliderColorIntel },
-            { title: "Smart Wardrobe", description: "Scan your closet. Our AI identifies every item, color, and fabric instantly.", media: sliderWardrobe },
-            { title: "Trend Radar", description: "Stay ahead with real-time trend intelligence matched to your personal style.", media: sliderTrending },
-            { title: "Capsule Builder", description: "Build the perfect capsule wardrobe with AI-curated essential pieces.", media: sliderCapsule }
+            { title: "Stop Guessing. Start Turning Heads.", description: "AURELIA reads your body, your wardrobe, and your life. Then it tells you exactly what to wear today.", media: sliderStyleDna },
+            { title: "Wake Up Knowing Exactly What to Wear", description: "Your outfit is ready before your coffee. Weather-checked, calendar-aware, built from clothes you already own.", media: sliderOutfitGen },
+            { title: "The Colors That Make People Look Twice", description: "Skin-tone analysis pinpoints the exact shades that make you glow. No more guessing at the store.", media: sliderColorIntel },
+            { title: "You Own $3,000 in Clothes You Never Wear", description: "Most people use 20% of their closet. AURELIA scans every piece and puts the forgotten 80% back to work.", media: sliderWardrobe },
+            { title: "Be First. Not a Follower.", description: "Real-time trend radar filtered to your taste, your budget, your body. Spot what's next before everyone else does.", media: sliderTrending },
+            { title: "Own Less. Look Richer.", description: "A tight capsule wardrobe beats a stuffed closet every time. AURELIA builds yours from what you already have.", media: sliderCapsule }
         ];
 
         const vertexShader = `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
@@ -381,7 +381,7 @@ const Hero = () => {
               style={{ animationDelay: '0ms' }}
             >
               
-              <span>Start Free Trial</span>
+              <span>Claim Your Spot</span>
             </button>
             <button
               onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}

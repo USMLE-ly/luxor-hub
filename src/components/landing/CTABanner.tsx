@@ -35,10 +35,10 @@ const CTABanner = () => {
         >
           
           <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-4">
-            Ready to Transform Your <span className="gold-text">Style</span>?
+            You Already Know You <span className="gold-text">Deserve This</span>
           </h2>
           <p className="font-sans text-muted-foreground text-base md:text-lg max-w-xl mx-auto mb-3">
-            Join 12,000+ stylists already using AURELIA to elevate their wardrobe and revenue.
+            12,847 people stopped settling for average. Your spot is waiting.
           </p>
           <motion.div
             className="flex justify-center"
@@ -57,17 +57,17 @@ const CTABanner = () => {
                 className="gradient-button text-base px-8 group will-change-transform"
                 onClick={() => navigate("/auth")}
               >
-                Start Your Free Trial
+                Join AURELIA Now
                 <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Button>
             </motion.div>
           </motion.div>
           <p className="mt-4 font-sans text-xs text-muted-foreground flex items-center justify-center gap-1.5">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-            <span className="font-medium text-foreground">847 stylists</span> joined this month
+            <span className="font-medium text-foreground">237 founding spots</span> remaining at this price
           </p>
           <p className="mt-2 font-sans text-xs text-muted-foreground">
-            No credit card required · Cancel anytime · 7-day free trial
+            30-day money-back guarantee. Zero risk.
           </p>
         </motion.div>
       </div>

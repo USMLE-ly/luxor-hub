@@ -9,27 +9,27 @@ import {
 const faqs = [
   {
     q: "How does the AI learn my style?",
-    a: "AURELIA analyzes your wardrobe photos, selfies, and style preferences to build a unique Style DNA profile. The more you interact, the smarter it gets.",
+    a: "You upload wardrobe photos and a selfie. AURELIA maps your body proportions, color season, and aesthetic preferences into a Style DNA profile. The more you use it, the sharper it gets. Most users say it 'clicks' within the first week.",
   },
   {
     q: "Is my data private and secure?",
-    a: "Absolutely. Your photos and style data are encrypted and never shared. We use enterprise-grade security and you can delete your data anytime.",
+    a: "Your photos and style data are encrypted end-to-end and never shared with third parties. We use enterprise-grade security. You can export or delete all your data at any time from your settings.",
   },
   {
-    q: "Can I try AURELIA before committing?",
-    a: "Yes! Every plan includes a 7-day free trial so you can experience the full power of AURELIA. After that, choose the plan that fits your style journey.",
+    q: "What if it doesn't work for me?",
+    a: "Every plan comes with a 30-day money-back guarantee. If AURELIA doesn't change how you get dressed, we'll refund every penny. No questions, no hoops.",
   },
   {
     q: "What body types does the AI support?",
-    a: "AURELIA supports all body types and sizes. Our inclusive AI is trained on diverse body shapes to provide flattering suggestions for everyone.",
+    a: "All of them. AURELIA's AI is trained on diverse body shapes, sizes, and proportions. The styling suggestions adapt to your specific measurements, not a generic mannequin.",
   },
   {
     q: "Does it work with my existing wardrobe?",
-    a: "That's the whole point! Scan what you already own, and AURELIA creates new outfits from your existing pieces before recommending anything new.",
+    a: "That's the whole point. Scan what you already own. AURELIA creates new outfit combinations from your existing pieces before recommending anything new. Most users discover 30+ outfits they never considered.",
   },
   {
     q: "Can I cancel anytime?",
-    a: "Yes, you can cancel your subscription at any time with no penalties. Your data remains accessible for 30 days after cancellation.",
+    a: "Yes. Cancel from your account settings with two clicks. No penalties, no retention tricks. Your data stays accessible for 30 days after cancellation.",
   },
 ];
 

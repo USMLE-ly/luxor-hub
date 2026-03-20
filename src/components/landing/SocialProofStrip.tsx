@@ -45,10 +45,10 @@ const AnimatedCounter = ({ target, suffix, duration = 2000 }: AnimatedCounterPro
 const mediaBadges = ["Vogue", "GQ", "Forbes", "Elle"];
 
 const stats = [
-  { value: 12, suffix: "K+", label: "Professional Stylists" },
-  { value: 2.4, suffix: "M", label: "Revenue Generated" },
-  { value: 98, suffix: "%", label: "Satisfaction Rate" },
-  { value: 45, suffix: "s", label: "Avg. Outfit Time" },
+  { value: 12, suffix: "K+", label: "Stopped Wasting Money on Wrong Clothes" },
+  { value: 2.4, suffix: "M", label: "Saved on Impulse Buys" },
+  { value: 98, suffix: "%", label: "Would Never Go Back" },
+  { value: 45, suffix: "s", label: "Morning Decision Time" },
 ];
 
 const SocialProofStrip = () => (

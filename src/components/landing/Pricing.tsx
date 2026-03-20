@@ -12,7 +12,7 @@ const tiers = [
     period: "/month",
     description: "Essential AI styling tools",
     features: ["200 closet items", "Daily outfit suggestions", "Basic color analysis", "Closet scanner", "Community access"],
-    cta: "Start Now",
+    cta: "Join Now",
     highlighted: false,
   },
   {
@@ -28,7 +28,7 @@ const tiers = [
       "Outfit calendar",
       "Priority AI processing",
     ],
-    cta: "Start Free Trial",
+    cta: "Claim Your Spot",
     highlighted: true,
   },
   {
@@ -64,10 +64,10 @@ const Pricing = () => {
         >
           <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase mb-3">Pricing</p>
           <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground">
-            Invest in Your <span className="gold-text">Best Self</span>
+            What's Looking Incredible Actually <span className="gold-text">Worth to You</span>?
           </h2>
           <p className="mt-4 max-w-lg mx-auto font-sans text-sm text-muted-foreground">
-            Choose the plan that fits your style journey. No free tier — because your style deserves real investment.
+            The average person wastes $1,200/year on clothes they barely wear. AURELIA pays for itself in the first month.
           </p>
         </motion.div>
 
@@ -158,7 +158,7 @@ const Pricing = () => {
           {/* Urgency micro-copy */}
           <p className="text-xs font-sans text-muted-foreground flex items-center gap-1.5">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary urgency-pulse" />
-            <span className="font-medium text-foreground">127 stylists</span> signed up this week
+            This price won't last. <span className="font-medium text-foreground">237 founding spots</span> remain.
           </p>
 
           {/* Guarantee badge */}
