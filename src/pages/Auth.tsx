@@ -81,7 +81,13 @@ const Auth = () => {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Welcome back to LUXOR!");
-        navigate("/dashboard");
+        // Returning user: check onboarding, then paywall gate handles the rest
+        const { data: profile } = await supabase
+          .from("style_profiles")
+          .select("onboarding_completed")
+          .eq("user_id", (await supabase.auth.getUser()).data.user!.id)
+          .single();
+        navigate(profile?.onboarding_completed ? "/dashboard" : "/onboarding");
       } else {
         const { error } = await supabase.auth.signUp({
           email,
@@ -94,7 +100,7 @@ const Auth = () => {
         if (error) throw error;
         trackEvent("CompleteRegistration", { content_name: "LUXOR Signup" });
         toast.success("Account created! Welcome to LUXOR!");
-        navigate("/dashboard");
+        navigate("/onboarding");
       }
     } catch (error: any) {
       const msg = error.message || "";
