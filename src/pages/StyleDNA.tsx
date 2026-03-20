@@ -538,7 +538,7 @@ const StyleDNA = () => {
               >
                 <div className="flex items-center gap-2 mb-3">
                   <ShieldCheck className="w-5 h-5 text-primary" />
-                  <h3 className="font-display text-base font-bold text-foreground">AI Summary</h3>
+                  <h3 className="font-display text-base font-bold text-foreground">What the AI Sees in You</h3>
                 </div>
                 <p className="text-muted-foreground font-sans text-sm leading-relaxed">{dna.summary}</p>
               </motion.div>
