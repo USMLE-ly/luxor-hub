@@ -51,6 +51,7 @@ const Navbar = () => {
 
   return (
     <motion.nav
+      aria-label="Main navigation"
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5 }}
@@ -81,6 +82,7 @@ const Navbar = () => {
             <button
               key={link.id}
               onClick={() => scrollTo(link.id)}
+              aria-current={activeSection === link.id ? "page" : undefined}
               className="relative py-1 transition-colors hover:text-foreground"
             >
               <span className={activeSection === link.id ? "text-primary font-medium" : "text-muted-foreground"}>
@@ -120,7 +122,7 @@ const Navbar = () => {
           {/* Mobile hamburger */}
           <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden h-9 w-9">
+              <Button variant="ghost" size="icon" className="md:hidden h-9 w-9" aria-expanded={sheetOpen}>
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Open menu</span>
               </Button>

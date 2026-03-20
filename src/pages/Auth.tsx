@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -11,16 +11,66 @@ import { toast } from "sonner";
 import { ArrowLeft, Mail, Lock, User } from "lucide-react";
 import { trackEvent } from "@/lib/fbPixel";
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+interface ValidationErrors {
+  email?: string;
+  password?: string;
+  displayName?: string;
+}
+
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<ValidationErrors>({});
   const navigate = useNavigate();
+
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
+
+  const validate = (): boolean => {
+    const newErrors: ValidationErrors = {};
+
+    if (!isLogin && !displayName.trim()) {
+      newErrors.displayName = "Display name is required.";
+    }
+
+    if (!email.trim()) {
+      newErrors.email = "Email is required.";
+    } else if (!EMAIL_REGEX.test(email)) {
+      newErrors.email = "Please enter a valid email address.";
+    }
+
+    if (!password) {
+      newErrors.password = "Password is required.";
+    } else if (password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters.";
+    }
+
+    setErrors(newErrors);
+
+    // Focus first invalid field
+    if (newErrors.displayName) nameRef.current?.focus();
+    else if (newErrors.email) emailRef.current?.focus();
+    else if (newErrors.password) passwordRef.current?.focus();
+
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validate()) return;
+    if (loading) return;
+
+    if (!navigator.onLine) {
+      toast.error("You appear to be offline. Please check your connection and try again.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -44,7 +94,11 @@ const Auth = () => {
         navigate("/dashboard");
       }
     } catch (error: any) {
-      toast.error(error.message);
+      if (error.message?.includes("fetch") || error.message?.includes("network") || error.message?.includes("Failed to fetch")) {
+        toast.error("Network error. Please check your connection and try again.");
+      } else {
+        toast.error(error.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -80,7 +134,7 @@ const Auth = () => {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5" aria-label="Authentication form" noValidate>
             {!isLogin && (
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-sm font-sans text-muted-foreground">
@@ -89,14 +143,21 @@ const Auth = () => {
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
+                    ref={nameRef}
                     id="name"
                     type="text"
                     placeholder="Your name"
                     value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
+                    onChange={(e) => { setDisplayName(e.target.value); setErrors((p) => ({ ...p, displayName: undefined })); }}
+                    autoComplete="name"
+                    aria-invalid={!!errors.displayName}
+                    aria-describedby={errors.displayName ? "name-error" : undefined}
                     className="pl-10 bg-secondary border-glass-border focus:border-primary/50 rounded-xl h-12 font-sans"
                   />
                 </div>
+                {errors.displayName && (
+                  <p id="name-error" role="alert" className="text-xs text-destructive font-sans mt-1">{errors.displayName}</p>
+                )}
               </div>
             )}
 
@@ -107,15 +168,21 @@ const Auth = () => {
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
+                  ref={emailRef}
                   id="email"
                   type="email"
                   placeholder="you@example.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
+                  onChange={(e) => { setEmail(e.target.value); setErrors((p) => ({ ...p, email: undefined })); }}
+                  autoComplete="email"
+                  aria-invalid={!!errors.email}
+                  aria-describedby={errors.email ? "email-error" : undefined}
                   className="pl-10 bg-secondary border-glass-border focus:border-primary/50 rounded-xl h-12 font-sans"
                 />
               </div>
+              {errors.email && (
+                <p id="email-error" role="alert" className="text-xs text-destructive font-sans mt-1">{errors.email}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -125,16 +192,21 @@ const Auth = () => {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
+                  ref={passwordRef}
                   id="password"
                   type="password"
                   placeholder="••••••••"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
+                  onChange={(e) => { setPassword(e.target.value); setErrors((p) => ({ ...p, password: undefined })); }}
+                  autoComplete={isLogin ? "current-password" : "new-password"}
+                  aria-invalid={!!errors.password}
+                  aria-describedby={errors.password ? "password-error" : undefined}
                   className="pl-10 bg-secondary border-glass-border focus:border-primary/50 rounded-xl h-12 font-sans"
                 />
               </div>
+              {errors.password && (
+                <p id="password-error" role="alert" className="text-xs text-destructive font-sans mt-1">{errors.password}</p>
+              )}
             </div>
 
             <Button
@@ -146,7 +218,6 @@ const Auth = () => {
                 <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
               ) : (
                 <>
-                  
                   {isLogin ? "Sign In" : "Create Account"}
                 </>
               )}
@@ -199,7 +270,7 @@ const Auth = () => {
 
           <div className="mt-6 text-center space-y-2">
             <button
-              onClick={() => setIsLogin(!isLogin)}
+              onClick={() => { setIsLogin(!isLogin); setErrors({}); }}
               className="text-sm text-muted-foreground hover:text-primary transition-colors font-sans block mx-auto"
             >
               {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
