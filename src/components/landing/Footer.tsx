@@ -67,7 +67,7 @@ const Footer = () => {
       <div className="max-w-6xl mx-auto px-4 py-16">
         <div className="grid md:grid-cols-3 gap-12 mb-12">
           <div>
-            <h3 className="font-display text-2xl font-bold gold-text mb-2">AURELIA</h3>
+            <h3 className="font-display text-2xl font-bold gold-text mb-2">LUXOR</h3>
             <p className="text-sm text-muted-foreground font-sans mb-4">AI Personal Stylist OS</p>
             
           </div>
@@ -129,7 +129,7 @@ const Footer = () => {
         </div>
 
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-8 border-t border-border">
-          <p className="text-xs text-muted-foreground font-sans">© 2026 AURELIA. All rights reserved.</p>
+          <p className="text-xs text-muted-foreground font-sans">© 2026 LUXOR. All rights reserved.</p>
           <div className="flex items-center gap-2 text-xs text-muted-foreground font-sans">
             <span className="gold-shimmer">Made with ❤️ for you</span>
           </div>

@@ -67,7 +67,7 @@ const Pricing = () => {
             What's Looking Incredible Actually <span className="gold-text">Worth to You</span>?
           </h2>
           <p className="mt-4 max-w-lg mx-auto font-sans text-sm text-muted-foreground">
-            The average person wastes $1,200/year on clothes they barely wear. AURELIA pays for itself in the first month.
+            The average person wastes $1,200/year on clothes they barely wear. LUXOR pays for itself in the first month.
           </p>
         </motion.div>
 
@@ -86,7 +86,7 @@ const Pricing = () => {
               eliteMonth={99}
               eliteAnnual={79}
               onGetStarted={() => {
-                trackEvent("InitiateCheckout", { content_name: "AURELIA Pricing" });
+                trackEvent("InitiateCheckout", { content_name: "LUXOR Pricing" });
                 navigate("/auth");
               }}
             />

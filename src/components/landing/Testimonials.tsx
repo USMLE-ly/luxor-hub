@@ -27,38 +27,38 @@ const heroProof = {
   image: proofRevenue6,
   stat: "$673,912",
   label: "Total Sales",
-  caption: "A styling agency went from plateauing at $400K to clearing $673K in one year. The only change was AURELIA.",
+  caption: "A styling agency went from plateauing at $400K to clearing $673K in one year. The only change was LUXOR.",
 };
 
 const shuffleProofs = [
   {
     id: 1,
     image: proofRevenue1,
-    testimonial: "She launched a boutique with zero fashion background. 90 days later, AURELIA's recommendations drove $10K in sales.",
+    testimonial: "She launched a boutique with zero fashion background. 90 days later, LUXOR's recommendations drove $10K in sales.",
     author: "$10,349 · 90-Day Revenue",
   },
   {
     id: 2,
     image: proofRevenue2,
-    testimonial: "11,880 orders fulfilled. This retailer used AURELIA's curation engine to stock exactly what customers wanted.",
+    testimonial: "11,880 orders fulfilled. This retailer used LUXOR's curation engine to stock exactly what customers wanted.",
     author: "€390,033 · Gross Sales",
   },
   {
     id: 3,
     image: proofRevenue3,
-    testimonial: "1,300% growth. The owner credits AURELIA's trend intelligence for turning a dead Shopify store into a top seller.",
+    testimonial: "1,300% growth. The owner credits LUXOR's trend intelligence for turning a dead Shopify store into a top seller.",
     author: "$105,525 · Total Sales",
   },
   {
     id: 4,
     image: proofRevenue4,
-    testimonial: "One Stripe payout. One month. An independent designer who let AURELIA handle the product strategy.",
+    testimonial: "One Stripe payout. One month. An independent designer who let LUXOR handle the product strategy.",
     author: "€48,579 · Single Payout",
   },
   {
     id: 5,
     image: proofRevenue5,
-    testimonial: "122K sessions and $81K in sales. All organic traffic. AURELIA's wardrobe AI turned browsers into buyers.",
+    testimonial: "122K sessions and $81K in sales. All organic traffic. LUXOR's wardrobe AI turned browsers into buyers.",
     author: "$81,452 · Total Revenue",
   },
 ];
@@ -128,7 +128,7 @@ const Testimonials = () => (
           They Didn't Believe It <span className="gold-text">Either</span>
         </h2>
         <p className="mt-4 max-w-lg mx-auto font-sans text-sm text-muted-foreground">
-          Unedited screenshots. Real numbers. Actual businesses that switched to AURELIA and watched the revenue follow.
+          Unedited screenshots. Real numbers. Actual businesses that switched to LUXOR and watched the revenue follow.
         </p>
       </motion.div>
 

@@ -4,7 +4,7 @@ import { X, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { trackEvent } from "@/lib/fbPixel";
 
-const DISMISSED_KEY = "aurelia-sticky-bar-dismissed";
+const DISMISSED_KEY = "luxor-sticky-bar-dismissed";
 
 export default function StickyPricingBar() {
   const navigate = useNavigate();
@@ -56,7 +56,7 @@ export default function StickyPricingBar() {
           <div className="max-w-2xl mx-auto pointer-events-auto glass-strong rounded-2xl px-5 py-3 flex items-center justify-between gap-4 shadow-[0_-4px_30px_-8px_hsl(var(--gold)/0.2)]">
             <div className="flex flex-col min-w-0">
               <span className="font-display text-sm font-bold text-foreground truncate">
-                Join AURELIA Now
+                Join LUXOR Now
               </span>
               <span className="text-[11px] font-sans text-muted-foreground">
                 Founding member pricing — limited spots

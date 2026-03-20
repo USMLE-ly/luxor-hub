@@ -7,7 +7,7 @@ interface UserLocation {
   loading: boolean;
 }
 
-const STORAGE_KEY = "aurelia-user-location";
+const STORAGE_KEY = "luxor-user-location";
 const CACHE_TTL = 30 * 60 * 1000; // 30 minutes
 
 interface CachedLocation {

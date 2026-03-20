@@ -36,16 +36,16 @@ const eveningPrompts = [
   "How did today's outfit feel? Rate it to help the AI learn your preferences.",
   "Time for your evening reflection — did you get any compliments today?",
   "Quick check-in: was today's outfit comfortable for everything you did?",
-  "Before bed, tell AURELIA how your style went today. 30 seconds = smarter outfits.",
+  "Before bed, tell LUXOR how your style went today. 30 seconds = smarter outfits.",
   "Evening reflection time ✨ Your feedback makes tomorrow's outfit even better.",
 ];
 
 export function NotificationPreferences() {
   const [settings, setSettings] = useState<NotificationSettings>(() => {
-    const saved = localStorage.getItem("aurelia_notif_settings_v2");
+    const saved = localStorage.getItem("luxor_notif_settings_v2");
     if (saved) return JSON.parse(saved);
     // Migrate from v1
-    const v1 = localStorage.getItem("aurelia_notif_settings");
+    const v1 = localStorage.getItem("luxor_notif_settings");
     if (v1) {
       const old = JSON.parse(v1);
       return {
@@ -68,7 +68,7 @@ export function NotificationPreferences() {
 
   const saveSettings = (newSettings: NotificationSettings) => {
     setSettings(newSettings);
-    localStorage.setItem("aurelia_notif_settings_v2", JSON.stringify(newSettings));
+    localStorage.setItem("luxor_notif_settings_v2", JSON.stringify(newSettings));
   };
 
   const anyEnabled = settings.morningEnabled || settings.eveningEnabled;
@@ -106,18 +106,18 @@ export function NotificationPreferences() {
 
   // Schedule checker
   useEffect(() => {
-    if ((window as any).__aureliaNotifInterval) {
-      clearInterval((window as any).__aureliaNotifInterval);
+    if ((window as any).__luxorNotifInterval) {
+      clearInterval((window as any).__luxorNotifInterval);
     }
     if (!anyEnabled || permissionState !== "granted") return;
 
-    (window as any).__aureliaNotifInterval = setInterval(() => {
+    (window as any).__luxorNotifInterval = setInterval(() => {
       const now = new Date();
       const currentTime = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
       const today = now.toISOString().split("T")[0];
 
       if (settings.morningEnabled && currentTime === settings.morningTime) {
-        const key = `aurelia_morning_notif_${today}`;
+        const key = `luxor_morning_notif_${today}`;
         if (!localStorage.getItem(key)) {
           localStorage.setItem(key, "1");
           sendMorningNotification();
@@ -125,7 +125,7 @@ export function NotificationPreferences() {
       }
 
       if (settings.eveningEnabled && currentTime === settings.eveningTime) {
-        const key = `aurelia_evening_notif_${today}`;
+        const key = `luxor_evening_notif_${today}`;
         if (!localStorage.getItem(key)) {
           localStorage.setItem(key, "1");
           sendEveningNotification();
@@ -134,8 +134,8 @@ export function NotificationPreferences() {
     }, 60000);
 
     return () => {
-      if ((window as any).__aureliaNotifInterval) {
-        clearInterval((window as any).__aureliaNotifInterval);
+      if ((window as any).__luxorNotifInterval) {
+        clearInterval((window as any).__luxorNotifInterval);
       }
     };
   }, [settings, permissionState]);
@@ -144,9 +144,9 @@ export function NotificationPreferences() {
     const tip = morningTips[Math.floor(Math.random() * morningTips.length)];
     let body = `☀️ ${tip}`;
     if (settings.weatherBased) {
-      body += "\nOpen AURELIA for weather-matched outfit suggestions.";
+      body += "\nOpen LUXOR for weather-matched outfit suggestions.";
     }
-    new Notification("AURELIA — Good Morning! 👗", {
+    new Notification("LUXOR — Good Morning! 👗", {
       body,
       icon: "/favicon.ico",
       tag: "morning-outfit",
@@ -155,7 +155,7 @@ export function NotificationPreferences() {
 
   const sendEveningNotification = () => {
     const prompt = eveningPrompts[Math.floor(Math.random() * eveningPrompts.length)];
-    new Notification("AURELIA — Evening Reflection 🌙", {
+    new Notification("LUXOR — Evening Reflection 🌙", {
       body: prompt,
       icon: "/favicon.ico",
       tag: "evening-reflection",
