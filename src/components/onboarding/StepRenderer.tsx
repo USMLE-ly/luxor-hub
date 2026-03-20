@@ -880,24 +880,53 @@ const maleGarments = [
   },
 ];
 
-const SparkleParticles = () => {
-  const particles = Array.from({ length: 12 }, (_, i) => ({
-    x: 30 + Math.random() * 140,
-    delay: Math.random() * 3,
-    duration: 2 + Math.random() * 2,
-  }));
+const SparkleParticles = ({ progress, garmentCount = 5 }: { progress?: number[]; garmentCount?: number }) => {
+  // Generate burst particles per garment position
+  const bursts = Array.from({ length: garmentCount }, (_, gi) => {
+    const cx = 60 + gi * 20;
+    return Array.from({ length: 6 }, (_, pi) => {
+      const angle = (pi / 6) * Math.PI * 2 + Math.random() * 0.5;
+      const dist = 8 + Math.random() * 14;
+      return {
+        gi,
+        cx,
+        tx: cx + Math.cos(angle) * dist,
+        ty: 45 - Math.sin(angle) * dist + Math.random() * 10,
+        delay: pi * 0.08,
+        size: 0.8 + Math.random() * 0.8,
+      };
+    });
+  }).flat();
+
   return (
     <>
-      {particles.map((p, i) => (
+      {bursts.map((p, i) => {
+        const done = progress && progress[p.gi] >= 100;
+        if (!done) return null;
+        return (
+          <motion.circle
+            key={i}
+            cx={p.cx}
+            cy={55}
+            r={p.size}
+            fill="hsl(43,74%,70%)"
+            initial={{ opacity: 0, cx: p.cx, cy: 55 }}
+            animate={{ opacity: [0, 1, 0], cx: p.tx, cy: p.ty, r: [p.size, p.size * 0.3, 0] }}
+            transition={{ duration: 0.8, delay: p.delay, ease: "easeOut" }}
+          />
+        );
+      })}
+      {/* Ambient floating sparkles */}
+      {Array.from({ length: 8 }, (_, i) => (
         <motion.circle
-          key={i}
-          cx={p.x}
+          key={`ambient-${i}`}
+          cx={40 + Math.random() * 120}
           cy={90}
-          r={1.2}
-          fill="hsl(43,74%,70%)"
+          r={0.8}
+          fill="hsl(43,74%,65%)"
           initial={{ opacity: 0, cy: 90 }}
-          animate={{ opacity: [0, 0.8, 0], cy: [90, 40 + Math.random() * 30, 10] }}
-          transition={{ duration: p.duration, delay: p.delay, repeat: Infinity, ease: "easeOut" }}
+          animate={{ opacity: [0, 0.6, 0], cy: [90, 30 + Math.random() * 30, 10] }}
+          transition={{ duration: 2.5 + Math.random() * 2, delay: Math.random() * 3, repeat: Infinity, ease: "easeOut" }}
         />
       ))}
     </>
