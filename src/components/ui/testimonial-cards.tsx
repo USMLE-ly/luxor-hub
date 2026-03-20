@@ -44,7 +44,7 @@ export function TestimonialCard({ handleShuffle, testimonial, position, id, auth
         dragRef.current = 0;
       }}
       transition={{ duration: 0.35 }}
-      className={`absolute left-0 top-0 grid h-[450px] w-[350px] select-none place-content-center space-y-6 rounded-2xl border-2 border-border/40 bg-card/20 p-6 shadow-xl backdrop-blur-md ${
+      className={`absolute left-0 top-0 grid h-[520px] w-[350px] select-none grid-rows-[1fr_auto] rounded-2xl border-2 border-border/40 bg-card/20 shadow-xl backdrop-blur-md overflow-hidden ${
         isFront ? "cursor-grab active:cursor-grabbing" : ""
       }`}
     >
@@ -52,17 +52,21 @@ export function TestimonialCard({ handleShuffle, testimonial, position, id, auth
         <img
           src={image}
           alt={`Revenue proof from ${author}`}
-          className="pointer-events-none mx-auto h-48 w-full rounded-xl border border-border/30 object-cover"
+          className="pointer-events-none w-full h-full object-cover object-top"
         />
       ) : (
-        <img
-          src={`https://i.pravatar.cc/128?img=${id}`}
-          alt={`Avatar of ${author}`}
-          className="pointer-events-none mx-auto h-32 w-32 rounded-full border-2 border-border/40 bg-muted object-cover"
-        />
+        <div className="flex items-center justify-center">
+          <img
+            src={`https://i.pravatar.cc/128?img=${id}`}
+            alt={`Avatar of ${author}`}
+            className="pointer-events-none h-32 w-32 rounded-full border-2 border-border/40 bg-muted object-cover"
+          />
+        </div>
       )}
-      <span className="text-center text-lg italic text-muted-foreground">"{testimonial}"</span>
-      <span className="text-center text-sm font-medium text-primary">{author}</span>
+      <div className="p-5 space-y-2">
+        <span className="block text-sm leading-relaxed text-muted-foreground">"{testimonial}"</span>
+        <span className="block text-sm font-semibold text-primary">{author}</span>
+      </div>
     </motion.div>
   );
 }
