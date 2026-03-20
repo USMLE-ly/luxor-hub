@@ -62,6 +62,7 @@ export function PricingInteraction({
   onTierChange?: (tier: "starter" | "pro" | "elite") => void;
   renderFooter?: (activeTier: "starter" | "pro" | "elite") => React.ReactNode;
 }) {
+  const tierNames: ("starter" | "pro" | "elite")[] = ["starter", "pro", "elite"];
   const [active, setActive] = React.useState(1);
   const [period, setPeriod] = React.useState(0);
   const [starter, setStarter] = React.useState(starterMonth);
