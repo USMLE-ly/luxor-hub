@@ -27,6 +27,8 @@ const Auth = () => {
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
+  const [oauthLoading, setOauthLoading] = useState<"google" | "apple" | null>(null);
+  const [pageReady, setPageReady] = useState(false);
   const navigate = useNavigate();
 
   const emailRef = useRef<HTMLInputElement>(null);
