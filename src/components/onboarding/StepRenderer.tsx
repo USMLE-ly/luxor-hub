@@ -1180,7 +1180,7 @@ const GeneratingStep = ({ step, gender }: { step: OnboardingStep; gender?: "fema
             </motion.g>
           ))}
 
-          <SparkleParticles />
+          <SparkleParticles progress={progress} garmentCount={garments.length} />
         </svg>
       </div>
 
