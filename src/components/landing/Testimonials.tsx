@@ -61,17 +61,17 @@ const ShuffleSection = () => {
       newPositions.unshift(newPositions.pop()!);
       return newPositions;
     });
-    setStartIdx((prev) => (prev + 1) % shuffleProofs.length);
+    setStartIdx((prev) => (prev + 1) % shuffleTestimonials.length);
   };
 
-  const visibleProofs = [0, 1, 2].map((offset) => shuffleProofs[(startIdx + offset) % shuffleProofs.length]);
+  const visible = [0, 1, 2].map((offset) => shuffleTestimonials[(startIdx + offset) % shuffleTestimonials.length]);
 
   return (
     <div className="relative h-[520px] w-[350px] mx-auto md:mx-0">
-      {visibleProofs.map((proof, index) => (
+      {visible.map((t, index) => (
         <TestimonialCard
-          key={proof.id}
-          {...proof}
+          key={t.id}
+          {...t}
           handleShuffle={handleShuffle}
           position={positions[index]}
         />
@@ -109,18 +109,18 @@ const Testimonials = () => (
         className="text-center mb-16"
       >
         <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-1.5 mb-4">
-          <ShieldCheck className="w-4 h-4 text-primary" />
-          <span className="font-sans text-xs font-semibold text-primary tracking-wider uppercase">Verified Results</span>
+          <Star className="w-4 h-4 text-primary" />
+          <span className="font-sans text-xs font-semibold text-primary tracking-wider uppercase">What Members Say</span>
         </div>
         <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground">
-          They Didn't Believe It <span className="gold-text">Either</span>
+          Real People. Real <span className="gold-text">Style.</span>
         </h2>
         <p className="mt-4 max-w-lg mx-auto font-sans text-sm text-muted-foreground">
-          Unedited screenshots. Real numbers. Actual businesses that switched to LUXOR and watched the revenue follow.
+          LUXOR members who stopped guessing and started dressing with confidence every single day.
         </p>
       </motion.div>
 
-      {/* Hero $673,912 card */}
+      {/* Hero testimonial card */}
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -128,39 +128,36 @@ const Testimonials = () => (
         transition={{ duration: 0.5 }}
         className="glass rounded-2xl overflow-hidden premium-card group transition-transform duration-300 hover:rotate-[0.5deg] mb-12"
       >
-        <div className="relative">
-          <img
-            src={heroProof.image}
-            alt={`Revenue proof: ${heroProof.stat}`}
-            className="w-full object-cover object-top h-72 md:h-80"
-            loading="lazy"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-primary/10 via-transparent to-transparent" />
-          <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-background to-transparent h-16" />
-          <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-500/15 backdrop-blur-sm border border-green-500/20">
-            <BadgeCheck className="w-3 h-3 text-green-400" />
-            <span className="text-[10px] font-semibold text-green-400 font-sans">Verified</span>
+        <div className="p-6 md:p-8">
+          <div className="flex items-center gap-1 mb-4">
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} className="w-4 h-4 text-primary fill-primary" />
+            ))}
           </div>
-        </div>
-        <div className="p-5">
-          <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="w-4 h-4 text-primary" />
-            <span className="font-display text-xl font-bold text-primary">
-              <AnimatedStat value={heroProof.stat} />
-            </span>
-            <span className="font-sans text-xs text-muted-foreground">· {heroProof.label}</span>
+          <p className="font-sans text-base md:text-lg text-foreground/90 leading-relaxed mb-6 italic">
+            "{heroTestimonial.caption}"
+          </p>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
+              <span className="font-display text-sm font-bold text-primary">ML</span>
+            </div>
+            <div>
+              <span className="block font-sans text-sm font-semibold text-foreground">{heroTestimonial.author}</span>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <BadgeCheck className="w-3.5 h-3.5 text-primary" />
+                <span className="text-[10px] font-semibold text-primary font-sans">Verified Member</span>
+              </div>
+            </div>
           </div>
-          <div className="w-12 h-0.5 rounded-full bg-primary/40 mb-3" />
-          <p className="font-sans text-sm text-muted-foreground leading-relaxed">{heroProof.caption}</p>
         </div>
       </motion.div>
 
-      {/* Shuffle cards for remaining proofs */}
+      {/* Shuffle cards */}
       <div className="flex justify-center md:justify-start pl-0 md:pl-12">
         <ShuffleSection />
       </div>
       <p className="text-center md:text-left md:pl-12 mt-6 text-xs text-muted-foreground/60 font-sans">
-        Swipe to see more results →
+        Swipe to see more →
       </p>
     </div>
   </section>
