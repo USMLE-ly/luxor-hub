@@ -313,7 +313,7 @@ const Closet = () => {
         price: newItem.price ? parseFloat(newItem.price) : null, photo_url: photoUrl,
       });
       if (error) throw error;
-      toast.success("Item added to your closet!");
+      toast.success("Added. Your closet just got stronger.");
       setUploadOpen(false);
       setNewItem({ name: "", category: "top", color: "", brand: "", season: "all-season", occasion: "", style: "", notes: "", price: "" });
       setSelectedFile(null); setPreviewUrl(null); fetchItems();
