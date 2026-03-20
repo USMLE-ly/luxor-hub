@@ -71,10 +71,11 @@ const PayPalButton = ({ tier, onApprove }: PayPalButtonProps) => {
           .Buttons({
             style: {
               shape: "pill",
-              color: "gold",
+              color: "black",
               layout: "horizontal",
               label: "subscribe",
               height: 40,
+              tagline: false,
             },
             createSubscription: (_data: any, actions: any) => {
               return actions.subscription.create({
