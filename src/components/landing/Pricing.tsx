@@ -14,7 +14,19 @@ import {
   BGComponent3,
 } from "@/components/ui/squishy-pricing";
 
-const tiers = [
+import type { PricingFeature } from "@/components/ui/squishy-pricing";
+
+type Tier = {
+  key: "starter" | "pro" | "elite";
+  label: string;
+  price: string;
+  desc: string;
+  features: (string | PricingFeature)[];
+  bg: string;
+  BG: React.FC;
+};
+
+const tiers: Tier[] = [
   {
     key: "starter" as const,
     label: "Starter",
