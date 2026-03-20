@@ -470,6 +470,28 @@ function SmoothBody({
             );
           }
 
+          // --- BAGS ---
+          if (isBagCat(item.subtype)) {
+            const { body: bagBody, handle } = createBagGeometry(item.subtype);
+            return (
+              <AnimatedGarment key={`clothing-${i}`} category={item.category}>
+                {/* Position bag at left hand */}
+                <group position={[-armX, 0.85, 0]}>
+                  <group rotation={poseData.leftUpperArm as [number, number, number]}>
+                    <group position={[0, -0.42, 0]}>
+                      <group rotation={poseData.leftForearm as [number, number, number]}>
+                        <group position={[0, -0.30, 0]}>
+                          <mesh geometry={bagBody} material={item.mat} castShadow />
+                          <mesh geometry={handle} material={item.mat} position={[0, 0.08, 0]} rotation={[0, 0, 0]} castShadow />
+                        </group>
+                      </group>
+                    </group>
+                  </group>
+                </group>
+              </AnimatedGarment>
+            );
+          }
+
           return null;
         })}
       </group>
