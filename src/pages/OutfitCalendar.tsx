@@ -914,10 +914,10 @@ const OutfitCalendar = () => {
           <div className="flex items-start justify-between mb-6">
             <div>
               <h1 className="font-display text-2xl font-bold text-foreground tracking-tight">
-                Outfit Schedule
+                Your Week, Styled
               </h1>
               <p className="text-muted-foreground font-sans text-xs mt-0.5">
-                Your curated weekly wardrobe — powered by AI & weather
+                Never open your closet wondering what to wear again
               </p>
             </div>
             <div className="flex items-center gap-2">
