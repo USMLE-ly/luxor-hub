@@ -567,7 +567,7 @@ const Closet = () => {
                 </DialogTrigger>
                 <DialogContent className="bg-card border-border max-w-md max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
-                    <DialogTitle className="font-display text-xl">Add Clothing Item</DialogTitle>
+                    <DialogTitle className="font-display text-xl">New Piece</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4 mt-4">
                     <div>
