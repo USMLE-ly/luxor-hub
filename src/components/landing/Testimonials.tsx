@@ -3,6 +3,7 @@ import { BarChart3, ArrowUpRight } from "lucide-react";
 import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
 import { useRef, useState, useEffect } from "react";
 import { useInView } from "framer-motion";
+import { TestimonialCard } from "@/components/ui/testimonial-cards";
 
 import statsMain from "@/assets/revenue/stats-main.png";
 import sales10k from "@/assets/revenue/sales-10k.png";
@@ -42,48 +43,13 @@ const AnimatedCounter = ({ target, prefix = "", suffix = "" }: { target: number;
 };
 
 const shuffleScreenshots = [
-  { id: 1, src: sales673k, label: "$673,912 Total Sales", growth: "+56%" },
-  { id: 2, src: sales105k, label: "$105,525 in 90 Days", growth: "+1,300%" },
-  { id: 3, src: grossSales390k, label: "€390,033 Gross Sales", growth: "+198K%" },
-  { id: 4, src: sales81k, label: "$81,452 in 5 Months", growth: "" },
-  { id: 5, src: sales10k, label: "$10,349 Early Stage", growth: "+1.88%" },
-  { id: 6, src: stripePayout, label: "€48,579 Stripe Payout", growth: "" },
+  { id: 1, image: sales673k, testimonial: "$673,912 total sales with 56% growth over 90 days.", author: "Shopify Dashboard" },
+  { id: 2, image: sales105k, testimonial: "$105,525 generated with 1,300% increase and 3.35K orders.", author: "Shopify Analytics" },
+  { id: 3, image: grossSales390k, testimonial: "€390,033 gross sales, 11,880 orders fulfilled, 391K sessions.", author: "Store Overview" },
+  { id: 4, image: sales81k, testimonial: "$81,452 in total sales across 1.01K orders over 5 months.", author: "Sales Report" },
+  { id: 5, image: sales10k, testimonial: "$10,349 in early-stage revenue with 330 orders at 1.88% conversion.", author: "Early Growth" },
+  { id: 6, image: stripePayout, testimonial: "€48,579.84 Stripe payout confirmed and on its way.", author: "Stripe Payout" },
 ];
-
-const positionStyles: Record<string, string> = {
-  front: "z-30 scale-100 translate-y-0 opacity-100",
-  middle: "z-20 scale-[0.95] translate-y-4 opacity-80",
-  back: "z-10 scale-[0.90] translate-y-8 opacity-60",
-};
-
-const ShuffleCard = ({
-  src, label, growth, position, handleShuffle,
-}: {
-  src: string; label: string; growth: string; position: string; handleShuffle: () => void;
-}) => (
-  <motion.div
-    onClick={handleShuffle}
-    className={`absolute inset-0 cursor-pointer transition-all duration-500 ease-out ${positionStyles[position]}`}
-    style={{ transformOrigin: "bottom center" }}
-    whileTap={{ scale: 0.97 }}
-  >
-    <div className="glass rounded-2xl overflow-hidden border border-white/[0.08] h-full">
-      <div className="relative h-full">
-        <img src={src} alt={label} className="w-full h-full object-cover" loading="lazy" />
-        <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/80 to-transparent" />
-        <div className="absolute bottom-3 left-3.5 right-3.5">
-          <p className="font-sans text-xs md:text-sm font-semibold text-white">{label}</p>
-          {growth && (
-            <span className="inline-flex items-center gap-0.5 text-emerald-400 text-[10px] font-bold mt-0.5">
-              <ArrowUpRight className="w-2.5 h-2.5" />
-              {growth}
-            </span>
-          )}
-        </div>
-      </div>
-    </div>
-  </motion.div>
-);
 
 const ShuffleSection = () => {
   const [positions, setPositions] = useState(["front", "middle", "back"]);
@@ -101,9 +67,14 @@ const ShuffleSection = () => {
   const visible = [0, 1, 2].map((offset) => shuffleScreenshots[(startIdx + offset) % shuffleScreenshots.length]);
 
   return (
-    <div className="relative h-[360px] w-[300px] md:h-[420px] md:w-[350px] mx-auto">
-      {visible.map((s, i) => (
-        <ShuffleCard key={s.id} src={s.src} label={s.label} growth={s.growth} position={positions[i]} handleShuffle={handleShuffle} />
+    <div className="relative -ml-[100px] h-[520px] w-[350px] md:-ml-[175px]">
+      {visible.map((s, index) => (
+        <TestimonialCard
+          key={s.id}
+          {...s}
+          handleShuffle={handleShuffle}
+          position={positions[index]}
+        />
       ))}
     </div>
   );
@@ -182,7 +153,7 @@ const Testimonials = () => (
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 0.6, delay: 0.15 }}
-        className="mb-10"
+        className="mb-12"
       >
         <div className="glass rounded-2xl overflow-hidden border border-white/[0.08] hover:border-primary/20 transition-all duration-500">
           <div className="relative">
@@ -207,18 +178,13 @@ const Testimonials = () => (
         </div>
       </motion.div>
 
-      {/* Shuffle stack */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-      >
+      {/* Shuffle cards */}
+      <div className="grid place-content-center overflow-hidden px-4 py-8">
         <ShuffleSection />
-        <p className="text-center mt-6 text-xs text-muted-foreground/60 font-sans">
-          Tap to see more screenshots →
-        </p>
-      </motion.div>
+      </div>
+      <p className="text-center mt-4 text-xs text-muted-foreground/60 font-sans">
+        Swipe left to see more →
+      </p>
 
       <motion.p
         initial={{ opacity: 0 }}
