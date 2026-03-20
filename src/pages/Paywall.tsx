@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Crown, Check, Shield, Clock } from "lucide-react";
+import { Crown, Check, Shield, Clock, RotateCcw } from "lucide-react";
 import { PricingInteraction } from "@/components/ui/pricing-interaction";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,6 +20,7 @@ const Paywall = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [activating, setActivating] = useState(false);
+  const [restoring, setRestoring] = useState(false);
 
   const handleGetStarted = async () => {
     if (!user) {
@@ -44,6 +45,34 @@ const Paywall = () => {
       toast.error("Something went wrong. Please try again.");
     } finally {
       setActivating(false);
+    }
+  };
+
+  const handleRestore = async () => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+    setRestoring(true);
+    try {
+      // Check if user previously had a paid status
+      const { data } = await supabase
+        .from("style_profiles")
+        .select("style_score")
+        .eq("user_id", user.id)
+        .single();
+
+      if (data?.style_score && data.style_score >= 1) {
+        localStorage.setItem("luxor_paid", "true");
+        toast.success("Purchase restored! Welcome back to Luxor.");
+        navigate("/dashboard");
+      } else {
+        toast.info("No previous purchase found for this account.");
+      }
+    } catch {
+      toast.error("Could not verify purchase. Please try again.");
+    } finally {
+      setRestoring(false);
     }
   };
 
@@ -144,9 +173,26 @@ const Paywall = () => {
           ))}
         </motion.div>
 
-        <p className="text-center text-[10px] text-muted-foreground/60 font-sans">
+        <p className="text-center text-[10px] text-muted-foreground/60 font-sans mb-4">
           Secure payment processing. Your data is encrypted.
         </p>
+
+        {/* Restore Purchase */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.55 }}
+          className="flex justify-center"
+        >
+          <button
+            onClick={handleRestore}
+            disabled={restoring}
+            className="flex items-center gap-1.5 text-xs font-sans text-muted-foreground hover:text-primary transition-colors active:scale-95"
+          >
+            <RotateCcw className={`w-3.5 h-3.5 ${restoring ? "animate-spin" : ""}`} />
+            Restore previous purchase
+          </button>
+        </motion.div>
       </div>
     </div>
   );
