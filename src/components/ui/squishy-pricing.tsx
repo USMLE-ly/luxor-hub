@@ -91,14 +91,23 @@ export const SquishyPricingCard = ({
         <>
           <div className="relative z-10 my-5 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
           <ul className="relative z-10 space-y-3 flex-1">
-            {features.map((f, i) => (
-              <li key={i} className="flex items-center gap-3 text-white">
-                <div className="w-5 h-5 flex-shrink-0 rounded-full bg-white/10 border border-white/15 flex items-center justify-center">
-                  <Check className="w-3 h-3 text-white/90" strokeWidth={2.5} />
-                </div>
-                <span className="text-[11px] font-sans leading-snug tracking-wide text-white/85">{f}</span>
-              </li>
-            ))}
+            {features.map((f, i) => {
+              const isObj = typeof f === 'object';
+              const text = isObj ? f.text : f;
+              const included = isObj ? f.included : true;
+              return (
+                <li key={i} className={`flex items-center gap-3 ${included ? 'text-white' : 'text-white/35'}`}>
+                  <div className={`w-5 h-5 flex-shrink-0 rounded-full flex items-center justify-center ${included ? 'bg-white/10 border border-white/15' : 'bg-white/5 border border-white/8'}`}>
+                    {included ? (
+                      <Check className="w-3 h-3 text-white/90" strokeWidth={2.5} />
+                    ) : (
+                      <X className="w-3 h-3 text-white/30" strokeWidth={2} />
+                    )}
+                  </div>
+                  <span className={`text-[11px] font-sans leading-snug tracking-wide ${included ? 'text-white/85' : 'text-white/35 line-through decoration-white/20'}`}>{text}</span>
+                </li>
+              );
+            })}
           </ul>
         </>
       )}
