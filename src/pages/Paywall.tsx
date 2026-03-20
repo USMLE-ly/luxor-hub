@@ -182,7 +182,10 @@ const Paywall = () => {
               footer={
                 <div
                   className="w-full"
-                  onClick={() => setSelectedTier(t.key)}
+                  onClick={() => {
+                    setSelectedTier(t.key);
+                    trackEvent("AddToCart", { content_name: `LEXOR® ${t.label}`, value: t.price, currency: "USD" });
+                  }}
                   onFocus={() => setSelectedTier(t.key)}
                 >
                   <PayPalButton
