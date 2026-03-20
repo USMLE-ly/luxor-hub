@@ -1,5 +1,5 @@
 /**
- * Premium body shape illustrations with anatomical detail, gradient shading, and highlight accents.
+ * Premium body shape SVG with anatomical detail, multi-layer shading, arms, and measurement labels.
  */
 
 interface BodyShapeSvgProps {
@@ -9,132 +9,134 @@ interface BodyShapeSvgProps {
   className?: string;
 }
 
-// Female body outline — refined with smoother curves
+// Female body — smooth curves with arms
 const femaleBodyOutline = `
-  M50,5 C54,5 57,8 57,12 C57,16 54,19 50,19 C46,19 43,16 43,12 C43,8 46,5 50,5
-  M50,19 L50,22
-  M40,25 C43,22 47,21 50,22 C53,21 57,22 60,25
-  L62,28 L61,32 L59,38 L57,44 L56,48 L57,52 L59,56 L60,62 L59,66
-  L57,70 L55,78 L53,86 L52,94
-  L48,94 L47,86 L45,78 L43,70 L41,66
-  L40,62 L41,56 L43,52 L44,48 L43,44 L41,38 L39,32 L38,28 Z
-  M40,25 L35,28 L32,34 L30,40 L29,46 L30,48
-  M60,25 L65,28 L68,34 L70,40 L71,46 L70,48
+  M50,5 C54.5,5 57.5,8 57.5,12.5 C57.5,17 54.5,20 50,20 C45.5,20 42.5,17 42.5,12.5 C42.5,8 45.5,5 50,5
+  M50,20 L50,22.5
+  M40,26 C43,22.5 47,21.5 50,22.5 C53,21.5 57,22.5 60,26
+  L62,29 L61,33 L59,39 L57,45 L56,49 L57,53 L59,57 L60,63 L59,67
+  L57,71 L55,79 L53,87 L52,95
+  L48,95 L47,87 L45,79 L43,71 L41,67
+  L40,63 L41,57 L43,53 L44,49 L43,45 L41,39 L39,33 L38,29 Z
+  M40,26 L35,29 L32,35 L30,41 L29,47 L30,49
+  M60,26 L65,29 L68,35 L70,41 L71,47 L70,49
 `;
 
 const maleBodyOutline = `
-  M50,4 C54.5,4 58,7.5 58,12 C58,16.5 54.5,20 50,20 C45.5,20 42,16.5 42,12 C42,7.5 45.5,4 50,4
-  M50,20 L50,23
-  M36,27 C40,23 45,22 50,23 C55,22 60,23 64,27
-  L67,31 L66,36 L64,42 L62,48 L61,52 L62,56 L63,62 L62,68
-  L60,73 L57,82 L55,90 L54,97
-  L46,97 L45,90 L43,82 L40,73 L38,68
-  L37,62 L38,56 L39,52 L38,48 L36,42 L34,36 L33,31 Z
-  M36,27 L28,31 L25,38 L23,46 L22,52 L24,54
-  M64,27 L72,31 L75,38 L77,46 L78,52 L76,54
+  M50,4 C55,4 58.5,7.5 58.5,12.5 C58.5,17.5 55,21 50,21 C45,21 41.5,17.5 41.5,12.5 C41.5,7.5 45,4 50,4
+  M50,21 L50,24
+  M36,28 C40,24 45,23 50,24 C55,23 60,24 64,28
+  L67,32 L66,37 L64,43 L62,49 L61,53 L62,57 L63,63 L62,69
+  L60,74 L57,83 L55,91 L54,98
+  L46,98 L45,91 L43,83 L40,74 L38,69
+  L37,63 L38,57 L39,53 L38,49 L36,43 L34,37 L33,32 Z
+  M36,28 L28,32 L25,39 L23,47 L22,53 L24,55
+  M64,28 L72,32 L75,39 L77,47 L78,53 L76,55
 `;
 
 const femaleShapeOverlays: Record<string, string> = {
-  Hourglass: `M38,25 L62,25 L64,30 L62,34 L58,38 L54,44 L52,48 L54,52 L58,56 L62,60 L64,66 L62,70 L38,70 L36,66 L38,60 L42,56 L46,52 L48,48 L46,44 L42,38 L38,34 L36,30 Z`,
-  Triangle: `M45,25 L55,25 L56,30 L55,36 L54,42 L53,48 L54,52 L57,56 L62,62 L66,68 L64,70 L36,70 L34,68 L38,62 L43,56 L46,52 L47,48 L46,42 L45,36 L44,30 Z`,
-  "Inverted triangle": `M32,25 L68,25 L67,30 L64,36 L60,42 L57,48 L56,52 L54,56 L53,62 L52,68 L52,70 L48,70 L48,68 L47,62 L46,56 L44,52 L43,48 L40,42 L36,36 L33,30 Z`,
-  Rectangle: `M42,25 L58,25 L59,30 L59,36 L59,42 L59,48 L59,52 L59,56 L59,62 L59,68 L58,70 L42,70 L41,68 L41,62 L41,56 L41,52 L41,48 L41,42 L41,36 L41,30 Z`,
-  Round: `M44,25 L56,25 L58,30 L60,36 Q66,46 66,52 Q66,58 62,64 L58,68 L56,70 L44,70 L42,68 L38,64 Q34,58 34,52 Q34,46 40,36 L42,30 Z`,
+  Hourglass: `M38,26 Q44,26 50,27 Q56,26 62,26 L64,31 Q62,35 58,39 Q54,44 52,49 Q54,53 58,57 Q62,61 64,67 L62,71 Q56,71 50,72 Q44,71 38,71 L36,67 Q38,61 42,57 Q46,53 48,49 Q46,44 42,39 Q38,35 36,31 Z`,
+  Triangle: `M45,26 Q47.5,26 50,27 Q52.5,26 55,26 L56,31 Q55,37 54,43 Q53,49 54,53 Q57,57 62,63 Q66,68 64,71 L36,71 Q34,68 38,63 Q43,57 46,53 Q47,49 46,43 Q45,37 44,31 Z`,
+  "Inverted triangle": `M32,26 Q41,26 50,27 Q59,26 68,26 L67,31 Q64,37 60,43 Q57,49 56,53 Q54,57 53,63 Q52,68 52,71 L48,71 Q48,68 47,63 Q46,57 44,53 Q43,49 40,43 Q36,37 33,31 Z`,
+  Rectangle: `M42,26 Q46,26 50,27 Q54,26 58,26 L59,31 L59,37 L59,43 L59,49 L59,53 L59,57 L59,63 L59,68 L58,71 L42,71 L41,68 L41,63 L41,57 L41,53 L41,49 L41,43 L41,37 L41,31 Z`,
+  Round: `M44,26 Q47,26 50,27 Q53,26 56,26 L58,31 Q60,37 64,43 Q68,50 68,55 Q68,61 64,67 L58,71 Q54,71 50,72 Q46,71 42,71 L36,67 Q32,61 32,55 Q32,50 36,43 Q40,37 42,31 Z`,
 };
 
 const maleShapeOverlays: Record<string, string> = {
-  Rectangle: `M40,27 L60,27 L61,32 L61,40 L61,48 L61,52 L61,58 L61,64 L61,70 L60,74 L40,74 L39,70 L39,64 L39,58 L39,52 L39,48 L39,40 L39,32 Z`,
-  Triangle: `M44,27 L56,27 L57,32 L56,40 L55,48 L55,52 L57,58 L61,64 L66,70 L65,74 L35,74 L34,70 L39,64 L43,58 L45,52 L45,48 L44,40 L43,32 Z`,
-  "Inverted triangle": `M28,27 L72,27 L70,32 L66,40 L62,48 L59,52 L57,58 L55,64 L54,70 L54,74 L46,74 L46,70 L45,64 L43,58 L41,52 L38,48 L34,40 L30,32 Z`,
-  Oval: `M43,27 L57,27 L60,32 L63,40 Q70,52 66,62 Q62,70 58,74 L42,74 Q38,70 34,62 Q30,52 37,40 L40,32 Z`,
-  Trapezoid: `M32,27 L68,27 L67,32 L64,40 L62,48 L61,52 L61,58 L61,64 L60,70 L59,74 L41,74 L40,70 L39,64 L39,58 L39,52 L38,48 L36,40 L33,32 Z`,
+  Rectangle: `M40,28 Q45,28 50,29 Q55,28 60,28 L61,33 L61,41 L61,49 L61,53 L61,59 L61,65 L61,71 L60,75 L40,75 L39,71 L39,65 L39,59 L39,53 L39,49 L39,41 L39,33 Z`,
+  Triangle: `M44,28 Q47,28 50,29 Q53,28 56,28 L57,33 Q56,41 55,49 Q55,53 57,59 Q61,65 66,71 L65,75 L35,75 L34,71 Q39,65 43,59 Q45,53 45,49 Q44,41 43,33 Z`,
+  "Inverted triangle": `M28,28 Q39,28 50,29 Q61,28 72,28 L70,33 Q66,41 62,49 Q59,53 57,59 Q55,65 54,71 L54,75 L46,75 L46,71 Q45,65 43,59 Q41,53 38,49 Q34,41 30,33 Z`,
+  Oval: `M43,28 Q46.5,28 50,29 Q53.5,28 57,28 L60,33 Q63,41 68,49 Q72,55 68,63 Q64,71 60,75 L40,75 Q36,71 32,63 Q28,55 32,49 Q37,41 40,33 Z`,
+  Trapezoid: `M32,28 Q41,28 50,29 Q59,28 68,28 L67,33 Q64,41 62,49 Q61,53 61,59 L61,65 L60,71 L59,75 L41,75 L40,71 L39,65 L39,59 Q39,53 38,49 Q36,41 33,33 Z`,
 };
 
 const BodyShapeSvg = ({ shape, gender, size = 80, className = "" }: BodyShapeSvgProps) => {
   const overlays = gender === "female" ? femaleShapeOverlays : maleShapeOverlays;
   const bodyOutline = gender === "female" ? femaleBodyOutline : maleBodyOutline;
   const overlayPath = overlays[shape];
-  const gradId = `body-grad-${shape.replace(/\s/g, "")}`;
-  const highlightId = `body-hl-${shape.replace(/\s/g, "")}`;
-  const shadowId = `body-sh-${shape.replace(/\s/g, "")}`;
+  const uid = `bs-${shape.replace(/\s/g, "")}-${gender}`;
 
   return (
     <div className={className}>
       <svg
         width={size}
-        height={size * 1.4}
+        height={size * 1.3}
         viewBox="0 0 100 100"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
-          {/* Skin gradient */}
-          <linearGradient id={gradId} x1="30%" y1="0%" x2="70%" y2="100%">
-            <stop offset="0%" stopColor="hsl(25, 70%, 88%)" />
-            <stop offset="50%" stopColor="hsl(20, 65%, 82%)" />
-            <stop offset="100%" stopColor="hsl(15, 55%, 76%)" />
+          {/* Rich skin gradient */}
+          <linearGradient id={`${uid}-skin`} x1="25%" y1="0%" x2="75%" y2="100%">
+            <stop offset="0%" stopColor="hsl(28, 72%, 90%)" />
+            <stop offset="30%" stopColor="hsl(22, 68%, 84%)" />
+            <stop offset="60%" stopColor="hsl(18, 62%, 78%)" />
+            <stop offset="100%" stopColor="hsl(14, 55%, 72%)" />
           </linearGradient>
-          {/* Highlight edge */}
-          <linearGradient id={highlightId} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="hsl(30, 80%, 92%)" stopOpacity="0.6" />
-            <stop offset="100%" stopColor="hsl(20, 60%, 80%)" stopOpacity="0" />
+          {/* 3D highlight */}
+          <linearGradient id={`${uid}-hl`} x1="0%" y1="15%" x2="100%" y2="85%">
+            <stop offset="0%" stopColor="hsl(35, 85%, 95%)" stopOpacity="0.7" />
+            <stop offset="40%" stopColor="hsl(25, 70%, 88%)" stopOpacity="0.15" />
+            <stop offset="100%" stopColor="transparent" stopOpacity="0" />
           </linearGradient>
-          {/* Shadow filter */}
-          <filter id={shadowId} x="-10%" y="-10%" width="120%" height="120%">
-            <feDropShadow dx="0" dy="1" stdDeviation="1.5" floodColor="hsl(15, 40%, 30%)" floodOpacity="0.15" />
+          {/* Inner shadow (right side) */}
+          <linearGradient id={`${uid}-ish`} x1="100%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="hsl(12, 45%, 50%)" stopOpacity="0.12" />
+            <stop offset="100%" stopColor="transparent" stopOpacity="0" />
+          </linearGradient>
+          {/* Specular */}
+          <radialGradient id={`${uid}-spec`} cx="40%" cy="30%" r="35%">
+            <stop offset="0%" stopColor="white" stopOpacity="0.15" />
+            <stop offset="100%" stopColor="transparent" stopOpacity="0" />
+          </radialGradient>
+          {/* Premium stroke */}
+          <linearGradient id={`${uid}-stroke`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="hsl(var(--primary) / 0.5)" />
+            <stop offset="50%" stopColor="hsl(var(--primary) / 0.7)" />
+            <stop offset="100%" stopColor="hsl(var(--primary) / 0.4)" />
+          </linearGradient>
+          {/* Drop shadow */}
+          <filter id={`${uid}-drop`} x="-12%" y="-8%" width="124%" height="120%">
+            <feDropShadow dx="0" dy="1.5" stdDeviation="2" floodColor="hsl(15, 40%, 22%)" floodOpacity="0.16" />
           </filter>
-          {/* Stroke gradient */}
-          <linearGradient id={`${gradId}-stroke`} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="hsl(20, 50%, 65%)" />
-            <stop offset="100%" stopColor="hsl(15, 40%, 55%)" />
-          </linearGradient>
         </defs>
 
-        {/* Shape overlay with gradient fill and shadow */}
+        {/* Shape overlay — multi-layer fill */}
         {overlayPath && (
-          <path
-            d={overlayPath}
-            fill={`url(#${gradId})`}
-            stroke={`url(#${gradId}-stroke)`}
-            strokeWidth="0.8"
-            strokeLinejoin="round"
-            strokeLinecap="round"
-            filter={`url(#${shadowId})`}
-          />
-        )}
-
-        {/* Highlight layer for depth */}
-        {overlayPath && (
-          <path
-            d={overlayPath}
-            fill={`url(#${highlightId})`}
-            stroke="none"
-          />
+          <>
+            <path d={overlayPath} fill={`url(#${uid}-skin)`} stroke={`url(#${uid}-stroke)`} strokeWidth="0.7" strokeLinejoin="round" strokeLinecap="round" filter={`url(#${uid}-drop)`} />
+            <path d={overlayPath} fill={`url(#${uid}-hl)`} stroke="none" />
+            <path d={overlayPath} fill={`url(#${uid}-ish)`} stroke="none" />
+            <path d={overlayPath} fill={`url(#${uid}-spec)`} stroke="none" />
+          </>
         )}
 
         {/* Body outline */}
         <path
           d={bodyOutline}
-          stroke="hsl(0, 0%, 30%)"
-          strokeWidth="0.6"
+          stroke="hsl(0, 0%, 35%)"
+          strokeWidth="0.5"
           fill="none"
           strokeLinecap="round"
           strokeLinejoin="round"
-          opacity="0.7"
+          opacity="0.5"
         />
 
-        {/* Measurement lines with dots */}
+        {/* Measurement guides with labels */}
         {overlayPath && (
-          <g opacity="0.25">
-            <line x1="26" y1="27" x2="74" y2="27" stroke="hsl(var(--primary))" strokeWidth="0.4" strokeDasharray="1.5,1.5" />
-            <line x1="26" y1="48" x2="74" y2="48" stroke="hsl(var(--primary))" strokeWidth="0.4" strokeDasharray="1.5,1.5" />
-            <line x1="26" y1="68" x2="74" y2="68" stroke="hsl(var(--primary))" strokeWidth="0.4" strokeDasharray="1.5,1.5" />
-            <circle cx="26" cy="27" r="1" fill="hsl(var(--primary))" />
-            <circle cx="74" cy="27" r="1" fill="hsl(var(--primary))" />
-            <circle cx="26" cy="48" r="1" fill="hsl(var(--primary))" />
-            <circle cx="74" cy="48" r="1" fill="hsl(var(--primary))" />
-            <circle cx="26" cy="68" r="1" fill="hsl(var(--primary))" />
-            <circle cx="74" cy="68" r="1" fill="hsl(var(--primary))" />
+          <g opacity="0.3">
+            {[
+              { y: gender === "female" ? 27 : 28, label: "S" },
+              { y: gender === "female" ? 49 : 49, label: "W" },
+              { y: gender === "female" ? 68 : 69, label: "H" },
+            ].map((m) => (
+              <g key={m.label}>
+                <line x1="22" y1={m.y} x2="78" y2={m.y} stroke="hsl(var(--primary))" strokeWidth="0.35" strokeDasharray="1.5,2" />
+                <circle cx="22" cy={m.y} r="1" fill="hsl(var(--primary))" opacity="0.5" />
+                <circle cx="78" cy={m.y} r="1" fill="hsl(var(--primary))" opacity="0.5" />
+                <text x="80" y={m.y + 1.5} fontSize="4" fill="hsl(var(--primary))" opacity="0.5" fontFamily="sans-serif" fontWeight="600">{m.label}</text>
+              </g>
+            ))}
           </g>
         )}
       </svg>
