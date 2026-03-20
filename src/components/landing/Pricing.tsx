@@ -1,57 +1,21 @@
 import { motion } from "framer-motion";
-import { Check, Crown, Shield, CreditCard } from "lucide-react";
+import { Shield } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { PricingInteraction } from "@/components/ui/pricing-interaction";
-import { useState } from "react";
 import { trackEvent } from "@/lib/fbPixel";
-
-const tiers = [
-  {
-    name: "Starter",
-    price: "$9",
-    period: "/month",
-    description: "Essential AI styling tools",
-    features: ["200 closet items", "Daily outfit suggestions", "Basic color analysis", "Closet scanner", "Community access"],
-    cta: "Join Now",
-    highlighted: false,
-  },
-  {
-    name: "Pro",
-    price: "$29",
-    period: "/month",
-    description: "Unlock your full style potential",
-    features: [
-      "Unlimited closet items",
-      "AI Stylist Chat",
-      "Advanced Style DNA",
-      "Shopping recommendations",
-      "Outfit calendar",
-      "Priority AI processing",
-    ],
-    cta: "Claim Your Spot",
-    highlighted: true,
-  },
-  {
-    name: "Elite",
-    price: "$99",
-    period: "/month",
-    description: "Full concierge-level styling",
-    features: [
-      "Everything in Pro",
-      "Virtual try-on",
-      "Trend intelligence",
-      "Fashion design studio",
-      "Personal style reports",
-      "1-on-1 AI consultations",
-    ],
-    cta: "Go Elite",
-    highlighted: false,
-  },
-];
+import {
+  SquishyPricingCard,
+  BGComponent1,
+  BGComponent2,
+  BGComponent3,
+} from "@/components/ui/squishy-pricing";
 
 const Pricing = () => {
   const navigate = useNavigate();
-  const [hoveredTier, setHoveredTier] = useState<number | null>(null);
+
+  const handleCta = () => {
+    trackEvent("InitiateCheckout", { content_name: "LUXOR Pricing" });
+    navigate("/auth");
+  };
 
   return (
     <section id="pricing" className="py-20 md:py-32 bg-muted/20">
@@ -59,7 +23,7 @@ const Pricing = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
+          viewport={{ once: true, amount: 0.2 }}
           className="text-center mb-16"
         >
           <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase mb-3">Pricing</p>
@@ -71,79 +35,44 @@ const Pricing = () => {
           </p>
         </motion.div>
 
-        <div className="grid lg:grid-cols-2 gap-12 items-start">
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
-            className="flex justify-center"
-          >
-            <PricingInteraction
-              starterMonth={9}
-              starterAnnual={7}
-              proMonth={29}
-              proAnnual={23}
-              eliteMonth={99}
-              eliteAnnual={79}
-              onGetStarted={() => {
-                trackEvent("InitiateCheckout", { content_name: "LUXOR Pricing" });
-                navigate("/auth");
-              }}
-            />
-          </motion.div>
-
-          <div className="grid gap-6">
-            {tiers.map((tier, i) => (
-              <motion.div
-                key={tier.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{ delay: i * 0.12 }}
-                className={`relative rounded-2xl p-6 premium-card transition-all duration-300 ${
-                  tier.highlighted
-                    ? "glass-strong border-primary/30 shadow-[0_0_30px_-8px_hsl(var(--primary)/0.2)] scale-[1.02] border-2"
-                    : "glass"
-                } ${hoveredTier !== null && hoveredTier !== i ? "opacity-60" : "opacity-100"}`}
-                onMouseEnter={() => setHoveredTier(i)}
-                onMouseLeave={() => setHoveredTier(null)}
-              >
-                {tier.highlighted && (
-                  <div className="absolute -top-3 left-6 px-4 py-1 rounded-full gold-gradient text-xs font-bold text-primary-foreground font-sans flex items-center gap-1">
-                    <Crown className="w-3 h-3" /> Most Popular
-                  </div>
-                )}
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <h3 className="font-display text-lg font-bold text-foreground">{tier.name}</h3>
-                    <p className="font-sans text-xs text-muted-foreground">{tier.description}</p>
-                  </div>
-                  <p className="font-display text-2xl font-bold text-foreground">
-                    {tier.price}
-                    <span className="text-sm font-sans font-normal text-muted-foreground">{tier.period}</span>
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {tier.features.map((f) => (
-                    <span key={f} className="inline-flex items-center gap-1 text-xs font-sans text-foreground bg-muted/50 px-2 py-1 rounded-full">
-                      <Check className="w-3 h-3 text-primary shrink-0" />
-                      {f}
-                    </span>
-                  ))}
-                </div>
-              </motion.div>
-            ))}
-          </div>
+        <div className="flex flex-col md:flex-row gap-6 justify-center items-center">
+          <SquishyPricingCard
+            label="Starter"
+            monthlyPrice="9"
+            description="Essential AI styling tools for your everyday wardrobe"
+            cta="Join Now"
+            background="bg-[hsl(43,74%,35%)]"
+            BGComponent={BGComponent1}
+            onCtaClick={handleCta}
+          />
+          <SquishyPricingCard
+            label="Pro"
+            monthlyPrice="29"
+            description="Unlock your full style potential with advanced AI"
+            cta="Claim Your Spot"
+            background="bg-[hsl(43,74%,49%)]"
+            BGComponent={BGComponent2}
+            onCtaClick={handleCta}
+          />
+          <SquishyPricingCard
+            label="Elite"
+            monthlyPrice="99"
+            description="Full concierge-level styling with virtual try-on"
+            cta="Go Elite"
+            background="bg-[hsl(35,80%,42%)]"
+            BGComponent={BGComponent3}
+            onCtaClick={handleCta}
+          />
         </div>
-        {/* Trust Badges & Urgency */}
+
+        {/* Trust Badges */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
+          viewport={{ once: true, amount: 0.2 }}
           transition={{ delay: 0.3 }}
           className="mt-12 flex flex-col items-center gap-5"
         >
-          {/* Payment icons */}
           <div className="flex items-center gap-3">
             {[
               { src: "/payments/visa.svg", alt: "Visa" },
@@ -154,22 +83,13 @@ const Pricing = () => {
               { src: "/payments/wechat.svg", alt: "WeChat Pay" },
               { src: "/payments/venmo.svg", alt: "Venmo" },
             ].map((icon) => (
-              <img
-                key={icon.alt}
-                src={icon.src}
-                alt={icon.alt}
-                className="h-8 w-auto rounded-md"
-              />
+              <img key={icon.alt} src={icon.src} alt={icon.alt} className="h-8 w-auto rounded-md" />
             ))}
           </div>
-
-          {/* Urgency micro-copy */}
           <p className="text-xs font-sans text-muted-foreground flex items-center gap-1.5">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary urgency-pulse" />
             This price won't last. <span className="font-medium text-foreground">237 founding spots</span> remain.
           </p>
-
-          {/* Guarantee badge */}
           <div className="flex items-center gap-2 text-xs font-sans text-muted-foreground">
             <Shield className="w-4 h-4 text-primary" />
             <span>30-day money-back guarantee</span>
