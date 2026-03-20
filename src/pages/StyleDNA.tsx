@@ -194,7 +194,7 @@ const StyleDNA = () => {
           <div className="p-5 relative z-10">
             {/* Header row */}
             <div className="flex items-center justify-between mb-5">
-              <h2 className="font-display text-xl font-bold text-foreground">My Style Formula</h2>
+              <h2 className="font-display text-xl font-bold text-foreground">Your Blueprint for Looking Incredible</h2>
               <Button
                 variant="outline"
                 size="sm"
