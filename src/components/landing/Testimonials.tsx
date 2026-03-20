@@ -79,7 +79,7 @@ const ShuffleSection = () => {
   const visibleProofs = [0, 1, 2].map((offset) => shuffleProofs[(startIdx + offset) % shuffleProofs.length]);
 
   return (
-    <div className="relative h-[450px] w-[350px] mx-auto md:mx-0">
+    <div className="relative h-[520px] w-[350px] mx-auto md:mx-0">
       {visibleProofs.map((proof, index) => (
         <TestimonialCard
           key={proof.id}
