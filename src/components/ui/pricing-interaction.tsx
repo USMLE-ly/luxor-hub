@@ -138,7 +138,10 @@ export function PricingInteraction({
             ref={(el) => { tierRefs.current[idx] = el; }}
             className="w-full cursor-pointer border-2 border-border p-4 rounded-2xl transition-all duration-300"
             style={{ opacity: active !== idx ? 0.7 : 1 }}
-            onClick={() => setActive(idx)}
+            onClick={() => {
+              setActive(idx);
+              onTierChange?.(tierNames[idx]);
+            }}
           >
             <div className="flex justify-between">
               <div className="flex flex-col items-start">
