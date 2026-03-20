@@ -46,8 +46,8 @@ export const SquishyPricingCard = ({
         </div>
       )}
 
-      <div className="relative z-10 text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.4)]">
-        <span className="mb-3 block w-fit rounded-full bg-black/20 backdrop-blur-md px-4 py-1 text-xs font-bold uppercase tracking-[0.12em] text-white border border-white/20 font-sans">
+      <div className="relative z-10 text-white">
+        <span className="mb-3 block w-fit rounded-full bg-black/30 backdrop-blur-md px-4 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-white border border-white/20 font-sans">
           {label}
         </span>
         <motion.div
@@ -59,9 +59,9 @@ export const SquishyPricingCard = ({
           <span className="font-display text-[2.75rem] sm:text-[3.25rem] font-bold leading-none tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)]">
             ${monthlyPrice}
           </span>
-          <span className="text-sm font-bold font-sans text-white/90 ml-1 drop-shadow-[0_1px_4px_rgba(0,0,0,0.3)]">/month</span>
+          <span className="text-sm font-sans text-white/80 ml-1">/month</span>
         </motion.div>
-        <p className="text-xs sm:text-sm text-white font-medium mt-1 font-sans leading-relaxed drop-shadow-[0_1px_4px_rgba(0,0,0,0.3)]">{description}</p>
+        <p className="inline text-xs sm:text-sm text-white mt-1 font-sans leading-relaxed"><span className="bg-black/25 rounded px-1.5 py-0.5 box-decoration-clone">{description}</span></p>
       </div>
 
       {hasFeatures && (
