@@ -835,19 +835,49 @@ const CameraCaptureStep = ({ step, answers, onSelect }: { step: OnboardingStep; 
 };
 
 const femaleGarments = [
-  { d: "M60,25 L55,35 Q50,55 45,80 Q44,85 48,85 L72,85 Q76,85 75,80 Q70,55 65,35 Z", fill: "hsl(43,74%,49%)", label: "Dress" },
-  { d: "M80,25 L76,32 Q78,40 74,55 L72,60 L88,60 L86,55 Q82,40 84,32 Z", fill: "hsl(350,60%,72%)", label: "Wrap Top" },
-  { d: "M100,25 L100,35 Q95,45 90,70 Q89,75 94,75 L106,75 Q111,75 110,70 Q105,45 100,35 Z", fill: "hsl(280,30%,75%)", label: "A-Line" },
-  { d: "M120,25 L117,33 Q119,42 116,55 L114,62 L126,62 L124,55 Q121,42 123,33 Z", fill: "hsl(0,0%,92%)", label: "Blouse" },
-  { d: "M140,25 L140,35 Q142,50 148,80 L152,80 Q150,70 148,60 L152,60 Q150,50 140,35 M140,35 Q130,50 128,60 L132,60 Q130,70 128,80 L132,80 Q138,50 140,35 Z", fill: "hsl(210,25%,68%)", label: "Wide Leg" },
+  {
+    d: "M60,24 L57,26 Q54,30 52,36 Q49,45 46,58 Q44,68 43,78 Q42,83 46,84 L50,84 L54,84 Q55,78 57,70 L60,60 L63,70 Q65,78 66,84 L70,84 L74,84 Q78,83 77,78 Q76,68 73,58 Q70,45 68,36 Q66,30 63,26 Z",
+    fill: "hsl(43,74%,49%)", label: "Dress"
+  },
+  {
+    d: "M80,24 L76,27 Q74,30 73,35 Q72,40 72,48 L72,56 L74,56 Q75,48 76,42 Q77,36 78,32 L80,28 L82,32 Q83,36 84,42 Q85,48 86,56 L88,56 L88,48 Q88,40 87,35 Q86,30 84,27 Z M76,56 Q75,60 74,64 L86,64 Q85,60 84,56 Z",
+    fill: "hsl(350,55%,68%)", label: "Blouse"
+  },
+  {
+    d: "M100,24 L96,27 Q93,32 91,40 Q88,52 85,66 Q84,74 83,82 Q82,86 86,86 L100,86 L114,86 Q118,86 117,82 Q116,74 113,66 Q110,52 108,40 Q106,32 104,27 Z",
+    fill: "hsl(280,25%,72%)", label: "A-Line"
+  },
+  {
+    d: "M120,24 L117,27 Q115,30 114,35 Q113,40 113,47 L113,55 L115,55 Q116,47 117,42 Q118,36 119,32 L120,28 L121,32 Q122,36 123,42 Q124,47 125,55 L127,55 L127,47 Q127,40 126,35 Q125,30 123,27 Z",
+    fill: "hsl(0,0%,93%)", label: "Tank"
+  },
+  {
+    d: "M140,24 L138,27 Q136,32 135,40 L135,52 L133,52 Q132,60 131,70 Q130,78 130,84 L134,84 Q135,78 136,70 L137,60 L140,52 L143,60 L144,70 Q145,78 146,84 L150,84 Q150,78 149,70 Q148,60 147,52 L145,52 L145,40 Q144,32 142,27 Z",
+    fill: "hsl(210,30%,62%)", label: "Palazzo"
+  },
 ];
 
 const maleGarments = [
-  { d: "M60,25 L52,35 L50,80 L54,80 L56,45 L60,35 L64,45 L66,80 L70,80 L68,35 Z", fill: "hsl(220,30%,35%)", label: "Blazer" },
-  { d: "M80,25 L77,33 Q78,42 77,58 L76,65 L84,65 L83,58 Q82,42 83,33 Z", fill: "hsl(0,0%,95%)", label: "Shirt" },
-  { d: "M100,25 L100,35 Q99,50 98,75 L102,75 Q101,50 100,35 M100,35 Q97,55 96,75 L104,75 Q103,55 100,35 Z", fill: "hsl(30,20%,55%)", label: "Chinos" },
-  { d: "M120,25 L117,33 Q118,40 117,52 L116,58 L124,58 L123,52 Q122,40 123,33 Z", fill: "hsl(160,25%,55%)", label: "Polo" },
-  { d: "M140,25 L133,35 L130,85 L135,85 L136,45 L140,35 L144,45 L145,85 L150,85 L147,35 Z", fill: "hsl(0,0%,25%)", label: "Overcoat" },
+  {
+    d: "M60,24 L55,27 Q52,32 50,40 L49,50 L50,60 Q51,70 51,80 L55,80 Q56,70 57,60 L58,45 L60,30 L62,45 L63,60 Q64,70 65,80 L69,80 Q69,70 70,60 L71,50 Q70,40 68,32 Q66,27 65,24 Z",
+    fill: "hsl(220,30%,30%)", label: "Blazer"
+  },
+  {
+    d: "M80,24 L77,27 Q76,30 75,35 Q74,40 74,48 L74,58 L76,58 Q77,50 78,44 Q79,38 80,32 L80,28 L80,32 Q81,38 82,44 Q83,50 84,58 L86,58 L86,48 Q86,40 85,35 Q84,30 83,27 Z",
+    fill: "hsl(0,0%,96%)", label: "Shirt"
+  },
+  {
+    d: "M100,24 L98,27 Q96,32 95,40 L95,52 L93,52 Q92,62 92,74 Q92,80 92,84 L96,84 Q97,78 98,68 L99,58 L100,52 L101,58 L102,68 Q103,78 104,84 L108,84 Q108,80 108,74 Q108,62 107,52 L105,52 L105,40 Q104,32 102,27 Z",
+    fill: "hsl(30,22%,52%)", label: "Chinos"
+  },
+  {
+    d: "M120,24 L117,27 Q115,30 114,36 Q113,42 113,50 L113,58 L115,58 Q116,50 117,44 Q118,38 119,33 L120,28 L121,33 Q122,38 123,44 Q124,50 125,58 L127,58 L127,50 Q127,42 126,36 Q125,30 123,27 Z",
+    fill: "hsl(160,28%,50%)", label: "Polo"
+  },
+  {
+    d: "M140,24 L135,27 Q132,32 130,42 L129,55 L130,68 Q131,76 131,84 L135,84 Q136,76 137,66 L138,50 L140,32 L142,50 L143,66 Q144,76 145,84 L149,84 Q149,76 150,68 L151,55 Q150,42 148,32 Q146,27 145,24 Z",
+    fill: "hsl(0,0%,20%)", label: "Overcoat"
+  },
 ];
 
 const SparkleParticles = () => {
@@ -1012,10 +1042,30 @@ const GeneratingStep = ({ step, gender }: { step: OnboardingStep; gender?: "fema
               <stop offset="55%" stopColor="hsl(43,74%,49%)" stopOpacity="0.4" />
               <stop offset="100%" stopColor="transparent" />
             </linearGradient>
+            {/* Per-garment gradients for depth */}
+            {garments.map((g, i) => (
+              <linearGradient key={`gg-${i}`} id={`garment-${i}`} x1="30%" y1="0%" x2="70%" y2="100%">
+                <stop offset="0%" stopColor={g.fill} stopOpacity="1" />
+                <stop offset="100%" stopColor={g.fill} stopOpacity="0.7" />
+              </linearGradient>
+            ))}
+            {/* Garment highlight */}
+            <linearGradient id="garmentHl" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="white" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="white" stopOpacity="0" />
+            </linearGradient>
+            <filter id="garmentShadow" x="-10%" y="-5%" width="120%" height="115%">
+              <feDropShadow dx="0" dy="1" stdDeviation="1.5" floodColor="hsl(0,0%,0%)" floodOpacity="0.2" />
+            </filter>
           </defs>
 
-          <line x1="40" y1="18" x2="40" y2="95" stroke="hsl(var(--foreground))" strokeWidth="1.5" opacity="0.4" />
-          <line x1="160" y1="18" x2="160" y2="95" stroke="hsl(var(--foreground))" strokeWidth="1.5" opacity="0.4" />
+          {/* Rack uprights */}
+          <line x1="40" y1="18" x2="40" y2="95" stroke="hsl(var(--foreground))" strokeWidth="1.5" opacity="0.35" />
+          <line x1="160" y1="18" x2="160" y2="95" stroke="hsl(var(--foreground))" strokeWidth="1.5" opacity="0.35" />
+          {/* Rack feet */}
+          <line x1="32" y1="95" x2="48" y2="95" stroke="hsl(var(--foreground))" strokeWidth="1.2" opacity="0.25" strokeLinecap="round" />
+          <line x1="152" y1="95" x2="168" y2="95" stroke="hsl(var(--foreground))" strokeWidth="1.2" opacity="0.25" strokeLinecap="round" />
+          {/* Rack bar with shimmer */}
           <line x1="35" y1="18" x2="165" y2="18" stroke="url(#rackShimmer)" strokeWidth="2.5" strokeLinecap="round" />
 
           {!allDone && (
@@ -1031,43 +1081,56 @@ const GeneratingStep = ({ step, gender }: { step: OnboardingStep; gender?: "fema
 
           {garments.map((g, i) => (
             <motion.g key={i}>
-              <motion.line
-                x1={60 + i * 20} y1={18} x2={60 + i * 20} y2={25}
-                stroke="hsl(var(--foreground))" strokeWidth="1" opacity="0.5"
+              {/* Hanger hook */}
+              <motion.path
+                d={`M${60 + i * 20},18 L${60 + i * 20},21 Q${60 + i * 20 - 4},22 ${60 + i * 20 - 5},24 L${60 + i * 20 + 5},24 Q${60 + i * 20 + 4},22 ${60 + i * 20},21`}
+                stroke="hsl(var(--foreground))" strokeWidth="0.8" fill="none" opacity="0.5"
                 initial={{ opacity: 0 }} animate={{ opacity: 0.5 }}
                 transition={{ delay: i * 0.3 }}
               />
+              {/* Garment body with gradient + shadow */}
               <motion.path
-                d={g.d} fill={g.fill} opacity="0.85"
+                d={g.d} fill={`url(#garment-${i})`} opacity="0.9"
+                filter="url(#garmentShadow)"
                 initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 0.85, rotate: [0, -2, 2, -1, 0], y: [0, -1.5, 1.5, -0.5, 0] }}
+                animate={{ scale: 1, opacity: 0.9, rotate: [0, -1.5, 1.5, -0.8, 0], y: [0, -1, 1, -0.5, 0] }}
                 transition={{
                   scale: { delay: i * 0.3, duration: 0.5, type: "spring", stiffness: 200 },
                   opacity: { delay: i * 0.3, duration: 0.4 },
                   rotate: { delay: i * 0.3 + 0.5, duration: 4, repeat: Infinity, ease: "easeInOut" },
                   y: { delay: i * 0.3 + 0.5, duration: 3, repeat: Infinity, ease: "easeInOut" },
                 }}
-                style={{ transformOrigin: `${60 + i * 20}px 25px` }}
+                style={{ transformOrigin: `${60 + i * 20}px 24px` }}
               />
+              {/* Highlight overlay for 3D depth */}
+              <motion.path
+                d={g.d} fill="url(#garmentHl)" opacity="0.6"
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 0.6 }}
+                transition={{ delay: i * 0.3 + 0.2, duration: 0.5 }}
+                style={{ transformOrigin: `${60 + i * 20}px 24px` }}
+              />
+              {/* Flash on completion */}
               {progress[i] >= 100 && (
                 <motion.path
                   d={g.d} fill="white"
-                  initial={{ opacity: 0.6 }} animate={{ opacity: 0 }}
+                  initial={{ opacity: 0.5 }} animate={{ opacity: 0 }}
                   transition={{ duration: 0.8 }}
-                  style={{ transformOrigin: `${60 + i * 20}px 25px` }}
+                  style={{ transformOrigin: `${60 + i * 20}px 24px` }}
                 />
               )}
-              {/* Garment label tooltip */}
+              {/* Garment label */}
               <motion.text
                 x={60 + i * 20}
                 y={94}
                 textAnchor="middle"
                 fill="hsl(var(--foreground))"
-                fontSize="5.5"
+                fontSize="5"
                 fontFamily="sans-serif"
-                opacity="0.6"
+                fontWeight="500"
+                opacity="0.5"
                 initial={{ opacity: 0, y: 98 }}
-                animate={{ opacity: 0.6, y: 94 }}
+                animate={{ opacity: 0.5, y: 94 }}
                 transition={{ delay: i * 0.3 + 0.6 }}
               >
                 {g.label}
