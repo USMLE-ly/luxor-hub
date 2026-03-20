@@ -22,6 +22,11 @@ import featureAppPreview from "@/assets/feature-outfit-gen.jpg";
 const Index = () => {
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
+  const { setTheme } = useTheme();
+
+  useEffect(() => {
+    setTheme("dark");
+  }, [setTheme]);
 
   return (
     <div className="min-h-screen overflow-x-hidden">
