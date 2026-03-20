@@ -49,6 +49,8 @@ export function PricingInteraction({
   eliteMonth,
   eliteAnnual,
   onGetStarted,
+  onTierChange,
+  renderFooter,
 }: {
   starterMonth: number;
   starterAnnual: number;
@@ -57,6 +59,8 @@ export function PricingInteraction({
   eliteMonth: number;
   eliteAnnual: number;
   onGetStarted?: () => void;
+  onTierChange?: (tier: "starter" | "pro" | "elite") => void;
+  renderFooter?: (activeTier: "starter" | "pro" | "elite") => React.ReactNode;
 }) {
   const [active, setActive] = React.useState(1);
   const [period, setPeriod] = React.useState(0);
