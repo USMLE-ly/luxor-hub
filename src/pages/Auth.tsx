@@ -100,7 +100,7 @@ const Auth = () => {
         if (error) throw error;
         trackEvent("CompleteRegistration", { content_name: "LUXOR Signup" });
         toast.success("Account created! Welcome to LUXOR!");
-        navigate("/dashboard");
+        navigate("/onboarding");
       }
     } catch (error: any) {
       const msg = error.message || "";
