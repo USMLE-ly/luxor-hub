@@ -67,13 +67,13 @@ export const SquishyPricingCard = ({
       {hasFeatures && (
         <>
           <div className="relative z-10 my-4 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-          <ul className="relative z-10 space-y-2.5 flex-1">
+          <ul className="relative z-10 space-y-2 flex-1">
             {features.map((f, i) => (
-              <li key={i} className="flex items-start gap-2.5 text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.4)]">
-                <div className="w-4 h-4 mt-0.5 flex-shrink-0 rounded-full bg-black/20 flex items-center justify-center">
+              <li key={i} className="flex items-start gap-2.5 text-white">
+                <div className="w-4 h-4 mt-0.5 flex-shrink-0 rounded-full bg-black/25 flex items-center justify-center">
                   <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
                 </div>
-                <span className="text-xs font-sans font-medium leading-relaxed tracking-wide">{f}</span>
+                <span className="text-xs font-sans leading-relaxed tracking-wide bg-black/25 rounded px-1.5 py-0.5 box-decoration-clone">{f}</span>
               </li>
             ))}
           </ul>
