@@ -46,8 +46,8 @@ export const SquishyPricingCard = ({
         </div>
       )}
 
-      <div className="relative z-10 text-white">
-        <span className="mb-3 block w-fit rounded-full bg-white/10 backdrop-blur-md px-4 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-white/95 border border-white/15 font-sans">
+      <div className="relative z-10 text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.4)]">
+        <span className="mb-3 block w-fit rounded-full bg-black/20 backdrop-blur-md px-4 py-1 text-xs font-bold uppercase tracking-[0.12em] text-white border border-white/20 font-sans">
           {label}
         </span>
         <motion.div
@@ -56,12 +56,12 @@ export const SquishyPricingCard = ({
           transition={{ duration: 1, ease: "backInOut" }}
           className="my-2 origin-top-left"
         >
-          <span className="font-display text-[2.75rem] sm:text-[3.25rem] font-bold leading-none tracking-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.2)]">
+          <span className="font-display text-[2.75rem] sm:text-[3.25rem] font-bold leading-none tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)]">
             ${monthlyPrice}
           </span>
-          <span className="text-sm font-sans text-white/60 ml-1">/month</span>
+          <span className="text-sm font-bold font-sans text-white/90 ml-1 drop-shadow-[0_1px_4px_rgba(0,0,0,0.3)]">/month</span>
         </motion.div>
-        <p className="text-xs sm:text-sm text-white/70 mt-1 font-sans leading-relaxed">{description}</p>
+        <p className="text-xs sm:text-sm text-white font-medium mt-1 font-sans leading-relaxed drop-shadow-[0_1px_4px_rgba(0,0,0,0.3)]">{description}</p>
       </div>
 
       {hasFeatures && (
@@ -69,11 +69,11 @@ export const SquishyPricingCard = ({
           <div className="relative z-10 my-4 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
           <ul className="relative z-10 space-y-2.5 flex-1">
             {features.map((f, i) => (
-              <li key={i} className="flex items-start gap-2.5 text-white/90">
-                <div className="w-4 h-4 mt-0.5 flex-shrink-0 rounded-full bg-white/15 backdrop-blur-sm flex items-center justify-center">
+              <li key={i} className="flex items-start gap-2.5 text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.4)]">
+                <div className="w-4 h-4 mt-0.5 flex-shrink-0 rounded-full bg-black/20 flex items-center justify-center">
                   <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
                 </div>
-                <span className="text-xs font-sans leading-relaxed tracking-wide">{f}</span>
+                <span className="text-xs font-sans font-medium leading-relaxed tracking-wide">{f}</span>
               </li>
             ))}
           </ul>
