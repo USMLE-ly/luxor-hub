@@ -263,8 +263,8 @@ function SmoothBody({
   return (
     <IdleRotation enabled={autoRotate}>
       <group ref={groupRef} scale={[heightScale, heightScale, heightScale]}>
-        {/* Head */}
-        <mesh geometry={headGeo} material={clayMaterial} position={[0, 1.18, 0]} castShadow />
+        {/* Head (slightly smaller for elegance) */}
+        <mesh geometry={headGeo} material={clayMaterial} position={[0, 1.18, 0]} scale={[0.95, 0.95, 0.95]} castShadow />
         {/* Neck */}
         <mesh geometry={neckGeo} material={darkClayMaterial} position={[0, 0.95, 0]} castShadow />
         {/* Torso */}
