@@ -48,7 +48,7 @@ const Index = () => {
       >
         <img
           src={featureAppPreview}
-          alt="AURELIA app preview showing AI outfit generation"
+          alt="LUXOR app preview showing AI outfit generation"
           className="w-full h-full object-cover rounded-2xl"
           loading="lazy"
         />

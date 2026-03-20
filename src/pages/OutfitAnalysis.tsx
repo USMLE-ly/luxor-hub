@@ -292,7 +292,7 @@ export default function OutfitAnalysis() {
   };
 
   const shareText = analysis
-    ? `My outfit scored ${analysis.styleScore}/100 — "${analysis.overallStyle}" ✨ Analyzed by AURELIA AI\n${analysis.summary}`
+    ? `My outfit scored ${analysis.styleScore}/100 — "${analysis.overallStyle}" ✨ Analyzed by LUXOR AI\n${analysis.summary}`
     : "";
 
   const handleCopyLink = () => {
@@ -366,12 +366,12 @@ export default function OutfitAnalysis() {
     });
 
     ctx.fillStyle = "#C6A55C"; ctx.font = "bold 18px serif";
-    ctx.fillText("AURELIA", 40, 375);
+    ctx.fillText("LUXOR", 40, 375);
     ctx.fillStyle = "#606070"; ctx.font = "12px sans-serif";
     ctx.fillText("AI Outfit Analysis", 140, 375);
 
     const link = document.createElement("a");
-    link.download = `aurelia-analysis-${analysis.styleScore}.png`;
+    link.download = `luxor-analysis-${analysis.styleScore}.png`;
     link.href = canvas.toDataURL("image/png");
     link.click();
     toast.success("Analysis card downloaded!");
@@ -870,7 +870,7 @@ export default function OutfitAnalysis() {
                         onClick={() => {
                           if (!flatLayImage) return;
                           const link = document.createElement("a");
-                          link.download = `aurelia-flatlay-${Date.now()}.png`;
+                          link.download = `luxor-flatlay-${Date.now()}.png`;
                           link.href = flatLayImage;
                           link.click();
                           toast.success("Flat-lay downloaded!");
@@ -1042,13 +1042,13 @@ export default function OutfitAnalysis() {
                   </div>
                   <p className="text-xs mb-3" style={{ color: "#a0a0b0" }}>{analysis.summary.slice(0, 100)}...</p>
                   <div className="flex items-center gap-2">
-                    <span className="font-display text-sm font-bold" style={{ color: "#C6A55C" }}>AURELIA</span>
+                    <span className="font-display text-sm font-bold" style={{ color: "#C6A55C" }}>LUXOR</span>
                     <span className="text-[10px]" style={{ color: "#606070" }}>AI Outfit Analysis</span>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-4 gap-2">
-                  <Button variant="outline" className="border-border flex-col h-auto py-3 hover:bg-primary/10" onClick={() => { if (navigator.share) { navigator.share({ title: `AURELIA: ${analysis.overallStyle}`, text: shareText }); } else { handleCopyLink(); } }}>
+                  <Button variant="outline" className="border-border flex-col h-auto py-3 hover:bg-primary/10" onClick={() => { if (navigator.share) { navigator.share({ title: `LUXOR: ${analysis.overallStyle}`, text: shareText }); } else { handleCopyLink(); } }}>
                     <Share2 className="h-4 w-4 mb-1" /><span className="text-[10px]">Share</span>
                   </Button>
                   <Button variant="outline" className="border-border flex-col h-auto py-3 hover:bg-primary/10" onClick={handleShareTwitter}>

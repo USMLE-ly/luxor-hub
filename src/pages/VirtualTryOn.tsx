@@ -87,7 +87,7 @@ export default function VirtualTryOn() {
 
   const handleDownload = (url: string) => {
     const link = document.createElement("a");
-    link.download = `aurelia-tryon-${Date.now()}.png`;
+    link.download = `luxor-tryon-${Date.now()}.png`;
     link.href = url;
     link.click();
     toast.success("Image downloaded!");
@@ -98,7 +98,7 @@ export default function VirtualTryOn() {
     try {
       if (navigator.share) {
         await navigator.share({
-          title: "Virtual Try-On by AURELIA",
+          title: "Virtual Try-On by LUXOR",
           text: "Check out this virtual try-on!",
           url: imageUrl,
         });

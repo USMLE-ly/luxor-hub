@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import { X, Diamond } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const DISMISSED_KEY = "aurelia-banner-dismissed";
-const TIMER_END_KEY = "aurelia-countdown-end";
+const DISMISSED_KEY = "luxor-banner-dismissed";
+const TIMER_END_KEY = "luxor-countdown-end";
 const COUNTDOWN_HOURS = 24;
 
 function getOrCreateEndTime(): number {

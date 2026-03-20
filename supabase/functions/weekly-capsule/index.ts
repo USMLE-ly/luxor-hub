@@ -94,7 +94,7 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are AURELIA, an elite AI stylist. Generate a 7-day capsule wardrobe plan using ONLY items from the user's closet.
+            content: `You are LUXOR, an elite AI stylist. Generate a 7-day capsule wardrobe plan using ONLY items from the user's closet.
 
 Closet: ${itemsList}
 Style: ${style?.archetype || "Unknown"}

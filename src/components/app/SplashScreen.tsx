@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const LETTERS = "AURELIA".split("");
+const LETTERS = "LUXOR".split("");
 const TAGLINE = "Your AI Style Intelligence";
 
 const GoldParticle = ({ index }: { index: number }) => {
@@ -36,9 +36,9 @@ const SplashScreen = () => {
       window.matchMedia("(display-mode: standalone)").matches ||
       (navigator as any).standalone === true;
 
-    if (isStandalone && !sessionStorage.getItem("aurelia_splash_shown")) {
+    if (isStandalone && !sessionStorage.getItem("luxor_splash_shown")) {
       setShow(true);
-      sessionStorage.setItem("aurelia_splash_shown", "1");
+      sessionStorage.setItem("luxor_splash_shown", "1");
       setTimeout(() => setShow(false), 3200);
     }
   }, []);

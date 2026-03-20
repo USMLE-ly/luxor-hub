@@ -60,9 +60,9 @@ const Install = () => {
           <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-primary/20 flex items-center justify-center">
             <Smartphone className="w-10 h-10 text-primary" />
           </div>
-          <h1 className="font-display text-3xl font-bold text-foreground mb-2">Install AURELIA</h1>
+          <h1 className="font-display text-3xl font-bold text-foreground mb-2">Install LUXOR</h1>
           <p className="text-muted-foreground font-sans text-sm">
-            Add AURELIA to your home screen for the best experience — instant access, offline support, and push notifications.
+            Add LUXOR to your home screen for the best experience — instant access, offline support, and push notifications.
           </p>
         </div>
 
@@ -71,7 +71,7 @@ const Install = () => {
             <div className="w-12 h-12 mx-auto rounded-full bg-green-500/20 flex items-center justify-center">
               <Check className="w-6 h-6 text-green-400" />
             </div>
-            <p className="font-sans text-foreground font-medium">AURELIA is installed!</p>
+            <p className="font-sans text-foreground font-medium">LUXOR is installed!</p>
             <p className="text-muted-foreground font-sans text-xs">Open it from your home screen for the full experience.</p>
             <Button onClick={() => navigate("/dashboard")} className="gold-gradient rounded-xl">
               Go to Dashboard <ArrowRight className="w-4 h-4 ml-2" />
@@ -82,7 +82,7 @@ const Install = () => {
             <Button onClick={handleInstall} className="w-full gold-gradient rounded-xl h-12 text-base font-semibold">
               <Download className="w-5 h-5 mr-2" /> Install App
             </Button>
-            <p className="text-muted-foreground font-sans text-xs">One tap to add AURELIA to your home screen</p>
+            <p className="text-muted-foreground font-sans text-xs">One tap to add LUXOR to your home screen</p>
           </div>
         ) : isIOS ? (
           <div className="glass rounded-2xl p-8 space-y-6 text-left">
@@ -112,7 +112,7 @@ const Install = () => {
                 </div>
                 <div>
                   <p className="font-sans text-sm text-foreground">Tap "Add"</p>
-                  <p className="font-sans text-xs text-muted-foreground">AURELIA will appear on your home screen</p>
+                  <p className="font-sans text-xs text-muted-foreground">LUXOR will appear on your home screen</p>
                 </div>
               </div>
             </div>

@@ -731,7 +731,7 @@ const OutfitCalendar = () => {
     // Title
     ctx.fillStyle = "#e8d48b";
     ctx.font = "bold 14px sans-serif";
-    ctx.fillText("AURELIA • OUTFIT SCHEDULE", 30, 40);
+    ctx.fillText("LUXOR • OUTFIT SCHEDULE", 30, 40);
 
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 28px sans-serif";
@@ -800,7 +800,7 @@ const OutfitCalendar = () => {
     // Watermark
     ctx.fillStyle = "#555555";
     ctx.font = "11px sans-serif";
-    ctx.fillText("Styled with AURELIA", 30, 780);
+    ctx.fillText("Styled with LUXOR", 30, 780);
 
     canvas.toBlob(async (blob) => {
       if (!blob) return;
