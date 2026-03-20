@@ -48,6 +48,34 @@ const Paywall = () => {
     }
   };
 
+  const handleRestore = async () => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+    setRestoring(true);
+    try {
+      // Check if user previously had a paid status
+      const { data } = await supabase
+        .from("style_profiles")
+        .select("style_score")
+        .eq("user_id", user.id)
+        .single();
+
+      if (data?.style_score && data.style_score >= 1) {
+        localStorage.setItem("luxor_paid", "true");
+        toast.success("Purchase restored! Welcome back to Luxor.");
+        navigate("/dashboard");
+      } else {
+        toast.info("No previous purchase found for this account.");
+      }
+    } catch {
+      toast.error("Could not verify purchase. Please try again.");
+    } finally {
+      setRestoring(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background dark flex flex-col">
       {/* Header */}
