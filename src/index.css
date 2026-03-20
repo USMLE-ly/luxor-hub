@@ -78,6 +78,7 @@
   }
 
   .dark {
+    --button-ripple-color: rgba(255, 255, 255, 0.5);
     --background: 240 10% 6%;
     --foreground: 40 20% 95%;
 
