@@ -50,73 +50,73 @@ function getColorHsl(name: string): string {
 function getFaceShapeTips(shape: string): string[] {
   const s = shape.toLowerCase();
   if (s.includes("oval")) return [
-    "Most frame shapes work — experiment with bold or geometric sunglasses",
-    "Side-swept bangs and layered cuts enhance your balanced proportions",
-    "Crew-neck and V-neck tops both complement your face shape equally well",
+    "Most frames work — go bold or geometric",
+    "Side-swept bangs enhance balanced proportions",
+    "Crew and V-necks both work. Pick based on mood.",
   ];
   if (s.includes("round")) return [
-    "Angular sunglasses and rectangular frames add definition",
-    "V-necklines and open collars elongate your face visually",
-    "Longer hairstyles with volume at the crown create a lengthening effect",
+    "Angular frames sharpen a round face instantly",
+    "V-necklines and open collars lengthen your face",
+    "Longer hair with crown volume creates a slimming effect",
   ];
   if (s.includes("square")) return [
-    "Round or oval sunglasses soften your strong jawline beautifully",
+    "Round or oval frames soften a strong jawline",
     "Scoop and round necklines balance angular features",
-    "Soft, layered hairstyles with side parts complement your bone structure",
+    "Soft layers with a side part complement bone structure",
   ];
   if (s.includes("heart") || s.includes("inverted triangle")) return [
     "Cat-eye or bottom-heavy frames balance a wider forehead",
-    "Chin-length bobs and side-swept bangs add width at the jaw",
-    "V-neck and scoop-neck tops draw attention downward harmoniously",
+    "Chin-length bobs and side-swept bangs add jaw width",
+    "V-neck and scoop-neck tops draw attention downward",
   ];
   if (s.includes("oblong") || s.includes("long") || s.includes("rectangle")) return [
-    "Wide frames and aviator sunglasses add horizontal balance",
-    "Bangs and chin-length cuts help shorten the appearance of your face",
-    "Boat-neck and crew-neck tops create the illusion of width",
+    "Wide frames and aviators add horizontal balance",
+    "Bangs and chin-length cuts shorten your face visually",
+    "Boat-neck and crew-neck tops create width",
   ];
   if (s.includes("diamond")) return [
-    "Oval frames or rimless glasses highlight your cheekbones",
-    "V-neck and sweetheart necklines mirror your face's natural geometry",
-    "Volume at the forehead or chin balances your widest points",
+    "Oval or rimless glasses highlight your cheekbones",
+    "V-neck and sweetheart necklines mirror your face geometry",
+    "Volume at forehead or chin balances your widest points",
   ];
   return [
-    "Choose sunglasses that contrast your face's dominant lines",
+    "Choose frames that contrast your face's dominant lines",
     "Necklines that mirror your face shape create visual harmony",
-    "Hairstyles adding volume where your face is narrowest create balance",
+    "Add volume where your face is narrowest for balance",
   ];
 }
 
 function getBodyShapeTips(shape: string): string[] {
   const s = shape.toLowerCase();
   if (s.includes("hourglass")) return [
-    "Fitted silhouettes and wrap dresses celebrate your balanced proportions",
-    "Defined waistlines are your best friend — belted coats and high-waisted trousers",
-    "Structured fabrics hold your shape better than overly drapey materials",
+    "Wrap dresses were made for hourglass figures. Lean into fitted cuts.",
+    "Belted coats and high-waisted trousers are your power moves",
+    "Structured fabrics hold your shape. Skip overly drapey material.",
   ];
   if (s.includes("pear") || s.includes("triangle")) return [
-    "Boat-neck, off-shoulder, and statement-collar tops broaden your shoulders",
-    "A-line skirts and straight-leg trousers skim over the hip area elegantly",
-    "Dark bottoms paired with lighter or patterned tops create balanced proportions",
+    "Boat-neck, off-shoulder, and statement collars broaden your shoulders",
+    "A-line skirts and straight-leg trousers skim the hip area",
+    "Dark bottoms paired with lighter tops create balanced proportions",
   ];
   if (s.includes("inverted") || s.includes("trapezoid")) return [
     "V-necklines and vertical details soften broader shoulders",
     "Flared or wide-leg pants add volume to balance your upper body",
-    "A-line and fuller skirts create proportional harmony with your frame",
+    "A-line and fuller skirts create proportional harmony",
   ];
   if (s.includes("rectangle") || s.includes("athletic")) return [
-    "Create curves with peplum tops, ruching, and belted pieces at the waist",
-    "Layering adds dimension — try jackets over fitted tops with textured bottoms",
-    "High-waisted bottoms paired with tucked-in tops define your midsection",
+    "Peplum tops, ruching, and belted pieces create curves at the waist",
+    "Layering adds dimension — jackets over fitted tops with textured bottoms",
+    "High-waisted bottoms with tucked-in tops define your midsection",
   ];
   if (s.includes("round") || s.includes("oval") || s.includes("apple")) return [
-    "Empire waistlines and A-line silhouettes skim over the midsection gracefully",
+    "Empire waistlines and A-line silhouettes skim the midsection",
     "V-necklines create a lengthening vertical line through your torso",
-    "Structured blazers and jackets define your shape without clinging",
+    "Structured blazers define your shape without clinging",
   ];
   return [
-    "Focus on fit — well-tailored pieces always look better than trendy but ill-fitting items",
-    "Use color blocking strategically to highlight areas you love",
-    "Layering with structured outer pieces adds dimension to any silhouette",
+    "Focus on fit — well-tailored pieces always beat trendy but ill-fitting items",
+    "Use color blocking to highlight areas you love",
+    "Structured outer layers add dimension to any silhouette",
   ];
 }
 
