@@ -1172,14 +1172,28 @@ const GeneratingStep = ({ step, gender }: { step: OnboardingStep; gender?: "fema
               </span>
               <span className="font-sans text-sm text-muted-foreground">{Math.round(progress[i])}%</span>
             </div>
-            <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+            <div className="h-2 rounded-full bg-secondary/60 overflow-hidden relative">
               <div
-                className="h-full rounded-full transition-all duration-200"
+                className="h-full rounded-full transition-all duration-200 relative overflow-hidden"
                 style={{
                   width: `${progress[i]}%`,
-                  background: progress[i] > 0 ? "linear-gradient(90deg, hsl(30,90%,60%), hsl(350,70%,65%))" : undefined,
+                  background: progress[i] > 0
+                    ? "linear-gradient(90deg, hsl(38,72%,42%), hsl(43,74%,49%), hsl(48,80%,58%), hsl(43,74%,49%), hsl(38,72%,42%))"
+                    : undefined,
+                  backgroundSize: "200% 100%",
+                  animation: progress[i] > 0 && progress[i] < 100 ? "shimmer 2s linear infinite" : undefined,
                 }}
               />
+              {progress[i] >= 100 && (
+                <div
+                  className="absolute inset-0 rounded-full"
+                  style={{
+                    background: "linear-gradient(90deg, transparent, hsla(43,74%,70%,0.4), transparent)",
+                    backgroundSize: "200% 100%",
+                    animation: "shimmer 2.5s linear infinite",
+                  }}
+                />
+              )}
             </div>
           </div>
         ))}
