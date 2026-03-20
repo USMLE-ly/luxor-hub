@@ -181,7 +181,7 @@ function SmoothBody({
       [0.001, 0.55], [0.08, 0.52], [shoulderR, 0.45],
       [chestR * shoulderScale, 0.35], [waistR, 0.15],
       [hipR, 0.0], [hipR * 0.95, -0.05], [0.001, -0.08],
-    ], 24);
+    ], 32);
   }, [isMale, shoulderScale, waistScale, hipScale]);
 
   const headGeo = useMemo(() => createBodyProfile([
