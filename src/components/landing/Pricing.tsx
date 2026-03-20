@@ -1,181 +1,88 @@
-import { motion } from "framer-motion";
-import { Check, Crown, Shield, CreditCard } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { PricingInteraction } from "@/components/ui/pricing-interaction";
-import { useState } from "react";
+import { Shield } from "lucide-react";
+import { ModernPricingPage, PricingCardProps } from "@/components/ui/animated-glassy-pricing";
 import { trackEvent } from "@/lib/fbPixel";
 
-const tiers = [
+const plans: PricingCardProps[] = [
   {
-    name: "Starter",
-    price: "$9",
-    period: "/month",
+    planName: "Starter",
     description: "Essential AI styling tools",
+    price: "9",
     features: ["200 closet items", "Daily outfit suggestions", "Basic color analysis", "Closet scanner", "Community access"],
-    cta: "Join Now",
-    highlighted: false,
+    buttonText: "Join Now",
+    buttonVariant: "secondary",
   },
   {
-    name: "Pro",
-    price: "$29",
-    period: "/month",
+    planName: "Pro",
     description: "Unlock your full style potential",
-    features: [
-      "Unlimited closet items",
-      "AI Stylist Chat",
-      "Advanced Style DNA",
-      "Shopping recommendations",
-      "Outfit calendar",
-      "Priority AI processing",
-    ],
-    cta: "Claim Your Spot",
-    highlighted: true,
+    price: "29",
+    features: ["Unlimited closet items", "AI Stylist Chat", "Advanced Style DNA", "Shopping recommendations", "Outfit calendar", "Priority AI processing"],
+    buttonText: "Claim Your Spot",
+    isPopular: true,
+    buttonVariant: "primary",
   },
   {
-    name: "Elite",
-    price: "$99",
-    period: "/month",
+    planName: "Elite",
     description: "Full concierge-level styling",
-    features: [
-      "Everything in Pro",
-      "Virtual try-on",
-      "Trend intelligence",
-      "Fashion design studio",
-      "Personal style reports",
-      "1-on-1 AI consultations",
-    ],
-    cta: "Go Elite",
-    highlighted: false,
+    price: "99",
+    features: ["Everything in Pro", "Virtual try-on", "Trend intelligence", "Fashion design studio", "Personal style reports", "1-on-1 AI consultations"],
+    buttonText: "Go Elite",
+    buttonVariant: "primary",
   },
 ];
 
 const Pricing = () => {
   const navigate = useNavigate();
-  const [hoveredTier, setHoveredTier] = useState<number | null>(null);
+
+  const plansWithHandlers = plans.map((plan) => ({
+    ...plan,
+    onButtonClick: () => {
+      trackEvent("InitiateCheckout", { content_name: `LUXOR ${plan.planName}` });
+      navigate("/auth");
+    },
+  }));
 
   return (
-    <section id="pricing" className="py-20 md:py-32 bg-muted/20">
-      <div className="max-w-6xl mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          className="text-center mb-16"
-        >
-          <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase mb-3">Pricing</p>
-          <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground">
-            What's Looking Incredible Actually <span className="gold-text">Worth to You</span>?
-          </h2>
-          <p className="mt-4 max-w-lg mx-auto font-sans text-sm text-muted-foreground">
-            The average person wastes $1,200/year on clothes they barely wear. LUXOR pays for itself in the first month.
-          </p>
-        </motion.div>
+    <section id="pricing">
+      <ModernPricingPage
+        title={
+          <>
+            What's Looking Incredible Actually{" "}
+            <span className="gold-text">Worth to You</span>?
+          </>
+        }
+        subtitle="The average person wastes $1,200/year on clothes they barely wear. LUXOR pays for itself in the first month."
+        plans={plansWithHandlers}
+        showAnimatedBackground={true}
+        bottomContent={
+          <div className="flex flex-col items-center gap-5">
+            {/* Payment icons */}
+            <div className="flex items-center gap-3">
+              {[
+                { src: "/payments/visa.svg", alt: "Visa" },
+                { src: "/payments/mastercard.svg", alt: "Mastercard" },
+                { src: "/payments/amex.svg", alt: "Amex" },
+                { src: "/payments/discover.svg", alt: "Discover" },
+                { src: "/payments/klarna.svg", alt: "Klarna" },
+                { src: "/payments/wechat.svg", alt: "WeChat Pay" },
+                { src: "/payments/venmo.svg", alt: "Venmo" },
+              ].map((icon) => (
+                <img key={icon.alt} src={icon.src} alt={icon.alt} className="h-8 w-auto rounded-md" />
+              ))}
+            </div>
 
-        <div className="grid lg:grid-cols-2 gap-12 items-start">
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
-            className="flex justify-center"
-          >
-            <PricingInteraction
-              starterMonth={9}
-              starterAnnual={7}
-              proMonth={29}
-              proAnnual={23}
-              eliteMonth={99}
-              eliteAnnual={79}
-              onGetStarted={() => {
-                trackEvent("InitiateCheckout", { content_name: "LUXOR Pricing" });
-                navigate("/auth");
-              }}
-            />
-          </motion.div>
+            <p className="text-xs font-sans text-muted-foreground flex items-center gap-1.5">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary urgency-pulse" />
+              This price won't last. <span className="font-medium text-foreground">237 founding spots</span> remain.
+            </p>
 
-          <div className="grid gap-6">
-            {tiers.map((tier, i) => (
-              <motion.div
-                key={tier.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{ delay: i * 0.12 }}
-                className={`relative rounded-2xl p-6 premium-card transition-all duration-300 ${
-                  tier.highlighted
-                    ? "glass-strong border-primary/30 shadow-[0_0_30px_-8px_hsl(var(--primary)/0.2)] scale-[1.02] border-2"
-                    : "glass"
-                } ${hoveredTier !== null && hoveredTier !== i ? "opacity-60" : "opacity-100"}`}
-                onMouseEnter={() => setHoveredTier(i)}
-                onMouseLeave={() => setHoveredTier(null)}
-              >
-                {tier.highlighted && (
-                  <div className="absolute -top-3 left-6 px-4 py-1 rounded-full gold-gradient text-xs font-bold text-primary-foreground font-sans flex items-center gap-1">
-                    <Crown className="w-3 h-3" /> Most Popular
-                  </div>
-                )}
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <h3 className="font-display text-lg font-bold text-foreground">{tier.name}</h3>
-                    <p className="font-sans text-xs text-muted-foreground">{tier.description}</p>
-                  </div>
-                  <p className="font-display text-2xl font-bold text-foreground">
-                    {tier.price}
-                    <span className="text-sm font-sans font-normal text-muted-foreground">{tier.period}</span>
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {tier.features.map((f) => (
-                    <span key={f} className="inline-flex items-center gap-1 text-xs font-sans text-foreground bg-muted/50 px-2 py-1 rounded-full">
-                      <Check className="w-3 h-3 text-primary shrink-0" />
-                      {f}
-                    </span>
-                  ))}
-                </div>
-              </motion.div>
-            ))}
+            <div className="flex items-center gap-2 text-xs font-sans text-muted-foreground">
+              <Shield className="w-4 h-4 text-primary" />
+              <span>30-day money-back guarantee</span>
+            </div>
           </div>
-        </div>
-        {/* Trust Badges & Urgency */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ delay: 0.3 }}
-          className="mt-12 flex flex-col items-center gap-5"
-        >
-          {/* Payment icons */}
-          <div className="flex items-center gap-3">
-            {[
-              { src: "/payments/visa.svg", alt: "Visa" },
-              { src: "/payments/mastercard.svg", alt: "Mastercard" },
-              { src: "/payments/amex.svg", alt: "American Express" },
-              { src: "/payments/discover.svg", alt: "Discover" },
-              { src: "/payments/klarna.svg", alt: "Klarna" },
-              { src: "/payments/wechat.svg", alt: "WeChat Pay" },
-              { src: "/payments/venmo.svg", alt: "Venmo" },
-            ].map((icon) => (
-              <img
-                key={icon.alt}
-                src={icon.src}
-                alt={icon.alt}
-                className="h-8 w-auto rounded-md"
-              />
-            ))}
-          </div>
-
-          {/* Urgency micro-copy */}
-          <p className="text-xs font-sans text-muted-foreground flex items-center gap-1.5">
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary urgency-pulse" />
-            This price won't last. <span className="font-medium text-foreground">237 founding spots</span> remain.
-          </p>
-
-          {/* Guarantee badge */}
-          <div className="flex items-center gap-2 text-xs font-sans text-muted-foreground">
-            <Shield className="w-4 h-4 text-primary" />
-            <span>30-day money-back guarantee</span>
-          </div>
-        </motion.div>
-      </div>
+        }
+      />
     </section>
   );
 };
