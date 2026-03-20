@@ -183,73 +183,110 @@ const HeightStep = ({ answers, onSelect }: { answers: Record<string, string[]>; 
     onSelect("heightUnit", newUnit, true);
   };
 
+  // Clamp values to logical ranges
+  const handleFtChange = (val: string) => {
+    const num = parseInt(val);
+    if (val === "" || (num >= 0 && num <= 8)) onSelect("heightFt", val, true);
+  };
+  const handleInChange = (val: string) => {
+    const num = parseInt(val);
+    if (val === "" || (num >= 0 && num <= 11)) onSelect("heightIn", val, true);
+  };
+  const handleCmChange = (val: string) => {
+    const num = parseInt(val);
+    if (val === "" || (num >= 0 && num <= 250)) onSelect("heightCm", val, true);
+  };
+
   return (
-    <div>
+    <div className="px-1">
       <h2 className="font-display text-2xl lg:text-3xl font-bold text-foreground text-center mb-6">
         Your height
       </h2>
-      <div className="flex justify-center gap-2 mb-8">
-        <button
-          onClick={() => handleUnitChange("inch")}
-          className={`px-6 py-2 rounded-full text-sm font-semibold transition-all ${
-            unit === "inch"
-              ? "bg-[hsl(0,70%,68%)] text-white"
-              : "bg-secondary text-muted-foreground"
-          }`}
-        >
-          INCH
-        </button>
-        <button
-          onClick={() => handleUnitChange("cm")}
-          className={`px-6 py-2 rounded-full text-sm font-semibold transition-all ${
-            unit === "cm"
-              ? "bg-[hsl(0,70%,68%)] text-white"
-              : "bg-secondary text-muted-foreground"
-          }`}
-        >
-          CM
-        </button>
+      
+      {/* Unit toggle */}
+      <div className="flex justify-center mb-8">
+        <div className="inline-flex bg-secondary/60 rounded-full p-1 gap-1">
+          <button
+            onClick={() => handleUnitChange("inch")}
+            className={`px-6 py-2 rounded-full text-sm font-sans font-semibold transition-all duration-300 ${
+              unit === "inch"
+                ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            INCH
+          </button>
+          <button
+            onClick={() => handleUnitChange("cm")}
+            className={`px-6 py-2 rounded-full text-sm font-sans font-semibold transition-all duration-300 ${
+              unit === "cm"
+                ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            CM
+          </button>
+        </div>
       </div>
 
       {unit === "inch" ? (
-        <div className="flex gap-4">
+        <div className="flex gap-4 max-w-xs mx-auto">
           <div className="flex-1">
-            <div className="flex items-center border-b border-border pb-2">
+            <label className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-2 block text-center">Feet</label>
+            <div className="relative rounded-xl bg-secondary/50 border border-border/40 focus-within:border-primary/40 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
               <input
                 type="number"
-                placeholder=""
+                inputMode="numeric"
+                placeholder="5"
+                min={0}
+                max={8}
                 value={ft}
-                onChange={(e) => onSelect("heightFt", e.target.value, true)}
-                className="flex-1 bg-transparent text-foreground text-lg outline-none font-sans"
+                onChange={(e) => handleFtChange(e.target.value)}
+                className="w-full bg-transparent text-foreground text-2xl font-display font-bold text-center py-4 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
-              <span className="text-muted-foreground text-sm font-sans ml-2">FT</span>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm font-sans">ft</span>
             </div>
           </div>
           <div className="flex-1">
-            <div className="flex items-center border-b border-border pb-2">
+            <label className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-2 block text-center">Inches</label>
+            <div className="relative rounded-xl bg-secondary/50 border border-border/40 focus-within:border-primary/40 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
               <input
                 type="number"
-                placeholder=""
+                inputMode="numeric"
+                placeholder="8"
+                min={0}
+                max={11}
                 value={inches}
-                onChange={(e) => onSelect("heightIn", e.target.value, true)}
-                className="flex-1 bg-transparent text-foreground text-lg outline-none font-sans"
+                onChange={(e) => handleInChange(e.target.value)}
+                className="w-full bg-transparent text-foreground text-2xl font-display font-bold text-center py-4 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
-              <span className="text-muted-foreground text-sm font-sans ml-2">IN</span>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm font-sans">in</span>
             </div>
           </div>
         </div>
       ) : (
-        <div className="flex items-center border-b border-border pb-2">
-          <input
-            type="number"
-            placeholder=""
-            value={cm}
-            onChange={(e) => onSelect("heightCm", e.target.value, true)}
-            className="flex-1 bg-transparent text-foreground text-lg outline-none font-sans"
-          />
-          <span className="text-muted-foreground text-sm font-sans ml-2">CM</span>
+        <div className="max-w-xs mx-auto">
+          <label className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-2 block text-center">Centimeters</label>
+          <div className="relative rounded-xl bg-secondary/50 border border-border/40 focus-within:border-primary/40 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
+            <input
+              type="number"
+              inputMode="numeric"
+              placeholder="172"
+              min={0}
+              max={250}
+              value={cm}
+              onChange={(e) => handleCmChange(e.target.value)}
+              className="w-full bg-transparent text-foreground text-2xl font-display font-bold text-center py-4 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            />
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm font-sans">cm</span>
+          </div>
         </div>
       )}
+
+      {/* Height reference hint */}
+      <p className="text-center text-xs text-muted-foreground/50 font-sans mt-4">
+        {unit === "inch" ? "Average: 5′7″ (female) · 5′10″ (male)" : "Average: 170 cm (female) · 178 cm (male)"}
+      </p>
     </div>
   );
 };
