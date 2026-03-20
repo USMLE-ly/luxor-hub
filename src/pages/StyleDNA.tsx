@@ -615,10 +615,10 @@ const StyleDNA = () => {
                 >
                   <div className="flex items-center gap-2 mb-4">
                     <TrendingUp className="w-4 h-4 text-primary" />
-                    <h3 className="font-display text-base font-bold text-foreground">Your Style Evolution</h3>
+                    <h3 className="font-display text-base font-bold text-foreground">Where Your Style Is Headed</h3>
                   </div>
                   <p className="text-xs text-muted-foreground font-sans mb-4">
-                    AI predicts how your style will evolve based on your lifestyle, goals, and personality
+                    Based on your habits and goals, here's how you'll evolve over the next 1–3 years
                   </p>
                   <div className="relative">
                     {/* Timeline line */}
