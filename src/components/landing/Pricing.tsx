@@ -28,7 +28,7 @@ const tiers = [
       "Outfit calendar",
       "Priority AI processing",
     ],
-    cta: "Start Free Trial",
+    cta: "Claim Your Spot",
     highlighted: true,
   },
   {
