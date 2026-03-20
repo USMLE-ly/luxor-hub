@@ -21,6 +21,7 @@
     --color-3: 210 100% 63%;
     --color-4: 195 100% 63%;
     --color-5: 90 100% 63%;
+    --button-ripple-color: rgba(0, 0, 0, 0.3);
     --background: 40 30% 97%;
     --foreground: 30 10% 12%;
 
