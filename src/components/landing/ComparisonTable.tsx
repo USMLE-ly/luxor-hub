@@ -114,7 +114,7 @@ export default function ComparisonTable() {
             <div key={cat.label}>
               <button
                 onClick={() => toggle(cat.label)}
-                className="w-full grid grid-cols-4 gap-0 px-4 py-3 bg-muted/30 hover:bg-muted/50 transition-colors border-b border-border min-w-[480px]"
+                className="w-full grid grid-cols-[1.4fr_1fr_1fr_1fr] gap-0 px-3 sm:px-4 py-3 bg-muted/30 hover:bg-muted/50 transition-colors border-b border-border"
               >
                 <span className="font-sans text-xs font-bold text-foreground flex items-center gap-2 col-span-4">
                   <ChevronDown
