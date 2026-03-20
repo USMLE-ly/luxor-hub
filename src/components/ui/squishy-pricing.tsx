@@ -1,12 +1,14 @@
 import { motion } from 'framer-motion';
 import React from 'react';
+import { Check } from 'lucide-react';
 
 // --- Types --- //
 export interface SquishyPricingCardProps {
   label: string;
   monthlyPrice: string;
   description: string;
-  cta: string;
+  features?: string[];
+  cta?: string;
   background: string;
   BGComponent: React.FC;
   onCtaClick?: () => void;
@@ -17,43 +19,60 @@ export const SquishyPricingCard = ({
   label,
   monthlyPrice,
   description,
+  features,
   cta,
   background,
   BGComponent,
   onCtaClick,
   footer,
 }: SquishyPricingCardProps) => {
+  const hasFeatures = features && features.length > 0;
   return (
     <motion.div
       whileHover="hover"
       transition={{ duration: 1, ease: "backInOut" }}
       variants={{ hover: { scale: 1.05 } }}
-      className={`relative h-[22rem] w-[calc(100vw-2rem)] max-w-[20rem] shrink-0 overflow-hidden rounded-xl p-6 sm:p-8 sm:h-96 sm:w-80 ${background} shadow-lg hover:shadow-xl transition-shadow`}
+      className={`relative ${hasFeatures ? 'h-auto min-h-[28rem] sm:min-h-[32rem]' : 'h-[22rem] sm:h-96'} w-[calc(100vw-2rem)] max-w-[20rem] sm:w-80 shrink-0 overflow-hidden rounded-xl p-6 sm:p-8 ${background} shadow-lg hover:shadow-xl transition-shadow flex flex-col`}
     >
       <div className="relative z-10 text-white">
-        <span className="mb-3 block w-fit rounded-full bg-white/20 backdrop-blur-sm px-3 py-0.5 text-sm font-medium text-white border border-white/20">
+        <span className="mb-2 block w-fit rounded-full bg-white/20 backdrop-blur-sm px-3 py-0.5 text-sm font-medium text-white border border-white/20">
           {label}
         </span>
         <motion.span
           initial={{ scale: 0.85 }}
           variants={{ hover: { scale: 1 } }}
           transition={{ duration: 1, ease: "backInOut" }}
-          className="my-2 block origin-top-left font-mono text-5xl sm:text-6xl font-black leading-[1.2]"
+          className="my-1 block origin-top-left font-mono text-4xl sm:text-5xl font-black leading-[1.1]"
         >
-          ${monthlyPrice}/<br />Month
+          ${monthlyPrice}/mo
         </motion.span>
-        <p className="text-sm sm:text-lg text-white/90 line-clamp-3">{description}</p>
+        <p className="text-xs sm:text-sm text-white/80 mt-1">{description}</p>
       </div>
-      {footer ? (
-        <div className="absolute bottom-4 left-4 right-4 z-20">{footer}</div>
-      ) : (
-        <button
-          onClick={onCtaClick}
-          className="absolute bottom-4 left-4 right-4 z-20 rounded-lg border-2 border-white bg-white py-2 text-center font-mono font-black uppercase text-neutral-800 backdrop-blur-sm transition-all duration-200 hover:bg-white/10 hover:text-white hover:border-white/80 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-transparent active:scale-95"
-        >
-          {cta}
-        </button>
+
+      {hasFeatures && (
+        <ul className="relative z-10 mt-4 space-y-1.5 flex-1">
+          {features.map((f, i) => (
+            <li key={i} className="flex items-start gap-2 text-white/90">
+              <Check className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-white" />
+              <span className="text-xs font-sans leading-tight">{f}</span>
+            </li>
+          ))}
+        </ul>
       )}
+
+      <div className={`${hasFeatures ? 'relative mt-4' : 'absolute bottom-4 left-4 right-4'} z-20`}>
+        {footer ? (
+          footer
+        ) : cta ? (
+          <button
+            onClick={onCtaClick}
+            className="w-full rounded-lg border-2 border-white bg-white py-2 text-center font-mono font-black uppercase text-neutral-800 backdrop-blur-sm transition-all duration-200 hover:bg-white/10 hover:text-white hover:border-white/80 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-transparent active:scale-95"
+          >
+            {cta}
+          </button>
+        ) : null}
+      </div>
+
       <BGComponent />
     </motion.div>
   );

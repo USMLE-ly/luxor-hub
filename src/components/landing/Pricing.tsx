@@ -2,6 +2,11 @@ import { motion } from "framer-motion";
 import { Shield } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { trackEvent } from "@/lib/fbPixel";
+import PayPalButton from "@/components/app/PayPalButton";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useCallback } from "react";
 import {
   SquishyPricingCard,
   BGComponent1,
@@ -9,13 +14,81 @@ import {
   BGComponent3,
 } from "@/components/ui/squishy-pricing";
 
+const tiers = [
+  {
+    key: "starter" as const,
+    label: "Starter",
+    price: "9",
+    desc: "Essential AI styling tools for your everyday wardrobe",
+    features: [
+      "AI outfit suggestions (10/day)",
+      "Basic color analysis",
+      "Closet digitization (50 items)",
+      "Daily outfit of the day",
+    ],
+    bg: "bg-[hsl(43,74%,35%)]",
+    BG: BGComponent1,
+  },
+  {
+    key: "pro" as const,
+    label: "Pro",
+    price: "29",
+    desc: "Unlock your full style potential with advanced AI",
+    features: [
+      "Unlimited AI outfit suggestions",
+      "Full color & style DNA analysis",
+      "Unlimited closet items",
+      "Weekly capsule wardrobes",
+      "Priority AI stylist chat",
+    ],
+    bg: "bg-[hsl(43,74%,49%)]",
+    BG: BGComponent2,
+  },
+  {
+    key: "elite" as const,
+    label: "Elite",
+    price: "99",
+    desc: "Full concierge-level styling with virtual try-on",
+    features: [
+      "Everything in Pro",
+      "Virtual try-on technology",
+      "Personal style concierge",
+      "Trend intelligence reports",
+      "Shopping recommendations",
+      "Wardrobe gap analysis",
+    ],
+    bg: "bg-[hsl(35,80%,42%)]",
+    BG: BGComponent3,
+  },
+];
+
 const Pricing = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
-  const handleCta = () => {
-    trackEvent("InitiateCheckout", { content_name: "LUXOR Pricing" });
-    navigate("/auth");
-  };
+  const handlePayPalApprove = useCallback(
+    async (subscriptionId: string, tier: string) => {
+      if (!user) {
+        navigate("/auth");
+        return;
+      }
+      try {
+        const { error } = await supabase.from("subscriptions").insert({
+          user_id: user.id,
+          paypal_subscription_id: subscriptionId,
+          plan_tier: tier,
+          status: "active",
+        });
+        if (error) throw error;
+        localStorage.setItem("luxor_paid", "true");
+        toast.success("Welcome to Luxor! Your style journey begins now.");
+        navigate("/dashboard");
+      } catch {
+        toast.error("Something went wrong saving your subscription.");
+      }
+    },
+    [user, navigate]
+  );
 
   return (
     <section id="pricing" className="py-20 md:py-32 bg-muted/20">
@@ -35,34 +108,26 @@ const Pricing = () => {
           </p>
         </motion.div>
 
-        <div className="flex flex-col md:flex-row gap-6 justify-center items-center">
-          <SquishyPricingCard
-            label="Starter"
-            monthlyPrice="9"
-            description="Essential AI styling tools for your everyday wardrobe"
-            cta="Join Now"
-            background="bg-[hsl(43,74%,35%)]"
-            BGComponent={BGComponent1}
-            onCtaClick={handleCta}
-          />
-          <SquishyPricingCard
-            label="Pro"
-            monthlyPrice="29"
-            description="Unlock your full style potential with advanced AI"
-            cta="Claim Your Spot"
-            background="bg-[hsl(43,74%,49%)]"
-            BGComponent={BGComponent2}
-            onCtaClick={handleCta}
-          />
-          <SquishyPricingCard
-            label="Elite"
-            monthlyPrice="99"
-            description="Full concierge-level styling with virtual try-on"
-            cta="Go Elite"
-            background="bg-[hsl(35,80%,42%)]"
-            BGComponent={BGComponent3}
-            onCtaClick={handleCta}
-          />
+        <div className="flex flex-col md:flex-row gap-6 justify-center items-center md:items-stretch">
+          {tiers.map((t) => (
+            <SquishyPricingCard
+              key={t.key}
+              label={t.label}
+              monthlyPrice={t.price}
+              description={t.desc}
+              features={t.features}
+              background={t.bg}
+              BGComponent={t.BG}
+              footer={
+                <div className="w-full">
+                  <PayPalButton
+                    tier={t.key}
+                    onApprove={(subId) => handlePayPalApprove(subId, t.key)}
+                  />
+                </div>
+              }
+            />
+          ))}
         </div>
 
         {/* Trust Badges */}
