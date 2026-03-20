@@ -3,6 +3,7 @@ import { ShieldCheck, TrendingUp, BadgeCheck } from "lucide-react";
 import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
 import { useRef, useState, useEffect } from "react";
 import { useInView } from "framer-motion";
+import { TestimonialCard } from "@/components/ui/testimonial-cards";
 import proofRevenue1 from "@/assets/proof-revenue-1.png";
 import proofRevenue2 from "@/assets/proof-revenue-2.jpg";
 import proofRevenue3 from "@/assets/proof-revenue-3.png";
@@ -22,84 +23,74 @@ const AnimatedStat = ({ value }: { value: string }) => {
   );
 };
 
-const proofs = [
+const heroProof = {
+  image: proofRevenue6,
+  stat: "$673,912",
+  label: "Total Sales",
+  caption: "A styling agency went from plateauing at $400K to clearing $673K in one year. The only change was AURELIA.",
+};
+
+const shuffleProofs = [
   {
-    image: proofRevenue6,
-    stat: "$673,912",
-    label: "Total Sales",
-    caption: "A styling agency went from plateauing at $400K to clearing $673K in one year. The only change was AURELIA.",
-    hero: true,
-  },
-  {
+    id: 1,
     image: proofRevenue1,
-    stat: "$10,349",
-    label: "90-Day Revenue",
-    caption: "She launched a boutique with zero fashion background. 90 days later, AURELIA's recommendations drove $10K in sales.",
+    testimonial: "She launched a boutique with zero fashion background. 90 days later, AURELIA's recommendations drove $10K in sales.",
+    author: "$10,349 · 90-Day Revenue",
   },
   {
+    id: 2,
     image: proofRevenue2,
-    stat: "€390,033",
-    label: "Gross Sales",
-    caption: "11,880 orders fulfilled. This retailer used AURELIA's curation engine to stock exactly what customers wanted.",
+    testimonial: "11,880 orders fulfilled. This retailer used AURELIA's curation engine to stock exactly what customers wanted.",
+    author: "€390,033 · Gross Sales",
   },
   {
+    id: 3,
     image: proofRevenue3,
-    stat: "$105,525",
-    label: "Total Sales",
-    caption: "1,300% growth. The owner credits AURELIA's trend intelligence for turning a dead Shopify store into a top seller.",
+    testimonial: "1,300% growth. The owner credits AURELIA's trend intelligence for turning a dead Shopify store into a top seller.",
+    author: "$105,525 · Total Sales",
   },
   {
+    id: 4,
     image: proofRevenue4,
-    stat: "€48,579",
-    label: "Single Payout",
-    caption: "One Stripe payout. One month. An independent designer who let AURELIA handle the product strategy.",
+    testimonial: "One Stripe payout. One month. An independent designer who let AURELIA handle the product strategy.",
+    author: "€48,579 · Single Payout",
   },
   {
+    id: 5,
     image: proofRevenue5,
-    stat: "$81,452",
-    label: "Total Revenue",
-    caption: "122K sessions and $81K in sales. All organic traffic. AURELIA's wardrobe AI turned browsers into buyers.",
+    testimonial: "122K sessions and $81K in sales. All organic traffic. AURELIA's wardrobe AI turned browsers into buyers.",
+    author: "$81,452 · Total Revenue",
   },
 ];
 
-const ProofCard = ({ p, i, isHero }: { p: typeof proofs[0]; i: number; isHero?: boolean }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 24 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, margin: "-80px" }}
-    transition={{ delay: i * 0.08, duration: 0.5 }}
-    className={`glass rounded-2xl overflow-hidden premium-card group transition-transform duration-300 hover:rotate-[0.5deg] ${isHero ? "md:col-span-2 lg:col-span-3" : "snap-center shrink-0 w-[85vw] sm:w-auto"}`}
-  >
-    <div className="relative">
-      <img
-        src={p.image}
-        alt={`Revenue proof: ${p.stat}`}
-        className={`w-full object-cover object-top ${isHero ? "h-72 md:h-80" : "h-52"}`}
-        loading="lazy"
-      />
-      {/* Gold gradient overlay on hero card */}
-      {isHero && (
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/10 via-transparent to-transparent" />
-      )}
-      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-background to-transparent h-16" />
-      <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-500/15 backdrop-blur-sm border border-green-500/20">
-        <BadgeCheck className="w-3 h-3 text-green-400" />
-        <span className="text-[10px] font-semibold text-green-400 font-sans">Verified</span>
-      </div>
+const ShuffleSection = () => {
+  const [positions, setPositions] = useState(["front", "middle", "back"]);
+  const [startIdx, setStartIdx] = useState(0);
+
+  const handleShuffle = () => {
+    setPositions((prev) => {
+      const newPositions = [...prev];
+      newPositions.unshift(newPositions.pop()!);
+      return newPositions;
+    });
+    setStartIdx((prev) => (prev + 1) % shuffleProofs.length);
+  };
+
+  const visibleProofs = [0, 1, 2].map((offset) => shuffleProofs[(startIdx + offset) % shuffleProofs.length]);
+
+  return (
+    <div className="relative h-[450px] w-[350px] mx-auto md:mx-0">
+      {visibleProofs.map((proof, index) => (
+        <TestimonialCard
+          key={proof.id}
+          {...proof}
+          handleShuffle={handleShuffle}
+          position={positions[index]}
+        />
+      ))}
     </div>
-    <div className="p-5">
-      <div className="flex items-center gap-2 mb-2">
-        <TrendingUp className="w-4 h-4 text-primary" />
-        <span className="font-display text-xl font-bold text-primary">
-          <AnimatedStat value={p.stat} />
-        </span>
-        <span className="font-sans text-xs text-muted-foreground">· {p.label}</span>
-      </div>
-      <div className="w-12 h-0.5 rounded-full bg-primary/40 mb-3" />
-      <p className="font-sans text-sm text-muted-foreground leading-relaxed">{p.caption}</p>
-    </div>
-  </motion.div>
-);
+  );
+};
 
 const Testimonials = () => (
   <section className="relative py-20 md:py-32 overflow-hidden" id="proof">
@@ -141,15 +132,48 @@ const Testimonials = () => (
         </p>
       </motion.div>
 
-      {/* Hero proof card */}
-      <ProofCard p={proofs[0]} i={0} isHero />
+      {/* Hero $673,912 card */}
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.5 }}
+        className="glass rounded-2xl overflow-hidden premium-card group transition-transform duration-300 hover:rotate-[0.5deg] mb-12"
+      >
+        <div className="relative">
+          <img
+            src={heroProof.image}
+            alt={`Revenue proof: ${heroProof.stat}`}
+            className="w-full object-cover object-top h-72 md:h-80"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-primary/10 via-transparent to-transparent" />
+          <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-background to-transparent h-16" />
+          <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-500/15 backdrop-blur-sm border border-green-500/20">
+            <BadgeCheck className="w-3 h-3 text-green-400" />
+            <span className="text-[10px] font-semibold text-green-400 font-sans">Verified</span>
+          </div>
+        </div>
+        <div className="p-5">
+          <div className="flex items-center gap-2 mb-2">
+            <TrendingUp className="w-4 h-4 text-primary" />
+            <span className="font-display text-xl font-bold text-primary">
+              <AnimatedStat value={heroProof.stat} />
+            </span>
+            <span className="font-sans text-xs text-muted-foreground">· {heroProof.label}</span>
+          </div>
+          <div className="w-12 h-0.5 rounded-full bg-primary/40 mb-3" />
+          <p className="font-sans text-sm text-muted-foreground leading-relaxed">{heroProof.caption}</p>
+        </div>
+      </motion.div>
 
-      {/* Remaining cards — horizontal scroll on mobile */}
-      <div className="flex gap-6 mt-6 overflow-x-auto snap-x snap-mandatory pb-4 md:grid md:grid-cols-2 lg:grid-cols-3 md:overflow-visible md:snap-none md:pb-0 scrollbar-hide">
-        {proofs.slice(1).map((p, i) => (
-          <ProofCard key={i} p={p} i={i + 1} />
-        ))}
+      {/* Shuffle cards for remaining proofs */}
+      <div className="flex justify-center md:justify-start pl-0 md:pl-12">
+        <ShuffleSection />
       </div>
+      <p className="text-center md:text-left md:pl-12 mt-6 text-xs text-muted-foreground/60 font-sans">
+        Swipe to see more results →
+      </p>
     </div>
   </section>
 );
