@@ -50,73 +50,73 @@ function getColorHsl(name: string): string {
 function getFaceShapeTips(shape: string): string[] {
   const s = shape.toLowerCase();
   if (s.includes("oval")) return [
-    "Most frame shapes work — experiment with bold or geometric sunglasses",
-    "Side-swept bangs and layered cuts enhance your balanced proportions",
-    "Crew-neck and V-neck tops both complement your face shape equally well",
+    "Most frames work — go bold or geometric",
+    "Side-swept bangs enhance balanced proportions",
+    "Crew and V-necks both work. Pick based on mood.",
   ];
   if (s.includes("round")) return [
-    "Angular sunglasses and rectangular frames add definition",
-    "V-necklines and open collars elongate your face visually",
-    "Longer hairstyles with volume at the crown create a lengthening effect",
+    "Angular frames sharpen a round face instantly",
+    "V-necklines and open collars lengthen your face",
+    "Longer hair with crown volume creates a slimming effect",
   ];
   if (s.includes("square")) return [
-    "Round or oval sunglasses soften your strong jawline beautifully",
+    "Round or oval frames soften a strong jawline",
     "Scoop and round necklines balance angular features",
-    "Soft, layered hairstyles with side parts complement your bone structure",
+    "Soft layers with a side part complement bone structure",
   ];
   if (s.includes("heart") || s.includes("inverted triangle")) return [
     "Cat-eye or bottom-heavy frames balance a wider forehead",
-    "Chin-length bobs and side-swept bangs add width at the jaw",
-    "V-neck and scoop-neck tops draw attention downward harmoniously",
+    "Chin-length bobs and side-swept bangs add jaw width",
+    "V-neck and scoop-neck tops draw attention downward",
   ];
   if (s.includes("oblong") || s.includes("long") || s.includes("rectangle")) return [
-    "Wide frames and aviator sunglasses add horizontal balance",
-    "Bangs and chin-length cuts help shorten the appearance of your face",
-    "Boat-neck and crew-neck tops create the illusion of width",
+    "Wide frames and aviators add horizontal balance",
+    "Bangs and chin-length cuts shorten your face visually",
+    "Boat-neck and crew-neck tops create width",
   ];
   if (s.includes("diamond")) return [
-    "Oval frames or rimless glasses highlight your cheekbones",
-    "V-neck and sweetheart necklines mirror your face's natural geometry",
-    "Volume at the forehead or chin balances your widest points",
+    "Oval or rimless glasses highlight your cheekbones",
+    "V-neck and sweetheart necklines mirror your face geometry",
+    "Volume at forehead or chin balances your widest points",
   ];
   return [
-    "Choose sunglasses that contrast your face's dominant lines",
+    "Choose frames that contrast your face's dominant lines",
     "Necklines that mirror your face shape create visual harmony",
-    "Hairstyles adding volume where your face is narrowest create balance",
+    "Add volume where your face is narrowest for balance",
   ];
 }
 
 function getBodyShapeTips(shape: string): string[] {
   const s = shape.toLowerCase();
   if (s.includes("hourglass")) return [
-    "Fitted silhouettes and wrap dresses celebrate your balanced proportions",
-    "Defined waistlines are your best friend — belted coats and high-waisted trousers",
-    "Structured fabrics hold your shape better than overly drapey materials",
+    "Wrap dresses were made for hourglass figures. Lean into fitted cuts.",
+    "Belted coats and high-waisted trousers are your power moves",
+    "Structured fabrics hold your shape. Skip overly drapey material.",
   ];
   if (s.includes("pear") || s.includes("triangle")) return [
-    "Boat-neck, off-shoulder, and statement-collar tops broaden your shoulders",
-    "A-line skirts and straight-leg trousers skim over the hip area elegantly",
-    "Dark bottoms paired with lighter or patterned tops create balanced proportions",
+    "Boat-neck, off-shoulder, and statement collars broaden your shoulders",
+    "A-line skirts and straight-leg trousers skim the hip area",
+    "Dark bottoms paired with lighter tops create balanced proportions",
   ];
   if (s.includes("inverted") || s.includes("trapezoid")) return [
     "V-necklines and vertical details soften broader shoulders",
     "Flared or wide-leg pants add volume to balance your upper body",
-    "A-line and fuller skirts create proportional harmony with your frame",
+    "A-line and fuller skirts create proportional harmony",
   ];
   if (s.includes("rectangle") || s.includes("athletic")) return [
-    "Create curves with peplum tops, ruching, and belted pieces at the waist",
-    "Layering adds dimension — try jackets over fitted tops with textured bottoms",
-    "High-waisted bottoms paired with tucked-in tops define your midsection",
+    "Peplum tops, ruching, and belted pieces create curves at the waist",
+    "Layering adds dimension — jackets over fitted tops with textured bottoms",
+    "High-waisted bottoms with tucked-in tops define your midsection",
   ];
   if (s.includes("round") || s.includes("oval") || s.includes("apple")) return [
-    "Empire waistlines and A-line silhouettes skim over the midsection gracefully",
+    "Empire waistlines and A-line silhouettes skim the midsection",
     "V-necklines create a lengthening vertical line through your torso",
-    "Structured blazers and jackets define your shape without clinging",
+    "Structured blazers define your shape without clinging",
   ];
   return [
-    "Focus on fit — well-tailored pieces always look better than trendy but ill-fitting items",
-    "Use color blocking strategically to highlight areas you love",
-    "Layering with structured outer pieces adds dimension to any silhouette",
+    "Focus on fit — well-tailored pieces always beat trendy but ill-fitting items",
+    "Use color blocking to highlight areas you love",
+    "Structured outer layers add dimension to any silhouette",
   ];
 }
 
@@ -194,7 +194,7 @@ const StyleDNA = () => {
           <div className="p-5 relative z-10">
             {/* Header row */}
             <div className="flex items-center justify-between mb-5">
-              <h2 className="font-display text-xl font-bold text-foreground">My Style Formula</h2>
+              <h2 className="font-display text-xl font-bold text-foreground">Your Blueprint for Looking Incredible</h2>
               <Button
                 variant="outline"
                 size="sm"
@@ -242,10 +242,10 @@ const StyleDNA = () => {
             {/* Calibration Section */}
             <div className="text-center space-y-3">
               <h3 className="font-display text-lg font-bold text-foreground">
-                Calibrate your Style Formula
+                Sharpen Your Style Edge
               </h3>
               <p className="text-muted-foreground text-xs font-sans max-w-[280px] mx-auto">
-                Like or dislike your Style Formula outfits to help the AI learn your style identity better
+                The more you calibrate, the sharper your recommendations. Every swipe teaches the AI what makes you, you.
               </p>
 
               {/* Progress bar */}
@@ -290,7 +290,7 @@ const StyleDNA = () => {
           >
             <div className="flex items-center gap-2 mb-3">
               <Sparkles className="w-5 h-5 text-primary" />
-              <p className="text-xs font-sans uppercase tracking-widest text-muted-foreground">Your Archetype</p>
+              <p className="text-xs font-sans uppercase tracking-widest text-muted-foreground">Who You Are, Styled</p>
             </div>
             <h2 className="font-display text-xl font-bold text-foreground mb-3">{archetype}</h2>
             <div className="flex items-center gap-4">
@@ -299,7 +299,7 @@ const StyleDNA = () => {
                   <span className="text-xl font-bold text-primary">{styleScore}</span>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground font-sans">Style Score</p>
+                  <p className="text-xs text-muted-foreground font-sans">Your Style Power</p>
                   <div className="flex gap-0.5 mt-0.5">
                     {[1, 2, 3, 4, 5].map((s) => (
                       <Star
@@ -367,7 +367,7 @@ const StyleDNA = () => {
             >
               <div className="flex items-center gap-2 mb-4">
                 <Glasses className="w-5 h-5 text-[hsl(200,50%,60%)]" />
-                <h3 className="font-display text-base font-bold text-foreground">Tips for {faceShape} Face</h3>
+                <h3 className="font-display text-base font-bold text-foreground">How to Work Your {faceShape} Face</h3>
               </div>
               <div className="space-y-3">
                 {getFaceShapeTips(faceShape).map((tip, i) => (
@@ -390,7 +390,7 @@ const StyleDNA = () => {
             >
               <div className="flex items-center gap-2 mb-4">
                 <Gem className="w-5 h-5 text-[hsl(270,40%,65%)]" />
-                <h3 className="font-display text-base font-bold text-foreground">Tips for {bodyShape} Body</h3>
+                <h3 className="font-display text-base font-bold text-foreground">Dressing Your {bodyShape} Frame</h3>
               </div>
               <div className="space-y-3">
                 {getBodyShapeTips(bodyShape).map((tip, i) => (
@@ -446,7 +446,7 @@ const StyleDNA = () => {
                 >
                   <div className="flex items-center gap-2 mb-4">
                     <Layers className="w-5 h-5 text-[hsl(15,80%,55%)]" />
-                    <h3 className="font-display text-base font-bold text-foreground">Prints & Fabrics</h3>
+                    <h3 className="font-display text-base font-bold text-foreground">Textures That Elevate You</h3>
                   </div>
                   {dna.recommendedPrints && dna.recommendedPrints.length > 0 && (
                     <div className="mb-4">
@@ -487,7 +487,7 @@ const StyleDNA = () => {
                 >
                   <div className="flex items-center gap-2 mb-4">
                     <Shapes className="w-5 h-5 text-[hsl(270,40%,65%)]" />
-                    <h3 className="font-display text-base font-bold text-foreground">Flattering Silhouettes</h3>
+                    <h3 className="font-display text-base font-bold text-foreground">Silhouettes Made for Your Body</h3>
                   </div>
                   <div className="space-y-3">
                     {dna.flatteringSilhouettes.map((sil, i) => (
@@ -510,7 +510,7 @@ const StyleDNA = () => {
                 >
                   <div className="flex items-center gap-2 mb-4">
                     <Palette className="w-5 h-5 text-[hsl(45,80%,55%)]" />
-                    <h3 className="font-display text-base font-bold text-foreground">Color Usage Guide</h3>
+                    <h3 className="font-display text-base font-bold text-foreground">Your Personal Color Playbook</h3>
                   </div>
                   <div className="space-y-2.5">
                     {dna.colorUsageTips.map((tip, i) => (
@@ -538,7 +538,7 @@ const StyleDNA = () => {
               >
                 <div className="flex items-center gap-2 mb-3">
                   <ShieldCheck className="w-5 h-5 text-primary" />
-                  <h3 className="font-display text-base font-bold text-foreground">AI Summary</h3>
+                  <h3 className="font-display text-base font-bold text-foreground">What the AI Sees in You</h3>
                 </div>
                 <p className="text-muted-foreground font-sans text-sm leading-relaxed">{dna.summary}</p>
               </motion.div>
@@ -552,7 +552,7 @@ const StyleDNA = () => {
               >
                 <div className="flex items-center gap-2 mb-4">
                   <Star className="w-5 h-5 text-primary" />
-                  <h3 className="font-display text-base font-bold text-foreground">Recommendations</h3>
+                  <h3 className="font-display text-base font-bold text-foreground">Your Next Moves</h3>
                 </div>
                 <div className="space-y-3">
                   {dna.recommendations.map((rec, i) => (
@@ -574,7 +574,7 @@ const StyleDNA = () => {
                 >
                   <div className="flex items-center gap-2 mb-4">
                     <Heart className="w-4 h-4 text-primary" />
-                    <h3 className="font-display text-base font-bold text-foreground">Your Style Psyche</h3>
+                    <h3 className="font-display text-base font-bold text-foreground">The Mind Behind Your Wardrobe</h3>
                   </div>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     {lifestyle && (
@@ -615,10 +615,10 @@ const StyleDNA = () => {
                 >
                   <div className="flex items-center gap-2 mb-4">
                     <TrendingUp className="w-4 h-4 text-primary" />
-                    <h3 className="font-display text-base font-bold text-foreground">Your Style Evolution</h3>
+                    <h3 className="font-display text-base font-bold text-foreground">Where Your Style Is Headed</h3>
                   </div>
                   <p className="text-xs text-muted-foreground font-sans mb-4">
-                    AI predicts how your style will evolve based on your lifestyle, goals, and personality
+                    Based on your habits and goals, here's how you'll evolve over the next 1–3 years
                   </p>
                   <div className="relative">
                     {/* Timeline line */}
@@ -665,7 +665,7 @@ const StyleDNA = () => {
                 transition={{ delay: 0.5 }}
                 className="rounded-2xl border border-border bg-card p-5"
               >
-                <p className="text-xs font-sans uppercase tracking-widest text-muted-foreground mb-3">Colors to Avoid</p>
+                <p className="text-xs font-sans uppercase tracking-widest text-muted-foreground mb-3">Colors Working Against You</p>
                 <div className="flex flex-wrap gap-2">
                   {dna.colorsToAvoid.map((color) => (
                     <div key={color} className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-destructive/10">
@@ -686,7 +686,7 @@ const StyleDNA = () => {
               className="rounded-2xl border border-border bg-card p-6 text-center"
             >
               <p className="text-muted-foreground font-sans mb-4">
-                Complete the onboarding with selfie capture to unlock your full AI Color & Style analysis.
+                Your full style blueprint is locked. Upload a selfie during onboarding and the AI will map your colors, body, and archetype in seconds.
               </p>
               <Button onClick={() => navigate("/onboarding")} className="rounded-xl">
                 Complete Onboarding

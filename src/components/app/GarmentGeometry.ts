@@ -17,9 +17,11 @@ export type GarmentSubtype =
   | "sneakers" | "boots" | "loafers" | "derby"
   // Hats
   | "cap" | "beanie" | "fedora"
+  // Bags
+  | "bag-handbag" | "bag-tote" | "bag-clutch"
   // Generic fallbacks
   | "generic-top" | "generic-bottom" | "generic-outerwear" | "generic-shoe" | "generic-hat"
-  | "generic-skirt" | "generic-dress";
+  | "generic-skirt" | "generic-dress" | "generic-bag";
 
 // =============================================
 // LAYER SYSTEM — controls rendering order & radial offsets
@@ -34,7 +36,8 @@ export const LAYER_ORDER: Record<string, number> = {
   dress: 5,
   shoes: 6,
   hat: 7,
-  accessory: 8,
+  bag: 8,
+  accessory: 9,
 };
 
 // Radial multiplier per layer to prevent z-fighting
@@ -48,6 +51,7 @@ export const LAYER_RADIAL_OFFSET: Record<number, number> = {
   6: 1.0,
   7: 1.0,
   8: 1.0,
+  9: 1.0,
 };
 
 // Slot-based replacement map: categories that conflict with each other
@@ -60,6 +64,7 @@ export const SLOT_MAP: Record<string, string[]> = {
   dress: ["dress", "tops", "bottoms", "skirts"],
   shoes: ["shoes"],
   hat: ["hat"],
+  bag: ["bag"],
   accessory: ["accessory"],
 };
 
@@ -349,29 +354,31 @@ function createShoeGeometry(subtype: GarmentSubtype): THREE.BufferGeometry {
 
   if (isBoot) {
     return createGarmentProfile([
-      [0.001, 0.14],
-      [0.04, 0.13],
-      [0.055, 0.1],
-      [0.06, 0.06],
-      [0.06, 0.02],
-      [0.065, -0.01],
-      [0.07, -0.03],
-      [0.065, -0.04],
-      [0.001, -0.045],
-    ], 12);
+      [0.001, 0.20],
+      [0.055, 0.19],
+      [0.075, 0.14],
+      [0.08, 0.08],
+      [0.08, 0.03],
+      [0.085, -0.01],
+      [0.09, -0.035],
+      [0.085, -0.05],
+      [0.08, -0.06],
+      [0.001, -0.065],
+    ], 14);
   }
 
-  const height = isSneaker ? 0.06 : 0.05;
+  const height = isSneaker ? 0.08 : 0.065;
   return createGarmentProfile([
-    [0.001, height + 0.02],
-    [0.04, height],
-    [0.055, height * 0.6],
-    [0.06, 0.02],
-    [0.065, -0.01],
-    [0.07, -0.025],
-    [0.065, -0.03],
-    [0.001, -0.035],
-  ], 12);
+    [0.001, height + 0.025],
+    [0.055, height],
+    [0.075, height * 0.6],
+    [0.08, 0.025],
+    [0.085, -0.01],
+    [0.09, -0.035],
+    [0.085, -0.05],
+    [0.08, -0.055],
+    [0.001, -0.06],
+  ], 14);
 }
 
 // =============================================
@@ -418,6 +425,14 @@ function createHatGeometry(subtype: GarmentSubtype): {
 export function resolveSubtype(category: string, name?: string): GarmentSubtype {
   const cat = (category || "").toLowerCase();
   const nm = (name || "").toLowerCase();
+
+  // Bags
+  if (["bag", "handbag", "purse", "tote"].some(k => cat.includes(k)) ||
+      (cat === "accessory" && ["bag", "handbag", "purse", "tote"].some(k => nm.includes(k)))) {
+    if (nm.includes("tote")) return "bag-tote";
+    if (nm.includes("clutch")) return "bag-clutch";
+    return "bag-handbag";
+  }
 
   if (["shoes", "footwear", "shoe"].some(k => cat.includes(k))) {
     if (nm.includes("boot")) return "boots";
@@ -470,6 +485,29 @@ export function resolveSubtype(category: string, name?: string): GarmentSubtype 
 }
 
 // =============================================
+// BAG GEOMETRIES
+// =============================================
+function createBagGeometry(subtype: GarmentSubtype): {
+  body: THREE.BufferGeometry;
+  handle: THREE.BufferGeometry;
+} {
+  const isClutch = subtype === "bag-clutch";
+  const isTote = subtype === "bag-tote";
+
+  const w = isClutch ? 0.10 : isTote ? 0.14 : 0.12;
+  const h = isClutch ? 0.06 : isTote ? 0.18 : 0.15;
+  const d = isClutch ? 0.02 : isTote ? 0.06 : 0.05;
+
+  const body = new THREE.BoxGeometry(w, h, d);
+  body.computeVertexNormals();
+
+  const handleRadius = w * 0.35;
+  const handle = new THREE.TorusGeometry(handleRadius, 0.008, 8, 16, Math.PI);
+
+  return { body, handle };
+}
+
+// =============================================
 // PUBLIC API
 // =============================================
 export {
@@ -481,4 +519,5 @@ export {
   createOuterwearGeometry,
   createShoeGeometry,
   createHatGeometry,
+  createBagGeometry,
 };

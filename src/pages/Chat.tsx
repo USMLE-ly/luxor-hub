@@ -24,21 +24,21 @@ interface Message {
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`;
 
 const quickPrompts = [
-  { emoji: "👔", label: "What should I wear today?" },
-  { emoji: "🌙", label: "Outfit for a dinner date" },
-  { emoji: "💼", label: "Smart casual for work" },
-  { emoji: "🎉", label: "Party outfit ideas" },
-  { emoji: "📸", label: "Check if this item matches me" },
-  { emoji: "🛍️", label: "What's missing in my closet?" },
+  { emoji: "👔", label: "Style me for today" },
+  { emoji: "🌙", label: "Date night outfit" },
+  { emoji: "💼", label: "Work-ready look" },
+  { emoji: "🎉", label: "Something for a party" },
+  { emoji: "📸", label: "Does this work on me?" },
+  { emoji: "🛍️", label: "What am I missing?" },
 ];
 
 const vanishPlaceholders = [
-  "What should I wear today?",
-  "Outfit for a dinner date",
-  "Smart casual for work",
-  "Party outfit ideas",
-  "What's missing in my closet?",
-  "Style tips for my body type",
+  "Style me for today",
+  "Date night outfit",
+  "Work-ready look",
+  "Something for a party",
+  "What am I missing?",
+  "Does this work on me?",
 ];
 
 function AnimatedAssistantMessage({ content, isStreaming }: { content: string; isStreaming?: boolean }) {
@@ -244,8 +244,8 @@ const Chat = () => {
               <Sparkles className="w-4.5 h-4.5 text-primary" />
             </div>
             <div>
-              <h1 className="font-sans font-semibold text-foreground text-sm">AI Stylist</h1>
-              <p className="text-muted-foreground font-sans text-[10px]">Your personal fashion advisor</p>
+              <h1 className="font-sans font-semibold text-foreground text-sm">Your Stylist</h1>
+              <p className="text-muted-foreground font-sans text-[10px]">Knows your closet. Knows your body. Ask anything.</p>
             </div>
           </div>
           <div className="flex items-center gap-1.5">
@@ -274,9 +274,9 @@ const Chat = () => {
                 <div className="w-16 h-16 rounded-2xl bg-primary/10 mx-auto mb-4 flex items-center justify-center">
                   <Sparkles className="w-7 h-7 text-primary" />
                 </div>
-                <h2 className="font-display text-xl font-bold text-foreground mb-1.5">Hi! I'm your AI Stylist</h2>
+                <h2 className="font-display text-xl font-bold text-foreground mb-1.5">What are we wearing today?</h2>
                 <p className="text-muted-foreground font-sans text-xs max-w-xs mx-auto leading-relaxed">
-                  I know your closet, your style DNA, and the latest trends. Ask me anything about fashion!
+                  I have your entire closet memorized, I know your colors, and I track what's trending. Let's build something good.
                 </p>
               </div>
 
@@ -380,7 +380,7 @@ const Chat = () => {
                   animate={{ opacity: [0.5, 1, 0.5] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
-                  Styling your answer...
+                  Putting your look together...
                 </motion.span>
               </div>
             </motion.div>
@@ -422,7 +422,7 @@ const Chat = () => {
               value={input}
               onChange={(e) => { setInput(e.target.value); adjustHeight(); }}
               onKeyDown={handleKeyDown}
-              placeholder="Ask your stylist..."
+              placeholder="What's the occasion?"
               rows={1}
               className="flex-1 bg-transparent border-none outline-none resize-none font-sans text-sm text-foreground placeholder:text-muted-foreground min-h-[24px] max-h-24 py-0.5"
             />

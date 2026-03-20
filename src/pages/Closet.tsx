@@ -84,6 +84,15 @@ const closetToMannequinCategory: Record<string, string> = {
   other: "tops",
 };
 
+// Detect bags by name and override category mapping
+function getMannequinCategory(category: string, name: string | null): string {
+  const nm = (name || "").toLowerCase();
+  if (category === "accessory" && (nm.includes("bag") || nm.includes("handbag") || nm.includes("purse") || nm.includes("tote"))) {
+    return "bag";
+  }
+  return closetToMannequinCategory[category] || "tops";
+}
+
 const filterPills = ["All", "Upper Body", "Lower Body", "Shoes", "Accessories", "Dresses"];
 const uploadCategories = ["top", "bottom", "shoes", "accessory", "outerwear", "dress", "other"];
 const seasons = ["spring", "summer", "fall", "winter", "all-season"];
@@ -279,7 +288,7 @@ const Closet = () => {
         occasion: analysis.occasion || prev.occasion,
         name: prev.name || analysis.suggestedName || prev.name,
       }));
-      toast.success("AI analysis complete!");
+      toast.success("Details filled. Check and save.");
     } catch { toast.error("AI analysis failed. Fill in details manually."); }
     finally { setAnalyzing(false); }
   };
@@ -304,7 +313,7 @@ const Closet = () => {
         price: newItem.price ? parseFloat(newItem.price) : null, photo_url: photoUrl,
       });
       if (error) throw error;
-      toast.success("Item added to your closet!");
+      toast.success("Added. Your closet just got stronger.");
       setUploadOpen(false);
       setNewItem({ name: "", category: "top", color: "", brand: "", season: "all-season", occasion: "", style: "", notes: "", price: "" });
       setSelectedFile(null); setPreviewUrl(null); fetchItems();
@@ -325,7 +334,7 @@ const Closet = () => {
     else {
       // Award style points
       await (supabase.from("style_points" as any).insert({ user_id: user.id, points: 5, reason: "Logged wear" }) as any);
-      toast.success("Marked as worn today! +5 pts 👕");
+      toast.success("Logged. +5 style points.");
     }
   };
 
@@ -373,7 +382,7 @@ const Closet = () => {
 
   // Quick try-on: instantly add to mannequin with defaults and switch tab (with replacement)
   const quickTryOn = (item: ClothingItem) => {
-    const mappedCat = closetToMannequinCategory[item.category] || "tops";
+    const mappedCat = getMannequinCategory(item.category, item.name);
     const mapped: MannequinClothingItem = {
       category: mappedCat,
       color: item.color || "navy",
@@ -401,7 +410,7 @@ const Closet = () => {
 
   const confirmAddToMannequin = () => {
     if (!pendingItem) return;
-    const mappedCat = closetToMannequinCategory[pendingItem.category] || "tops";
+    const mappedCat = getMannequinCategory(pendingItem.category, pendingItem.name);
     const mapped: MannequinClothingItem = {
       category: mappedCat,
       color: pendingItem.color || "navy",
@@ -476,7 +485,7 @@ const Closet = () => {
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
           <div className="flex items-center justify-between">
-            <h1 className="font-display text-2xl font-bold text-foreground">My Closet</h1>
+            <h1 className="font-display text-2xl font-bold text-foreground">Your Closet</h1>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => receiptInputRef.current?.click()}
@@ -552,13 +561,13 @@ const Closet = () => {
                     <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
                       <Plus className="w-5 h-5 text-primary" />
                     </div>
-                    <p className="font-sans font-semibold text-sm text-foreground">New Item</p>
-                    <p className="text-xs text-muted-foreground font-sans mt-0.5">Add manually</p>
+                    <p className="font-sans font-semibold text-sm text-foreground">Add Piece</p>
+                    <p className="text-xs text-muted-foreground font-sans mt-0.5">Upload or snap</p>
                   </motion.button>
                 </DialogTrigger>
                 <DialogContent className="bg-card border-border max-w-md max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
-                    <DialogTitle className="font-display text-xl">Add Clothing Item</DialogTitle>
+                    <DialogTitle className="font-display text-xl">New Piece</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4 mt-4">
                     <div>
@@ -573,14 +582,14 @@ const Closet = () => {
                       ) : (
                         <label className="mt-2 flex flex-col items-center justify-center h-32 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/50 transition-colors">
                           <Upload className="h-6 w-6 text-muted-foreground mb-2" />
-                          <span className="text-sm text-muted-foreground font-sans">Upload photo</span>
+                          <span className="text-sm text-muted-foreground font-sans">Snap or upload</span>
                           <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
                         </label>
                       )}
                     </div>
                     <Button variant="outline" onClick={analyzeWithAI} disabled={analyzing || (!previewUrl && !newItem.name)} className="w-full border-primary/30 text-primary hover:bg-primary/10 font-sans">
                       {analyzing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
-                      {analyzing ? "Analyzing..." : "Auto-detect with AI"}
+                      {analyzing ? "Analyzing..." : "Let AI fill the details"}
                     </Button>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
@@ -632,8 +641,8 @@ const Closet = () => {
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
                   <Camera className="w-5 h-5 text-primary" />
                 </div>
-                <p className="font-sans font-semibold text-sm text-foreground">Upload Items</p>
-                <p className="text-xs text-muted-foreground font-sans mt-0.5">Scan with AI</p>
+                <p className="font-sans font-semibold text-sm text-foreground">Upload Pieces</p>
+                <p className="text-xs text-muted-foreground font-sans mt-0.5">Snap or upload</p>
               </motion.button>
             </div>
 
@@ -816,7 +825,7 @@ const Closet = () => {
                           <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
                             <Plus className="w-5 h-5 text-primary" />
                           </div>
-                          <span className="text-[10px] font-sans font-medium text-muted-foreground">New Item</span>
+                          <span className="text-[10px] font-sans font-medium text-muted-foreground">Add Piece</span>
                         </button>
                         {sectionItems.slice(0, 5).map((item, i) => (
                           <ItemCard key={item.id} item={item} index={i} onDelete={handleDelete} onWear={handleWornToday} onAddToMannequin={() => addToMannequin(item)} onQuickTryOn={() => quickTryOn(item)} />

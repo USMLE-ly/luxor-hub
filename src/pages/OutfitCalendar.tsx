@@ -285,7 +285,7 @@ const OutfitCalendar = () => {
     const granted = await requestNotificationPermission();
     if (granted) {
       setNotificationsEnabled(true);
-      toast.success("Outfit reminders enabled! You'll be reminded at 8 PM the night before.");
+      toast.success("Reminders on. You'll get a nudge at 8 PM the night before.");
       scheduleReminders(events);
     } else {
       toast.error("Notification permission denied. Enable it in your browser settings.");
@@ -465,7 +465,7 @@ const OutfitCalendar = () => {
         if (!existingDates.has(dateStr)) daysToFill.push(d);
       }
       if (daysToFill.length === 0) {
-        toast.info("Your upcoming week is already fully scheduled!");
+        toast.info("Your week is fully booked. You're ahead of everyone.");
         setAutoFilling(false);
         return;
       }
@@ -513,7 +513,7 @@ const OutfitCalendar = () => {
       });
       const { error } = await supabase.from("calendar_events").insert(eventsToInsert);
       if (error) throw error;
-      toast.success(`Scheduled ${eventsToInsert.length} weather-smart outfits!`);
+      toast.success(`Done. ${eventsToInsert.length} outfits locked in.`);
       fetchEvents();
     } catch (e: any) {
       toast.error(e.message || "Failed to auto-fill schedule");
@@ -914,10 +914,10 @@ const OutfitCalendar = () => {
           <div className="flex items-start justify-between mb-6">
             <div>
               <h1 className="font-display text-2xl font-bold text-foreground tracking-tight">
-                Outfit Schedule
+                Your Week, Styled
               </h1>
               <p className="text-muted-foreground font-sans text-xs mt-0.5">
-                Your curated weekly wardrobe — powered by AI & weather
+                Never open your closet wondering what to wear again
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -967,7 +967,7 @@ const OutfitCalendar = () => {
                   {weatherCodeToIcon(todayWeather.code)}
                 </div>
                 <div>
-                  <p className="font-sans text-xs text-muted-foreground">Today's Weather</p>
+                  <p className="font-sans text-xs text-muted-foreground">What the Weather Demands</p>
                   <p className="font-display text-lg font-bold text-foreground leading-tight">
                     {todayWeather.tempMax}° <span className="text-muted-foreground text-sm font-normal">/ {todayWeather.tempMin}°</span>
                   </p>

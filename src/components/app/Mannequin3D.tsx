@@ -11,6 +11,7 @@ import {
   createOuterwearGeometry,
   createShoeGeometry,
   createHatGeometry,
+  createBagGeometry,
   resolveSubtype,
   LAYER_ORDER,
   LAYER_RADIAL_OFFSET,
@@ -45,9 +46,15 @@ type PosePreset = "neutral" | "fashion" | "walking";
 
 const DEFAULT_DNA: BodyDNA = { height: 0.5, shoulder: 0.5, waist: 0.5, hips: 0.5, legLength: 0.5 };
 
-// --- Materials ---
-const clayMaterial = new THREE.MeshStandardMaterial({ color: "#D4B896", roughness: 0.92, metalness: 0 });
-const darkClayMaterial = new THREE.MeshStandardMaterial({ color: "#C4A882", roughness: 0.88, metalness: 0 });
+// --- Materials (premium) ---
+const clayMaterial = new THREE.MeshPhysicalMaterial({
+  color: "#D4B896", roughness: 0.88, metalness: 0, clearcoat: 0.15,
+  sheen: 0.3, sheenColor: new THREE.Color("#E8D5B7"),
+});
+const darkClayMaterial = new THREE.MeshPhysicalMaterial({
+  color: "#C4A882", roughness: 0.85, metalness: 0, clearcoat: 0.1,
+  sheen: 0.2, sheenColor: new THREE.Color("#D8C5A7"),
+});
 
 // --- Lathe Profile Builder ---
 function createBodyProfile(points: [number, number][], segments = 32): THREE.LatheGeometry {
@@ -97,6 +104,8 @@ const isShoeCat = (s: GarmentSubtype) =>
   s.includes("sneakers") || s.includes("boots") || s.includes("loafers") || s.includes("derby") || s === "generic-shoe";
 const isHatCat = (s: GarmentSubtype) =>
   s.includes("cap") || s.includes("beanie") || s.includes("fedora") || s === "generic-hat";
+const isBagCat = (s: GarmentSubtype) =>
+  s.includes("bag-") || s === "generic-bag";
 
 // --- Animated Garment Wrapper ---
 function AnimatedGarment({ children, category }: { children: React.ReactNode; category: string }) {
@@ -172,7 +181,7 @@ function SmoothBody({
       [0.001, 0.55], [0.08, 0.52], [shoulderR, 0.45],
       [chestR * shoulderScale, 0.35], [waistR, 0.15],
       [hipR, 0.0], [hipR * 0.95, -0.05], [0.001, -0.08],
-    ], 24);
+    ], 32);
   }, [isMale, shoulderScale, waistScale, hipScale]);
 
   const headGeo = useMemo(() => createBodyProfile([
@@ -254,8 +263,8 @@ function SmoothBody({
   return (
     <IdleRotation enabled={autoRotate}>
       <group ref={groupRef} scale={[heightScale, heightScale, heightScale]}>
-        {/* Head */}
-        <mesh geometry={headGeo} material={clayMaterial} position={[0, 1.18, 0]} castShadow />
+        {/* Head (slightly smaller for elegance) */}
+        <mesh geometry={headGeo} material={clayMaterial} position={[0, 1.18, 0]} scale={[0.95, 0.95, 0.95]} castShadow />
         {/* Neck */}
         <mesh geometry={neckGeo} material={darkClayMaterial} position={[0, 0.95, 0]} castShadow />
         {/* Torso */}
@@ -388,7 +397,7 @@ function SmoothBody({
             const { body, sleeves } = createDressGeometry(item.subtype, item.fit, shoulderScale, waistScale, hipScale, lo);
             return (
               <AnimatedGarment key={`clothing-${i}`} category={item.category}>
-                <mesh geometry={body} material={item.mat} position={[0, 0.45, 0]} castShadow />
+                <mesh geometry={body} material={item.mat} position={[0, 0.30, 0]} castShadow />
                 {sleeves && (
                   <>
                     <group position={[-armX, 0.85, 0]}>
@@ -456,6 +465,28 @@ function SmoothBody({
                     <mesh geometry={brim} material={item.mat}
                       position={[0, -0.02, 0.04]} rotation={[-Math.PI / 2, 0, 0]} castShadow />
                   )}
+                </group>
+              </AnimatedGarment>
+            );
+          }
+
+          // --- BAGS ---
+          if (isBagCat(item.subtype)) {
+            const { body: bagBody, handle } = createBagGeometry(item.subtype);
+            return (
+              <AnimatedGarment key={`clothing-${i}`} category={item.category}>
+                {/* Position bag at left hand */}
+                <group position={[-armX, 0.85, 0]}>
+                  <group rotation={poseData.leftUpperArm as [number, number, number]}>
+                    <group position={[0, -0.42, 0]}>
+                      <group rotation={poseData.leftForearm as [number, number, number]}>
+                        <group position={[0, -0.30, 0]}>
+                          <mesh geometry={bagBody} material={item.mat} castShadow />
+                          <mesh geometry={handle} material={item.mat} position={[0, 0.08, 0]} rotation={[0, 0, 0]} castShadow />
+                        </group>
+                      </group>
+                    </group>
+                  </group>
                 </group>
               </AnimatedGarment>
             );
@@ -562,6 +593,7 @@ export default function Mannequin3D({
           shadow-camera-far={10}
         />
         <directionalLight position={[-2, 3, -1]} intensity={0.3} />
+        <pointLight position={[-1, 2, -2]} intensity={0.2} color="#F5E6D3" />
         <spotLight position={[0, 5, 0]} intensity={0.3} angle={0.6} penumbra={0.8} castShadow />
         <pointLight position={[0, -1, 2]} intensity={0.15} />
 

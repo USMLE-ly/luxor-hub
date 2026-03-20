@@ -541,9 +541,9 @@ export default function OutfitAnalysis() {
         >
           <div className="absolute -top-4 -left-4 w-32 h-32 bg-primary/10 rounded-full blur-[60px]" />
           <h1 className="font-display text-4xl font-bold text-foreground relative">
-            AI Outfit <span className="gold-text">Analysis</span>
+            See What the World <span className="gold-text">Sees</span>
           </h1>
-          <p className="text-muted-foreground mt-2 text-lg">Upload a photo and get comprehensive styling feedback powered by AI</p>
+          <p className="text-muted-foreground mt-2 text-lg">Upload your outfit. The AI scores it, finds the strengths, and tells you exactly what to fix.</p>
         </motion.div>
 
         <Tabs defaultValue="analyze" className="w-full">
@@ -602,12 +602,12 @@ export default function OutfitAnalysis() {
 
                     <div className="flex-1 space-y-4">
                       <div className="space-y-2">
-                        <h3 className="font-display text-lg font-semibold text-foreground">How it works</h3>
+                        <h3 className="font-display text-lg font-semibold text-foreground">Three steps. Honest feedback.</h3>
                         <div className="space-y-3">
                           {[
-                            { icon: Upload, text: "Upload a full-body outfit photo", color: "text-primary" },
-                            { icon: Sparkles, text: "AI analyzes style, colors, fit & occasion", color: "text-primary" },
-                            { icon: TrendingUp, text: "Get detailed scores and improvement tips", color: "text-primary" },
+                            { icon: Upload, text: "Snap or upload your look", color: "text-primary" },
+                            { icon: Sparkles, text: "AI breaks down every detail — color, fit, occasion match", color: "text-primary" },
+                            { icon: TrendingUp, text: "Get a score and specific fixes", color: "text-primary" },
                           ].map((step, i) => (
                             <motion.div
                               key={i}
@@ -627,7 +627,7 @@ export default function OutfitAnalysis() {
                     {isAnalyzing ? (
                         <div className="space-y-4 w-full">
                           <div className="space-y-3">
-                            {["Uploading image...", "Analyzing style & colors...", "Generating insights..."].map((step, i) => (
+                            {["Loading your look...", "Reading the outfit...", "Building your report..."].map((step, i) => (
                               <motion.div
                                 key={step}
                                 initial={{ opacity: 0, x: -10 }}
