@@ -88,6 +88,11 @@ const Paywall = () => {
   const [selectedTier, setSelectedTier] = useState<"starter" | "pro" | "elite">("pro");
   const [restoring, setRestoring] = useState(false);
 
+  // Track paywall view
+  useState(() => {
+    trackEvent("InitiateCheckout", { content_name: "LEXOR® Paywall View" });
+  });
+
   const handlePayPalApprove = useCallback(
     async (subscriptionId: string, tier: string) => {
       if (!user) {
