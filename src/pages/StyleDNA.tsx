@@ -552,7 +552,7 @@ const StyleDNA = () => {
               >
                 <div className="flex items-center gap-2 mb-4">
                   <Star className="w-5 h-5 text-primary" />
-                  <h3 className="font-display text-base font-bold text-foreground">Recommendations</h3>
+                  <h3 className="font-display text-base font-bold text-foreground">Your Next Moves</h3>
                 </div>
                 <div className="space-y-3">
                   {dna.recommendations.map((rec, i) => (
