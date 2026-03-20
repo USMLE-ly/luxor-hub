@@ -513,7 +513,7 @@ const OutfitCalendar = () => {
       });
       const { error } = await supabase.from("calendar_events").insert(eventsToInsert);
       if (error) throw error;
-      toast.success(`Scheduled ${eventsToInsert.length} weather-smart outfits!`);
+      toast.success(`Done. ${eventsToInsert.length} outfits locked in.`);
       fetchEvents();
     } catch (e: any) {
       toast.error(e.message || "Failed to auto-fill schedule");
