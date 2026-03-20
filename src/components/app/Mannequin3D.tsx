@@ -46,9 +46,15 @@ type PosePreset = "neutral" | "fashion" | "walking";
 
 const DEFAULT_DNA: BodyDNA = { height: 0.5, shoulder: 0.5, waist: 0.5, hips: 0.5, legLength: 0.5 };
 
-// --- Materials ---
-const clayMaterial = new THREE.MeshStandardMaterial({ color: "#D4B896", roughness: 0.92, metalness: 0 });
-const darkClayMaterial = new THREE.MeshStandardMaterial({ color: "#C4A882", roughness: 0.88, metalness: 0 });
+// --- Materials (premium) ---
+const clayMaterial = new THREE.MeshPhysicalMaterial({
+  color: "#D4B896", roughness: 0.88, metalness: 0, clearcoat: 0.15,
+  sheen: 0.3, sheenColor: new THREE.Color("#E8D5B7"),
+});
+const darkClayMaterial = new THREE.MeshPhysicalMaterial({
+  color: "#C4A882", roughness: 0.85, metalness: 0, clearcoat: 0.1,
+  sheen: 0.2, sheenColor: new THREE.Color("#D8C5A7"),
+});
 
 // --- Lathe Profile Builder ---
 function createBodyProfile(points: [number, number][], segments = 32): THREE.LatheGeometry {
