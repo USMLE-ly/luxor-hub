@@ -410,7 +410,7 @@ const Closet = () => {
 
   const confirmAddToMannequin = () => {
     if (!pendingItem) return;
-    const mappedCat = closetToMannequinCategory[pendingItem.category] || "tops";
+    const mappedCat = getMannequinCategory(pendingItem.category, pendingItem.name);
     const mapped: MannequinClothingItem = {
       category: mappedCat,
       color: pendingItem.color || "navy",
