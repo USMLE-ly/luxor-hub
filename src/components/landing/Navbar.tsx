@@ -17,7 +17,7 @@ const Navbar = () => {
   const [activeSection, setActiveSection] = useState("");
   const [sheetOpen, setSheetOpen] = useState(false);
   const navigate = useNavigate();
-  const { theme, setTheme } = useTheme();
+  
 
   useEffect(() => {
     const handleScroll = () => {
