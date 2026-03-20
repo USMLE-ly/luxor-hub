@@ -35,9 +35,9 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       manifest: {
-        name: "LUXOR — AI Personal Stylist",
+        name: "LUXOR — AI-Powered Style Intelligence",
         short_name: "LUXOR",
-        description: "Your AI stylist that knows you better than you know yourself.",
+        description: "The AI style platform that turns your wardrobe into revenue. Smart outfit curation, trend forecasting, and personal styling.",
         theme_color: "#C8A951",
         background_color: "#0A0A0B",
         display: "standalone",
