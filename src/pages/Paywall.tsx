@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Crown, Check, Shield, Clock, RotateCcw } from "lucide-react";
@@ -6,6 +6,7 @@ import { PricingInteraction } from "@/components/ui/pricing-interaction";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import PayPalButton from "@/components/app/PayPalButton";
 
 const features = [
   "Unlimited AI outfit suggestions",
@@ -19,34 +20,31 @@ const features = [
 const Paywall = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [activating, setActivating] = useState(false);
+  const [selectedTier, setSelectedTier] = useState<"starter" | "pro" | "elite">("pro");
   const [restoring, setRestoring] = useState(false);
 
-  const handleGetStarted = async () => {
+  const handlePayPalApprove = useCallback(async (subscriptionId: string) => {
     if (!user) {
       navigate("/auth");
       return;
     }
-    setActivating(true);
     try {
-      // For now, mark the user as "paid" by setting a flag in style_profiles
-      const { error } = await supabase
-        .from("style_profiles")
-        .update({ style_score: 1 } as any)
-        .eq("user_id", user.id);
-
+      // Save subscription to database
+      const { error } = await supabase.from("subscriptions").insert({
+        user_id: user.id,
+        paypal_subscription_id: subscriptionId,
+        plan_tier: selectedTier,
+        status: "active",
+      });
       if (error) throw error;
 
-      // Store paid status locally for immediate gate check
       localStorage.setItem("luxor_paid", "true");
       toast.success("Welcome to Luxor! Your style journey begins now.");
       navigate("/dashboard");
     } catch {
-      toast.error("Something went wrong. Please try again.");
-    } finally {
-      setActivating(false);
+      toast.error("Something went wrong saving your subscription.");
     }
-  };
+  }, [user, selectedTier, navigate]);
 
   const handleRestore = async () => {
     if (!user) {
@@ -55,14 +53,15 @@ const Paywall = () => {
     }
     setRestoring(true);
     try {
-      // Check if user previously had a paid status
       const { data } = await supabase
-        .from("style_profiles")
-        .select("style_score")
+        .from("subscriptions")
+        .select("id")
         .eq("user_id", user.id)
-        .single();
+        .eq("status", "active")
+        .limit(1)
+        .maybeSingle();
 
-      if (data?.style_score && data.style_score >= 1) {
+      if (data) {
         localStorage.setItem("luxor_paid", "true");
         toast.success("Purchase restored! Welcome back to Luxor.");
         navigate("/dashboard");
@@ -103,7 +102,7 @@ const Paywall = () => {
           </p>
         </motion.div>
 
-        {/* Pricing Card */}
+        {/* Pricing Card with PayPal */}
         <motion.div
           initial={{ y: 24, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -117,7 +116,12 @@ const Paywall = () => {
             proAnnual={23}
             eliteMonth={99}
             eliteAnnual={79}
-            onGetStarted={handleGetStarted}
+            onTierChange={setSelectedTier}
+            renderFooter={(tier) => (
+              <div className="w-full">
+                <PayPalButton tier={tier} onApprove={handlePayPalApprove} />
+              </div>
+            )}
           />
         </motion.div>
 
@@ -177,7 +181,7 @@ const Paywall = () => {
         </motion.div>
 
         <p className="text-center text-[10px] text-muted-foreground/60 font-sans mb-4">
-          Secure payment processing. Your data is encrypted.
+          Secure payment processing via PayPal. Your data is encrypted.
         </p>
 
         {/* Restore Purchase */}

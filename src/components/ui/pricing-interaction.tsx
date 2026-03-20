@@ -49,6 +49,8 @@ export function PricingInteraction({
   eliteMonth,
   eliteAnnual,
   onGetStarted,
+  onTierChange,
+  renderFooter,
 }: {
   starterMonth: number;
   starterAnnual: number;
@@ -57,7 +59,10 @@ export function PricingInteraction({
   eliteMonth: number;
   eliteAnnual: number;
   onGetStarted?: () => void;
+  onTierChange?: (tier: "starter" | "pro" | "elite") => void;
+  renderFooter?: (activeTier: "starter" | "pro" | "elite") => React.ReactNode;
 }) {
+  const tierNames: ("starter" | "pro" | "elite")[] = ["starter", "pro", "elite"];
   const [active, setActive] = React.useState(1);
   const [period, setPeriod] = React.useState(0);
   const [starter, setStarter] = React.useState(starterMonth);
@@ -133,7 +138,10 @@ export function PricingInteraction({
             ref={(el) => { tierRefs.current[idx] = el; }}
             className="w-full cursor-pointer border-2 border-border p-4 rounded-2xl transition-all duration-300"
             style={{ opacity: active !== idx ? 0.7 : 1 }}
-            onClick={() => setActive(idx)}
+            onClick={() => {
+              setActive(idx);
+              onTierChange?.(tierNames[idx]);
+            }}
           >
             <div className="flex justify-between">
               <div className="flex flex-col items-start">
@@ -208,12 +216,16 @@ export function PricingInteraction({
         />
       </div>
 
-      <button
-        onClick={onGetStarted}
-        className="rounded-full gold-gradient text-primary-foreground text-lg font-semibold w-full p-3 active:scale-95 transition-transform duration-300"
-      >
-        Get Started
-      </button>
+      {renderFooter ? (
+        renderFooter(tierNames[active])
+      ) : (
+        <button
+          onClick={onGetStarted}
+          className="rounded-full gold-gradient text-primary-foreground text-lg font-semibold w-full p-3 active:scale-95 transition-transform duration-300"
+        >
+          Get Started
+        </button>
+      )}
     </div>
   );
 }
