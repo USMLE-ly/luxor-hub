@@ -12,49 +12,69 @@ import {
   BGComponent2,
   BGComponent3,
 } from "@/components/ui/squishy-pricing";
+import type { PricingFeature } from "@/components/ui/squishy-pricing";
 
-const tiers = [
+type Tier = {
+  key: "starter" | "pro" | "elite";
+  label: string;
+  price: string;
+  desc: string;
+  features: (string | PricingFeature)[];
+  bg: string;
+  BG: React.FC;
+};
+
+const tiers: Tier[] = [
   {
-    key: "starter" as const,
+    key: "starter",
     label: "Starter",
     price: "9",
-    desc: "Essential AI styling tools",
+    desc: "The essentials to start dressing smarter",
     features: [
-      "AI outfit suggestions (10/day)",
+      "AI outfit suggestions — 10 per day",
       "Basic color analysis",
-      "Closet digitization (50 items)",
+      "Closet digitization — up to 50 items",
       "Daily outfit of the day",
+      { text: "Style DNA deep analysis", included: false },
+      { text: "Weekly capsule wardrobes", included: false },
+      { text: "Virtual try-on", included: false },
+      { text: "Personal concierge", included: false },
     ],
     bg: "bg-[hsl(43,74%,35%)]",
     BG: BGComponent1,
   },
   {
-    key: "pro" as const,
+    key: "pro",
     label: "Pro",
     price: "29",
-    desc: "Unlock your full style potential",
+    desc: "Full AI styling arsenal — no limits on your closet",
     features: [
       "Unlimited AI outfit suggestions",
       "Full color & style DNA analysis",
       "Unlimited closet items",
       "Weekly capsule wardrobes",
       "Priority AI stylist chat",
+      "Outfit calendar & planning",
+      { text: "Virtual try-on", included: false },
+      { text: "Personal concierge", included: false },
     ],
     bg: "bg-[hsl(43,74%,49%)]",
     BG: BGComponent2,
   },
   {
-    key: "elite" as const,
+    key: "elite",
     label: "Elite",
     price: "99",
-    desc: "Full concierge-level styling",
+    desc: "White-glove styling — your AI concierge handles everything",
     features: [
-      "Everything in Pro",
+      "Everything in Pro, plus:",
       "Virtual try-on technology",
       "Personal style concierge",
       "Trend intelligence reports",
       "Shopping recommendations",
       "Wardrobe gap analysis",
+      "Monthly style report",
+      "Priority support",
     ],
     bg: "bg-[hsl(35,80%,42%)]",
     BG: BGComponent3,
