@@ -65,12 +65,12 @@ const Hero = () => {
         const TRANSITION_DURATION = () => SLIDER_CONFIG.settings.transitionDuration;
 
         const slides = [
-            { title: "Stop Guessing. Start Turning Heads.", description: "LUXOR reads your body, your wardrobe, and your life. Then it tells you exactly what to wear today.", media: sliderStyleDna },
+            { title: "Stop Guessing. Start Turning Heads.", description: "LEXOR® reads your body, your wardrobe, and your life. Then it tells you exactly what to wear today.", media: sliderStyleDna },
             { title: "Wake Up Knowing Exactly What to Wear", description: "Your outfit is ready before your coffee. Weather-checked, calendar-aware, built from clothes you already own.", media: sliderOutfitGen },
             { title: "The Colors That Make People Look Twice", description: "Skin-tone analysis pinpoints the exact shades that make you glow. No more guessing at the store.", media: sliderColorIntel },
-            { title: "You Own $3,000 in Clothes You Never Wear", description: "Most people use 20% of their closet. LUXOR scans every piece and puts the forgotten 80% back to work.", media: sliderWardrobe },
+            { title: "You Own $3,000 in Clothes You Never Wear", description: "Most people use 20% of their closet. LEXOR® scans every piece and puts the forgotten 80% back to work.", media: sliderWardrobe },
             { title: "Be First. Not a Follower.", description: "Real-time trend radar filtered to your taste, your budget, your body. Spot what's next before everyone else does.", media: sliderTrending },
-            { title: "Own Less. Look Richer.", description: "A tight capsule wardrobe beats a stuffed closet every time. LUXOR builds yours from what you already have.", media: sliderCapsule }
+            { title: "Own Less. Look Richer.", description: "A tight capsule wardrobe beats a stuffed closet every time. LEXOR® builds yours from what you already have.", media: sliderCapsule }
         ];
 
         const vertexShader = `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
@@ -343,7 +343,7 @@ const Hero = () => {
           </div>
           {/* Staggered letter reveal */}
           <div className="flex items-center gap-[2px]">
-            {'LUXOR'.split('').map((letter, i) => (
+            {'LEXOR'.split('').map((letter, i) => (
               <span
                 key={i}
                 className="font-display text-lg tracking-[0.3em] gold-text inline-block animate-fade-in"
@@ -352,6 +352,7 @@ const Hero = () => {
                 {letter}
               </span>
             ))}
+            <span className="font-display text-[10px] gold-text inline-block animate-fade-in align-super ml-0.5" style={{ animationDelay: '600ms', animationFillMode: 'backwards' }}>®</span>
           </div>
           {/* Loading bar */}
           <div className="w-32 h-[2px] bg-muted/30 rounded-full overflow-hidden">
