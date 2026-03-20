@@ -24,21 +24,21 @@ interface Message {
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`;
 
 const quickPrompts = [
-  { emoji: "👔", label: "What should I wear today?" },
-  { emoji: "🌙", label: "Outfit for a dinner date" },
-  { emoji: "💼", label: "Smart casual for work" },
-  { emoji: "🎉", label: "Party outfit ideas" },
-  { emoji: "📸", label: "Check if this item matches me" },
-  { emoji: "🛍️", label: "What's missing in my closet?" },
+  { emoji: "👔", label: "Style me for today" },
+  { emoji: "🌙", label: "Date night outfit" },
+  { emoji: "💼", label: "Work-ready look" },
+  { emoji: "🎉", label: "Something for a party" },
+  { emoji: "📸", label: "Does this work on me?" },
+  { emoji: "🛍️", label: "What am I missing?" },
 ];
 
 const vanishPlaceholders = [
-  "What should I wear today?",
-  "Outfit for a dinner date",
-  "Smart casual for work",
-  "Party outfit ideas",
-  "What's missing in my closet?",
-  "Style tips for my body type",
+  "Style me for today",
+  "Date night outfit",
+  "Work-ready look",
+  "Something for a party",
+  "What am I missing?",
+  "Does this work on me?",
 ];
 
 function AnimatedAssistantMessage({ content, isStreaming }: { content: string; isStreaming?: boolean }) {
