@@ -593,6 +593,7 @@ export default function Mannequin3D({
           shadow-camera-far={10}
         />
         <directionalLight position={[-2, 3, -1]} intensity={0.3} />
+        <pointLight position={[-1, 2, -2]} intensity={0.2} color="#F5E6D3" />
         <spotLight position={[0, 5, 0]} intensity={0.3} angle={0.6} penumbra={0.8} castShadow />
         <pointLight position={[0, -1, 2]} intensity={0.15} />
 
