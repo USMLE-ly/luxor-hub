@@ -242,10 +242,10 @@ const StyleDNA = () => {
             {/* Calibration Section */}
             <div className="text-center space-y-3">
               <h3 className="font-display text-lg font-bold text-foreground">
-                Calibrate your Style Formula
+                Sharpen Your Style Edge
               </h3>
               <p className="text-muted-foreground text-xs font-sans max-w-[280px] mx-auto">
-                Like or dislike your Style Formula outfits to help the AI learn your style identity better
+                The more you calibrate, the sharper your recommendations. Every swipe teaches the AI what makes you, you.
               </p>
 
               {/* Progress bar */}
