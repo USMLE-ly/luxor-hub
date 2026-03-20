@@ -64,10 +64,10 @@ const Pricing = () => {
         >
           <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase mb-3">Pricing</p>
           <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground">
-            Invest in Your <span className="gold-text">Best Self</span>
+            What's Looking Incredible Actually <span className="gold-text">Worth to You</span>?
           </h2>
           <p className="mt-4 max-w-lg mx-auto font-sans text-sm text-muted-foreground">
-            Choose the plan that fits your style journey. No free tier — because your style deserves real investment.
+            The average person wastes $1,200/year on clothes they barely wear. AURELIA pays for itself in the first month.
           </p>
         </motion.div>
 
