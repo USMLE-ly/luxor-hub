@@ -1042,10 +1042,30 @@ const GeneratingStep = ({ step, gender }: { step: OnboardingStep; gender?: "fema
               <stop offset="55%" stopColor="hsl(43,74%,49%)" stopOpacity="0.4" />
               <stop offset="100%" stopColor="transparent" />
             </linearGradient>
+            {/* Per-garment gradients for depth */}
+            {garments.map((g, i) => (
+              <linearGradient key={`gg-${i}`} id={`garment-${i}`} x1="30%" y1="0%" x2="70%" y2="100%">
+                <stop offset="0%" stopColor={g.fill} stopOpacity="1" />
+                <stop offset="100%" stopColor={g.fill} stopOpacity="0.7" />
+              </linearGradient>
+            ))}
+            {/* Garment highlight */}
+            <linearGradient id="garmentHl" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="white" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="white" stopOpacity="0" />
+            </linearGradient>
+            <filter id="garmentShadow" x="-10%" y="-5%" width="120%" height="115%">
+              <feDropShadow dx="0" dy="1" stdDeviation="1.5" floodColor="hsl(0,0%,0%)" floodOpacity="0.2" />
+            </filter>
           </defs>
 
-          <line x1="40" y1="18" x2="40" y2="95" stroke="hsl(var(--foreground))" strokeWidth="1.5" opacity="0.4" />
-          <line x1="160" y1="18" x2="160" y2="95" stroke="hsl(var(--foreground))" strokeWidth="1.5" opacity="0.4" />
+          {/* Rack uprights */}
+          <line x1="40" y1="18" x2="40" y2="95" stroke="hsl(var(--foreground))" strokeWidth="1.5" opacity="0.35" />
+          <line x1="160" y1="18" x2="160" y2="95" stroke="hsl(var(--foreground))" strokeWidth="1.5" opacity="0.35" />
+          {/* Rack feet */}
+          <line x1="32" y1="95" x2="48" y2="95" stroke="hsl(var(--foreground))" strokeWidth="1.2" opacity="0.25" strokeLinecap="round" />
+          <line x1="152" y1="95" x2="168" y2="95" stroke="hsl(var(--foreground))" strokeWidth="1.2" opacity="0.25" strokeLinecap="round" />
+          {/* Rack bar with shimmer */}
           <line x1="35" y1="18" x2="165" y2="18" stroke="url(#rackShimmer)" strokeWidth="2.5" strokeLinecap="round" />
 
           {!allDone && (
@@ -1061,43 +1081,56 @@ const GeneratingStep = ({ step, gender }: { step: OnboardingStep; gender?: "fema
 
           {garments.map((g, i) => (
             <motion.g key={i}>
-              <motion.line
-                x1={60 + i * 20} y1={18} x2={60 + i * 20} y2={25}
-                stroke="hsl(var(--foreground))" strokeWidth="1" opacity="0.5"
+              {/* Hanger hook */}
+              <motion.path
+                d={`M${60 + i * 20},18 L${60 + i * 20},21 Q${60 + i * 20 - 4},22 ${60 + i * 20 - 5},24 L${60 + i * 20 + 5},24 Q${60 + i * 20 + 4},22 ${60 + i * 20},21`}
+                stroke="hsl(var(--foreground))" strokeWidth="0.8" fill="none" opacity="0.5"
                 initial={{ opacity: 0 }} animate={{ opacity: 0.5 }}
                 transition={{ delay: i * 0.3 }}
               />
+              {/* Garment body with gradient + shadow */}
               <motion.path
-                d={g.d} fill={g.fill} opacity="0.85"
+                d={g.d} fill={`url(#garment-${i})`} opacity="0.9"
+                filter="url(#garmentShadow)"
                 initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 0.85, rotate: [0, -2, 2, -1, 0], y: [0, -1.5, 1.5, -0.5, 0] }}
+                animate={{ scale: 1, opacity: 0.9, rotate: [0, -1.5, 1.5, -0.8, 0], y: [0, -1, 1, -0.5, 0] }}
                 transition={{
                   scale: { delay: i * 0.3, duration: 0.5, type: "spring", stiffness: 200 },
                   opacity: { delay: i * 0.3, duration: 0.4 },
                   rotate: { delay: i * 0.3 + 0.5, duration: 4, repeat: Infinity, ease: "easeInOut" },
                   y: { delay: i * 0.3 + 0.5, duration: 3, repeat: Infinity, ease: "easeInOut" },
                 }}
-                style={{ transformOrigin: `${60 + i * 20}px 25px` }}
+                style={{ transformOrigin: `${60 + i * 20}px 24px` }}
               />
+              {/* Highlight overlay for 3D depth */}
+              <motion.path
+                d={g.d} fill="url(#garmentHl)" opacity="0.6"
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 0.6 }}
+                transition={{ delay: i * 0.3 + 0.2, duration: 0.5 }}
+                style={{ transformOrigin: `${60 + i * 20}px 24px` }}
+              />
+              {/* Flash on completion */}
               {progress[i] >= 100 && (
                 <motion.path
                   d={g.d} fill="white"
-                  initial={{ opacity: 0.6 }} animate={{ opacity: 0 }}
+                  initial={{ opacity: 0.5 }} animate={{ opacity: 0 }}
                   transition={{ duration: 0.8 }}
-                  style={{ transformOrigin: `${60 + i * 20}px 25px` }}
+                  style={{ transformOrigin: `${60 + i * 20}px 24px` }}
                 />
               )}
-              {/* Garment label tooltip */}
+              {/* Garment label */}
               <motion.text
                 x={60 + i * 20}
                 y={94}
                 textAnchor="middle"
                 fill="hsl(var(--foreground))"
-                fontSize="5.5"
+                fontSize="5"
                 fontFamily="sans-serif"
-                opacity="0.6"
+                fontWeight="500"
+                opacity="0.5"
                 initial={{ opacity: 0, y: 98 }}
-                animate={{ opacity: 0.6, y: 94 }}
+                animate={{ opacity: 0.5, y: 94 }}
                 transition={{ delay: i * 0.3 + 0.6 }}
               >
                 {g.label}
