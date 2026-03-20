@@ -216,12 +216,16 @@ export function PricingInteraction({
         />
       </div>
 
-      <button
-        onClick={onGetStarted}
-        className="rounded-full gold-gradient text-primary-foreground text-lg font-semibold w-full p-3 active:scale-95 transition-transform duration-300"
-      >
-        Get Started
-      </button>
+      {renderFooter ? (
+        renderFooter(tierNames[active])
+      ) : (
+        <button
+          onClick={onGetStarted}
+          className="rounded-full gold-gradient text-primary-foreground text-lg font-semibold w-full p-3 active:scale-95 transition-transform duration-300"
+        >
+          Get Started
+        </button>
+      )}
     </div>
   );
 }
