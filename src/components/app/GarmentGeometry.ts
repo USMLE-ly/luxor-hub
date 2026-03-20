@@ -64,6 +64,7 @@ export const SLOT_MAP: Record<string, string[]> = {
   dress: ["dress", "tops", "bottoms", "skirts"],
   shoes: ["shoes"],
   hat: ["hat"],
+  bag: ["bag"],
   accessory: ["accessory"],
 };
 
