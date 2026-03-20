@@ -42,7 +42,7 @@ export const SquishyPricingCard = ({
         >
           ${monthlyPrice}/<br />Month
         </motion.span>
-        <p className="text-lg text-white/90">{description}</p>
+        <p className="text-sm sm:text-lg text-white/90 line-clamp-3">{description}</p>
       </div>
       {footer ? (
         <div className="absolute bottom-4 left-4 right-4 z-20">{footer}</div>
