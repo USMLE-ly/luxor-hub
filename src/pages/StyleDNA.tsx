@@ -299,7 +299,7 @@ const StyleDNA = () => {
                   <span className="text-xl font-bold text-primary">{styleScore}</span>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground font-sans">Style Score</p>
+                  <p className="text-xs text-muted-foreground font-sans">Your Style Power</p>
                   <div className="flex gap-0.5 mt-0.5">
                     {[1, 2, 3, 4, 5].map((s) => (
                       <Star
