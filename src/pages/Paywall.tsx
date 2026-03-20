@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Crown, Check, Shield, Clock } from "lucide-react";
+import { Crown, Check, Shield, Clock, RotateCcw } from "lucide-react";
 import { PricingInteraction } from "@/components/ui/pricing-interaction";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
