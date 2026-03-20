@@ -28,7 +28,7 @@ export const SquishyPricingCard = ({
       whileHover="hover"
       transition={{ duration: 1, ease: "backInOut" }}
       variants={{ hover: { scale: 1.05 } }}
-      className={`relative h-96 w-80 shrink-0 overflow-hidden rounded-xl p-8 ${background} shadow-lg hover:shadow-xl transition-shadow`}
+      className={`relative h-[22rem] w-[calc(100vw-2rem)] max-w-[20rem] shrink-0 overflow-hidden rounded-xl p-6 sm:p-8 sm:h-96 sm:w-80 ${background} shadow-lg hover:shadow-xl transition-shadow`}
     >
       <div className="relative z-10 text-white">
         <span className="mb-3 block w-fit rounded-full bg-white/20 backdrop-blur-sm px-3 py-0.5 text-sm font-medium text-white border border-white/20">
@@ -38,11 +38,11 @@ export const SquishyPricingCard = ({
           initial={{ scale: 0.85 }}
           variants={{ hover: { scale: 1 } }}
           transition={{ duration: 1, ease: "backInOut" }}
-          className="my-2 block origin-top-left font-mono text-6xl font-black leading-[1.2]"
+          className="my-2 block origin-top-left font-mono text-5xl sm:text-6xl font-black leading-[1.2]"
         >
           ${monthlyPrice}/<br />Month
         </motion.span>
-        <p className="text-lg text-white/90">{description}</p>
+        <p className="text-sm sm:text-lg text-white/90 line-clamp-3">{description}</p>
       </div>
       {footer ? (
         <div className="absolute bottom-4 left-4 right-4 z-20">{footer}</div>

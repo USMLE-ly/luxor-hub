@@ -7,7 +7,7 @@ const PAYPAL_CLIENT_ID =
 const PLAN_IDS: Record<string, string> = {
   starter: "P-6KB46929KR388530GNG6YDAA",
   pro: "P-3TT76167R1560735XNG6X7TQ",
-  elite: "P-6KB46929KR388530GNG6YDAA", // placeholder until Elite ID is provided
+  elite: "P-6KB46929KR388530GNG6YDAA",
 };
 
 let sdkPromise: Promise<void> | null = null;
