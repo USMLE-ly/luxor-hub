@@ -104,6 +104,8 @@ const isShoeCat = (s: GarmentSubtype) =>
   s.includes("sneakers") || s.includes("boots") || s.includes("loafers") || s.includes("derby") || s === "generic-shoe";
 const isHatCat = (s: GarmentSubtype) =>
   s.includes("cap") || s.includes("beanie") || s.includes("fedora") || s === "generic-hat";
+const isBagCat = (s: GarmentSubtype) =>
+  s.includes("bag-") || s === "generic-bag";
 
 // --- Animated Garment Wrapper ---
 function AnimatedGarment({ children, category }: { children: React.ReactNode; category: string }) {
