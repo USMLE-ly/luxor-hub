@@ -627,7 +627,7 @@ export default function OutfitAnalysis() {
                     {isAnalyzing ? (
                         <div className="space-y-4 w-full">
                           <div className="space-y-3">
-                            {["Uploading image...", "Analyzing style & colors...", "Generating insights..."].map((step, i) => (
+                            {["Loading your look...", "Reading the outfit...", "Building your report..."].map((step, i) => (
                               <motion.div
                                 key={step}
                                 initial={{ opacity: 0, x: -10 }}

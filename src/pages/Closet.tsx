@@ -825,7 +825,7 @@ const Closet = () => {
                           <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
                             <Plus className="w-5 h-5 text-primary" />
                           </div>
-                          <span className="text-[10px] font-sans font-medium text-muted-foreground">New Item</span>
+                          <span className="text-[10px] font-sans font-medium text-muted-foreground">Add Piece</span>
                         </button>
                         {sectionItems.slice(0, 5).map((item, i) => (
                           <ItemCard key={item.id} item={item} index={i} onDelete={handleDelete} onWear={handleWornToday} onAddToMannequin={() => addToMannequin(item)} onQuickTryOn={() => quickTryOn(item)} />

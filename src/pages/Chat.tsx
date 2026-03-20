@@ -422,7 +422,7 @@ const Chat = () => {
               value={input}
               onChange={(e) => { setInput(e.target.value); adjustHeight(); }}
               onKeyDown={handleKeyDown}
-              placeholder="Ask your stylist..."
+              placeholder="What's the occasion?"
               rows={1}
               className="flex-1 bg-transparent border-none outline-none resize-none font-sans text-sm text-foreground placeholder:text-muted-foreground min-h-[24px] max-h-24 py-0.5"
             />

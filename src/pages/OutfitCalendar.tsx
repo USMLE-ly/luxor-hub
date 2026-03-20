@@ -967,7 +967,7 @@ const OutfitCalendar = () => {
                   {weatherCodeToIcon(todayWeather.code)}
                 </div>
                 <div>
-                  <p className="font-sans text-xs text-muted-foreground">Today's Weather</p>
+                  <p className="font-sans text-xs text-muted-foreground">What the Weather Demands</p>
                   <p className="font-display text-lg font-bold text-foreground leading-tight">
                     {todayWeather.tempMax}° <span className="text-muted-foreground text-sm font-normal">/ {todayWeather.tempMin}°</span>
                   </p>

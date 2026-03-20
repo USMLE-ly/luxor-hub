@@ -686,7 +686,7 @@ const StyleDNA = () => {
               className="rounded-2xl border border-border bg-card p-6 text-center"
             >
               <p className="text-muted-foreground font-sans mb-4">
-                Complete the onboarding with selfie capture to unlock your full AI Color & Style analysis.
+                Your full style blueprint is locked. Upload a selfie during onboarding and the AI will map your colors, body, and archetype in seconds.
               </p>
               <Button onClick={() => navigate("/onboarding")} className="rounded-xl">
                 Complete Onboarding
