@@ -144,14 +144,22 @@ const Pricing = () => {
           className="mt-12 flex flex-col items-center gap-5"
         >
           {/* Payment icons */}
-          <div className="flex items-center gap-4">
-            {["Visa", "Mastercard", "Apple Pay", "Google Pay", "PayPal"].map((name) => (
-              <span
-                key={name}
-                className="payment-badge text-[10px] font-sans font-medium text-muted-foreground border border-border rounded-md px-2.5 py-1.5 select-none"
-              >
-                {name}
-              </span>
+          <div className="flex items-center gap-3">
+            {[
+              { src: "/payments/visa.svg", alt: "Visa" },
+              { src: "/payments/mastercard.svg", alt: "Mastercard" },
+              { src: "/payments/amex.svg", alt: "American Express" },
+              { src: "/payments/discover.svg", alt: "Discover" },
+              { src: "/payments/klarna.svg", alt: "Klarna" },
+              { src: "/payments/wechat.svg", alt: "WeChat Pay" },
+              { src: "/payments/venmo.svg", alt: "Venmo" },
+            ].map((icon) => (
+              <img
+                key={icon.alt}
+                src={icon.src}
+                alt={icon.alt}
+                className="h-8 w-auto rounded-md"
+              />
             ))}
           </div>
 
