@@ -641,8 +641,8 @@ const Closet = () => {
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
                   <Camera className="w-5 h-5 text-primary" />
                 </div>
-                <p className="font-sans font-semibold text-sm text-foreground">Upload Items</p>
-                <p className="text-xs text-muted-foreground font-sans mt-0.5">Scan with AI</p>
+                <p className="font-sans font-semibold text-sm text-foreground">Upload Pieces</p>
+                <p className="text-xs text-muted-foreground font-sans mt-0.5">Snap or upload</p>
               </motion.button>
             </div>
 
