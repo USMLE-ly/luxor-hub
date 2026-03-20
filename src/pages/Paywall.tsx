@@ -5,6 +5,7 @@ import { Crown, Shield, Clock, RotateCcw } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { trackEvent } from "@/lib/fbPixel";
 import PayPalButton from "@/components/app/PayPalButton";
 import {
   SquishyPricingCard,
@@ -87,6 +88,11 @@ const Paywall = () => {
   const [selectedTier, setSelectedTier] = useState<"starter" | "pro" | "elite">("pro");
   const [restoring, setRestoring] = useState(false);
 
+  // Track paywall view
+  useState(() => {
+    trackEvent("InitiateCheckout", { content_name: "LEXOR® Paywall View" });
+  });
+
   const handlePayPalApprove = useCallback(
     async (subscriptionId: string, tier: string) => {
       if (!user) {
@@ -101,6 +107,7 @@ const Paywall = () => {
           status: "active",
         });
         if (error) throw error;
+        trackEvent("Subscribe", { value: tier === "starter" ? "9.00" : tier === "pro" ? "29.00" : "59.00", currency: "USD", content_name: `LEXOR® ${tier}` });
         localStorage.setItem("luxor_paid", "true");
         toast.success("Welcome to Lexor! Your style journey begins now.");
         navigate("/dashboard");
