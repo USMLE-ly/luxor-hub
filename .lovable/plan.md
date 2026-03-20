@@ -1,147 +1,135 @@
 
 
-## Plan: Googolplex-Level Landing Page Rewrite — Emotional Seduction, Zero AI-isms
+## Plan: Googolplex-Level App Pages Rewrite + Mannequin Fixes
 
-The entire landing page gets rewritten through two lenses simultaneously: **persuasion psychology** (pain → desire → proof → urgency → commitment) and the **Humanizer anti-AI filter** from the uploaded SKILL.md (no rule-of-three, no "testament", no copula avoidance, no promotional fluff, no negative parallelisms). Every CTA shifts from "free trial" to paid commitment. Copy reads like it was written by a sharp, opinionated fashion insider — not a marketing bot.
-
----
-
-### The Emotional Arc (Section by Section)
-
-```text
-Announcement Banner     → FOMO + Scarcity ("Only 237 founding spots left")
-         ↓
-Hero Slides             → Pain Amplification + Identity Promise
-         ↓
-Social Proof Strip      → Reframed Stats as Emotional Outcomes
-         ↓
-Features (Orbital)      → "What happens when..." desire triggers
-         ↓
-Tabbed Features         → Before/After emotional storytelling
-         ↓
-How It Works            → "3 minutes from chaos to compliments"
-         ↓
-App Showcase            → "This is tomorrow morning for you"
-         ↓
-Testimonials/Proof      → "They didn't believe it either"
-         ↓
-Pricing                 → Investment framing, cost-of-inaction math
-         ↓
-Comparison Table        → (unchanged structure)
-         ↓
-FAQ                     → Objection crushing, no free trial mentions
-         ↓
-CTA Banner              → Identity close: "You already know"
-         ↓
-Sticky Bar              → "Join Now" — founding member framing
-```
+Two workstreams: (A) Humanizer copy rewrite across 5 app pages, (B) 3D mannequin geometry fixes for dress positioning, shoe sizing, bag handling, and premium materials.
 
 ---
 
-### File-by-File Changes
+### A. Copy Rewrites (5 files)
 
-**1. `src/components/landing/AnnouncementBanner.tsx`**
-- Slot 1: "50% off Pro for the first 1,000 users" → "Founding member pricing closes when the timer hits zero"
-- Slot 2: "Join 10K+ Members" → "847 people joined this week"
-- "Early Access" badge stays (works for scarcity)
+**1. `src/pages/StyleDNA.tsx`**
 
-**2. `src/components/landing/Hero.tsx`** (slides array + CTAs only)
-- 6 slide rewrites — pain-first, then desire:
-  - "Your Style, Perfected" → "Stop Guessing. Start Turning Heads."
-  - "AI Outfit Generator" → "Wake Up Knowing Exactly What to Wear"
-  - "Color Intelligence" → "The Colors That Make People Look Twice"
-  - "Smart Wardrobe" → "You Own $3,000 in Clothes You Never Wear"
-  - "Trend Radar" → "Be First. Not a Follower."
-  - "Capsule Builder" → "Own Less. Look Richer."
-- Descriptions rewritten: specific, punchy, no "-ing" chains, no "leveraging"
-- Primary CTA: "Start Free Trial" → "Claim Your Spot"
-- Secondary CTA: "How It Works" stays (low-commitment scroll action)
+All header/label rewrites:
+- L197 `"My Style Formula"` → `"Your Blueprint for Looking Incredible"`
+- L244 `"Calibrate your Style Formula"` → `"Sharpen Your Style Edge"`
+- L248 description → `"The more you calibrate, the sharper your recommendations. Every swipe teaches the AI what makes you, you."`
+- L293 `"Your Archetype"` → `"Who You Are, Styled"`
+- L302 `"Style Score"` → `"Your Style Power"`
+- L370 `"Tips for {faceShape} Face"` → `"How to Work Your {faceShape} Face"`
+- L393 `"Tips for {bodyShape} Body"` → `"Dressing Your {bodyShape} Frame"`
+- L449 `"Prints & Fabrics"` → `"Textures That Elevate You"`
+- L490 `"Flattering Silhouettes"` → `"Silhouettes Made for Your Body"`
+- L513 `"Color Usage Guide"` → `"Your Personal Color Playbook"`
+- L541 `"AI Summary"` → `"What the AI Sees in You"`
+- L555 `"Recommendations"` → `"Your Next Moves"`
+- L577 `"Your Style Psyche"` → `"The Mind Behind Your Wardrobe"`
+- L618 `"Your Style Evolution"` → `"Where Your Style Is Headed"`
+- L621 prediction text → `"Based on your habits and goals, here's how you'll evolve over the next 1–3 years"`
+- L668 `"Colors to Avoid"` → `"Colors Working Against You"`
+- L689 empty state → `"Your full style blueprint is locked. Upload a selfie during onboarding and the AI will map your colors, body, and archetype in seconds."`
 
-**3. `src/components/landing/SocialProofStrip.tsx`**
-- Stats reframed as emotional outcomes:
-  - "Professional Stylists" → "People Who Stopped Wasting Money on Wrong Clothes"
-  - "Revenue Generated" → "Saved on Impulse Buys"
-  - "Satisfaction Rate" → "Would Never Go Back"
-  - "Avg. Outfit Time" → "Morning Decision Time"
-- Keeps animated counters, gold accents, media badges
+Face tips rewrite (L50-87) — punchier, no "-ing" chains:
+- Oval: `"Most frames work — go bold or geometric"` / `"Side-swept bangs enhance balanced proportions"` / `"Crew and V-necks both work. Pick based on mood."`
+- Round: `"Angular frames sharpen a round face instantly"` / `"V-necklines and open collars lengthen your face"` / `"Longer hair with crown volume creates a slimming effect"`
+- Square: `"Round or oval frames soften a strong jawline"` / `"Scoop and round necklines balance angular features"` / `"Soft layers with a side part complement bone structure"`
+- Heart: `"Cat-eye or bottom-heavy frames balance a wider forehead"` / `"Chin-length bobs and side-swept bangs add jaw width"` / `"V-neck and scoop-neck tops draw attention downward"`
+- Oblong: `"Wide frames and aviators add horizontal balance"` / `"Bangs and chin-length cuts shorten your face visually"` / `"Boat-neck and crew-neck tops create width"`
+- Diamond: `"Oval or rimless glasses highlight your cheekbones"` / `"V-neck and sweetheart necklines mirror your face geometry"` / `"Volume at forehead or chin balances your widest points"`
 
-**4. `src/components/landing/Features.tsx`**
-- Section heading: "Everything You Need to Look Your Best" → "What Happens When AI Understands Your Body Better Than You Do"
-- Subheading: removes generic "Click any node to explore" → specific benefit line
-- Timeline node descriptions rewritten with emotional outcomes (not technical process)
+Body tips rewrite (L89-121):
+- Hourglass: `"Wrap dresses were made for hourglass figures. Lean into fitted cuts."` / `"Belted coats and high-waisted trousers are your power moves"` / `"Structured fabrics hold your shape. Skip overly drapey material."`
+- Pear: `"Boat-neck, off-shoulder, and statement collars broaden your shoulders"` / `"A-line skirts and straight-leg trousers skim the hip area"` / `"Dark bottoms paired with lighter tops create balanced proportions"`
+- Inverted: `"V-necklines and vertical details soften broader shoulders"` / `"Flared or wide-leg pants add volume to balance your upper body"` / `"A-line and fuller skirts create proportional harmony"`
+- Rectangle: `"Peplum tops, ruching, and belted pieces create curves at the waist"` / `"Layering adds dimension — jackets over fitted tops with textured bottoms"` / `"High-waisted bottoms with tucked-in tops define your midsection"`
+- Apple: `"Empire waistlines and A-line silhouettes skim the midsection"` / `"V-necklines create a lengthening vertical line through your torso"` / `"Structured blazers define your shape without clinging"`
+- Default: `"Focus on fit — well-tailored pieces always beat trendy but ill-fitting items"` / `"Use color blocking to highlight areas you love"` / `"Structured outer layers add dimension to any silhouette"`
 
-**5. `src/components/landing/TabbedFeatures.tsx`**
-- Tab headlines become desire-driven:
-  - "Your Personal AI Stylist" → "Imagine Never Second-Guessing an Outfit Again"
-  - "Your Digital Closet" → "Stop Buying Clothes You'll Never Wear"
-  - "Shop Smarter, Not More" → "Every Purchase Becomes Your Best Purchase"
-- Feature card descriptions rewritten: specific feelings, not feature specs
-- Section heading: "Explore Every Capability" → "Three Ways AURELIA Changes Your Morning"
+**2. `src/pages/OutfitCalendar.tsx`**
+- L917 `"Outfit Schedule"` → `"Your Week, Styled"`
+- L920 `"Your curated weekly wardrobe — powered by AI & weather"` → `"Never open your closet wondering what to wear again"`
+- L970 `"Today's Weather"` → `"What the Weather Demands"`
+- L288 toast → `"Reminders on. You'll get a nudge at 8 PM the night before."`
+- L468 toast → `"Your week is fully booked. You're ahead of everyone."`
+- L516 toast → `"Done. ${eventsToInsert.length} outfits locked in."`
 
-**6. `src/components/landing/HowItWorks.tsx`**
-- Title: "Three Steps to Effortless Style" → "From Closet Chaos to Compliments. Three Minutes."
-- Description line shortened and made visceral
-- Each step title and description rewritten with transformation language
+**3. `src/pages/OutfitAnalysis.tsx`**
+- L544 `"AI Outfit Analysis"` → `"See What the World Sees"`  (keep `<span className="gold-text">Analysis</span>` → change to `<span className="gold-text">Sees</span>`)
+- L546 description → `"Upload your outfit. The AI scores it, finds the strengths, and tells you exactly what to fix."`
+- L605 `"How it works"` → `"Three steps. Honest feedback."`
+- L608 steps → `"Snap or upload your look"` / `"AI breaks down every detail — color, fit, occasion match"` / `"Get a score and specific fixes"`
+- L630 loading steps → `"Loading your look..."` / `"Reading the outfit..."` / `"Building your report..."`
 
-**7. `src/pages/Index.tsx`**
-- ContainerScroll title: "Your Entire Wardrobe, Reimagined" → "This Is What Tomorrow Morning Looks Like"
+**4. `src/pages/Chat.tsx`**
+- L247 `"AI Stylist"` → `"Your Stylist"`
+- L248 `"Your personal fashion advisor"` → `"Knows your closet. Knows your body. Ask anything."`
+- L277 `"Hi! I'm your AI Stylist"` → `"What are we wearing today?"`
+- L279 description → `"I have your entire closet memorized, I know your colors, and I track what's trending. Let's build something good."`
+- L383 `"Styling your answer..."` → `"Putting your look together..."`
+- L425 placeholder → `"What's the occasion?"`
+- L26-33 quickPrompts → `"Style me for today"` / `"Date night outfit"` / `"Work-ready look"` / `"Something for a party"` / `"Does this work on me?"` / `"What am I missing?"`
+- L35-42 vanishPlaceholders updated to match
 
-**8. `src/components/landing/Testimonials.tsx`**
-- Section heading: "Real Revenue, Real Proof" → "They Didn't Believe It Either"
-- Subheading: drops "We don't make empty promises" (defensive) → "Unedited screenshots. Real numbers. Actual businesses."
-- Captions rewritten with before/after emotional arcs
+**5. `src/pages/Closet.tsx`**
+- L479 `"My Closet"` → `"Your Closet"`
+- L555 `"New Item"` → `"Add Piece"`
+- L556 `"Add manually"` → `"Upload or snap"`
+- L561 `"Add Clothing Item"` → `"New Piece"`
+- L576 `"Upload photo"` → `"Snap or upload"`
+- L583 `"Auto-detect with AI"` → `"Let AI fill the details"`
+- L307 toast → `"Added. Your closet just got stronger."`
+- L282 toast → `"Details filled. Check and save."`
+- L328 toast → `"Logged. +5 style points."`
+- L819 `"New Item"` → `"Add Piece"`
+- L635 `"Upload Items"` → `"Upload Pieces"` / L636 `"Scan with AI"` → `"Snap or upload"`
 
-**9. `src/components/landing/Pricing.tsx`**
-- Heading: "Invest in Your Best Self" → "What's Looking Incredible Actually Worth to You?"
-- Subheading: adds cost-of-inaction line: "The average person wastes $1,200/year on clothes they barely wear. AURELIA pays for itself in the first month."
-- All tier CTAs: "Start Now" / "Start Free Trial" / "Go Elite" → "Join Now" / "Claim Your Spot" / "Go Elite" (Elite stays — it's already commitment-framed)
-- Urgency copy: "127 stylists signed up this week" → "This price won't last. 237 founding spots remain."
-- Remove "7-day free trial" language from the urgency micro-copy
-- Trust badges and payment icons stay
+---
 
-**10. `src/components/landing/FAQ.tsx`**
-- "Can I try AURELIA before committing?" → rewrite answer: "Every plan comes with a 30-day money-back guarantee. If AURELIA doesn't change how you get dressed, we'll refund every penny. No questions."
-- Other answers: tighten, add specificity, remove "Absolutely." openers (AI tell)
-- No structural changes
+### B. Mannequin & Garment Geometry Fixes (2 files)
 
-**11. `src/components/landing/CTABanner.tsx`**
-- Heading: "Ready to Transform Your Style?" → "You Already Know You Deserve This"
-- Sub-copy: "Join 12,000+ stylists..." → "12,847 people stopped settling for average. Your spot is waiting."
-- CTA: "Start Your Free Trial" → "Join AURELIA Now"
-- Remove "No credit card required · Cancel anytime · 7-day free trial"
-- Replace with: "30-day money-back guarantee. Zero risk."
+**`src/components/app/GarmentGeometry.ts`**
 
-**12. `src/components/landing/StickyPricingBar.tsx`**
-- Title: "Start Your Free Trial" → "Join AURELIA Now"
-- Subtitle: "7 days free · Cancel anytime" → "Founding member pricing — limited spots"
-- Button: "Try Free" → "Get Started"
+1. **Shoe geometry too small** — shoes at L346-374 use radii of 0.04-0.07 which barely wrap the foot (BoxGeometry 0.1 wide, 0.06 tall, 0.22 deep at L222). Fix: increase all shoe profile radii by ~30%, add sole thickness at the bottom of the profile. Boots get taller shaft (0.14 → 0.20).
+
+2. **Dress positioned like a shirt** — the dress body geometry starts at Y=0.56 (neckline) and goes to negative hemY, but is placed at `position={[0, 0.45, 0]}` in Mannequin3D (same as tops). The profile already extends into negative Y for the skirt portion, but the 0.45 offset means the hem floats. Fix: shift dress mesh position from `[0, 0.45, 0]` to `[0, 0.30, 0]` in Mannequin3D, and adjust the dress profile to start higher (Y=0.72) so shoulders still align at the right body position.
+
+3. **Bags map to "hat"** — `closetToMannequinCategory` at L82 maps `accessory: "hat"`, so all bags render on the head. Fix:
+   - Add `"bag"` subtype to `GarmentSubtype` and `resolveSubtype` (detect "bag", "handbag", "purse", "tote" in name)
+   - Add `createBagGeometry` — a simple BoxGeometry (0.12 × 0.15 × 0.05) with a handle arc (TorusGeometry)
+   - In Mannequin3D, add `isBagCat` helper and a bag rendering branch that positions the bag at the left hand position (following the arm chain) instead of the head
+
+**`src/components/app/Mannequin3D.tsx`**
+
+4. **Premium mannequin polish**:
+   - Upgrade body material from `MeshStandardMaterial` to `MeshPhysicalMaterial` with `clearcoat: 0.15`, `sheen: 0.3`, `sheenColor: "#E8D5B7"` for subtle skin-like luminosity
+   - Increase torso segment count from 24 → 32 for smoother silhouette
+   - Add a rim light: `<pointLight position={[-1, 2, -2]} intensity={0.2} color="#F5E6D3" />` for silhouette definition
+   - Slightly reduce head scale (0.95x) for more elegant proportions
+   - Dress mesh position fix: L391 `[0, 0.45, 0]` → `[0, 0.30, 0]`
+   - Add bag rendering branch after hats section (L448-462)
+   - Add `isBagCat` helper next to other category helpers (L86-99)
+
+**`src/pages/Closet.tsx`**
+   - L82: split accessory mapping — detect bags by name and map to `"bag"` category, keep other accessories as `"hat"`
 
 ---
 
-### Humanizer Anti-AI Rules Applied Throughout
+### Files Modified (7 total)
 
-All copy passes through these filters from the uploaded SKILL.md:
-
-| Pattern to Kill | Example Before | Replacement Style |
-|---|---|---|
-| Rule of three | "innovation, inspiration, insights" | Use 2 or 4 items |
-| "Testament/landscape/journey" | "a testament to modern fashion" | Cut entirely |
-| Negative parallelism | "It's not just X, it's Y" | State Y directly |
-| Copula avoidance | "serves as... features... boasts" | Use "is" and "has" |
-| Promotional fluff | "nestled within breathtaking..." | Flat, specific claim |
-| "-ing" chain analyses | "symbolizing... reflecting..." | Active verbs, past tense |
-| "Additionally/Moreover/Furthermore" | Sentence openers | Cut or use "Also" / restructure |
-| Em dash overuse | "fashion — reimagined — for you" | One per paragraph max |
-
----
+| File | Type |
+|------|------|
+| `src/pages/StyleDNA.tsx` | Copy rewrite |
+| `src/pages/OutfitCalendar.tsx` | Copy rewrite |
+| `src/pages/OutfitAnalysis.tsx` | Copy rewrite |
+| `src/pages/Chat.tsx` | Copy rewrite |
+| `src/pages/Closet.tsx` | Copy rewrite + bag mapping fix |
+| `src/components/app/Mannequin3D.tsx` | Dress position, bag rendering, premium materials, rim light |
+| `src/components/app/GarmentGeometry.ts` | Shoe scale fix, bag geometry, bag subtype |
 
 ### What Does NOT Change
-- Zero layout or structural changes
-- All animations, WebGL, Three.js, GSAP, framer-motion untouched
-- No new components, no new dependencies
+- No new dependencies
 - No database changes
-- Pricing amounts ($9/$29/$99) unchanged
-
-### Files Modified (12 total)
-`AnnouncementBanner.tsx`, `Hero.tsx`, `SocialProofStrip.tsx`, `Features.tsx`, `TabbedFeatures.tsx`, `HowItWorks.tsx`, `Testimonials.tsx`, `Pricing.tsx`, `FAQ.tsx`, `CTABanner.tsx`, `StickyPricingBar.tsx`, `Index.tsx`
+- No layout or structural changes
+- All animations and interactions stay identical
+- Pricing amounts unchanged
 
