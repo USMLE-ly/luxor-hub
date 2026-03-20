@@ -485,7 +485,7 @@ const Closet = () => {
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
           <div className="flex items-center justify-between">
-            <h1 className="font-display text-2xl font-bold text-foreground">My Closet</h1>
+            <h1 className="font-display text-2xl font-bold text-foreground">Your Closet</h1>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => receiptInputRef.current?.click()}
