@@ -487,7 +487,7 @@ const StyleDNA = () => {
                 >
                   <div className="flex items-center gap-2 mb-4">
                     <Shapes className="w-5 h-5 text-[hsl(270,40%,65%)]" />
-                    <h3 className="font-display text-base font-bold text-foreground">Flattering Silhouettes</h3>
+                    <h3 className="font-display text-base font-bold text-foreground">Silhouettes Made for Your Body</h3>
                   </div>
                   <div className="space-y-3">
                     {dna.flatteringSilhouettes.map((sil, i) => (
