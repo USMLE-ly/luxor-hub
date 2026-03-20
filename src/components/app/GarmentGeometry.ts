@@ -485,6 +485,29 @@ export function resolveSubtype(category: string, name?: string): GarmentSubtype 
 }
 
 // =============================================
+// BAG GEOMETRIES
+// =============================================
+function createBagGeometry(subtype: GarmentSubtype): {
+  body: THREE.BufferGeometry;
+  handle: THREE.BufferGeometry;
+} {
+  const isClutch = subtype === "bag-clutch";
+  const isTote = subtype === "bag-tote";
+
+  const w = isClutch ? 0.10 : isTote ? 0.14 : 0.12;
+  const h = isClutch ? 0.06 : isTote ? 0.18 : 0.15;
+  const d = isClutch ? 0.02 : isTote ? 0.06 : 0.05;
+
+  const body = new THREE.BoxGeometry(w, h, d);
+  body.computeVertexNormals();
+
+  const handleRadius = w * 0.35;
+  const handle = new THREE.TorusGeometry(handleRadius, 0.008, 8, 16, Math.PI);
+
+  return { body, handle };
+}
+
+// =============================================
 // PUBLIC API
 // =============================================
 export {
@@ -496,4 +519,5 @@ export {
   createOuterwearGeometry,
   createShoeGeometry,
   createHatGeometry,
+  createBagGeometry,
 };
