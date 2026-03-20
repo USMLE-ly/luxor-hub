@@ -251,6 +251,11 @@
     100% { background-position: -200% 50%; }
   }
 
+  @keyframes pulseGlow {
+    0%, 100% { opacity: 0.25; transform: scale(0.92); }
+    50% { opacity: 0.55; transform: scale(1.08); }
+  }
+
   @keyframes gold-shimmer-sweep {
     0% { background-position: 200% 50%; }
     100% { background-position: -200% 50%; }
