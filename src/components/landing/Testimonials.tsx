@@ -1,15 +1,9 @@
 import { motion } from "framer-motion";
-import { ShieldCheck, TrendingUp, BadgeCheck } from "lucide-react";
+import { ShieldCheck, TrendingUp, BadgeCheck, Star } from "lucide-react";
 import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
 import { useRef, useState, useEffect } from "react";
 import { useInView } from "framer-motion";
 import { TestimonialCard } from "@/components/ui/testimonial-cards";
-import proofRevenue1 from "@/assets/proof-revenue-1.png";
-import proofRevenue2 from "@/assets/proof-revenue-2.jpg";
-import proofRevenue3 from "@/assets/proof-revenue-3.png";
-import proofRevenue4 from "@/assets/proof-revenue-4.jpg";
-import proofRevenue5 from "@/assets/proof-revenue-5.jpeg";
-import proofRevenue6 from "@/assets/proof-revenue-6.jpg";
 
 const AnimatedStat = ({ value }: { value: string }) => {
   const ref = useRef<HTMLSpanElement>(null);
@@ -23,46 +17,40 @@ const AnimatedStat = ({ value }: { value: string }) => {
   );
 };
 
-const heroProof = {
-  image: proofRevenue6,
-  stat: "$673,912",
-  label: "Total Sales",
-  caption: "A styling agency went from plateauing at $400K to clearing $673K in one year. The only change was LUXOR.",
+const heroTestimonial = {
+  stat: "4.9 ★",
+  label: "Average Rating",
+  caption: "I used to spend 30 minutes every morning staring at my closet. Now LUXOR picks my outfit in seconds and I get compliments daily. It genuinely changed how I show up.",
+  author: "Mariana L. — Elite Member",
 };
 
-const shuffleProofs = [
+const shuffleTestimonials = [
   {
     id: 1,
-    image: proofRevenue1,
-    testimonial: "She launched a boutique with zero fashion background. 90 days later, LUXOR's recommendations drove $10K in sales.",
-    author: "$10,349 · 90-Day Revenue",
+    testimonial: "My wardrobe is half the size it used to be but I look twice as good. LUXOR taught me what actually works for my body and coloring.",
+    author: "Aiden K. — Pro Member",
   },
   {
     id: 2,
-    image: proofRevenue2,
-    testimonial: "11,880 orders fulfilled. This retailer used LUXOR's curation engine to stock exactly what customers wanted.",
-    author: "€390,033 · Gross Sales",
+    testimonial: "I bought fewer clothes this year than ever before — and got more compliments than the last three years combined. The AI styling is unreal.",
+    author: "Sophie T. — Elite Member",
   },
   {
     id: 3,
-    image: proofRevenue3,
-    testimonial: "1,300% growth. The owner credits LUXOR's trend intelligence for turning a dead Shopify store into a top seller.",
-    author: "$105,525 · Total Sales",
+    testimonial: "My husband asked if I hired a personal stylist. No. I just subscribed to LUXOR. The outfit suggestions are scary accurate.",
+    author: "Rachel M. — Pro Member",
   },
   {
     id: 4,
-    image: proofRevenue4,
-    testimonial: "One Stripe payout. One month. An independent designer who let LUXOR handle the product strategy.",
-    author: "€48,579 · Single Payout",
+    testimonial: "As a guy who knows nothing about fashion, this app is a lifesaver. I finally look put-together without thinking about it.",
+    author: "Derek W. — Starter Member",
   },
   {
     id: 5,
-    image: proofRevenue5,
-    testimonial: "122K sessions and $81K in sales. All organic traffic. LUXOR's wardrobe AI turned browsers into buyers.",
-    author: "$81,452 · Total Revenue",
+    testimonial: "The virtual try-on alone is worth the subscription. I stopped buying clothes that end up sitting unworn. Every purchase hits now.",
+    author: "Priya N. — Elite Member",
   },
 ];
-
 const ShuffleSection = () => {
   const [positions, setPositions] = useState(["front", "middle", "back"]);
   const [startIdx, setStartIdx] = useState(0);
