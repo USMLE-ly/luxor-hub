@@ -397,7 +397,7 @@ function SmoothBody({
             const { body, sleeves } = createDressGeometry(item.subtype, item.fit, shoulderScale, waistScale, hipScale, lo);
             return (
               <AnimatedGarment key={`clothing-${i}`} category={item.category}>
-                <mesh geometry={body} material={item.mat} position={[0, 0.45, 0]} castShadow />
+                <mesh geometry={body} material={item.mat} position={[0, 0.30, 0]} castShadow />
                 {sleeves && (
                   <>
                     <group position={[-armX, 0.85, 0]}>
