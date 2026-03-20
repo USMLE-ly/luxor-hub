@@ -380,7 +380,7 @@ const Chat = () => {
                   animate={{ opacity: [0.5, 1, 0.5] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
-                  Styling your answer...
+                  Putting your look together...
                 </motion.span>
               </div>
             </motion.div>
