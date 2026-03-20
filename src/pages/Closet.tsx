@@ -561,8 +561,8 @@ const Closet = () => {
                     <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
                       <Plus className="w-5 h-5 text-primary" />
                     </div>
-                    <p className="font-sans font-semibold text-sm text-foreground">New Item</p>
-                    <p className="text-xs text-muted-foreground font-sans mt-0.5">Add manually</p>
+                    <p className="font-sans font-semibold text-sm text-foreground">Add Piece</p>
+                    <p className="text-xs text-muted-foreground font-sans mt-0.5">Upload or snap</p>
                   </motion.button>
                 </DialogTrigger>
                 <DialogContent className="bg-card border-border max-w-md max-h-[90vh] overflow-y-auto">
