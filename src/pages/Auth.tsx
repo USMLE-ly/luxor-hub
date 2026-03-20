@@ -97,10 +97,17 @@ const Auth = () => {
         navigate("/dashboard");
       }
     } catch (error: any) {
-      if (error.message?.includes("fetch") || error.message?.includes("network") || error.message?.includes("Failed to fetch")) {
+      const msg = error.message || "";
+      if (msg.includes("fetch") || msg.includes("network") || msg.includes("Failed to fetch")) {
         toast.error("Network error. Please check your connection and try again.");
+      } else if (msg.includes("Invalid login credentials")) {
+        toast.error("Incorrect email or password. Please try again.");
+      } else if (msg.includes("Email not confirmed")) {
+        toast.error("Please verify your email before signing in. Check your inbox.");
+      } else if (msg.includes("User already registered")) {
+        toast.error("This email is already registered. Try signing in instead.");
       } else {
-        toast.error(error.message);
+        toast.error(msg || "Something went wrong. Please try again.");
       }
     } finally {
       setLoading(false);
