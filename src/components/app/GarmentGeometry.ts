@@ -36,7 +36,8 @@ export const LAYER_ORDER: Record<string, number> = {
   dress: 5,
   shoes: 6,
   hat: 7,
-  accessory: 8,
+  bag: 8,
+  accessory: 9,
 };
 
 // Radial multiplier per layer to prevent z-fighting
