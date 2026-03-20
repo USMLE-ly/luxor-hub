@@ -574,7 +574,7 @@ const StyleDNA = () => {
                 >
                   <div className="flex items-center gap-2 mb-4">
                     <Heart className="w-4 h-4 text-primary" />
-                    <h3 className="font-display text-base font-bold text-foreground">Your Style Psyche</h3>
+                    <h3 className="font-display text-base font-bold text-foreground">The Mind Behind Your Wardrobe</h3>
                   </div>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     {lifestyle && (
