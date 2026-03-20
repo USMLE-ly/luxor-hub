@@ -34,11 +34,11 @@ export function TestimonialCard({ handleShuffle, testimonial, position, id, auth
         right: 0,
         bottom: 0
       }}
-      onDragStart={(e: any) => {
-        dragRef.current = e.clientX;
+      onDragStart={(e: any, info: any) => {
+        dragRef.current = info.point.x;
       }}
-      onDragEnd={(e: any) => {
-        if (dragRef.current - e.clientX > 150) {
+      onDragEnd={(e: any, info: any) => {
+        if (dragRef.current - info.point.x > 100 || info.offset.x < -100) {
           handleShuffle();
         }
         dragRef.current = 0;

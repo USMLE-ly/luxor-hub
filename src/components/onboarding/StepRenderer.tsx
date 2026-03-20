@@ -1333,51 +1333,93 @@ const DetectionResultStep = ({ step, answers, gender, aiResults }: { step: Onboa
         {isLoading ? "Our AI is studying your body proportions" : step.description}
       </motion.p>
 
-      {/* Body photo */}
+      {/* Body photo + illustration side by side */}
       <motion.div
-        className="relative w-32 h-52 rounded-2xl overflow-hidden mb-6 ring-4 ring-primary/30"
+        className="relative flex items-center justify-center gap-6 mb-8 w-full"
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       >
-        {capturedImage ? (
-          <img src={capturedImage} alt="Your body" className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full bg-secondary flex items-center justify-center">
-            <User className="w-12 h-12 text-muted-foreground" />
-          </div>
-        )}
-        {isLoading && (
-          <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-            <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-          </div>
+        {/* Photo */}
+        <div className="relative w-28 h-44 rounded-2xl overflow-hidden ring-2 ring-primary/20 shadow-lg shadow-primary/5">
+          {capturedImage ? (
+            <img src={capturedImage} alt="Your body" className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full bg-secondary flex items-center justify-center">
+              <User className="w-10 h-10 text-muted-foreground" />
+            </div>
+          )}
+          {isLoading && (
+            <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+              <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            </div>
+          )}
+          {/* Scanning line overlay */}
+          {isLoading && (
+            <motion.div
+              className="absolute left-0 right-0 h-[2px]"
+              style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary)), transparent)" }}
+              animate={{ top: ["10%", "90%", "10%"] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            />
+          )}
+        </div>
+
+        {/* Arrow + illustration when revealed */}
+        {revealed && !isLoading && (
+          <>
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+              className="text-primary"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.4, type: "spring", stiffness: 200 }}
+              className="relative"
+            >
+              <div className="absolute -inset-3 rounded-full bg-primary/5 blur-xl" />
+              <BodyShapeIllustration shape={detectedBodyShape.label} size={130} />
+            </motion.div>
+          </>
         )}
       </motion.div>
 
       {/* Morphing body illustration during analysis */}
       {isLoading && (
-        <BodyShapeIllustration shape="rectangle" size={100} morphing className="mb-4" />
+        <BodyShapeIllustration shape="rectangle" size={120} morphing className="mb-4" />
       )}
 
-      {/* Detected body shape */}
+      {/* Detected body shape badge */}
       <AnimatePresence>
         {revealed && !isLoading && (
           <motion.div
-            className="flex flex-col items-center gap-2 mb-6"
+            className="flex flex-col items-center gap-3 mb-6 w-full"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           >
-            <BodyShapeIllustration shape={detectedBodyShape.label} size={100} className="mb-2" />
-            <p className="text-xs text-muted-foreground font-sans uppercase tracking-wider">{detectedBodyShape.label} shape</p>
-            <div className="flex flex-wrap justify-center gap-2 mt-1">
+            {/* Shape name with glow */}
+            <div className="relative">
+              <div className="absolute -inset-2 bg-primary/10 rounded-full blur-lg" />
+              <div className="relative px-6 py-2 rounded-full bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 border border-primary/20">
+                <p className="text-sm font-display font-bold text-foreground tracking-wider uppercase">{detectedBodyShape.label} shape</p>
+              </div>
+            </div>
+            
+            {/* Traits as premium pills */}
+            <div className="flex flex-wrap justify-center gap-2 mt-2">
               {detectedBodyShape.traits.map((trait, i) => (
                 <motion.span
                   key={trait}
-                  className="px-3 py-1 rounded-full bg-secondary text-foreground font-sans text-xs font-medium"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.6 + i * 0.15 }}
+                  className="px-3 py-1.5 rounded-full bg-secondary/80 border border-border/50 text-foreground font-sans text-xs font-medium shadow-sm"
+                  initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ delay: 0.6 + i * 0.12, type: "spring", stiffness: 200 }}
                 >
                   {trait}
                 </motion.span>
@@ -1399,26 +1441,29 @@ const DetectionResultStep = ({ step, answers, gender, aiResults }: { step: Onboa
           >
             <h4 className="font-display text-lg font-bold text-foreground text-center">Best For You</h4>
             <div className="grid grid-cols-2 gap-2">
-              <div className="p-3 rounded-xl bg-secondary/50 space-y-1">
-                <div className="flex items-center gap-1.5"><Shirt className="w-4 h-4 text-primary" /><span className="text-xs font-semibold text-foreground font-sans">Silhouettes</span></div>
-                {recs.silhouettes.map(n => <p key={n} className="text-xs text-muted-foreground font-sans">• {n}</p>)}
-              </div>
-              <div className="p-3 rounded-xl bg-secondary/50 space-y-1">
-                <div className="flex items-center gap-1.5"><Scissors className="w-4 h-4 text-primary" /><span className="text-xs font-semibold text-foreground font-sans">Dresses</span></div>
-                {recs.dresses.map(n => <p key={n} className="text-xs text-muted-foreground font-sans">• {n}</p>)}
-              </div>
-              <div className="p-3 rounded-xl bg-secondary/50 space-y-1">
-                <div className="flex items-center gap-1.5"><Watch className="w-4 h-4 text-primary" /><span className="text-xs font-semibold text-foreground font-sans">Trousers</span></div>
-                {recs.trousers.map(n => <p key={n} className="text-xs text-muted-foreground font-sans">• {n}</p>)}
-              </div>
-              <div className="p-3 rounded-xl bg-secondary/50 space-y-1">
-                <div className="flex items-center gap-1.5"><Gem className="w-4 h-4 text-primary" /><span className="text-xs font-semibold text-foreground font-sans">Jackets</span></div>
-                {recs.jackets.map(n => <p key={n} className="text-xs text-muted-foreground font-sans">• {n}</p>)}
-              </div>
+              {[
+                { icon: <Shirt className="w-4 h-4 text-primary" />, label: "Silhouettes", items: recs.silhouettes },
+                { icon: <Scissors className="w-4 h-4 text-primary" />, label: "Dresses", items: recs.dresses },
+                { icon: <Watch className="w-4 h-4 text-primary" />, label: "Trousers", items: recs.trousers },
+                { icon: <Gem className="w-4 h-4 text-primary" />, label: "Jackets", items: recs.jackets },
+              ].map((cat, idx) => (
+                <motion.div
+                  key={cat.label}
+                  className="p-3 rounded-xl bg-secondary/50 border border-border/30 space-y-1"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 + idx * 0.1 }}
+                >
+                  <div className="flex items-center gap-1.5">{cat.icon}<span className="text-xs font-semibold text-foreground font-sans">{cat.label}</span></div>
+                  {cat.items.map(n => <p key={n} className="text-xs text-muted-foreground font-sans">• {n}</p>)}
+                </motion.div>
+              ))}
             </div>
           </motion.div>
         );
       })()}
+
+      {/* Body shape guide */}
       {!isLoading && (
         <motion.div
           className="w-full"
@@ -1429,19 +1474,24 @@ const DetectionResultStep = ({ step, answers, gender, aiResults }: { step: Onboa
           <p className="text-muted-foreground font-sans text-xs text-center mb-3 uppercase tracking-wider">Body shape guide</p>
           <div className="flex flex-col gap-2">
             {bodyShapes.map((bs) => (
-              <div
+              <motion.div
                 key={bs.label}
                 className={`flex items-center justify-between p-3 rounded-xl transition-all ${
                   bs.label === detectedBodyShape.label
-                    ? "bg-foreground text-background"
+                    ? "bg-primary/10 border border-primary/30 text-foreground"
                     : "bg-secondary/60 text-muted-foreground"
                 }`}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
               >
                 <span className="font-sans text-sm font-medium">{bs.label}</span>
                 {bs.label === detectedBodyShape.label && (
-                  <Check className="h-4 w-4" />
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-sans text-primary font-semibold">Your Shape</span>
+                    <Check className="h-4 w-4 text-primary" />
+                  </div>
                 )}
-              </div>
+              </motion.div>
             ))}
           </div>
         </motion.div>
