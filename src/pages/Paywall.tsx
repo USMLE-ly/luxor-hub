@@ -150,6 +150,7 @@ const Paywall = () => {
               description={t.desc}
               features={t.features}
               background={t.bg}
+              popular={t.key === "pro"}
               BGComponent={t.BG}
               footer={
                 <div
