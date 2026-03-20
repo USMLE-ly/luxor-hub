@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { RainbowButton } from "@/components/ui/rainbow-button";
-import { Menu, Diamond } from "lucide-react";
+import { Menu } from "lucide-react";
 import { MagneticCursor } from "@/components/ui/magnetic-cursor";
 import {
   Sheet,
