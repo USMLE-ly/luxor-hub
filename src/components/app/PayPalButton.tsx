@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, Lock } from "lucide-react";
 
 const PAYPAL_CLIENT_ID =
   "ARa9CFxEtURh2bL23KEBSHEjQ7JJA39Dxl-Jn4JCR7fsRx6AaUEe7IXKl97AaApUq0pwXDUMe97sgco-";
@@ -60,7 +60,6 @@ const PayPalButton = ({ tier, onApprove }: PayPalButtonProps) => {
         await loadPayPalSDK();
         if (cancelled || !containerRef.current) return;
 
-        // Clear previous buttons
         containerRef.current.innerHTML = "";
 
         const paypal = (window as any).paypal;
@@ -75,6 +74,7 @@ const PayPalButton = ({ tier, onApprove }: PayPalButtonProps) => {
               color: "gold",
               layout: "horizontal",
               label: "subscribe",
+              height: 40,
             },
             createSubscription: (_data: any, actions: any) => {
               return actions.subscription.create({
@@ -104,12 +104,12 @@ const PayPalButton = ({ tier, onApprove }: PayPalButtonProps) => {
 
   if (error) {
     return (
-      <div className="w-full rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-center">
-        <AlertCircle className="w-5 h-5 text-destructive mx-auto mb-2" />
-        <p className="text-xs text-muted-foreground font-sans">
-          PayPal buttons may not load in preview mode.
+      <div className="w-full rounded-xl bg-black/20 backdrop-blur-sm border border-white/10 p-4 text-center">
+        <Lock className="w-4 h-4 text-white/50 mx-auto mb-2" />
+        <p className="text-[11px] text-white/60 font-sans leading-relaxed">
+          PayPal loads on the published site.
           <br />
-          <span className="text-foreground font-medium">Publish your app to test payments.</span>
+          <span className="text-white/90 font-medium">Publish to test payments.</span>
         </p>
       </div>
     );
@@ -118,12 +118,18 @@ const PayPalButton = ({ tier, onApprove }: PayPalButtonProps) => {
   return (
     <div className="w-full">
       {loading && (
-        <div className="flex items-center justify-center py-3">
-          <Loader2 className="w-5 h-5 animate-spin text-primary" />
-          <span className="ml-2 text-xs text-muted-foreground">Loading PayPal…</span>
+        <div className="flex items-center justify-center py-3 rounded-xl bg-black/10 backdrop-blur-sm border border-white/10">
+          <Loader2 className="w-4 h-4 animate-spin text-white/70" />
+          <span className="ml-2 text-[11px] text-white/60 font-sans tracking-wide">Preparing checkout…</span>
         </div>
       )}
-      <div ref={containerRef} className="w-full min-h-[45px]" />
+      <div ref={containerRef} className="w-full min-h-[40px] rounded-xl overflow-hidden" />
+      {!loading && !error && (
+        <p className="mt-2 text-center text-[9px] text-white/40 font-sans flex items-center justify-center gap-1">
+          <Lock className="w-2.5 h-2.5" />
+          Secured by PayPal
+        </p>
+      )}
     </div>
   );
 };

@@ -13,6 +13,7 @@ export interface SquishyPricingCardProps {
   BGComponent: React.FC;
   onCtaClick?: () => void;
   footer?: React.ReactNode;
+  popular?: boolean;
 }
 
 export const SquishyPricingCard = ({
@@ -25,6 +26,7 @@ export const SquishyPricingCard = ({
   BGComponent,
   onCtaClick,
   footer,
+  popular,
 }: SquishyPricingCardProps) => {
   const hasFeatures = features && features.length > 0;
   return (
@@ -32,41 +34,59 @@ export const SquishyPricingCard = ({
       whileHover="hover"
       transition={{ duration: 1, ease: "backInOut" }}
       variants={{ hover: { scale: 1.05 } }}
-      className={`relative ${hasFeatures ? 'h-auto min-h-[28rem] sm:min-h-[32rem]' : 'h-[22rem] sm:h-96'} w-[calc(100vw-2rem)] max-w-[20rem] sm:w-80 shrink-0 overflow-hidden rounded-xl p-6 sm:p-8 ${background} shadow-lg hover:shadow-xl transition-shadow flex flex-col`}
+      className={`relative ${hasFeatures ? 'h-auto min-h-[30rem] sm:min-h-[34rem]' : 'h-[22rem] sm:h-96'} w-[calc(100vw-2rem)] max-w-[20rem] sm:w-80 shrink-0 overflow-hidden rounded-2xl p-6 sm:p-8 ${background} transition-shadow flex flex-col ${popular ? 'shadow-[0_8px_40px_-8px_hsl(43,74%,49%,0.4)] ring-1 ring-white/20' : 'shadow-[0_4px_24px_-4px_rgba(0,0,0,0.3)]'}`}
     >
+      {/* Premium glass overlay */}
+      <div className="absolute inset-0 z-[1] rounded-2xl bg-gradient-to-b from-white/[0.12] via-transparent to-black/[0.15] pointer-events-none" />
+      
+      {/* Popular badge */}
+      {popular && (
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10 px-4 py-1 rounded-b-lg bg-white/90 backdrop-blur-sm">
+          <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-neutral-900 font-sans">Most Popular</span>
+        </div>
+      )}
+
       <div className="relative z-10 text-white">
-        <span className="mb-2 block w-fit rounded-full bg-white/20 backdrop-blur-sm px-3 py-0.5 text-sm font-medium text-white border border-white/20">
+        <span className="mb-3 block w-fit rounded-full bg-white/10 backdrop-blur-md px-4 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-white/95 border border-white/15 font-sans">
           {label}
         </span>
-        <motion.span
+        <motion.div
           initial={{ scale: 0.85 }}
           variants={{ hover: { scale: 1 } }}
           transition={{ duration: 1, ease: "backInOut" }}
-          className="my-1 block origin-top-left font-mono text-4xl sm:text-5xl font-black leading-[1.1]"
+          className="my-2 origin-top-left"
         >
-          ${monthlyPrice}/mo
-        </motion.span>
-        <p className="text-xs sm:text-sm text-white/80 mt-1">{description}</p>
+          <span className="font-display text-[2.75rem] sm:text-[3.25rem] font-bold leading-none tracking-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.2)]">
+            ${monthlyPrice}
+          </span>
+          <span className="text-sm font-sans text-white/60 ml-1">/month</span>
+        </motion.div>
+        <p className="text-xs sm:text-sm text-white/70 mt-1 font-sans leading-relaxed">{description}</p>
       </div>
 
       {hasFeatures && (
-        <ul className="relative z-10 mt-4 space-y-1.5 flex-1">
-          {features.map((f, i) => (
-            <li key={i} className="flex items-start gap-2 text-white/90">
-              <Check className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-white" />
-              <span className="text-xs font-sans leading-tight">{f}</span>
-            </li>
-          ))}
-        </ul>
+        <>
+          <div className="relative z-10 my-4 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+          <ul className="relative z-10 space-y-2.5 flex-1">
+            {features.map((f, i) => (
+              <li key={i} className="flex items-start gap-2.5 text-white/90">
+                <div className="w-4 h-4 mt-0.5 flex-shrink-0 rounded-full bg-white/15 backdrop-blur-sm flex items-center justify-center">
+                  <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
+                </div>
+                <span className="text-xs font-sans leading-relaxed tracking-wide">{f}</span>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
 
-      <div className={`${hasFeatures ? 'relative mt-4' : 'absolute bottom-4 left-4 right-4'} z-20`}>
+      <div className={`${hasFeatures ? 'relative mt-5' : 'absolute bottom-4 left-4 right-4'} z-20`}>
         {footer ? (
           footer
         ) : cta ? (
           <button
             onClick={onCtaClick}
-            className="w-full rounded-lg border-2 border-white bg-white py-2 text-center font-mono font-black uppercase text-neutral-800 backdrop-blur-sm transition-all duration-200 hover:bg-white/10 hover:text-white hover:border-white/80 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-transparent active:scale-95"
+            className="w-full rounded-xl border border-white/30 bg-white/95 py-2.5 text-center text-sm font-bold uppercase tracking-[0.08em] text-neutral-900 backdrop-blur-sm transition-all duration-300 hover:bg-white hover:shadow-[0_4px_20px_rgba(255,255,255,0.3)] focus:outline-none focus:ring-2 focus:ring-white/50 active:scale-[0.97] font-sans"
           >
             {cta}
           </button>
