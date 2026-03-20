@@ -12,7 +12,7 @@ const tiers = [
     period: "/month",
     description: "Essential AI styling tools",
     features: ["200 closet items", "Daily outfit suggestions", "Basic color analysis", "Closet scanner", "Community access"],
-    cta: "Start Now",
+    cta: "Join Now",
     highlighted: false,
   },
   {
