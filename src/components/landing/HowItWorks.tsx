@@ -9,49 +9,49 @@ import featureAnalytics from "@/assets/feature-analytics.jpg";
 const howItWorksItems = [
   {
     id: "scan-closet",
-    title: "Scan Your Closet",
+    title: "Photograph Your Closet",
     description:
-      "Snap photos of your clothes. Our AI identifies each item, color, and fabric instantly — building your digital wardrobe in seconds.",
+      "Open your wardrobe, snap a few photos. AURELIA identifies every piece, tags colors and fabrics, and builds your digital closet in under two minutes.",
     href: "#features",
     image: featureClosetScanner,
   },
   {
     id: "style-dna",
-    title: "AI Analyzes Your Style",
+    title: "Let the AI Learn You",
     description:
-      "AURELIA learns your preferences, body shape, and lifestyle to build your unique Style DNA — a living profile that evolves with you.",
+      "AURELIA studies your body shape, color season, lifestyle, and taste. Within hours it knows what flatters you better than most personal stylists.",
     href: "#features",
     image: featureStyleDna,
   },
   {
     id: "daily-outfits",
-    title: "Get Daily Outfits",
+    title: "Wake Up to Your Outfit",
     description:
-      "Receive personalized outfit suggestions each morning — weather-aware, occasion-ready, and perfectly matched to your mood.",
+      "Every morning, a complete look waits on your screen. Weather-checked, calendar-aware, pulled from clothes you already own. The decision is made.",
     href: "#features",
     image: featureOutfitGen,
   },
   {
     id: "ai-stylist",
-    title: "Chat with Your Stylist",
+    title: "Ask Anything",
     description:
-      "Ask AURELIA anything about fashion. Get instant advice on what to wear, how to style pieces, and what to buy next.",
+      "\"What do I wear to a rooftop dinner?\" \"Does this jacket work with these shoes?\" AURELIA answers in seconds, with outfit mockups attached.",
     href: "#features",
     image: featureAiChat,
   },
   {
     id: "smart-shopping",
-    title: "Shop Smarter",
+    title: "Buy Only What You Need",
     description:
-      "Discover pieces that perfectly complement your existing wardrobe. No more impulse buys — only intentional additions.",
+      "AURELIA tells you the exact pieces missing from your wardrobe. Every recommendation fills a gap. No impulse buys, no regret purchases.",
     href: "#features",
     image: featureShopping,
   },
   {
     id: "track-progress",
-    title: "Track Your Style Evolution",
+    title: "Watch Your Confidence Grow",
     description:
-      "See your style score grow, earn badges, and watch your fashion confidence soar with detailed analytics.",
+      "Track your style score, see cost-per-wear data, earn badges, and watch the compliments roll in. Numbers don't lie.",
     href: "#features",
     image: featureAnalytics,
   },
