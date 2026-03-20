@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { RainbowButton } from "@/components/ui/rainbow-button";
-import { Menu, Diamond } from "lucide-react";
+import { Menu } from "lucide-react";
 import { MagneticCursor } from "@/components/ui/magnetic-cursor";
 import {
   Sheet,
@@ -68,12 +68,11 @@ const Navbar = () => {
 
       <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
         <motion.h1
-          className="font-display text-2xl font-bold gold-text cursor-pointer flex items-center gap-1.5"
+          className="font-display text-2xl font-bold gold-text cursor-pointer"
           onClick={() => navigate("/")}
           whileHover={{ letterSpacing: "0.08em" }}
           transition={{ duration: 0.3 }}
         >
-          <Diamond className="w-5 h-5 text-primary fill-primary/20" />
           AURELIA
         </motion.h1>
 
