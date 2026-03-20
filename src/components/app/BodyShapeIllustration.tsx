@@ -72,7 +72,7 @@ function buildPath(p: ShapeSvgData): string {
   `;
 }
 
-const BodyShapeIllustration = ({ shape, size = 140, className = "", morphing = false }: Props) => {
+const BodyShapeIllustration = ({ shape, size = 160, className = "", morphing = false }: Props) => {
   const cx = 50;
   const [morphIndex, setMorphIndex] = useState(0);
 
@@ -100,49 +100,73 @@ const BodyShapeIllustration = ({ shape, size = 140, className = "", morphing = f
     >
       <svg width={size * 0.7} height={size} viewBox="0 0 100 100" fill="none">
         <defs>
-          <linearGradient id="body-fill" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="hsl(25, 55%, 87%)" />
-            <stop offset="100%" stopColor="hsl(15, 45%, 78%)" />
+          <linearGradient id="body-fill-main" x1="30%" y1="0%" x2="70%" y2="100%">
+            <stop offset="0%" stopColor="hsl(25, 70%, 88%)" />
+            <stop offset="40%" stopColor="hsl(20, 65%, 82%)" />
+            <stop offset="100%" stopColor="hsl(15, 55%, 76%)" />
           </linearGradient>
-          <linearGradient id="body-stroke" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="hsl(270, 40%, 65%)" />
-            <stop offset="100%" stopColor="hsl(340, 40%, 65%)" />
+          <linearGradient id="body-highlight" x1="20%" y1="0%" x2="80%" y2="100%">
+            <stop offset="0%" stopColor="hsl(30, 80%, 93%)" stopOpacity="0.5" />
+            <stop offset="100%" stopColor="transparent" stopOpacity="0" />
           </linearGradient>
+          <linearGradient id="body-stroke-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="hsl(var(--primary) / 0.6)" />
+            <stop offset="100%" stopColor="hsl(var(--primary) / 0.3)" />
+          </linearGradient>
+          <filter id="body-shadow" x="-10%" y="-10%" width="120%" height="120%">
+            <feDropShadow dx="0" dy="1.5" stdDeviation="2" floodColor="hsl(15, 40%, 25%)" floodOpacity="0.15" />
+          </filter>
         </defs>
-        {/* Head */}
-        <circle cx={cx} cy="10" r="6" fill="url(#body-fill)" stroke="url(#body-stroke)" strokeWidth="1.5" />
+
+        {/* Head with gradient */}
+        <circle cx={cx} cy="10" r="6" fill="url(#body-fill-main)" stroke="url(#body-stroke-grad)" strokeWidth="1" filter="url(#body-shadow)" />
+        <circle cx={cx} cy="10" r="6" fill="url(#body-highlight)" />
+
         {/* Body silhouette with morphing */}
         <motion.path
           d={path}
-          fill="url(#body-fill)"
-          stroke="url(#body-stroke)"
-          strokeWidth="1.5"
+          fill="url(#body-fill-main)"
+          stroke="url(#body-stroke-grad)"
+          strokeWidth="1"
           strokeLinejoin="round"
+          filter="url(#body-shadow)"
           animate={{ d: path }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
         />
+
+        {/* Highlight layer for 3D depth */}
+        <motion.path
+          d={path}
+          fill="url(#body-highlight)"
+          stroke="none"
+          animate={{ d: path }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+        />
+
         {/* Measurement guides - only when settled */}
         {!morphing && [
           { y: 28, w: p.shoulders, label: "Shoulders" },
           { y: 48, w: p.waist, label: "Waist" },
           { y: 62, w: p.hips, label: "Hips" },
         ].map((m, i) => (
-          <motion.g key={m.label} initial={{ opacity: 0 }} animate={{ opacity: 0.35 }} transition={{ delay: 0.6 + i * 0.15 }}>
-            <line x1={cx - m.w / 2 - 3} y1={m.y} x2={cx + m.w / 2 + 3} y2={m.y} stroke="hsl(270, 40%, 65%)" strokeWidth="0.5" strokeDasharray="2,2" />
-            <circle cx={cx - m.w / 2 - 3} cy={m.y} r="1" fill="hsl(270, 40%, 65%)" />
-            <circle cx={cx + m.w / 2 + 3} cy={m.y} r="1" fill="hsl(270, 40%, 65%)" />
+          <motion.g key={m.label} initial={{ opacity: 0 }} animate={{ opacity: 0.3 }} transition={{ delay: 0.6 + i * 0.15 }}>
+            <line x1={cx - m.w / 2 - 3} y1={m.y} x2={cx + m.w / 2 + 3} y2={m.y} stroke="hsl(var(--primary))" strokeWidth="0.4" strokeDasharray="2,2" />
+            <circle cx={cx - m.w / 2 - 3} cy={m.y} r="1" fill="hsl(var(--primary))" opacity="0.5" />
+            <circle cx={cx + m.w / 2 + 3} cy={m.y} r="1" fill="hsl(var(--primary))" opacity="0.5" />
           </motion.g>
         ))}
+
         {/* Scanning line when morphing */}
         {morphing && (
           <motion.line
             x1="15" x2="85"
-            stroke="hsl(270, 40%, 65%)" strokeWidth="1" opacity="0.5"
+            stroke="hsl(var(--primary))" strokeWidth="1" opacity="0.4"
             animate={{ y1: [20, 80, 20], y2: [20, 80, 20] }}
             transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
           />
         )}
       </svg>
+
       {/* Shape label when morphing */}
       {morphing && (
         <AnimatePresence mode="wait">
