@@ -290,7 +290,7 @@ const StyleDNA = () => {
           >
             <div className="flex items-center gap-2 mb-3">
               <Sparkles className="w-5 h-5 text-primary" />
-              <p className="text-xs font-sans uppercase tracking-widest text-muted-foreground">Your Archetype</p>
+              <p className="text-xs font-sans uppercase tracking-widest text-muted-foreground">Who You Are, Styled</p>
             </div>
             <h2 className="font-display text-xl font-bold text-foreground mb-3">{archetype}</h2>
             <div className="flex items-center gap-4">
