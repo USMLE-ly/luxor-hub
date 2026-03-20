@@ -123,7 +123,7 @@ const PayPalButton = ({ tier, onApprove }: PayPalButtonProps) => {
           <span className="ml-2 text-[11px] text-white/60 font-sans tracking-wide">Preparing checkout…</span>
         </div>
       )}
-      <div ref={containerRef} className="w-full min-h-[40px] rounded-xl overflow-hidden" />
+      <div ref={containerRef} className="w-full min-h-[40px] rounded-xl overflow-hidden [&_iframe]:rounded-xl" style={{ background: 'transparent' }} />
       {!loading && !error && (
         <p className="mt-2 text-center text-[9px] text-white/40 font-sans flex items-center justify-center gap-1">
           <Lock className="w-2.5 h-2.5" />
