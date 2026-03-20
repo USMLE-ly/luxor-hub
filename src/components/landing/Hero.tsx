@@ -343,7 +343,7 @@ const Hero = () => {
           </div>
           {/* Staggered letter reveal */}
           <div className="flex items-center gap-[2px]">
-            {'LUXOR'.split('').map((letter, i) => (
+            {'LEXOR'.split('').map((letter, i) => (
               <span
                 key={i}
                 className="font-display text-lg tracking-[0.3em] gold-text inline-block animate-fade-in"
@@ -352,6 +352,7 @@ const Hero = () => {
                 {letter}
               </span>
             ))}
+            <span className="font-display text-[10px] gold-text inline-block animate-fade-in align-super ml-0.5" style={{ animationDelay: '600ms', animationFillMode: 'backwards' }}>®</span>
           </div>
           {/* Loading bar */}
           <div className="w-32 h-[2px] bg-muted/30 rounded-full overflow-hidden">
