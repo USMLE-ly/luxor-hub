@@ -67,7 +67,7 @@ const ShuffleSection = () => {
   const visible = [0, 1, 2].map((offset) => shuffleScreenshots[(startIdx + offset) % shuffleScreenshots.length]);
 
   return (
-    <div className="relative -ml-[100px] h-[520px] w-[350px] md:-ml-[175px]">
+    <div className="relative -ml-[70px] h-[380px] w-[260px] md:-ml-[175px] md:h-[520px] md:w-[350px]">
       {visible.map((s, index) => (
         <TestimonialCard
           key={s.id}
