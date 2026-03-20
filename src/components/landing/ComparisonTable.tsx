@@ -95,12 +95,12 @@ export default function ComparisonTable() {
           className="glass rounded-2xl overflow-x-auto"
         >
           {/* Header row */}
-          <div className="grid grid-cols-4 gap-0 border-b border-border px-4 py-4 min-w-[480px]">
-            <div className="font-sans text-xs text-muted-foreground uppercase tracking-wider">Feature</div>
+          <div className="grid grid-cols-[1.4fr_1fr_1fr_1fr] gap-0 border-b border-border px-3 sm:px-4 py-4">
+            <div className="font-sans text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider">Feature</div>
             {plans.map((p) => (
               <div key={p} className="text-center">
                 <span className={cn(
-                  "font-sans text-sm font-bold",
+                  "font-sans text-[11px] sm:text-sm font-bold",
                   p === "Pro" ? "gold-text" : "text-foreground"
                 )}>
                   {p}
@@ -114,7 +114,7 @@ export default function ComparisonTable() {
             <div key={cat.label}>
               <button
                 onClick={() => toggle(cat.label)}
-                className="w-full grid grid-cols-4 gap-0 px-4 py-3 bg-muted/30 hover:bg-muted/50 transition-colors border-b border-border min-w-[480px]"
+                className="w-full grid grid-cols-[1.4fr_1fr_1fr_1fr] gap-0 px-3 sm:px-4 py-3 bg-muted/30 hover:bg-muted/50 transition-colors border-b border-border"
               >
                 <span className="font-sans text-xs font-bold text-foreground flex items-center gap-2 col-span-4">
                   <ChevronDown
@@ -137,11 +137,11 @@ export default function ComparisonTable() {
                   <div
                     key={row.name}
                     className={cn(
-                      "grid grid-cols-4 gap-0 px-4 py-3 border-b border-border/50 text-center min-w-[480px]",
+                      "grid grid-cols-[1.4fr_1fr_1fr_1fr] gap-0 px-3 sm:px-4 py-3 border-b border-border/50 text-center",
                       i % 2 === 0 ? "bg-transparent" : "bg-muted/10"
                     )}
                   >
-                    <span className="text-left text-xs font-sans text-muted-foreground">
+                    <span className="text-left text-[10px] sm:text-xs font-sans text-muted-foreground">
                       {row.name}
                     </span>
                     <CellValue value={row.starter} />
