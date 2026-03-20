@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import { motion, useScroll, useSpring } from "framer-motion";
+import { useTheme } from "next-themes";
 import Navbar from "@/components/landing/Navbar";
 import Hero from "@/components/landing/Hero";
 import SocialProofStrip from "@/components/landing/SocialProofStrip";
