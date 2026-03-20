@@ -51,6 +51,7 @@ export const LAYER_RADIAL_OFFSET: Record<number, number> = {
   6: 1.0,
   7: 1.0,
   8: 1.0,
+  9: 1.0,
 };
 
 // Slot-based replacement map: categories that conflict with each other
