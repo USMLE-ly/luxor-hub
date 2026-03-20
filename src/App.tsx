@@ -12,6 +12,7 @@ import { ErrorBoundary } from "@/components/app/ErrorBoundary";
 import StarfieldBackground from "@/components/ui/starfield-background";
 import OfflineIndicator from "@/components/app/OfflineIndicator";
 import SplashScreen from "@/components/app/SplashScreen";
+import PaywallGate from "@/components/app/PaywallGate";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Onboarding from "./pages/Onboarding";
