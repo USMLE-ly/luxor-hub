@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
-import { ArrowLeft, Mail, Lock, User, Sparkles } from "lucide-react";
+import { ArrowLeft, Mail, Lock, User } from "lucide-react";
 import { trackEvent } from "@/lib/fbPixel";
 
 const Auth = () => {
