@@ -510,7 +510,7 @@ const StyleDNA = () => {
                 >
                   <div className="flex items-center gap-2 mb-4">
                     <Palette className="w-5 h-5 text-[hsl(45,80%,55%)]" />
-                    <h3 className="font-display text-base font-bold text-foreground">Color Usage Guide</h3>
+                    <h3 className="font-display text-base font-bold text-foreground">Your Personal Color Playbook</h3>
                   </div>
                   <div className="space-y-2.5">
                     {dna.colorUsageTips.map((tip, i) => (
