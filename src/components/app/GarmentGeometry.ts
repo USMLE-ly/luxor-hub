@@ -426,6 +426,14 @@ export function resolveSubtype(category: string, name?: string): GarmentSubtype 
   const cat = (category || "").toLowerCase();
   const nm = (name || "").toLowerCase();
 
+  // Bags
+  if (["bag", "handbag", "purse", "tote"].some(k => cat.includes(k)) ||
+      (cat === "accessory" && ["bag", "handbag", "purse", "tote"].some(k => nm.includes(k)))) {
+    if (nm.includes("tote")) return "bag-tote";
+    if (nm.includes("clutch")) return "bag-clutch";
+    return "bag-handbag";
+  }
+
   if (["shoes", "footwear", "shoe"].some(k => cat.includes(k))) {
     if (nm.includes("boot")) return "boots";
     if (nm.includes("loafer")) return "loafers";
