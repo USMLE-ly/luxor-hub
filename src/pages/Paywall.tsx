@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Crown, Check, Shield, Clock, RotateCcw } from "lucide-react";
+import { Crown, Shield, Clock, RotateCcw } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -13,13 +13,52 @@ import {
   BGComponent3,
 } from "@/components/ui/squishy-pricing";
 
-const features = [
-  "Unlimited AI outfit suggestions",
-  "Full color & style DNA analysis",
-  "Smart closet digitization",
-  "Weekly capsule wardrobes",
-  "Virtual try-on technology",
-  "Priority AI stylist chat",
+const tiers = [
+  {
+    key: "starter" as const,
+    label: "Starter",
+    price: "9",
+    desc: "Essential AI styling tools",
+    features: [
+      "AI outfit suggestions (10/day)",
+      "Basic color analysis",
+      "Closet digitization (50 items)",
+      "Daily outfit of the day",
+    ],
+    bg: "bg-[hsl(43,74%,35%)]",
+    BG: BGComponent1,
+  },
+  {
+    key: "pro" as const,
+    label: "Pro",
+    price: "29",
+    desc: "Unlock your full style potential",
+    features: [
+      "Unlimited AI outfit suggestions",
+      "Full color & style DNA analysis",
+      "Unlimited closet items",
+      "Weekly capsule wardrobes",
+      "Priority AI stylist chat",
+    ],
+    bg: "bg-[hsl(43,74%,49%)]",
+    BG: BGComponent2,
+  },
+  {
+    key: "elite" as const,
+    label: "Elite",
+    price: "99",
+    desc: "Full concierge-level styling",
+    features: [
+      "Everything in Pro",
+      "Virtual try-on technology",
+      "Personal style concierge",
+      "Trend intelligence reports",
+      "Shopping recommendations",
+      "Wardrobe gap analysis",
+    ],
+    bg: "bg-[hsl(35,80%,42%)]",
+    BG: BGComponent3,
+  },
 ];
 
 const Paywall = () => {
@@ -29,7 +68,7 @@ const Paywall = () => {
   const [restoring, setRestoring] = useState(false);
 
   const handlePayPalApprove = useCallback(
-    async (subscriptionId: string) => {
+    async (subscriptionId: string, tier: string) => {
       if (!user) {
         navigate("/auth");
         return;
@@ -38,7 +77,7 @@ const Paywall = () => {
         const { error } = await supabase.from("subscriptions").insert({
           user_id: user.id,
           paypal_subscription_id: subscriptionId,
-          plan_tier: selectedTier,
+          plan_tier: tier,
           status: "active",
         });
         if (error) throw error;
@@ -49,7 +88,7 @@ const Paywall = () => {
         toast.error("Something went wrong saving your subscription.");
       }
     },
-    [user, selectedTier, navigate]
+    [user, navigate]
   );
 
   const handleRestore = async () => {
@@ -80,32 +119,23 @@ const Paywall = () => {
     }
   };
 
-  const tiers: { key: "starter" | "pro" | "elite"; label: string; price: string; desc: string; bg: string; BG: React.FC }[] = [
-    { key: "starter", label: "Starter", price: "9", desc: "Essential AI styling tools", bg: "bg-[hsl(43,74%,35%)]", BG: BGComponent1 },
-    { key: "pro", label: "Pro", price: "29", desc: "Unlock your full style potential", bg: "bg-[hsl(43,74%,49%)]", BG: BGComponent2 },
-    { key: "elite", label: "Elite", price: "99", desc: "Full concierge-level styling", bg: "bg-[hsl(35,80%,42%)]", BG: BGComponent3 },
-  ];
-
   return (
     <div className="min-h-screen bg-background dark flex flex-col">
-      {/* Header */}
       <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-lg px-4 py-3 flex items-center justify-center border-b border-border/50">
         <h1 className="font-display font-bold text-foreground text-lg tracking-wide gold-text">LUXOR</h1>
       </div>
 
       <div className="flex-1 px-5 pb-10 overflow-y-auto">
-        {/* Hero */}
         <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="text-center pt-8 pb-6">
           <div className="w-16 h-16 rounded-2xl gold-gradient mx-auto mb-4 flex items-center justify-center">
             <Crown className="w-8 h-8 text-primary-foreground" />
           </div>
           <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-2">Your Style Awaits</h2>
           <p className="text-muted-foreground font-sans text-sm leading-relaxed max-w-xs mx-auto">
-            Choose a plan to unlock the full Luxor experience. AI-powered styling, just for you.
+            Choose a plan to unlock the full Luxor experience.
           </p>
         </motion.div>
 
-        {/* Squishy Pricing Cards with PayPal */}
         <motion.div
           initial={{ y: 24, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -118,38 +148,22 @@ const Paywall = () => {
               label={t.label}
               monthlyPrice={t.price}
               description={t.desc}
-              cta=""
+              features={t.features}
               background={t.bg}
               BGComponent={t.BG}
-              onCtaClick={() => setSelectedTier(t.key)}
               footer={
                 <div
                   className="w-full"
                   onClick={() => setSelectedTier(t.key)}
                   onFocus={() => setSelectedTier(t.key)}
                 >
-                  <PayPalButton tier={t.key} onApprove={handlePayPalApprove} />
+                  <PayPalButton
+                    tier={t.key}
+                    onApprove={(subId) => handlePayPalApprove(subId, t.key)}
+                  />
                 </div>
               }
             />
-          ))}
-        </motion.div>
-
-        {/* Features */}
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="rounded-2xl bg-card border border-border p-5 space-y-3 mb-6"
-        >
-          <h3 className="font-sans font-semibold text-foreground text-sm">Every plan includes</h3>
-          {features.map((feature, i) => (
-            <div key={i} className="flex items-center gap-3">
-              <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Check className="w-3 h-3 text-primary" />
-              </div>
-              <span className="text-sm text-foreground font-sans">{feature}</span>
-            </div>
           ))}
         </motion.div>
 
@@ -157,7 +171,7 @@ const Paywall = () => {
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: 0.3 }}
           className="flex items-center justify-center gap-6 text-muted-foreground mb-6"
         >
           <div className="flex items-center gap-1.5 text-xs font-sans">
@@ -170,11 +184,10 @@ const Paywall = () => {
           </div>
         </motion.div>
 
-        {/* Payment icons */}
         <motion.div
           initial={{ y: 16, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.45 }}
+          transition={{ delay: 0.4 }}
           className="flex items-center justify-center gap-2 flex-wrap mb-4"
         >
           {[
@@ -194,8 +207,7 @@ const Paywall = () => {
           Secure payment processing via PayPal. Your data is encrypted.
         </p>
 
-        {/* Restore Purchase */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.55 }} className="flex justify-center">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="flex justify-center">
           <button
             onClick={handleRestore}
             disabled={restoring}
