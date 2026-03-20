@@ -1027,8 +1027,21 @@ const GeneratingStep = ({ step, gender }: { step: OnboardingStep; gender?: "fema
         style={{ opacity: allDone ? 1 : 0 }}
       />
 
-      <div className="w-56 h-52 mb-4 flex flex-col items-center justify-center">
-        <svg viewBox="0 0 200 100" className="w-full flex-1" fill="none">
+      <div className="w-56 h-52 mb-4 flex flex-col items-center justify-center relative">
+        {/* Pulsing glow behind the rack */}
+        {!allDone && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div
+              className="w-40 h-32 rounded-full opacity-40"
+              style={{
+                background: 'radial-gradient(ellipse at center, hsl(43,74%,49%) 0%, hsl(43,74%,49%,0.3) 40%, transparent 70%)',
+                animation: 'pulseGlow 2.5s ease-in-out infinite',
+                filter: 'blur(18px)',
+              }}
+            />
+          </div>
+        )}
+        <svg viewBox="0 0 200 100" className="w-full flex-1 relative z-[1]" fill="none">
           <defs>
             <linearGradient id="rackShimmer" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="hsl(var(--foreground))" stopOpacity="0.6" />
