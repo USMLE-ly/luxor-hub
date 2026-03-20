@@ -161,15 +161,18 @@ const Paywall = () => {
           initial={{ y: 16, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.45 }}
-          className="flex items-center justify-center gap-3 mb-4"
+          className="flex items-center justify-center gap-2 flex-wrap mb-4"
         >
           {[
-            { src: "/payments/visa.svg", alt: "Visa" },
-            { src: "/payments/mastercard.svg", alt: "Mastercard" },
-            { src: "/payments/amex.svg", alt: "Amex" },
-            { src: "/payments/discover.svg", alt: "Discover" },
+            { src: "/payments/card1.svg", alt: "Visa" },
+            { src: "/payments/card2.svg", alt: "Mastercard" },
+            { src: "/payments/card3.svg", alt: "Amex" },
+            { src: "/payments/card4.svg", alt: "Discover" },
+            { src: "/payments/wallet1.svg", alt: "Apple Pay" },
+            { src: "/payments/wallet2.svg", alt: "Google Pay" },
+            { src: "/payments/wallet3.svg", alt: "PayPal" },
           ].map((icon) => (
-            <img key={icon.alt} src={icon.src} alt={icon.alt} className="h-7 w-auto rounded" />
+            <img key={icon.alt} src={icon.src} alt={icon.alt} className="h-7 w-auto" />
           ))}
         </motion.div>
 
