@@ -602,12 +602,12 @@ export default function OutfitAnalysis() {
 
                     <div className="flex-1 space-y-4">
                       <div className="space-y-2">
-                        <h3 className="font-display text-lg font-semibold text-foreground">How it works</h3>
+                        <h3 className="font-display text-lg font-semibold text-foreground">Three steps. Honest feedback.</h3>
                         <div className="space-y-3">
                           {[
-                            { icon: Upload, text: "Upload a full-body outfit photo", color: "text-primary" },
-                            { icon: Sparkles, text: "AI analyzes style, colors, fit & occasion", color: "text-primary" },
-                            { icon: TrendingUp, text: "Get detailed scores and improvement tips", color: "text-primary" },
+                            { icon: Upload, text: "Snap or upload your look", color: "text-primary" },
+                            { icon: Sparkles, text: "AI breaks down every detail — color, fit, occasion match", color: "text-primary" },
+                            { icon: TrendingUp, text: "Get a score and specific fixes", color: "text-primary" },
                           ].map((step, i) => (
                             <motion.div
                               key={i}
