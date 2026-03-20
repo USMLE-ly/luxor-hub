@@ -1,13 +1,18 @@
 import { motion } from 'framer-motion';
 import React from 'react';
-import { Check, Crown } from 'lucide-react';
+import { Check, Crown, X } from 'lucide-react';
 
 // --- Types --- //
+export interface PricingFeature {
+  text: string;
+  included: boolean;
+}
+
 export interface SquishyPricingCardProps {
   label: string;
   monthlyPrice: string;
   description: string;
-  features?: string[];
+  features?: (string | PricingFeature)[];
   cta?: string;
   background: string;
   BGComponent: React.FC;
