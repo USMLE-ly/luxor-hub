@@ -75,34 +75,34 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard" element={<PaywallGate><Dashboard /></PaywallGate>} />
             <Route path="/onboarding" element={<Onboarding />} />
-            <Route path="/closet" element={<Closet />} />
-            <Route path="/chat" element={<Chat />} />
-            <Route path="/outfits" element={<Outfits />} />
-            <Route path="/analytics" element={<Analytics />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/inspiration" element={<Inspiration />} />
-            <Route path="/outfit-builder" element={<OutfitBuilder />} />
-            <Route path="/profile/:userId" element={<Profile />} />
-            <Route path="/outfit-analysis" element={<OutfitAnalysisPage />} />
-            <Route path="/leaderboard" element={<Leaderboard />} />
-            <Route path="/weekly-challenge" element={<WeeklyChallenge />} />
-            <Route path="/badges" element={<Badges />} />
-            <Route path="/notifications" element={<NotificationCenter />} />
-            <Route path="/style-dna" element={<StyleDNA />} />
-            <Route path="/calibration" element={<Calibration />} />
-            <Route path="/color-type" element={<ColorType />} />
+            <Route path="/closet" element={<PaywallGate><Closet /></PaywallGate>} />
+            <Route path="/chat" element={<PaywallGate><Chat /></PaywallGate>} />
+            <Route path="/outfits" element={<PaywallGate><Outfits /></PaywallGate>} />
+            <Route path="/analytics" element={<PaywallGate><Analytics /></PaywallGate>} />
+            <Route path="/settings" element={<PaywallGate><Settings /></PaywallGate>} />
+            <Route path="/inspiration" element={<PaywallGate><Inspiration /></PaywallGate>} />
+            <Route path="/outfit-builder" element={<PaywallGate><OutfitBuilder /></PaywallGate>} />
+            <Route path="/profile/:userId" element={<PaywallGate><Profile /></PaywallGate>} />
+            <Route path="/outfit-analysis" element={<PaywallGate><OutfitAnalysisPage /></PaywallGate>} />
+            <Route path="/leaderboard" element={<PaywallGate><Leaderboard /></PaywallGate>} />
+            <Route path="/weekly-challenge" element={<PaywallGate><WeeklyChallenge /></PaywallGate>} />
+            <Route path="/badges" element={<PaywallGate><Badges /></PaywallGate>} />
+            <Route path="/notifications" element={<PaywallGate><NotificationCenter /></PaywallGate>} />
+            <Route path="/style-dna" element={<PaywallGate><StyleDNA /></PaywallGate>} />
+            <Route path="/calibration" element={<PaywallGate><Calibration /></PaywallGate>} />
+            <Route path="/color-type" element={<PaywallGate><ColorType /></PaywallGate>} />
             <Route path="/paywall" element={<Paywall />} />
-            <Route path="/outfit-calendar" element={<OutfitCalendar />} />
-            <Route path="/mood-board" element={<MoodBoard />} />
-            <Route path="/video-analysis" element={<VideoAnalysis />} />
-            <Route path="/fashion-designer" element={<FashionDesigner />} />
-            <Route path="/virtual-tryon" element={<VirtualTryOn />} />
-            <Route path="/community-gallery" element={<CommunityGallery />} />
+            <Route path="/outfit-calendar" element={<PaywallGate><OutfitCalendar /></PaywallGate>} />
+            <Route path="/mood-board" element={<PaywallGate><MoodBoard /></PaywallGate>} />
+            <Route path="/video-analysis" element={<PaywallGate><VideoAnalysis /></PaywallGate>} />
+            <Route path="/fashion-designer" element={<PaywallGate><FashionDesigner /></PaywallGate>} />
+            <Route path="/virtual-tryon" element={<PaywallGate><VirtualTryOn /></PaywallGate>} />
+            <Route path="/community-gallery" element={<PaywallGate><CommunityGallery /></PaywallGate>} />
             <Route path="/install" element={<Install />} />
-            <Route path="/council" element={<Council />} />
-            <Route path="/monthly-report" element={<MonthlyReport />} />
+            <Route path="/council" element={<PaywallGate><Council /></PaywallGate>} />
+            <Route path="/monthly-report" element={<PaywallGate><MonthlyReport /></PaywallGate>} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
