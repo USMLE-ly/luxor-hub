@@ -288,7 +288,7 @@ const Closet = () => {
         occasion: analysis.occasion || prev.occasion,
         name: prev.name || analysis.suggestedName || prev.name,
       }));
-      toast.success("AI analysis complete!");
+      toast.success("Details filled. Check and save.");
     } catch { toast.error("AI analysis failed. Fill in details manually."); }
     finally { setAnalyzing(false); }
   };
