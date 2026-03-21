@@ -95,7 +95,7 @@ const App = () => (
             <Route path="/calibration" element={<PaywallGate><Calibration /></PaywallGate>} />
             <Route path="/color-type" element={<PaywallGate><ColorType /></PaywallGate>} />
             <Route path="/paywall" element={<Paywall />} />
-            <Route path="/pixel-test" element={<PixelTest />} />
+            
             <Route path="/outfit-calendar" element={<PaywallGate><OutfitCalendar /></PaywallGate>} />
             <Route path="/mood-board" element={<PaywallGate><MoodBoard /></PaywallGate>} />
             <Route path="/video-analysis" element={<PaywallGate><VideoAnalysis /></PaywallGate>} />
