@@ -23,6 +23,10 @@ const Index = () => {
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
 
+  useEffect(() => {
+    captureUTMParams();
+  }, []);
+
   return (
     <div className="min-h-screen overflow-x-hidden dark">
       <motion.div
