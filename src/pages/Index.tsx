@@ -7,7 +7,7 @@ import SocialProofStrip from "@/components/landing/SocialProofStrip";
 import HowItWorks from "@/components/landing/HowItWorks";
 import Features from "@/components/landing/Features";
 import TabbedFeatures from "@/components/landing/TabbedFeatures";
-import BrandMarquee from "@/components/landing/BrandMarquee";
+
 import Testimonials from "@/components/landing/Testimonials";
 import Pricing from "@/components/landing/Pricing";
 import FAQ from "@/components/landing/FAQ";
@@ -60,7 +60,7 @@ const Index = () => {
         />
       </ContainerScroll>
 
-      <BrandMarquee />
+      
       <Testimonials />
       <Pricing />
       <ComparisonTable />
