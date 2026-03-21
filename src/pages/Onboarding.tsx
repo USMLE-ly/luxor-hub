@@ -413,10 +413,8 @@ const Onboarding = () => {
                 ease: [0.22, 1, 0.36, 1],
                 filter: { duration: 0.3 },
               }}
-              drag={currentStep > 0 ? "x" : false}
-              dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={0.12}
-              onDragEnd={(_, info) => {
+              onPanEnd={(_, info) => {
+                if (currentStep === 0) return;
                 setSwipeVelocity({ x: info.velocity.x, y: info.velocity.y });
                 setSwipeTrigger((t) => t + 1);
                 const threshold = 50;
@@ -430,18 +428,11 @@ const Onboarding = () => {
                   setCurrentStep((s) => s - 1);
                 }
               }}
-              style={{
-                perspective: 800,
-                transformStyle: "preserve-3d",
-              }}
             >
-              <motion.div
+              <div
                 style={{
-                  rotateX: tilt.rotateX,
-                  rotateY: tilt.rotateY,
-                  transformStyle: "preserve-3d",
+                  transform: `perspective(800px) rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg)`,
                 }}
-                transition={{ type: "tween", duration: 0 }}
               >
                 {/* Step category chip */}
                 {category && !isGenderStep && (
@@ -467,7 +458,7 @@ const Onboarding = () => {
                     aiResults={aiResults}
                   />
                 ) : null}
-              </motion.div>
+              </div>
             </motion.div>
           </AnimatePresence>
         </div>
