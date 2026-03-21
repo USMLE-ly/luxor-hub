@@ -1,5 +1,5 @@
 // Facebook Pixel utility
-import { getUTMParamsForPixel } from "@/utmTracker";
+import { getUTMParamsForPixel } from "@/lib/utmTracker";
 
 declare global {
   interface Window {
