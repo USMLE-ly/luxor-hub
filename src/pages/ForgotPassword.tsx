@@ -6,7 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, Mail, Sparkles } from "lucide-react";
+import { ArrowLeft, Mail } from "lucide-react";
+import { GoldParticles } from "@/components/app/GoldParticles";
+import { GoldDivider, PremiumCardWrapper, GoldShimmerButton } from "@/components/app/PremiumAuthCard";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -35,8 +37,9 @@ const ForgotPassword = () => {
     <div className="min-h-screen bg-background flex items-center justify-center px-4 relative overflow-hidden">
       <div className="absolute inset-0">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gold-dark/10 rounded-full blur-[100px]" />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-[hsl(43,80%,42%)]/10 rounded-full blur-[100px]" />
       </div>
+      <GoldParticles />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -52,9 +55,15 @@ const ForgotPassword = () => {
           Back to sign in
         </button>
 
-        <div className="glass rounded-2xl p-8 gold-glow">
-          <div className="text-center mb-8">
-            <h1 className="font-display text-3xl font-bold gold-text mb-2">Reset Password</h1>
+        <PremiumCardWrapper>
+          <div className="text-center mb-6">
+            <div className="flex items-center justify-center gap-3 mb-3">
+              <div className="h-px w-8 bg-gradient-to-r from-transparent to-[hsl(43,80%,58%,0.4)]" />
+              <span className="text-[10px] tracking-[0.3em] text-[hsl(43,80%,58%,0.6)] font-sans uppercase">LEXOR®</span>
+              <div className="h-px w-8 bg-gradient-to-l from-transparent to-[hsl(43,80%,58%,0.4)]" />
+            </div>
+            <h1 className="font-display text-3xl font-bold gold-text">Reset Password</h1>
+            <GoldDivider />
             <p className="text-muted-foreground font-sans text-sm">
               {sent ? "We've sent you a reset link." : "Enter your email to receive a reset link."}
             </p>
@@ -62,8 +71,8 @@ const ForgotPassword = () => {
 
           {sent ? (
             <div className="text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto">
-                <Mail className="w-8 h-8 text-primary" />
+              <div className="w-16 h-16 rounded-full bg-[hsl(43,80%,58%,0.15)] flex items-center justify-center mx-auto">
+                <Mail className="w-8 h-8 text-[hsl(43,80%,58%)]" />
               </div>
               <p className="text-sm text-muted-foreground font-sans">
                 Check your inbox for <span className="text-foreground">{email}</span> and click the link to reset your password.
@@ -71,7 +80,7 @@ const ForgotPassword = () => {
               <Button
                 variant="outline"
                 onClick={() => navigate("/auth")}
-                className="border-glass-border hover:border-primary/50 rounded-xl font-sans"
+                className="border-[hsl(43,80%,58%,0.3)] hover:border-[hsl(43,80%,58%,0.5)] rounded-xl font-sans hover:shadow-[0_0_15px_hsl(43,80%,58%,0.15)]"
               >
                 Return to Sign In
               </Button>
@@ -91,28 +100,27 @@ const ForgotPassword = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="pl-10 bg-secondary border-glass-border focus:border-primary/50 rounded-xl h-12 font-sans"
+                    className="pl-10 bg-secondary border-glass-border rounded-xl h-12 font-sans focus:border-[hsl(43,80%,58%,0.5)] focus:ring-1 focus:ring-[hsl(43,80%,58%,0.3)] transition-all"
                   />
                 </div>
               </div>
 
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full gold-gradient text-primary-foreground font-semibold rounded-xl h-12 text-base hover:opacity-90 transition-opacity"
-              >
-                {loading ? (
-                  <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    Send Reset Link
-                  </>
-                )}
-              </Button>
+              <GoldShimmerButton>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full gold-gradient text-primary-foreground font-semibold rounded-xl h-12 text-base hover:shadow-[0_0_20px_hsl(43,80%,58%,0.3)] transition-all relative"
+                >
+                  {loading ? (
+                    <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                  ) : (
+                    "Send Reset Link"
+                  )}
+                </Button>
+              </GoldShimmerButton>
             </form>
           )}
-        </div>
+        </PremiumCardWrapper>
       </motion.div>
     </div>
   );
