@@ -1,5 +1,5 @@
 // Facebook Pixel utility
-// Replace YOUR_PIXEL_ID with your actual Meta Pixel ID
+import { getUTMParamsForPixel } from "@/lib/utmTracker";
 
 declare global {
   interface Window {
@@ -17,8 +17,10 @@ export const pageview = () => {
 
 export const trackEvent = (eventName: string, params?: Record<string, any>) => {
   if (typeof window.fbq === 'function') {
-    if (params) {
-      window.fbq('track', eventName, params);
+    const utmParams = getUTMParamsForPixel();
+    const mergedParams = { ...utmParams, ...params };
+    if (Object.keys(mergedParams).length > 0) {
+      window.fbq('track', eventName, mergedParams);
     } else {
       window.fbq('track', eventName);
     }
