@@ -1,8 +1,7 @@
 import { motion } from "framer-motion";
-import { BarChart3, ArrowUpRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
-import { useRef, useState, useEffect } from "react";
-import { useInView } from "framer-motion";
+import { useState } from "react";
 import { TestimonialCard } from "@/components/ui/testimonial-cards";
 
 import statsMain from "@/assets/revenue/stats-main.png";
@@ -12,35 +11,6 @@ import sales105k from "@/assets/revenue/sales-105k.png";
 import stripePayout from "@/assets/revenue/stripe-payout.jpg";
 import sales81k from "@/assets/revenue/sales-81k.jpeg";
 import sales673k from "@/assets/revenue/sales-673k.jpg";
-
-const AnimatedCounter = ({ target, prefix = "", suffix = "" }: { target: number; prefix?: string; suffix?: string }) => {
-  const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true });
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    if (!isInView) return;
-    let start = 0;
-    const duration = 2000;
-    const step = target / (duration / 16);
-    const timer = setInterval(() => {
-      start += step;
-      if (start >= target) {
-        setCount(target);
-        clearInterval(timer);
-      } else {
-        setCount(Math.floor(start));
-      }
-    }, 16);
-    return () => clearInterval(timer);
-  }, [isInView, target]);
-
-  return (
-    <span ref={ref} className="tabular-nums">
-      {prefix}{count.toLocaleString()}{suffix}
-    </span>
-  );
-};
 
 const shuffleScreenshots = [
   { id: 1, image: sales673k, testimonial: "$673,912 total sales with 56% growth over 90 days.", author: "Shopify Dashboard" },
@@ -80,13 +50,6 @@ const ShuffleSection = () => {
   );
 };
 
-const milestones = [
-  { label: "Total Revenue", value: 673912, prefix: "$", suffix: "" },
-  { label: "Paid Members", value: 4218, prefix: "", suffix: "+" },
-  { label: "Avg. MRR Growth", value: 186, prefix: "", suffix: "%" },
-  { label: "Retention Rate", value: 94, prefix: "", suffix: "%" },
-];
-
 const Testimonials = () => (
   <section className="relative py-20 md:py-32 overflow-hidden" id="proof">
     <AnimatedGradientBackground
@@ -117,34 +80,12 @@ const Testimonials = () => (
         transition={{ duration: 0.6 }}
         className="text-center mb-12"
       >
-        <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-1.5 mb-4">
-          <BarChart3 className="w-4 h-4 text-primary" />
-          <span className="font-sans text-xs font-semibold text-primary tracking-wider uppercase">Our Revenue</span>
-        </div>
         <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground">
-          How We Built <span className="gold-text">$673K+</span>
+          Real Results. <span className="gold-text">Real Revenue.</span>
         </h2>
         <p className="mt-4 max-w-lg mx-auto font-sans text-sm text-muted-foreground leading-relaxed">
-          No venture capital. No free trials. Just a product people pay for because it makes them look and feel incredible.
+          Unedited screenshots from our dashboards — no inflated numbers, no fake metrics. See the actual data.
         </p>
-      </motion.div>
-
-      {/* Stats row */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-10"
-      >
-        {milestones.map((m) => (
-          <div key={m.label} className="glass rounded-xl p-4 md:p-5 text-center border border-white/[0.06] hover:border-primary/20 transition-colors duration-300">
-            <div className="font-display text-2xl md:text-3xl font-bold text-foreground">
-              <AnimatedCounter target={m.value} prefix={m.prefix} suffix={m.suffix} />
-            </div>
-            <div className="font-sans text-[10px] md:text-xs text-muted-foreground mt-1 tracking-wide uppercase">{m.label}</div>
-          </div>
-        ))}
       </motion.div>
 
       {/* Hero screenshot */}
@@ -159,7 +100,7 @@ const Testimonials = () => (
           <div className="relative">
             <img
               src={statsMain}
-              alt="LEXOR® revenue dashboard showing €758K total sales, $689K total sales, campaign performance, and conversion summary"
+              alt="LEXOR® revenue dashboard showing real earnings across multiple platforms"
               className="w-full h-auto rounded-t-2xl"
               loading="lazy"
             />
@@ -193,7 +134,7 @@ const Testimonials = () => (
         transition={{ delay: 0.4 }}
         className="text-center mt-8 text-[11px] text-muted-foreground/50 font-sans"
       >
-        Revenue figures from internal analytics. Updated monthly.
+        All screenshots are unedited. Revenue figures from live dashboards.
       </motion.p>
     </div>
   </section>
