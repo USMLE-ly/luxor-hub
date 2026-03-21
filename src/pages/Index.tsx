@@ -60,7 +60,7 @@ const Index = () => {
         />
       </ContainerScroll>
 
-      <BrandMarquee />
+      
       <Testimonials />
       <Pricing />
       <ComparisonTable />
