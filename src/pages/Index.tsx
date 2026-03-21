@@ -7,13 +7,17 @@ import SocialProofStrip from "@/components/landing/SocialProofStrip";
 import HowItWorks from "@/components/landing/HowItWorks";
 import Features from "@/components/landing/Features";
 import TabbedFeatures from "@/components/landing/TabbedFeatures";
+
 import Testimonials from "@/components/landing/Testimonials";
 import Pricing from "@/components/landing/Pricing";
 import FAQ from "@/components/landing/FAQ";
 import Footer from "@/components/landing/Footer";
 import CTABanner from "@/components/landing/CTABanner";
 import AnnouncementBanner from "@/components/landing/AnnouncementBanner";
+import ComparisonTable from "@/components/landing/ComparisonTable";
 import StickyPricingBar from "@/components/landing/StickyPricingBar";
+import { ContainerScroll } from "@/components/ui/container-scroll";
+import featureAppPreview from "@/assets/feature-outfit-gen.jpg";
 
 const Index = () => {
   const { scrollYProgress } = useScroll();
@@ -36,8 +40,30 @@ const Index = () => {
       <Features />
       <TabbedFeatures />
       <HowItWorks />
+
+      {/* App Showcase */}
+      <ContainerScroll
+        titleComponent={
+          <div className="text-center">
+            <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase mb-3">App Preview</p>
+            <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground">
+              See It <span className="gold-text">In Action</span>
+            </h2>
+          </div>
+        }
+      >
+        <img
+          src={featureAppPreview}
+          alt="LEXOR® app preview showing AI outfit generation"
+          className="w-full h-full object-cover rounded-2xl"
+          loading="lazy"
+        />
+      </ContainerScroll>
+
+      
       <Testimonials />
       <Pricing />
+      <ComparisonTable />
       <FAQ />
       <CTABanner />
       <Footer />
