@@ -8,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ArrowLeft, Mail, Lock, User } from "lucide-react";
 import { trackEvent } from "@/lib/fbPixel";
+import { GoldParticles } from "@/components/app/GoldParticles";
+import { GoldDivider, PremiumCardWrapper, GoldShimmerButton } from "@/components/app/PremiumAuthCard";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -117,8 +119,9 @@ const Auth = () => {
     <div className="min-h-screen bg-background flex items-center justify-center px-4 relative overflow-hidden">
       <div className="absolute inset-0">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gold-dark/10 rounded-full blur-[100px]" />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-[hsl(43,80%,42%)]/10 rounded-full blur-[100px]" />
       </div>
+      <GoldParticles />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -134,9 +137,16 @@ const Auth = () => {
           Back to home
         </button>
 
-        <div className="glass rounded-2xl p-8 gold-glow">
-          <div className="text-center mb-8">
-            <h1 className="font-display text-3xl font-bold gold-text mb-2">LEXOR®</h1>
+        <PremiumCardWrapper>
+          <div className="text-center mb-6">
+            {/* Decorative top line */}
+            <div className="flex items-center justify-center gap-3 mb-3">
+              <div className="h-px w-8 bg-gradient-to-r from-transparent to-[hsl(43,80%,58%,0.4)]" />
+              <span className="text-[10px] tracking-[0.3em] text-[hsl(43,80%,58%,0.6)] font-sans uppercase">Est. 2020</span>
+              <div className="h-px w-8 bg-gradient-to-l from-transparent to-[hsl(43,80%,58%,0.4)]" />
+            </div>
+            <h1 className="font-display text-3xl font-bold gold-text">LEXOR®</h1>
+            <GoldDivider />
             <p className="text-muted-foreground font-sans text-sm">
               {isLogin ? "Welcome back. Your style awaits." : "Begin your style journey."}
             </p>
@@ -160,7 +170,7 @@ const Auth = () => {
                     autoComplete="name"
                     aria-invalid={!!errors.displayName}
                     aria-describedby={errors.displayName ? "name-error" : undefined}
-                    className="pl-10 bg-secondary border-glass-border focus:border-primary/50 rounded-xl h-12 font-sans"
+                    className="pl-10 bg-secondary border-glass-border rounded-xl h-12 font-sans focus:border-[hsl(43,80%,58%,0.5)] focus:ring-1 focus:ring-[hsl(43,80%,58%,0.3)] transition-all"
                   />
                 </div>
                 {errors.displayName && (
@@ -185,7 +195,7 @@ const Auth = () => {
                   autoComplete="email"
                   aria-invalid={!!errors.email}
                   aria-describedby={errors.email ? "email-error" : undefined}
-                  className="pl-10 bg-secondary border-glass-border focus:border-primary/50 rounded-xl h-12 font-sans"
+                  className="pl-10 bg-secondary border-glass-border rounded-xl h-12 font-sans focus:border-[hsl(43,80%,58%,0.5)] focus:ring-1 focus:ring-[hsl(43,80%,58%,0.3)] transition-all"
                 />
               </div>
               {errors.email && (
@@ -209,7 +219,7 @@ const Auth = () => {
                   autoComplete={isLogin ? "current-password" : "new-password"}
                   aria-invalid={!!errors.password}
                   aria-describedby={errors.password ? "password-error" : undefined}
-                  className="pl-10 bg-secondary border-glass-border focus:border-primary/50 rounded-xl h-12 font-sans"
+                  className="pl-10 bg-secondary border-glass-border rounded-xl h-12 font-sans focus:border-[hsl(43,80%,58%,0.5)] focus:ring-1 focus:ring-[hsl(43,80%,58%,0.3)] transition-all"
                 />
               </div>
               {errors.password && (
@@ -217,36 +227,43 @@ const Auth = () => {
               )}
             </div>
 
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full gold-gradient text-primary-foreground font-semibold rounded-xl h-12 text-base hover:opacity-90 transition-opacity"
-            >
-              {loading ? (
-                <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-              ) : (
-                <>{isLogin ? "Sign In" : "Create Account"}</>
-              )}
-            </Button>
+            <GoldShimmerButton>
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full gold-gradient text-primary-foreground font-semibold rounded-xl h-12 text-base hover:shadow-[0_0_20px_hsl(43,80%,58%,0.3)] transition-all relative"
+              >
+                {loading ? (
+                  <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                ) : (
+                  <>{isLogin ? "Sign In" : "Create Account"}</>
+                )}
+              </Button>
+            </GoldShimmerButton>
           </form>
 
           <div className="mt-6 text-center space-y-2">
             <button
               onClick={() => { setIsLogin(!isLogin); setErrors({}); }}
-              className="text-sm text-muted-foreground hover:text-primary transition-colors font-sans block mx-auto"
+              className="text-sm font-sans block mx-auto group"
             >
-              {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+              <span className="text-muted-foreground">
+                {isLogin ? "Don't have an account? " : "Already have an account? "}
+              </span>
+              <span className="bg-gradient-to-r from-[hsl(38,72%,42%)] to-[hsl(48,80%,58%)] bg-clip-text text-transparent font-medium group-hover:brightness-125 transition-all">
+                {isLogin ? "Sign up" : "Sign in"}
+              </span>
             </button>
             {isLogin && (
               <button
                 onClick={() => navigate("/forgot-password")}
-                className="text-xs text-muted-foreground hover:text-primary transition-colors font-sans block mx-auto"
+                className="text-xs font-sans block mx-auto bg-gradient-to-r from-[hsl(38,72%,42%)] to-[hsl(48,80%,58%)] bg-clip-text text-transparent hover:brightness-125 transition-all"
               >
                 Forgot your password?
               </button>
             )}
           </div>
-        </div>
+        </PremiumCardWrapper>
       </motion.div>
     </div>
   );
