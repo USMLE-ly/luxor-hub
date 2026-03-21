@@ -9,7 +9,7 @@ const timelineData = [
     id: 1,
     title: "Style DNA",
     date: "AI Core",
-    content: "Upload a selfie and a few wardrobe shots. Within seconds, LEXOR® knows your proportions, your color season, and the cuts that flatter you most.",
+    content: "One selfie. AI maps your proportions, color season, and best cuts in seconds.",
     category: "AI Styling",
     icon: Brain,
     relatedIds: [2, 3],
@@ -20,7 +20,7 @@ const timelineData = [
     id: 2,
     title: "Outfit Generator",
     date: "Daily AI",
-    content: "Every morning, a fresh outfit lands on your screen. It already checked the weather, your calendar, and which pieces have been sitting untouched.",
+    content: "A fresh outfit every morning. Weather-checked, calendar-aware, from your closet.",
     category: "AI Styling",
     icon: Wand2,
     relatedIds: [1, 5],
@@ -31,7 +31,7 @@ const timelineData = [
     id: 3,
     title: "Color Intelligence",
     date: "Analysis",
-    content: "Computer vision scans your skin tone and tells you the exact shades that make you look alive. No more buying colors that wash you out.",
+    content: "AI scans your skin tone and reveals the exact shades that make you glow.",
     category: "AI Styling",
     icon: Palette,
     relatedIds: [1, 4],
@@ -42,7 +42,7 @@ const timelineData = [
     id: 4,
     title: "Smart Shopping",
     date: "Commerce",
-    content: "LEXOR® identifies the holes in your wardrobe and finds pieces to fill them. Every recommendation has a reason behind it.",
+    content: "AI finds the gaps in your wardrobe. Every recommendation has a reason.",
     category: "Shopping",
     icon: ShoppingBag,
     relatedIds: [3, 6],
@@ -53,7 +53,7 @@ const timelineData = [
     id: 5,
     title: "Outfit Calendar",
     date: "Planning",
-    content: "Plan your week's looks on Sunday night. Track what you wore. Stop the 'I have nothing to wear' panic at 7 AM.",
+    content: "Plan your week's looks on Sunday. End the morning panic.",
     category: "Wardrobe",
     icon: Calendar,
     relatedIds: [2, 6],
@@ -64,7 +64,7 @@ const timelineData = [
     id: 6,
     title: "Trend Radar",
     date: "Real-time",
-    content: "Live trend data filtered through your style profile and budget. You see only what matters to you, not noise.",
+    content: "Live trends filtered to your style and budget. Only what matters.",
     category: "Shopping",
     icon: TrendingUp,
     relatedIds: [4, 5],
@@ -96,10 +96,10 @@ const Features = () => (
       <AnimatedContainer className="mx-auto max-w-xl text-center">
         <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase mb-3">Features</p>
         <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground tracking-wide text-balance">
-          What Happens When AI Understands Your Body <span className="gold-text">Better Than You Do</span>
+          AI That Understands <span className="gold-text">Your Body</span>
         </h2>
         <p className="text-muted-foreground mt-4 text-sm tracking-wide text-balance">
-          Six tools that eliminate the guesswork from getting dressed, shopping, and building a wardrobe you actually use.
+          Six tools. Zero guesswork.
         </p>
       </AnimatedContainer>
     </div>

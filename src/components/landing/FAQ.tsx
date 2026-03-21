@@ -9,27 +9,27 @@ import {
 const faqs = [
   {
     q: "How does the AI learn my style?",
-    a: "You upload wardrobe photos and a selfie. LEXOR® maps your body proportions, color season, and aesthetic preferences into a Style DNA profile. The more you use it, the sharper it gets. Most users say it 'clicks' within the first week.",
+    a: "Upload wardrobe photos and a selfie. LEXOR® maps your body, color season, and taste into a Style DNA profile that sharpens with use.",
   },
   {
-    q: "Is my data private and secure?",
-    a: "Your photos and style data are encrypted end-to-end and never shared with third parties. We use enterprise-grade security. You can export or delete all your data at any time from your settings.",
+    q: "Is my data private?",
+    a: "End-to-end encrypted. Never shared. Export or delete anytime from settings.",
   },
   {
     q: "What if it doesn't work for me?",
-    a: "Every plan comes with a 30-day money-back guarantee. If LEXOR® doesn't change how you get dressed, we'll refund every penny. No questions, no hoops.",
+    a: "30-day money-back guarantee. Full refund, no questions.",
   },
   {
-    q: "What body types does the AI support?",
-    a: "All of them. LEXOR®'s AI is trained on diverse body shapes, sizes, and proportions. The styling suggestions adapt to your specific measurements, not a generic mannequin.",
+    q: "What body types does it support?",
+    a: "All of them. AI adapts to your specific measurements, not a generic mannequin.",
   },
   {
     q: "Does it work with my existing wardrobe?",
-    a: "That's the whole point. Scan what you already own. LEXOR® creates new outfit combinations from your existing pieces before recommending anything new. Most users discover 30+ outfits they never considered.",
+    a: "That's the point. LEXOR® creates new combinations from what you own before recommending anything new.",
   },
   {
     q: "Can I cancel anytime?",
-    a: "Yes. Cancel from your account settings with two clicks. No penalties, no retention tricks. Your data stays accessible for 30 days after cancellation.",
+    a: "Yes. Two clicks. No penalties. Data stays accessible for 30 days.",
   },
 ];
 

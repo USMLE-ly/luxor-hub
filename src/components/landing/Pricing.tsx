@@ -122,10 +122,10 @@ const Pricing = () => {
         >
           <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase mb-3">Pricing</p>
           <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground">
-            What's Looking Incredible Actually <span className="gold-text">Worth to You</span>?
+            Choose <span className="gold-text">Your Plan</span>
           </h2>
           <p className="mt-4 max-w-lg mx-auto font-sans text-sm text-muted-foreground">
-            The average person wastes $1,200/year on clothes they barely wear. LEXOR® pays for itself in the first month.
+            Pays for itself in the first month.
           </p>
         </motion.div>
 
