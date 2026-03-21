@@ -11,39 +11,39 @@ const tabs = [
     id: "ai",
     label: "AI Styling",
     icon: Brain,
-    headline: "Imagine Never Second-Guessing an Outfit Again",
-    description: "LEXOR® learns your body, your taste, and your schedule. Then it does the hard part for you.",
+    headline: "Never Second-Guess an Outfit",
+    description: "AI learns your body, taste, and schedule — then does the hard part.",
     features: [
-      { icon: Brain, title: "Style DNA Analysis", detail: "Upload a selfie. The AI maps your proportions, coloring, and aesthetic preferences into a profile that gets sharper every day." },
-      { icon: Wand2Icon, title: "AI Outfit Generator", detail: "Open the app, see today's outfit. It already factored in the rain, your 2 PM meeting, and the shirt you wore yesterday." },
-      { icon: Palette, title: "Color Intelligence", detail: "Computer vision tells you the 12 shades that make your skin glow. That mauve top you keep reaching for? There's a reason." },
-      { icon: Wand2, title: "Virtual Try-On", detail: "See how a new jacket looks on your actual body type before you spend a dime. Powered by generative AI." },
+      { icon: Brain, title: "Style DNA Analysis", detail: "Maps your proportions, coloring, and preferences. Gets sharper daily." },
+      { icon: Wand2Icon, title: "AI Outfit Generator", detail: "Today's outfit, ready. Rain, meetings, and yesterday's shirt — already factored in." },
+      { icon: Palette, title: "Color Intelligence", detail: "The 12 shades that make your skin glow. Science, not guesswork." },
+      { icon: Wand2, title: "Virtual Try-On", detail: "See how a jacket looks on your body type before you buy." },
     ],
   },
   {
     id: "wardrobe",
     label: "Wardrobe",
     icon: Shirt,
-    headline: "Stop Buying Clothes You'll Never Wear",
-    description: "Most people use 20% of their closet. LEXOR® puts the other 80% back to work.",
+    headline: "Stop Buying Clothes You Never Wear",
+    description: "Most people use 20% of their closet. LEXOR® activates the rest.",
     features: [
-      { icon: Scan, title: "Closet Scanner", detail: "Photograph your clothes. AI tags the color, brand, fabric, and occasion in seconds. Your entire wardrobe, digitized." },
-      { icon: Calendar, title: "Outfit Calendar", detail: "Plan Monday through Friday on Sunday night. Track repeats. End the morning scramble." },
-      { icon: Shirt, title: "Capsule Builder", detail: "Traveling for a week? The AI packs 5 outfits from 8 pieces. All from clothes you already own." },
-      { icon: BarChart3, title: "Wardrobe Analytics", detail: "See your cost-per-wear, spot underused pieces, and find category gaps before your next shopping trip." },
+      { icon: Scan, title: "Closet Scanner", detail: "Photograph clothes. AI tags color, brand, fabric instantly." },
+      { icon: Calendar, title: "Outfit Calendar", detail: "Plan Monday–Friday on Sunday. End the morning scramble." },
+      { icon: Shirt, title: "Capsule Builder", detail: "5 outfits from 8 pieces. All from what you own." },
+      { icon: BarChart3, title: "Wardrobe Analytics", detail: "Cost-per-wear, underused pieces, category gaps — all visible." },
     ],
   },
   {
     id: "shopping",
     label: "Shopping",
     icon: ShoppingBag,
-    headline: "Every Purchase Becomes Your Best Purchase",
-    description: "No more impulse buys that sit in the closet with tags on. Every recommendation fills a real gap.",
+    headline: "Every Purchase Counts",
+    description: "No impulse buys. Every recommendation fills a real gap.",
     features: [
-      { icon: ShoppingBag, title: "Gap Analysis", detail: "LEXOR® scans your wardrobe and tells you exactly what's missing. That's the only thing worth buying next." },
-      { icon: TrendingUp, title: "Trend Radar", detail: "Live trends filtered through your style profile and budget. You see what matters. Everything else is noise." },
-      { icon: Zap, title: "Price Alerts", detail: "Wishlist a piece and forget about it. LEXOR® pings you the moment it drops in price at any partnered retailer." },
-      { icon: Users, title: "Style Community", detail: "Browse real outfits from people with your body type and taste. Inspiration that actually applies to you." },
+      { icon: ShoppingBag, title: "Gap Analysis", detail: "AI tells you what's missing. That's the only thing worth buying." },
+      { icon: TrendingUp, title: "Trend Radar", detail: "Live trends filtered to your style and budget." },
+      { icon: Zap, title: "Price Alerts", detail: "Wishlist a piece. Get pinged when the price drops." },
+      { icon: Users, title: "Style Community", detail: "Real outfits from people with your body type and taste." },
     ],
   },
 ];
@@ -53,7 +53,6 @@ const TabbedFeatures = () => {
   const shouldReduceMotion = useReducedMotion();
   const active = tabs.find((t) => t.id === activeTab)!;
 
-  // Listen for tab-switch events from feature cards
   useEffect(() => {
     const handler = (e: Event) => {
       const tabId = (e as CustomEvent).detail;
@@ -75,11 +74,8 @@ const TabbedFeatures = () => {
         >
           <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase mb-3">Deep Dive</p>
           <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground tracking-wide text-balance">
-            Three Ways LEXOR® Changes <span className="gold-text">Your Morning</span>
+            Three Ways to Transform <span className="gold-text">Your Morning</span>
           </h2>
-          <p className="text-muted-foreground mt-4 text-sm tracking-wide text-balance">
-            AI styling, a smarter closet, and shopping that actually makes sense. Pick a tab and see what changes.
-          </p>
         </motion.div>
 
         {/* Tab triggers */}
@@ -126,7 +122,7 @@ const TabbedFeatures = () => {
               <p className="text-muted-foreground text-sm mt-2 max-w-lg mx-auto">{active.description}</p>
             </div>
 
-            {/* Feature grid — dashed border grid cards */}
+            {/* Feature grid */}
             <div className="grid grid-cols-1 divide-x divide-y divide-dashed border border-dashed sm:grid-cols-2">
               {active.features.map((feat) => (
                 <FeatureCard

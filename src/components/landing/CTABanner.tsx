@@ -35,10 +35,10 @@ const CTABanner = () => {
         >
           
           <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-4">
-            You Already Know You <span className="gold-text">Deserve This</span>
+            Ready to <span className="gold-text">Look Incredible</span>?
           </h2>
           <p className="font-sans text-muted-foreground text-base md:text-lg max-w-xl mx-auto mb-3">
-            12,847 people stopped settling for average. Your spot is waiting.
+            Your spot is waiting.
           </p>
           <motion.div
             className="flex justify-center"

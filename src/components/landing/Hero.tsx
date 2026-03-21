@@ -65,12 +65,12 @@ const Hero = () => {
         const TRANSITION_DURATION = () => SLIDER_CONFIG.settings.transitionDuration;
 
         const slides = [
-            { title: "Stop Guessing. Start Turning Heads.", description: "LEXOR® reads your body, your wardrobe, and your life. Then it tells you exactly what to wear today.", media: sliderStyleDna },
-            { title: "Wake Up Knowing Exactly What to Wear", description: "Your outfit is ready before your coffee. Weather-checked, calendar-aware, built from clothes you already own.", media: sliderOutfitGen },
-            { title: "The Colors That Make People Look Twice", description: "Skin-tone analysis pinpoints the exact shades that make you glow. No more guessing at the store.", media: sliderColorIntel },
-            { title: "You Own $3,000 in Clothes You Never Wear", description: "Most people use 20% of their closet. LEXOR® scans every piece and puts the forgotten 80% back to work.", media: sliderWardrobe },
-            { title: "Be First. Not a Follower.", description: "Real-time trend radar filtered to your taste, your budget, your body. Spot what's next before everyone else does.", media: sliderTrending },
-            { title: "Own Less. Look Richer.", description: "A tight capsule wardrobe beats a stuffed closet every time. LEXOR® builds yours from what you already have.", media: sliderCapsule }
+            { title: "Stop Guessing. Start Turning Heads.", description: "AI reads your body and wardrobe. You get the perfect outfit daily.", media: sliderStyleDna },
+            { title: "Your Outfit Is Ready Before Coffee.", description: "Weather-checked. Calendar-aware. From clothes you already own.", media: sliderOutfitGen },
+            { title: "Colors That Make You Glow.", description: "Skin-tone analysis finds your best shades instantly.", media: sliderColorIntel },
+            { title: "80% of Your Closet Is Unused.", description: "LEXOR® puts forgotten pieces back to work.", media: sliderWardrobe },
+            { title: "Be First. Not a Follower.", description: "Real-time trends filtered to your taste and budget.", media: sliderTrending },
+            { title: "Own Less. Look Richer.", description: "AI builds your capsule wardrobe from what you have.", media: sliderCapsule }
         ];
 
         const vertexShader = `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;

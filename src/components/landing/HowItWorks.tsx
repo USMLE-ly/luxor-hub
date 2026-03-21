@@ -10,48 +10,42 @@ const howItWorksItems = [
   {
     id: "scan-closet",
     title: "Photograph Your Closet",
-    description:
-      "Open your wardrobe, snap a few photos. LEXOR® identifies every piece, tags colors and fabrics, and builds your digital closet in under two minutes.",
+    description: "Snap a few photos. AI tags every piece in under two minutes.",
     href: "#features",
     image: featureClosetScanner,
   },
   {
     id: "style-dna",
     title: "Let the AI Learn You",
-    description:
-      "LEXOR® studies your body shape, color season, lifestyle, and taste. Within hours it knows what flatters you better than most personal stylists.",
+    description: "Body shape, color season, lifestyle — mapped in one session.",
     href: "#features",
     image: featureStyleDna,
   },
   {
     id: "daily-outfits",
     title: "Wake Up to Your Outfit",
-    description:
-      "Every morning, a complete look waits on your screen. Weather-checked, calendar-aware, pulled from clothes you already own. The decision is made.",
+    description: "A complete look every morning. Weather-checked, from your closet.",
     href: "#features",
     image: featureOutfitGen,
   },
   {
     id: "ai-stylist",
     title: "Ask Anything",
-    description:
-      "\"What do I wear to a rooftop dinner?\" \"Does this jacket work with these shoes?\" LEXOR® answers in seconds, with outfit mockups attached.",
+    description: "\"What do I wear tonight?\" Answers in seconds, with outfit mockups.",
     href: "#features",
     image: featureAiChat,
   },
   {
     id: "smart-shopping",
     title: "Buy Only What You Need",
-    description:
-      "LEXOR® tells you the exact pieces missing from your wardrobe. Every recommendation fills a gap. No impulse buys, no regret purchases.",
+    description: "AI finds the gaps. Every recommendation fills one.",
     href: "#features",
     image: featureShopping,
   },
   {
     id: "track-progress",
     title: "Watch Your Confidence Grow",
-    description:
-      "Track your style score, see cost-per-wear data, earn badges, and watch the compliments roll in. Numbers don't lie.",
+    description: "Track style scores, cost-per-wear, and earned badges.",
     href: "#features",
     image: featureAnalytics,
   },
@@ -60,8 +54,8 @@ const howItWorksItems = [
 const HowItWorks = () => (
   <div id="how-it-works">
     <Gallery4
-      title="From Closet Chaos to Compliments. Three Minutes."
-      description="Scan your wardrobe. Let the AI learn you. Wake up knowing what to wear. That's it."
+      title="Closet Chaos to Compliments. Three Minutes."
+      description="Scan. Learn. Wear. That's it."
       items={howItWorksItems}
     />
   </div>
