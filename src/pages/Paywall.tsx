@@ -184,7 +184,7 @@ const Paywall = () => {
                   className="w-full"
                   onClick={() => {
                     setSelectedTier(t.key);
-                    trackEvent("AddToCart", { content_name: `LEXOR® ${t.label}`, value: t.price, currency: "USD" });
+                    trackEvent("AddToCart", { content_name: `LEXOR® ${t.label}`, content_ids: [`lexor_${t.key}`], content_type: "product", value: parseFloat(t.price), currency: "USD" });
                   }}
                   onFocus={() => setSelectedTier(t.key)}
                 >
