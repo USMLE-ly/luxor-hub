@@ -66,8 +66,6 @@ const Hero = () => {
 
         const slides = [
             { title: "Stop Guessing. Start Turning Heads.", description: "AI reads your body and wardrobe. You get the perfect outfit daily.", media: sliderStyleDna },
-            { title: "80% of Your Closet Is Unused.", description: "LEXOR® puts forgotten pieces back to work.", media: sliderWardrobe },
-            { title: "Be First. Not a Follower.", description: "Real-time trends filtered to your taste and budget.", media: sliderTrending },
             { title: "Own Less. Look Richer.", description: "AI builds your capsule wardrobe from what you have.", media: sliderCapsule }
         ];
 
