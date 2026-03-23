@@ -3,10 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { renderCanvas } from "@/components/ui/hero-designali";
 import { ArrowRight } from "lucide-react";
 import sliderStyleDna from "@/assets/slider-style-dna.jpg";
-import sliderOutfitGen from "@/assets/slider-outfit-gen.jpg";
-import sliderColorIntel from "@/assets/slider-color-intel.jpg";
-import sliderWardrobe from "@/assets/slider-wardrobe.jpg";
-import sliderTrending from "@/assets/slider-trending.jpg";
 import sliderCapsule from "@/assets/slider-capsule.jpg";
 
 declare const gsap: any;
