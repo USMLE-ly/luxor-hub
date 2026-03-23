@@ -1,65 +1,115 @@
 
 
-# Landing Page Overhaul — Keep Revenue Section, No Stripe, Add Free Tier
+# Shrine Pro-Inspired Minimalist Overhaul — Black & White
 
 ## What's Changing
 
-Streamline the landing page, add a Free tier with limitations, clean up trust-damaging elements. **Keep the Revenue Showcase testimonials**. **No Stripe integration**.
+Convert the entire landing page color system from gold/warm tones to a strict black-and-white palette. Simplify every section to match the Shrine Pro wireframe aesthetic: clean whitespace, flat backgrounds, minimal decoration, editorial restraint.
 
 ---
 
-## 1. Remove Low-Value Sections from Index.tsx
+## 1. CSS Color System Overhaul (`src/index.css`)
 
-- Remove `ContainerScroll` "App Preview" section (scroll filler, no conversion lift)
-- Remove `ComparisonTable` (redundant with pricing cards)
-- **Keep Testimonials (Revenue Showcase)** as-is
+### Dark mode (`.dark`) — the landing page theme:
+- `--background`: `0 0% 4%` (near-black)
+- `--foreground`: `0 0% 95%` (off-white)
+- `--card`: `0 0% 7%`
+- `--primary`: `0 0% 95%` (white — used for buttons/accents)
+- `--primary-foreground`: `0 0% 4%` (black text on white buttons)
+- `--accent`: `0 0% 15%`
+- `--muted`: `0 0% 12%`
+- `--muted-foreground`: `0 0% 50%`
+- `--border`: `0 0% 15%`
+- `--input`: `0 0% 15%`
+- `--ring`: `0 0% 30%`
+- `--gold/gold-light/gold-dark`: all → grayscale (`0 0% 80%`, `0 0% 90%`, `0 0% 65%`)
+- `--glass`: `0 0% 7%`
+- `--glass-border`: `0 0% 18%`
+- All sidebar vars → neutral grayscale
 
-New order:
-```text
-AnnouncementBanner → Navbar → Hero → SocialProofStrip →
-Features → TabbedFeatures → HowItWorks →
-Testimonials (Revenue Showcase — kept) → Pricing → FAQ →
-CTABanner → Footer → StickyPricingBar
-```
+### Light mode (`:root`):
+- `--background`: `0 0% 100%`
+- `--primary`: `0 0% 10%`
+- `--gold/gold-light/gold-dark`: → grayscale equivalents
 
-## 2. Add Free Tier to Pricing
+### Utility classes updated:
+- `.gold-gradient` → white-to-gray gradient
+- `.gold-text` → white gradient text (dark mode) / black gradient text (light)
+- `.gold-glow` → subtle white glow
+- `.gold-shimmer`, `.gold-shimmer-text` → grayscale shimmer
+- `.gradient-button` → solid white bg, black text, no gold border-bottom; hover lifts with white glow
+- `.gradient-button-variant` → white/gray outline
+- `.premium-card:hover` → subtle white/gray glow
+- `.slide-progress-fill` → white instead of gold
 
-Add a 4th "Free" card (first position, visually muted `bg-muted/20`):
+## 2. Navbar Cleanup (`src/components/landing/Navbar.tsx`)
 
-| Feature | Free |
-|---------|------|
-| AI outfit suggestions | 3/day |
-| Closet items | 15 max |
-| Style DNA | Basic snapshot |
-| Color analysis | ✗ |
-| Capsule wardrobes | ✗ |
-| Virtual try-on | ✗ |
+- Remove `RainbowButton` — replace with a clean white-bordered button
+- Remove `MagneticCursor` wrapper
+- Remove green pulse dot
+- Keep: LEXOR® logo, nav links, Try Free ghost button, Get Started (white outline)
 
-- CTA: "Start Free" → navigates to `/auth` (no payment, no Stripe)
-- No PayPal button on free card
-- Remove "237 founding spots" from Pricing (already in sticky bar)
+## 3. Hero Minimal Touch (`src/components/landing/Hero.tsx`)
 
-## 3. Add "Try Free" CTAs
+- "Try Free" button: simple white outline, no gold
+- Keep WebGL slider (colors change via CSS vars automatically)
 
-- **Navbar**: Ghost "Try Free" button before "View Plans"
-- **Hero**: Secondary outline "Try Free" button next to primary CTA
+## 4. SocialProofStrip Cleanup (`src/components/landing/SocialProofStrip.tsx`)
 
-## 4. Clean CTABanner
+- Remove radial gradient overlay
+- Increase text opacity from `text-muted-foreground/20` to `text-muted-foreground/30`
+- Remove `backdrop-blur-sm`
 
-- Remove duplicate "237 founding spots remaining" text (redundant with sticky bar)
+## 5. Pricing — Free Tier + Comparison Table (`src/components/landing/Pricing.tsx`)
 
-## 5. Clean Footer
+- Free card: dashed border (`border-dashed border-white/20`), "FREE" badge
+- Add collapsible "Compare All Features" section below cards using `Collapsible` from radix
+- Comparison table: 4 columns (Free/Starter/Pro/Elite), checkmarks/dashes, grouped rows
 
-- Remove dead social media icons (all show "Coming Soon" tooltips)
+## 6. FAQ Cleanup (`src/components/landing/FAQ.tsx`)
+
+- Remove `premium-card` class from accordion items
+- Simple `border-b border-border` instead of glass cards
+
+## 7. CTABanner Simplification (`src/components/landing/CTABanner.tsx`)
+
+- Remove `AnimatedGradientBackground` — flat `bg-muted/20` background
+- Button becomes solid white with black text
+
+## 8. StickyPricingBar (`src/components/landing/StickyPricingBar.tsx`)
+
+- Remove gold shadow → simple `shadow-lg`
+- Button: white bg, black text
+
+## 9. AnnouncementBanner (`src/components/landing/AnnouncementBanner.tsx`)
+
+- Remove gold shimmer sweep
+- `gold-text` on "Early Access" will auto-convert via CSS vars
+
+## 10. Footer (`src/components/landing/Footer.tsx`)
+
+- Newsletter submit button: white bg instead of `gold-gradient`
 
 ---
 
 ## Files Modified
 
-1. **`src/pages/Index.tsx`** — Remove ContainerScroll + ComparisonTable; keep Testimonials
-2. **`src/components/landing/Pricing.tsx`** — Add Free tier card, remove "237 spots" text
-3. **`src/components/landing/Navbar.tsx`** — Add "Try Free" ghost button
-4. **`src/components/landing/Hero.tsx`** — Add "Try Free" outline CTA
-5. **`src/components/landing/CTABanner.tsx`** — Remove duplicate urgency copy
-6. **`src/components/landing/Footer.tsx`** — Remove dead social icons
+1. **`src/index.css`** — Full color variable conversion + utility class updates
+2. **`src/components/landing/Navbar.tsx`** — Remove RainbowButton, MagneticCursor, pulse dot
+3. **`src/components/landing/Hero.tsx`** — Clean button styling
+4. **`src/components/landing/SocialProofStrip.tsx`** — Remove radial gradient, increase opacity
+5. **`src/components/landing/Pricing.tsx`** — Free tier dashed border + badge, collapsible comparison table
+6. **`src/components/landing/FAQ.tsx`** — Remove premium-card, use border-bottom
+7. **`src/components/landing/CTABanner.tsx`** — Remove animated background, flat dark bg
+8. **`src/components/landing/StickyPricingBar.tsx`** — Remove gold shadow
+9. **`src/components/landing/AnnouncementBanner.tsx`** — Remove shimmer animation
+10. **`src/components/landing/Footer.tsx`** — White newsletter button
+
+## Technical Notes
+
+- All color changes propagate through CSS variables — most components auto-update
+- Collapsible comparison table uses existing `@radix-ui/react-collapsible`
+- No new dependencies
+- No database changes
+- The app pages (dashboard, etc.) will also shift to grayscale via the CSS vars — this is intentional for consistency
 
