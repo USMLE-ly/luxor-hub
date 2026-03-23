@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Crown, Shield, Clock, RotateCcw } from "lucide-react";
@@ -104,6 +105,7 @@ const tiers: Tier[] = [
 const Paywall = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [selectedTier, setSelectedTier] = useState<"free" | "starter" | "pro" | "elite">("pro");
   const [restoring, setRestoring] = useState(false);
 
@@ -111,6 +113,13 @@ const Paywall = () => {
   useState(() => {
     trackEvent("InitiateCheckout", { content_name: "LEXOR® Paywall View" });
   });
+
+  const grantAccess = useCallback((tier: string) => {
+    // Immediately update the cache so PaywallGate won't redirect back
+    if (user) {
+      queryClient.setQueryData(["subscription-check", user.id], true);
+    }
+  }, [user, queryClient]);
 
   const handlePayPalApprove = useCallback(
     async (subscriptionId: string, tier: string) => {
@@ -130,13 +139,14 @@ const Paywall = () => {
         trackEvent("Subscribe", eventParams);
         trackEvent("Purchase", eventParams);
         localStorage.setItem("luxor_paid", "true");
+        grantAccess(tier);
         toast.success("Welcome to Lexor! Your style journey begins now.");
         navigate("/dashboard");
       } catch {
         toast.error("Something went wrong saving your subscription.");
       }
     },
-    [user, navigate]
+    [user, navigate, grantAccess]
   );
 
   const handleRestore = async () => {
@@ -155,6 +165,7 @@ const Paywall = () => {
         .maybeSingle();
       if (data) {
         localStorage.setItem("luxor_paid", "true");
+        grantAccess("restored");
         toast.success("Purchase restored! Welcome back to Lexor.");
         navigate("/dashboard");
       } else {
@@ -213,6 +224,7 @@ const Paywall = () => {
                       <button
                         onClick={() => {
                           localStorage.setItem("luxor_paid", "free");
+                          grantAccess("free");
                           navigate("/dashboard");
                         }}
                         className="w-full h-10 rounded-lg border border-foreground/20 text-foreground font-sans font-semibold text-sm hover:bg-foreground/5 transition-colors"

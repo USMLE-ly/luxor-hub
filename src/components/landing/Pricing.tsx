@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Shield, ChevronDown, Check, Minus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -7,7 +8,6 @@ import PayPalButton from "@/components/app/PayPalButton";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useCallback } from "react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -155,7 +155,14 @@ const CellValue = ({ value }: { value: boolean | string }) => {
 const Pricing = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [compareOpen, setCompareOpen] = useState(false);
+
+  const grantAccess = useCallback(() => {
+    if (user) {
+      queryClient.setQueryData(["subscription-check", user.id], true);
+    }
+  }, [user, queryClient]);
 
   const handlePayPalApprove = useCallback(
     async (subscriptionId: string, tier: string) => {
@@ -172,13 +179,14 @@ const Pricing = () => {
         });
         if (error) throw error;
         localStorage.setItem("luxor_paid", "true");
+        grantAccess();
         toast.success("Welcome to Lexor! Your style journey begins now.");
         navigate("/dashboard");
       } catch {
         toast.error("Something went wrong saving your subscription.");
       }
     },
-    [user, navigate]
+    [user, navigate, grantAccess]
   );
 
   return (
