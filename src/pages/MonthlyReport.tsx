@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import TierGate from "@/components/app/TierGate";
 import { motion } from "framer-motion";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
