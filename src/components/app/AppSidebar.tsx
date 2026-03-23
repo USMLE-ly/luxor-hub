@@ -43,6 +43,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const { user, signOut } = useAuth();
+  const { tier } = usePlanTier();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
