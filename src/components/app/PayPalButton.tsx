@@ -105,12 +105,15 @@ const PayPalButton = ({ tier, onApprove }: PayPalButtonProps) => {
 
   if (error) {
     return (
-      <div className="w-full rounded-xl bg-black/20 backdrop-blur-sm border border-white/10 p-4 text-center">
-        <Lock className="w-4 h-4 text-white/50 mx-auto mb-2" />
-        <p className="text-[11px] text-white/60 font-sans leading-relaxed">
+      <div className="w-full rounded-2xl bg-gradient-to-b from-white/[0.06] to-white/[0.02] backdrop-blur-md border border-white/[0.08] p-5 text-center shadow-[0_4px_24px_-4px_rgba(0,0,0,0.4)]">
+        <div className="w-10 h-10 rounded-full bg-white/[0.06] border border-white/[0.08] mx-auto mb-3 flex items-center justify-center">
+          <Lock className="w-4 h-4 text-white/40" />
+        </div>
+        <p className="text-[12px] text-white/50 font-sans leading-relaxed">
           PayPal loads on the published site.
-          <br />
-          <span className="text-white/90 font-medium">Publish to test payments.</span>
+        </p>
+        <p className="text-[12px] text-white/80 font-sans font-medium mt-1">
+          Publish to test payments.
         </p>
       </div>
     );
@@ -119,15 +122,19 @@ const PayPalButton = ({ tier, onApprove }: PayPalButtonProps) => {
   return (
     <div className="w-full">
       {loading && (
-        <div className="flex items-center justify-center py-3 rounded-xl bg-black/10 backdrop-blur-sm border border-white/10">
-          <Loader2 className="w-4 h-4 animate-spin text-white/70" />
-          <span className="ml-2 text-[11px] text-white/60 font-sans tracking-wide">Preparing checkout…</span>
+        <div className="flex items-center justify-center py-4 rounded-2xl bg-gradient-to-b from-white/[0.06] to-white/[0.02] backdrop-blur-md border border-white/[0.08] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.4)]">
+          <Loader2 className="w-4 h-4 animate-spin text-white/60" />
+          <span className="ml-2 text-[11px] text-white/50 font-sans tracking-wide">Preparing checkout…</span>
         </div>
       )}
-      <div ref={containerRef} className="w-full min-h-[40px] rounded-xl overflow-hidden [&_iframe]:rounded-xl bg-black" style={{ background: '#000' }} />
+      <div
+        ref={containerRef}
+        className="w-full min-h-[40px] rounded-2xl overflow-hidden [&_iframe]:rounded-2xl border border-white/[0.08] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.4)]"
+        style={{ background: 'linear-gradient(to bottom, #111, #0a0a0a)' }}
+      />
       {!loading && !error && (
-        <p className="mt-2 text-center text-[9px] text-white/40 font-sans flex items-center justify-center gap-1">
-          <Lock className="w-2.5 h-2.5" />
+        <p className="mt-3 text-center text-[10px] text-white/30 font-sans flex items-center justify-center gap-1.5 tracking-wide">
+          <Lock className="w-3 h-3" />
           Secured by PayPal
         </p>
       )}
