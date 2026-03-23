@@ -5,18 +5,19 @@ import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Wraps app routes behind a paywall check.
- * Users must be authenticated AND have an active subscription to access protected content.
+ * Users must be authenticated AND have an active subscription OR free tier to access protected content.
  */
 const PaywallGate = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
 
-  const { data: hasSubscription, isLoading: subLoading } = useQuery({
+  const { data: hasAccess, isLoading: subLoading } = useQuery({
     queryKey: ["subscription-check", user?.id],
     queryFn: async () => {
       if (!user) return false;
 
-      // Check localStorage first for quick gate
-      if (localStorage.getItem("luxor_paid") === "true") return true;
+      // Check localStorage first for quick gate (supports "true" for paid and "free" for free tier)
+      const localPaid = localStorage.getItem("luxor_paid");
+      if (localPaid === "true" || localPaid === "free") return true;
 
       const { data } = await supabase
         .from("subscriptions")
@@ -40,7 +41,7 @@ const PaywallGate = ({ children }: { children: React.ReactNode }) => {
 
   if (!user) return <Navigate to="/auth" replace />;
 
-  if (!hasSubscription) return <Navigate to="/paywall" replace />;
+  if (!hasAccess) return <Navigate to="/paywall" replace />;
 
   return <>{children}</>;
 };
