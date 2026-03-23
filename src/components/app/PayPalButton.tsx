@@ -71,8 +71,8 @@ const PayPalButton = ({ tier, onApprove }: PayPalButtonProps) => {
           .Buttons({
             style: {
               shape: "pill",
-              color: "silver",
-              layout: "horizontal",
+              color: "black",
+              layout: "vertical",
               label: "subscribe",
               height: 40,
               tagline: false,
