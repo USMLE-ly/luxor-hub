@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   Brain, Wand2 as Wand2Icon, Palette, ShoppingBag, Calendar, TrendingUp,
-  Scan, Shirt, Wand2, BarChart3, Users, Zap,
+  Scan, Shirt, Wand2, BarChart3, Users, Zap, Play, X,
 } from "lucide-react";
 import { FeatureCard } from "@/components/ui/grid-feature-cards";
-
+import { SidePanelVideo, VideoPlayer } from "@/components/ui/side-panel-video";
+import { Button } from "@/components/ui/button";
 const tabs = [
   {
     id: "ai",
