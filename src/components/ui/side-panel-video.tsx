@@ -1,5 +1,6 @@
 import React, { ReactNode, forwardRef } from "react";
 import { AnimatePresence, motion, type Transition, type Variants } from "framer-motion";
+// @ts-ignore - react-player types
 import ReactPlayer from "react-player";
 import useMeasure from "react-use-measure";
 import { cn } from "@/lib/utils";
