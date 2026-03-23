@@ -1,7 +1,9 @@
-import { Home, Shirt, Wand2, MessageCircle, BarChart3, Settings, LogOut, Sparkles, Move, User, ScanEye, Trophy, Flame, Award, Bell, CalendarDays, LayoutGrid, Video, Paintbrush, Layers, Globe } from "lucide-react";
+import { Home, Shirt, Wand2, MessageCircle, BarChart3, Settings, LogOut, Sparkles, Move, User, ScanEye, Trophy, Flame, Award, Bell, CalendarDays, LayoutGrid, Video, Paintbrush, Layers, Globe, Crown } from "lucide-react";
 import { NotificationBell } from "./NotificationBell";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePlanTier } from "@/hooks/usePlanTier";
+import type { PlanTier } from "@/lib/planRestrictions";
 import { useNavigate } from "react-router-dom";
 import {
   Sidebar,
