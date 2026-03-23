@@ -165,6 +165,7 @@ const Paywall = () => {
         .maybeSingle();
       if (data) {
         localStorage.setItem("luxor_paid", "true");
+        grantAccess("restored");
         toast.success("Purchase restored! Welcome back to Lexor.");
         navigate("/dashboard");
       } else {
