@@ -16,16 +16,35 @@ import {
 import type { PricingFeature } from "@/components/ui/squishy-pricing";
 
 type Tier = {
-  key: "starter" | "pro" | "elite";
+  key: "free" | "starter" | "pro" | "elite";
   label: string;
   price: string;
   desc: string;
   features: (string | PricingFeature)[];
   bg: string;
   BG: React.FC;
+  isFree?: boolean;
 };
 
 const tiers: Tier[] = [
+  {
+    key: "free",
+    label: "Free",
+    price: "0",
+    desc: "Explore the basics — no credit card needed",
+    isFree: true,
+    features: [
+      "AI outfit suggestions — 3 per day",
+      "Closet digitization — up to 15 items",
+      "Basic Style DNA snapshot",
+      { text: "Color analysis", included: false },
+      { text: "Capsule wardrobes", included: false },
+      { text: "Virtual try-on", included: false },
+      { text: "Personal concierge", included: false },
+    ],
+    bg: "bg-muted/20",
+    BG: BGComponent1,
+  },
   {
     key: "starter",
     label: "Starter",
@@ -41,7 +60,7 @@ const tiers: Tier[] = [
       { text: "Virtual try-on", included: false },
       { text: "Personal concierge", included: false },
     ],
-    bg: "bg-[hsl(43,74%,35%)]",
+    bg: "bg-muted/30",
     BG: BGComponent1,
   },
   {
@@ -59,7 +78,7 @@ const tiers: Tier[] = [
       { text: "Virtual try-on", included: false },
       { text: "Personal concierge", included: false },
     ],
-    bg: "bg-[hsl(43,74%,49%)]",
+    bg: "bg-foreground/5",
     BG: BGComponent2,
   },
   {
@@ -77,7 +96,7 @@ const tiers: Tier[] = [
       "Monthly style report",
       "Priority support",
     ],
-    bg: "bg-[hsl(35,80%,42%)]",
+    bg: "bg-foreground/10",
     BG: BGComponent3,
   },
 ];
@@ -85,7 +104,7 @@ const tiers: Tier[] = [
 const Paywall = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [selectedTier, setSelectedTier] = useState<"starter" | "pro" | "elite">("pro");
+  const [selectedTier, setSelectedTier] = useState<"free" | "starter" | "pro" | "elite">("pro");
   const [restoring, setRestoring] = useState(false);
 
   // Track paywall view
@@ -172,31 +191,53 @@ const Paywall = () => {
           className="flex flex-col items-center gap-6 mb-8"
         >
           {tiers.map((t) => (
-            <SquishyPricingCard
-              key={t.key}
-              label={t.label}
-              monthlyPrice={t.price}
-              description={t.desc}
-              features={t.features}
-              background={t.bg}
-              popular={t.key === "pro"}
-              BGComponent={t.BG}
-              footer={
-                <div
-                  className="w-full"
-                  onClick={() => {
-                    setSelectedTier(t.key);
-                    trackEvent("AddToCart", { content_name: `LEXOR® ${t.label}`, content_ids: [`lexor_${t.key}`], content_type: "product", value: parseFloat(t.price), currency: "USD" });
-                  }}
-                  onFocus={() => setSelectedTier(t.key)}
-                >
-                  <PayPalButton
-                    tier={t.key}
-                    onApprove={(subId) => handlePayPalApprove(subId, t.key)}
-                  />
+            <div key={t.key} className={t.isFree ? "relative" : ""}>
+              {t.isFree && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                  <span className="px-3 py-1 rounded-full text-[10px] font-sans font-bold uppercase tracking-widest border border-dashed border-foreground/20 bg-background text-muted-foreground">
+                    FREE
+                  </span>
                 </div>
-              }
-            />
+              )}
+              <div className={t.isFree ? "border border-dashed border-foreground/15 rounded-2xl" : ""}>
+                <SquishyPricingCard
+                  label={t.label}
+                  monthlyPrice={t.price}
+                  description={t.desc}
+                  features={t.features}
+                  background={t.bg}
+                  popular={t.key === "pro"}
+                  BGComponent={t.BG}
+                  footer={
+                    t.isFree ? (
+                      <button
+                        onClick={() => {
+                          localStorage.setItem("luxor_paid", "free");
+                          navigate("/dashboard");
+                        }}
+                        className="w-full h-10 rounded-lg border border-foreground/20 text-foreground font-sans font-semibold text-sm hover:bg-foreground/5 transition-colors"
+                      >
+                        Start Free
+                      </button>
+                    ) : (
+                      <div
+                        className="w-full"
+                        onClick={() => {
+                          setSelectedTier(t.key);
+                          trackEvent("AddToCart", { content_name: `LEXOR® ${t.label}`, content_ids: [`lexor_${t.key}`], content_type: "product", value: parseFloat(t.price), currency: "USD" });
+                        }}
+                        onFocus={() => setSelectedTier(t.key)}
+                      >
+                        <PayPalButton
+                          tier={t.key as "starter" | "pro" | "elite"}
+                          onApprove={(subId) => handlePayPalApprove(subId, t.key)}
+                        />
+                      </div>
+                    )
+                  }
+                />
+              </div>
+            </div>
           ))}
         </motion.div>
 
