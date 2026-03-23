@@ -52,6 +52,7 @@ const tabs = [
 
 const TabbedFeatures = () => {
   const [activeTab, setActiveTab] = useState("ai");
+  const [videoOpen, setVideoOpen] = useState(false);
   const shouldReduceMotion = useReducedMotion();
   const active = tabs.find((t) => t.id === activeTab)!;
 
