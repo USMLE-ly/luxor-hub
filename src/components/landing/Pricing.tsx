@@ -156,7 +156,14 @@ const CellValue = ({ value }: { value: boolean | string }) => {
 const Pricing = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [compareOpen, setCompareOpen] = useState(false);
+
+  const grantAccess = useCallback(() => {
+    if (user) {
+      queryClient.setQueryData(["subscription-check", user.id], true);
+    }
+  }, [user, queryClient]);
 
   const handlePayPalApprove = useCallback(
     async (subscriptionId: string, tier: string) => {
@@ -173,13 +180,14 @@ const Pricing = () => {
         });
         if (error) throw error;
         localStorage.setItem("luxor_paid", "true");
+        grantAccess();
         toast.success("Welcome to Lexor! Your style journey begins now.");
         navigate("/dashboard");
       } catch {
         toast.error("Something went wrong saving your subscription.");
       }
     },
-    [user, navigate]
+    [user, navigate, grantAccess]
   );
 
   return (
