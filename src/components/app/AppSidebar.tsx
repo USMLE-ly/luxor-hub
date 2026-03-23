@@ -95,7 +95,16 @@ export function AppSidebar() {
             <div className="w-8 h-8 rounded-full gold-gradient flex items-center justify-center text-primary-foreground font-semibold text-sm">
               {displayName[0]?.toUpperCase()}
             </div>
-            <span className="font-sans text-sm text-foreground truncate">{displayName}</span>
+            <div className="flex flex-col min-w-0">
+              <span className="font-sans text-sm text-foreground truncate">{displayName}</span>
+              <button
+                onClick={() => navigate("/paywall")}
+                className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-primary transition-colors"
+              >
+                <Crown className="w-3 h-3" />
+                {tier === "free" ? "Free" : tier === "starter" ? "Starter" : tier === "pro" ? "Pro" : "Elite"}
+              </button>
+            </div>
           </div>
         )}
         <button
