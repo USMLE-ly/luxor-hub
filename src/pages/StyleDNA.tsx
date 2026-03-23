@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { usePlanTier } from "@/hooks/usePlanTier";
+import { hasTierAccess } from "@/lib/planRestrictions";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -122,6 +124,8 @@ function getBodyShapeTips(shape: string): string[] {
 
 const StyleDNA = () => {
   const { user, loading: authLoading } = useAuth();
+  const { tier } = usePlanTier();
+  const isFullDna = hasTierAccess(tier, "pro");
   const navigate = useNavigate();
   const [profile, setProfile] = useState<any>(null);
   const [dna, setDna] = useState<StyleDNAData | null>(null);

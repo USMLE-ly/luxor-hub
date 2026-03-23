@@ -7,6 +7,7 @@ import {
 import { FeatureCard } from "@/components/ui/grid-feature-cards";
 import { SidePanelVideo, VideoPlayer } from "@/components/ui/side-panel-video";
 import { Button } from "@/components/ui/button";
+
 const tabs = [
   {
     id: "ai",
@@ -67,7 +68,7 @@ const TabbedFeatures = () => {
   return (
     <section id="tabbed-features" className="py-12 md:py-20 bg-background">
       <div className="mx-auto w-full max-w-5xl px-4 space-y-8">
-        {/* Video section replacing Deep Dive header */}
+        {/* Video section */}
         <div className="flex flex-col items-center gap-4">
           <SidePanelVideo
             panelOpen={videoOpen}
@@ -79,11 +80,7 @@ const TabbedFeatures = () => {
                     LEXOR®
                   </span>
                 </p>
-                <Button
-                  className="rounded-r-[33px] py-8 ml-2"
-                  onClick={toggle}
-                  variant="secondary"
-                >
+                <Button className="rounded-r-[33px] py-8 ml-2" onClick={toggle} variant="secondary">
                   {videoOpen ? <X className="w-4 h-4 mr-1" /> : <Play className="w-4 h-4 mr-1" />}
                   {videoOpen ? "Close" : "Watch"}
                 </Button>
@@ -132,8 +129,6 @@ const TabbedFeatures = () => {
             exit={shouldReduceMotion ? {} : { opacity: 0, y: -8 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
           >
-            {/* Feature grid */}
-
             {/* Feature grid */}
             <div className="grid grid-cols-1 divide-x divide-y divide-dashed border border-dashed sm:grid-cols-2">
               {active.features.map((feat) => (

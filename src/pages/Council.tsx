@@ -59,12 +59,12 @@ const vanishPlaceholders = [
 const Council = () => {
   return (
     <TierGate requiredTier="elite" featureName="Personal Style Concierge">
-      <CouncilContent />
+      <CouncilInner />
     </TierGate>
   );
 };
 
-const CouncilContent = () => {
+const CouncilInner = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [messages, setMessages] = useState<CouncilMessage[]>([]);

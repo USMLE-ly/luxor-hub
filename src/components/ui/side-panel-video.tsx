@@ -1,6 +1,6 @@
 import React, { ReactNode, forwardRef } from "react";
-import { AnimatePresence, motion, type Transition, type Variants } from "framer-motion";
-// @ts-ignore - react-player types
+import { AnimatePresence, motion } from "framer-motion";
+// @ts-ignore
 import ReactPlayer from "react-player";
 import useMeasure from "react-use-measure";
 import { cn } from "@/lib/utils";
@@ -30,7 +30,7 @@ export const VideoPlayer = forwardRef<HTMLDivElement, VideoPlayerProps>(
           initial={{ opacity: 0, scale: 0.9, y: 30 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 30 }}
-          transition={{ duration: 0.2, ease: [0.04, 0.62, 0.23, 0.98] as any, delay: 0.3 } as Transition}
+          transition={{ duration: 0.4, delay: 0.15 }}
         >
           {/* @ts-ignore */}
           <ReactPlayer width="100%" height="100%" controls={false} playing={videoOpen} loop muted url={url} />
@@ -49,16 +49,6 @@ type SidePanelVideoProps = {
   children: ReactNode;
 };
 
-const sectionVariants: Variants = {
-  open: {
-    width: "97%",
-    transition: { duration: 0.3, ease: "easeInOut" as any, delayChildren: 0.3, staggerChildren: 0.2 } as any,
-  },
-  closed: {
-    transition: { duration: 0.2, ease: "easeInOut" as any } as any,
-  },
-};
-
 export const SidePanelVideo = forwardRef<HTMLDivElement, SidePanelVideoProps>(
   ({ panelOpen, handlePanelOpen, className, renderButton, children }, ref) => {
     const [measureRef, bounds] = useMeasure();
@@ -68,8 +58,8 @@ export const SidePanelVideo = forwardRef<HTMLDivElement, SidePanelVideoProps>(
         <motion.div
           ref={ref}
           className={cn("bg-muted/30 rounded-r-[44px] w-[160px] md:w-[260px]", className)}
-          animate={panelOpen ? "open" : "closed"}
-          variants={sectionVariants}
+          animate={panelOpen ? { width: "97%" } : {}}
+          transition={{ duration: 0.3 }}
         >
           <motion.div
             animate={{ height: bounds.height > 0 ? bounds.height : undefined }}
@@ -78,11 +68,7 @@ export const SidePanelVideo = forwardRef<HTMLDivElement, SidePanelVideoProps>(
           >
             <div ref={measureRef}>
               <AnimatePresence mode="popLayout">
-                <motion.div
-                  key={String(panelOpen)}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
+                <motion.div key={String(panelOpen)} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
                   <div className={cn("flex items-center w-full justify-start pl-4 md:pl-4 py-1 md:py-3", panelOpen ? "pr-3" : "")}>
                     {renderButton && renderButton(handlePanelOpen)}
                   </div>

@@ -164,7 +164,6 @@ const Paywall = () => {
         .limit(1)
         .maybeSingle();
       if (data) {
-        // Fetch the actual tier for restored purchases
         const { data: subData } = await supabase
           .from("subscriptions")
           .select("plan_tier")

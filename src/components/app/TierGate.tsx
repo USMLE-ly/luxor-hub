@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Lock, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePlanTier } from "@/hooks/usePlanTier";
-import { hasTierAccess, TIER_ORDER, type PlanTier } from "@/lib/planRestrictions";
+import { hasTierAccess, type PlanTier } from "@/lib/planRestrictions";
 
 interface TierGateProps {
   requiredTier: PlanTier;
@@ -43,10 +43,7 @@ const TierGate = ({ requiredTier, featureName, children }: TierGateProps) => {
       <p className="text-muted-foreground text-sm mb-6 max-w-xs">
         This feature requires the <span className="text-foreground font-semibold">{TIER_LABELS[requiredTier]}</span> plan or higher. Upgrade to unlock it.
       </p>
-      <Button
-        onClick={() => navigate("/paywall")}
-        className="gap-2"
-      >
+      <Button onClick={() => navigate("/paywall")} className="gap-2">
         Upgrade Now <ArrowRight className="w-4 h-4" />
       </Button>
       <p className="text-muted-foreground/60 text-xs mt-3">

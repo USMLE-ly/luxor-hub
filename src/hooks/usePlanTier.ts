@@ -11,16 +11,13 @@ export function usePlanTier(): { tier: PlanTier; isLoading: boolean } {
     queryFn: async (): Promise<PlanTier> => {
       if (!user) return "free";
 
-      // Check localStorage for quick access
       const local = localStorage.getItem("luxor_paid");
       if (local && local !== "true" && local !== "false") {
-        // It's a tier string
         if (["free", "starter", "pro", "elite"].includes(local)) {
           return local as PlanTier;
         }
       }
 
-      // Query database
       const { data } = await supabase
         .from("subscriptions")
         .select("plan_tier")

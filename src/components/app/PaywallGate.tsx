@@ -15,7 +15,6 @@ const PaywallGate = ({ children }: { children: React.ReactNode }) => {
     queryFn: async () => {
       if (!user) return false;
 
-      // Check localStorage first for quick gate
       const localPaid = localStorage.getItem("luxor_paid");
       if (localPaid && localPaid !== "false") return true;
 
