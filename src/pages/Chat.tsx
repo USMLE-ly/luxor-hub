@@ -56,6 +56,9 @@ function AnimatedAssistantMessage({ content, isStreaming }: { content: string; i
 const Chat = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { tier } = usePlanTier();
+  const dailyLimit = PLAN_LIMITS[tier].aiSuggestionsPerDay;
+  const [dailySendCount, setDailySendCount] = useState(0);
   const [searchParams] = useSearchParams();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
