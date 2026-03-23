@@ -90,56 +90,6 @@ const TabbedFeatures = () => {
             <VideoPlayer videoOpen={videoOpen} url="/videos/lexor-showcase.mp4" />
           </SidePanelVideo>
         </div>
-
-        {/* Tab triggers */}
-        <div className="flex justify-center">
-          <div className="inline-flex items-center gap-1 p-1 rounded-xl bg-muted/50 backdrop-blur-sm border border-border/40">
-            {tabs.map((tab) => {
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`
-                    relative flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200
-                    ${isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground/80"}
-                  `}
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="tab-active-bg"
-                      className="absolute inset-0 rounded-lg bg-background shadow-sm border border-border/60"
-                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                    />
-                  )}
-                  <tab.icon className="w-4 h-4 relative z-10" strokeWidth={1.5} />
-                  <span className="relative z-10 hidden sm:inline">{tab.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Tab content */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={active.id}
-            initial={shouldReduceMotion ? {} : { opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={shouldReduceMotion ? {} : { opacity: 0, y: -8 }}
-            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-          >
-            {/* Feature grid */}
-            <div className="grid grid-cols-1 divide-x divide-y divide-dashed border border-dashed sm:grid-cols-2">
-              {active.features.map((feat) => (
-                <FeatureCard
-                  key={feat.title}
-                  feature={{ title: feat.title, icon: feat.icon, description: feat.detail }}
-                />
-              ))}
-            </div>
-          </motion.div>
-        </AnimatePresence>
       </div>
     </section>
   );
