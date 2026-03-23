@@ -1,4 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
+import { usePlanTier } from "@/hooks/usePlanTier";
+import { PLAN_LIMITS } from "@/lib/planRestrictions";
 import { motion, AnimatePresence } from "framer-motion";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
