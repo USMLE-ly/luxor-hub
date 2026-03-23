@@ -59,13 +59,13 @@ const Testimonials = () => (
       startingGap={130}
       topOffset={20}
       gradientColors={[
-        "hsl(240 10% 6%)",
-        "hsl(43 74% 15%)",
-        "hsl(43 60% 20%)",
-        "hsl(30 40% 12%)",
-        "hsl(43 74% 10%)",
-        "hsl(240 10% 8%)",
-        "hsl(240 10% 6%)",
+        "hsl(0 0% 4%)",
+        "hsl(0 0% 8%)",
+        "hsl(0 0% 10%)",
+        "hsl(0 0% 8%)",
+        "hsl(0 0% 6%)",
+        "hsl(0 0% 5%)",
+        "hsl(0 0% 4%)",
       ]}
       gradientStops={[0, 30, 45, 55, 70, 85, 100]}
       containerClassName="rounded-none"
