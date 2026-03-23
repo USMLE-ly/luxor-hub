@@ -291,7 +291,6 @@ const Hero = () => {
         document.addEventListener("visibilitychange", handleVisibility);
         window.addEventListener("resize", handleResize);
 
-        // Touch swipe support
         let touchStartX = 0;
         let touchStartY = 0;
         const SWIPE_THRESHOLD = 50;
@@ -317,14 +316,13 @@ const Hero = () => {
 
   return (
     <section className="relative" ref={containerRef}>
-      {/* Premium Preloader */}
+      {/* Preloader */}
       <div className="slider-preloader absolute inset-0 z-[20] flex items-center justify-center bg-background transition-opacity duration-700">
-        {/* Floating gold particle field */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {Array.from({ length: 24 }).map((_, i) => (
             <div
               key={i}
-              className="absolute w-1 h-1 rounded-full bg-primary/40"
+              className="absolute w-1 h-1 rounded-full bg-foreground/20"
               style={{
                 left: `${8 + (i * 37) % 84}%`,
                 top: `${5 + (i * 53) % 90}%`,
@@ -334,27 +332,24 @@ const Hero = () => {
           ))}
         </div>
         <div className="flex flex-col items-center gap-6 relative z-10">
-          {/* Dual-ring spinner */}
           <div className="relative w-16 h-16">
-            <div className="absolute inset-0 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
-            <div className="absolute inset-2 rounded-full border-2 border-primary/10 border-b-primary animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
+            <div className="absolute inset-0 rounded-full border-2 border-foreground/10 border-t-foreground/60 animate-spin" />
+            <div className="absolute inset-2 rounded-full border-2 border-foreground/5 border-b-foreground/40 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
           </div>
-          {/* Staggered letter reveal */}
           <div className="flex items-center gap-[2px]">
             {'LEXOR'.split('').map((letter, i) => (
               <span
                 key={i}
-                className="font-display text-lg tracking-[0.3em] gold-text inline-block animate-fade-in"
+                className="font-display text-lg tracking-[0.3em] text-foreground inline-block animate-fade-in"
                 style={{ animationDelay: `${i * 120}ms`, animationFillMode: 'backwards' }}
               >
                 {letter}
               </span>
             ))}
-            <span className="font-display text-[10px] gold-text inline-block animate-fade-in align-super ml-0.5" style={{ animationDelay: '600ms', animationFillMode: 'backwards' }}>®</span>
+            <span className="font-display text-[10px] text-foreground inline-block animate-fade-in align-super ml-0.5" style={{ animationDelay: '600ms', animationFillMode: 'backwards' }}>®</span>
           </div>
-          {/* Loading bar */}
           <div className="w-32 h-[2px] bg-muted/30 rounded-full overflow-hidden">
-            <div className="h-full gold-gradient rounded-full animate-[loading-bar_2s_ease-in-out_infinite]" />
+            <div className="h-full bg-foreground/40 rounded-full animate-[loading-bar_2s_ease-in-out_infinite]" />
           </div>
         </div>
       </div>
@@ -364,35 +359,29 @@ const Hero = () => {
         <span className="slide-number" id="heroSlideNumber">01</span>
         <span className="slide-total" id="heroSlideTotal">06</span>
 
-        {/* Dark overlay for readability */}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent z-[1]" />
         <div className="absolute inset-0 bg-gradient-to-r from-background/50 to-transparent z-[1]" />
 
         <div className="slide-content z-[5]" style={{ pointerEvents: 'none' }}>
-          <h1 className="slide-title font-display gold-shimmer-text" id="heroMainTitle"></h1>
+          <h1 className="slide-title font-display" id="heroMainTitle"></h1>
           <p className="slide-description" id="heroMainDesc"></p>
           
-          {/* CTA buttons — staggered entrance */}
           <div className="flex flex-col sm:flex-row items-start gap-3 mt-6" style={{ pointerEvents: 'auto' }}>
             <button
               onClick={() => navigate("/auth")}
-              className="gradient-button h-11 px-7 rounded-xl font-sans font-semibold text-sm tracking-wide flex items-center gap-2 gold-glow will-change-transform"
-              style={{ animationDelay: '0ms' }}
+              className="h-11 px-7 rounded-xl font-sans font-semibold text-sm tracking-wide flex items-center gap-2 will-change-transform bg-white text-black hover:bg-white/90 transition-colors"
             >
-              
               <span>Claim Your Spot</span>
             </button>
             <button
               onClick={() => navigate("/auth")}
-              className="h-11 px-7 rounded-xl font-sans font-semibold text-sm tracking-wide flex items-center gap-2 will-change-transform border border-primary/40 text-primary hover:bg-primary/10 transition-colors"
-              style={{ animationDelay: '200ms' }}
+              className="h-11 px-7 rounded-xl font-sans font-semibold text-sm tracking-wide flex items-center gap-2 will-change-transform border border-white/30 text-white hover:bg-white/10 transition-colors"
             >
               <span>Try Free</span>
             </button>
             <button
               onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
-              className="gradient-button gradient-button-variant h-11 px-7 rounded-xl font-sans font-semibold text-sm tracking-wide flex items-center gap-2 will-change-transform"
-              style={{ animationDelay: '400ms' }}
+              className="h-11 px-7 rounded-xl font-sans font-semibold text-sm tracking-wide flex items-center gap-2 will-change-transform border border-white/20 text-white/70 hover:text-white hover:border-white/40 transition-colors"
             >
               <span>How It Works</span>
               <ArrowRight className="w-4 h-4" />
@@ -402,7 +391,6 @@ const Hero = () => {
 
       <nav className="slides-navigation z-[5]" id="heroSlidesNav"></nav>
 
-        {/* Scroll indicator — smooth custom animation */}
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[6] flex flex-col items-center gap-1 scroll-hint-anim">
           <span className="font-sans text-[10px] text-muted-foreground tracking-widest uppercase">Scroll</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted-foreground">

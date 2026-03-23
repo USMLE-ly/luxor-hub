@@ -42,9 +42,9 @@ const FAQ = () => (
         viewport={{ once: true, margin: "-80px" }}
         className="text-center mb-12"
       >
-        <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase mb-3">FAQ</p>
+        <p className="font-sans text-sm font-semibold text-muted-foreground tracking-widest uppercase mb-3">FAQ</p>
         <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground">
-          Common <span className="gold-text">Questions</span>
+          Common Questions
         </h2>
       </motion.div>
 
@@ -53,12 +53,12 @@ const FAQ = () => (
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-80px" }}
       >
-        <Accordion type="single" collapsible className="space-y-3">
+        <Accordion type="single" collapsible className="space-y-0">
           {faqs.map((faq, i) => (
             <AccordionItem
               key={i}
               value={`faq-${i}`}
-              className="glass rounded-xl px-6 border-none premium-card data-[state=open]:border-l-2 data-[state=open]:border-l-primary/60 transition-all duration-200"
+              className="border-b border-border px-0 rounded-none"
             >
               <AccordionTrigger className="font-sans text-sm font-semibold text-foreground hover:no-underline py-5">
                 {faq.q}
