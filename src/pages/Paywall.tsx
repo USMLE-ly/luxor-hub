@@ -224,6 +224,7 @@ const Paywall = () => {
                       <button
                         onClick={() => {
                           localStorage.setItem("luxor_paid", "free");
+                          grantAccess("free");
                           navigate("/dashboard");
                         }}
                         className="w-full h-10 rounded-lg border border-foreground/20 text-foreground font-sans font-semibold text-sm hover:bg-foreground/5 transition-colors"
