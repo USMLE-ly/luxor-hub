@@ -164,8 +164,16 @@ const Paywall = () => {
         .limit(1)
         .maybeSingle();
       if (data) {
-        localStorage.setItem("luxor_paid", "true");
-        grantAccess("restored");
+        const { data: subData } = await supabase
+          .from("subscriptions")
+          .select("plan_tier")
+          .eq("user_id", user.id)
+          .eq("status", "active")
+          .limit(1)
+          .maybeSingle();
+        const restoredTier = subData?.plan_tier || "starter";
+        localStorage.setItem("luxor_paid", restoredTier);
+        grantAccess(restoredTier);
         toast.success("Purchase restored! Welcome back to Lexor.");
         navigate("/dashboard");
       } else {

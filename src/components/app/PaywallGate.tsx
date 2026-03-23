@@ -15,20 +15,19 @@ const PaywallGate = ({ children }: { children: React.ReactNode }) => {
     queryFn: async () => {
       if (!user) return false;
 
-      // Check localStorage first for quick gate (supports "true" for paid and "free" for free tier)
       const localPaid = localStorage.getItem("luxor_paid");
-      if (localPaid === "true" || localPaid === "free") return true;
+      if (localPaid && localPaid !== "false") return true;
 
       const { data } = await supabase
         .from("subscriptions")
-        .select("id")
+        .select("id, plan_tier")
         .eq("user_id", user.id)
         .eq("status", "active")
         .limit(1)
         .maybeSingle();
 
       if (data) {
-        localStorage.setItem("luxor_paid", "true");
+        localStorage.setItem("luxor_paid", (data as any).plan_tier || "starter");
         return true;
       }
       return false;

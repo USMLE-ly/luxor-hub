@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import { hasTierAccess } from "@/lib/planRestrictions";
+import { usePlanTier } from "@/hooks/usePlanTier";
+import { hasTierAccess } from "@/lib/planRestrictions";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
