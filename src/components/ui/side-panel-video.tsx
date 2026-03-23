@@ -32,6 +32,7 @@ export const VideoPlayer = forwardRef<HTMLDivElement, VideoPlayerProps>(
           exit={{ opacity: 0, scale: 0.9, y: 30 }}
           transition={{ duration: 0.2, ease: [0.04, 0.62, 0.23, 0.98] as any, delay: 0.3 } as Transition}
         >
+          {/* @ts-ignore */}
           <ReactPlayer width="100%" height="100%" controls={false} playing={videoOpen} loop muted url={url} />
         </motion.div>
       )}
