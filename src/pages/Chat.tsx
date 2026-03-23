@@ -117,6 +117,11 @@ const Chat = () => {
   const send = async (overrideInput?: string) => {
     const text = overrideInput || input.trim();
     if (!text || isLoading || !user) return;
+    if (dailySendCount >= dailyLimit) {
+      toast.error(`You've reached your ${dailyLimit} AI suggestions for today. Upgrade for more.`);
+      return;
+    }
+    setDailySendCount((c) => c + 1);
     const userMsg: Message = { role: "user", content: text, imagePreview: pendingImage || undefined };
     const imageToSend = pendingImage;
     setMessages((prev) => [...prev, userMsg]);
