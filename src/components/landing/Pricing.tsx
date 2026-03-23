@@ -17,16 +17,35 @@ import {
 import type { PricingFeature } from "@/components/ui/squishy-pricing";
 
 type Tier = {
-  key: "starter" | "pro" | "elite";
+  key: "free" | "starter" | "pro" | "elite";
   label: string;
   price: string;
   desc: string;
   features: (string | PricingFeature)[];
   bg: string;
   BG: React.FC;
+  isFree?: boolean;
 };
 
 const tiers: Tier[] = [
+  {
+    key: "free" as const,
+    label: "Free",
+    price: "0",
+    desc: "Explore the basics — no credit card needed",
+    isFree: true,
+    features: [
+      "AI outfit suggestions — 3 per day",
+      "Closet digitization — up to 15 items",
+      "Basic Style DNA snapshot",
+      { text: "Color analysis", included: false },
+      { text: "Capsule wardrobes", included: false },
+      { text: "Virtual try-on", included: false },
+      { text: "Personal concierge", included: false },
+    ],
+    bg: "bg-muted/20",
+    BG: BGComponent1,
+  },
   {
     key: "starter" as const,
     label: "Starter",
@@ -129,7 +148,7 @@ const Pricing = () => {
           </p>
         </motion.div>
 
-        <div className="flex flex-col md:flex-row gap-6 justify-center items-center md:items-stretch">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 justify-center items-stretch">
           {tiers.map((t) => (
             <SquishyPricingCard
               key={t.key}
@@ -141,12 +160,21 @@ const Pricing = () => {
               popular={t.key === "pro"}
               BGComponent={t.BG}
               footer={
-                <div className="w-full">
-                  <PayPalButton
-                    tier={t.key}
-                    onApprove={(subId) => handlePayPalApprove(subId, t.key)}
-                  />
-                </div>
+                t.isFree ? (
+                  <button
+                    onClick={() => navigate("/auth")}
+                    className="w-full h-10 rounded-lg border border-primary/30 text-primary font-sans font-semibold text-sm hover:bg-primary/10 transition-colors"
+                  >
+                    Start Free
+                  </button>
+                ) : (
+                  <div className="w-full">
+                    <PayPalButton
+                      tier={t.key as "starter" | "pro" | "elite"}
+                      onApprove={(subId) => handlePayPalApprove(subId, t.key)}
+                    />
+                  </div>
+                )
               }
             />
           ))}
@@ -173,9 +201,8 @@ const Pricing = () => {
               <img key={icon.alt} src={icon.src} alt={icon.alt} className="h-8 w-auto rounded-md" />
             ))}
           </div>
-          <p className="text-xs font-sans text-muted-foreground flex items-center gap-1.5">
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary urgency-pulse" />
-            This price won't last. <span className="font-medium text-foreground">237 founding spots</span> remain.
+          <p className="text-xs font-sans text-muted-foreground">
+            Cancel anytime. No hidden fees.
           </p>
           <div className="flex items-center gap-2 text-xs font-sans text-muted-foreground">
             <Shield className="w-4 h-4 text-primary" />

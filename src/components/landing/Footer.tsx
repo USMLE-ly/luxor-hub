@@ -133,34 +133,13 @@ const Footer = () => {
           <div className="flex items-center gap-2 text-xs text-muted-foreground font-sans">
             <span className="gold-shimmer">Made with ❤️ for you</span>
           </div>
-          <div className="flex items-center gap-4">
-            {[
-              { icon: Instagram, label: "Instagram" },
-              { icon: Twitter, label: "Twitter" },
-              { icon: TikTokIcon, label: "TikTok", custom: true },
-              { icon: Linkedin, label: "LinkedIn" },
-              { icon: Github, label: "GitHub" },
-            ].map(({ icon: Icon, label, custom }) => (
-              <span
-                key={label}
-                className="text-muted-foreground/40 cursor-default relative group"
-                aria-disabled="true"
-                title="Coming Soon"
-              >
-                {custom ? <TikTokIcon /> : <Icon className="w-4 h-4" />}
-                <span className="absolute -top-7 left-1/2 -translate-x-1/2 text-[9px] font-sans text-muted-foreground bg-muted px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                  Coming Soon
-                </span>
-              </span>
-            ))}
             <button
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-              className="ml-2 p-1.5 rounded-full border border-border hover:border-primary/30 hover:text-primary transition-all"
+              className="p-1.5 rounded-full border border-border hover:border-primary/30 hover:text-primary transition-all"
               aria-label="Back to top"
             >
               <ArrowUp className="w-3.5 h-3.5" />
             </button>
-          </div>
         </div>
       </div>
     </footer>

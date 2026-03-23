@@ -383,9 +383,16 @@ const Hero = () => {
               <span>Claim Your Spot</span>
             </button>
             <button
+              onClick={() => navigate("/auth")}
+              className="h-11 px-7 rounded-xl font-sans font-semibold text-sm tracking-wide flex items-center gap-2 will-change-transform border border-primary/40 text-primary hover:bg-primary/10 transition-colors"
+              style={{ animationDelay: '200ms' }}
+            >
+              <span>Try Free</span>
+            </button>
+            <button
               onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
               className="gradient-button gradient-button-variant h-11 px-7 rounded-xl font-sans font-semibold text-sm tracking-wide flex items-center gap-2 will-change-transform"
-              style={{ animationDelay: '200ms' }}
+              style={{ animationDelay: '400ms' }}
             >
               <span>How It Works</span>
               <ArrowRight className="w-4 h-4" />
