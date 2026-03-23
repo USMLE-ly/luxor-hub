@@ -129,12 +129,6 @@ const TabbedFeatures = () => {
             exit={shouldReduceMotion ? {} : { opacity: 0, y: -8 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
           >
-            {/* Header */}
-            <div className="text-center mb-8">
-              <h3 className="font-display text-xl md:text-2xl font-bold text-foreground">{active.headline}</h3>
-              <p className="text-muted-foreground text-sm mt-2 max-w-lg mx-auto">{active.description}</p>
-            </div>
-
             {/* Feature grid */}
             <div className="grid grid-cols-1 divide-x divide-y divide-dashed border border-dashed sm:grid-cols-2">
               {active.features.map((feat) => (
