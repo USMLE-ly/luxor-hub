@@ -1,7 +1,5 @@
 import React, { ReactNode, forwardRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-// @ts-ignore
-import ReactPlayer from "react-player";
 import useMeasure from "react-use-measure";
 import { cn } from "@/lib/utils";
 
@@ -26,14 +24,20 @@ export const VideoPlayer = forwardRef<HTMLDivElement, VideoPlayerProps>(
       {videoOpen && (
         <motion.div
           ref={ref}
-          className="md:flex md:justify-center py-1 px-1 md:py-8 md:px-8 w-full h-[300px] md:h-[800px] md:aspect-video rounded-2xl bg-background"
+          className="md:flex md:justify-center py-1 px-1 md:py-8 md:px-8 w-full h-[300px] md:h-[500px] rounded-2xl bg-background"
           initial={{ opacity: 0, scale: 0.9, y: 30 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 30 }}
           transition={{ duration: 0.4, delay: 0.15 }}
         >
-          {/* @ts-ignore */}
-          <ReactPlayer width="100%" height="100%" controls={false} playing={videoOpen} loop muted url={url} />
+          <video
+            className="w-full h-full rounded-xl object-cover"
+            src={url}
+            autoPlay
+            loop
+            muted
+            playsInline
+          />
         </motion.div>
       )}
     </AnimatePresence>
