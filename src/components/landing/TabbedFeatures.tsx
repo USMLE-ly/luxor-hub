@@ -90,7 +90,9 @@ const TabbedFeatures = () => {
             <VideoPlayer videoOpen={videoOpen} url="/videos/lexor-showcase.mp4" />
           </SidePanelVideo>
         </div>
-
-
+      </div>
+    </section>
+  );
+};
 
 export default TabbedFeatures;
