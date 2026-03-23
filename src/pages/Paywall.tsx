@@ -16,14 +16,90 @@ import {
 import type { PricingFeature } from "@/components/ui/squishy-pricing";
 
 type Tier = {
-  key: "starter" | "pro" | "elite";
+  key: "free" | "starter" | "pro" | "elite";
   label: string;
   price: string;
   desc: string;
   features: (string | PricingFeature)[];
   bg: string;
   BG: React.FC;
+  isFree?: boolean;
 };
+
+const tiers: Tier[] = [
+  {
+    key: "free",
+    label: "Free",
+    price: "0",
+    desc: "Explore the basics — no credit card needed",
+    isFree: true,
+    features: [
+      "AI outfit suggestions — 3 per day",
+      "Closet digitization — up to 15 items",
+      "Basic Style DNA snapshot",
+      { text: "Color analysis", included: false },
+      { text: "Capsule wardrobes", included: false },
+      { text: "Virtual try-on", included: false },
+      { text: "Personal concierge", included: false },
+    ],
+    bg: "bg-muted/20",
+    BG: BGComponent1,
+  },
+  {
+    key: "starter",
+    label: "Starter",
+    price: "9",
+    desc: "The essentials to start dressing smarter",
+    features: [
+      "AI outfit suggestions — 10 per day",
+      "Basic color analysis",
+      "Closet digitization — up to 50 items",
+      "Daily outfit of the day",
+      { text: "Style DNA deep analysis", included: false },
+      { text: "Weekly capsule wardrobes", included: false },
+      { text: "Virtual try-on", included: false },
+      { text: "Personal concierge", included: false },
+    ],
+    bg: "bg-muted/30",
+    BG: BGComponent1,
+  },
+  {
+    key: "pro",
+    label: "Pro",
+    price: "29",
+    desc: "Full AI styling arsenal — no limits on your closet",
+    features: [
+      "Unlimited AI outfit suggestions",
+      "Full color & style DNA analysis",
+      "Unlimited closet items",
+      "Weekly capsule wardrobes",
+      "Priority AI stylist chat",
+      "Outfit calendar & planning",
+      { text: "Virtual try-on", included: false },
+      { text: "Personal concierge", included: false },
+    ],
+    bg: "bg-foreground/5",
+    BG: BGComponent2,
+  },
+  {
+    key: "elite",
+    label: "Elite",
+    price: "99",
+    desc: "White-glove styling — your AI concierge handles everything",
+    features: [
+      "Everything in Pro, plus:",
+      "Virtual try-on technology",
+      "Personal style concierge",
+      "Trend intelligence reports",
+      "Shopping recommendations",
+      "Wardrobe gap analysis",
+      "Monthly style report",
+      "Priority support",
+    ],
+    bg: "bg-foreground/10",
+    BG: BGComponent3,
+  },
+];
 
 const tiers: Tier[] = [
   {
