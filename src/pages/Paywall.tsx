@@ -105,6 +105,7 @@ const tiers: Tier[] = [
 const Paywall = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [selectedTier, setSelectedTier] = useState<"free" | "starter" | "pro" | "elite">("pro");
   const [restoring, setRestoring] = useState(false);
 
@@ -112,6 +113,13 @@ const Paywall = () => {
   useState(() => {
     trackEvent("InitiateCheckout", { content_name: "LEXOR® Paywall View" });
   });
+
+  const grantAccess = useCallback((tier: string) => {
+    // Immediately update the cache so PaywallGate won't redirect back
+    if (user) {
+      queryClient.setQueryData(["subscription-check", user.id], true);
+    }
+  }, [user, queryClient]);
 
   const handlePayPalApprove = useCallback(
     async (subscriptionId: string, tier: string) => {
@@ -131,13 +139,14 @@ const Paywall = () => {
         trackEvent("Subscribe", eventParams);
         trackEvent("Purchase", eventParams);
         localStorage.setItem("luxor_paid", "true");
+        grantAccess(tier);
         toast.success("Welcome to Lexor! Your style journey begins now.");
         navigate("/dashboard");
       } catch {
         toast.error("Something went wrong saving your subscription.");
       }
     },
-    [user, navigate]
+    [user, navigate, grantAccess]
   );
 
   const handleRestore = async () => {
