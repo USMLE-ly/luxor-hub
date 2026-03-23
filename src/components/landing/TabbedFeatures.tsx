@@ -68,18 +68,28 @@ const TabbedFeatures = () => {
   return (
     <section id="tabbed-features" className="py-12 md:py-20 bg-background">
       <div className="mx-auto w-full max-w-5xl px-4 space-y-8">
-        <motion.div
-          initial={{ opacity: 0, y: -8 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.6 }}
-          className="text-center max-w-xl mx-auto"
-        >
-          <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase mb-3">Deep Dive</p>
-          <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground tracking-wide text-balance">
-            Three Ways to Transform <span className="gold-text">Your Morning</span>
-          </h2>
-        </motion.div>
+        {/* Video section */}
+        <div className="flex flex-col items-center gap-4">
+          <SidePanelVideo
+            panelOpen={videoOpen}
+            handlePanelOpen={() => setVideoOpen(!videoOpen)}
+            renderButton={(toggle) => (
+              <div className="flex items-center w-full justify-start pr-4 md:pl-4 py-1 md:py-1">
+                <p className="text-xl font-black tracking-tight sm:text-3xl">
+                  <span className="bg-gradient-to-t from-muted-foreground to-foreground bg-clip-text font-display text-xl font-bold text-transparent sm:text-5xl">
+                    LEXOR®
+                  </span>
+                </p>
+                <Button className="rounded-r-[33px] py-8 ml-2" onClick={toggle} variant="secondary">
+                  {videoOpen ? <X className="w-4 h-4 mr-1" /> : <Play className="w-4 h-4 mr-1" />}
+                  {videoOpen ? "Close" : "Watch"}
+                </Button>
+              </div>
+            )}
+          >
+            <VideoPlayer videoOpen={videoOpen} url="/videos/lexor-showcase.mp4" />
+          </SidePanelVideo>
+        </div>
 
         {/* Tab triggers */}
         <div className="flex justify-center">
