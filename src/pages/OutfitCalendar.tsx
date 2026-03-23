@@ -94,6 +94,14 @@ const scheduleNotification = (title: string, body: string, delayMs: number) => {
 };
 
 const OutfitCalendar = () => {
+  return (
+    <TierGate requiredTier="pro" featureName="Outfit Calendar & Planning">
+      <OutfitCalendarInner />
+    </TierGate>
+  );
+};
+
+const OutfitCalendarInner = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [currentMonth, setCurrentMonth] = useState(new Date());
