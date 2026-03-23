@@ -201,9 +201,8 @@ const Pricing = () => {
               <img key={icon.alt} src={icon.src} alt={icon.alt} className="h-8 w-auto rounded-md" />
             ))}
           </div>
-          <p className="text-xs font-sans text-muted-foreground flex items-center gap-1.5">
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary urgency-pulse" />
-            This price won't last. <span className="font-medium text-foreground">237 founding spots</span> remain.
+          <p className="text-xs font-sans text-muted-foreground">
+            Cancel anytime. No hidden fees.
           </p>
           <div className="flex items-center gap-2 text-xs font-sans text-muted-foreground">
             <Shield className="w-4 h-4 text-primary" />

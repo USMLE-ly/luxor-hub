@@ -62,9 +62,8 @@ const CTABanner = () => {
               </Button>
             </motion.div>
           </motion.div>
-          <p className="mt-4 font-sans text-xs text-muted-foreground flex items-center justify-center gap-1.5">
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-            <span className="font-medium text-foreground">237 founding spots</span> remaining at this price
+          <p className="mt-4 font-sans text-xs text-muted-foreground">
+            Start free — upgrade anytime.
           </p>
           <p className="mt-2 font-sans text-xs text-muted-foreground">
             30-day money-back guarantee. Zero risk.

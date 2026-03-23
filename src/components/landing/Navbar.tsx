@@ -100,7 +100,14 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-3">
-
+          <Button
+            variant="ghost"
+            size="sm"
+            className="hidden md:inline-flex font-sans"
+            onClick={() => navigate("/auth")}
+          >
+            Try Free
+          </Button>
           <Button
             variant="ghost"
             size="sm"
