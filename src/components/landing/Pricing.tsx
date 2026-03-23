@@ -148,7 +148,7 @@ const Pricing = () => {
           </p>
         </motion.div>
 
-        <div className="flex flex-col md:flex-row gap-6 justify-center items-center md:items-stretch">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 justify-center items-stretch">
           {tiers.map((t) => (
             <SquishyPricingCard
               key={t.key}
@@ -160,12 +160,21 @@ const Pricing = () => {
               popular={t.key === "pro"}
               BGComponent={t.BG}
               footer={
-                <div className="w-full">
-                  <PayPalButton
-                    tier={t.key}
-                    onApprove={(subId) => handlePayPalApprove(subId, t.key)}
-                  />
-                </div>
+                t.isFree ? (
+                  <button
+                    onClick={() => navigate("/auth")}
+                    className="w-full h-10 rounded-lg border border-primary/30 text-primary font-sans font-semibold text-sm hover:bg-primary/10 transition-colors"
+                  >
+                    Start Free
+                  </button>
+                ) : (
+                  <div className="w-full">
+                    <PayPalButton
+                      tier={t.key}
+                      onApprove={(subId) => handlePayPalApprove(subId, t.key)}
+                    />
+                  </div>
+                )
               }
             />
           ))}
