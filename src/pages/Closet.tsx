@@ -295,8 +295,15 @@ const Closet = () => {
     finally { setAnalyzing(false); }
   };
 
+  const { tier } = usePlanTier();
+  const itemLimit = PLAN_LIMITS[tier].closetItems;
+
   const handleUpload = async () => {
     if (!user) return;
+    if (items.length >= itemLimit) {
+      toast.error(`Your ${tier} plan allows up to ${itemLimit} items. Upgrade for more.`);
+      return;
+    }
     setUploading(true);
     try {
       let photoUrl: string | null = null;
