@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   Brain, Wand2 as Wand2Icon, Palette, ShoppingBag, Calendar, TrendingUp,
-  Scan, Shirt, Wand2, BarChart3, Users, Zap,
+  Scan, Shirt, Wand2, BarChart3, Users, Zap, Play, X,
 } from "lucide-react";
 import { FeatureCard } from "@/components/ui/grid-feature-cards";
+import { SidePanelVideo, VideoPlayer } from "@/components/ui/side-panel-video";
+import { Button } from "@/components/ui/button";
 
 const tabs = [
   {
@@ -50,6 +52,7 @@ const tabs = [
 
 const TabbedFeatures = () => {
   const [activeTab, setActiveTab] = useState("ai");
+  const [videoOpen, setVideoOpen] = useState(false);
   const shouldReduceMotion = useReducedMotion();
   const active = tabs.find((t) => t.id === activeTab)!;
 
@@ -65,6 +68,29 @@ const TabbedFeatures = () => {
   return (
     <section id="tabbed-features" className="py-12 md:py-20 bg-background">
       <div className="mx-auto w-full max-w-5xl px-4 space-y-8">
+        {/* Video section */}
+        <div className="flex flex-col items-center gap-4">
+          <SidePanelVideo
+            panelOpen={videoOpen}
+            handlePanelOpen={() => setVideoOpen(!videoOpen)}
+            renderButton={(toggle) => (
+              <div className="flex items-center w-full justify-start pr-4 md:pl-4 py-1 md:py-1">
+                <p className="text-xl font-black tracking-tight sm:text-3xl">
+                  <span className="bg-gradient-to-t from-muted-foreground to-foreground bg-clip-text font-display text-xl font-bold text-transparent sm:text-5xl">
+                    LEXOR®
+                  </span>
+                </p>
+                <Button className="rounded-r-[33px] py-8 ml-2" onClick={toggle} variant="secondary">
+                  {videoOpen ? <X className="w-4 h-4 mr-1" /> : <Play className="w-4 h-4 mr-1" />}
+                  {videoOpen ? "Close" : "Watch"}
+                </Button>
+              </div>
+            )}
+          >
+            <VideoPlayer videoOpen={videoOpen} url="/videos/lexor-showcase.mp4" />
+          </SidePanelVideo>
+        </div>
+
         {/* Tab triggers */}
         <div className="flex justify-center">
           <div className="inline-flex items-center gap-1 p-1 rounded-xl bg-muted/50 backdrop-blur-sm border border-border/40">
