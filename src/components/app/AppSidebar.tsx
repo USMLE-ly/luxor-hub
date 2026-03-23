@@ -1,7 +1,9 @@
-import { Home, Shirt, Wand2, MessageCircle, BarChart3, Settings, LogOut, Sparkles, Move, User, ScanEye, Trophy, Flame, Award, Bell, CalendarDays, LayoutGrid, Video, Paintbrush, Layers, Globe } from "lucide-react";
+import { Home, Shirt, Wand2, MessageCircle, BarChart3, Settings, LogOut, Sparkles, Move, User, ScanEye, Trophy, Flame, Award, Bell, CalendarDays, LayoutGrid, Video, Paintbrush, Layers, Globe, Crown } from "lucide-react";
 import { NotificationBell } from "./NotificationBell";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePlanTier } from "@/hooks/usePlanTier";
+import type { PlanTier } from "@/lib/planRestrictions";
 import { useNavigate } from "react-router-dom";
 import {
   Sidebar,
@@ -41,6 +43,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const { user, signOut } = useAuth();
+  const { tier } = usePlanTier();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -92,7 +95,16 @@ export function AppSidebar() {
             <div className="w-8 h-8 rounded-full gold-gradient flex items-center justify-center text-primary-foreground font-semibold text-sm">
               {displayName[0]?.toUpperCase()}
             </div>
-            <span className="font-sans text-sm text-foreground truncate">{displayName}</span>
+            <div className="flex flex-col min-w-0">
+              <span className="font-sans text-sm text-foreground truncate">{displayName}</span>
+              <button
+                onClick={() => navigate("/paywall")}
+                className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-primary transition-colors"
+              >
+                <Crown className="w-3 h-3" />
+                {tier === "free" ? "Free" : tier === "starter" ? "Starter" : tier === "pro" ? "Pro" : "Elite"}
+              </button>
+            </div>
           </div>
         )}
         <button
