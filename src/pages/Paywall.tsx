@@ -138,7 +138,7 @@ const Paywall = () => {
         const eventParams = { value: tier === "starter" ? 9.00 : tier === "pro" ? 29.00 : 99.00, currency: "USD", content_name: `LEXOR® ${tier}`, content_ids: [`lexor_${tier}`], content_type: "product", num_items: 1 };
         trackEvent("Subscribe", eventParams);
         trackEvent("Purchase", eventParams);
-        localStorage.setItem("luxor_paid", "true");
+        localStorage.setItem("luxor_paid", tier);
         grantAccess(tier);
         toast.success("Welcome to Lexor! Your style journey begins now.");
         navigate("/dashboard");
@@ -164,8 +164,17 @@ const Paywall = () => {
         .limit(1)
         .maybeSingle();
       if (data) {
-        localStorage.setItem("luxor_paid", "true");
-        grantAccess("restored");
+        // Fetch the actual tier for restored purchases
+        const { data: subData } = await supabase
+          .from("subscriptions")
+          .select("plan_tier")
+          .eq("user_id", user.id)
+          .eq("status", "active")
+          .limit(1)
+          .maybeSingle();
+        const restoredTier = subData?.plan_tier || "starter";
+        localStorage.setItem("luxor_paid", restoredTier);
+        grantAccess(restoredTier);
         toast.success("Purchase restored! Welcome back to Lexor.");
         navigate("/dashboard");
       } else {

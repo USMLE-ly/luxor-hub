@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import TierGate from "@/components/app/TierGate";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/app/AppLayout";
@@ -93,6 +94,14 @@ const scheduleNotification = (title: string, body: string, delayMs: number) => {
 };
 
 const OutfitCalendar = () => {
+  return (
+    <TierGate requiredTier="pro" featureName="Outfit Calendar & Planning">
+      <OutfitCalendarContent />
+    </TierGate>
+  );
+};
+
+const OutfitCalendarContent = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [currentMonth, setCurrentMonth] = useState(new Date());

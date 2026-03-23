@@ -13,6 +13,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { RainbowButton } from "@/components/ui/rainbow-button";
+import TierGate from "@/components/app/TierGate";
 
 interface SavedDesign {
   id: string;
@@ -22,6 +23,14 @@ interface SavedDesign {
 }
 
 export default function VirtualTryOn() {
+  return (
+    <TierGate requiredTier="elite" featureName="Virtual Try-On">
+      <VirtualTryOnContent />
+    </TierGate>
+  );
+}
+
+function VirtualTryOnContent() {
   const { user } = useAuth();
   const [userPhoto, setUserPhoto] = useState<string | null>(null);
   const [userPhotoFile, setUserPhotoFile] = useState<File | null>(null);

@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import TierGate from "@/components/app/TierGate";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -100,6 +101,14 @@ interface ExtractedColor {
 }
 
 const ColorType = () => {
+  return (
+    <TierGate requiredTier="starter" featureName="Color Analysis">
+      <ColorTypeContent />
+    </TierGate>
+  );
+};
+
+const ColorTypeContent = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [dna, setDna] = useState<any>(null);

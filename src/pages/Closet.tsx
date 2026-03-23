@@ -1,4 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
+import { usePlanTier } from "@/hooks/usePlanTier";
+import { PLAN_LIMITS } from "@/lib/planRestrictions";
 import { motion, AnimatePresence } from "framer-motion";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
@@ -293,8 +295,15 @@ const Closet = () => {
     finally { setAnalyzing(false); }
   };
 
+  const { tier } = usePlanTier();
+  const itemLimit = PLAN_LIMITS[tier].closetItems;
+
   const handleUpload = async () => {
     if (!user) return;
+    if (items.length >= itemLimit) {
+      toast.error(`Your ${tier} plan allows up to ${itemLimit} items. Upgrade for more.`);
+      return;
+    }
     setUploading(true);
     try {
       let photoUrl: string | null = null;

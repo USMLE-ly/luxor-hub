@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { usePlanTier } from "@/hooks/usePlanTier";
+import { PLAN_LIMITS } from "@/lib/planRestrictions";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/app/AppLayout";
@@ -54,6 +56,9 @@ function AnimatedAssistantMessage({ content, isStreaming }: { content: string; i
 const Chat = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { tier } = usePlanTier();
+  const dailyLimit = PLAN_LIMITS[tier].aiSuggestionsPerDay;
+  const [dailySendCount, setDailySendCount] = useState(0);
   const [searchParams] = useSearchParams();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -112,6 +117,11 @@ const Chat = () => {
   const send = async (overrideInput?: string) => {
     const text = overrideInput || input.trim();
     if (!text || isLoading || !user) return;
+    if (dailySendCount >= dailyLimit) {
+      toast.error(`You've reached your ${dailyLimit} AI suggestions for today. Upgrade for more.`);
+      return;
+    }
+    setDailySendCount((c) => c + 1);
     const userMsg: Message = { role: "user", content: text, imagePreview: pendingImage || undefined };
     const imageToSend = pendingImage;
     setMessages((prev) => [...prev, userMsg]);
