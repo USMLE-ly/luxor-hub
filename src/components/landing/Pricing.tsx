@@ -170,7 +170,7 @@ const Pricing = () => {
                 ) : (
                   <div className="w-full">
                     <PayPalButton
-                      tier={t.key}
+                      tier={t.key as "starter" | "pro" | "elite"}
                       onApprove={(subId) => handlePayPalApprove(subId, t.key)}
                     />
                   </div>
