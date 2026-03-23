@@ -371,13 +371,7 @@ const Hero = () => {
               onClick={() => navigate("/auth")}
               className="h-11 px-7 rounded-xl font-sans font-semibold text-sm tracking-wide flex items-center gap-2 will-change-transform bg-white text-black hover:bg-white/90 transition-colors"
             >
-              <span>Claim Your Spot</span>
-            </button>
-            <button
-              onClick={() => navigate("/auth")}
-              className="h-11 px-7 rounded-xl font-sans font-semibold text-sm tracking-wide flex items-center gap-2 will-change-transform border border-white/30 text-white hover:bg-white/10 transition-colors"
-            >
-              <span>Try Free</span>
+              <span>Try Risk-Free</span>
             </button>
             <button
               onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}

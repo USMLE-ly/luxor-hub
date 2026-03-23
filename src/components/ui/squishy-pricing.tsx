@@ -39,7 +39,7 @@ export const SquishyPricingCard = ({
       whileHover="hover"
       transition={{ duration: 1, ease: "backInOut" }}
       variants={{ hover: { scale: 1.05 } }}
-      className={`group relative ${hasFeatures ? 'h-auto min-h-[30rem] sm:min-h-[34rem]' : 'h-[22rem] sm:h-96'} w-[calc(100vw-2rem)] max-w-[20rem] sm:w-80 shrink-0 overflow-hidden rounded-3xl p-6 sm:p-8 ${background} transition-all duration-500 flex flex-col ${popular ? 'shadow-[0_0_60px_-12px_hsl(43,74%,49%,0.5),0_0_0_1px_rgba(255,255,255,0.15)] scale-[1.02]' : 'shadow-[0_8px_32px_-8px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.08)]'}`}
+      className={`group relative ${hasFeatures ? 'h-auto min-h-[30rem] sm:min-h-[34rem]' : 'h-[22rem] sm:h-96'} w-full shrink-0 overflow-hidden rounded-3xl p-6 sm:p-8 ${background} transition-all duration-500 flex flex-col ${popular ? 'shadow-[0_0_60px_-12px_rgba(255,255,255,0.15),0_0_0_1px_rgba(255,255,255,0.15)] scale-[1.02]' : 'shadow-[0_8px_32px_-8px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.08)]'}`}
     >
       {/* Layered glass overlays for depth */}
       <div className="absolute inset-0 z-[1] rounded-3xl bg-gradient-to-b from-white/[0.15] via-transparent to-black/[0.25] pointer-events-none" />
