@@ -13,6 +13,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { RainbowButton } from "@/components/ui/rainbow-button";
+import TierGate from "@/components/app/TierGate";
 
 interface SavedDesign {
   id: string;
