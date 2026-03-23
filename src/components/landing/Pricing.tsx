@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Shield } from "lucide-react";
+import { Shield, ChevronDown, Check, Minus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { trackEvent } from "@/lib/fbPixel";
 import PayPalButton from "@/components/app/PayPalButton";
@@ -7,6 +8,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useCallback } from "react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   SquishyPricingCard,
   BGComponent1,
@@ -29,7 +35,7 @@ type Tier = {
 
 const tiers: Tier[] = [
   {
-    key: "free" as const,
+    key: "free",
     label: "Free",
     price: "0",
     desc: "Explore the basics — no credit card needed",
@@ -47,7 +53,7 @@ const tiers: Tier[] = [
     BG: BGComponent1,
   },
   {
-    key: "starter" as const,
+    key: "starter",
     label: "Starter",
     price: "9",
     desc: "The essentials to start dressing smarter",
@@ -61,11 +67,11 @@ const tiers: Tier[] = [
       { text: "Virtual try-on", included: false },
       { text: "Personal concierge", included: false },
     ],
-    bg: "bg-[hsl(43,74%,35%)]",
+    bg: "bg-muted/30",
     BG: BGComponent1,
   },
   {
-    key: "pro" as const,
+    key: "pro",
     label: "Pro",
     price: "29",
     desc: "Full AI styling arsenal — no limits on your closet",
@@ -79,11 +85,11 @@ const tiers: Tier[] = [
       { text: "Virtual try-on", included: false },
       { text: "Personal concierge", included: false },
     ],
-    bg: "bg-[hsl(43,74%,49%)]",
+    bg: "bg-foreground/5",
     BG: BGComponent2,
   },
   {
-    key: "elite" as const,
+    key: "elite",
     label: "Elite",
     price: "99",
     desc: "White-glove styling — your AI concierge handles everything",
@@ -97,14 +103,59 @@ const tiers: Tier[] = [
       "Monthly style report",
       "Priority support",
     ],
-    bg: "bg-[hsl(35,80%,42%)]",
+    bg: "bg-foreground/10",
     BG: BGComponent3,
   },
 ];
 
+// Comparison table data
+const comparisonCategories = [
+  {
+    name: "AI Styling",
+    features: [
+      { label: "AI outfit suggestions", free: "3/day", starter: "10/day", pro: "Unlimited", elite: "Unlimited" },
+      { label: "Style DNA analysis", free: "Basic", starter: "Basic", pro: "Full", elite: "Full" },
+      { label: "Color analysis", free: false, starter: true, pro: true, elite: true },
+      { label: "AI stylist chat", free: false, starter: false, pro: "Priority", elite: "Priority" },
+    ],
+  },
+  {
+    name: "Wardrobe",
+    features: [
+      { label: "Closet items", free: "15", starter: "50", pro: "Unlimited", elite: "Unlimited" },
+      { label: "Capsule wardrobes", free: false, starter: false, pro: true, elite: true },
+      { label: "Outfit calendar", free: false, starter: false, pro: true, elite: true },
+      { label: "Wardrobe gap analysis", free: false, starter: false, pro: false, elite: true },
+    ],
+  },
+  {
+    name: "Premium",
+    features: [
+      { label: "Virtual try-on", free: false, starter: false, pro: false, elite: true },
+      { label: "Personal concierge", free: false, starter: false, pro: false, elite: true },
+      { label: "Trend intelligence", free: false, starter: false, pro: false, elite: true },
+      { label: "Shopping recommendations", free: false, starter: false, pro: false, elite: true },
+      { label: "Monthly style report", free: false, starter: false, pro: false, elite: true },
+    ],
+  },
+  {
+    name: "Support",
+    features: [
+      { label: "Priority support", free: false, starter: false, pro: false, elite: true },
+    ],
+  },
+];
+
+const CellValue = ({ value }: { value: boolean | string }) => {
+  if (value === true) return <Check className="w-4 h-4 text-foreground mx-auto" />;
+  if (value === false) return <Minus className="w-4 h-4 text-muted-foreground/40 mx-auto" />;
+  return <span className="text-xs font-sans text-foreground">{value}</span>;
+};
+
 const Pricing = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [compareOpen, setCompareOpen] = useState(false);
 
   const handlePayPalApprove = useCallback(
     async (subscriptionId: string, tier: string) => {
@@ -131,7 +182,7 @@ const Pricing = () => {
   );
 
   return (
-    <section id="pricing" className="py-20 md:py-32 bg-muted/20">
+    <section id="pricing" className="py-20 md:py-32 bg-background">
       <div className="max-w-6xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -139,9 +190,9 @@ const Pricing = () => {
           viewport={{ once: true, amount: 0.2 }}
           className="text-center mb-16"
         >
-          <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase mb-3">Pricing</p>
+          <p className="font-sans text-sm font-semibold text-muted-foreground tracking-widest uppercase mb-3">Pricing</p>
           <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground">
-            Choose <span className="gold-text">Your Plan</span>
+            Choose Your Plan
           </h2>
           <p className="mt-4 max-w-lg mx-auto font-sans text-sm text-muted-foreground">
             Pays for itself in the first month.
@@ -150,35 +201,96 @@ const Pricing = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 justify-center items-stretch">
           {tiers.map((t) => (
-            <SquishyPricingCard
-              key={t.key}
-              label={t.label}
-              monthlyPrice={t.price}
-              description={t.desc}
-              features={t.features}
-              background={t.bg}
-              popular={t.key === "pro"}
-              BGComponent={t.BG}
-              footer={
-                t.isFree ? (
-                  <button
-                    onClick={() => navigate("/auth")}
-                    className="w-full h-10 rounded-lg border border-primary/30 text-primary font-sans font-semibold text-sm hover:bg-primary/10 transition-colors"
-                  >
-                    Start Free
-                  </button>
-                ) : (
-                  <div className="w-full">
-                    <PayPalButton
-                      tier={t.key as "starter" | "pro" | "elite"}
-                      onApprove={(subId) => handlePayPalApprove(subId, t.key)}
-                    />
-                  </div>
-                )
-              }
-            />
+            <div key={t.key} className={t.isFree ? "relative" : ""}>
+              {t.isFree && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                  <span className="px-3 py-1 rounded-full text-[10px] font-sans font-bold uppercase tracking-widest border border-dashed border-foreground/20 bg-background text-muted-foreground">
+                    FREE
+                  </span>
+                </div>
+              )}
+              <div className={t.isFree ? "border border-dashed border-foreground/15 rounded-2xl" : ""}>
+                <SquishyPricingCard
+                  label={t.label}
+                  monthlyPrice={t.price}
+                  description={t.desc}
+                  features={t.features}
+                  background={t.bg}
+                  popular={t.key === "pro"}
+                  BGComponent={t.BG}
+                  footer={
+                    t.isFree ? (
+                      <button
+                        onClick={() => navigate("/auth")}
+                        className="w-full h-10 rounded-lg border border-foreground/20 text-foreground font-sans font-semibold text-sm hover:bg-foreground/5 transition-colors"
+                      >
+                        Start Free
+                      </button>
+                    ) : (
+                      <div className="w-full">
+                        <PayPalButton
+                          tier={t.key as "starter" | "pro" | "elite"}
+                          onApprove={(subId) => handlePayPalApprove(subId, t.key)}
+                        />
+                      </div>
+                    )
+                  }
+                />
+              </div>
+            </div>
           ))}
         </div>
+
+        {/* Compare All Features */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ delay: 0.2 }}
+          className="mt-12"
+        >
+          <Collapsible open={compareOpen} onOpenChange={setCompareOpen}>
+            <CollapsibleTrigger className="mx-auto flex items-center gap-2 text-sm font-sans font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+              <span>Compare All Features</span>
+              <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${compareOpen ? "rotate-180" : ""}`} />
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="mt-8 overflow-x-auto">
+                <table className="w-full min-w-[600px] text-sm font-sans">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="text-left py-3 px-2 text-muted-foreground font-medium w-[200px]">Feature</th>
+                      <th className="text-center py-3 px-2 text-muted-foreground font-medium">Free</th>
+                      <th className="text-center py-3 px-2 text-muted-foreground font-medium">Starter</th>
+                      <th className="text-center py-3 px-2 font-semibold text-foreground">Pro</th>
+                      <th className="text-center py-3 px-2 text-muted-foreground font-medium">Elite</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {comparisonCategories.map((cat) => (
+                      <>
+                        <tr key={cat.name}>
+                          <td colSpan={5} className="pt-5 pb-2 px-2 text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+                            {cat.name}
+                          </td>
+                        </tr>
+                        {cat.features.map((f) => (
+                          <tr key={f.label} className="border-b border-border/50">
+                            <td className="py-2.5 px-2 text-foreground">{f.label}</td>
+                            <td className="py-2.5 px-2 text-center"><CellValue value={f.free} /></td>
+                            <td className="py-2.5 px-2 text-center"><CellValue value={f.starter} /></td>
+                            <td className="py-2.5 px-2 text-center"><CellValue value={f.pro} /></td>
+                            <td className="py-2.5 px-2 text-center"><CellValue value={f.elite} /></td>
+                          </tr>
+                        ))}
+                      </>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        </motion.div>
 
         {/* Trust Badges */}
         <motion.div
@@ -205,7 +317,7 @@ const Pricing = () => {
             Cancel anytime. No hidden fees.
           </p>
           <div className="flex items-center gap-2 text-xs font-sans text-muted-foreground">
-            <Shield className="w-4 h-4 text-primary" />
+            <Shield className="w-4 h-4 text-foreground" />
             <span>30-day money-back guarantee</span>
           </div>
         </motion.div>

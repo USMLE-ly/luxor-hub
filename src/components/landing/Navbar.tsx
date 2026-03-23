@@ -2,14 +2,11 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { RainbowButton } from "@/components/ui/rainbow-button";
 import { Menu } from "lucide-react";
-import { MagneticCursor } from "@/components/ui/magnetic-cursor";
 import {
   Sheet,
   SheetContent,
   SheetTrigger,
-  SheetClose,
 } from "@/components/ui/sheet";
 
 const Navbar = () => {
@@ -21,7 +18,6 @@ const Navbar = () => {
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
-
       const sections = ["features", "how-it-works", "pricing", "faq"];
       let current = "";
       for (const id of sections) {
@@ -63,13 +59,13 @@ const Navbar = () => {
         <motion.div
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
-          className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent"
+          className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/20 to-transparent"
         />
       )}
 
       <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
         <motion.h1
-          className="font-display text-2xl font-bold gold-text cursor-pointer"
+          className="font-display text-2xl font-bold text-foreground cursor-pointer"
           onClick={() => navigate("/")}
           whileHover={{ letterSpacing: "0.08em" }}
           transition={{ duration: 0.3 }}
@@ -85,13 +81,13 @@ const Navbar = () => {
               aria-current={activeSection === link.id ? "page" : undefined}
               className="relative py-1 transition-colors hover:text-foreground"
             >
-              <span className={activeSection === link.id ? "text-primary font-medium" : "text-muted-foreground"}>
+              <span className={activeSection === link.id ? "text-foreground font-medium" : "text-muted-foreground"}>
                 {link.label}
               </span>
               {activeSection === link.id && (
                 <motion.div
                   layoutId="nav-underline"
-                  className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary rounded-full will-change-transform"
+                  className="absolute -bottom-1 left-0 right-0 h-0.5 bg-foreground rounded-full will-change-transform"
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
               )}
@@ -109,22 +105,13 @@ const Navbar = () => {
             Try Free
           </Button>
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
-            className="hidden md:inline-flex font-sans"
-            onClick={() => scrollTo("pricing")}
+            className="hidden md:inline-flex font-sans border-foreground/20 hover:bg-foreground/5"
+            onClick={() => navigate("/auth")}
           >
-            View Plans
+            Get Started
           </Button>
-          <MagneticCursor className="hidden md:block relative" strength={0.3} radius={70}>
-            <RainbowButton
-              onClick={() => navigate("/auth")}
-              className="h-9 px-4 text-sm font-semibold"
-            >
-              Get Started
-            </RainbowButton>
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.6)] animate-pulse" />
-          </MagneticCursor>
 
           {/* Mobile hamburger */}
           <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
@@ -141,8 +128,8 @@ const Navbar = () => {
                     <button
                       key={link.id}
                       onClick={() => scrollTo(link.id)}
-                      className={`text-left py-3 text-base font-sans transition-colors border-b border-primary/10 ${
-                        activeSection === link.id ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
+                      className={`text-left py-3 text-base font-sans transition-colors border-b border-border ${
+                        activeSection === link.id ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
                       }`}
                     >
                       {link.label}
@@ -150,18 +137,18 @@ const Navbar = () => {
                   ))}
                 </div>
 
-                <div className="h-px w-full bg-gradient-to-r from-primary/40 to-transparent my-6" />
+                <div className="h-px w-full bg-border my-6" />
 
                 <div className="flex flex-col gap-3">
                   <Button variant="outline" className="w-full font-sans" onClick={() => { setSheetOpen(false); navigate("/auth"); }}>
                     Log In
                   </Button>
-                  <RainbowButton
+                  <Button
                     onClick={() => { setSheetOpen(false); navigate("/auth"); }}
                     className="w-full h-10 text-sm font-semibold"
                   >
                     Get Started
-                  </RainbowButton>
+                  </Button>
                 </div>
               </div>
             </SheetContent>

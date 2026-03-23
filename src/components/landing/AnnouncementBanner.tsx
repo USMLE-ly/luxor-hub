@@ -42,7 +42,6 @@ export default function AnnouncementBanner() {
     return () => clearInterval(id);
   }, [visible]);
 
-  // Rotate info text on mobile
   useEffect(() => {
     if (!visible) return;
     const id = setInterval(() => setInfoIndex((i) => (i + 1) % 2), 4000);
@@ -75,24 +74,14 @@ export default function AnnouncementBanner() {
           animate={{ height: 40, opacity: 1 }}
           exit={{ height: 0, opacity: 0 }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
-          className="relative z-[60] overflow-hidden bg-[hsl(var(--primary)/0.08)] border-b border-primary/10 backdrop-blur-md"
+          className="relative z-[60] overflow-hidden bg-muted/50 border-b border-border"
         >
-          {/* Shimmer sweep */}
-          <div className="absolute inset-0 overflow-hidden">
-            <motion.div
-              className="absolute inset-y-0 w-[200px] bg-gradient-to-r from-transparent via-primary/10 to-transparent -skew-x-12"
-              animate={{ x: ["-200px", "calc(100vw + 200px)"] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "linear", repeatDelay: 2 }}
-            />
-          </div>
-
           <div className="relative h-10 flex items-center justify-center px-10 gap-3">
             <div className="flex items-center gap-2 text-xs font-sans font-medium">
-              <Diamond className="w-3 h-3 text-primary shrink-0" />
-              <span className="gold-text font-semibold">Early Access</span>
+              <Diamond className="w-3 h-3 text-foreground shrink-0" />
+              <span className="font-semibold text-foreground">Early Access</span>
 
-              {/* Countdown timer */}
-              <span className="inline-flex items-center gap-0.5 font-mono text-[11px] text-primary font-bold tracking-wider">
+              <span className="inline-flex items-center gap-0.5 font-mono text-[11px] text-foreground font-bold tracking-wider">
                 <span>{h}</span>
                 <span className="countdown-colon">:</span>
                 <span>{m}</span>
@@ -100,12 +89,10 @@ export default function AnnouncementBanner() {
                 <span>{s}</span>
               </span>
 
-              {/* Desktop: always show first slot */}
               <span className="hidden sm:inline-flex items-center gap-2">
                 {infoSlots[0]}
               </span>
 
-              {/* Mobile: rotate between slots */}
               <span className="sm:hidden inline-flex items-center gap-2">
                 <AnimatePresence mode="wait">
                   <motion.span
@@ -124,7 +111,7 @@ export default function AnnouncementBanner() {
 
             <button
               onClick={dismiss}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full text-muted-foreground hover:text-foreground hover:bg-primary/10 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
               aria-label="Dismiss"
             >
               <X className="w-3 h-3" />

@@ -15,19 +15,15 @@ export default function StickyPricingBar() {
 
   useEffect(() => {
     if (dismissed) return;
-
     const onScroll = () => {
       const heroEnd = window.innerHeight;
       const pricingEl = document.getElementById("pricing");
       const pricingTop = pricingEl?.getBoundingClientRect().top ?? Infinity;
       const pricingBottom = pricingEl?.getBoundingClientRect().bottom ?? Infinity;
-
       const pastHero = window.scrollY > heroEnd;
       const pricingInView = pricingTop < window.innerHeight && pricingBottom > 0;
-
       setVisible(pastHero && !pricingInView);
     };
-
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, [dismissed]);
@@ -53,7 +49,7 @@ export default function StickyPricingBar() {
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
           className="fixed bottom-0 inset-x-0 z-50 px-4 pb-4 pointer-events-none"
         >
-          <div className="max-w-2xl mx-auto pointer-events-auto glass-strong rounded-2xl px-5 py-3 flex items-center justify-between gap-4 shadow-[0_-4px_30px_-8px_hsl(var(--gold)/0.2)]">
+          <div className="max-w-2xl mx-auto pointer-events-auto glass-strong rounded-2xl px-5 py-3 flex items-center justify-between gap-4 shadow-lg">
             <div className="flex flex-col min-w-0">
               <span className="font-display text-sm font-bold text-foreground truncate">
                 Join LEXOR® Now
@@ -66,7 +62,7 @@ export default function StickyPricingBar() {
             <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={handleCTA}
-                className="gradient-button rounded-full px-5 py-2 text-xs font-sans font-bold flex items-center gap-1.5"
+                className="rounded-full px-5 py-2 text-xs font-sans font-bold flex items-center gap-1.5 bg-foreground text-background hover:bg-foreground/90 transition-colors"
               >
                 <span>Get Started</span>
                 <ArrowRight className="w-3.5 h-3.5" />
