@@ -56,6 +56,14 @@ const seasonIcon = (s: string) => {
 };
 
 const MonthlyReport = () => {
+  return (
+    <TierGate requiredTier="elite" featureName="Monthly Style Report">
+      <MonthlyReportContent />
+    </TierGate>
+  );
+};
+
+const MonthlyReportContent = () => {
   const { user } = useAuth();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [events, setEvents] = useState<CalendarEvent[]>([]);

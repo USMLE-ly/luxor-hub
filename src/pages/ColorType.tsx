@@ -101,6 +101,14 @@ interface ExtractedColor {
 }
 
 const ColorType = () => {
+  return (
+    <TierGate requiredTier="starter" featureName="Color Analysis">
+      <ColorTypeContent />
+    </TierGate>
+  );
+};
+
+const ColorTypeContent = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [dna, setDna] = useState<any>(null);
