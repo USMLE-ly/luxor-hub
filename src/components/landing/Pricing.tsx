@@ -17,16 +17,35 @@ import {
 import type { PricingFeature } from "@/components/ui/squishy-pricing";
 
 type Tier = {
-  key: "starter" | "pro" | "elite";
+  key: "free" | "starter" | "pro" | "elite";
   label: string;
   price: string;
   desc: string;
   features: (string | PricingFeature)[];
   bg: string;
   BG: React.FC;
+  isFree?: boolean;
 };
 
 const tiers: Tier[] = [
+  {
+    key: "free" as const,
+    label: "Free",
+    price: "0",
+    desc: "Explore the basics — no credit card needed",
+    isFree: true,
+    features: [
+      "AI outfit suggestions — 3 per day",
+      "Closet digitization — up to 15 items",
+      "Basic Style DNA snapshot",
+      { text: "Color analysis", included: false },
+      { text: "Capsule wardrobes", included: false },
+      { text: "Virtual try-on", included: false },
+      { text: "Personal concierge", included: false },
+    ],
+    bg: "bg-muted/20",
+    BG: BGComponent1,
+  },
   {
     key: "starter" as const,
     label: "Starter",
