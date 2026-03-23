@@ -124,6 +124,8 @@ function getBodyShapeTips(shape: string): string[] {
 
 const StyleDNA = () => {
   const { user, loading: authLoading } = useAuth();
+  const { tier } = usePlanTier();
+  const isFullDna = hasTierAccess(tier, "pro");
   const navigate = useNavigate();
   const [profile, setProfile] = useState<any>(null);
   const [dna, setDna] = useState<StyleDNAData | null>(null);
