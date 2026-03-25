@@ -45,6 +45,7 @@ import CommunityGallery from "./pages/CommunityGallery";
 import Install from "./pages/Install";
 import Council from "./pages/Council";
 import MonthlyReport from "./pages/MonthlyReport";
+import WardrobeValue from "./pages/WardrobeValue";
 
 
 // Tracks route changes for Facebook Pixel
