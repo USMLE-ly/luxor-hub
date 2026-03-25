@@ -1,115 +1,60 @@
 
 
-# Shrine Pro-Inspired Minimalist Overhaul — Black & White
+# Next Feature Sprint: Weather-Smart Dashboard + Closet Value Intelligence
 
-## What's Changing
-
-Convert the entire landing page color system from gold/warm tones to a strict black-and-white palette. Simplify every section to match the Shrine Pro wireframe aesthetic: clean whitespace, flat backgrounds, minimal decoration, editorial restraint.
+The B&W overhaul and tier restrictions are fully shipped. Here are the two highest-impact features to build next.
 
 ---
 
-## 1. CSS Color System Overhaul (`src/index.css`)
+## Feature 1: Weather-Smart Outfit on Dashboard
 
-### Dark mode (`.dark`) — the landing page theme:
-- `--background`: `0 0% 4%` (near-black)
-- `--foreground`: `0 0% 95%` (off-white)
-- `--card`: `0 0% 7%`
-- `--primary`: `0 0% 95%` (white — used for buttons/accents)
-- `--primary-foreground`: `0 0% 4%` (black text on white buttons)
-- `--accent`: `0 0% 15%`
-- `--muted`: `0 0% 12%`
-- `--muted-foreground`: `0 0% 50%`
-- `--border`: `0 0% 15%`
-- `--input`: `0 0% 15%`
-- `--ring`: `0 0% 30%`
-- `--gold/gold-light/gold-dark`: all → grayscale (`0 0% 80%`, `0 0% 90%`, `0 0% 65%`)
-- `--glass`: `0 0% 7%`
-- `--glass-border`: `0 0% 18%`
-- All sidebar vars → neutral grayscale
+The `get-weather` edge function and `useUserLocation` hook exist but the Dashboard doesn't use them. The outfit generator mentions "weather-checked" but doesn't actually factor it in visually.
 
-### Light mode (`:root`):
-- `--background`: `0 0% 100%`
-- `--primary`: `0 0% 10%`
-- `--gold/gold-light/gold-dark`: → grayscale equivalents
+### What changes
 
-### Utility classes updated:
-- `.gold-gradient` → white-to-gray gradient
-- `.gold-text` → white gradient text (dark mode) / black gradient text (light)
-- `.gold-glow` → subtle white glow
-- `.gold-shimmer`, `.gold-shimmer-text` → grayscale shimmer
-- `.gradient-button` → solid white bg, black text, no gold border-bottom; hover lifts with white glow
-- `.gradient-button-variant` → white/gray outline
-- `.premium-card:hover` → subtle white/gray glow
-- `.slide-progress-fill` → white instead of gold
+**Dashboard (`src/pages/Dashboard.tsx`)**:
+- Add a weather widget card at the top of the dashboard grid
+- Shows current temp, condition icon, and a one-line styling tip (e.g. "Layer up — 8°C and overcast")
+- The existing "Morning Routine" card gets a weather context line injected
+- Uses `useUserLocation` to get lat/lon, calls `get-weather` edge function
 
-## 2. Navbar Cleanup (`src/components/landing/Navbar.tsx`)
-
-- Remove `RainbowButton` — replace with a clean white-bordered button
-- Remove `MagneticCursor` wrapper
-- Remove green pulse dot
-- Keep: LEXOR® logo, nav links, Try Free ghost button, Get Started (white outline)
-
-## 3. Hero Minimal Touch (`src/components/landing/Hero.tsx`)
-
-- "Try Free" button: simple white outline, no gold
-- Keep WebGL slider (colors change via CSS vars automatically)
-
-## 4. SocialProofStrip Cleanup (`src/components/landing/SocialProofStrip.tsx`)
-
-- Remove radial gradient overlay
-- Increase text opacity from `text-muted-foreground/20` to `text-muted-foreground/30`
-- Remove `backdrop-blur-sm`
-
-## 5. Pricing — Free Tier + Comparison Table (`src/components/landing/Pricing.tsx`)
-
-- Free card: dashed border (`border-dashed border-white/20`), "FREE" badge
-- Add collapsible "Compare All Features" section below cards using `Collapsible` from radix
-- Comparison table: 4 columns (Free/Starter/Pro/Elite), checkmarks/dashes, grouped rows
-
-## 6. FAQ Cleanup (`src/components/landing/FAQ.tsx`)
-
-- Remove `premium-card` class from accordion items
-- Simple `border-b border-border` instead of glass cards
-
-## 7. CTABanner Simplification (`src/components/landing/CTABanner.tsx`)
-
-- Remove `AnimatedGradientBackground` — flat `bg-muted/20` background
-- Button becomes solid white with black text
-
-## 8. StickyPricingBar (`src/components/landing/StickyPricingBar.tsx`)
-
-- Remove gold shadow → simple `shadow-lg`
-- Button: white bg, black text
-
-## 9. AnnouncementBanner (`src/components/landing/AnnouncementBanner.tsx`)
-
-- Remove gold shimmer sweep
-- `gold-text` on "Early Access" will auto-convert via CSS vars
-
-## 10. Footer (`src/components/landing/Footer.tsx`)
-
-- Newsletter submit button: white bg instead of `gold-gradient`
+**New component: `src/components/app/WeatherOutfitCard.tsx`**:
+- Compact card: weather icon + temp + condition on the left, styling tip on the right
+- Styling tips are mapped from weather codes (rain → "waterproof layers", hot → "breathable fabrics", cold → "warm layers")
+- Tier-gated: Free tier sees weather only, Starter+ sees the outfit tip
 
 ---
 
-## Files Modified
+## Feature 2: Closet Value Dashboard
 
-1. **`src/index.css`** — Full color variable conversion + utility class updates
-2. **`src/components/landing/Navbar.tsx`** — Remove RainbowButton, MagneticCursor, pulse dot
-3. **`src/components/landing/Hero.tsx`** — Clean button styling
-4. **`src/components/landing/SocialProofStrip.tsx`** — Remove radial gradient, increase opacity
-5. **`src/components/landing/Pricing.tsx`** — Free tier dashed border + badge, collapsible comparison table
-6. **`src/components/landing/FAQ.tsx`** — Remove premium-card, use border-bottom
-7. **`src/components/landing/CTABanner.tsx`** — Remove animated background, flat dark bg
-8. **`src/components/landing/StickyPricingBar.tsx`** — Remove gold shadow
-9. **`src/components/landing/AnnouncementBanner.tsx`** — Remove shimmer animation
-10. **`src/components/landing/Footer.tsx`** — White newsletter button
+Cost-per-wear data already exists in Analytics and WardrobeIntelligence but there's no dedicated "wardrobe value" view. This is a high-retention feature for paid users.
 
-## Technical Notes
+### What changes
 
-- All color changes propagate through CSS variables — most components auto-update
-- Collapsible comparison table uses existing `@radix-ui/react-collapsible`
-- No new dependencies
-- No database changes
-- The app pages (dashboard, etc.) will also shift to grayscale via the CSS vars — this is intentional for consistency
+**New page: `src/pages/WardrobeValue.tsx`** (route: `/wardrobe-value`, Pro+ tier gate):
+- **Summary row**: Total wardrobe value (sum of all item prices), average cost-per-wear, total items
+- **Best & worst value items**: Top 5 lowest cost-per-wear vs. top 5 highest (items worn least relative to price)
+- **Dead inventory alert**: Items not worn in 60+ days with price > $20, shown as a dismissible list with "Donate" or "Restyle" action buttons
+- **Category breakdown**: Pie/bar showing spend by category (tops, bottoms, shoes, accessories)
+- Data comes from existing `clothing_items` table (`price`, `wear_count`, `last_worn`, `category` columns)
+
+**Sidebar (`src/components/app/AppSidebar.tsx`)**:
+- Add "Wardrobe Value" nav item under the Analytics section with a `DollarSign` icon
+
+**Route (`src/App.tsx`)**:
+- Add `/wardrobe-value` route wrapped in `PaywallGate` + `TierGate` requiring "pro"
+
+---
+
+## Files Changed
+
+| File | Action |
+|------|--------|
+| `src/components/app/WeatherOutfitCard.tsx` | Create — weather + styling tip card |
+| `src/pages/Dashboard.tsx` | Modify — add WeatherOutfitCard to grid |
+| `src/pages/WardrobeValue.tsx` | Create — closet value analytics page |
+| `src/components/app/AppSidebar.tsx` | Modify — add Wardrobe Value nav item |
+| `src/App.tsx` | Modify — add /wardrobe-value route |
+
+No database changes. No new dependencies. Uses existing edge functions and hooks.
 
