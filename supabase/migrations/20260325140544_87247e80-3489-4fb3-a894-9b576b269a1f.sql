@@ -1,0 +1,10 @@
+CREATE INDEX IF NOT EXISTS idx_clothing_items_user_id ON public.clothing_items(user_id);
+CREATE INDEX IF NOT EXISTS idx_outfit_analyses_user_id ON public.outfit_analyses(user_id);
+CREATE INDEX IF NOT EXISTS idx_wear_logs_user_id ON public.wear_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_outfits_user_id ON public.outfits(user_id);
+CREATE INDEX IF NOT EXISTS idx_chat_messages_user_id ON public.chat_messages(user_id);
+CREATE INDEX IF NOT EXISTS idx_style_profiles_user_id ON public.style_profiles(user_id);
+CREATE INDEX IF NOT EXISTS idx_calendar_events_user_id ON public.calendar_events(user_id);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON public.subscriptions(user_id);
+CREATE INDEX IF NOT EXISTS idx_wear_logs_worn_at ON public.wear_logs(worn_at);
+CREATE INDEX IF NOT EXISTS idx_clothing_items_last_worn ON public.clothing_items(last_worn_at);
