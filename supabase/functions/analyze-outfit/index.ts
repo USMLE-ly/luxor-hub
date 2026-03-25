@@ -10,7 +10,11 @@ serve(async (req) => {
 
   try {
     const { imageUrl } = await req.json();
-    if (!imageUrl) throw new Error("imageUrl is required");
+    if (!imageUrl || typeof imageUrl !== "string") {
+      return new Response(JSON.stringify({ error: "imageUrl is required and must be a string" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
