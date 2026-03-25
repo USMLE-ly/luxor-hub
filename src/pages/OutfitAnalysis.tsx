@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { canProceed } from "@/lib/rateLimiter";
 import { AppLayout } from "@/components/app/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
