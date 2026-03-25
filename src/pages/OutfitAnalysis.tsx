@@ -158,6 +158,7 @@ export default function OutfitAnalysis() {
       toast.error("Please wait a moment before analyzing again.");
       return;
     }
+    setIsAnalyzing(true);
     setSaved(false);
     setAnalysisError(null);
     try {
