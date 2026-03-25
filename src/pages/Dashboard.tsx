@@ -380,6 +380,11 @@ const Dashboard = () => {
           </div>
         </motion.div>
 
+        {/* ── Weather Card ─────────────────────────── */}
+        <motion.div variants={fadeUp}>
+          <WeatherOutfitCard />
+        </motion.div>
+
         {/* ── Morning Routine Card ─────────────────────────── */}
         <motion.div variants={fadeUp}>
           <MorningRoutineCard />
