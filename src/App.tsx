@@ -106,6 +106,7 @@ const App = () => (
             <Route path="/install" element={<Install />} />
             <Route path="/council" element={<PaywallGate><Council /></PaywallGate>} />
             <Route path="/monthly-report" element={<PaywallGate><MonthlyReport /></PaywallGate>} />
+            <Route path="/wardrobe-value" element={<PaywallGate><WardrobeValue /></PaywallGate>} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

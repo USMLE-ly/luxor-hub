@@ -35,6 +35,7 @@ const navItems = [
   { title: "Leaderboard", url: "/leaderboard", icon: Trophy },
   { title: "Weekly Challenge", url: "/weekly-challenge", icon: Flame },
   { title: "Badges", url: "/badges", icon: Award },
+  { title: "Wardrobe Value", url: "/wardrobe-value", icon: DollarSign },
   { title: "Notifications", url: "/notifications", icon: Bell },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
