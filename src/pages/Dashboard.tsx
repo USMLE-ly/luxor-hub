@@ -16,6 +16,7 @@ import { TrendIntelligenceWidget } from "@/components/app/TrendIntelligenceWidge
 import { MorningRoutineCard } from "@/components/app/MorningRoutineCard";
 import { EveningReflection } from "@/components/app/EveningReflection";
 import { StylePointsWidget } from "@/components/app/StylePointsWidget";
+import { WeatherOutfitCard } from "@/components/app/WeatherOutfitCard";
 
 interface ShopProduct {
   name: string;
@@ -377,6 +378,11 @@ const Dashboard = () => {
               </span>
             </button>
           </div>
+        </motion.div>
+
+        {/* ── Weather Card ─────────────────────────── */}
+        <motion.div variants={fadeUp}>
+          <WeatherOutfitCard />
         </motion.div>
 
         {/* ── Morning Routine Card ─────────────────────────── */}
