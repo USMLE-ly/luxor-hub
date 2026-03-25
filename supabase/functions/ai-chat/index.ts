@@ -11,6 +11,21 @@ serve(async (req) => {
 
   try {
     const { messages, userId, styleProfile, closetSummary, image, mood } = await req.json();
+
+    // Input validation
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return new Response(JSON.stringify({ error: "messages must be a non-empty array" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    for (const msg of messages) {
+      if (!msg.role || !msg.content) {
+        return new Response(JSON.stringify({ error: "Each message must have role and content" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 

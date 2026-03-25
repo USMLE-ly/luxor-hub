@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 serve(async (req) => {
@@ -12,7 +12,19 @@ serve(async (req) => {
 
   try {
     const { lat, lon } = await req.json();
-    
+
+    // Input validation
+    if (lat !== undefined && (typeof lat !== "number" || lat < -90 || lat > 90)) {
+      return new Response(JSON.stringify({ error: "Invalid latitude. Must be a number between -90 and 90." }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (lon !== undefined && (typeof lon !== "number" || lon < -180 || lon > 180)) {
+      return new Response(JSON.stringify({ error: "Invalid longitude. Must be a number between -180 and 180." }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Use Open-Meteo (free, no API key needed)
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat || 40.7128}&longitude=${lon || -74.006}&current=temperature_2m,weathercode,windspeed_10m,relativehumidity_2m&temperature_unit=celsius`;
     
