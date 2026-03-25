@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { canProceed } from "@/lib/rateLimiter";
 import { AppLayout } from "@/components/app/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -153,6 +154,10 @@ export default function OutfitAnalysis() {
 
   const handleAnalyze = async () => {
     if (!imageFile || !user) return;
+    if (!canProceed("outfit-analyze", 3000)) {
+      toast.error("Please wait a moment before analyzing again.");
+      return;
+    }
     setIsAnalyzing(true);
     setSaved(false);
     setAnalysisError(null);

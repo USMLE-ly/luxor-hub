@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { canProceed } from "@/lib/rateLimiter";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import { PLAN_LIMITS } from "@/lib/planRestrictions";
 import { motion, AnimatePresence } from "framer-motion";
@@ -117,6 +118,10 @@ const Chat = () => {
   const send = async (overrideInput?: string) => {
     const text = overrideInput || input.trim();
     if (!text || isLoading || !user) return;
+    if (!canProceed("chat-send", 2000)) {
+      toast.error("Please wait a moment before sending another message.");
+      return;
+    }
     if (dailySendCount >= dailyLimit) {
       toast.error(`You've reached your ${dailyLimit} AI suggestions for today. Upgrade for more.`);
       return;
