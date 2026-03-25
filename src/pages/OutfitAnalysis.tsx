@@ -154,7 +154,10 @@ export default function OutfitAnalysis() {
 
   const handleAnalyze = async () => {
     if (!imageFile || !user) return;
-    setIsAnalyzing(true);
+    if (!canProceed("outfit-analyze", 3000)) {
+      toast.error("Please wait a moment before analyzing again.");
+      return;
+    }
     setSaved(false);
     setAnalysisError(null);
     try {
