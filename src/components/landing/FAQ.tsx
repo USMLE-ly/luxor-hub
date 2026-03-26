@@ -8,28 +8,28 @@ import {
 
 const faqs = [
   {
-    q: "How does the AI learn my style?",
-    a: "Upload wardrobe photos and a selfie. LEXOR® maps your body, color season, and taste into a Style DNA profile that sharpens with use.",
+    q: "I don't have time for this.",
+    a: "Setup takes 3 minutes. Photograph your closet, upload a selfie, done. After that, LEXOR® works in the background — your outfit is ready before you wake up.",
   },
   {
-    q: "Is my data private?",
+    q: "What if the AI gets it wrong?",
+    a: "30-day money-back guarantee, no questions. But the AI learns from your feedback — every thumbs-up or swap makes it sharper. Most users see accurate suggestions within a week.",
+  },
+  {
+    q: "Is my data safe?",
     a: "End-to-end encrypted. Never shared. Export or delete anytime from settings.",
   },
   {
-    q: "What if it doesn't work for me?",
-    a: "30-day money-back guarantee. Full refund, no questions.",
+    q: "Does it work for my body type?",
+    a: "All of them. AI adapts to your specific measurements, not a generic mannequin. Tall, petite, plus-size, athletic — it adjusts cuts, proportions, and color placement for you.",
   },
   {
-    q: "What body types does it support?",
-    a: "All of them. AI adapts to your specific measurements, not a generic mannequin.",
+    q: "I already know how to dress.",
+    a: "Even professional stylists use data. LEXOR® finds combinations you'd miss — it cross-references weather, your calendar, what you wore recently, and pieces buried in your closet.",
   },
   {
-    q: "Does it work with my existing wardrobe?",
-    a: "That's the point. LEXOR® creates new combinations from what you own before recommending anything new.",
-  },
-  {
-    q: "Can I cancel anytime?",
-    a: "Yes. Two clicks. No penalties. Data stays accessible for 30 days.",
+    q: "Can I cancel?",
+    a: "Yes. Two clicks in settings. No penalties, no guilt trips. Your data stays accessible for 30 days after cancellation.",
   },
 ];
 
@@ -44,7 +44,7 @@ const FAQ = () => (
       >
         <p className="font-sans text-sm font-semibold text-muted-foreground tracking-widest uppercase mb-3">FAQ</p>
         <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground">
-          Common Questions
+          Still on the Fence?
         </h2>
       </motion.div>
 
