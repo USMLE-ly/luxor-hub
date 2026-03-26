@@ -120,7 +120,7 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-8 border-t border-border">
           <p className="text-xs text-muted-foreground font-sans">© 2020 LEXOR®. All rights reserved.</p>
           <div className="flex items-center gap-2 text-xs text-muted-foreground font-sans">
-            <span>Made with ❤️ for you</span>
+            <span>AI-powered personal styling</span>
           </div>
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}

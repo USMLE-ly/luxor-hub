@@ -200,10 +200,10 @@ const Pricing = () => {
         >
           <p className="font-sans text-sm font-semibold text-muted-foreground tracking-widest uppercase mb-3">Pricing</p>
           <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground">
-            Choose Your Plan
+            Pick Your Level
           </h2>
           <p className="mt-4 max-w-lg mx-auto font-sans text-sm text-muted-foreground">
-            Pays for itself in the first month.
+            Costs less than one bad outfit.
           </p>
         </motion.div>
 

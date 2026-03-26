@@ -147,7 +147,7 @@ const Navbar = () => {
                     onClick={() => { setSheetOpen(false); navigate("/auth"); }}
                     className="w-full h-10 text-sm font-semibold"
                   >
-                    Get Started
+                    Try LEXOR®
                   </Button>
                 </div>
               </div>

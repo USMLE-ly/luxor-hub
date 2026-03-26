@@ -44,7 +44,7 @@ export default function AnnouncementBanner() {
 
   useEffect(() => {
     if (!visible) return;
-    const id = setInterval(() => setInfoIndex((i) => (i + 1) % 2), 4000);
+    const id = setInterval(() => setInfoIndex((i) => (i + 1) % 1), 4000);
     return () => clearInterval(id);
   }, [visible]);
 
