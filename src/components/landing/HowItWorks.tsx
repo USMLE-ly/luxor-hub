@@ -54,8 +54,8 @@ const howItWorksItems = [
 const HowItWorks = () => (
   <div id="how-it-works">
     <Gallery4
-      title="Closet Chaos to Compliments. Three Minutes."
-      description="Scan. Learn. Wear. That's it."
+      title="Three Steps. That's It."
+      description="Scan your closet. Let AI learn you. Wake up to your outfit."
       items={howItWorksItems}
     />
   </div>

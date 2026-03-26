@@ -44,7 +44,7 @@ export default function AnnouncementBanner() {
 
   useEffect(() => {
     if (!visible) return;
-    const id = setInterval(() => setInfoIndex((i) => (i + 1) % 2), 4000);
+    const id = setInterval(() => setInfoIndex((i) => (i + 1) % 1), 4000);
     return () => clearInterval(id);
   }, [visible]);
 
@@ -58,11 +58,7 @@ export default function AnnouncementBanner() {
   const infoSlots = [
     <>
       <span className="text-muted-foreground">—</span>
-      <span className="text-muted-foreground">Founding member pricing closes when the timer hits zero</span>
-    </>,
-    <>
-      <span className="text-muted-foreground">—</span>
-      <span className="text-muted-foreground">✦ 847 people joined this week</span>
+      <span className="text-muted-foreground">Lock in founding pricing</span>
     </>,
   ];
 

@@ -16,10 +16,10 @@ const CTABanner = () => {
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
           <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-4">
-            Ready to Look Incredible?
+            Your Closet Is Costing You Money Every Day You Wait
           </h2>
           <p className="font-sans text-muted-foreground text-base md:text-lg max-w-xl mx-auto mb-6">
-            Your spot is waiting.
+            Start free. See results in 3 minutes. Cancel anytime.
           </p>
           <motion.div className="flex justify-center">
             <Button
@@ -27,14 +27,11 @@ const CTABanner = () => {
               className="text-base px-8 group"
               onClick={() => navigate("/auth")}
             >
-              Join LEXOR® Now
+              Try Free — No Card Needed
               <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Button>
           </motion.div>
           <p className="mt-4 font-sans text-xs text-muted-foreground">
-            Start free — upgrade anytime.
-          </p>
-          <p className="mt-2 font-sans text-xs text-muted-foreground">
             30-day money-back guarantee. Zero risk.
           </p>
         </motion.div>

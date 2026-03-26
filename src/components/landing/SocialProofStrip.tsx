@@ -1,33 +1,24 @@
-import { motion } from "framer-motion";
+import { Shirt, ScanFace, CloudSun, ShieldCheck } from "lucide-react";
 
-const mediaBadges = ["VOGUE", "GQ", "FORBES", "ELLE", "BAZAAR", "COSMOPOLITAN", "ESQUIRE", "GLAMOUR"];
-
-const MarqueeRow = ({ reverse = false }: { reverse?: boolean }) => (
-  <div className="flex overflow-hidden marquee-fade-mask">
-    <motion.div
-      className="flex shrink-0 gap-12 md:gap-20 items-center"
-      animate={{ x: reverse ? ["0%", "-50%"] : ["-50%", "0%"] }}
-      transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-    >
-      {[...mediaBadges, ...mediaBadges].map((name, i) => (
-        <span
-          key={`${name}-${i}`}
-          className="font-display text-lg md:text-2xl font-bold tracking-[0.25em] uppercase select-none text-muted-foreground/30 hover:text-foreground/50 transition-colors duration-500 whitespace-nowrap"
-        >
-          {name}
-        </span>
-      ))}
-    </motion.div>
-  </div>
-);
+const uvps = [
+  { icon: Shirt, label: "Works With Your Existing Closet", sub: "No shopping required" },
+  { icon: ScanFace, label: "Learns Your Body, Not a Mannequin", sub: "Personalized to you" },
+  { icon: CloudSun, label: "Weather-Checked Every Morning", sub: "Practical daily value" },
+  { icon: ShieldCheck, label: "30-Day Money-Back Guarantee", sub: "Zero risk" },
+];
 
 const SocialProofStrip = () => (
-  <section className="py-10 md:py-14 border-y border-border bg-background relative overflow-hidden">
-    <div className="relative z-10 space-y-6">
-      <p className="text-center font-sans text-[10px] md:text-[11px] text-muted-foreground/60 tracking-[0.3em] uppercase">
-        As Featured In
-      </p>
-      <MarqueeRow />
+  <section className="py-10 md:py-14 border-y border-border bg-muted/20">
+    <div className="max-w-5xl mx-auto px-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+        {uvps.map((item) => (
+          <div key={item.label} className="flex flex-col items-center text-center gap-2">
+            <item.icon className="w-6 h-6 text-foreground" />
+            <p className="font-sans text-sm font-semibold text-foreground leading-tight">{item.label}</p>
+            <p className="font-sans text-xs text-muted-foreground">{item.sub}</p>
+          </div>
+        ))}
+      </div>
     </div>
   </section>
 );

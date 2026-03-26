@@ -102,7 +102,7 @@ const Navbar = () => {
             className="hidden md:inline-flex font-sans"
             onClick={() => navigate("/auth")}
           >
-            Try Free
+            Log In
           </Button>
           <Button
             variant="outline"
@@ -110,7 +110,7 @@ const Navbar = () => {
             className="hidden md:inline-flex font-sans border-foreground/20 hover:bg-foreground/5"
             onClick={() => navigate("/auth")}
           >
-            Get Started
+            Try LEXOR®
           </Button>
 
           {/* Mobile hamburger */}
@@ -147,7 +147,7 @@ const Navbar = () => {
                     onClick={() => { setSheetOpen(false); navigate("/auth"); }}
                     className="w-full h-10 text-sm font-semibold"
                   >
-                    Get Started
+                    Try LEXOR®
                   </Button>
                 </div>
               </div>

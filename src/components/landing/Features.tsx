@@ -1,111 +1,46 @@
-import { motion, useReducedMotion } from "framer-motion";
-import {
-  Brain, Palette, ShoppingBag, Calendar, TrendingUp, Wand2,
-} from "lucide-react";
-import RadialOrbitalTimeline from "@/components/ui/radial-orbital-timeline";
+import { motion } from "framer-motion";
+import { Sunrise, Palette, PiggyBank, CalendarCheck, BarChart3, Camera } from "lucide-react";
 
-const timelineData = [
-  {
-    id: 1,
-    title: "Style DNA",
-    date: "AI Core",
-    content: "One selfie. AI maps your proportions, color season, and best cuts in seconds.",
-    category: "AI Styling",
-    icon: Brain,
-    relatedIds: [2, 3],
-    status: "completed" as const,
-    energy: 95,
-  },
-  {
-    id: 2,
-    title: "Outfit Generator",
-    date: "Daily AI",
-    content: "A fresh outfit every morning. Weather-checked, calendar-aware, from your closet.",
-    category: "AI Styling",
-    icon: Wand2,
-    relatedIds: [1, 5],
-    status: "completed" as const,
-    energy: 90,
-  },
-  {
-    id: 3,
-    title: "Color Intelligence",
-    date: "Analysis",
-    content: "AI scans your skin tone and reveals the exact shades that make you glow.",
-    category: "AI Styling",
-    icon: Palette,
-    relatedIds: [1, 4],
-    status: "in-progress" as const,
-    energy: 80,
-  },
-  {
-    id: 4,
-    title: "Smart Shopping",
-    date: "Commerce",
-    content: "AI finds the gaps in your wardrobe. Every recommendation has a reason.",
-    category: "Shopping",
-    icon: ShoppingBag,
-    relatedIds: [3, 6],
-    status: "in-progress" as const,
-    energy: 70,
-  },
-  {
-    id: 5,
-    title: "Outfit Calendar",
-    date: "Planning",
-    content: "Plan your week's looks on Sunday. End the morning panic.",
-    category: "Wardrobe",
-    icon: Calendar,
-    relatedIds: [2, 6],
-    status: "completed" as const,
-    energy: 85,
-  },
-  {
-    id: 6,
-    title: "Trend Radar",
-    date: "Real-time",
-    content: "Live trends filtered to your style and budget. Only what matters.",
-    category: "Shopping",
-    icon: TrendingUp,
-    relatedIds: [4, 5],
-    status: "pending" as const,
-    energy: 60,
-  },
+const features = [
+  { icon: Sunrise, title: "End Morning Panic", desc: "AI picks your outfit before you wake up. Weather, schedule, and yesterday's shirt — already factored in." },
+  { icon: Palette, title: "Know Your Best Colors", desc: "Science-backed color analysis maps the exact shades that make your skin glow." },
+  { icon: PiggyBank, title: "Stop Wasting Money", desc: "See what you actually need before buying. Every recommendation fills a real gap." },
+  { icon: CalendarCheck, title: "Dress for Any Event", desc: "Date night, interview, casual Friday — handled. Plan your week on Sunday." },
+  { icon: BarChart3, title: "Track What Works", desc: "Cost-per-wear analytics show your smartest buys and forgotten pieces." },
+  { icon: Camera, title: "Your Closet, Digitized", desc: "Snap photos. AI tags color, brand, and fabric in seconds." },
 ];
 
-function AnimatedContainer({ className, delay = 0.1, children }: { delay?: number; className?: string; children: React.ReactNode }) {
-  const shouldReduceMotion = useReducedMotion();
-  if (shouldReduceMotion) return <>{children}</>;
-
-  return (
-    <motion.div
-      initial={{ filter: "blur(4px)", translateY: -8, opacity: 0 }}
-      whileInView={{ filter: "blur(0px)", translateY: 0, opacity: 1 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ delay, duration: 0.8 }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
 const Features = () => (
-  <section id="features" className="relative bg-muted/20 overflow-hidden">
-    <div className="mx-auto w-full max-w-6xl px-4 pt-16 md:pt-24">
-      <AnimatedContainer className="mx-auto max-w-xl text-center">
+  <section id="features" className="py-16 md:py-24 bg-muted/20">
+    <div className="max-w-5xl mx-auto px-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-80px" }}
+        className="text-center mb-14"
+      >
         <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase mb-3">Features</p>
-        <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground tracking-wide text-balance">
-          AI That Understands <span className="gold-text">Your Body</span>
+        <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground">
+          Six Problems. <span className="gold-text">Solved.</span>
         </h2>
-        <p className="text-muted-foreground mt-4 text-sm tracking-wide text-balance">
-          Six tools. Zero guesswork.
-        </p>
-      </AnimatedContainer>
-    </div>
+      </motion.div>
 
-    <div className="h-[600px] md:h-[700px]">
-      <RadialOrbitalTimeline timelineData={timelineData} />
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {features.map((f, i) => (
+          <motion.div
+            key={f.title}
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ delay: i * 0.07, duration: 0.5 }}
+            className="rounded-xl border border-border bg-card p-6 space-y-3 hover:border-foreground/20 transition-colors"
+          >
+            <f.icon className="w-6 h-6 text-foreground" />
+            <h3 className="font-display text-lg font-bold text-foreground">{f.title}</h3>
+            <p className="font-sans text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+          </motion.div>
+        ))}
+      </div>
     </div>
   </section>
 );
