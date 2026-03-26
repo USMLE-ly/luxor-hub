@@ -58,11 +58,7 @@ export default function AnnouncementBanner() {
   const infoSlots = [
     <>
       <span className="text-muted-foreground">—</span>
-      <span className="text-muted-foreground">Founding member pricing closes when the timer hits zero</span>
-    </>,
-    <>
-      <span className="text-muted-foreground">—</span>
-      <span className="text-muted-foreground">✦ 847 people joined this week</span>
+      <span className="text-muted-foreground">Lock in founding pricing</span>
     </>,
   ];
 
