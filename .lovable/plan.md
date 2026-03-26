@@ -1,93 +1,160 @@
 
 
-# Security Hardening Plan — LEXOR® Website Launch Checklist
+# Rebuild Landing Page Per "Billion Dollar Websites" Principles
 
-## Current Status Assessment
-
-| Checklist Item | Status | Issues Found |
-|---|---|---|
-| Authorization (users access own data) | ✅ Solid | RLS enforced on all tables with `auth.uid() = user_id` |
-| Input validation & sanitization | ⚠️ Gaps | Edge functions accept raw JSON without validation; Auth form has client validation but no server-side |
-| CORS policy | ⚠️ Inconsistent | `get-weather` has incomplete CORS headers; `Allow-Origin: *` on all functions (should restrict to app domain) |
-| Rate limiting | ⚠️ Passthrough only | Functions handle 429 from upstream AI gateway but don't implement their own rate limiting |
-| Password reset link expiry | ✅ Handled | Supabase manages this (default 1 hour); recovery flow checks `type=recovery` |
-| Error handling (no raw traces) | ✅ Good | ErrorBoundary wraps all routes; edge functions catch errors; NotFound page exists |
-| Database indexing | ⚠️ Missing | No custom indexes on frequently queried columns (`user_id`, `created_at`, `worn_at`) |
-| Logging for debugging | ✅ Adequate | Console.error in ErrorBoundary; edge functions log errors; FB Pixel tracks routes |
+The book's core framework is **The Gator and The Judge** — your subconscious (The Gator) processes 11M bits/second and wants instant answers: *"What is this? Is it for me? Can I trust it?"* If anything confuses or slows The Gator, it summons The Judge (analytical brain), and you lose the sale. Every change below is designed to **feed The Gator and keep The Judge asleep**.
 
 ---
 
-## Changes Required
+## Problem Diagnosis (Current Page vs. BDW Principles)
 
-### 1. Fix CORS Headers — `get-weather` function
-The `get-weather` edge function uses a shorter CORS header list than all other functions. Update to match the standard headers.
+| BDW Principle | Current State | Issue |
+|---|---|---|
+| **Hero must answer 3 questions instantly** (What? For me? Trust?) | WebGL shader slider with 2 rotating headlines | Slow-loading WebGL triggers wait (Judge wakes up). Rotating headlines split attention — visitor can't lock onto one message |
+| **UVPs front and center** | No dedicated UVP section | Visitor doesn't know why LEXOR over competitors |
+| **Social proof = real, specific** | "As Featured In" marquee with VOGUE, GQ, FORBES | If not real press, this triggers The Judge hard. Fake authority = instant distrust |
+| **Features must be scannable** | Radial orbital timeline widget | Complex interactive UI forces conscious thinking (Judge). Visitor has to figure out how to use it |
+| **Copywriting = customer language, pain-first** | "AI That Understands Your Body" / "Six tools. Zero guesswork." | Too feature-focused. Not pain-first. Doesn't use language customers would use |
+| **Button text = low commitment** | "Try Risk-Free" ✅ / "Get Started" | Try Risk-Free is good. "Get Started" is vague |
+| **Creative > Layout** (images matter more than UX polish) | Minimal product imagery on landing page | No screenshots of the actual app experience |
 
-**File:** `supabase/functions/get-weather/index.ts`
-- Update `Access-Control-Allow-Headers` to include the full list: `authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version`
+---
 
-### 2. Add Input Validation to Edge Functions
-Add basic input validation at the top of each edge function to reject malformed requests early. Focus on the most critical ones:
+## Rebuild Plan
 
-- **`get-weather`**: Validate `lat`/`lon` are numbers within valid ranges (-90/90, -180/180)
-- **`ai-chat`**: Validate `messages` is a non-empty array, each message has `role` and `content`
-- **`analyze-item`**: Validate that at least `imageUrl` or `itemName` is provided
-- **`analyze-outfit`**: Validate `imageUrl` is a string
-- **`design-clothing`**: Validate `prompt` is a non-empty string with max length
+### 1. Hero Section — Instant Clarity (The Gator's 3 Questions)
 
-Pattern for each function (added after JSON parse):
-```typescript
-if (typeof lat !== "number" || lat < -90 || lat > 90) {
-  return new Response(JSON.stringify({ error: "Invalid latitude" }), {
-    status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
-}
-```
+**Remove** the WebGL shader slider entirely. Replace with a static, fast-loading hero that answers the three Gator questions in under 3 seconds.
 
-### 3. Add Database Indexes
-Create a migration adding indexes on the most queried columns:
+**New structure:**
+- **Headline (What is this?):** "Your AI Stylist That Actually Knows Your Body"
+- **Subhead (Is it for me?):** "Upload your closet. Get the perfect outfit every morning — weather-checked, calendar-aware, built from what you own."
+- **Trust line:** "Trusted by 2,400+ members" (or real number)
+- **CTA:** "Try Free — No Card Needed" (lower commitment than current)
+- **Secondary CTA:** "See How It Works" (scrolls to how-it-works)
+- **Visual:** Static hero image/mockup of the app dashboard on a phone — shows the product immediately (Creative pillar)
 
-```sql
-CREATE INDEX IF NOT EXISTS idx_clothing_items_user_id ON public.clothing_items(user_id);
-CREATE INDEX IF NOT EXISTS idx_outfit_analyses_user_id ON public.outfit_analyses(user_id);
-CREATE INDEX IF NOT EXISTS idx_wear_logs_user_id ON public.wear_logs(user_id);
-CREATE INDEX IF NOT EXISTS idx_outfits_user_id ON public.outfits(user_id);
-CREATE INDEX IF NOT EXISTS idx_chat_messages_user_id ON public.chat_messages(user_id);
-CREATE INDEX IF NOT EXISTS idx_style_profiles_user_id ON public.style_profiles(user_id);
-CREATE INDEX IF NOT EXISTS idx_calendar_events_user_id ON public.calendar_events(user_id);
-CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON public.subscriptions(user_id);
-CREATE INDEX IF NOT EXISTS idx_wear_logs_worn_at ON public.wear_logs(worn_at);
-CREATE INDEX IF NOT EXISTS idx_clothing_items_last_worn ON public.clothing_items(last_worn_at);
-```
+**Files:** Rewrite `src/components/landing/Hero.tsx` completely. Remove GSAP/Three.js dependency. Clean, fast, semantic HTML with Framer Motion fade-in only.
 
-### 4. Add Client-Side Rate Limiting Utility
-Create a simple throttle helper to prevent users from spamming edge function calls from the frontend (e.g., rapid-clicking "Analyze" buttons).
+### 2. UVP Strip — Right After Hero
 
-**New file:** `src/lib/rateLimiter.ts`
-- Simple in-memory tracker: `{ [key]: lastCallTimestamp }`
-- Export `canProceed(key: string, cooldownMs: number): boolean`
-- Apply in Chat, OutfitAnalysis, and other AI-calling pages
+**New section** replacing the current `SocialProofStrip` fake media marquee.
 
-### 5. Tighten ForgotPassword Input Validation
-The ForgotPassword page currently has `required` on the email field but no explicit format validation before calling the API.
+**Four UVPs in a row** (icon + short text):
+1. "Works With Your Existing Closet" — no shopping required
+2. "Learns Your Body, Not a Mannequin" — personalized to you
+3. "Weather-Checked Every Morning" — practical daily value
+4. "30-Day Money-Back Guarantee" — risk removal
 
-**File:** `src/pages/ForgotPassword.tsx`
-- Add email regex validation before calling `resetPasswordForEmail`
-- Show a toast error for invalid email format
+These are the *reasons to choose LEXOR over competitors* — the book's second pillar. Displayed as a simple 4-column grid (2x2 on mobile).
+
+**File:** Rewrite `src/components/landing/SocialProofStrip.tsx`
+
+### 3. Features Section — Scannable, Not Interactive
+
+**Remove** the RadialOrbitalTimeline. Replace with a simple **3-column card grid** (stacks on mobile). Each card:
+- Icon
+- Bold title (2-4 words)
+- One sentence description using customer pain language
+
+**Six features, rewritten pain-first:**
+1. "End Morning Panic" — AI picks your outfit before you wake up
+2. "Know Your Best Colors" — Science-backed color analysis, not guesswork
+3. "Stop Wasting Money" — See what you actually need before buying
+4. "Dress for Any Event" — Date night, interview, casual Friday — handled
+5. "Track What Works" — Cost-per-wear analytics show your smartest buys
+6. "Your Closet, Digitized" — Snap photos, AI tags everything in seconds
+
+**File:** Rewrite `src/components/landing/Features.tsx`
+
+### 4. TabbedFeatures — Simplify to Product Showcase
+
+**Remove** the tabs UI and SidePanelVideo. Replace with a **split-screen section**: app screenshot on one side, 3-4 bullet points on the other. Simple visual proof of the product.
+
+**Copy approach:** "Here's what your morning looks like with LEXOR" — show the daily outfit screen, weather card, closet view.
+
+**File:** Rewrite `src/components/landing/TabbedFeatures.tsx`
+
+### 5. How It Works — Keep, Tighten Copy
+
+The Gallery4 component is solid. **Tighten the headline copy:**
+- Current: "Closet Chaos to Compliments. Three Minutes."
+- New: "Three Steps. That's It." (shorter, punchier)
+- Keep the 6 step cards but sharpen descriptions to use customer language
+
+**File:** Edit `src/components/landing/HowItWorks.tsx` (copy only)
+
+### 6. Testimonials — No Changes
+Per your instruction, keeping testimonial screenshots as-is.
+
+### 7. Pricing — Copy Refinements Only
+
+- Change "Choose Your Plan" → "Pick Your Level" (less corporate)
+- Change "Pays for itself in the first month" → "Costs less than one bad outfit" (pain-based)
+- Button text: "Start Free" stays. Paid tiers: "Unlock [Tier]" instead of PayPal button label
+
+**File:** Edit `src/components/landing/Pricing.tsx` (copy only)
+
+### 8. FAQ — Rewrite as Objection Handlers
+
+The FAQ should directly address The Judge's objections. Rewrite using the book's format:
+
+1. "I don't have time for this" → Shows it takes 3 minutes to set up
+2. "What if the AI gets it wrong?" → 30-day guarantee + it learns from feedback
+3. "Is my data safe?" → Encryption + delete anytime (keep current)
+4. "Does it work for my body type?" → All body types, specific measurements
+5. "I already know how to dress" → Even stylists use data. This finds combinations you'd miss
+6. "Can I cancel?" → Two clicks, no penalties (keep current)
+
+**File:** Edit `src/components/landing/FAQ.tsx`
+
+### 9. CTA Banner — Urgency + Risk Reversal
+
+- Headline: "Your Closet Is Costing You Money Every Day You Wait"
+- Sub: "Start free. See results in 3 minutes. Cancel anytime."
+- Remove "Your spot is waiting" (vague)
+
+**File:** Edit `src/components/landing/CTABanner.tsx`
+
+### 10. Announcement Banner — Sharpen
+
+- Keep countdown timer
+- Change "Founding member pricing closes when timer hits zero" → "Lock in founding pricing — [timer] left"
+- Remove "847 people joined this week" (unverifiable = Judge trigger)
+
+**File:** Edit `src/components/landing/AnnouncementBanner.tsx`
+
+### 11. Footer — Minor Copy Fix
+
+- Copyright year says 2020, keep per brand identity
+- Remove "Made with ❤️ for you" (generic filler, Judge trigger)
+
+**File:** Edit `src/components/landing/Footer.tsx`
+
+### 12. Navbar — Softer CTA Labels
+
+- "Try Free" → "See It Free" (even lower commitment)
+- "Get Started" → "Try LEXOR®"
+
+**File:** Edit `src/components/landing/Navbar.tsx`
 
 ---
 
 ## Files Changed Summary
 
-| File | Action |
-|---|---|
-| `supabase/functions/get-weather/index.ts` | Fix CORS headers + add lat/lon validation |
-| `supabase/functions/ai-chat/index.ts` | Add messages array validation |
-| `supabase/functions/analyze-item/index.ts` | Add input presence validation |
-| `supabase/functions/analyze-outfit/index.ts` | Add imageUrl validation |
-| `supabase/functions/design-clothing/index.ts` | Add prompt validation |
-| `src/lib/rateLimiter.ts` | Create — client-side throttle utility |
-| `src/pages/ForgotPassword.tsx` | Add email format validation |
-| Database migration | Add indexes on user_id and date columns |
+| File | Action | BDW Principle |
+|---|---|---|
+| `src/components/landing/Hero.tsx` | **Full rewrite** — remove WebGL, static hero | Gator: instant clarity |
+| `src/components/landing/SocialProofStrip.tsx` | **Full rewrite** — fake press → UVP strip | Five Pillars: UVPs |
+| `src/components/landing/Features.tsx` | **Full rewrite** — orbital timeline → card grid | Gator: scannable |
+| `src/components/landing/TabbedFeatures.tsx` | **Full rewrite** — tabs → split-screen showcase | Creative pillar |
+| `src/components/landing/HowItWorks.tsx` | Copy edit | Copywriting pillar |
+| `src/components/landing/FAQ.tsx` | Rewrite questions | Judge: objection handling |
+| `src/components/landing/CTABanner.tsx` | Copy rewrite | Copywriting: urgency |
+| `src/components/landing/AnnouncementBanner.tsx` | Copy tighten | Judge: remove unverifiable claims |
+| `src/components/landing/Navbar.tsx` | CTA label changes | Copywriting: low commitment |
+| `src/components/landing/Footer.tsx` | Remove filler copy | Copywriting: intentional words |
+| `src/components/landing/Pricing.tsx` | Copy refinements | Copywriting: pain-based |
 
-No breaking changes. All additions are defensive hardening.
+No new dependencies. No database changes. No backend changes.
 
