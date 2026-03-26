@@ -33,7 +33,8 @@ const Features = () => (
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ delay: i * 0.07, duration: 0.5 }}
-            className="rounded-xl border border-border bg-card p-6 space-y-3 hover:border-foreground/20 transition-colors"
+            className="rounded-xl border border-border bg-card p-6 space-y-3 hover:border-foreground/20 hover:shadow-lg transition-all duration-300"
+            whileHover={{ y: -4 }}
           >
             <f.icon className="w-6 h-6 text-foreground" />
             <h3 className="font-display text-lg font-bold text-foreground">{f.title}</h3>
