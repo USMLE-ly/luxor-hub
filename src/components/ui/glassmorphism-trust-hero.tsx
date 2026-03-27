@@ -74,7 +74,7 @@ export default function GlassmorphismTrustHero() {
           playsInline
           className="absolute inset-0 w-full h-[120%] object-cover"
         />
-        <div className="absolute inset-0 bg-background/60" />
+        <div className="absolute inset-0 bg-background/40" />
         <div
           className="absolute inset-0 opacity-30"
           style={{
