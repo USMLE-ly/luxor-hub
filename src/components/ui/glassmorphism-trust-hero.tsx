@@ -161,41 +161,6 @@ export default function GlassmorphismTrustHero() {
                 <ChevronDown className="w-4 h-4" />
               </button>
             </div>
-
-            {/* Floating Rotating Testimonial Card */}
-            <div className="hero-animate-fade-in hero-delay-500">
-              <div className="relative max-w-md rounded-2xl border border-border/20 bg-card/20 p-5 backdrop-blur-xl shadow-lg overflow-hidden min-h-[120px]">
-                <div className="absolute -top-3 -left-2 text-3xl text-primary/40 font-serif select-none">"</div>
-                {TESTIMONIALS.map((t, i) => (
-                  <div
-                    key={i}
-                    className="transition-all duration-700 ease-in-out pl-4"
-                    style={{
-                      opacity: i === testimonialIdx ? 1 : 0,
-                      position: i === testimonialIdx ? "relative" : "absolute",
-                      top: i === testimonialIdx ? undefined : 0,
-                      left: i === testimonialIdx ? undefined : 0,
-                      right: i === testimonialIdx ? undefined : 0,
-                    }}
-                  >
-                    <p className="text-sm text-muted-foreground leading-relaxed italic">
-                      {t.quote}
-                    </p>
-                    <div className="mt-4 flex items-center gap-3">
-                      <div>
-                        <div className="text-xs font-semibold text-foreground">{t.name}</div>
-                        <div className="text-[10px] text-muted-foreground">{t.detail}</div>
-                      </div>
-                      <div className="ml-auto flex gap-0.5">
-                        {[...Array(t.stars)].map((_, j) => (
-                          <Star key={j} className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
 
           {/* RIGHT COLUMN */}
@@ -250,30 +215,53 @@ export default function GlassmorphismTrustHero() {
               </div>
             </div>
 
-            {/* Marquee Card */}
-            <div className="hero-animate-fade-in hero-delay-500 relative overflow-hidden rounded-3xl border border-border/20 bg-card/30 py-8 backdrop-blur-xl">
-              <h3 className="mb-6 px-8 text-sm font-medium text-muted-foreground">As Featured In</h3>
-
-              <div
-                className="relative flex overflow-hidden"
-                style={{
-                  maskImage: "linear-gradient(to right, transparent, black 20%, black 80%, transparent)",
-                  WebkitMaskImage: "linear-gradient(to right, transparent, black 20%, black 80%, transparent)",
-                }}
-              >
-                <div className="hero-animate-marquee flex gap-12 whitespace-nowrap px-4">
-                  {[...CLIENTS, ...CLIENTS, ...CLIENTS].map((client, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center gap-2 opacity-50 transition-all hover:opacity-100 hover:scale-105 cursor-default grayscale hover:grayscale-0"
-                    >
-                      <client.icon className="h-5 w-5 text-foreground" />
-                      <span className="text-sm font-bold text-foreground tracking-[0.15em] font-display">
-                        {client.name}
-                      </span>
+            {/* Testimonial Card */}
+            <div className="hero-animate-fade-in hero-delay-500 relative overflow-hidden rounded-3xl border border-border/20 bg-card/30 p-6 backdrop-blur-xl">
+              <div className="absolute -top-2 left-4 text-3xl text-primary/40 font-serif select-none">"</div>
+              <div className="relative min-h-[110px]">
+                {TESTIMONIALS.map((t, i) => (
+                  <div
+                    key={i}
+                    className="transition-all duration-700 ease-in-out pl-4"
+                    style={{
+                      opacity: i === testimonialIdx ? 1 : 0,
+                      position: i === testimonialIdx ? "relative" : "absolute",
+                      top: i === testimonialIdx ? undefined : 0,
+                      left: i === testimonialIdx ? undefined : 0,
+                      right: i === testimonialIdx ? undefined : 0,
+                    }}
+                  >
+                    <p className="text-sm text-muted-foreground leading-relaxed italic">
+                      {t.quote}
+                    </p>
+                    <div className="mt-4 flex items-center gap-3">
+                      <div>
+                        <div className="text-xs font-semibold text-foreground">{t.name}</div>
+                        <div className="text-[10px] text-muted-foreground">{t.detail}</div>
+                      </div>
+                      <div className="ml-auto flex gap-0.5">
+                        {[...Array(t.stars)].map((_, j) => (
+                          <Star key={j} className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                        ))}
+                      </div>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
+              </div>
+              {/* Dot Indicators */}
+              <div className="flex justify-center gap-2 mt-5">
+                {TESTIMONIALS.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setTestimonialIdx(i)}
+                    className={`h-1.5 rounded-full transition-all duration-500 ${
+                      i === testimonialIdx
+                        ? "w-6 bg-primary"
+                        : "w-1.5 bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                    }`}
+                    aria-label={`Show testimonial ${i + 1}`}
+                  />
+                ))}
               </div>
             </div>
           </div>
