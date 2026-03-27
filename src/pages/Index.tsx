@@ -32,7 +32,7 @@ const Index = () => {
       <AnnouncementBanner />
       <Navbar />
       <Hero />
-      <SocialProofStrip />
+      
       <TabbedFeatures />
       <Features />
       <HowItWorks />
