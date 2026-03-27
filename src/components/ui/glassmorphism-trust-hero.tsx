@@ -44,6 +44,12 @@ export default function GlassmorphismTrustHero() {
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const videoY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
+  const [testimonialIdx, setTestimonialIdx] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => setTestimonialIdx((i) => (i + 1) % TESTIMONIALS.length), 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
     <div ref={heroRef} className="relative w-full bg-background text-foreground overflow-hidden font-sans">
