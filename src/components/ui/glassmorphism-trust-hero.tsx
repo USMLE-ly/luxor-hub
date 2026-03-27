@@ -79,6 +79,7 @@ export default function GlassmorphismTrustHero() {
           playsInline
           className="absolute inset-0 w-full h-[120%] object-cover"
           style={{ animation: "heroKenBurns 20s ease-in-out infinite" }}
+        />
         <div className="absolute inset-0 bg-background/40" />
         <div
           className="absolute inset-0 opacity-30"
