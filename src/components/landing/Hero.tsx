@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
 import heroVideo from "@/assets/hero-video.mp4";
 
 const Hero = () => {
@@ -9,7 +10,16 @@ const Hero = () => {
 
   return (
     <section className="relative min-h-[90vh] flex flex-col bg-background overflow-hidden pt-28 pb-12 md:pt-32 md:pb-20">
-      <div className="max-w-6xl mx-auto px-4 w-full flex-1 flex flex-col justify-center">
+      <AnimatedGradientBackground
+        Breathing
+        startingGap={120}
+        animationSpeed={0.03}
+        breathingRange={4}
+        topOffset={-20}
+        gradientColors={["hsl(var(--background))", "#1a1a2e", "#16213e", "#0f3460", "#1a1a2e", "#0d0d0d", "hsl(var(--background))"]}
+        gradientStops={[20, 40, 55, 65, 75, 88, 100]}
+      />
+      <div className="max-w-6xl mx-auto px-4 w-full flex-1 flex flex-col justify-center relative z-10">
         {/* Copy — centered */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
