@@ -21,8 +21,8 @@ const TabbedFeatures = () => (
           transition={{ duration: 0.6 }}
         >
           <img
-            src={featureOutfitGen}
-            alt="LEXOR daily outfit generation screen"
+            src={featureClosetView}
+            alt="LEXOR digital closet showing organized wardrobe with category filters"
             loading="lazy"
             width={600}
             height={600}
