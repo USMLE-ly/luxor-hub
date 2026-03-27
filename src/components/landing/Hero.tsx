@@ -84,7 +84,7 @@ const Hero = () => {
 
     </ContainerScroll>
 
-    <div className="relative z-10 py-10 md:py-14 overflow-hidden bg-background">
+    <div className="relative z-10 py-10 md:py-14 overflow-hidden bg-background border-t border-border/30">
       <p className="text-center text-[10px] md:text-xs font-sans text-muted-foreground/40 tracking-[0.25em] uppercase mb-5">
         As Featured In
       </p>
