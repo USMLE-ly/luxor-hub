@@ -168,9 +168,9 @@ export default function GlassmorphismTrustHero() {
                 <div className="h-px w-full bg-border/20 mb-6" />
 
                 <div className="grid grid-cols-3 gap-4 text-center">
-                  <StatItem value="50K+" label="Outfits" />
+                  <StatItem value="12K+" label="Outfits Built" />
                   <StatItem value="24/7" label="AI Stylist" />
-                  <StatItem value="100%" label="Personalized" />
+                  <StatItem value="4.9★" label="Rating" />
                 </div>
 
                 <div className="mt-8 flex flex-wrap gap-2">
