@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
-import featureOutfitGen from "@/assets/feature-outfit-gen.jpg";
+import featureClosetView from "@/assets/feature-closet-view.jpg";
 
 const bullets = [
   "A complete outfit waiting when you wake up",
@@ -21,8 +21,8 @@ const TabbedFeatures = () => (
           transition={{ duration: 0.6 }}
         >
           <img
-            src={featureOutfitGen}
-            alt="LEXOR daily outfit generation screen"
+            src={featureClosetView}
+            alt="LEXOR digital closet showing organized wardrobe with category filters"
             loading="lazy"
             width={600}
             height={600}

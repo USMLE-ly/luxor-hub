@@ -33,7 +33,6 @@ const Index = () => {
       <Navbar />
       <Hero />
       <SocialProofStrip />
-      <Features />
       <TabbedFeatures />
       <HowItWorks />
       <Testimonials />
