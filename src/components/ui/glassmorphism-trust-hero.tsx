@@ -51,7 +51,7 @@ export default function GlassmorphismTrustHero() {
           opacity: 0;
         }
         .hero-animate-marquee {
-          animation: heroMarquee 40s linear infinite;
+          animation: heroMarquee 60s linear infinite;
         }
         .hero-delay-100 { animation-delay: 0.1s; }
         .hero-delay-200 { animation-delay: 0.2s; }
