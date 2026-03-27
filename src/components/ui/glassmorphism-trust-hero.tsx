@@ -212,7 +212,16 @@ export default function GlassmorphismTrustHero() {
             </div>
 
             {/* Testimonial Card */}
-            <div className="hero-animate-fade-in hero-delay-500 relative overflow-hidden rounded-3xl border border-border/20 bg-card/30 p-6 backdrop-blur-xl">
+            <div
+              className="hero-animate-fade-in hero-delay-500 relative overflow-hidden rounded-3xl border border-border/20 bg-card/30 p-6 backdrop-blur-xl touch-pan-y"
+              onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+              onTouchEnd={(e) => {
+                const diff = touchStartX.current - e.changedTouches[0].clientX;
+                if (Math.abs(diff) > 40) {
+                  setTestimonialIdx((prev) => diff > 0 ? (prev + 1) % TESTIMONIALS.length : (prev - 1 + TESTIMONIALS.length) % TESTIMONIALS.length);
+                }
+              }}
+            >
               <div className="absolute -top-2 left-4 text-3xl text-primary/40 font-serif select-none">"</div>
               <div className="relative min-h-[110px]">
                 {TESTIMONIALS.map((t, i) => (
