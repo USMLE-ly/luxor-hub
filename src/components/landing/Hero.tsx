@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
+import { GoldParticles } from "@/components/app/GoldParticles";
 import heroVideo from "@/assets/hero-video.mp4";
 
 const Hero = () => {
@@ -19,6 +20,7 @@ const Hero = () => {
         gradientColors={["hsl(var(--background))", "#2d1e00", "#4a3000", "#6b4400", "#4a3000", "#1a1200", "hsl(var(--background))"]}
         gradientStops={[15, 35, 50, 62, 75, 88, 100]}
       />
+      <GoldParticles />
       <div className="max-w-6xl mx-auto px-4 w-full flex-1 flex flex-col justify-center relative z-10">
         {/* Copy — centered */}
         <motion.div
