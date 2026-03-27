@@ -30,7 +30,7 @@ export const ContainerTextScroll = ({
   return (
     <div
       ref={containerRef}
-      className="h-[44rem] md:h-[56rem] flex items-center justify-center relative p-2 md:p-20"
+      className="h-[36rem] md:h-[56rem] flex items-center justify-center relative p-2 md:p-20"
     >
       <motion.div
         style={{ translateY }}
