@@ -27,6 +27,7 @@ export function GoldParticles() {
             y: [0, 120, 250],
             x: [0, Math.random() * 30 - 15, Math.random() * 20 - 10],
             opacity: [0, 0.6, 0],
+            scale: [0.8, 1.3, 1, 1.2, 0.9, 1.1, 0.8],
           }}
           transition={{
             duration: p.duration,
