@@ -70,7 +70,7 @@ const Hero = () => {
         </ContainerAnimated>
       </ContainerStagger>
 
-      <ContainerInset insetXRange={[30, 0]} className="mx-4 md:mx-8 z-10">
+      <ContainerInset insetXRange={[20, 0]} insetYRange={[20, 0]} translateYRange={["-15%", "30%"]} roundednessRange={[40, 12]} className="mx-4 md:mx-8 z-10">
         <video
           src={heroVideo}
           autoPlay
