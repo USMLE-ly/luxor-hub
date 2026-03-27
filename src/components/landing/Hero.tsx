@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
+import { GoldParticles } from "@/components/app/GoldParticles";
 import heroVideo from "@/assets/hero-video.mp4";
 
 const Hero = () => {
