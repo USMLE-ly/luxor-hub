@@ -42,6 +42,7 @@ const StatItem = ({ value, label }: { value: string; label: string }) => (
 export default function GlassmorphismTrustHero() {
   const navigate = useNavigate();
   const heroRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef(0);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const videoY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
   const [testimonialIdx, setTestimonialIdx] = useState(0);
@@ -171,15 +172,10 @@ export default function GlassmorphismTrustHero() {
               <div className="absolute top-0 right-0 -mr-16 -mt-16 h-64 w-64 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
 
               <div className="relative z-10">
-                <div className="flex items-center gap-4 mb-8">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/20">
-                    <Target className="h-6 w-6 text-foreground" />
-                  </div>
-                  <div>
-                    <div className="text-3xl font-bold tracking-tight text-foreground">2,400+</div>
-                    <div className="text-sm text-muted-foreground">Active Members</div>
-                  </div>
-                </div>
+              <div className="mb-8">
+                  <div className="text-3xl font-bold tracking-tight text-foreground">2,400+</div>
+                  <div className="text-sm text-muted-foreground">Active Members</div>
+              </div>
 
                 <div className="space-y-3 mb-8">
                   <div className="flex justify-between text-sm">
@@ -216,7 +212,16 @@ export default function GlassmorphismTrustHero() {
             </div>
 
             {/* Testimonial Card */}
-            <div className="hero-animate-fade-in hero-delay-500 relative overflow-hidden rounded-3xl border border-border/20 bg-card/30 p-6 backdrop-blur-xl">
+            <div
+              className="hero-animate-fade-in hero-delay-500 relative overflow-hidden rounded-3xl border border-border/20 bg-card/30 p-6 backdrop-blur-xl touch-pan-y"
+              onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+              onTouchEnd={(e) => {
+                const diff = touchStartX.current - e.changedTouches[0].clientX;
+                if (Math.abs(diff) > 40) {
+                  setTestimonialIdx((prev) => diff > 0 ? (prev + 1) % TESTIMONIALS.length : (prev - 1 + TESTIMONIALS.length) % TESTIMONIALS.length);
+                }
+              }}
+            >
               <div className="absolute -top-2 left-4 text-3xl text-primary/40 font-serif select-none">"</div>
               <div className="relative min-h-[110px]">
                 {TESTIMONIALS.map((t, i) => (
