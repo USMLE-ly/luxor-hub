@@ -21,7 +21,7 @@ const TabbedFeatures = () => (
           className="mx-auto rounded-2xl object-cover h-full w-full object-center"
           draggable={false}
         />
-        <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-background via-background/60 to-transparent rounded-b-2xl pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-background/70 via-background/30 to-transparent rounded-b-2xl pointer-events-none" />
       </div>
     </ContainerTextScroll>
 
