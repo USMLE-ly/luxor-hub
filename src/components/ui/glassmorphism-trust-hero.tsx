@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useScroll, useTransform, motion } from "framer-motion";
 import {
@@ -26,6 +26,12 @@ const CLIENTS = [
   { name: "WIRED", icon: Cpu },
 ];
 
+const TESTIMONIALS = [
+  { quote: "This app completely changed how I get dressed. I save 20 minutes every morning and always feel confident.", name: "Jessica M.", detail: "Premium Member · NYC", stars: 5 },
+  { quote: "I finally stopped buying clothes I never wear. The AI recommendations are scarily accurate.", name: "David R.", detail: "Style Plan · London", stars: 5 },
+  { quote: "My friends keep asking how I always look so put together. It's my secret weapon.", name: "Aisha K.", detail: "Premium Member · Dubai", stars: 5 },
+];
+
 const StatItem = ({ value, label }: { value: string; label: string }) => (
   <div className="flex flex-col items-center justify-center transition-transform hover:-translate-y-1 cursor-default">
     <span className="text-xl font-bold text-foreground sm:text-2xl">{value}</span>
@@ -38,6 +44,12 @@ export default function GlassmorphismTrustHero() {
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const videoY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
+  const [testimonialIdx, setTestimonialIdx] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => setTestimonialIdx((i) => (i + 1) % TESTIMONIALS.length), 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
     <div ref={heroRef} className="relative w-full bg-background text-foreground overflow-hidden font-sans">
@@ -150,27 +162,38 @@ export default function GlassmorphismTrustHero() {
               </button>
             </div>
 
-            {/* Floating Testimonial Card */}
+            {/* Floating Rotating Testimonial Card */}
             <div className="hero-animate-fade-in hero-delay-500">
-              <div className="relative max-w-md rounded-2xl border border-border/20 bg-card/20 p-5 backdrop-blur-xl shadow-lg">
+              <div className="relative max-w-md rounded-2xl border border-border/20 bg-card/20 p-5 backdrop-blur-xl shadow-lg overflow-hidden min-h-[120px]">
                 <div className="absolute -top-3 -left-2 text-3xl text-primary/40 font-serif select-none">"</div>
-                <p className="text-sm text-muted-foreground leading-relaxed italic pl-4">
-                  This app completely changed how I get dressed. I save 20 minutes every morning and always feel confident.
-                </p>
-                <div className="mt-4 flex items-center gap-3 pl-4">
-                  <div className="h-8 w-8 rounded-full bg-primary/10 ring-1 ring-primary/20 flex items-center justify-center text-xs font-bold text-foreground">
-                    JM
+                {TESTIMONIALS.map((t, i) => (
+                  <div
+                    key={i}
+                    className="transition-all duration-700 ease-in-out pl-4"
+                    style={{
+                      opacity: i === testimonialIdx ? 1 : 0,
+                      position: i === testimonialIdx ? "relative" : "absolute",
+                      top: i === testimonialIdx ? undefined : 0,
+                      left: i === testimonialIdx ? undefined : 0,
+                      right: i === testimonialIdx ? undefined : 0,
+                    }}
+                  >
+                    <p className="text-sm text-muted-foreground leading-relaxed italic">
+                      {t.quote}
+                    </p>
+                    <div className="mt-4 flex items-center gap-3">
+                      <div>
+                        <div className="text-xs font-semibold text-foreground">{t.name}</div>
+                        <div className="text-[10px] text-muted-foreground">{t.detail}</div>
+                      </div>
+                      <div className="ml-auto flex gap-0.5">
+                        {[...Array(t.stars)].map((_, j) => (
+                          <Star key={j} className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-xs font-semibold text-foreground">Jessica M.</div>
-                    <div className="text-[10px] text-muted-foreground">Premium Member · NYC</div>
-                  </div>
-                  <div className="ml-auto flex gap-0.5">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                    ))}
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
