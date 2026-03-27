@@ -15,6 +15,7 @@ const Hero = () => {
   const navigate = useNavigate();
 
   return (
+    <>
     <ContainerScroll className="bg-background text-center overflow-hidden">
       {/* Starfield */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
