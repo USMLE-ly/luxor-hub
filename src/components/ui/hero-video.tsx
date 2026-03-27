@@ -98,7 +98,7 @@ const ContainerScroll = ({
     <ContainerScrollContext.Provider value={{ scrollYProgress }}>
       <section
         className={cn(
-          "relative min-h-[100vh] w-full pb-[15%] pt-8",
+          "relative min-h-[120vh] w-full pb-[30%] pt-8",
           className
         )}
         {...props}
