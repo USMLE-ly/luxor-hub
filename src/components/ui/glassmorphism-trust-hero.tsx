@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useScroll, useTransform, motion } from "framer-motion";
 import {
   ArrowRight,
   Play,
