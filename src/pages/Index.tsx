@@ -34,6 +34,7 @@ const Index = () => {
       <Hero />
       <SocialProofStrip />
       <TabbedFeatures />
+      <Features />
       <HowItWorks />
       <Testimonials />
       <Pricing />
