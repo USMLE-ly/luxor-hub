@@ -14,6 +14,7 @@ import {
   Cpu,
   ChevronDown,
 } from "lucide-react";
+import heroVideo from "@/assets/hero-video.mp4";
 
 const CLIENTS = [
   { name: "VOGUE", icon: Hexagon },
