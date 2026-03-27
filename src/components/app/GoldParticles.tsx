@@ -3,10 +3,10 @@ import { motion } from "framer-motion";
 const particles = Array.from({ length: 30 }, (_, i) => ({
   id: i,
   x: Math.random() * 100,
-  y: Math.random() * 100,
+  y: -10 - Math.random() * 20,
   size: Math.random() * 3 + 1.5,
-  duration: Math.random() * 8 + 10,
-  delay: Math.random() * 5,
+  duration: Math.random() * 10 + 12,
+  delay: Math.random() * 8,
 }));
 
 export function GoldParticles() {
@@ -21,18 +21,18 @@ export function GoldParticles() {
             top: `${p.y}%`,
             width: p.size,
             height: p.size,
-            background: "radial-gradient(circle, hsl(43 80% 58% / 0.6), hsl(38 72% 42% / 0.2))",
+            background: "radial-gradient(circle, hsl(0 0% 85% / 0.7), hsl(0 0% 65% / 0.2))",
           }}
           animate={{
-            y: [0, -30, 10, -20, 0],
-            x: [0, 15, -10, 5, 0],
-            opacity: [0.2, 0.5, 0.3, 0.6, 0.2],
+            y: [0, 120, 250],
+            x: [0, Math.random() * 30 - 15, Math.random() * 20 - 10],
+            opacity: [0, 0.6, 0],
           }}
           transition={{
             duration: p.duration,
             delay: p.delay,
             repeat: Infinity,
-            ease: "easeInOut",
+            ease: "linear",
           }}
         />
       ))}
