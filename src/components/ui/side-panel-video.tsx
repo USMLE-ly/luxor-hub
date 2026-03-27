@@ -1,32 +1,28 @@
-"use client"
-
 import React, { ReactNode, forwardRef } from "react"
-import { AnimatePresence, MotionConfig, motion } from "framer-motion"
+import { AnimatePresence, MotionConfig, motion, type Transition } from "framer-motion"
 import useMeasure from "react-use-measure"
 import { cn } from "@/lib/utils"
 
-const ResizablePanelInternal = React.forwardRef<HTMLDivElement, { children: React.ReactNode }>(
-  ({ children }, ref) => {
-    const transition = { type: "ease", ease: "easeInOut", duration: 0.4 }
+const panelTransition: Transition = { type: "tween", ease: "easeInOut", duration: 0.4 }
 
-    return (
-      <MotionConfig transition={transition}>
-        <div className="flex w-full flex-col items-start">
-          <div className="mx-auto w-full">
-            <div
-              ref={ref}
-              className={cn(
-                children ? "rounded-r-none" : "rounded-sm",
-                "relative overflow-hidden"
-              )}
-            >
-              {children}
-            </div>
+const ResizablePanelInternal = React.forwardRef<HTMLDivElement, { children: React.ReactNode }>(
+  ({ children }, ref) => (
+    <MotionConfig transition={panelTransition}>
+      <div className="flex w-full flex-col items-start">
+        <div className="mx-auto w-full">
+          <div
+            ref={ref}
+            className={cn(
+              children ? "rounded-r-none" : "rounded-sm",
+              "relative overflow-hidden"
+            )}
+          >
+            {children}
           </div>
         </div>
-      </MotionConfig>
-    )
-  }
+      </div>
+    </MotionConfig>
+  )
 )
 ResizablePanelInternal.displayName = "ResizablePanelInternal"
 
@@ -36,42 +32,29 @@ type NativeVideoProps = {
 }
 
 export const NativeVideo = forwardRef<HTMLDivElement, NativeVideoProps>(
-  ({ videoOpen, src }, ref) => {
-    const videoVariants = {
-      hidden: { opacity: 0, scale: 0.9, y: 30 },
-      visible: { opacity: 1, scale: 1, y: 0 },
-    }
-    const transitionConfig = {
-      duration: 0.2,
-      ease: [0.04, 0.62, 0.23, 0.98],
-      delay: 0.3,
-    }
-
-    return (
-      <AnimatePresence>
-        {videoOpen && (
-          <motion.div
-            ref={ref}
-            className="md:flex md:justify-center py-1 px-1 md:py-8 md:px-8 w-full h-[300px] md:h-[800px] md:aspect-video rounded-2xl bg-background"
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-            variants={videoVariants}
-            transition={transitionConfig}
-          >
-            <video
-              className="w-full h-full rounded-xl object-cover"
-              src={src}
-              autoPlay
-              loop
-              muted
-              playsInline
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    )
-  }
+  ({ videoOpen, src }, ref) => (
+    <AnimatePresence>
+      {videoOpen && (
+        <motion.div
+          ref={ref}
+          className="md:flex md:justify-center py-1 px-1 md:py-8 md:px-8 w-full h-[300px] md:h-[800px] md:aspect-video rounded-2xl bg-background"
+          initial={{ opacity: 0, scale: 0.9, y: 30 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.9, y: 30 }}
+          transition={{ duration: 0.2, ease: [0.04, 0.62, 0.23, 0.98] as const, delay: 0.3 }}
+        >
+          <video
+            className="w-full h-full rounded-xl object-cover"
+            src={src}
+            autoPlay
+            loop
+            muted
+            playsInline
+          />
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
 )
 NativeVideo.displayName = "NativeVideo"
 
@@ -88,17 +71,17 @@ const sectionVariants = {
     width: "97%",
     transition: {
       duration: 0.3,
-      ease: "easeInOut",
+      ease: "easeInOut" as const,
       delayChildren: 0.3,
       staggerChildren: 0.2,
     },
   },
   closed: {
-    transition: { duration: 0.2, ease: "easeInOut" },
+    transition: { duration: 0.2, ease: "easeInOut" as const },
   },
 }
 
-const sharedTransition = { duration: 0.6, ease: "easeInOut" }
+const sharedTransition: Transition = { duration: 0.6, ease: "easeInOut" as const }
 
 export const SidePanelVideo = forwardRef<HTMLDivElement, ComponentProps>(
   ({ panelOpen, handlePanelOpen, className, renderButton, children }, ref) => {
@@ -125,10 +108,7 @@ export const SidePanelVideo = forwardRef<HTMLDivElement, ComponentProps>(
                 <motion.div
                   key={String(panelOpen)}
                   exit={{ opacity: 0 }}
-                  transition={{
-                    ...sharedTransition,
-                    duration: sharedTransition.duration / 2,
-                  }}
+                  transition={{ duration: 0.3 }}
                 >
                   <div
                     className={cn(
