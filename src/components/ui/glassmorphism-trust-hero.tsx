@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useScroll, useTransform, motion } from "framer-motion";
 import {
   ArrowRight,
   Play,
@@ -34,9 +35,12 @@ const StatItem = ({ value, label }: { value: string; label: string }) => (
 
 export default function GlassmorphismTrustHero() {
   const navigate = useNavigate();
+  const heroRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
+  const videoY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
 
   return (
-    <div className="relative w-full bg-background text-foreground overflow-hidden font-sans">
+    <div ref={heroRef} className="relative w-full bg-background text-foreground overflow-hidden font-sans">
       <style>{`
         @keyframes heroFadeSlideIn {
           from { opacity: 0; transform: translateY(20px); }
@@ -60,24 +64,24 @@ export default function GlassmorphismTrustHero() {
         .hero-delay-500 { animation-delay: 0.5s; }
       `}</style>
 
-      {/* Background video */}
-      <div className="absolute inset-0 z-0">
+      {/* Background video with parallax */}
+      <motion.div className="absolute inset-0 z-0" style={{ y: videoY }}>
         <video
           src={heroVideo}
           autoPlay
           loop
           muted
           playsInline
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-[120%] object-cover"
         />
-        <div className="absolute inset-0 bg-background/85" />
+        <div className="absolute inset-0 bg-background/60" />
         <div
-          className="absolute inset-0 opacity-40"
+          className="absolute inset-0 opacity-30"
           style={{
             background: "radial-gradient(ellipse at 30% 20%, hsl(var(--primary) / 0.2), transparent 60%), radial-gradient(ellipse at 70% 80%, hsl(var(--accent) / 0.15), transparent 60%)",
           }}
         />
-      </div>
+      </motion.div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 pt-24 pb-12 sm:px-6 md:pt-32 md:pb-20 lg:px-8">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-8 items-start">
