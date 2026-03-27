@@ -171,15 +171,10 @@ export default function GlassmorphismTrustHero() {
               <div className="absolute top-0 right-0 -mr-16 -mt-16 h-64 w-64 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
 
               <div className="relative z-10">
-                <div className="flex items-center gap-4 mb-8">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/20">
-                    <Target className="h-6 w-6 text-foreground" />
-                  </div>
-                  <div>
-                    <div className="text-3xl font-bold tracking-tight text-foreground">2,400+</div>
-                    <div className="text-sm text-muted-foreground">Active Members</div>
-                  </div>
-                </div>
+              <div className="mb-8">
+                  <div className="text-3xl font-bold tracking-tight text-foreground">2,400+</div>
+                  <div className="text-sm text-muted-foreground">Active Members</div>
+              </div>
 
                 <div className="space-y-3 mb-8">
                   <div className="flex justify-between text-sm">
