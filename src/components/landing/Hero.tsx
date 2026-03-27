@@ -16,7 +16,7 @@ const Hero = () => {
         animationSpeed={0.03}
         breathingRange={4}
         topOffset={-20}
-        gradientColors={["hsl(var(--background))", "#1a1a2e", "#16213e", "#0f3460", "#1a1a2e", "#0d0d0d", "hsl(var(--background))"]}
+        gradientColors={["hsl(var(--background))", "#1a1508", "#2a1f0a", "#3d2e10", "#2a1f0a", "#0d0d0d", "hsl(var(--background))"]}
         gradientStops={[20, 40, 55, 65, 75, 88, 100]}
       />
       <div className="max-w-6xl mx-auto px-4 w-full flex-1 flex flex-col justify-center relative z-10">
