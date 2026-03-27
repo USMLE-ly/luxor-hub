@@ -80,6 +80,22 @@ const Hero = () => {
           className="relative z-10 block h-auto max-h-full w-full max-w-full object-contain align-middle"
         />
       </ContainerInset>
+
+      <div className="relative z-10 mt-12 md:mt-16 pb-8">
+        <p className="text-center text-[10px] md:text-xs font-sans text-muted-foreground/40 tracking-[0.25em] uppercase mb-5">
+          As Featured In
+        </p>
+        <div className="flex items-center justify-center gap-8 md:gap-14 flex-wrap">
+          {["VOGUE", "GLAMOUR", "BAZAAR", "ELLE", "GQ"].map((name) => (
+            <span
+              key={name}
+              className="text-sm md:text-lg font-display tracking-[0.2em] text-muted-foreground/20 select-none"
+            >
+              {name}
+            </span>
+          ))}
+        </div>
+      </div>
     </ContainerScroll>
   );
 };
