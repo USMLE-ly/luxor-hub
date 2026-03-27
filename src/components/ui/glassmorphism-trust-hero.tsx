@@ -149,6 +149,30 @@ export default function GlassmorphismTrustHero() {
                 <ChevronDown className="w-4 h-4" />
               </button>
             </div>
+
+            {/* Floating Testimonial Card */}
+            <div className="hero-animate-fade-in hero-delay-500">
+              <div className="relative max-w-md rounded-2xl border border-border/20 bg-card/20 p-5 backdrop-blur-xl shadow-lg">
+                <div className="absolute -top-3 -left-2 text-3xl text-primary/40 font-serif select-none">"</div>
+                <p className="text-sm text-muted-foreground leading-relaxed italic pl-4">
+                  This app completely changed how I get dressed. I save 20 minutes every morning and always feel confident.
+                </p>
+                <div className="mt-4 flex items-center gap-3 pl-4">
+                  <div className="h-8 w-8 rounded-full bg-primary/10 ring-1 ring-primary/20 flex items-center justify-center text-xs font-bold text-foreground">
+                    JM
+                  </div>
+                  <div>
+                    <div className="text-xs font-semibold text-foreground">Jessica M.</div>
+                    <div className="text-[10px] text-muted-foreground">Premium Member · NYC</div>
+                  </div>
+                  <div className="ml-auto flex gap-0.5">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* RIGHT COLUMN */}
