@@ -8,14 +8,14 @@ const Hero = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="relative min-h-[90vh] flex flex-col bg-background overflow-hidden pt-28 pb-16 md:pt-32 md:pb-24">
+    <section className="relative min-h-[90vh] flex flex-col bg-background overflow-hidden pt-28 pb-12 md:pt-32 md:pb-20">
       <div className="max-w-6xl mx-auto px-4 w-full flex-1 flex flex-col justify-center">
         {/* Copy — centered */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="text-center space-y-6 max-w-2xl mx-auto mb-12"
+          className="text-center space-y-5 max-w-2xl mx-auto mb-8 md:mb-10"
         >
           <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-[1.1] tracking-tight">
             Your AI Stylist That Actually Knows{" "}
