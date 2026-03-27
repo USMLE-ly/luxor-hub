@@ -3,7 +3,7 @@ import { motion, useScroll, useSpring } from "framer-motion";
 import { captureUTMParams } from "@/lib/utmTracker";
 import Navbar from "@/components/landing/Navbar";
 import Hero from "@/components/landing/Hero";
-import SocialProofStrip from "@/components/landing/SocialProofStrip";
+
 import HowItWorks from "@/components/landing/HowItWorks";
 import Features from "@/components/landing/Features";
 import TabbedFeatures from "@/components/landing/TabbedFeatures";
@@ -32,7 +32,7 @@ const Index = () => {
       <AnnouncementBanner />
       <Navbar />
       <Hero />
-      <SocialProofStrip />
+      
       <TabbedFeatures />
       <Features />
       <HowItWorks />
