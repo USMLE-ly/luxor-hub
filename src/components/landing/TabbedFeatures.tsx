@@ -1,6 +1,6 @@
-import { motion } from "framer-motion";
 import { Check } from "lucide-react";
-import featureClosetView from "@/assets/feature-closet-view.jpg";
+import { ContainerTextScroll } from "@/components/ui/container-text-scroll";
+import featureOutfitGen from "@/assets/feature-outfit-gen.jpg";
 
 const bullets = [
   "A complete outfit waiting when you wake up",
@@ -10,48 +10,44 @@ const bullets = [
 ];
 
 const TabbedFeatures = () => (
-  <section id="tabbed-features" className="py-16 md:py-24 bg-background">
-    <div className="max-w-5xl mx-auto px-4">
-      <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
-        {/* Image */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.6 }}
-        >
-          <img
-            src={featureClosetView}
-            alt="LEXOR digital closet showing organized wardrobe with category filters"
-            loading="lazy"
-            width={600}
-            height={600}
-            className="rounded-xl border border-border w-full"
-          />
-        </motion.div>
-
-        {/* Copy */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="space-y-5"
-        >
-          <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase">Your Morning With LEXOR®</p>
-          <h2 className="font-display text-2xl md:text-4xl font-bold text-foreground leading-tight">
-            Open the app. Your outfit is ready.
+  <section id="tabbed-features" className="bg-background">
+    <ContainerTextScroll
+      titleComponent={
+        <>
+          <h2 className="text-3xl md:text-5xl font-bold font-display leading-tight drop-shadow-lg">
+            Your Morning With
+            <br />
+            <span className="text-5xl md:text-[6rem] font-bold mt-1 leading-none gold-text">
+              LEXOR®
+            </span>
           </h2>
-          <ul className="space-y-3">
-            {bullets.map((b) => (
-              <li key={b} className="flex items-start gap-3 font-sans text-sm text-muted-foreground">
-                <Check className="w-4 h-4 mt-0.5 text-foreground shrink-0" />
-                <span>{b}</span>
-              </li>
-            ))}
-          </ul>
-        </motion.div>
-      </div>
+        </>
+      }
+    >
+      <img
+        src={featureOutfitGen}
+        alt="Three elegant outfits on mannequins styled by LEXOR AI"
+        className="mx-auto rounded-2xl object-cover h-full w-full object-center"
+        draggable={false}
+      />
+    </ContainerTextScroll>
+
+    {/* Bullets below the scroll card */}
+    <div className="max-w-2xl mx-auto px-4 -mt-32 md:-mt-48 pb-16 md:pb-24">
+      <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase mb-4">
+        Your Morning With LEXOR®
+      </p>
+      <h3 className="font-display text-2xl md:text-3xl font-bold text-foreground leading-tight mb-5">
+        Open the app. Your outfit is ready.
+      </h3>
+      <ul className="space-y-3">
+        {bullets.map((b) => (
+          <li key={b} className="flex items-start gap-3 font-sans text-sm text-muted-foreground">
+            <Check className="w-4 h-4 mt-0.5 text-foreground shrink-0" />
+            <span>{b}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   </section>
 );
