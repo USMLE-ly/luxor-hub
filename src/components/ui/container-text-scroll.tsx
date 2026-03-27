@@ -38,15 +38,6 @@ export const ContainerTextScroll = ({
       >
         <Card rotate={rotate} scale={scale}>
           {children}
-
-          <motion.div
-            style={{ translateY: titleTranslateY, scale: titleScale }}
-            className="absolute inset-0 flex items-center justify-center text-center px-4"
-          >
-            <div className="text-white">
-              {titleComponent}
-            </div>
-          </motion.div>
         </Card>
       </motion.div>
     </div>
