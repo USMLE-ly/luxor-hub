@@ -46,6 +46,11 @@ export default function GlassmorphismTrustHero() {
           from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes heroKenBurns {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.08); }
+          100% { transform: scale(1); }
+        }
         @keyframes heroMarquee {
           from { transform: translateX(0); }
           to { transform: translateX(-50%); }
@@ -73,6 +78,7 @@ export default function GlassmorphismTrustHero() {
           muted
           playsInline
           className="absolute inset-0 w-full h-[120%] object-cover"
+          style={{ animation: "heroKenBurns 20s ease-in-out infinite" }}
         />
         <div className="absolute inset-0 bg-background/40" />
         <div
