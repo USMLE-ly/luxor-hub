@@ -87,6 +87,10 @@ export default function GlassmorphismTrustHero() {
             background: "radial-gradient(ellipse at 30% 20%, hsl(var(--primary) / 0.2), transparent 60%), radial-gradient(ellipse at 70% 80%, hsl(var(--accent) / 0.15), transparent 60%)",
           }}
         />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ boxShadow: "inset 0 0 120px 60px hsl(var(--background))" }}
+        />
       </motion.div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 pt-24 pb-12 sm:px-6 md:pt-32 md:pb-20 lg:px-8">
