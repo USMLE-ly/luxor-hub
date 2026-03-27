@@ -46,6 +46,11 @@ export default function GlassmorphismTrustHero() {
           from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes heroKenBurns {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.08); }
+          100% { transform: scale(1); }
+        }
         @keyframes heroMarquee {
           from { transform: translateX(0); }
           to { transform: translateX(-50%); }
