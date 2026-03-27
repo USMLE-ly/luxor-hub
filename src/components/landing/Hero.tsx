@@ -2,8 +2,8 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
 import { GoldParticles } from "@/components/app/GoldParticles";
+import "@/components/ui/starfield.css";
 import heroVideo from "@/assets/hero-video.mp4";
 
 const Hero = () => {
@@ -11,15 +11,18 @@ const Hero = () => {
 
   return (
     <section className="relative min-h-[90vh] flex flex-col bg-background overflow-hidden pt-28 pb-12 md:pt-32 md:pb-20">
-      <AnimatedGradientBackground
-        Breathing
-        startingGap={110}
-        animationSpeed={0.04}
-        breathingRange={6}
-        topOffset={-15}
-        gradientColors={["hsl(var(--background))", "#2d1e00", "#4a3000", "#6b4400", "#4a3000", "#1a1200", "hsl(var(--background))"]}
-        gradientStops={[15, 35, 50, 62, 75, 88, 100]}
-      />
+      {/* Starfield */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="starfield-layer starfield-small" />
+        <div className="starfield-layer starfield-medium" />
+        <div className="starfield-layer starfield-large" />
+        <div className="shooting-star shooting-star-1" />
+        <div className="shooting-star shooting-star-2" />
+        <div className="shooting-star shooting-star-3" />
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: 'radial-gradient(ellipse at 50% 20%, hsl(0 0% 20% / 0.15) 0%, transparent 70%)',
+        }} />
+      </div>
       <GoldParticles />
       <div className="max-w-6xl mx-auto px-4 w-full flex-1 flex flex-col justify-center relative z-10">
         {/* Copy — centered */}
