@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
-import featureOutfitGen from "@/assets/feature-outfit-gen.jpg";
+import featureClosetView from "@/assets/feature-closet-view.jpg";
 
 const bullets = [
   "A complete outfit waiting when you wake up",
