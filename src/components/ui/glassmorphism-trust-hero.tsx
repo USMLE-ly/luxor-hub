@@ -40,7 +40,7 @@ export default function GlassmorphismTrustHero() {
   const videoY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
 
   return (
-    <div className="relative w-full bg-background text-foreground overflow-hidden font-sans">
+    <div ref={heroRef} className="relative w-full bg-background text-foreground overflow-hidden font-sans">
       <style>{`
         @keyframes heroFadeSlideIn {
           from { opacity: 0; transform: translateY(20px); }
