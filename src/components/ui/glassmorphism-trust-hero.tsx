@@ -35,6 +35,9 @@ const StatItem = ({ value, label }: { value: string; label: string }) => (
 
 export default function GlassmorphismTrustHero() {
   const navigate = useNavigate();
+  const heroRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
+  const videoY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
 
   return (
     <div className="relative w-full bg-background text-foreground overflow-hidden font-sans">
