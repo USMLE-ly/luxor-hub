@@ -42,6 +42,7 @@ const StatItem = ({ value, label }: { value: string; label: string }) => (
 export default function GlassmorphismTrustHero() {
   const navigate = useNavigate();
   const heroRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef(0);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const videoY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
   const [testimonialIdx, setTestimonialIdx] = useState(0);
