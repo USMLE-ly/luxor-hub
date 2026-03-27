@@ -161,41 +161,6 @@ export default function GlassmorphismTrustHero() {
                 <ChevronDown className="w-4 h-4" />
               </button>
             </div>
-
-            {/* Floating Rotating Testimonial Card */}
-            <div className="hero-animate-fade-in hero-delay-500">
-              <div className="relative max-w-md rounded-2xl border border-border/20 bg-card/20 p-5 backdrop-blur-xl shadow-lg overflow-hidden min-h-[120px]">
-                <div className="absolute -top-3 -left-2 text-3xl text-primary/40 font-serif select-none">"</div>
-                {TESTIMONIALS.map((t, i) => (
-                  <div
-                    key={i}
-                    className="transition-all duration-700 ease-in-out pl-4"
-                    style={{
-                      opacity: i === testimonialIdx ? 1 : 0,
-                      position: i === testimonialIdx ? "relative" : "absolute",
-                      top: i === testimonialIdx ? undefined : 0,
-                      left: i === testimonialIdx ? undefined : 0,
-                      right: i === testimonialIdx ? undefined : 0,
-                    }}
-                  >
-                    <p className="text-sm text-muted-foreground leading-relaxed italic">
-                      {t.quote}
-                    </p>
-                    <div className="mt-4 flex items-center gap-3">
-                      <div>
-                        <div className="text-xs font-semibold text-foreground">{t.name}</div>
-                        <div className="text-[10px] text-muted-foreground">{t.detail}</div>
-                      </div>
-                      <div className="ml-auto flex gap-0.5">
-                        {[...Array(t.stars)].map((_, j) => (
-                          <Star key={j} className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
 
           {/* RIGHT COLUMN */}
