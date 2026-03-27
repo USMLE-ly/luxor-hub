@@ -19,18 +19,18 @@ export const ContainerTextScroll = ({
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const scaleDimensions = () => (isMobile ? [0.8, 1] : [0.9, 1]);
+  const scaleDimensions = () => (isMobile ? [0.92, 1] : [0.95, 1]);
 
-  const rotate = useTransform(scrollYProgress, [0, 1], [-20, 0]);
+  const rotate = useTransform(scrollYProgress, [0, 1], [-8, 0]);
   const scale = useTransform(scrollYProgress, [0, 1], scaleDimensions());
-  const translateY = useTransform(scrollYProgress, [0, 1], [100, 0]);
-  const titleTranslateY = useTransform(scrollYProgress, [0, 1], [100, 0]);
-  const titleScale = useTransform(scrollYProgress, [0, 1], [0.8, 1]);
+  const translateY = useTransform(scrollYProgress, [0, 1], [40, 0]);
+  const titleTranslateY = useTransform(scrollYProgress, [0, 1], [30, 0]);
+  const titleScale = useTransform(scrollYProgress, [0, 1], [0.92, 1]);
 
   return (
     <div
       ref={containerRef}
-      className="h-[60rem] md:h-[80rem] flex items-center justify-center relative p-2 md:p-20"
+      className="h-[44rem] md:h-[56rem] flex items-center justify-center relative p-2 md:p-20"
     >
       <motion.div
         style={{ translateY }}
