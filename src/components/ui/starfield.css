@@ -117,31 +117,31 @@
 .shooting-star-1 {
   top: 8%;
   left: 75%;
-  animation: shoot 14s ease-in-out 3s infinite;
+  animation: shoot 28s ease-in-out 5s infinite;
 }
 
 .shooting-star-2 {
   top: 22%;
   left: 45%;
-  animation: shoot 18s ease-in-out 10s infinite;
+  animation: shoot 35s ease-in-out 18s infinite;
 }
 
 .shooting-star-3 {
   top: 15%;
   left: 90%;
-  animation: shoot 16s ease-in-out 20s infinite;
+  animation: shoot 32s ease-in-out 38s infinite;
 }
 
 .shooting-star-4 {
   top: 5%;
   left: 30%;
-  animation: shoot 20s ease-in-out 32s infinite;
+  animation: shoot 40s ease-in-out 55s infinite;
 }
 
 .shooting-star-5 {
   top: 35%;
   left: 60%;
-  animation: shoot 22s ease-in-out 45s infinite;
+  animation: shoot 45s ease-in-out 75s infinite;
 }
 
 @keyframes shoot {
