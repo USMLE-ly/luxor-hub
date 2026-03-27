@@ -12,12 +12,12 @@ const Hero = () => {
     <section className="relative min-h-[90vh] flex flex-col bg-background overflow-hidden pt-28 pb-12 md:pt-32 md:pb-20">
       <AnimatedGradientBackground
         Breathing
-        startingGap={120}
-        animationSpeed={0.03}
-        breathingRange={4}
-        topOffset={-20}
-        gradientColors={["hsl(var(--background))", "#1a1508", "#2a1f0a", "#3d2e10", "#2a1f0a", "#0d0d0d", "hsl(var(--background))"]}
-        gradientStops={[20, 40, 55, 65, 75, 88, 100]}
+        startingGap={110}
+        animationSpeed={0.04}
+        breathingRange={6}
+        topOffset={-15}
+        gradientColors={["hsl(var(--background))", "#2d1e00", "#4a3000", "#6b4400", "#4a3000", "#1a1200", "hsl(var(--background))"]}
+        gradientStops={[15, 35, 50, 62, 75, 88, 100]}
       />
       <div className="max-w-6xl mx-auto px-4 w-full flex-1 flex flex-col justify-center relative z-10">
         {/* Copy — centered */}
