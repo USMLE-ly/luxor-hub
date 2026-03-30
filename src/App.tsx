@@ -46,6 +46,7 @@ import Install from "./pages/Install";
 import Council from "./pages/Council";
 import MonthlyReport from "./pages/MonthlyReport";
 import WardrobeValue from "./pages/WardrobeValue";
+import ParallaxDemo from "./pages/ParallaxDemo";
 
 
 // Tracks route changes for Facebook Pixel
@@ -107,6 +108,7 @@ const App = () => (
             <Route path="/council" element={<PaywallGate><Council /></PaywallGate>} />
             <Route path="/monthly-report" element={<PaywallGate><MonthlyReport /></PaywallGate>} />
             <Route path="/wardrobe-value" element={<PaywallGate><WardrobeValue /></PaywallGate>} />
+            <Route path="/parallax-demo" element={<ParallaxDemo />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
