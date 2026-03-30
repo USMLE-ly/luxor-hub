@@ -14,6 +14,7 @@ import Footer from "@/components/landing/Footer";
 import CTABanner from "@/components/landing/CTABanner";
 import AnnouncementBanner from "@/components/landing/AnnouncementBanner";
 import StickyPricingBar from "@/components/landing/StickyPricingBar";
+import { ImagesScrollingAnimation } from "@/components/ui/images-scrolling-animation";
 
 const Index = () => {
   const { scrollYProgress } = useScroll();
