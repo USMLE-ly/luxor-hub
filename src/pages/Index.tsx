@@ -33,7 +33,7 @@ const Index = () => {
       <AnnouncementBanner />
       <Navbar />
       <Hero />
-      
+      <ImagesScrollingAnimation />
       <TabbedFeatures />
       <Features />
       <HowItWorks />
