@@ -130,7 +130,7 @@ export default function GlassmorphismTrustHero() {
                 WebkitMaskImage: "linear-gradient(180deg, black 0%, black 80%, transparent 100%)",
               }}
             >
-              Your AI Stylist<br />
+             Your AI Fashion Stylist<br />
               <span className="gold-text">
                 That Actually
               </span><br />
