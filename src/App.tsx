@@ -47,6 +47,7 @@ import Council from "./pages/Council";
 import MonthlyReport from "./pages/MonthlyReport";
 import WardrobeValue from "./pages/WardrobeValue";
 import Blog from "./pages/Blog";
+import BlogArticle from "./pages/BlogArticle";
 
 
 // Tracks route changes for Facebook Pixel
