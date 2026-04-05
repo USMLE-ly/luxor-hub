@@ -25,7 +25,7 @@ const faqs = [
   },
   {
     q: "I already know how to dress.",
-    a: "Even professional stylists use data. LEXOR® finds combinations you'd miss — it cross-references weather, your calendar, what you wore recently, and pieces buried in your closet.",
+    a: "Even professional fashion stylists use data. LEXOR® finds outfit combinations you'd miss. It cross-references weather, your calendar, recent outfits, and pieces buried in your closet.",
   },
   {
     q: "Can I cancel?",

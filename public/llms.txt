@@ -1,0 +1,34 @@
+# LEXOR® — Personal Style OS
+> AI fashion stylist and virtual wardrobe platform at https://luxor.ly
+
+## What is LEXOR®?
+LEXOR® is an AI-powered fashion platform that helps users manage their wardrobe, get daily outfit recommendations, and track fashion trends. Users photograph their closet, and the AI learns their style, body type, and preferences to deliver personalized outfits every morning.
+
+## Core Features
+- **AI Outfit Analyzer**: Upload outfit photos for instant style scoring, color analysis, and improvement tips.
+- **Virtual Wardrobe**: Photograph and catalog every clothing item with AI tagging (category, color, brand, season).
+- **Daily Outfit Recommendations**: Weather-checked, calendar-aware outfit suggestions built from your existing closet.
+- **Style DNA Profiling**: AI maps your body shape, color season, and lifestyle to create a unique style profile.
+- **Trend Forecasting**: Real-time fashion trend analysis with personalized recommendations.
+- **Virtual Try-On**: See how outfits look before wearing them.
+- **Fashion Designer AI**: Generate custom clothing designs with AI.
+- **Wardrobe Gap Analysis**: AI identifies what's missing from your wardrobe and suggests targeted purchases.
+- **Style Council**: Multiple AI fashion personas debate your outfit choices.
+- **Outfit Calendar**: Plan and track what you wear each day.
+
+## Pricing
+- **Free (Starter)**: Basic wardrobe management, limited AI suggestions.
+- **Style Plan ($9/month)**: Unlimited AI outfits, trend alerts, wardrobe analytics.
+- **Premium ($29/month)**: Full AI styling suite, council, fashion designer, priority support.
+- **Elite ($99/month)**: Virtual try-on, personal styling sessions, all features unlocked.
+
+## Technology
+Built with React, TypeScript, and AI/ML models for computer vision (clothing recognition), color analysis, body type detection, and natural language styling advice.
+
+## Target Users
+Fashion-conscious individuals aged 18-45 seeking efficient wardrobe management, daily outfit inspiration, and personalized style guidance. Also serves budget-conscious shoppers and sustainable fashion advocates.
+
+## Links
+- Website: https://luxor.ly
+- Sign Up: https://luxor.ly/auth
+- Install App: https://luxor.ly/install
