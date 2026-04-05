@@ -36,7 +36,6 @@ const Index = () => {
       <TabbedFeatures />
       <Features />
       <HowItWorks />
-      <AIFashionEditorial />
       <Testimonials />
       <Pricing />
       <FAQ />
