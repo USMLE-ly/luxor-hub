@@ -91,6 +91,19 @@ const Blog = () => {
     document.title = "Fashion Blog — AI Styling Tips & Wardrobe Guides | LEXOR®";
     const metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc) metaDesc.setAttribute("content", "Expert fashion advice powered by AI. Read guides on capsule wardrobes, color analysis, office outfits, wardrobe management, and AI outfit recommendations from LEXOR®.");
+    
+    // OG tags
+    let ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle) ogTitle.setAttribute("content", "Fashion Blog — AI Styling Tips & Wardrobe Guides | LEXOR®");
+    let ogDesc = document.querySelector('meta[property="og:description"]');
+    if (ogDesc) ogDesc.setAttribute("content", "Expert fashion advice powered by AI. Guides on capsule wardrobes, color analysis, and AI outfit recommendations.");
+    let twitterCard = document.querySelector('meta[name="twitter:card"]');
+    if (!twitterCard) {
+      twitterCard = document.createElement("meta");
+      twitterCard.setAttribute("name", "twitter:card");
+      twitterCard.setAttribute("content", "summary_large_image");
+      document.head.appendChild(twitterCard);
+    }
   }, []);
 
   return (
