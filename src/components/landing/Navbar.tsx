@@ -78,7 +78,7 @@ const Navbar = () => {
           {navLinks.map((link) => (
             <button
               key={link.id}
-              onClick={() => scrollTo(link.id)}
+              onClick={() => (link as any).isRoute ? navigate("/blog") : scrollTo(link.id)}
               aria-current={activeSection === link.id ? "page" : undefined}
               className="relative py-1 transition-colors hover:text-foreground"
             >
