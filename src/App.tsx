@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "next-themes";
+import { HelmetProvider } from "react-helmet-async";
 import { pageview } from "@/lib/fbPixel";
 import Index from "./pages/Index";
 import { ErrorBoundary } from "@/components/app/ErrorBoundary";
@@ -47,6 +48,7 @@ import Council from "./pages/Council";
 import MonthlyReport from "./pages/MonthlyReport";
 import WardrobeValue from "./pages/WardrobeValue";
 import Blog from "./pages/Blog";
+import BlogArticle from "./pages/BlogArticle";
 
 
 // Tracks route changes for Facebook Pixel
@@ -61,6 +63,7 @@ const RouteTracker = () => {
 const queryClient = new QueryClient();
 
 const App = () => (
+  <HelmetProvider>
   <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
     <StarfieldBackground />
     <OfflineIndicator />
@@ -109,6 +112,7 @@ const App = () => (
             <Route path="/monthly-report" element={<PaywallGate><MonthlyReport /></PaywallGate>} />
             <Route path="/wardrobe-value" element={<PaywallGate><WardrobeValue /></PaywallGate>} />
             <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogArticle />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
@@ -119,6 +123,7 @@ const App = () => (
       </TooltipProvider>
     </QueryClientProvider>
   </ThemeProvider>
+  </HelmetProvider>
 );
 
 export default App;

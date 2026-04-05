@@ -43,6 +43,7 @@ const Navbar = () => {
     { label: "How It Works", id: "how-it-works" },
     { label: "Pricing", id: "pricing" },
     { label: "FAQ", id: "faq" },
+    { label: "Blog", id: "blog", isRoute: true },
   ];
 
   return (
@@ -77,7 +78,7 @@ const Navbar = () => {
           {navLinks.map((link) => (
             <button
               key={link.id}
-              onClick={() => scrollTo(link.id)}
+              onClick={() => (link as any).isRoute ? navigate("/blog") : scrollTo(link.id)}
               aria-current={activeSection === link.id ? "page" : undefined}
               className="relative py-1 transition-colors hover:text-foreground"
             >
@@ -127,7 +128,7 @@ const Navbar = () => {
                   {navLinks.map((link) => (
                     <button
                       key={link.id}
-                      onClick={() => scrollTo(link.id)}
+                      onClick={() => (link as any).isRoute ? (() => { setSheetOpen(false); navigate("/blog"); })() : scrollTo(link.id)}
                       className={`text-left py-3 text-base font-sans transition-colors border-b border-border ${
                         activeSection === link.id ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
                       }`}
