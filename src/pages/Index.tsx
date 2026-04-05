@@ -10,6 +10,7 @@ import TabbedFeatures from "@/components/landing/TabbedFeatures";
 import Testimonials from "@/components/landing/Testimonials";
 import Pricing from "@/components/landing/Pricing";
 import FAQ from "@/components/landing/FAQ";
+import AIFashionEditorial from "@/components/landing/AIFashionEditorial";
 import Footer from "@/components/landing/Footer";
 import CTABanner from "@/components/landing/CTABanner";
 import AnnouncementBanner from "@/components/landing/AnnouncementBanner";
