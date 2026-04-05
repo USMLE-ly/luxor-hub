@@ -9,7 +9,7 @@ import {
 const faqs = [
   {
     q: "I don't have time for this.",
-    a: "Setup takes 3 minutes. Photograph your closet, upload a selfie, done. After that, LEXOR® works in the background — your outfit is ready before you wake up.",
+    a: "Setup takes 3 minutes. Photograph your closet and upload a selfie. After that, your AI fashion stylist works in the background. Your outfit is ready before you wake up.",
   },
   {
     q: "What if the AI gets it wrong?",
