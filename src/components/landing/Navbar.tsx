@@ -43,6 +43,7 @@ const Navbar = () => {
     { label: "How It Works", id: "how-it-works" },
     { label: "Pricing", id: "pricing" },
     { label: "FAQ", id: "faq" },
+    { label: "Blog", id: "blog", isRoute: true },
   ];
 
   return (
