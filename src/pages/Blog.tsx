@@ -86,21 +86,14 @@ const articles = [
   },
 ];
 
-const Blog = () => (
-  <>
-    <Helmet>
-      <title>Fashion Blog — AI Styling Tips & Wardrobe Guides | LEXOR®</title>
-      <meta
-        name="description"
-        content="Expert fashion advice powered by AI. Read guides on capsule wardrobes, color analysis, office outfits, wardrobe management, and AI outfit recommendations from LEXOR®."
-      />
-      <meta
-        name="keywords"
-        content="AI fashion blog, capsule wardrobe guide, color analysis fashion, what to wear to work, wardrobe management app, AI outfit recommendations"
-      />
-      <link rel="canonical" href="https://luxor.ly/blog" />
-    </Helmet>
+const Blog = () => {
+  useEffect(() => {
+    document.title = "Fashion Blog — AI Styling Tips & Wardrobe Guides | LEXOR®";
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute("content", "Expert fashion advice powered by AI. Read guides on capsule wardrobes, color analysis, office outfits, wardrobe management, and AI outfit recommendations from LEXOR®.");
+  }, []);
 
+  return (
     <div className="min-h-screen bg-background dark">
       {/* Nav */}
       <nav className="sticky top-0 z-50 border-b border-border/20 bg-background/80 backdrop-blur-xl">
