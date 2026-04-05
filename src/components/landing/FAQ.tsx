@@ -13,7 +13,7 @@ const faqs = [
   },
   {
     q: "What if the AI gets it wrong?",
-    a: "30-day money-back guarantee, no questions. But the AI learns from your feedback — every thumbs-up or swap makes it sharper. Most users see accurate suggestions within a week.",
+    a: "We offer a 30-day money-back guarantee. No questions asked. The AI learns from your feedback — every thumbs-up or swap makes fashion recommendations more accurate. Most users see precise outfit suggestions within one week.",
   },
   {
     q: "Is my data safe?",
