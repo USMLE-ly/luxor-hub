@@ -54,9 +54,12 @@ const Features = () => {
         >
           <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase mb-3">Features</p>
           <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground">
-            Everything You Need.{" "}
+            Every Fashion Tool You Need.{" "}
             <span className="gold-text">One App.</span>
           </h2>
+          <p className="mt-4 max-w-2xl mx-auto text-sm text-muted-foreground leading-relaxed">
+            From AI outfit analysis to trend forecasting, wardrobe management to virtual try-on — LEXOR® combines every fashion styling feature into a single intelligent platform.
+          </p>
         </motion.div>
 
         {/* Side Panel Video */}

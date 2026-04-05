@@ -9,11 +9,11 @@ import {
 const faqs = [
   {
     q: "I don't have time for this.",
-    a: "Setup takes 3 minutes. Photograph your closet, upload a selfie, done. After that, LEXOR® works in the background — your outfit is ready before you wake up.",
+    a: "Setup takes 3 minutes. Photograph your closet and upload a selfie. After that, your AI fashion stylist works in the background. Your outfit is ready before you wake up.",
   },
   {
     q: "What if the AI gets it wrong?",
-    a: "30-day money-back guarantee, no questions. But the AI learns from your feedback — every thumbs-up or swap makes it sharper. Most users see accurate suggestions within a week.",
+    a: "We offer a 30-day money-back guarantee. No questions asked. The AI learns from your feedback — every thumbs-up or swap makes fashion recommendations more accurate. Most users see precise outfit suggestions within one week.",
   },
   {
     q: "Is my data safe?",
@@ -25,7 +25,7 @@ const faqs = [
   },
   {
     q: "I already know how to dress.",
-    a: "Even professional stylists use data. LEXOR® finds combinations you'd miss — it cross-references weather, your calendar, what you wore recently, and pieces buried in your closet.",
+    a: "Even professional fashion stylists use data. LEXOR® finds outfit combinations you'd miss. It cross-references weather, your calendar, recent outfits, and pieces buried in your closet.",
   },
   {
     q: "Can I cancel?",

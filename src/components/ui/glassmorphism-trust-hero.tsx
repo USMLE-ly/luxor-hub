@@ -130,7 +130,7 @@ export default function GlassmorphismTrustHero() {
                 WebkitMaskImage: "linear-gradient(180deg, black 0%, black 80%, transparent 100%)",
               }}
             >
-              Your AI Stylist<br />
+             Your AI Fashion Stylist<br />
               <span className="gold-text">
                 That Actually
               </span><br />
@@ -139,7 +139,7 @@ export default function GlassmorphismTrustHero() {
 
             {/* Description */}
             <p className="hero-animate-fade-in hero-delay-300 max-w-xl text-lg text-muted-foreground leading-relaxed">
-              Upload your closet. Get the perfect outfit every morning — weather-checked, calendar-aware, built from what you own.
+              Upload your closet. Get the perfect fashion outfit every morning — weather-checked, calendar-aware, and built entirely from what you own. Your AI fashion stylist learns your style, body type, and preferences to save you time and boost confidence.
             </p>
 
             {/* CTA Buttons */}
