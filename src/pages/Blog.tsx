@@ -168,18 +168,24 @@ const Blog = () => {
 
                 {/* Full article body rendered for SEO */}
                 <div className="space-y-4 text-sm text-muted-foreground/80 leading-relaxed">
-                  {article.body.map((paragraph, j) => (
+                  {article.body.slice(0, 2).map((paragraph, j) => (
                     <p key={j}>{paragraph}</p>
                   ))}
                 </div>
 
-                <div className="mt-6 pt-4 border-t border-border/10">
+                <div className="mt-6 pt-4 border-t border-border/10 flex items-center justify-between">
                   <Link
-                    to="/auth"
+                    to={`/blog/${article.slug}`}
                     className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
                   >
-                    Try LEXOR® Free
+                    Read Full Article
                     <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                  <Link
+                    to="/auth"
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Try LEXOR® Free
                   </Link>
                 </div>
               </div>
