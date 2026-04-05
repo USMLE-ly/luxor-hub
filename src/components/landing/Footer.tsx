@@ -68,6 +68,7 @@ const Footer = () => {
             <a href="#pricing" onClick={(e) => scrollTo(e, "pricing")} className="hover:text-foreground transition-colors w-fit">Pricing</a>
             <a href="#faq" onClick={(e) => scrollTo(e, "faq")} className="hover:text-foreground transition-colors w-fit">FAQ</a>
             <button onClick={() => navigate("/blog")} className="hover:text-foreground transition-colors w-fit text-left">Blog</button>
+            <button onClick={() => navigate("/deep-dive")} className="hover:text-foreground transition-colors w-fit text-left">Deep Dive</button>
             <a href="#" className="hover:text-foreground transition-colors w-fit">Privacy Policy</a>
             <a href="#" className="hover:text-foreground transition-colors w-fit">Terms of Service</a>
           </div>
