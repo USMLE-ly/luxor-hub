@@ -211,7 +211,7 @@ const Blog = () => {
         </motion.div>
       </main>
     </div>
-  </>
-);
+  );
+};
 
 export default Blog;
