@@ -78,11 +78,11 @@ const articles = [
     readTime: "12 min read",
     date: "March 5, 2026",
     body: [
-      "The wardrobe management app market has exploded. In 2024, fewer than five apps offered meaningful AI styling. By 2026, there are over twenty — but quality varies wildly. Some are glorified photo albums. Others, like LEXOR®, are genuine AI fashion platforms that learn, recommend, and evolve with your style.",
-      "The baseline features every closet app should offer: photo upload with background removal, category tagging, outfit creation, and basic search. These are table stakes. What separates the best from the rest is intelligence — does the app actually help you dress better, or just organize what you already own?",
-      "LEXOR® leads in several categories: AI outfit generation that factors in weather and calendar; Style DNA profiling across 40+ dimensions; cost-per-wear analytics; wardrobe gap identification; and a social layer for sharing looks and getting community feedback. The free tier is generous enough for casual users, while the Pro tier unlocks full AI capability.",
-      "When evaluating any wardrobe app, ask three questions. First: does it reduce decision fatigue? If you still spend 15 minutes choosing clothes, the app isn't working. Second: does it save money? The best apps pay for themselves by preventing redundant purchases. Third: does it improve over time? Static tools plateau fast — you want a system that learns your preferences with every interaction.",
-      "Privacy should be non-negotiable. Your wardrobe is intimate data. Look for apps with end-to-end encryption, local-first processing, and clear data retention policies. LEXOR® stores wardrobe data in encrypted cloud storage with zero third-party sharing, and the AI model processes recommendations without exposing individual user patterns.",
+      "The wardrobe app market has exploded. By 2026, there are over twenty options — but quality varies. Some are glorified photo albums. Others, like LEXOR®, are AI platforms that learn and evolve with your style.",
+      "Baseline features every app should have: photo upload with background removal, category tagging, outfit creation, and search. What separates the best is intelligence — does it help you dress better, or just organize what you own?",
+      "LEXOR® leads in AI outfit generation (weather + calendar), Style DNA profiling, cost-per-wear analytics, wardrobe gap detection, and a social layer for sharing looks. The free tier works for casual users; Pro unlocks full AI capability.",
+      "When evaluating any app, ask: Does it cut decision fatigue? Does it save money? Does it improve over time? Static tools plateau. You want a system that learns with every interaction.",
+      "Privacy is non-negotiable. Your wardrobe is intimate data. Look for end-to-end encryption and clear data policies. LEXOR® uses encrypted cloud storage with zero third-party sharing.",
     ],
   },
 ];
