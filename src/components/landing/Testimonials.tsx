@@ -13,12 +13,12 @@ import sales81k from "@/assets/revenue/sales-81k.jpeg";
 import sales673k from "@/assets/revenue/sales-673k.jpg";
 
 const shuffleScreenshots = [
-  { id: 1, image: sales673k, testimonial: "$673,912 total sales with 56% growth over 90 days.", author: "Shopify Dashboard" },
-  { id: 2, image: sales105k, testimonial: "$105,525 generated with 1,300% increase and 3.35K orders.", author: "Shopify Analytics" },
-  { id: 3, image: grossSales390k, testimonial: "€390,033 gross sales, 11,880 orders fulfilled, 391K sessions.", author: "Store Overview" },
-  { id: 4, image: sales81k, testimonial: "$81,452 in total sales across 1.01K orders over 5 months.", author: "Sales Report" },
-  { id: 5, image: sales10k, testimonial: "$10,349 in early-stage revenue with 330 orders at 1.88% conversion.", author: "Early Growth" },
-  { id: 6, image: stripePayout, testimonial: "€48,579.84 Stripe payout confirmed and on its way.", author: "Stripe Payout" },
+  { id: 1, image: sales673k, testimonial: "$673,912 total sales — 56% growth in 90 days.", author: "Shopify Dashboard" },
+  { id: 2, image: sales105k, testimonial: "$105,525 revenue — 1,300% increase, 3.35K orders.", author: "Shopify Analytics" },
+  { id: 3, image: grossSales390k, testimonial: "€390,033 gross sales, 11,880 orders, 391K sessions.", author: "Store Overview" },
+  { id: 4, image: sales81k, testimonial: "$81,452 across 1.01K orders over 5 months.", author: "Sales Report" },
+  { id: 5, image: sales10k, testimonial: "$10,349 early-stage — 330 orders, 1.88% conversion.", author: "Early Growth" },
+  { id: 6, image: stripePayout, testimonial: "€48,579.84 Stripe payout confirmed.", author: "Stripe Payout" },
 ];
 
 const ShuffleSection = () => {
