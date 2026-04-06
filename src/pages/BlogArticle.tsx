@@ -4,6 +4,7 @@ import { ArrowLeft, Clock, Tag, ArrowRight, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import NewsletterSignup from "@/components/blog/NewsletterSignup";
+import ShareButtons from "@/components/blog/ShareButtons";
 
 const articles: Record<string, {
   title: string;
