@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Clock, Tag, ArrowRight, Sparkles } from "lucide-react";
 import { useEffect } from "react";
+import NewsletterSignup from "@/components/blog/NewsletterSignup";
 
 const articles = [
   {
@@ -206,13 +207,18 @@ const Blog = () => {
           ))}
         </div>
 
+        {/* Newsletter Signup */}
+        <div className="mt-16">
+          <NewsletterSignup />
+        </div>
+
         {/* Bottom CTA */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="mt-20 text-center"
+          className="mt-12 text-center"
         >
           <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground tracking-tight mb-4">
             Ready to Dress Smarter?
