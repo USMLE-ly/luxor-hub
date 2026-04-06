@@ -224,7 +224,7 @@ const Blog = () => {
             Ready to Dress Smarter?
           </h2>
           <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
-            Join thousands of people using AI to build better wardrobes, save money, and feel confident every day.
+            Thousands of people use AI to build better wardrobes and save money. Join them.
           </p>
           <Link
             to="/auth"
