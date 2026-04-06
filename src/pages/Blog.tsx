@@ -57,7 +57,7 @@ const articles = [
     slug: "color-analysis-for-fashion-find-your-season",
     title: "Color Analysis for Fashion: How to Find Your Season and Dress in Your Best Shades",
     excerpt:
-      "Seasonal color analysis isn't just a TikTok trend — it's a proven framework for identifying which hues make your skin glow and which wash you out. Here's the science behind it.",
+      "Seasonal color analysis is a proven framework for finding which hues make your skin glow and which wash you out. Here's the science.",
     category: "Color Theory",
     readTime: "9 min read",
     date: "March 12, 2026",
