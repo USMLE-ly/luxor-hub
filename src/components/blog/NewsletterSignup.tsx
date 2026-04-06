@@ -43,7 +43,7 @@ const NewsletterSignup = () => {
         animate={{ opacity: 1, scale: 1 }}
         className="rounded-2xl border border-border/20 bg-card/30 backdrop-blur-sm p-8 text-center"
       >
-        <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-3" />
+        <CheckCircle className="w-8 h-8 text-primary mx-auto mb-3" />
         <h3 className="font-display text-lg font-bold text-foreground mb-1">You're In!</h3>
         <p className="text-sm text-muted-foreground">
           Weekly style intelligence delivered to your inbox.
