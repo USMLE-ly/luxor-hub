@@ -9,7 +9,7 @@ const articles = [
     slug: "ai-outfit-recommendation-how-it-works",
     title: "How AI Outfit Recommendation Engines Actually Work in 2026",
     excerpt:
-      "Modern AI outfit engines go far beyond simple color matching. They analyze body proportions, fabric compatibility, weather forecasts, and personal taste graphs to build daily looks that feel uniquely you.",
+      "AI outfit engines go beyond color matching. They analyze body proportions, fabric compatibility, weather, and personal taste to build daily looks.",
     category: "Technology",
     readTime: "8 min read",
     date: "April 3, 2026",
