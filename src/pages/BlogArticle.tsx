@@ -4,6 +4,7 @@ import { ArrowLeft, Clock, Tag, ArrowRight, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import NewsletterSignup from "@/components/blog/NewsletterSignup";
+import ShareButtons from "@/components/blog/ShareButtons";
 
 const articles: Record<string, {
   title: string;
@@ -188,6 +189,9 @@ const BlogArticle = () => {
             <h1 className="font-display text-3xl md:text-5xl font-bold text-foreground tracking-tight leading-tight">
               {article.title}
             </h1>
+            <div className="mt-6">
+              <ShareButtons title={article.title} slug={slug!} />
+            </div>
           </motion.header>
 
           <div className="space-y-6 text-base md:text-lg text-muted-foreground leading-relaxed">
