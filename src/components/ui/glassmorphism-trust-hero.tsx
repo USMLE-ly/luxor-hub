@@ -27,9 +27,9 @@ const CLIENTS = [
 ];
 
 const TESTIMONIALS = [
-  { quote: "This app completely changed how I get dressed. I save 20 minutes every morning and always feel confident.", name: "Jessica M.", detail: "Premium Member · NYC", stars: 5 },
-  { quote: "I finally stopped buying clothes I never wear. The AI recommendations are scarily accurate.", name: "David R.", detail: "Style Plan · London", stars: 5 },
-  { quote: "My friends keep asking how I always look so put together. It's my secret weapon.", name: "Aisha K.", detail: "Premium Member · Dubai", stars: 5 },
+  { quote: "I save 20 minutes every morning. Haven't second-guessed an outfit in weeks.", name: "Jessica M.", detail: "Premium · NYC", stars: 5 },
+  { quote: "Stopped buying clothes I never wear. The AI knows my style better than I do.", name: "David R.", detail: "Style Plan · London", stars: 5 },
+  { quote: "Everyone asks how I always look put together. This is why.", name: "Aisha K.", detail: "Premium · Dubai", stars: 5 },
 ];
 
 const StatItem = ({ value, label }: { value: string; label: string }) => (
