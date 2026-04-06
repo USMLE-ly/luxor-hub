@@ -62,11 +62,11 @@ const articles = [
     readTime: "9 min read",
     date: "March 12, 2026",
     body: [
-      "Color analysis divides human coloring into seasonal archetypes — Spring, Summer, Autumn, Winter — based on three dimensions: undertone (warm vs. cool), value (light vs. dark), and chroma (muted vs. clear). Knowing your season transforms shopping from guesswork into precision.",
-      "The traditional method involves draping fabric swatches against your face under neutral lighting. AI has accelerated this dramatically. LEXOR®'s color analysis uses your selfie to map skin undertone, eye color, and hair shade, then outputs your seasonal type along with a personalized palette of 30+ complementary colors.",
-      "Why does it matter? Wearing colors that harmonize with your natural coloring creates visual coherence — your skin looks healthier, your eyes pop, your overall appearance looks intentional. Wearing clashing colors creates subtle discord that viewers register as 'something's off' without knowing why.",
-      "Each season has signature strengths. Springs shine in warm, clear tones: coral, warm turquoise, golden yellow. Winters command attention in high-contrast combinations: true red, cobalt blue, crisp white against jet black. Autumns glow in earthy warmth: olive, burnt orange, chocolate. Summers look effortless in soft, cool tones: dusty rose, periwinkle, sage.",
-      "The most common mistake is chasing trendy colors regardless of season. A Pantone Color of the Year might look stunning on a Deep Winter but terrible on a Soft Summer. AI styling tools filter trend recommendations through your personal palette, ensuring you stay current without sacrificing harmony.",
+      "Color analysis divides human coloring into seasonal archetypes — Spring, Summer, Autumn, Winter — based on undertone, value, and chroma. Knowing your season turns shopping from guesswork into precision.",
+      "The traditional method uses fabric drapes under neutral light. AI has made it instant. LEXOR® uses your selfie to map skin undertone, eye color, and hair shade, then outputs your season with 30+ complementary colors.",
+      "Colors that match your natural coloring make your skin look healthier and your appearance more intentional. Clashing colors create subtle discord people register as 'something's off.'",
+      "Springs shine in coral and golden yellow. Winters command attention in cobalt and crisp white. Autumns glow in olive and burnt orange. Summers look effortless in dusty rose and sage.",
+      "The biggest mistake is chasing trendy colors regardless of season. AI styling filters trends through your personal palette so you stay current without losing harmony.",
     ],
   },
   {
