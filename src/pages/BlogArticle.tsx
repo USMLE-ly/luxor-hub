@@ -120,6 +120,19 @@ const BlogArticle = () => {
         <meta name="twitter:title" content={article.title} />
         <meta name="twitter:description" content={article.ogDescription} />
         <link rel="canonical" href={`https://luxor.ly/blog/${slug}`} />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": article.title,
+            "description": article.ogDescription,
+            "datePublished": article.date,
+            "author": { "@type": "Organization", "name": "LEXOR®", "url": "https://luxor.ly" },
+            "publisher": { "@type": "Organization", "name": "LEXOR®", "url": "https://luxor.ly" },
+            "mainEntityOfPage": { "@type": "WebPage", "@id": `https://luxor.ly/blog/${slug}` },
+            "articleSection": article.category,
+          })}
+        </script>
       </Helmet>
 
       <div className="min-h-screen bg-background dark">
