@@ -142,7 +142,7 @@ const Blog = () => {
             The LEXOR® Fashion Blog
           </h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Expert guides on AI fashion styling, capsule wardrobes, color analysis, and smarter dressing — backed by data, written for real people.
+            Guides on AI styling, capsule wardrobes, color analysis, and smarter dressing — backed by data.
           </p>
         </motion.div>
       </header>
