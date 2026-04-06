@@ -1,87 +1,80 @@
 
 
-# Humanize All Copy + Blog/Deep Dive Enhancements
+# Publish + Blog/Deep Dive Enhancements
 
-## What's Happening
+## Overview
 
-The entire site's copy reads like polished AI output: rule-of-three structures, promotional language ("vibrant," "genuine," "deeply personal"), copula avoidance ("serves as," "stands as"), and padded paragraphs. We'll rewrite every user-facing string using the uploaded Humanizer patterns, cut word count by ~40%, and add three technical features.
-
----
-
-## Part 1: Humanize Copy Across All Files
-
-**Files to rewrite** (copy only — no layout/logic changes):
-
-| File | What changes |
-|------|-------------|
-| `glassmorphism-trust-hero.tsx` | Tighten H1 subtext, testimonial quotes (cut filler), stat labels |
-| `Features.tsx` | Rewrite subtitle — kill "combines every fashion styling feature into a single intelligent platform" |
-| `HowItWorks.tsx` (Gallery items) | Shorten 6 card descriptions. Cut "-ing" phrases and promotional words |
-| `SocialProofStrip.tsx` | Tighten UVP labels and subs |
-| `FAQ.tsx` | Rewrite all 6 answers: shorter, direct, no padding. Kill "genuine source of stress," "that's the promise of" |
-| `Pricing.tsx` | Tier descriptions: cut "full AI styling arsenal" type language |
-| `CTABanner.tsx` | Tighten CTA headline and body |
-| `Testimonials.tsx` | Clean up screenshot captions |
-| `AIFashionEditorial.tsx` | Rewrite all 5 step bodies + closing essay — ~50% shorter. Kill "transforms," "eliminates friction," "amplifying it" |
-| `Blog.tsx` | Rewrite article excerpts, header copy, CTA copy |
-| `BlogArticle.tsx` | Rewrite all 25 article body paragraphs across 5 articles — cut filler, use direct "is/has" constructions |
-| `DeepDive.tsx` | Update meta description to match new editorial copy |
-| `NewsletterSignup.tsx` | Tighten newsletter CTA copy |
-| `Footer.tsx` | Tighten "Stay in Style" copy |
-| `Navbar.tsx` | No copy changes needed (already minimal) |
-
-**Humanizer rules applied:**
-- Replace "serves as / stands as / marks / represents" → "is / has"
-- Kill rule-of-three lists
-- Remove "-ing" filler phrases (showcasing, reflecting, ensuring)
-- Cut promotional words (vibrant, groundbreaking, stunning, breathtaking)
-- Remove negative parallelisms ("not just X, it's Y")
-- Remove "Additionally" / "Furthermore" / "Moreover"
-- Vary sentence length. Add direct opinion where appropriate.
-- Keep SEO keywords intact — just remove the padding around them
+Six changes: publish the site, add read-time-remaining indicator, add OG images to blog articles, add a link-preview hover component, redesign Deep Dive with grid feature cards, and remove Sparkles icons from blog/deep-dive pages.
 
 ---
 
-## Part 2: Newsletter Signup Test
+## 1. Publish the Site
 
-The newsletter form already exists and writes to `newsletter_subscribers`. No code changes needed — just manual testing by navigating to `/blog` and submitting an email. Will verify the form works during implementation.
-
----
-
-## Part 3: JSON-LD for Deep Dive Page
-
-**File:** `src/pages/DeepDive.tsx`
-
-Add an `Article` structured data block inside `<Helmet>`:
-```json
-{
-  "@context": "https://schema.org",
-  "@type": "Article",
-  "headline": "How AI Fashion Styling Works — Deep Dive",
-  "description": "...",
-  "author": { "@type": "Organization", "name": "LEXOR®" },
-  "publisher": { "@type": "Organization", "name": "LEXOR®" },
-  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://luxor.ly/deep-dive" }
-}
-```
+Use the publish settings tool to ensure the site is public, then instruct the user to click "Publish > Update" to push frontend changes live.
 
 ---
 
-## Part 4: Reading Progress Bar for Blog Articles
+## 2. Read Time Remaining Indicator
 
 **File:** `src/pages/BlogArticle.tsx`
 
-Add a thin fixed progress bar at the top of the page that fills as the user scrolls through the article. Implementation:
-- Use `window.scrollY` and `document.documentElement.scrollHeight` to calculate progress
-- Render a `<div>` with `position: fixed; top: 0; height: 3px; bg-primary` that scales width from 0-100%
-- Lightweight — no library needed
+Parse the `readTime` string (e.g. "8 min read") to get total minutes. Calculate remaining minutes based on scroll progress: `Math.ceil(totalMin * (1 - progress / 100))`. Display next to the progress bar as a small label like "3 min left" that fades in once scrolling begins.
 
 ---
 
-## Summary of Deliverables
+## 3. Open Graph Images for Blog Articles
 
-1. Rewritten copy across ~14 files (shorter, human, direct)
-2. JSON-LD structured data on `/deep-dive`
-3. Reading progress bar on blog article pages
-4. Newsletter form verification
+**File:** `src/pages/BlogArticle.tsx`
+
+Add `og:image` and `twitter:image` meta tags in the Helmet. Since we don't have custom images per article, we'll generate a dynamic OG image URL using a free service (e.g. `https://og.luxor.ly` or a simple fallback to a branded static image). The simplest approach: add a single branded OG image to `public/og/blog-default.png` and reference it, or use a dynamic OG image generator via URL params. We'll use a static branded fallback image for now with the path `/og/blog-og.png`.
+
+---
+
+## 4. Link Preview Component (Adapted for React/Vite)
+
+**File:** `src/components/ui/link-preview.tsx`
+
+Adapt the provided Next.js component for our React/Vite stack:
+- Replace `next/image` with standard `<img>` tags
+- Replace `next/link` with React Router `<Link>` or `<a>` tags
+- Install `qss` package (framer-motion and @radix-ui/react-hover-card already exist)
+- Keep the hover card animation, microlink API screenshot integration, and mouse-follow effect
+- Style to match our dark theme (dark card background, subtle border)
+
+**File:** `src/pages/Blog.tsx`
+
+Use `LinkPreview` on article titles or "Read Full Article" links so hovering shows a preview of the article content.
+
+---
+
+## 5. Deep Dive with Grid Feature Cards
+
+**File:** `src/components/ui/grid-feature-cards.tsx` — already exists, no changes needed.
+
+**File:** `src/pages/DeepDive.tsx` and `src/components/landing/AIFashionEditorial.tsx`
+
+Redesign the Deep Dive page to use the grid-feature-cards layout:
+- Replace the vertical timeline layout with a 2x3 or 3-column grid of `FeatureCard` components
+- Each of the 5 steps becomes a card with its icon, title, and description
+- Add the AnimatedContainer wrapper for blur-in animation
+- Keep the closing "Why AI Styling Matters" section below the grid
+- Use dashed border grid dividers as shown in the demo
+
+---
+
+## 6. Remove Sparkles Icon
+
+**Files:** `src/pages/Blog.tsx`, `src/pages/BlogArticle.tsx`, `src/components/landing/AIFashionEditorial.tsx`
+
+- Remove the `<Sparkles>` icon from the blog header badge, article CTA section, and deep dive header badge
+- Replace with nothing (just remove the icon) or use a simpler visual indicator
+
+---
+
+## Technical Notes
+
+- `qss` is the only new npm dependency needed
+- The link-preview uses microlink.io's free API for screenshot generation — no API key required
+- Grid feature cards use `React.useId()` for unique SVG pattern IDs — no collision risk
+- OG image will be a static fallback until custom per-article images are created
 
