@@ -200,6 +200,11 @@ const BlogArticle = () => {
             ) : <div />}
           </div>
 
+          {/* Newsletter */}
+          <div className="mt-16">
+            <NewsletterSignup />
+          </div>
+
           {/* CTA */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
