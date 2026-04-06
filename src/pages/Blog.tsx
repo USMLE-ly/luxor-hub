@@ -41,7 +41,7 @@ const articles = [
     slug: "what-to-wear-to-work-office-outfit-ideas",
     title: "What to Wear to Work: Smart Office Outfit Ideas for Every Dress Code",
     excerpt:
-      "From business formal to creative casual, navigating office dress codes is tricky. Here's how to decode your workplace style and build a rotation that looks polished without feeling stiff.",
+      "From business formal to creative casual — here's how to decode your workplace style and build a rotation that looks polished without feeling stiff.",
     category: "Office Style",
     readTime: "7 min read",
     date: "March 20, 2026",
