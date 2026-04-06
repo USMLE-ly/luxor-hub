@@ -74,7 +74,7 @@ const tiers: Tier[] = [
     key: "pro",
     label: "Pro",
     price: "29",
-    desc: "Full AI styling arsenal — no limits on your closet",
+    desc: "Unlimited AI styling — no closet limits",
     features: [
       "Unlimited AI outfit suggestions",
       "Full color & style DNA analysis",
