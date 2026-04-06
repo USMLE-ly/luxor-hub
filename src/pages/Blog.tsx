@@ -25,7 +25,7 @@ const articles = [
     slug: "capsule-wardrobe-guide-minimalist-fashion",
     title: "The Complete Capsule Wardrobe Guide: Build a Minimalist Closet That Works",
     excerpt:
-      "A capsule wardrobe isn't about owning less — it's about owning better. Learn how to audit your closet, identify versatile staples, and use AI to maximize outfit combinations from fewer pieces.",
+      "A capsule wardrobe isn't about owning less — it's about owning better. Audit your closet, find versatile staples, and use AI to maximize outfit combinations.",
     category: "Style Guide",
     readTime: "10 min read",
     date: "March 28, 2026",
