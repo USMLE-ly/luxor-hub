@@ -92,7 +92,7 @@ const tiers: Tier[] = [
     key: "elite",
     label: "Elite",
     price: "99",
-    desc: "White-glove styling — your AI concierge handles everything",
+    desc: "Your AI concierge handles everything",
     features: [
       "Everything in Pro, plus:",
       "Virtual try-on technology",

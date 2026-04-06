@@ -9,27 +9,27 @@ import {
 const faqs = [
   {
     q: "I don't have time for this.",
-    a: "Setup takes 3 minutes. Photograph your closet and upload a selfie. After that, your AI fashion stylist works in the background. Your outfit is ready before you wake up.",
+    a: "Setup takes 3 minutes. Photograph your closet, upload a selfie, done. Your outfit is ready before you wake up.",
   },
   {
     q: "What if the AI gets it wrong?",
-    a: "We offer a 30-day money-back guarantee. No questions asked. The AI learns from your feedback — every thumbs-up or swap makes fashion recommendations more accurate. Most users see precise outfit suggestions within one week.",
+    a: "30-day money-back guarantee, no questions. The AI learns from every thumbs-up or swap. Most users see accurate picks within a week.",
   },
   {
     q: "Is my data safe?",
-    a: "End-to-end encrypted. Never shared. Export or delete anytime from settings.",
+    a: "End-to-end encrypted. Never shared. Export or delete anytime in settings.",
   },
   {
     q: "Does it work for my body type?",
-    a: "All of them. AI adapts to your specific measurements, not a generic mannequin. Tall, petite, plus-size, athletic — it adjusts cuts, proportions, and color placement for you.",
+    a: "All of them. The AI uses your measurements — not a generic mannequin. It adjusts cuts, proportions, and color placement for you.",
   },
   {
     q: "I already know how to dress.",
-    a: "Even professional fashion stylists use data. LEXOR® finds outfit combinations you'd miss. It cross-references weather, your calendar, recent outfits, and pieces buried in your closet.",
+    a: "Even stylists use data. LEXOR® finds combinations you'd miss by cross-referencing weather, your calendar, and pieces buried in your closet.",
   },
   {
     q: "Can I cancel?",
-    a: "Yes. Two clicks in settings. No penalties, no guilt trips. Your data stays accessible for 30 days after cancellation.",
+    a: "Yes. Two clicks in settings. No penalties. Your data stays accessible for 30 days after.",
   },
 ];
 

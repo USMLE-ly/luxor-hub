@@ -14,8 +14,19 @@ const DeepDive = () => {
         <title>How AI Fashion Styling Works — Deep Dive | LEXOR®</title>
         <meta
           name="description"
-          content="Discover exactly how LEXOR® uses AI to digitize your wardrobe, learn your style DNA, and deliver weather-checked outfits every morning. A step-by-step deep dive."
+          content="How LEXOR® digitizes your wardrobe, learns your style DNA, and delivers weather-checked outfits every morning. Step-by-step."
         />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "How AI Fashion Styling Works — Deep Dive",
+            "description": "How LEXOR® digitizes your wardrobe, learns your style DNA, and delivers weather-checked outfits every morning.",
+            "author": { "@type": "Organization", "name": "LEXOR®", "url": "https://luxor.ly" },
+            "publisher": { "@type": "Organization", "name": "LEXOR®", "url": "https://luxor.ly" },
+            "mainEntityOfPage": { "@type": "WebPage", "@id": "https://luxor.ly/deep-dive" },
+          })}
+        </script>
         <link rel="canonical" href="https://luxor.ly/deep-dive" />
         <meta property="og:title" content="How AI Fashion Styling Works — Deep Dive | LEXOR®" />
         <meta property="og:description" content="A step-by-step look at how AI turns your closet into a smart, personal fashion stylist." />

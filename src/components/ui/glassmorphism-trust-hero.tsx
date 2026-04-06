@@ -139,7 +139,7 @@ export default function GlassmorphismTrustHero() {
 
             {/* Description */}
             <p className="hero-animate-fade-in hero-delay-300 max-w-xl text-base sm:text-lg text-muted-foreground leading-relaxed">
-              Upload your closet. Get the perfect outfit every morning — weather-checked, calendar-aware, and uniquely yours.
+              Upload your closet. Get a weather-checked outfit every morning — built from what you already own.
             </p>
 
             {/* CTA Buttons */}

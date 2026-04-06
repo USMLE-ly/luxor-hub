@@ -84,7 +84,7 @@ const Testimonials = () => (
           Real Results. <span className="gold-text">Real Revenue.</span>
         </h2>
         <p className="mt-4 max-w-lg mx-auto font-sans text-sm text-muted-foreground leading-relaxed">
-          Unedited screenshots from our dashboards — no inflated numbers, no fake metrics. See the actual data.
+          Unedited dashboard screenshots. No inflated numbers. Actual data.
         </p>
       </motion.div>
 

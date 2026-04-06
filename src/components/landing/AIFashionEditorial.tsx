@@ -5,27 +5,27 @@ const steps = [
   {
     icon: Camera,
     title: "Step 1: Digitize Your Wardrobe",
-    body: "Start by photographing the clothes you already own. Our computer vision AI identifies each garment in seconds — detecting the category, dominant colors, fabric type, brand, and season. No manual tagging required. Within minutes your entire closet lives in one searchable, visual catalog on your phone.",
+    body: "Photograph your clothes. The AI identifies each piece in seconds — category, colors, fabric, brand, season. No manual tagging. Your entire closet lives in one searchable catalog on your phone.",
   },
   {
     icon: Brain,
-    title: "Step 2: AI Learns Your Unique Style DNA",
-    body: "LEXOR® doesn't use generic fashion rules. It builds a personal Style DNA profile based on your body measurements, skin-tone color season, lifestyle, and the outfits you actually wear. The algorithm maps your preferences across 40+ style dimensions — from silhouette proportions to pattern affinity — so every recommendation feels like you, not a mannequin.",
+    title: "Step 2: AI Learns Your Style DNA",
+    body: "LEXOR® builds a personal Style DNA profile from your body measurements, skin-tone color season, lifestyle, and the outfits you actually wear. It maps 40+ style dimensions so every recommendation feels like you.",
   },
   {
     icon: Sun,
     title: "Step 3: Wake Up to a Weather-Checked Outfit",
-    body: "Each morning, the AI cross-references your wardrobe, local weather forecast, and calendar events to assemble a complete outfit. Running late for a meeting? It prioritizes business-appropriate pieces. Weekend brunch? It shifts to relaxed, trend-forward combinations. You approve, swap, or skip — and every interaction makes tomorrow's suggestion smarter.",
+    body: "Each morning, the AI checks your wardrobe, local weather, and calendar to assemble a complete outfit. Late for a meeting? It picks business-appropriate pieces. Weekend brunch? Relaxed and current. Every interaction makes tomorrow smarter.",
   },
   {
     icon: ShoppingBag,
-    title: "Step 4: Shop Smarter With Wardrobe Gap Analysis",
-    body: "Instead of impulse buys, LEXOR® identifies what's genuinely missing from your closet. The AI highlights gaps — a versatile neutral blazer, a transitional-weather layer, the right shade of denim — and recommends specific pieces that multiply outfit possibilities. Users report spending 35% less on clothing while wearing 60% more of what they own.",
+    title: "Step 4: Shop Smarter With Gap Analysis",
+    body: "Instead of impulse buys, LEXOR® shows what's actually missing — a neutral blazer, a transitional layer, the right denim shade. Users spend 35% less on clothing while wearing 60% more of what they own.",
   },
   {
     icon: BarChart3,
     title: "Step 5: Track Progress and Build Confidence",
-    body: "Your dashboard shows cost-per-wear analytics, style scores, outfit variety metrics, and wardrobe utilization rates. Earn badges for consistency. Watch your confidence grow as you stop second-guessing and start showing up dressed exactly right — every single day.",
+    body: "Your dashboard shows cost-per-wear, style scores, outfit variety, and wardrobe utilization. Earn badges for consistency. Stop second-guessing and start showing up dressed right every day.",
   },
 ];
 
@@ -52,9 +52,7 @@ const AIFashionEditorial = () => (
           How AI Fashion Styling Actually Works
         </h2>
         <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-          Artificial intelligence is transforming the way people get dressed. Here's a step-by-step
-          look at how LEXOR® turns your closet into a smart, personal fashion stylist — no fashion
-          degree required.
+          Here's how LEXOR® turns your closet into a personal AI fashion stylist — step by step, no fashion degree required.
         </p>
       </motion.div>
 
@@ -68,7 +66,6 @@ const AIFashionEditorial = () => (
             transition={{ duration: 0.4, delay: i * 0.05 }}
             className="relative pl-12 md:pl-16"
           >
-            {/* Vertical connector line */}
             {i < steps.length - 1 && (
               <div className="absolute left-[18px] md:left-[22px] top-12 bottom-[-2.5rem] md:bottom-[-3.5rem] w-px bg-border/30" />
             )}
@@ -87,7 +84,6 @@ const AIFashionEditorial = () => (
         ))}
       </div>
 
-      {/* Closing editorial paragraph for additional SEO word count */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -100,24 +96,13 @@ const AIFashionEditorial = () => (
         </h3>
         <div className="space-y-4 text-sm md:text-base text-muted-foreground leading-relaxed">
           <p>
-            The average person spends 20 minutes every morning deciding what to wear — and still
-            feels unsure about the choice. Over a year, that's more than 120 hours lost to wardrobe
-            indecision. AI fashion styling eliminates that friction by doing what human intuition
-            can't: processing your entire wardrobe, the day's weather, your schedule, and current
-            trends in under a second.
+            The average person spends 20 minutes every morning deciding what to wear — and still feels unsure. Over a year, that's 120+ hours lost. AI styling fixes this by processing your entire wardrobe, the day's weather, your schedule, and current trends in under a second.
           </p>
           <p>
-            Unlike generic style quizzes or static lookbooks, LEXOR® uses machine learning that
-            improves with every interaction. The more you use it, the more precisely it understands
-            your taste — right down to fabric preferences, color affinities, and occasion-specific
-            dress codes. It's not replacing your style; it's amplifying it.
+            LEXOR® uses machine learning that improves with every interaction. The more you use it, the better it understands your taste — fabrics, colors, occasion-specific dress codes. It's not replacing your style. It's making it sharper.
           </p>
           <p>
-            Whether you're a busy professional who needs polished outfits without the effort, a
-            fashion enthusiast looking to maximize a curated closet, or someone rebuilding their
-            confidence through better self-presentation — AI fashion styling adapts to you. That's
-            the promise of LEXOR®: look your best, waste nothing, and never overthink getting
-            dressed again.
+            Whether you're a busy professional, a fashion enthusiast maximizing a curated closet, or someone rebuilding confidence through better self-presentation — AI styling adapts to you.
           </p>
         </div>
       </motion.div>
