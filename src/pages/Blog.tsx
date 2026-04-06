@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Clock, Tag, ArrowRight, Sparkles } from "lucide-react";
+import { ArrowLeft, Clock, Tag, ArrowRight } from "lucide-react";
 import { useEffect } from "react";
 import NewsletterSignup from "@/components/blog/NewsletterSignup";
+import { LinkPreview } from "@/components/ui/link-preview";
 
 const articles = [
   {
@@ -93,7 +94,6 @@ const Blog = () => {
     const metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc) metaDesc.setAttribute("content", "Expert fashion advice powered by AI. Read guides on capsule wardrobes, color analysis, office outfits, wardrobe management, and AI outfit recommendations from LEXOR®.");
     
-    // OG tags
     let ogTitle = document.querySelector('meta[property="og:title"]');
     if (ogTitle) ogTitle.setAttribute("content", "Fashion Blog — AI Styling Tips & Wardrobe Guides | LEXOR®");
     let ogDesc = document.querySelector('meta[property="og:description"]');
@@ -133,7 +133,6 @@ const Blog = () => {
           transition={{ duration: 0.5 }}
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-border/30 bg-card/40 px-3 py-1.5 backdrop-blur-md mb-6">
-            <Sparkles className="w-3.5 h-3.5 text-primary" />
             <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Fashion Intelligence
             </span>
@@ -188,13 +187,17 @@ const Blog = () => {
                 </div>
 
                 <div className="mt-6 pt-4 border-t border-border/10 flex items-center justify-between">
-                  <Link
-                    to={`/blog/${article.slug}`}
+                  <LinkPreview
+                    url={`/blog/${article.slug}`}
                     className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
+                    isStatic
+                    imageSrc="/og/blog-og.jpg"
+                    width={300}
+                    height={188}
                   >
                     Read Full Article
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
+                    <ArrowRight className="w-3.5 h-3.5 inline" />
+                  </LinkPreview>
                   <Link
                     to="/auth"
                     className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"

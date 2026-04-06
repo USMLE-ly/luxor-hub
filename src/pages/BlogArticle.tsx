@@ -1,6 +1,6 @@
 import { useParams, Link, Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Clock, Tag, ArrowRight, Sparkles } from "lucide-react";
+import { ArrowLeft, Clock, Tag, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import NewsletterSignup from "@/components/blog/NewsletterSignup";
@@ -120,6 +120,11 @@ const BlogArticle = () => {
   const nextSlug = currentIndex < articleSlugs.length - 1 ? articleSlugs[currentIndex + 1] : null;
   const prevSlug = currentIndex > 0 ? articleSlugs[currentIndex - 1] : null;
 
+  // Parse total minutes from readTime string like "8 min read"
+  const totalMin = parseInt(article.readTime) || 5;
+  const remainingMin = Math.max(1, Math.ceil(totalMin * (1 - progress / 100)));
+  const ogImageUrl = "https://luxor-hub.lovable.app/og/blog-og.jpg";
+
   return (
     <>
       <Helmet>
@@ -130,9 +135,13 @@ const BlogArticle = () => {
         <meta property="og:type" content="article" />
         <meta property="og:url" content={`https://luxor.ly/blog/${slug}`} />
         <meta property="og:site_name" content="LEXOR®" />
+        <meta property="og:image" content={ogImageUrl} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={article.title} />
         <meta name="twitter:description" content={article.ogDescription} />
+        <meta name="twitter:image" content={ogImageUrl} />
         <link rel="canonical" href={`https://luxor.ly/blog/${slug}`} />
         <script type="application/ld+json">
           {JSON.stringify({
@@ -145,15 +154,23 @@ const BlogArticle = () => {
             "publisher": { "@type": "Organization", "name": "LEXOR®", "url": "https://luxor.ly" },
             "mainEntityOfPage": { "@type": "WebPage", "@id": `https://luxor.ly/blog/${slug}` },
             "articleSection": article.category,
+            "image": ogImageUrl,
           })}
         </script>
       </Helmet>
 
-      {/* Reading progress bar */}
-      <div
-        className="fixed top-0 left-0 h-1 bg-primary z-[60] transition-all duration-150"
-        style={{ width: `${progress}%` }}
-      />
+      {/* Reading progress bar + time remaining */}
+      <div className="fixed top-0 left-0 right-0 z-[60]">
+        <div
+          className="h-1 bg-primary transition-all duration-150"
+          style={{ width: `${progress}%` }}
+        />
+        {progress > 2 && progress < 98 && (
+          <div className="absolute right-3 top-2 text-[10px] font-medium text-muted-foreground bg-background/80 backdrop-blur-sm rounded-full px-2 py-0.5 border border-border/20">
+            {remainingMin} min left
+          </div>
+        )}
+      </div>
 
       <div className="min-h-screen bg-background dark">
         <nav className="sticky top-0 z-50 border-b border-border/20 bg-background/80 backdrop-blur-xl">
@@ -236,7 +253,6 @@ const BlogArticle = () => {
             transition={{ duration: 0.5 }}
             className="mt-16 text-center rounded-2xl border border-border/20 bg-card/30 backdrop-blur-sm p-8"
           >
-            <Sparkles className="w-5 h-5 text-primary mx-auto mb-3" />
             <h2 className="font-display text-xl md:text-2xl font-bold text-foreground tracking-tight mb-3">
               Ready to Try AI Styling?
             </h2>
