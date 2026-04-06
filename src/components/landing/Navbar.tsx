@@ -129,7 +129,7 @@ const Navbar = () => {
                   {navLinks.map((link) => (
                     <button
                       key={link.id}
-                      onClick={() => (link as any).isRoute ? (() => { setSheetOpen(false); navigate("/blog"); })() : scrollTo(link.id)}
+                      onClick={() => (link as any).isRoute ? (() => { setSheetOpen(false); navigate(`/${link.id}`); })() : scrollTo(link.id)}
                       className={`text-left py-3 text-base font-sans transition-colors border-b border-border ${
                         activeSection === link.id ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
                       }`}
