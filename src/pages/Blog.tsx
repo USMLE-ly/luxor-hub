@@ -73,7 +73,7 @@ const articles = [
     slug: "wardrobe-management-app-comparison",
     title: "Best Wardrobe Management Apps in 2026: Features, Pricing, and Honest Reviews",
     excerpt:
-      "We compare the top digital closet apps — from basic cataloging tools to full AI styling platforms — so you can choose the right one for your lifestyle and budget.",
+      "We compare the top digital closet apps — from basic cataloging to full AI styling — so you can pick the right one.",
     category: "Reviews",
     readTime: "12 min read",
     date: "March 5, 2026",
