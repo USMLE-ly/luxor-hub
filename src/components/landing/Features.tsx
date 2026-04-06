@@ -58,7 +58,7 @@ const Features = () => {
             <span className="gold-text">One App.</span>
           </h2>
           <p className="mt-4 max-w-2xl mx-auto text-sm text-muted-foreground leading-relaxed">
-            From AI outfit analysis to trend forecasting, wardrobe management to virtual try-on — LEXOR® combines every fashion styling feature into a single intelligent platform.
+            AI outfit analysis, trend forecasting, wardrobe management, and virtual try-on — all in one app.
           </p>
         </motion.div>
 

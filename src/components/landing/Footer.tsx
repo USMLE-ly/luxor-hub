@@ -75,7 +75,7 @@ const Footer = () => {
 
           <div>
             <p className="font-semibold text-foreground text-sm font-sans mb-3">Stay in Style</p>
-            <p className="text-xs text-muted-foreground font-sans mb-3">Get weekly AI styling tips and updates.</p>
+            <p className="text-xs text-muted-foreground font-sans mb-3">Weekly styling tips. No spam.</p>
             <form onSubmit={handleSubscribe} className="flex gap-2">
               <div className="relative flex-1">
                 <input

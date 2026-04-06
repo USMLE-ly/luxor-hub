@@ -16,10 +16,10 @@ const CTABanner = () => {
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
           <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-4">
-            Your Closet Is Costing You Money Every Day You Wait
+            Your Closet Costs You Money Every Day You Wait
           </h2>
           <p className="font-sans text-muted-foreground text-base md:text-lg max-w-xl mx-auto mb-6">
-            Start free. See results in 3 minutes. Cancel anytime.
+            Free to start. Results in 3 minutes. Cancel anytime.
           </p>
           <motion.div className="flex justify-center">
             <Button

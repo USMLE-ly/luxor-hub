@@ -3,10 +3,10 @@ import { motion, useInView } from "framer-motion";
 import { Shirt, ScanFace, CloudSun, ShieldCheck } from "lucide-react";
 
 const uvps = [
-  { icon: Shirt, label: "Works With Your Existing Closet", sub: "No shopping required" },
-  { icon: ScanFace, label: "Learns Your Body, Not a Mannequin", sub: "Personalized to you" },
-  { icon: CloudSun, label: "Weather-Checked Every Morning", sub: "Practical daily value" },
-  { icon: ShieldCheck, label: "30-Day Money-Back Guarantee", sub: "Zero risk" },
+  { icon: Shirt, label: "Uses Your Existing Closet", sub: "No shopping required" },
+  { icon: ScanFace, label: "Learns Your Body", sub: "Not a generic mannequin" },
+  { icon: CloudSun, label: "Weather-Checked Daily", sub: "Practical value every morning" },
+  { icon: ShieldCheck, label: "30-Day Money Back", sub: "Zero risk" },
 ];
 
 const CountUp = ({ target, suffix = "" }: { target: number; suffix?: string }) => {

@@ -65,7 +65,7 @@ const NewsletterSignup = () => {
         <h3 className="font-display text-lg font-bold text-foreground">Style Intelligence Weekly</h3>
       </div>
       <p className="text-sm text-muted-foreground mb-5">
-        Get AI fashion tips, wardrobe hacks, and trend forecasts — delivered every Thursday.
+        AI styling tips and trend picks — every Thursday.
       </p>
       <form onSubmit={handleSubmit} className="flex gap-2">
         <input
