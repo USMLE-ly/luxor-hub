@@ -46,11 +46,11 @@ const articles = [
     readTime: "7 min read",
     date: "March 20, 2026",
     body: [
-      "Office dress codes have evolved dramatically. The rigid suit-and-tie era gave way to business casual, which then fragmented into 'smart casual', 'creative professional', and the ambiguous 'dress appropriately'. For many professionals, figuring out what to wear each morning is a genuine source of stress.",
-      "The key is building a flexible work wardrobe around three tiers. Tier one: polished staples — tailored trousers, structured blazers, quality button-downs. These are your board-meeting pieces. Tier two: smart-casual bridges — chinos, knit polos, loafers, midi skirts. These handle 80% of normal workdays. Tier three: creative accents — statement accessories, textured layers, interesting footwear that shows personality without crossing lines.",
-      "Color strategy matters in professional settings. Navy and charcoal project authority. Soft pastels read approachable. Bold jewel tones signal confidence. AI styling tools like LEXOR® factor in your industry norms and meeting schedule to recommend the right register each day.",
-      "Seasonal transitions trip up even stylish dressers. The shift from winter to spring demands layering intelligence — a skill AI handles effortlessly by checking the hourly forecast and selecting pieces that work at 7 AM and 2 PM alike.",
-      "Investment-per-wear is the metric that matters. A $200 blazer worn 100 times costs $2 per wear. A $30 trend piece worn twice costs $15 per wear. Smart work wardrobes prioritize cost-per-wear, and AI analytics make this visible for every item in your closet.",
+      "Office dress codes have fragmented. The suit-and-tie era gave way to business casual, which split into 'smart casual,' 'creative professional,' and the vague 'dress appropriately.' Figuring out what to wear each morning is real friction.",
+      "Build a flexible work wardrobe around three tiers. Tier one: polished staples — tailored trousers, structured blazers, quality button-downs. Tier two: smart-casual bridges — chinos, knit polos, loafers. These cover 80% of workdays. Tier three: creative accents that show personality without crossing lines.",
+      "Navy and charcoal project authority. Pastels read approachable. Jewel tones signal confidence. LEXOR® factors in your industry and meeting schedule to pick the right register each day.",
+      "Seasonal transitions trip up even good dressers. AI handles this by checking the hourly forecast and picking pieces that work at 7 AM and 2 PM.",
+      "A $200 blazer worn 100 times costs $2 per wear. A $30 trend piece worn twice costs $15 per wear. AI analytics make cost-per-wear visible for every item in your closet.",
     ],
   },
   {
