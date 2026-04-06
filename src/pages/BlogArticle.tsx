@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Clock, Tag, ArrowRight, Sparkles } from "lucide-react";
 import { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
+import NewsletterSignup from "@/components/blog/NewsletterSignup";
 
 const articles: Record<string, {
   title: string;

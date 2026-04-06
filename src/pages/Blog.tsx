@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Clock, Tag, ArrowRight, Sparkles } from "lucide-react";
 import { useEffect } from "react";
+import NewsletterSignup from "@/components/blog/NewsletterSignup";
 
 const articles = [
   {
