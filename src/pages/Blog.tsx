@@ -14,11 +14,11 @@ const articles = [
     readTime: "8 min read",
     date: "April 3, 2026",
     body: [
-      "Artificial intelligence has quietly reshaped how people get dressed. What once required a personal stylist — analyzing proportions, coordinating fabrics, anticipating weather — now happens inside a pocket-sized app in under a second.",
-      "At the core of every AI outfit recommendation engine sits a multi-layer neural network trained on millions of fashion images. But raw image recognition is only the beginning. The best systems, like LEXOR®, layer contextual signals on top: your calendar events, the local forecast, cultural dress codes for your region, and even your recent mood selections.",
-      "The algorithm starts by mapping your wardrobe into a high-dimensional style space. Each garment is encoded not just by category (shirt, trouser, jacket) but by over 40 style attributes: silhouette tension, color temperature, pattern density, fabric drape, and seasonal weight. When you request an outfit, the model searches for combinations that maximize harmony across all dimensions while respecting hard constraints like weather suitability and dress code.",
-      "What separates AI styling from a static lookbook is the feedback loop. Every time you accept, modify, or skip a suggestion, the system recalibrates. Within two weeks of daily use, most users report that recommendations feel indistinguishable from choices they'd make themselves — except faster and more creative.",
-      "Privacy is built into the architecture. Your wardrobe data never leaves encrypted storage, and the recommendation model runs inference without exposing individual preferences to other users. The result: a deeply personal styling experience that scales to millions of people without sacrificing individuality.",
+      "AI has reshaped how people get dressed. What once needed a personal stylist now happens inside an app in under a second.",
+      "At the core sits a neural network trained on millions of fashion images. But image recognition is only the start. LEXOR® layers contextual signals on top: calendar events, local forecast, dress codes, and mood.",
+      "The algorithm maps your wardrobe into a style space. Each garment is encoded across 40+ attributes — silhouette, color temperature, pattern density, fabric drape, seasonal weight. When you request an outfit, the model finds combinations that maximize harmony while respecting weather and dress code constraints.",
+      "What separates AI styling from a static lookbook is the feedback loop. Every time you accept or skip a suggestion, the system recalibrates. Within two weeks, most users say recommendations feel like their own choices — just faster.",
+      "Your wardrobe data never leaves encrypted storage. The model runs without exposing individual preferences. Personal styling at scale, without sacrificing privacy.",
     ],
   },
   {
