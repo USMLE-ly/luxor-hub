@@ -30,11 +30,11 @@ const articles = [
     readTime: "10 min read",
     date: "March 28, 2026",
     body: [
-      "The capsule wardrobe concept dates back to the 1970s, but it has never been more relevant. Fast fashion has left the average person with 100+ garments, yet studies show most people wear fewer than 20% of what they own. A capsule wardrobe flips that ratio.",
-      "Start with an honest audit. Photograph every item you own — apps like LEXOR® can do this automatically, categorizing each piece by type, color, season, and versatility score. Once digitized, patterns emerge fast: three near-identical black tees, five blazers you never wear, zero transitional-weather layers.",
-      "The core of a working capsule is roughly 30–40 pieces that interlock. Think of it as a matrix: every top should pair with at least three bottoms, every layer should complement at least two outfits. AI wardrobe tools excel here because they can calculate combinatorial coverage — showing you exactly how many unique outfits your capsule produces and where the gaps are.",
-      "Color cohesion matters more than trend-chasing. Choose a neutral base (navy, charcoal, ivory) and add two or three accent colors that complement your skin tone. LEXOR®'s color-season analysis maps your complexion to a personalized palette, removing guesswork.",
-      "The payoff is immediate. Users who switch to a curated capsule report getting dressed 70% faster, spending 35% less on clothing annually, and feeling more confident in their daily appearance. Minimalism, it turns out, is maximally effective.",
+      "The capsule wardrobe concept dates back to the 1970s but has never been more relevant. Fast fashion left the average person with 100+ garments, yet most people wear fewer than 20% of what they own.",
+      "Start with an honest audit. Photograph every item — LEXOR® does this automatically, categorizing by type, color, season, and versatility. Patterns emerge fast: duplicate black tees, unworn blazers, zero transitional layers.",
+      "A working capsule is 30–40 pieces that interlock. Every top pairs with at least three bottoms. AI tools calculate combinatorial coverage — how many unique outfits your capsule produces and where the gaps are.",
+      "Color cohesion beats trend-chasing. Pick a neutral base (navy, charcoal, ivory), add two accent colors that match your skin tone. LEXOR®'s color analysis maps your complexion to a personalized palette.",
+      "Users who switch to a capsule get dressed 70% faster and spend 35% less on clothing annually.",
     ],
   },
   {
