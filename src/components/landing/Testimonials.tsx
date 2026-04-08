@@ -196,9 +196,9 @@ const Testimonials = () => (
         </p>
       </motion.div>
 
-      <CardStackScroll className="container h-[200vh]">
-        <div className="sticky left-0 top-0 h-svh w-full py-12">
-          <CardsContainer className="mx-auto size-full h-[450px] w-[350px]">
+      <CardStackScroll className="container h-[200vh] border-4 border-red-500">
+        <div className="sticky left-0 top-0 h-svh w-full py-12 border-2 border-green-500">
+          <CardsContainer className="mx-auto size-full h-[450px] w-[350px] border-2 border-blue-500">
             {TESTIMONIALS.map((testimonial, index) => (
               <CardTransformed
                 arrayLength={TESTIMONIALS.length}
