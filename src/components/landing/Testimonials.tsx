@@ -180,7 +180,7 @@ const Testimonials = () => (
     </div>
 
     {/* Animated card stack testimonials */}
-    <div className="relative z-10 mt-20 md:mt-32 px-4">
+    <div className="relative z-20 mt-20 md:mt-32 px-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
