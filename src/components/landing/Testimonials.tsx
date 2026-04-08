@@ -3,12 +3,7 @@ import { ArrowUpRight } from "lucide-react";
 import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
 import { useState } from "react";
 import { TestimonialCard } from "@/components/ui/testimonial-cards";
-import {
-  CardStackScroll,
-  CardsContainer,
-  CardTransformed,
-  ReviewStars,
-} from "@/components/ui/animated-cards-stack";
+import { ReviewStars } from "@/components/ui/animated-cards-stack";
 
 import statsMain from "@/assets/revenue/stats-main.png";
 import sales10k from "@/assets/revenue/sales-10k.png";
@@ -92,7 +87,7 @@ const ShuffleSection = () => {
 };
 
 const Testimonials = () => (
-  <section className="relative py-20 md:py-32 overflow-hidden" id="proof">
+  <section className="relative py-20 md:py-32" id="proof">
     <AnimatedGradientBackground
       Breathing={true}
       animationSpeed={0.015}
@@ -180,57 +175,43 @@ const Testimonials = () => (
     </div>
 
     {/* Animated card stack testimonials */}
-    <div className="relative z-10 mt-20 md:mt-32 px-4">
+    <div className="relative z-20 mt-20 md:mt-32 px-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 0.6 }}
-        className="text-center mb-8"
+        className="text-center mb-12"
       >
         <h3 className="font-display text-2xl md:text-4xl font-bold text-foreground">
           What Our <span className="gold-text">Clients Say</span>
         </h3>
         <p className="mt-3 max-w-md mx-auto font-sans text-sm text-muted-foreground leading-relaxed">
-          Scroll to reveal real feedback from real businesses.
+          Real feedback from real businesses.
         </p>
       </motion.div>
 
-      <CardStackScroll className="container h-[300vh]">
-        <div className="sticky left-0 top-0 h-svh w-full py-12">
-          <CardsContainer className="mx-auto size-full h-[450px] w-[350px]">
-            {TESTIMONIALS.map((testimonial, index) => (
-              <CardTransformed
-                arrayLength={TESTIMONIALS.length}
-                key={testimonial.id}
-                variant="dark"
-                index={index + 2}
-                role="article"
-                aria-labelledby={`card-${testimonial.id}-title`}
-                aria-describedby={`card-${testimonial.id}-content`}
-              >
-                <div className="flex flex-col items-center space-y-4 text-center">
-                  <ReviewStars
-                    className="text-primary"
-                    rating={testimonial.rating}
-                  />
-                  <div className="mx-auto w-4/5 text-lg text-primary-foreground">
-                    <blockquote>"{testimonial.description}"</blockquote>
-                  </div>
-                </div>
-                <div className="text-center">
-                  <span className="block text-lg font-semibold tracking-tight text-foreground md:text-xl">
-                    {testimonial.name}
-                  </span>
-                  <span className="block text-sm text-muted-foreground">
-                    {testimonial.profession}
-                  </span>
-                </div>
-              </CardTransformed>
-            ))}
-          </CardsContainer>
-        </div>
-      </CardStackScroll>
+      <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto pb-8">
+        {TESTIMONIALS.map((testimonial, index) => (
+          <motion.div
+            key={testimonial.id}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: index * 0.1, duration: 0.5 }}
+            className="glass rounded-2xl border border-border/30 p-6 flex flex-col items-center gap-4 text-center"
+          >
+            <ReviewStars className="text-primary" rating={testimonial.rating} />
+            <blockquote className="text-sm text-foreground leading-relaxed">
+              "{testimonial.description}"
+            </blockquote>
+            <div className="pt-3 border-t border-border/20 w-full">
+              <span className="block text-sm font-semibold text-foreground">{testimonial.name}</span>
+              <span className="block text-xs text-muted-foreground">{testimonial.profession}</span>
+            </div>
+          </motion.div>
+        ))}
+      </div>
     </div>
   </section>
 );

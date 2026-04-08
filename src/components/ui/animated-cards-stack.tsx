@@ -7,7 +7,7 @@ import {
   useMotionTemplate,
   useScroll,
   useTransform,
-} from "motion/react"
+} from "framer-motion"
 import { cn } from "@/lib/utils"
 
 const cardVariants = cva("absolute will-change-transform", {
@@ -69,8 +69,8 @@ export const CardStackScroll: React.FC<
     <ContainerScrollContext.Provider value={{ scrollYProgress }}>
       <div
         ref={scrollRef}
-        className={cn("relative min-h-svh w-full", className)}
-        style={{ perspective: "1000px", ...style }}
+        className={cn("relative min-h-svh w-full overflow-visible", className)}
+        style={style}
         {...props}
       >
         {children}
