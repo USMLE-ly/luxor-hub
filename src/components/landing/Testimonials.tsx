@@ -196,7 +196,7 @@ const Testimonials = () => (
         </p>
       </motion.div>
 
-      <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+      <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto pb-8">
         {TESTIMONIALS.map((testimonial, index) => (
           <motion.div
             key={testimonial.id}
