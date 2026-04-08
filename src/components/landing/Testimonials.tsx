@@ -3,6 +3,12 @@ import { ArrowUpRight } from "lucide-react";
 import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
 import { useState } from "react";
 import { TestimonialCard } from "@/components/ui/testimonial-cards";
+import {
+  CardStackScroll,
+  CardsContainer,
+  CardTransformed,
+  ReviewStars,
+} from "@/components/ui/animated-cards-stack";
 
 import statsMain from "@/assets/revenue/stats-main.png";
 import sales10k from "@/assets/revenue/sales-10k.png";
@@ -19,6 +25,41 @@ const shuffleScreenshots = [
   { id: 4, image: sales81k, testimonial: "$81,452 across 1.01K orders over 5 months.", author: "Sales Report" },
   { id: 5, image: sales10k, testimonial: "$10,349 early-stage — 330 orders, 1.88% conversion.", author: "Early Growth" },
   { id: 6, image: stripePayout, testimonial: "€48,579.84 Stripe payout confirmed.", author: "Stripe Payout" },
+];
+
+const TESTIMONIALS = [
+  {
+    id: "testimonial-1",
+    name: "Sarah K.",
+    profession: "Shopify Store Owner",
+    rating: 5,
+    description:
+      "LEXOR completely transformed how I run my store. Revenue jumped 340% in the first quarter. The AI recommendations are scarily accurate.",
+  },
+  {
+    id: "testimonial-2",
+    name: "Marcus T.",
+    profession: "E-commerce Entrepreneur",
+    rating: 4.5,
+    description:
+      "I was skeptical at first, but the results speak for themselves. Went from $2K to $18K monthly within 90 days. Best investment I've made.",
+  },
+  {
+    id: "testimonial-3",
+    name: "Amelia R.",
+    profession: "Fashion Brand Founder",
+    rating: 5,
+    description:
+      "The platform pays for itself ten times over. My conversion rate tripled and customer retention is at an all-time high.",
+  },
+  {
+    id: "testimonial-4",
+    name: "David L.",
+    profession: "Dropshipping Expert",
+    rating: 5,
+    description:
+      "Finally a tool that actually delivers on its promises. The analytics alone saved me hours every week. Revenue is up 200%.",
+  },
 ];
 
 const ShuffleSection = () => {
@@ -136,6 +177,60 @@ const Testimonials = () => (
       >
         All screenshots are unedited. Revenue figures from live dashboards.
       </motion.p>
+    </div>
+
+    {/* Animated card stack testimonials */}
+    <div className="relative z-10 mt-20 md:mt-32 px-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.6 }}
+        className="text-center mb-8"
+      >
+        <h3 className="font-display text-2xl md:text-4xl font-bold text-foreground">
+          What Our <span className="gold-text">Clients Say</span>
+        </h3>
+        <p className="mt-3 max-w-md mx-auto font-sans text-sm text-muted-foreground leading-relaxed">
+          Scroll to reveal real feedback from real businesses.
+        </p>
+      </motion.div>
+
+      <CardStackScroll className="container h-[300vh]">
+        <div className="sticky left-0 top-0 h-svh w-full py-12">
+          <CardsContainer className="mx-auto size-full h-[450px] w-[350px]">
+            {TESTIMONIALS.map((testimonial, index) => (
+              <CardTransformed
+                arrayLength={TESTIMONIALS.length}
+                key={testimonial.id}
+                variant="dark"
+                index={index + 2}
+                role="article"
+                aria-labelledby={`card-${testimonial.id}-title`}
+                aria-describedby={`card-${testimonial.id}-content`}
+              >
+                <div className="flex flex-col items-center space-y-4 text-center">
+                  <ReviewStars
+                    className="text-primary"
+                    rating={testimonial.rating}
+                  />
+                  <div className="mx-auto w-4/5 text-lg text-primary-foreground">
+                    <blockquote>"{testimonial.description}"</blockquote>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <span className="block text-lg font-semibold tracking-tight text-foreground md:text-xl">
+                    {testimonial.name}
+                  </span>
+                  <span className="block text-sm text-muted-foreground">
+                    {testimonial.profession}
+                  </span>
+                </div>
+              </CardTransformed>
+            ))}
+          </CardsContainer>
+        </div>
+      </CardStackScroll>
     </div>
   </section>
 );
