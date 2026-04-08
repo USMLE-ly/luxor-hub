@@ -196,7 +196,7 @@ const Testimonials = () => (
         </p>
       </motion.div>
 
-      <CardStackScroll className="container h-[300vh]">
+      <CardStackScroll className="container h-[200vh]">
         <div className="sticky left-0 top-0 h-svh w-full py-12">
           <CardsContainer className="mx-auto size-full h-[450px] w-[350px]">
             {TESTIMONIALS.map((testimonial, index) => (
