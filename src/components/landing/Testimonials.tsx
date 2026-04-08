@@ -3,12 +3,7 @@ import { ArrowUpRight } from "lucide-react";
 import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
 import { useState } from "react";
 import { TestimonialCard } from "@/components/ui/testimonial-cards";
-import {
-  CardStackScroll,
-  CardsContainer,
-  CardTransformed,
-  ReviewStars,
-} from "@/components/ui/animated-cards-stack";
+import { ReviewStars } from "@/components/ui/animated-cards-stack";
 
 import statsMain from "@/assets/revenue/stats-main.png";
 import sales10k from "@/assets/revenue/sales-10k.png";
