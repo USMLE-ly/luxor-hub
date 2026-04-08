@@ -69,8 +69,8 @@ export const CardStackScroll: React.FC<
     <ContainerScrollContext.Provider value={{ scrollYProgress }}>
       <div
         ref={scrollRef}
-        className={cn("relative min-h-svh w-full", className)}
-        style={{ perspective: "1000px", ...style }}
+        className={cn("relative min-h-svh w-full overflow-visible", className)}
+        style={style}
         {...props}
       >
         {children}
