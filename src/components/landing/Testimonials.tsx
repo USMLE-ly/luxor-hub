@@ -92,7 +92,7 @@ const ShuffleSection = () => {
 };
 
 const Testimonials = () => (
-  <section className="relative py-20 md:py-32 overflow-hidden" id="proof">
+  <section className="relative py-20 md:py-32" id="proof">
     <AnimatedGradientBackground
       Breathing={true}
       animationSpeed={0.015}
