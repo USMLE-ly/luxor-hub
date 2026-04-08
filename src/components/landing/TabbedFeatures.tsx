@@ -1,5 +1,5 @@
 import { Check } from "lucide-react";
-import { ContainerTextScroll } from "@/components/ui/container-text-scroll";
+import { ContainerScroll } from "@/components/ui/container-scroll-animation";
 import featureOutfitGen from "@/assets/feature-outfit-gen.jpg";
 
 const bullets = [
@@ -11,8 +11,17 @@ const bullets = [
 
 const TabbedFeatures = () => (
   <section id="tabbed-features" className="bg-background">
-    <ContainerTextScroll
-      titleComponent={null}
+    <ContainerScroll
+      titleComponent={
+        <div className="flex flex-col items-center gap-3 mb-4">
+          <p className="font-sans text-xs font-semibold text-primary tracking-widest uppercase">
+            Your Morning With LEXOR®
+          </p>
+          <h3 className="font-display text-2xl md:text-4xl font-bold text-foreground leading-tight">
+            Open the app. Your outfit is ready.
+          </h3>
+        </div>
+      }
     >
       <div className="relative h-full w-full">
         <img
@@ -23,16 +32,10 @@ const TabbedFeatures = () => (
         />
         <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-background/70 via-background/30 to-transparent rounded-b-2xl pointer-events-none" />
       </div>
-    </ContainerTextScroll>
+    </ContainerScroll>
 
-    {/* Bullets below the scroll card */}
+    {/* Bullets below */}
     <div className="max-w-2xl mx-auto px-4 -mt-20 md:-mt-32 pb-16 md:pb-24">
-      <p className="font-sans text-xs font-semibold text-primary tracking-widest uppercase mb-3">
-        Your Morning With LEXOR®
-      </p>
-      <h3 className="font-display text-2xl md:text-3xl font-bold text-foreground leading-tight mb-6">
-        Open the app. Your outfit is ready.
-      </h3>
       <ul className="space-y-3">
         {bullets.map((b) => (
           <li key={b} className="flex items-start gap-3 font-sans text-sm text-muted-foreground">
