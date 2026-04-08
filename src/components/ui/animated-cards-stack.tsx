@@ -7,7 +7,7 @@ import {
   useMotionTemplate,
   useScroll,
   useTransform,
-} from "motion/react"
+} from "framer-motion"
 import { cn } from "@/lib/utils"
 
 const cardVariants = cva("absolute will-change-transform", {
