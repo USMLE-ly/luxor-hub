@@ -1,80 +1,99 @@
 
 
-# Publish + Blog/Deep Dive Enhancements
+# Luxury Brand Integration + Animated Testimonial Card Stack
 
 ## Overview
 
-Six changes: publish the site, add read-time-remaining indicator, add OG images to blog articles, add a link-preview hover component, redesign Deep Dive with grid feature cards, and remove Sparkles icons from blog/deep-dive pages.
+Three workstreams: (1) integrate the brand guide typography (Cormorant Garamond + Josefin Sans) and extract usable assets from the 195-image zip, (2) re-implement the scroll-driven animated card stack for testimonials in its own isolated section, and (3) add stagger/parallax animations to the existing grid cards.
 
 ---
 
-## 1. Publish the Site
+## 1. Brand Guide Typography Integration
 
-Use the publish settings tool to ensure the site is public, then instruct the user to click "Publish > Update" to push frontend changes live.
+**What**: The uploaded brand guide specifies two luxury fonts — **Cormorant Garamond** (display/headings) and **Josefin Sans** (body/UI). Currently the site uses Playfair Display + Inter.
 
----
+**Changes**:
+- **`src/index.css`** — Update the Google Fonts import to include `Cormorant+Garamond:wght@300;400;500;600;700` and `Josefin+Sans:wght@300;400;500;600;700`. Keep Playfair Display as a fallback. Update the `body` font-family to `'Josefin Sans'` and headings to `'Cormorant Garamond'`.
+- **`tailwind.config.ts`** — Update `fontFamily.display` to `['"Cormorant Garamond"', 'serif']` and `fontFamily.sans` to `['"Josefin Sans"', 'sans-serif']`.
 
-## 2. Read Time Remaining Indicator
-
-**File:** `src/pages/BlogArticle.tsx`
-
-Parse the `readTime` string (e.g. "8 min read") to get total minutes. Calculate remaining minutes based on scroll progress: `Math.ceil(totalMin * (1 - progress / 100))`. Display next to the progress bar as a small label like "3 min left" that fades in once scrolling begins.
+This gives the entire site a more refined, editorial luxury feel while requiring minimal code changes.
 
 ---
 
-## 3. Open Graph Images for Blog Articles
+## 2. Extract & Integrate Zip Assets
 
-**File:** `src/pages/BlogArticle.tsx`
+**What**: Copy `Luxor_layers.zip` to the sandbox, unzip, and catalog the 195 images. Select key brand assets (logos, patterns, textures, lifestyle imagery) and copy them into `src/assets/brand/` for use across the site.
 
-Add `og:image` and `twitter:image` meta tags in the Helmet. Since we don't have custom images per article, we'll generate a dynamic OG image URL using a free service (e.g. `https://og.luxor.ly` or a simple fallback to a branded static image). The simplest approach: add a single branded OG image to `public/og/blog-default.png` and reference it, or use a dynamic OG image generator via URL params. We'll use a static branded fallback image for now with the path `/og/blog-og.png`.
-
----
-
-## 4. Link Preview Component (Adapted for React/Vite)
-
-**File:** `src/components/ui/link-preview.tsx`
-
-Adapt the provided Next.js component for our React/Vite stack:
-- Replace `next/image` with standard `<img>` tags
-- Replace `next/link` with React Router `<Link>` or `<a>` tags
-- Install `qss` package (framer-motion and @radix-ui/react-hover-card already exist)
-- Keep the hover card animation, microlink API screenshot integration, and mouse-follow effect
-- Style to match our dark theme (dark card background, subtle border)
-
-**File:** `src/pages/Blog.tsx`
-
-Use `LinkPreview` on article titles or "Read Full Article" links so hovering shows a preview of the article content.
+**Process**:
+- Unzip to `/tmp/Luxor_layers/`
+- List and categorize files by type (logos, patterns, backgrounds, product shots)
+- Copy the most impactful assets (up to ~20 key images) into `src/assets/brand/`
+- Use select images as section backgrounds, hero overlays, or card imagery where appropriate
 
 ---
 
-## 5. Deep Dive with Grid Feature Cards
+## 3. Isolated Scroll-Driven Animated Card Stack
 
-**File:** `src/components/ui/grid-feature-cards.tsx` — already exists, no changes needed.
+**What**: The current "What Our Clients Say" section uses a simple 2x2 grid. Re-implement the scroll-driven `CardStackScroll` + `CardTransformed` card stack in its own `<section>` **outside** the `AnimatedGradientBackground` overflow container, so sticky positioning works correctly.
 
-**File:** `src/pages/DeepDive.tsx` and `src/components/landing/AIFashionEditorial.tsx`
+**File**: `src/components/landing/Testimonials.tsx`
 
-Redesign the Deep Dive page to use the grid-feature-cards layout:
-- Replace the vertical timeline layout with a 2x3 or 3-column grid of `FeatureCard` components
-- Each of the 5 steps becomes a card with its icon, title, and description
-- Add the AnimatedContainer wrapper for blur-in animation
-- Keep the closing "Why AI Styling Matters" section below the grid
-- Use dashed border grid dividers as shown in the demo
+**Structure**:
+```text
+<section id="proof">                    ← Real Results section (existing)
+  <AnimatedGradientBackground />
+  <div z-10> ... screenshots ... </div>
+</section>
+
+<section>                               ← NEW isolated section
+  <CardStackScroll className="h-[200vh]">
+    <div className="sticky top-0 h-screen">
+      <CardsContainer>
+        {TESTIMONIALS.map((t, i) => (
+          <CardTransformed variant="dark" index={i+2} arrayLength={4}>
+            <ReviewStars />
+            <blockquote>...</blockquote>
+            <name/profession>
+          </CardTransformed>
+        ))}
+      </CardsContainer>
+    </div>
+  </CardStackScroll>
+</section>
+```
+
+Key decisions:
+- `h-[200vh]` for tighter scroll (not 300vh)
+- `variant="dark"` to match the dark theme
+- No avatars — text-only cards with stars, quote, name, profession
+- Section gets its own dark background, no `AnimatedGradientBackground` overlap
 
 ---
 
-## 6. Remove Sparkles Icon
+## 4. Stagger & Parallax on Grid Cards (Keep Both)
 
-**Files:** `src/pages/Blog.tsx`, `src/pages/BlogArticle.tsx`, `src/components/landing/AIFashionEditorial.tsx`
+**What**: Keep the existing 2x2 grid as a visible fallback above the card stack, but enhance it with stagger and parallax effects.
 
-- Remove the `<Sparkles>` icon from the blog header badge, article CTA section, and deep dive header badge
-- Replace with nothing (just remove the icon) or use a simpler visual indicator
+**Changes to the grid cards**:
+- Increase stagger delay from `index * 0.1` to `index * 0.15`
+- Add a subtle scale animation: `initial={{ opacity: 0, y: 40, scale: 0.95 }}` → `whileInView={{ opacity: 1, y: 0, scale: 1 }}`
+- Add hover parallax: `whileHover={{ y: -6, transition: { type: "spring", stiffness: 300 } }}`
+- Add a subtle gold border glow on hover: `hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5`
+
+---
+
+## 5. Verify Everything
+
+- Scroll the landing page end-to-end
+- Confirm the grid cards appear after "Real Results"
+- Confirm the card stack animates correctly below the grid
+- Confirm new fonts render on headings and body text
 
 ---
 
 ## Technical Notes
 
-- `qss` is the only new npm dependency needed
-- The link-preview uses microlink.io's free API for screenshot generation — no API key required
-- Grid feature cards use `React.useId()` for unique SVG pattern IDs — no collision risk
-- OG image will be a static fallback until custom per-article images are created
+- No new npm dependencies needed (Cormorant Garamond and Josefin Sans are Google Fonts loaded via CSS)
+- The card stack uses existing `CardStackScroll`, `CardsContainer`, `CardTransformed` from `animated-cards-stack.tsx`
+- The `.ai` and `.sketch` files are binary design files — not directly usable in code, but the PDF instructions extracted the key brand specs
 
