@@ -4,6 +4,15 @@ import { IPhoneMockup } from "@/components/ui/iphone-mockup";
 import featureDemo from "@/assets/feature-demo.mp4";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+const shimmerParticles = Array.from({ length: 12 }, (_, i) => ({
+  id: i,
+  x: 15 + Math.random() * 70,
+  y: 20 + Math.random() * 60,
+  size: 1.5 + Math.random() * 2.5,
+  delay: Math.random() * 4,
+  duration: 3 + Math.random() * 3,
+}));
+
 const Features = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
@@ -37,7 +46,7 @@ const Features = () => {
           </p>
         </motion.div>
 
-        {/* iPhone Mockup with Video + Parallax */}
+        {/* iPhone Mockup with Video + Parallax + Shimmer */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={isInView ? { opacity: 1, scale: 1 } : {}}
@@ -45,6 +54,33 @@ const Features = () => {
           style={{ y: mockupY }}
           className="flex justify-center relative"
         >
+          {/* Floating shimmer particles */}
+          {isInView && shimmerParticles.map((p) => (
+            <motion.span
+              key={p.id}
+              initial={{ opacity: 0, y: 0 }}
+              animate={{
+                opacity: [0, 0.7, 0],
+                y: [0, -20 - Math.random() * 30, -50],
+                x: [0, (Math.random() - 0.5) * 24],
+              }}
+              transition={{
+                duration: p.duration,
+                delay: p.delay,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              className="absolute rounded-full bg-primary pointer-events-none"
+              style={{
+                left: `${p.x}%`,
+                top: `${p.y}%`,
+                width: p.size,
+                height: p.size,
+                filter: `blur(${p.size > 3.5 ? 1 : 0}px)`,
+              }}
+            />
+          ))}
+
           <IPhoneMockup
             model="15-pro"
             color="space-black"
@@ -59,6 +95,7 @@ const Features = () => {
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
           </IPhoneMockup>
+
           {/* Luxury glow reflection */}
           <motion.div
             style={{ opacity: glowOpacity }}
