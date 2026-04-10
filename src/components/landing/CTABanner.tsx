@@ -2,12 +2,19 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import timelessBg from "@/assets/brand/timeless.png";
 
 const CTABanner = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="relative py-16 md:py-24 bg-muted/30">
+    <section className="relative py-16 md:py-24 bg-muted/30 overflow-hidden">
+      <img
+        src={timelessBg}
+        alt=""
+        aria-hidden
+        className="absolute inset-0 w-full h-full object-cover opacity-[0.04] pointer-events-none select-none"
+      />
       <div className="relative z-10 max-w-3xl mx-auto px-4 text-center">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
