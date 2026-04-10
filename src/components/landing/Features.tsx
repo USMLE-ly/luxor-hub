@@ -10,7 +10,7 @@ const Features = () => {
   const isMobile = useIsMobile();
 
   return (
-    <section id="features" className="py-16 md:py-24 bg-muted/20" ref={sectionRef}>
+    <section id="features" className="pt-16 md:pt-24 pb-8 md:pb-12 bg-muted/20" ref={sectionRef}>
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
         <motion.div
@@ -34,7 +34,7 @@ const Features = () => {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={isInView ? { opacity: 1, scale: 1 } : {}}
           transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-          className="flex justify-center"
+          className="flex justify-center relative"
         >
           <IPhoneMockup
             model="15-pro"
@@ -50,6 +50,8 @@ const Features = () => {
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
           </IPhoneMockup>
+          {/* Luxury glow reflection */}
+          <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 w-3/4 h-32 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
         </motion.div>
       </div>
     </section>
