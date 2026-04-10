@@ -4,11 +4,11 @@ import { IPhoneMockup } from "@/components/ui/iphone-mockup";
 import featureDemo from "@/assets/feature-demo.mp4";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-const shimmerParticles = Array.from({ length: 18 }, (_, i) => ({
+const shimmerParticles = Array.from({ length: 12 }, (_, i) => ({
   id: i,
-  x: Math.random() * 100,
-  y: 40 + Math.random() * 50,
-  size: 2 + Math.random() * 3,
+  x: 15 + Math.random() * 70,
+  y: 20 + Math.random() * 60,
+  size: 1.5 + Math.random() * 2.5,
   delay: Math.random() * 4,
   duration: 3 + Math.random() * 3,
 }));
