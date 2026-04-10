@@ -54,6 +54,28 @@ const Features = () => {
           style={{ y: mockupY }}
           className="flex justify-center relative"
         >
+          {/* Pulsing halo ring behind phone */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.7 }}
+            animate={isInView ? {
+              opacity: [0, 0.25, 0.08, 0.25, 0],
+              scale: [0.7, 1.05, 1.1, 1.05, 0.7],
+            } : {}}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/20 pointer-events-none"
+            style={{ width: isMobile ? 260 : 360, height: isMobile ? 260 : 360 }}
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.6 }}
+            animate={isInView ? {
+              opacity: [0, 0.15, 0.05, 0.15, 0],
+              scale: [0.6, 1.15, 1.2, 1.15, 0.6],
+            } : {}}
+            transition={{ duration: 6, delay: 1.5, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/10 pointer-events-none"
+            style={{ width: isMobile ? 320 : 440, height: isMobile ? 320 : 440 }}
+          />
+
           {/* Floating shimmer particles */}
           {isInView && shimmerParticles.map((p) => (
             <motion.span
