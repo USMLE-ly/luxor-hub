@@ -1,4 +1,5 @@
 import { Gallery4 } from "@/components/ui/gallery4";
+import transparencyBg from "@/assets/brand/transparency.png";
 import featureStyleDna from "@/assets/feature-style-dna.jpg";
 import featureClosetScanner from "@/assets/feature-closet-scanner.jpg";
 import featureOutfitGen from "@/assets/feature-outfit-gen.jpg";
@@ -52,7 +53,8 @@ const howItWorksItems = [
 ];
 
 const HowItWorks = () => (
-  <div id="how-it-works">
+  <div id="how-it-works" className="relative overflow-hidden">
+    <img src={transparencyBg} alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover opacity-[0.03] pointer-events-none select-none z-0" />
     <Gallery4
       title="Three Steps. That's It."
       description="Scan your closet. Let AI learn you. Wake up to your outfit."

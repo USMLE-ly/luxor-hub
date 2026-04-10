@@ -8,6 +8,7 @@ import PayPalButton from "@/components/app/PayPalButton";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import brutalistBg from "@/assets/brand/brutalist-lines.png";
 import {
   Collapsible,
   CollapsibleContent,
@@ -190,7 +191,8 @@ const Pricing = () => {
   );
 
   return (
-    <section id="pricing" className="py-20 md:py-32 bg-background">
+    <section id="pricing" className="relative py-20 md:py-32 bg-background overflow-hidden">
+      <img src={brutalistBg} alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover opacity-[0.03] pointer-events-none select-none" />
       <div className="max-w-6xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

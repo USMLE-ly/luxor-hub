@@ -235,8 +235,8 @@ const Testimonials = () => (
     </section>
 
     {/* Scroll-driven animated card stack — isolated section */}
-    <section className="relative bg-accent overflow-visible">
-      <CardStackScroll className="h-[200vh]">
+    <section className="relative bg-gradient-to-b from-background via-accent/50 to-background border-t border-border/10">
+      <CardStackScroll className="h-[180vh]">
         <div className="sticky top-0 left-0 h-screen w-full flex flex-col items-center justify-center py-12">
           <motion.p
             initial={{ opacity: 0 }}
@@ -244,7 +244,7 @@ const Testimonials = () => (
             viewport={{ once: true }}
             className="font-display text-lg md:text-2xl text-foreground/60 mb-8 text-center"
           >
-            Scroll to reveal more
+            What Our Clients Say
           </motion.p>
           <CardsContainer className="mx-auto h-[420px] w-[320px] md:h-[450px] md:w-[360px]">
             {TESTIMONIALS.map((testimonial, index) => (
