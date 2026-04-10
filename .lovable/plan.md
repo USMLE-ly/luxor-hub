@@ -1,99 +1,62 @@
 
 
-# Luxury Brand Integration + Animated Testimonial Card Stack
+# iPhone Mockup Feature Video + Testimonial Fixes + Brand Asset Overlays
 
 ## Overview
 
-Three workstreams: (1) integrate the brand guide typography (Cormorant Garamond + Josefin Sans) and extract usable assets from the 195-image zip, (2) re-implement the scroll-driven animated card stack for testimonials in its own isolated section, and (3) add stagger/parallax animations to the existing grid cards.
+Four changes: (1) create the iPhone mockup component and integrate it into the Features section with the auto-playing video inside the phone frame, (2) fix the "Scroll to reveal more" card stack so it actually works, (3) add subtle brand asset overlays to Pricing, FAQ, and How It Works sections, (4) verify all sections render correctly.
 
 ---
 
-## 1. Brand Guide Typography Integration
+## 1. iPhone Mockup Component + Features Integration
 
-**What**: The uploaded brand guide specifies two luxury fonts — **Cormorant Garamond** (display/headings) and **Josefin Sans** (body/UI). Currently the site uses Playfair Display + Inter.
+**Create** `src/components/ui/iphone-mockup.tsx` — adapted from the provided component, removing `next/image` references and converting to standard React/Vite patterns.
 
-**Changes**:
-- **`src/index.css`** — Update the Google Fonts import to include `Cormorant+Garamond:wght@300;400;500;600;700` and `Josefin+Sans:wght@300;400;500;600;700`. Keep Playfair Display as a fallback. Update the `body` font-family to `'Josefin Sans'` and headings to `'Cormorant Garamond'`.
-- **`tailwind.config.ts`** — Update `fontFamily.display` to `['"Cormorant Garamond"', 'serif']` and `fontFamily.sans` to `['"Josefin Sans"', 'sans-serif']`.
-
-This gives the entire site a more refined, editorial luxury feel while requiring minimal code changes.
-
----
-
-## 2. Extract & Integrate Zip Assets
-
-**What**: Copy `Luxor_layers.zip` to the sandbox, unzip, and catalog the 195 images. Select key brand assets (logos, patterns, textures, lifestyle imagery) and copy them into `src/assets/brand/` for use across the site.
-
-**Process**:
-- Unzip to `/tmp/Luxor_layers/`
-- List and categorize files by type (logos, patterns, backgrounds, product shots)
-- Copy the most impactful assets (up to ~20 key images) into `src/assets/brand/`
-- Use select images as section backgrounds, hero overlays, or card imagery where appropriate
+**Update** `src/components/landing/Features.tsx`:
+- Remove the `SidePanelVideo` / `NativeVideo` approach and the open/close button
+- Replace with an `IPhoneMockup` (model `15-pro`, color `space-black`) containing the `featureDemo` video
+- Video auto-plays inside the phone frame (autoPlay, loop, muted, playsInline)
+- The mockup scales responsively: `scale={0.55}` on mobile, `scale={0.75}` on desktop
+- Wrap in a motion.div with a fade+scale entrance animation
+- Keep the section header text as-is
 
 ---
 
-## 3. Isolated Scroll-Driven Animated Card Stack
+## 2. Fix "Scroll to Reveal More" Card Stack
 
-**What**: The current "What Our Clients Say" section uses a simple 2x2 grid. Re-implement the scroll-driven `CardStackScroll` + `CardTransformed` card stack in its own `<section>` **outside** the `AnimatedGradientBackground` overflow container, so sticky positioning works correctly.
-
-**File**: `src/components/landing/Testimonials.tsx`
-
-**Structure**:
-```text
-<section id="proof">                    ← Real Results section (existing)
-  <AnimatedGradientBackground />
-  <div z-10> ... screenshots ... </div>
-</section>
-
-<section>                               ← NEW isolated section
-  <CardStackScroll className="h-[200vh]">
-    <div className="sticky top-0 h-screen">
-      <CardsContainer>
-        {TESTIMONIALS.map((t, i) => (
-          <CardTransformed variant="dark" index={i+2} arrayLength={4}>
-            <ReviewStars />
-            <blockquote>...</blockquote>
-            <name/profession>
-          </CardTransformed>
-        ))}
-      </CardsContainer>
-    </div>
-  </CardStackScroll>
-</section>
-```
-
-Key decisions:
-- `h-[200vh]` for tighter scroll (not 300vh)
-- `variant="dark"` to match the dark theme
-- No avatars — text-only cards with stars, quote, name, profession
-- Section gets its own dark background, no `AnimatedGradientBackground` overlap
+**Update** `src/components/landing/Testimonials.tsx`:
+- The `CardStackScroll` section currently uses `bg-accent` which may blend into the background. Change to a contrasting dark gradient background
+- Remove `overflow-visible` (which can cause layout issues) — the sticky container handles its own overflow
+- Ensure the sticky div uses `overflow: visible` while the section itself clips properly
+- Reduce `h-[200vh]` to `h-[180vh]` for snappier scroll
+- Add a subtle top border or gradient divider between the grid section and the card stack section
 
 ---
 
-## 4. Stagger & Parallax on Grid Cards (Keep Both)
+## 3. Brand Asset Overlays
 
-**What**: Keep the existing 2x2 grid as a visible fallback above the card stack, but enhance it with stagger and parallax effects.
+Add subtle background overlays (opacity 3-5%) to three sections:
 
-**Changes to the grid cards**:
-- Increase stagger delay from `index * 0.1` to `index * 0.15`
-- Add a subtle scale animation: `initial={{ opacity: 0, y: 40, scale: 0.95 }}` → `whileInView={{ opacity: 1, y: 0, scale: 1 }}`
-- Add hover parallax: `whileHover={{ y: -6, transition: { type: "spring", stiffness: 300 } }}`
-- Add a subtle gold border glow on hover: `hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5`
+- **Pricing** (`src/components/landing/Pricing.tsx`): Import `brutalist-lines.png`, add as absolute background overlay at `opacity-[0.03]`
+- **FAQ** (`src/components/landing/FAQ.tsx`): Import `ombra.png`, add as absolute background overlay at `opacity-[0.04]`
+- **HowItWorks** (`src/components/landing/HowItWorks.tsx`): Import `transparency.png`, add as absolute background overlay at `opacity-[0.03]`
+
+Each overlay: `<img src={asset} alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover opacity-[0.03] pointer-events-none select-none" />`
 
 ---
 
-## 5. Verify Everything
+## 4. Verification
 
-- Scroll the landing page end-to-end
-- Confirm the grid cards appear after "Real Results"
-- Confirm the card stack animates correctly below the grid
-- Confirm new fonts render on headings and body text
+- Scroll through the entire landing page on desktop and mobile viewports
+- Confirm the iPhone mockup with video renders in the Features section
+- Confirm the card stack animates on scroll
+- Confirm brand overlays are subtle and don't interfere with readability
 
 ---
 
 ## Technical Notes
 
-- No new npm dependencies needed (Cormorant Garamond and Josefin Sans are Google Fonts loaded via CSS)
-- The card stack uses existing `CardStackScroll`, `CardsContainer`, `CardTransformed` from `animated-cards-stack.tsx`
-- The `.ai` and `.sketch` files are binary design files — not directly usable in code, but the PDF instructions extracted the key brand specs
+- No new npm dependencies needed — the iPhone mockup is pure React + inline styles
+- The `featureDemo.mp4` asset is already in the project at `src/assets/feature-demo.mp4`
+- Brand assets are already extracted in `src/assets/brand/`
 
