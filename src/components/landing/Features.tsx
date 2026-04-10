@@ -1,46 +1,13 @@
-import { useState, useRef, useEffect } from "react";
+import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { SidePanelVideo, NativeVideo } from "@/components/ui/side-panel-video";
-import { cn } from "@/lib/utils";
+import { IPhoneMockup } from "@/components/ui/iphone-mockup";
 import featureDemo from "@/assets/feature-demo.mp4";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Features = () => {
-  const [videoOpen, setVideoOpen] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
-
-  // Auto-open on first scroll into view
-  useEffect(() => {
-    if (isInView && !videoOpen) {
-      const timer = setTimeout(() => setVideoOpen(true), 400);
-      return () => clearTimeout(timer);
-    }
-  }, [isInView]);
-
-  const handleVideoOpen = () => setVideoOpen(!videoOpen);
-
-  const renderVideoButton = (toggleFunction: () => void) => (
-    <div
-      className={cn(
-        "flex items-center w-full justify-start pr-4 md:pl-4 py-1 md:py-1",
-        videoOpen ? "pr-3" : ""
-      )}
-    >
-      <p className="text-xl font-black tracking-tight sm:text-3xl">
-        <span className="bg-gradient-to-t from-muted-foreground to-foreground bg-clip-text font-display text-xl font-bold text-transparent sm:text-5xl">
-          Features
-        </span>
-      </p>
-      <Button
-        className="rounded-r-[33px] py-8 ml-2"
-        onClick={toggleFunction}
-        variant="secondary"
-      >
-        {videoOpen ? "close" : "open"}
-      </Button>
-    </div>
-  );
+  const isMobile = useIsMobile();
 
   return (
     <section id="features" className="py-16 md:py-24 bg-muted/20" ref={sectionRef}>
@@ -62,19 +29,28 @@ const Features = () => {
           </p>
         </motion.div>
 
-        {/* Side Panel Video */}
-        <div className="min-h-[120px] flex flex-col justify-center">
-          <SidePanelVideo
-            panelOpen={videoOpen}
-            handlePanelOpen={handleVideoOpen}
-            renderButton={renderVideoButton}
+        {/* iPhone Mockup with Video */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={isInView ? { opacity: 1, scale: 1 } : {}}
+          transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+          className="flex justify-center"
+        >
+          <IPhoneMockup
+            model="15-pro"
+            color="space-black"
+            scale={isMobile ? 0.55 : 0.75}
           >
-            <NativeVideo
-              videoOpen={videoOpen}
+            <video
               src={featureDemo}
+              autoPlay
+              loop
+              muted
+              playsInline
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
-          </SidePanelVideo>
-        </div>
+          </IPhoneMockup>
+        </motion.div>
       </div>
     </section>
   );

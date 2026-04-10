@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import ombraBg from "@/assets/brand/ombra.png";
 import {
   Accordion,
   AccordionContent,
@@ -34,7 +35,8 @@ const faqs = [
 ];
 
 const FAQ = () => (
-  <section id="faq" className="py-12 md:py-20 bg-background">
+  <section id="faq" className="relative py-12 md:py-20 bg-background overflow-hidden">
+    <img src={ombraBg} alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover opacity-[0.04] pointer-events-none select-none" />
     <div className="max-w-3xl mx-auto px-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
