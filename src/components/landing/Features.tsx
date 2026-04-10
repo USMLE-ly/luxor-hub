@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { IPhoneMockup } from "@/components/ui/iphone-mockup";
 import featureDemo from "@/assets/feature-demo.mp4";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -9,8 +9,16 @@ const Features = () => {
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
   const isMobile = useIsMobile();
 
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  });
+
+  const mockupY = useTransform(scrollYProgress, [0, 1], [40, -40]);
+  const glowOpacity = useTransform(scrollYProgress, [0.2, 0.5, 0.8], [0.2, 0.6, 0.3]);
+
   return (
-    <section id="features" className="pt-16 md:pt-24 pb-8 md:pb-12 bg-muted/20" ref={sectionRef}>
+    <section id="features" className="pt-16 md:pt-24 pb-8 md:pb-12 bg-muted/20 overflow-hidden" ref={sectionRef}>
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
         <motion.div
@@ -29,11 +37,12 @@ const Features = () => {
           </p>
         </motion.div>
 
-        {/* iPhone Mockup with Video */}
+        {/* iPhone Mockup with Video + Parallax */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={isInView ? { opacity: 1, scale: 1 } : {}}
           transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+          style={{ y: mockupY }}
           className="flex justify-center relative"
         >
           <IPhoneMockup
@@ -51,7 +60,10 @@ const Features = () => {
             />
           </IPhoneMockup>
           {/* Luxury glow reflection */}
-          <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 w-3/4 h-32 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
+          <motion.div
+            style={{ opacity: glowOpacity }}
+            className="absolute -bottom-16 left-1/2 -translate-x-1/2 w-3/4 h-32 rounded-full bg-primary/15 blur-3xl pointer-events-none"
+          />
         </motion.div>
       </div>
     </section>
