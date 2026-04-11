@@ -32,6 +32,7 @@ const Gallery4 = ({
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [showSwipeHint, setShowSwipeHint] = useState(true);
 
   useEffect(() => {
     if (!carouselApi) return;
