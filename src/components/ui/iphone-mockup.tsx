@@ -83,7 +83,7 @@ export const IPhoneMockup: React.FC<IPhoneMockupProps> = ({
   const outerHeight = screenHeight + resolvedBezel * 2;
   const outerRadius = resolvedRadius + resolvedBezel;
   const colorHex = PRESET_COLORS[color] ?? color;
-  const frameGradient = `linear-gradient(135deg, ${shade(colorHex, 8)} 0%, ${colorHex} 40%, ${shade(colorHex, -14)} 100%)`;
+  const frameGradient = `linear-gradient(145deg, ${shade(colorHex, 18)} 0%, ${shade(colorHex, 6)} 20%, ${colorHex} 45%, ${shade(colorHex, -10)} 70%, ${shade(colorHex, -20)} 100%)`;
 
   const useIsland = typeof showDynamicIsland === 'boolean' ? showDynamicIsland : Boolean(spec.island);
   const useNotch = typeof showNotch === 'boolean' ? showNotch : Boolean(spec.notch) && !useIsland;
@@ -102,8 +102,8 @@ export const IPhoneMockup: React.FC<IPhoneMockupProps> = ({
     right: safeAreaOverrides?.right ?? 0,
   };
 
-  const outerShadow = typeof shadow === 'string' ? shadow : shadow ? '0 12px 30px rgba(0,0,0,0.35), 0 2px 6px rgba(0,0,0,0.22)' : 'none';
-  const innerShadowCss = innerShadow ? 'inset 0 0 0 1px rgba(255,255,255,0.03), inset 0 10px 20px rgba(0,0,0,0.35), inset 0 -8px 16px rgba(0,0,0,0.28)' : 'none';
+  const outerShadow = typeof shadow === 'string' ? shadow : shadow ? '0 0 0 1px rgba(255,255,255,0.08), 0 0 20px rgba(255,255,255,0.04), 0 8px 32px rgba(0,0,0,0.5), 0 20px 60px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.3)' : 'none';
+  const innerShadowCss = innerShadow ? 'inset 0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.1), inset 0 10px 20px rgba(0,0,0,0.35), inset 0 -8px 16px rgba(0,0,0,0.28)' : 'none';
 
   const cutoutCommon: CSSProperties = {
     position: 'absolute', left: '50%', transform: 'translateX(-50%)',
