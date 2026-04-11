@@ -1,5 +1,6 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
   Carousel,
@@ -49,7 +50,13 @@ const Gallery4 = ({
   return (
     <section className="py-24 md:py-32">
       <div className="container mx-auto px-4">
-        <div className="mb-8 flex flex-col md:flex-row items-start md:items-end justify-between md:mb-14 lg:mb-16 gap-4">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="mb-8 flex flex-col md:flex-row items-start md:items-end justify-between md:mb-14 lg:mb-16 gap-4"
+        >
           <div className="flex flex-col gap-4">
             <h2 className="font-display text-3xl font-bold md:text-4xl lg:text-5xl text-foreground">
               {title}
@@ -76,9 +83,15 @@ const Gallery4 = ({
               <ArrowRight className="size-5" />
             </Button>
           </div>
-        </div>
+        </motion.div>
       </div>
-      <div className="w-full">
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.15 }}
+        transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }}
+        className="w-full"
+      >
         <Carousel
           setApi={setCarouselApi}
           opts={{
@@ -135,7 +148,7 @@ const Gallery4 = ({
             />
           ))}
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 };
