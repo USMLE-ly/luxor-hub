@@ -83,7 +83,7 @@ export const IPhoneMockup: React.FC<IPhoneMockupProps> = ({
   const outerHeight = screenHeight + resolvedBezel * 2;
   const outerRadius = resolvedRadius + resolvedBezel;
   const colorHex = PRESET_COLORS[color] ?? color;
-  const frameGradient = `linear-gradient(135deg, ${shade(colorHex, 8)} 0%, ${colorHex} 40%, ${shade(colorHex, -14)} 100%)`;
+  const frameGradient = `linear-gradient(145deg, ${shade(colorHex, 18)} 0%, ${shade(colorHex, 6)} 20%, ${colorHex} 45%, ${shade(colorHex, -10)} 70%, ${shade(colorHex, -20)} 100%)`;
 
   const useIsland = typeof showDynamicIsland === 'boolean' ? showDynamicIsland : Boolean(spec.island);
   const useNotch = typeof showNotch === 'boolean' ? showNotch : Boolean(spec.notch) && !useIsland;
@@ -102,8 +102,8 @@ export const IPhoneMockup: React.FC<IPhoneMockupProps> = ({
     right: safeAreaOverrides?.right ?? 0,
   };
 
-  const outerShadow = typeof shadow === 'string' ? shadow : shadow ? '0 12px 30px rgba(0,0,0,0.35), 0 2px 6px rgba(0,0,0,0.22)' : 'none';
-  const innerShadowCss = innerShadow ? 'inset 0 0 0 1px rgba(255,255,255,0.03), inset 0 10px 20px rgba(0,0,0,0.35), inset 0 -8px 16px rgba(0,0,0,0.28)' : 'none';
+  const outerShadow = typeof shadow === 'string' ? shadow : shadow ? '0 0 0 1px rgba(255,255,255,0.08), 0 0 20px rgba(255,255,255,0.04), 0 8px 32px rgba(0,0,0,0.5), 0 20px 60px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.3)' : 'none';
+  const innerShadowCss = innerShadow ? 'inset 0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.1), inset 0 10px 20px rgba(0,0,0,0.35), inset 0 -8px 16px rgba(0,0,0,0.28)' : 'none';
 
   const cutoutCommon: CSSProperties = {
     position: 'absolute', left: '50%', transform: 'translateX(-50%)',
@@ -117,6 +117,14 @@ export const IPhoneMockup: React.FC<IPhoneMockupProps> = ({
   return (
     <div className={className} style={{ display: 'inline-block', transform: `scale(${scale})`, transformOrigin: 'top center', ...style }}>
       <div style={{ width: outerWidth, height: outerHeight, borderRadius: outerRadius, background: frameGradient, padding: resolvedBezel, boxSizing: 'border-box', boxShadow: outerShadow, position: 'relative', overflow: 'hidden', ...frameStyle }} aria-label={`iPhone mockup (${model})`}>
+        {/* Titanium edge highlight */}
+        <div aria-hidden style={{ position: 'absolute', inset: 0, borderRadius: outerRadius, border: '1px solid rgba(255,255,255,0.08)', pointerEvents: 'none', zIndex: 4 }} />
+        <div aria-hidden style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '50%', borderRadius: `${outerRadius}px ${outerRadius}px 0 0`, background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 100%)', pointerEvents: 'none', zIndex: 4 }} />
+        {/* Side buttons */}
+        <div aria-hidden style={{ position: 'absolute', left: -2, top: 160, width: 3, height: 32, borderRadius: '2px 0 0 2px', background: `linear-gradient(180deg, ${shade(colorHex, 10)}, ${shade(colorHex, -8)})`, zIndex: 5 }} />
+        <div aria-hidden style={{ position: 'absolute', left: -2, top: 210, width: 3, height: 52, borderRadius: '2px 0 0 2px', background: `linear-gradient(180deg, ${shade(colorHex, 10)}, ${shade(colorHex, -8)})`, zIndex: 5 }} />
+        <div aria-hidden style={{ position: 'absolute', left: -2, top: 275, width: 3, height: 52, borderRadius: '2px 0 0 2px', background: `linear-gradient(180deg, ${shade(colorHex, 10)}, ${shade(colorHex, -8)})`, zIndex: 5 }} />
+        <div aria-hidden style={{ position: 'absolute', right: -2, top: 220, width: 3, height: 72, borderRadius: '0 2px 2px 0', background: `linear-gradient(180deg, ${shade(colorHex, 10)}, ${shade(colorHex, -8)})`, zIndex: 5 }} />
         <div style={{ width: '100%', height: '100%', borderRadius: resolvedRadius, position: 'relative', overflow: 'hidden', background: screenBg, boxShadow: innerShadowCss, ...screenStyle }}>
           {wallpaper && <div aria-hidden style={{ position: 'absolute', inset: 0, backgroundImage: `url(${wallpaper})`, backgroundSize: wallpaperFit, backgroundPosition: wallpaperPosition, backgroundRepeat: 'no-repeat', zIndex: 0 }} />}
           {useIsland && finalIslandW > 0 && <div aria-hidden style={{ ...cutoutCommon, top: 12, width: finalIslandW, height: finalIslandH, borderRadius: finalIslandR }} />}
