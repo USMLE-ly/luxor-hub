@@ -42,6 +42,7 @@ const Index = () => {
       <CTABanner />
       <Footer />
       <StickyPricingBar />
+      <ScrollToTop />
     </div>
   );
 };
