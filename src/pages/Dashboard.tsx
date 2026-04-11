@@ -4,7 +4,7 @@ import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Shirt, Wand2, ArrowRight, Heart, Sparkles, Palette, Scissors,
+  Shirt, Wand2, ArrowRight, Heart, Palette, Scissors, Eye,
   ShoppingBag, ExternalLink, Check, Gift, Calendar, Briefcase, PartyPopper, Sun, ChevronRight,
   TrendingUp, Snowflake, Dumbbell, AlertCircle,
 } from "lucide-react";
