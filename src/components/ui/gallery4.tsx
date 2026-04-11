@@ -148,7 +148,7 @@ const Gallery4 = ({
             />
           ))}
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 };
