@@ -254,7 +254,7 @@ const Pricing = () => {
                   }
                 />
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
 
