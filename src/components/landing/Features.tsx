@@ -1,5 +1,5 @@
-import { useRef } from "react";
-import { motion, useInView, useScroll, useTransform } from "framer-motion";
+import { useRef, useState, useEffect } from "react";
+import { motion, useInView, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { IPhoneMockup } from "@/components/ui/iphone-mockup";
 import featureDemo from "@/assets/feature-demo.mp4";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -13,10 +13,27 @@ const shimmerParticles = Array.from({ length: 12 }, (_, i) => ({
   duration: 3 + Math.random() * 3,
 }));
 
+const featureNames = [
+  "AI Outfit Analysis",
+  "Virtual Try-On",
+  "Trend Forecasting",
+  "Wardrobe Management",
+  "Style DNA Mapping",
+  "Color Analysis",
+];
+
 const Features = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
   const isMobile = useIsMobile();
+  const [activeFeature, setActiveFeature] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveFeature((prev) => (prev + 1) % featureNames.length);
+    }, 2400);
+    return () => clearInterval(interval);
+  }, []);
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -27,14 +44,14 @@ const Features = () => {
   const glowOpacity = useTransform(scrollYProgress, [0.2, 0.5, 0.8], [0.2, 0.6, 0.3]);
 
   return (
-    <section id="features" className="pt-16 md:pt-24 pb-8 md:pb-12 bg-muted/20 overflow-hidden" ref={sectionRef}>
+    <section id="features" className="pt-16 md:pt-24 pb-4 md:pb-8 bg-muted/20 overflow-hidden" ref={sectionRef}>
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
-          className="text-center mb-10"
+          className="text-center mb-6"
         >
           <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase mb-3">Features</p>
           <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground">
@@ -44,6 +61,22 @@ const Features = () => {
           <p className="mt-4 max-w-2xl mx-auto text-sm text-muted-foreground leading-relaxed">
             AI outfit analysis, trend forecasting, wardrobe management, and virtual try-on — all in one app.
           </p>
+
+          {/* Rotating feature text */}
+          <div className="mt-4 h-7 flex items-center justify-center overflow-hidden">
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={activeFeature}
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -14 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+                className="font-sans text-sm font-medium tracking-wider uppercase text-primary/80"
+              >
+                {featureNames[activeFeature]}
+              </motion.span>
+            </AnimatePresence>
+          </div>
         </motion.div>
 
         {/* iPhone Mockup with Video + Parallax + Shimmer */}
@@ -54,7 +87,7 @@ const Features = () => {
           style={{ y: mockupY }}
           className="flex justify-center relative"
         >
-          {/* Pulsing halo ring behind phone */}
+          {/* Pulsing halo rings — sized relative to phone */}
           <motion.div
             initial={{ opacity: 0, scale: 0.7 }}
             animate={isInView ? {
@@ -63,7 +96,7 @@ const Features = () => {
             } : {}}
             transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/20 pointer-events-none"
-            style={{ width: isMobile ? 260 : 360, height: isMobile ? 260 : 360 }}
+            style={{ width: isMobile ? 200 : 320, height: isMobile ? 200 : 320 }}
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.6 }}
@@ -73,7 +106,7 @@ const Features = () => {
             } : {}}
             transition={{ duration: 6, delay: 1.5, repeat: Infinity, ease: "easeInOut" }}
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/10 pointer-events-none"
-            style={{ width: isMobile ? 320 : 440, height: isMobile ? 320 : 440 }}
+            style={{ width: isMobile ? 260 : 400, height: isMobile ? 260 : 400 }}
           />
 
           {/* Floating shimmer particles */}
@@ -118,10 +151,10 @@ const Features = () => {
             />
           </IPhoneMockup>
 
-          {/* Luxury glow reflection */}
+          {/* Luxury glow reflection — tighter */}
           <motion.div
             style={{ opacity: glowOpacity }}
-            className="absolute -bottom-16 left-1/2 -translate-x-1/2 w-3/4 h-32 rounded-full bg-primary/15 blur-3xl pointer-events-none"
+            className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-1/2 h-12 rounded-full bg-primary/15 blur-2xl pointer-events-none"
           />
         </motion.div>
       </div>
