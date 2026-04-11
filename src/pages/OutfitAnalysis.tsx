@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import {
-  Upload, Camera, Sparkles, TrendingUp, Palette, ShieldCheck, AlertTriangle,
+  Upload, Camera, ScanLine, TrendingUp, Palette, ShieldCheck, AlertTriangle,
   Star, Shirt, Loader2, History, Save, Trash2, Share2, X,
   Twitter, Link, Check, Download, Clock, ArrowLeftRight, Users, Search, ExternalLink, ShoppingBag, RefreshCw,
   Layers, Eye, Plus
@@ -554,7 +554,7 @@ export default function OutfitAnalysis() {
         <Tabs defaultValue="analyze" className="w-full">
           <TabsList className="grid w-full grid-cols-4 mb-6 bg-muted/50 backdrop-blur-sm">
             <TabsTrigger value="analyze" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <Sparkles className="w-4 h-4" /> Analyze
+              <ScanLine className="w-4 h-4" /> Analyze
             </TabsTrigger>
             <TabsTrigger value="flat-lay" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Layers className="w-4 h-4" /> Flat-Lay
@@ -611,7 +611,7 @@ export default function OutfitAnalysis() {
                         <div className="space-y-3">
                           {[
                             { icon: Upload, text: "Snap or upload your look", color: "text-primary" },
-                            { icon: Sparkles, text: "AI breaks down every detail — color, fit, occasion match", color: "text-primary" },
+                            { icon: Eye, text: "AI breaks down every detail — color, fit, occasion match", color: "text-primary" },
                             { icon: TrendingUp, text: "Get a score and specific fixes", color: "text-primary" },
                           ].map((step, i) => (
                             <motion.div
@@ -646,7 +646,7 @@ export default function OutfitAnalysis() {
                                   transition={{ delay: i * 1.2 + 0.3 }}
                                   className="w-6 h-6 rounded-full bg-primary/15 flex items-center justify-center"
                                 >
-                                  <Sparkles className="w-3 h-3 text-primary" />
+                                  <Check className="w-3 h-3 text-primary" />
                                 </motion.div>
                                 <span className="text-sm text-muted-foreground">{step}</span>
                               </motion.div>
@@ -667,7 +667,7 @@ export default function OutfitAnalysis() {
                           disabled={!imageFile}
                           className="w-full md:w-auto px-8 font-semibold"
                         >
-                          <Sparkles className="w-5 h-5 mr-2" />Analyze My Outfit
+                          <ScanLine className="w-5 h-5 mr-2" />Analyze My Outfit
                         </RainbowButton>
                       )}
                       {analysisError && !isAnalyzing && (

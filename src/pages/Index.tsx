@@ -14,7 +14,7 @@ import Footer from "@/components/landing/Footer";
 import CTABanner from "@/components/landing/CTABanner";
 import AnnouncementBanner from "@/components/landing/AnnouncementBanner";
 import StickyPricingBar from "@/components/landing/StickyPricingBar";
-
+import ScrollToTop from "@/components/landing/ScrollToTop";
 const Index = () => {
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
@@ -42,6 +42,7 @@ const Index = () => {
       <CTABanner />
       <Footer />
       <StickyPricingBar />
+      <ScrollToTop />
     </div>
   );
 };
