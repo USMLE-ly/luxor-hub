@@ -311,7 +311,7 @@ const Dashboard = () => {
   }, [wardrobeItems]);
 
   const occasionTabs = [
-    { label: "All", icon: <Sparkles className="w-4 h-4" />, color: "hsl(var(--primary))", value: null },
+    { label: "All", icon: <Shirt className="w-4 h-4" />, color: "hsl(var(--primary))", value: null },
     { label: "Everyday", icon: <Sun className="w-4 h-4" />, color: "hsl(142, 60%, 45%)", value: "everyday" },
     { label: "Work", icon: <Briefcase className="w-4 h-4" />, color: "hsl(30, 80%, 55%)", value: "work" },
     { label: "Party", icon: <PartyPopper className="w-4 h-4" />, color: "hsl(270, 60%, 55%)", value: "party" },
@@ -363,7 +363,7 @@ const Dashboard = () => {
         {/* Header */}
         <motion.div variants={fadeUp} className="flex items-center justify-between">
           <div className="w-10 h-10">
-            <Sparkles className="w-8 h-8 text-foreground" />
+            <Wand2 className="w-8 h-8 text-foreground" />
           </div>
           <div className="flex items-center gap-3">
             <button className="w-10 h-10 flex items-center justify-center">
@@ -663,7 +663,7 @@ const Dashboard = () => {
                           onClick={() => navigate("/closet")}
                           className="text-[10px] font-sans text-primary flex items-center gap-1"
                         >
-                          <Sparkles className="w-2.5 h-2.5" /> Try it on
+                          <Eye className="w-2.5 h-2.5" /> Try it on
                         </button>
                       </div>
                     </div>
