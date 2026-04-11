@@ -85,7 +85,13 @@ const Gallery4 = ({
           </div>
         </motion.div>
       </div>
-      <div className="w-full">
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.15 }}
+        transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }}
+        className="w-full"
+      >
         <Carousel
           setApi={setCarouselApi}
           opts={{
