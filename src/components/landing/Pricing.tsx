@@ -210,8 +210,15 @@ const Pricing = () => {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 justify-center items-stretch">
-          {tiers.map((t) => (
-            <div key={t.key} className={t.isFree ? "relative" : ""}>
+          {tiers.map((t, i) => (
+            <motion.div
+              key={t.key}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ duration: 0.5, delay: i * 0.1, ease: "easeOut" }}
+              className={t.isFree ? "relative" : ""}
+            >
               {t.isFree && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
                   <span className="px-3 py-1 rounded-full text-[10px] font-sans font-bold uppercase tracking-widest border border-dashed border-foreground/20 bg-background text-muted-foreground">
@@ -247,7 +254,7 @@ const Pricing = () => {
                   }
                 />
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
 
