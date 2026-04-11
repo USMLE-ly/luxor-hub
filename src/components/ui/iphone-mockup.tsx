@@ -117,6 +117,14 @@ export const IPhoneMockup: React.FC<IPhoneMockupProps> = ({
   return (
     <div className={className} style={{ display: 'inline-block', transform: `scale(${scale})`, transformOrigin: 'top center', ...style }}>
       <div style={{ width: outerWidth, height: outerHeight, borderRadius: outerRadius, background: frameGradient, padding: resolvedBezel, boxSizing: 'border-box', boxShadow: outerShadow, position: 'relative', overflow: 'hidden', ...frameStyle }} aria-label={`iPhone mockup (${model})`}>
+        {/* Titanium edge highlight */}
+        <div aria-hidden style={{ position: 'absolute', inset: 0, borderRadius: outerRadius, border: '1px solid rgba(255,255,255,0.08)', pointerEvents: 'none', zIndex: 4 }} />
+        <div aria-hidden style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '50%', borderRadius: `${outerRadius}px ${outerRadius}px 0 0`, background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 100%)', pointerEvents: 'none', zIndex: 4 }} />
+        {/* Side buttons */}
+        <div aria-hidden style={{ position: 'absolute', left: -2, top: 160, width: 3, height: 32, borderRadius: '2px 0 0 2px', background: `linear-gradient(180deg, ${shade(colorHex, 10)}, ${shade(colorHex, -8)})`, zIndex: 5 }} />
+        <div aria-hidden style={{ position: 'absolute', left: -2, top: 210, width: 3, height: 52, borderRadius: '2px 0 0 2px', background: `linear-gradient(180deg, ${shade(colorHex, 10)}, ${shade(colorHex, -8)})`, zIndex: 5 }} />
+        <div aria-hidden style={{ position: 'absolute', left: -2, top: 275, width: 3, height: 52, borderRadius: '2px 0 0 2px', background: `linear-gradient(180deg, ${shade(colorHex, 10)}, ${shade(colorHex, -8)})`, zIndex: 5 }} />
+        <div aria-hidden style={{ position: 'absolute', right: -2, top: 220, width: 3, height: 72, borderRadius: '0 2px 2px 0', background: `linear-gradient(180deg, ${shade(colorHex, 10)}, ${shade(colorHex, -8)})`, zIndex: 5 }} />
         <div style={{ width: '100%', height: '100%', borderRadius: resolvedRadius, position: 'relative', overflow: 'hidden', background: screenBg, boxShadow: innerShadowCss, ...screenStyle }}>
           {wallpaper && <div aria-hidden style={{ position: 'absolute', inset: 0, backgroundImage: `url(${wallpaper})`, backgroundSize: wallpaperFit, backgroundPosition: wallpaperPosition, backgroundRepeat: 'no-repeat', zIndex: 0 }} />}
           {useIsland && finalIslandW > 0 && <div aria-hidden style={{ ...cutoutCommon, top: 12, width: finalIslandW, height: finalIslandH, borderRadius: finalIslandR }} />}
