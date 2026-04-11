@@ -85,7 +85,7 @@ const Features = () => {
           animate={isInView ? { opacity: 1, scale: 1 } : {}}
           transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
           style={{ y: mockupY }}
-          className="flex justify-center relative mb-[-200px] md:mb-[-100px]"
+          className="flex justify-center relative mb-[-340px] md:mb-[-140px]"
         >
           {/* Pulsing halo rings — sized relative to phone */}
           <motion.div
