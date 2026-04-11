@@ -108,7 +108,7 @@ const Gallery4 = ({
           }}
         >
           <CarouselContent className="ml-4 md:ml-[max(4rem,calc(50vw-600px))] mr-4 md:mr-[max(0rem,calc(50vw-600px))]">
-            {items.map((item) => (
+            {items.map((item, index) => (
               <CarouselItem
                 key={item.id}
                 className="max-w-[300px] pl-[20px] lg:max-w-[360px]"
@@ -135,6 +135,28 @@ const Gallery4 = ({
                         <ArrowRight className="ml-2 size-5 transition-transform group-hover:translate-x-1" />
                       </div>
                     </div>
+                    {/* Swipe hint on first card — mobile only */}
+                    {index === 0 && (
+                      <AnimatePresence>
+                        {showSwipeHint && (
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 flex items-center justify-end pointer-events-none md:hidden"
+                          >
+                            <motion.div
+                              animate={{ x: [0, -16, 0] }}
+                              transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+                              className="mr-3 flex items-center gap-1.5 rounded-full bg-background/80 backdrop-blur-sm px-3 py-1.5 shadow-lg"
+                            >
+                              <ArrowLeft className="size-3.5 text-foreground/70" />
+                              <span className="text-xs font-medium text-foreground/70">Swipe</span>
+                            </motion.div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    )}
                   </div>
                 </a>
               </CarouselItem>
