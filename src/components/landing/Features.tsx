@@ -44,7 +44,7 @@ const Features = () => {
   const glowOpacity = useTransform(scrollYProgress, [0.2, 0.5, 0.8], [0.2, 0.6, 0.3]);
 
   return (
-    <section id="features" className="pt-16 md:pt-24 pb-4 md:pb-8 bg-muted/20 overflow-hidden" ref={sectionRef}>
+    <section id="features" className="pt-16 md:pt-24 pb-0 bg-muted/20 overflow-hidden" ref={sectionRef}>
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
         <motion.div
