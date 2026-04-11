@@ -40,11 +40,15 @@ const Gallery4 = ({
       setCanScrollPrev(carouselApi.canScrollPrev());
       setCanScrollNext(carouselApi.canScrollNext());
       setCurrentSlide(carouselApi.selectedScrollSnap());
+      if (carouselApi.selectedScrollSnap() > 0) setShowSwipeHint(false);
     };
     updateSelection();
     carouselApi.on("select", updateSelection);
+    // Auto-hide hint after 4 seconds
+    const timer = setTimeout(() => setShowSwipeHint(false), 4000);
     return () => {
       carouselApi.off("select", updateSelection);
+      clearTimeout(timer);
     };
   }, [carouselApi]);
 
