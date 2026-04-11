@@ -83,7 +83,7 @@ const Gallery4 = ({
               <ArrowRight className="size-5" />
             </Button>
           </div>
-        </div>
+        </motion.div>
       </div>
       <div className="w-full">
         <Carousel
