@@ -77,7 +77,8 @@ export default function GlassmorphismTrustHero() {
   const heroRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef(0);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
-  const videoY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
+  const videoY = useTransform(scrollYProgress, [0, 1], ["0%", "35%"]);
+  const videoScale = useTransform(scrollYProgress, [0, 0.4], [1, 1.1]);
   const [testimonialIdx, setTestimonialIdx] = useState(0);
 
   useEffect(() => {
