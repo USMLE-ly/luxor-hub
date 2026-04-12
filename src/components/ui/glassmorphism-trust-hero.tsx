@@ -17,6 +17,39 @@ import {
 } from "lucide-react";
 import heroVideo from "@/assets/hero-video.mp4";
 
+const FloatingCircle = ({
+  size,
+  top,
+  left,
+  gradient,
+  duration,
+  delay,
+}: {
+  size: number;
+  top: string;
+  left: string;
+  gradient: string;
+  duration: number;
+  delay: number;
+}) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: [0, 15, 0] }}
+    transition={{
+      opacity: { duration: 1.5, delay },
+      y: { duration, repeat: Infinity, ease: "easeInOut", delay },
+    }}
+    className="absolute rounded-full pointer-events-none border border-white/[0.08] backdrop-blur-[2px]"
+    style={{
+      width: size,
+      height: size,
+      top,
+      left,
+      background: gradient,
+    }}
+  />
+);
+
 const CLIENTS = [
   { name: "VOGUE", icon: Hexagon },
   { name: "GLAMOUR", icon: Triangle },
