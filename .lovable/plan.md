@@ -1,28 +1,32 @@
 
 
-# Remove Testimonial Section, Add iPhone Glow, Fix Gap
+## Plan: Enhanced Hero Background with Parallax & Floating Circle Effects
 
-## Changes
+### What Changes
 
-### 1. Remove "What Our Clients Say" entirely
-**File**: `src/components/landing/Testimonials.tsx`
-- Delete the entire "Testimonial Grid" section (lines 185-235) — the 2x2 grid with heading "What Our Clients Say"
-- Delete the entire "Scroll-driven animated card stack" section (lines 237-285) — the CardStackScroll with sticky cards
-- Keep only the "Real Results. Real Revenue." section (lines 97-183)
-- Remove unused imports: `CardStackScroll`, `CardsContainer`, `CardTransformed`, `ReviewStars`, and the `TESTIMONIALS` array
+**1. Enhance parallax scroll effect on the video background**
+- The hero already has a basic parallax (`videoY` transforms from `0%` to `30%`). We'll increase the range slightly and add a scale transform that grows as user scrolls, creating a more cinematic zoom-out depth effect.
 
-### 2. Add subtle glow/reflection below iPhone mockup
-**File**: `src/components/landing/Features.tsx`
-- Add a radial gradient glow element below the mockup: a `div` with `bg-gradient-radial from-primary/15 via-primary/5 to-transparent` positioned below the phone, blurred (`blur-3xl`), creating a luxury reflection effect
-- Reduce bottom padding of the section from `py-16 md:py-24` to `py-16 md:py-20` to tighten spacing
+**2. Add floating premium circle elements**
+- Add 4-5 animated circular shapes behind the content (similar to the `ElegantShape` pattern in `shape-landing-hero.tsx`) but using circles with soft gradient fills and slow floating animations.
+- Circles will have varying sizes (100px–400px), subtle white/gold/primary opacity, blur, and slow `y` oscillation via framer-motion.
+- Positioned absolutely within the hero, layered between the video background (z-0) and content (z-10).
 
-### 3. Fix large gap between Features and HowItWorks
-**File**: `src/components/landing/Features.tsx`
-- Change section padding from `py-16 md:py-24` to `pt-16 md:pt-24 pb-8 md:pb-12`
+### Files Modified
 
-**File**: `src/components/landing/HowItWorks.tsx`
-- Reduce top padding if needed (check current values)
+**`src/components/ui/glassmorphism-trust-hero.tsx`**
+- Add a `FloatingCircle` component with framer-motion entrance animation (fade + drift down) and continuous float (`y: [0, 15, 0]` over 10-16s).
+- Render 5 circles at various positions with gradients using `primary`, `accent`, and white tones at low opacity (0.06–0.12).
+- Adjust parallax: add `useTransform` for scale (`[1, 1.1]`) on the video container for depth.
 
-### 4. Publish
-- Use publish tools to push all changes live
+### Technical Details
+
+```text
+Layer stack (z-index):
+  z-0  — Video + overlays + parallax scale
+  z-[1] — Floating gradient circles (new)
+  z-10 — Content (unchanged)
+```
+
+Each circle: `rounded-full`, `backdrop-blur-[2px]`, `border border-white/[0.08]`, soft radial gradient fill, `pointer-events-none`.
 
