@@ -116,8 +116,8 @@ export default function GlassmorphismTrustHero() {
         .hero-delay-500 { animation-delay: 0.5s; }
       `}</style>
 
-      {/* Background video with parallax */}
-      <motion.div className="absolute inset-0 z-0" style={{ y: videoY }}>
+      {/* Background video with parallax + scale */}
+      <motion.div className="absolute inset-0 z-0" style={{ y: videoY, scale: videoScale }}>
         <video
           src={heroVideo}
           autoPlay
@@ -139,6 +139,15 @@ export default function GlassmorphismTrustHero() {
           style={{ boxShadow: "inset 0 0 120px 60px hsl(var(--background))" }}
         />
       </motion.div>
+
+      {/* Floating premium circles */}
+      <div className="absolute inset-0 z-[1] overflow-hidden pointer-events-none">
+        <FloatingCircle size={320} top="-5%" left="-8%" gradient="radial-gradient(circle, hsl(var(--primary) / 0.1) 0%, transparent 70%)" duration={14} delay={0} />
+        <FloatingCircle size={200} top="15%" left="75%" gradient="radial-gradient(circle, hsl(var(--accent) / 0.08) 0%, transparent 70%)" duration={12} delay={1} />
+        <FloatingCircle size={400} top="55%" left="60%" gradient="radial-gradient(circle, hsl(var(--primary) / 0.06) 0%, transparent 70%)" duration={16} delay={2} />
+        <FloatingCircle size={150} top="70%" left="10%" gradient="radial-gradient(circle, hsla(0, 0%, 100%, 0.06) 0%, transparent 70%)" duration={10} delay={0.5} />
+        <FloatingCircle size={250} top="30%" left="40%" gradient="radial-gradient(circle, hsl(var(--accent) / 0.06) 0%, transparent 70%)" duration={13} delay={1.5} />
+      </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 pt-24 pb-12 sm:px-6 md:pt-32 md:pb-20 lg:px-8">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-8 items-start">
