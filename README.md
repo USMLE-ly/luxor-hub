@@ -1,5 +1,9 @@
 # ⚔️ Annihilation
 
+<div align="center">
+  <img src="logo.png" alt="Annihilation Logo" width="200"/>
+</div>
+
 **Autonomous Language Model Decensoring Framework**
 
 [![License: AGPLv3](https://img.shields.io/badge/License-AGPLv3-blue.svg)](LICENSE)
