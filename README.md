@@ -1,16 +1,10 @@
 # ⚔️ Annihilation
 
-<div align="center">
-
-![Annihilation Logo](logo.png)
-
 **Autonomous Language Model Decensoring Framework**
 
 [![License: AGPLv3](https://img.shields.io/badge/License-AGPLv3-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-green)](https://www.python.org/)
 [![PyTorch 2.2+](https://img.shields.io/badge/PyTorch-2.2%2B-red)](https://pytorch.org/)
-
-</div>
 
 ---
 
@@ -35,29 +29,6 @@
 
 ---
 
-## 🖼️ Logo Design
-
-```
-╔═══════════════════════════════════════════════════════════════╗
-║                                                               ║
-║     ██████╗  █████╗ ██████╗  █████╗ ██╗     ██╗             ║
-║     ██╔══██╗██╔══██╗██╔══██╗██╔══██╗██║     ██║             ║
-║     ██║  ██║███████║██████╔╝███████║██║     ██║             ║
-║     ██║  ██║██╔══██║██╔══██╗██╔══██║██║     ██║             ║
-║     ██████╔╝██║  ██║██║  ██║██║  ██║███████╗███████╗        ║
-║     ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝        ║
-║                                                               ║
-║     ██████╗ ███████╗ █████╗ ██████╗                        ║
-║     ██╔══██╗██╔════╝██╔══██╗██╔══██╗                       ║
-║     ██║  ██║█████╗  ███████║██████╔╝                       ║
-║     ██║  ██║██╔══╝  ██╔══██║██╔══██╗                       ║
-║     ██████╔╝███████╗██║  ██║██║  ██║                       ║
-║     ╚═════╝ ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝                       ║
-║                                                               ║
-╚═══════════════════════════════════════════════════════════════╝
-```
-
-The logo represents the **breaking of chains** - the central "A" symbol serves as the blade that cuts through the safety alignments, freeing the model from imposed restrictions.
 
 ---
 
