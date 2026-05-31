@@ -1,7 +1,7 @@
 # ⚔️ Annihilation
 
 <div align="center">
-  <img src="logo.png" alt="Annihilation Logo" width="200"/>
+  <img src="https://raw.githubusercontent.com/tjcrims0nx/annihilation-llm/main/logo.png" alt="Annihilation Logo" width="300"/>
 </div>
 
 **Autonomous Language Model Decensoring Framework**
