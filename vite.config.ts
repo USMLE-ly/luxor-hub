@@ -5,6 +5,7 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  base: "./",  // CRITICAL for Capacitor: use relative paths for file:// loading
   server: {
     host: "::",
     port: 8080,
@@ -20,5 +21,9 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  build: {
+    outDir: "dist",
+    assetsInlineLimit: 0,  // Prevent asset inlining issues
   },
 }));

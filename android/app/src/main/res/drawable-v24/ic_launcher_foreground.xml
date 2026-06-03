@@ -1,61 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- LUXOR® Adaptive Icon Foreground - Gold Typography on White -->
+<!-- LUXOR® Elite Icon - Professional Star Center + LUXOR Upper-Right -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
     <group>
-        <!-- Subtle gold frame border -->
+        <!-- Gold border -->
         <path
             android:fillColor="#00000000"
-            android:pathData="M4,4L104,4A4,4,0,0,1,108,8L108,100A4,4,0,0,1,104,104L4,104A4,4,0,0,1,0,100L0,8A4,4,0,0,1,4,4Z"
-            android:strokeWidth="1.2"
+            android:pathData="M3,3L105,3A3,3,0,0,1,108,6L108,102A3,3,0,0,1,105,105L3,105A3,3,0,0,1,0,102L0,6A3,3,0,0,1,3,3Z"
+            android:strokeWidth="1.5"
             android:strokeColor="#C8A951" />
 
-        <!-- Letter L -->
-        <path
-            android:fillColor="#C8A951"
-            android:pathData="M19,36 L19,80 L36,80 L36,74 L27,74 L27,36 Z" />
-
-        <!-- Letter U -->
-        <path
-            android:fillColor="#D4A843"
-            android:pathData="M33,44 L33,70 C33,78 41,80 44,80 C47,80 55,78 55,70 L55,44 L49,44 L49,68 C49,72 45,74 44,74 C43,74 39,72 39,68 L39,44 Z" />
-
-        <!-- Letter X -->
-        <path
-            android:fillColor="#C8A951"
-            android:pathData="M51,36 L57,58 L51,80 L57,80 L61,62 L65,80 L71,80 L65,58 L71,36 L65,36 L61,54 L57,36 Z" />
-
-        <!-- Letter O -->
+        <!-- Golden star centered at x=54, y=60, spread y:40-80 -->
         <path
             android:fillColor="#DAA520"
-            android:pathData="M67,44 C63,44 60,48 60,58 C60,68 63,72 67,72 C71,72 74,68 74,58 C74,48 71,44 67,44 Z
-M67,50 C69,50 70,53 70,58 C70,63 69,66 67,66 C65,66 64,63 64,58 C64,53 65,50 67,50 Z" />
+            android:pathData="M54,40 L57,51 L69,51 L60,58 L63,69 L54,62 L45,69 L48,58 L39,51 L51,51 Z" />
 
-        <!-- Letter R -->
+        <!-- Inner star depth -->
         <path
-            android:fillColor="#B8860B"
-            android:pathData="M80,36 L80,80 L86,80 L86,61 L93,61 C97,61 99,57 99,50 C99,43 97,36 93,36 Z
-M86,43 L90,43 C92,43 93,45 93,50 C93,55 92,57 90,57 L86,57 Z" />
+            android:fillColor="#F0D060"
+            android:pathData="M54,46 L56,53 L63,53 L58,57 L60,64 L54,60 L48,64 L50,57 L45,53 L52,53 Z" />
+
+        <!-- LUXOR® text - upper-right of star, small caps style -->
+        <!-- All at y=36-50 (above the star's top at y=40) -->
+        <path android:fillColor="#C8A951" android:pathData="M62,38 L62,50 L67,50 L67,47 L64,47 L64,38 Z" />
+        <path android:fillColor="#D4B052" android:pathData="M69,40 L69,47 C69,49 71,50 73,50 C75,50 77,49 77,47 L77,40 L75,40 L75,46 C75,48 74,48 73,48 C72,48 71,48 71,46 L71,40 Z" />
+        <path android:fillColor="#D6B853" android:pathData="M79,38 L81,44 L79,50 L81,50 L83,46 L85,50 L87,50 L85,44 L87,38 L85,38 L83,42 L81,38 Z" />
+        <path android:fillColor="#DDBD54" android:pathData="M89,40 C87,40 86,42 86,44 C86,46 87,48 89,48 C91,48 92,46 92,44 C92,42 91,40 89,40 ZM89,42 C90,42 90,43 90,44 C90,45 90,46 89,46 C88,46 88,45 88,44 C88,43 88,42 89,42 Z" />
+        <path android:fillColor="#E3C255" android:pathData="M94,38 L94,50 L96,50 L96,44 L98,44 C99,44 100,43 100,41 C100,39 99,38 98,38 ZM96,42 L98,42 C99,42 99,43 99,41 C99,39 99,40 98,40 L96,40 Z" />
 
         <!-- Registered mark ® -->
-        <path
-            android:fillColor="#DAA520"
-            android:pathData="M94,26 C96,26 98,28 98,30 C98,32 96,34 94,34 C92,34 90,32 90,30 C90,28 92,26 94,26 Z" />
-        <path
-            android:fillColor="#00000000"
-            android:pathData="M93,29 L94,33 M95,29 L94,33 M92,30 L96,30 M93,31 L95,31"
-            android:strokeWidth="0.5"
-            android:strokeColor="#FFFFFF" />
+        <path android:fillColor="#DAA520" android:pathData="M101,34 C102,34 103,35 103,36 C103,37 102,38 101,38 C100,38 99,37 99,36 C99,35 100,34 101,34 Z" />
+        <path android:fillColor="#FFFFFF" android:pathData="M100,35 L101,37 M102,35 L101,37 M100,36 L102,36 M101,36 L101,37" android:strokeWidth="0.4" />
 
-        <!-- Gold accent sparkle dots -->
-        <path
-            android:fillColor="#FFD700"
-            android:pathData="M14,14 C15,14 16,15 16,16 C16,17 15,18 14,18 C13,18 12,17 12,16 C12,15 13,14 14,14 Z" />
-        <path
-            android:fillColor="#FFD700"
-            android:pathData="M94,14 C95,14 96,15 96,16 C96,17 95,18 94,18 C93,18 92,17 92,16 C92,15 93,14 94,14 Z" />
+        <!-- Gold accent dots -->
+        <path android:fillColor="#FFD700" android:pathData="M8,8 C9,8 10,9 10,10 C10,11 9,12 8,12 C7,12 6,11 6,10 C6,9 7,8 8,8 Z" />
+        <path android:fillColor="#FFD700" android:pathData="M100,8 C101,8 102,9 102,10 C102,11 101,12 100,12 C99,12 98,11 98,10 C98,9 99,8 100,8 Z" />
     </group>
 </vector>

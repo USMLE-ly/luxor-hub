@@ -67,7 +67,9 @@ const LoadingFallback = () => (
 const RouteTracker = () => {
   const location = useLocation();
   useEffect(() => {
-    pageview();
+    try {
+      pageview();
+    } catch {}
   }, [location.pathname]);
   return null;
 };
@@ -85,18 +87,24 @@ const queryClient = new QueryClient({
 
 const App = () => {
   useEffect(() => {
-    // Initialize LEXOR security module
-    security.startMonitoring(10000);
-    
-    // Check device security status
-    security.isDeviceSecure().then((secure: boolean) => {
-      if (!secure) {
-        console.warn('[LEXOR] Device security compromised');
-      }
-    });
+    try {
+      // Initialize LEXOR security module
+      security.startMonitoring(10000);
+      
+      // Check device security status
+      security.isDeviceSecure().then((secure: boolean) => {
+        if (!secure) {
+          console.warn('[LEXOR] Device security compromised');
+        }
+      }).catch(() => {});
+    } catch (err) {
+      console.warn('[LEXOR] Security init error:', err);
+    }
 
     return () => {
-      security.stopMonitoring();
+      try {
+        security.stopMonitoring();
+      } catch {}
     };
   }, []);
   return (

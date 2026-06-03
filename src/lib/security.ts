@@ -1,16 +1,37 @@
 /**
- * LEXOR Security Module — Runtime Integrity Checks
- * Protects against: debugger, devtools, hooking
- * ⚠️ NOTE: Does NOT freeze built-in prototypes — that breaks React/JS frameworks
+ * LEXOR® Security Module — Runtime Integrity Checks
+ * Version: 2.1.1
+ * NOTE: Does NOT freeze built-in prototypes — that breaks React/JS frameworks
+ * NOTE: All checks are wrapped in try-catch to prevent crashes in restricted WebView environments
  */
+
+export interface SecurityEvent {
+  reason: string;
+  time: number;
+  type: 'devtools' | 'hooking' | 'prototype' | 'root' | 'emulator' | 'tamper';
+}
 
 export class SecurityModule {
   private static instance: SecurityModule;
-  private integrityInterval: number | null = null;
+  private integrityInterval: ReturnType<typeof setInterval> | null = null;
   private compromised = false;
+  private listeners: Array<(event: SecurityEvent) => void> = [];
+  private readonly CHECK_INTERVAL = 10000;
 
   private constructor() {
-    // No prototype freezing — that breaks React and all modern JS frameworks
+    try {
+      // Listen for security events from the native layer
+      window.addEventListener('lexor:security', ((e: CustomEvent) => {
+        try {
+          const detail = e.detail || {};
+          this.handleViolation({
+            reason: detail.reason || 'hook',
+            time: detail.time || Date.now(),
+            type: 'hooking'
+          });
+        } catch {}
+      }) as EventListener);
+    } catch {}
   }
 
   static getInstance(): SecurityModule {
@@ -20,18 +41,37 @@ export class SecurityModule {
     return SecurityModule.instance;
   }
 
-  /**
-   * Start periodic integrity checks
-   */
-  startMonitoring(intervalMs = 10000): void {
+  /** Subscribe to security events */
+  onSecurityEvent(callback: (event: SecurityEvent) => void): () => void {
+    this.listeners.push(callback);
+    return () => {
+      this.listeners = this.listeners.filter(l => l !== callback);
+    };
+  }
+
+  /** Start periodic integrity checks */
+  startMonitoring(intervalMs = this.CHECK_INTERVAL): void {
     if (this.integrityInterval) return;
 
-    this.integrityInterval = window.setInterval(() => {
-      if (this.detectDevTools()) {
-        this.onCompromised('DevTools detected');
-      }
-      if (this.detectHooking()) {
-        this.onCompromised('Code hooking detected');
+    // Wrap entire callback so no uncaught exception can break the interval
+    this.integrityInterval = setInterval(() => {
+      try {
+        if (this.detectDevTools()) {
+          this.handleViolation({
+            reason: 'DevTools detected',
+            time: Date.now(),
+            type: 'devtools'
+          });
+        }
+        if (this.detectHooking()) {
+          this.handleViolation({
+            reason: 'Code hooking detected',
+            time: Date.now(),
+            type: 'hooking'
+          });
+        }
+      } catch {
+        // Silently ignore — WebView may restrict some APIs
       }
     }, intervalMs);
   }
@@ -43,55 +83,63 @@ export class SecurityModule {
     }
   }
 
-  /**
-   * Detect DevTools via outer/inner window dimension check
-   */
+  /** Detect DevTools via multiple methods */
   private detectDevTools(): boolean {
-    const widthThreshold = window.outerWidth - window.innerWidth > 160;
-    const heightThreshold = window.outerHeight - window.innerHeight > 160;
-    if (widthThreshold || heightThreshold) {
-      return true;
+    try {
+      const wThreshold = window.outerWidth - window.innerWidth > 160;
+      const hThreshold = window.outerHeight - window.innerHeight > 160;
+      if (wThreshold || hThreshold) return true;
+
+      try {
+        if ((window.console as any)?.firebug) return true;
+      } catch {}
+
+      return false;
+    } catch {
+      return false;
     }
+  }
+
+  /** Detect JS hooking frameworks */
+  private detectHooking(): boolean {
+    try {
+      const hooks = [
+        '__REACT_DEVTOOLS_GLOBAL_HOOK__',
+        '__VUE_DEVTOOLS_GLOBAL_HOOK__',
+        '__REDUX_DEVTOOLS_EXTENSION__'
+      ];
+      for (const key of hooks) {
+        if ((window as any)[key]) return true;
+      }
+      if (typeof (window as any).Frida !== 'undefined') return true;
+    } catch {}
     return false;
   }
 
-  /**
-   * Detect React/Vue devtools hook presence
-   */
-  private detectHooking(): boolean {
+  /** Handle detected security violation */
+  private handleViolation(event: SecurityEvent): void {
     try {
-      const hooks = ['__REACT_DEVTOOLS_GLOBAL_HOOK__', '__VUE_DEVTOOLS_GLOBAL_HOOK__'];
-      for (const key of hooks) {
-        if ((window as any)[key]) {
-          return true;
-        }
-      }
-      return false;
+      if (this.compromised) return;
+      this.compromised = true;
+
+      // Notify listeners
+      this.listeners.forEach(l => l(event));
+
+      // Dispatch custom event
+      window.dispatchEvent(new CustomEvent('lexor:security-compromised', {
+        detail: event
+      }));
     } catch {
-      return false;
+      // Never throw
     }
   }
 
-  /**
-   * Handle compromise detection
-   */
-  private onCompromised(reason: string): void {
-    if (this.compromised) return;
-    this.compromised = true;
-
-    // Dispatch event for app to handle
-    window.dispatchEvent(new CustomEvent('lexor:security-compromised', {
-      detail: { reason, timestamp: Date.now() }
-    }));
-  }
-
-  /**
-   * Check if device is secure via native bridge
-   */
+  /** Check device security via native bridge */
   async isDeviceSecure(): Promise<boolean> {
     try {
-      if (typeof (window as any).WebViewBridge?.isDeviceSecure === 'function') {
-        return (window as any).WebViewBridge.isDeviceSecure();
+      const bridge = (window as any).WebViewBridge;
+      if (typeof bridge?.isDeviceSecure === 'function') {
+        return await Promise.resolve(bridge.isDeviceSecure());
       }
       return true;
     } catch {
@@ -99,21 +147,29 @@ export class SecurityModule {
     }
   }
 
-  /**
-   * Get security report from native layer
-   */
+  /** Get security report from native layer */
   async getSecurityReport(): Promise<string> {
     try {
-      if (typeof (window as any).WebViewBridge?.getSecurityReport === 'function') {
-        return (window as any).WebViewBridge.getSecurityReport();
+      const bridge = (window as any).WebViewBridge;
+      if (typeof bridge?.getSecurityReport === 'function') {
+        return await Promise.resolve(bridge.getSecurityReport());
       }
       return 'Security bridge not available';
     } catch {
       return 'Security bridge not available';
     }
+  }
+
+  /** Check if currently compromised */
+  isCompromised(): boolean {
+    return this.compromised;
+  }
+
+  /** Reset compromised state */
+  reset(): void {
+    this.compromised = false;
   }
 }
 
-// Export singleton
 export const security = SecurityModule.getInstance();
 export default security;
