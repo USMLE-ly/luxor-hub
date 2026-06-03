@@ -1,7 +1,18 @@
-import { defineConfig } from "vite";
+import { defineConfig, Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
+
+// Plugin to remove crossorigin from script/link tags for Capacitor file:// compatibility
+function removeCrossOrigin(): Plugin {
+  return {
+    name: "remove-crossorigin",
+    enforce: "post",
+    transformIndexHtml(html) {
+      return html.replace(/\s+crossorigin(=["'][^"']*["'])?/gi, "");
+    },
+  };
+}
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -16,6 +27,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === "development" && componentTagger(),
+    removeCrossOrigin(),
   ].filter(Boolean),
   resolve: {
     alias: {

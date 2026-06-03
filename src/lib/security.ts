@@ -1,8 +1,9 @@
 /**
  * LEXOR® Security Module — Runtime Integrity Checks
- * Version: 2.1.1
- * NOTE: Does NOT freeze built-in prototypes — that breaks React/JS frameworks
- * NOTE: All checks are wrapped in try-catch to prevent crashes in restricted WebView environments
+ * Version: 2.1.2
+ * 
+ * IMPORTANT: This module does NOT run any code at import time.
+ * All initialization happens lazily when startMonitoring() is called.
  */
 
 export interface SecurityEvent {
@@ -12,15 +13,28 @@ export interface SecurityEvent {
 }
 
 export class SecurityModule {
-  private static instance: SecurityModule;
+  private static instance: SecurityModule | null = null;
   private integrityInterval: ReturnType<typeof setInterval> | null = null;
   private compromised = false;
   private listeners: Array<(event: SecurityEvent) => void> = [];
-  private readonly CHECK_INTERVAL = 10000;
+  private initialized = false;
 
   private constructor() {
+    // No side effects in constructor — everything starts lazily
+  }
+
+  static getInstance(): SecurityModule {
+    if (!SecurityModule.instance) {
+      SecurityModule.instance = new SecurityModule();
+    }
+    return SecurityModule.instance;
+  }
+
+  /** Must be called once before startMonitoring to set up listeners */
+  private ensureInitialized(): void {
+    if (this.initialized) return;
+    this.initialized = true;
     try {
-      // Listen for security events from the native layer
       window.addEventListener('lexor:security', ((e: CustomEvent) => {
         try {
           const detail = e.detail || {};
@@ -34,13 +48,6 @@ export class SecurityModule {
     } catch {}
   }
 
-  static getInstance(): SecurityModule {
-    if (!SecurityModule.instance) {
-      SecurityModule.instance = new SecurityModule();
-    }
-    return SecurityModule.instance;
-  }
-
   /** Subscribe to security events */
   onSecurityEvent(callback: (event: SecurityEvent) => void): () => void {
     this.listeners.push(callback);
@@ -50,10 +57,10 @@ export class SecurityModule {
   }
 
   /** Start periodic integrity checks */
-  startMonitoring(intervalMs = this.CHECK_INTERVAL): void {
+  startMonitoring(intervalMs = 10000): void {
     if (this.integrityInterval) return;
+    this.ensureInitialized();
 
-    // Wrap entire callback so no uncaught exception can break the interval
     this.integrityInterval = setInterval(() => {
       try {
         if (this.detectDevTools()) {
@@ -89,11 +96,9 @@ export class SecurityModule {
       const wThreshold = window.outerWidth - window.innerWidth > 160;
       const hThreshold = window.outerHeight - window.innerHeight > 160;
       if (wThreshold || hThreshold) return true;
-
       try {
         if ((window.console as any)?.firebug) return true;
       } catch {}
-
       return false;
     } catch {
       return false;
@@ -121,11 +126,7 @@ export class SecurityModule {
     try {
       if (this.compromised) return;
       this.compromised = true;
-
-      // Notify listeners
       this.listeners.forEach(l => l(event));
-
-      // Dispatch custom event
       window.dispatchEvent(new CustomEvent('lexor:security-compromised', {
         detail: event
       }));
@@ -171,5 +172,6 @@ export class SecurityModule {
   }
 }
 
+// Export singleton — but NO code runs at module level
 export const security = SecurityModule.getInstance();
 export default security;
