@@ -88,7 +88,7 @@
   window.addEventListener('appinstalled', () => {
     deferredPrompt = null;
     console.log('[PWA] App installed');
-    document.getElementById('pwa-install-banner').style.display = 'none';
+    const installBanner = document.getElementById('pwa-install-banner'); if (installBanner) installBanner.style.display = 'none';
     if (window.gtag) gtag('event', 'install', { app_id: 'com.luxor.app' });
     if (window.fbq) fbq('track', 'PWAInstalled');
   });
@@ -124,7 +124,7 @@
   function updateNetworkStatus() {
     const isOffline = !navigator.onLine;
     document.documentElement.classList.toggle('is-offline', isOffline);
-    document.querySelector('.offline-banner').style.display = isOffline ? 'flex' : 'none';
+    const offlineBanner = document.querySelector('.offline-banner'); if (offlineBanner) offlineBanner.style.display = isOffline ? 'flex' : 'none';
     
     if (isOffline) {
       setBadge(1); // Show badge when offline

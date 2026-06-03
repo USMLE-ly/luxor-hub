@@ -1,17 +1,13 @@
-import { useEffect, lazy, Suspense } from "react";
-import { security } from '@/lib/security';
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "next-themes";
 import { HelmetProvider } from "react-helmet-async";
-import { pageview } from "@/lib/fbPixel";
 import { ErrorBoundary } from "@/components/app/ErrorBoundary";
-import StarfieldBackground from "@/components/ui/starfield-background";
-import OfflineIndicator from "@/components/app/OfflineIndicator";
 import SplashScreen from "@/components/app/SplashScreen";
 import PaywallGate from "@/components/app/PaywallGate";
 
@@ -63,22 +59,11 @@ const LoadingFallback = () => (
   </div>
 );
 
-// Tracks route changes for analytics
-const RouteTracker = () => {
-  const location = useLocation();
-  useEffect(() => {
-    try {
-      pageview();
-    } catch {}
-  }, [location.pathname]);
-  return null;
-};
-
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 min
-      gcTime: 30 * 60 * 1000,   // 30 min cache
+      staleTime: 5 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
       retry: 2,
       refetchOnWindowFocus: false,
     },
@@ -86,39 +71,15 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  useEffect(() => {
-    try {
-      // Initialize LEXOR security module
-      security.startMonitoring(10000);
-      
-      // Check device security status
-      security.isDeviceSecure().then((secure: boolean) => {
-        if (!secure) {
-          console.warn('[LEXOR] Device security compromised');
-        }
-      }).catch(() => {});
-    } catch (err) {
-      console.warn('[LEXOR] Security init error:', err);
-    }
-
-    return () => {
-      try {
-        security.stopMonitoring();
-      } catch {}
-    };
-  }, []);
   return (
   <HelmetProvider>
   <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-    <StarfieldBackground />
-    <OfflineIndicator />
     <SplashScreen />
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
         <Sonner />
       <BrowserRouter>
-        <RouteTracker />
         <AuthProvider>
           <ErrorBoundary>
           <Suspense fallback={<LoadingFallback />}>

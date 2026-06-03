@@ -99,16 +99,6 @@ const SplashScreen = () => {
               transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
             />
           </div>
-
-          {/* Version */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.3 }}
-            transition={{ delay: 1.5 }}
-            className="absolute bottom-8 text-[10px] text-muted-foreground font-sans tracking-widest z-10"
-          >
-            v2.1.5
-          </motion.p>
         </motion.div>
       )}
     </AnimatePresence>
