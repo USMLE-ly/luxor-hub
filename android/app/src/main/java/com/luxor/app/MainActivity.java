@@ -15,8 +15,8 @@ import android.util.Log;
 
 public class MainActivity extends BridgeActivity {
 
-    private static final String CHANNEL_ID = "lexor_notifications";
-    private static final String CHANNEL_NAME = "LEXOR Notifications";
+    private static final String CHANNEL_ID = "luxor_notifications";
+    private static final String CHANNEL_NAME = "LUXOR Notifications";
     private static final String CHANNEL_DESC = "Style alerts, outfit suggestions, and AI recommendations";
 
     private SecurityUtils securityUtils;
@@ -25,19 +25,16 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // ╔══════════════════════════════════════════════════╗
-        // ║   LEXOR SECURITY SUITE — Enterprise Protection  ║
-        // ╚══════════════════════════════════════════════════╝
         securityUtils = new SecurityUtils(this);
         boolean secure = securityUtils.audit();
 
         if (!secure) {
-            Log.w("LEXOR-Security", 
+            Log.w("LUXOR-Security", 
                 "⚠ Running on potentially compromised device: " + 
                 securityUtils.getReport());
         }
 
-        // 1. Edge-to-edge display (Android 15+)
+        // 1. Edge-to-edge display
         EdgeToEdge.enable(this);
 
         // 2. Window insets handling
@@ -49,97 +46,89 @@ public class MainActivity extends BridgeActivity {
         insetsController.setAppearanceLightStatusBars(false);
         insetsController.setAppearanceLightNavigationBars(false);
 
-        // 3. ⚡ SECURE FLAG — Prevent screenshots and screen recording
+        // 3. Prevent screenshots and screen recording
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
 
-        // 4. Predictive back gesture (Android 14+)
-        // Handled automatically by AndroidX Activity
-
-        // 5. Create notification channels (Android 8+ required)
+        // 4. Create notification channels
         createNotificationChannels();
 
-        // 6. WebView configuration (post-bridge init)
-        getBridge().getWebView().addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
-            @Override
-            public void onViewAttachedToWindow(View v) {
-                configureWebView((WebView) v);
-                v.removeOnAttachStateChangeListener(this);
-            }
-            @Override public void onViewDetachedFromWindow(View v) {}
-        });
+        // 5. WebView configuration (runs after bridge init)
+        getBridge().getWebView().post(() -> configureWebView(getBridge().getWebView()));
     }
 
     /**
-     * Configure WebView with security settings balanced for app functionality
+     * Configure WebView with security settings balanced for app functionality.
+     * Does NOT replace Capacitor's built-in WebViewClient (which handles
+     * WebViewAssetLoader for serving local assets). Replacing it would cause
+     * a blank screen because the app content would never load.
      */
     private void configureWebView(WebView webView) {
         if (webView == null) return;
         
         WebSettings settings = webView.getSettings();
-        
-        // Required for Capacitor with androidScheme: 'https'
-        settings.setAllowFileAccess(false);               // No local file access
-        settings.setAllowFileAccessFromFileURLs(false);    // No file protocol
+
+        // Security: disable unwanted access
+        settings.setAllowFileAccess(false);
+        settings.setAllowFileAccessFromFileURLs(false);
         settings.setAllowUniversalAccessFromFileURLs(false);
-        settings.setAllowContentAccess(false);             // No content://
-        
-        // Secure JavaScript
-        settings.setJavaScriptEnabled(true);               // Required for app
+        settings.setAllowContentAccess(false);
+
+        // JavaScript must be enabled
+        settings.setJavaScriptEnabled(true);
         settings.setJavaScriptCanOpenWindowsAutomatically(false);
         settings.setDomStorageEnabled(true);
-        
-        // Disable form auto-fill (security risk)
+
+        // Disable form auto-fill
         settings.setSavePassword(false);
         settings.setSaveFormData(false);
-        
-        // Disable zoom controls (prevents UI manipulation)
+
+        // Disable zoom controls
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
-        
-        // Disable mixed content (block HTTP on HTTPS pages)
+
+        // Allow mixed content (needed for Capacitor local http://localhost)
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+            settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         }
-        
-        // Enable WebGL and related features needed by Three.js/React Three Fiber
-        settings.setAllowFileAccess(false);
-        settings.setJavaScriptEnabled(true);
-        settings.setDomStorageEnabled(true);
+
+        // Enable WebGL / Three.js features
         settings.setDatabaseEnabled(true);
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
-        
-        // Enable hardware acceleration for WebGL
+
+        // Hardware acceleration for WebGL
         webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-        
+
         // Remove dangerous JS interfaces
         webView.removeJavascriptInterface("accessibility");
         webView.removeJavascriptInterface("accessibilityTraversal");
-        
-        // Use secure WebView client
-        webView.setWebViewClient(new SecureWebViewClient());
-        
+
+        // CRITICAL: Do NOT call webView.setWebViewClient() here.
+        // Capacitor's bridge has its own WebViewClient that handles
+        // WebViewAssetLoader for serving local files over the configured scheme.
+        // Replacing it breaks asset loading and causes a blank screen.
+
         // Add JS bridge for error logging from web app
         webView.addJavascriptInterface(new Object() {
             @JavascriptInterface
             public void logError(String message, String stack) {
-                Log.e("LEXOR-JS", "JS Error: " + message + "\n" + stack);
+                Log.e("LUXOR-JS", "JS Error: " + message + "\n" + stack);
             }
             @JavascriptInterface
             public void logInfo(String message) {
-                Log.i("LEXOR-JS", message);
+                Log.i("LUXOR-JS", message);
             }
         }, "AndroidBridge");
-        
-        // Disable long-press selection (prevents text extraction)
+
+        // Disable long-press selection
         webView.setOnLongClickListener(v -> {
             WebView.HitTestResult result = webView.getHitTestResult();
             if (result != null && result.getType() == WebView.HitTestResult.UNKNOWN_TYPE) {
-                return true; // Consume the event
+                return true;
             }
             return false;
         });
 
-        Log.i("LEXOR-Security", "✅ WebView configured");
+        Log.i("LUXOR-Security", "✅ WebView configured");
     }
 
     @android.webkit.JavascriptInterface
@@ -165,14 +154,14 @@ public class MainActivity extends BridgeActivity {
             channel.setShowBadge(true);
 
             android.app.NotificationChannel styleChannel = new android.app.NotificationChannel(
-                "lexor_style_alerts",
+                "luxor_style_alerts",
                 "Style Alerts",
                 android.app.NotificationManager.IMPORTANCE_DEFAULT
             );
             styleChannel.setDescription("Daily style recommendations and trend alerts");
 
             android.app.NotificationChannel socialChannel = new android.app.NotificationChannel(
-                "lexor_social",
+                "luxor_social",
                 "Social",
                 android.app.NotificationManager.IMPORTANCE_LOW
             );
@@ -190,11 +179,10 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onResume() {
         super.onResume();
-        // Re-check security on resume
         if (securityUtils != null) {
             boolean secure = securityUtils.audit();
             if (!secure) {
-                Log.w("LEXOR-Security", 
+                Log.w("LUXOR-Security", 
                     "⚠ Security check on resume: " + securityUtils.getReport());
             }
         }
@@ -210,7 +198,6 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onPause() {
         super.onPause();
-        // Ensure FLAG_SECURE is maintained
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
     }
 }
