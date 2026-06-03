@@ -70,7 +70,7 @@ self.addEventListener('periodicsync', (event) => {
       // Show notification if there are updates
       const data = await response.json();
       if (data.alerts?.length > 0) {
-        self.registration.showNotification('LEXOR Wardrobe Update', {
+        self.registration.showNotification('LUXOR Wardrobe Update', {
           body: data.alerts.join('. '),
           icon: '/pwa-192.png',
           badge: '/pwa-192.png'
@@ -110,7 +110,7 @@ async function registerContent() {
 // ---- PUSH NOTIFICATIONS ----
 self.addEventListener('push', (event) => {
   const data = event.data?.json() ?? {
-    title: 'LEXOR',
+    title: 'LUXOR',
     body: 'You have a new style update!',
     icon: '/pwa-192.png',
     badge: '/pwa-192.png',
@@ -280,4 +280,4 @@ self.addEventListener('activate', (event) => {
 });
 
 // Log SW lifecycle
-console.log('[SW] LEXOR Service Worker v2 loaded');
+console.log('[SW] LUXOR Service Worker v2 loaded');
