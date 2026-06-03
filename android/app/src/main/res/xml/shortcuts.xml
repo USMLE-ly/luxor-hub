@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="closet"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_closet_short"
+        android:shortcutLongLabel="@string/shortcut_closet_long"
+        android:shortcutDisabledMessage="@string/shortcut_closet_disabled">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.luxor.app"
+            android:targetClass="com.luxor.app.MainActivity"
+            android:data="lexor://closet" />
+        <categories android:name="android.shortcut.conversations" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="chat"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_chat_short"
+        android:shortcutLongLabel="@string/shortcut_chat_long"
+        android:shortcutDisabledMessage="@string/shortcut_chat_disabled">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.luxor.app"
+            android:targetClass="com.luxor.app.MainActivity"
+            android:data="lexor://chat" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="outfits"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_outfits_short"
+        android:shortcutLongLabel="@string/shortcut_outfits_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.luxor.app"
+            android:targetClass="com.luxor.app.MainActivity"
+            android:data="lexor://outfit-builder" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="style-dna"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_dna_short"
+        android:shortcutLongLabel="@string/shortcut_dna_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.luxor.app"
+            android:targetClass="com.luxor.app.MainActivity"
+            android:data="lexor://style-dna" />
+    </shortcut>
+</shortcuts>

@@ -1,0 +1,17 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "TEAMID.com.luxor.app",
+        "paths": ["*"]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": ["TEAMID.com.luxor.app"]
+  },
+  "activitycontinuation": {
+    "apps": ["TEAMID.com.luxor.app"]
+  }
+}

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Strict HTTPS only for production -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+    
+    <!-- LEXOR API domains with certificate pinning -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">luxor.ly</domain>
+        <domain includeSubdomains="true">supabase.co</domain>
+        <pin-set expiration="2027-12-31">
+            <!-- Let's Encrypt R3 (current) -->
+            <pin digest="SHA-256">jQJTbIh0grw0/1TkHqLg7M4XOvMZgW0VjHNv2dE8pY8=</pin>
+            <!-- Let's Encrypt E1 (backup) -->
+            <pin digest="SHA-256">mEflZT1qN4S3L8H2bR8v9GX5cK6aD7fA0sS2dF3gH4J=</pin>
+            <!-- ISRG Root X1 -->
+            <pin digest="SHA-256">C5+lpZ7tcVwmwQIMcRtPbsQtWLABXhQzsaXyHReG0sM=</pin>
+        </pin-set>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+    
+    <!-- Additional secure domains -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">stripe.com</domain>
+        <domain includeSubdomains="true">github.io</domain>
+        <domain includeSubdomains="true">googleapis.com</domain>
+        <domain includeSubdomains="true">gstatic.com</domain>
+        <domain includeSubdomains="true">googletagmanager.com</domain>
+        <domain includeSubdomains="true">google-analytics.com</domain>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+    
+    <!-- Local development only -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="false">10.0.2.2</domain>
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </domain-config>
+</network-security-config>

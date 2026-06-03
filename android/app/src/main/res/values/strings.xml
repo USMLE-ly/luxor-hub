@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LEXOR</string>
+    <string name="title_activity_main">LEXOR</string>
+    <string name="shortcut_closet_short">Closet</string>
+    <string name="shortcut_closet_long">My Wardrobe</string>
+    <string name="shortcut_closet_disabled">Open LEXOR to access your wardrobe</string>
+    <string name="shortcut_chat_short">AI Stylist</string>
+    <string name="shortcut_chat_long">Chat with AI Stylist</string>
+    <string name="shortcut_chat_disabled">Open LEXOR to chat with AI</string>
+    <string name="shortcut_outfits_short">Outfits</string>
+    <string name="shortcut_outfits_long">Build Outfits</string>
+    <string name="shortcut_dna_short">Style DNA</string>
+    <string name="shortcut_dna_long">My Style Profile</string>
+</resources>

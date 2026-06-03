@@ -2,6 +2,9 @@
 <html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="DENY" />
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>LEXOR® — AI Fashion Stylist & Virtual Wardrobe | Personal Style OS</title>
     <meta name="description" content="LEXOR® is the AI fashion platform that styles your wardrobe. Get daily outfit recommendations, trend forecasting, and personal fashion styling — powered by AI.">
@@ -145,10 +148,28 @@
     <meta name="twitter:title" content="LEXOR® — AI Fashion Stylist & Virtual Wardrobe | Personal Style OS">
     <meta property="og:description" content="LEXOR® is the AI fashion platform that styles your wardrobe. Get daily outfit recommendations, trend forecasting, and personal fashion styling — powered by AI.">
     <meta name="twitter:description" content="LEXOR® is the AI fashion platform that styles your wardrobe. Get daily outfit recommendations, trend forecasting, and personal fashion styling — powered by AI.">
-  </head>
+      <link rel="dns-prefetch" href="https://supabase.co" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://gstatic.com" crossorigin />
+    
+    <!-- Apple Touch Icons for iOS -->
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icons/icon-57.png" />
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icons/icon-60.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icons/icon-72.png" />
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icons/icon-76.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icons/icon-114.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icons/icon-120.png" />
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icons/icon-144.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icons/icon-152.png" />
+    <link rel="apple-touch-icon" sizes="167x167" href="/apple-icons/icon-167.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icons/icon-180.png" />
+    
+    <!-- PWA Registration -->
+    <script defer src="/pwa.js"></script>
+</head>
   <body>
-    <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1567409157678795&ev=PageView&noscript=1"/></noscript>
     <div id="root"></div>
+    <script defer src="/security.js"></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
