@@ -20,7 +20,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    console.warn("[LEXOR] ErrorBoundary caught:", error.message, info);
+    console.warn("[LUXOR] ErrorBoundary caught:", error.message, info);
   }
 
   render() {
@@ -61,9 +61,6 @@ export class ErrorBoundary extends Component<Props, State> {
               Reload App
             </Button>
           </div>
-          <p className="mt-8 text-xs text-muted-foreground/50">
-            LEXOR® v2.1.5 — If this persists, contact support
-          </p>
         </div>
       );
     }

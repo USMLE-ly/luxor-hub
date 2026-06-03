@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const GoldParticle = ({ index }: { index: number }) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const x = 20 + Math.random() * 60;
   const delay = Math.random() * 2;
   const duration = 2.5 + Math.random() * 2;
@@ -28,16 +29,15 @@ const SplashScreen = () => {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    const isStandalone =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      (navigator as any).standalone === true;
-
-    if (isStandalone && !sessionStorage.getItem("luxor_splash_shown")) {
+    if (!sessionStorage.getItem("luxor_splash_shown")) {
       setShow(true);
       sessionStorage.setItem("luxor_splash_shown", "1");
-      setTimeout(() => setShow(false), 2500);
+      // Ensure splash always dismisses after timeout, even if something hangs
+      setTimeout(() => setShow(false), 3000);
     }
   }, []);
+
+  if (!show) return null;
 
   return (
     <AnimatePresence>
