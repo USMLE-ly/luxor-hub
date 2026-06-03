@@ -2,13 +2,13 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.luxor.app',
-  appName: 'LEXOR',
+  appName: 'LUXOR',
   webDir: 'dist',
   bundledWebRuntime: false,
   server: {
-    androidScheme: 'https',
+    androidScheme: 'http',
     iosScheme: 'lexor',
-    hostname: 'luxor.ly'
+    hostname: 'localhost'
   },
   ios: {
     contentInset: 'always',
@@ -16,10 +16,10 @@ const config: CapacitorConfig = {
     limitsNavigationsToAppBoundDomains: true,
     backgroundColor: '#0A0A0B',
     minVersion: '15.0',
-    scheme: 'LEXOR'
+    scheme: 'LUXOR'
   },
   android: {
-    allowMixedContent: false,
+    allowMixedContent: true,
     backgroundColor: '#0A0A0B',
     captureInput: true,
     webContentsDebuggingEnabled: false

@@ -18,6 +18,9 @@ public class SecureWebViewClient extends WebViewClient {
     private static final String TAG = "LEXOR-SecureWebView";
     
     // Content Security Policy — restricts scripts, connections, frames
+    // NOTE: 'unsafe-eval' is required by React and some animation libraries
+    // blob: is required for service worker and worker threads
+    // Capacitor local server runs on the device's configured scheme+hostname
     private static final String CSP_HEADER = 
         "default-src 'self' https://*.supabase.co wss://*.supabase.co https://fonts.googleapis.com " +
         "https://fonts.gstatic.com https://*.fbcdn.net https://connect.facebook.net " +
@@ -29,9 +32,9 @@ public class SecureWebViewClient extends WebViewClient {
         "font-src 'self' https://fonts.gstatic.com; " +
         "connect-src 'self' https://*.supabase.co wss://*.supabase.co " +
         "https://*.google-analytics.com https://*.googletagmanager.com " +
-        "https://api.stripe.com; " +
+        "https://api.stripe.com http://localhost:*; " +
         "frame-src 'self' https://connect.facebook.net https://js.stripe.com; " +
-        "media-src 'self' https:; " +
+        "media-src 'self' blob: https: http://localhost:*; " +
         "worker-src 'self' blob:;";
 
     private static final Map<String, String> SECURITY_HEADERS = new HashMap<>();
@@ -50,8 +53,13 @@ public class SecureWebViewClient extends WebViewClient {
     public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
         String url = request.getUrl().toString();
         
+        // Allow localhost HTTP (Capacitor dev server)
+        if (url.startsWith("http://localhost") || url.startsWith("http://10.0.2.2")) {
+            return null;
+        }
+
         // Block cleartext HTTP (except localhost for dev)
-        if (url.startsWith("http://") && !url.contains("localhost") && !url.contains("10.0.2.2")) {
+        if (url.startsWith("http://")) {
             Log.w(TAG, "Blocked cleartext HTTP: " + url);
             return new WebResourceResponse("text/plain", "utf-8", 
                 new ByteArrayInputStream("Blocked by LEXOR security".getBytes()));
@@ -64,8 +72,10 @@ public class SecureWebViewClient extends WebViewClient {
     public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
         String url = request.getUrl().toString();
         
-        // Allow only HTTPS, custom scheme, or known safe protocols
+        // Allow safe protocols
         if (url.startsWith("https://") || 
+            url.startsWith("http://localhost") ||
+            url.startsWith("http://10.0.2.2") ||
             url.startsWith("lexor://") ||
             url.startsWith("blob:") ||
             url.startsWith("data:") ||

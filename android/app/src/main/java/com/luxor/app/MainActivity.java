@@ -1,16 +1,17 @@
 package com.luxor.app;
 
-import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
 import android.webkit.WebView;
 import android.webkit.WebSettings;
+import android.webkit.JavascriptInterface;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.activity.EdgeToEdge;
 import com.getcapacitor.BridgeActivity;
+import android.util.Log;
 
 public class MainActivity extends BridgeActivity {
 
@@ -31,9 +32,7 @@ public class MainActivity extends BridgeActivity {
         boolean secure = securityUtils.audit();
 
         if (!secure) {
-            // Device is compromised — log but continue (don't block UX)
-            // In production, route to a secure warning screen via JS bridge
-            android.util.Log.w("LEXOR-Security", 
+            Log.w("LEXOR-Security", 
                 "⚠ Running on potentially compromised device: " + 
                 securityUtils.getReport());
         }
@@ -59,11 +58,11 @@ public class MainActivity extends BridgeActivity {
         // 5. Create notification channels (Android 8+ required)
         createNotificationChannels();
 
-        // 6. Secure WebView configuration (post-bridge init)
+        // 6. WebView configuration (post-bridge init)
         getBridge().getWebView().addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View v) {
-                configureSecureWebView((WebView) v);
+                configureWebView((WebView) v);
                 v.removeOnAttachStateChangeListener(this);
             }
             @Override public void onViewDetachedFromWindow(View v) {}
@@ -71,14 +70,14 @@ public class MainActivity extends BridgeActivity {
     }
 
     /**
-     * Configure WebView with enterprise security settings
+     * Configure WebView with security settings balanced for app functionality
      */
-    private void configureSecureWebView(WebView webView) {
+    private void configureWebView(WebView webView) {
         if (webView == null) return;
         
         WebSettings settings = webView.getSettings();
         
-        // Disable dangerous features
+        // Required for Capacitor with androidScheme: 'https'
         settings.setAllowFileAccess(false);               // No local file access
         settings.setAllowFileAccessFromFileURLs(false);    // No file protocol
         settings.setAllowUniversalAccessFromFileURLs(false);
@@ -102,12 +101,34 @@ public class MainActivity extends BridgeActivity {
             settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
         }
         
+        // Enable WebGL and related features needed by Three.js/React Three Fiber
+        settings.setAllowFileAccess(false);
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+        settings.setDatabaseEnabled(true);
+        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        
+        // Enable hardware acceleration for WebGL
+        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        
         // Remove dangerous JS interfaces
         webView.removeJavascriptInterface("accessibility");
         webView.removeJavascriptInterface("accessibilityTraversal");
         
         // Use secure WebView client
         webView.setWebViewClient(new SecureWebViewClient());
+        
+        // Add JS bridge for error logging from web app
+        webView.addJavascriptInterface(new Object() {
+            @JavascriptInterface
+            public void logError(String message, String stack) {
+                Log.e("LEXOR-JS", "JS Error: " + message + "\n" + stack);
+            }
+            @JavascriptInterface
+            public void logInfo(String message) {
+                Log.i("LEXOR-JS", message);
+            }
+        }, "AndroidBridge");
         
         // Disable long-press selection (prevents text extraction)
         webView.setOnLongClickListener(v -> {
@@ -118,13 +139,9 @@ public class MainActivity extends BridgeActivity {
             return false;
         });
 
-        android.util.Log.i("LEXOR-Security", "✅ WebView secured");
+        Log.i("LEXOR-Security", "✅ WebView configured");
     }
 
-    /**
-     * Expose security status to JavaScript bridge
-     * Call via: window.WebViewBridge.getSecurityReport()
-     */
     @android.webkit.JavascriptInterface
     public String getSecurityReport() {
         return securityUtils != null ? securityUtils.getReport() : "Security not initialized";
@@ -177,7 +194,7 @@ public class MainActivity extends BridgeActivity {
         if (securityUtils != null) {
             boolean secure = securityUtils.audit();
             if (!secure) {
-                android.util.Log.w("LEXOR-Security", 
+                Log.w("LEXOR-Security", 
                     "⚠ Security check on resume: " + securityUtils.getReport());
             }
         }
