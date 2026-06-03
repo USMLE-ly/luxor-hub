@@ -1,11 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const LETTERS = "LEXOR®".split("");
-const TAGLINE = "Your AI Style Intelligence";
-
 const GoldParticle = ({ index }: { index: number }) => {
-  const x = 20 + Math.random() * 60; // % position
+  const x = 20 + Math.random() * 60;
   const delay = Math.random() * 2;
   const duration = 2.5 + Math.random() * 2;
   const size = 2 + Math.random() * 3;
@@ -29,7 +26,6 @@ const GoldParticle = ({ index }: { index: number }) => {
 
 const SplashScreen = () => {
   const [show, setShow] = useState(false);
-  const [taglineText, setTaglineText] = useState("");
 
   useEffect(() => {
     const isStandalone =
@@ -39,25 +35,9 @@ const SplashScreen = () => {
     if (isStandalone && !sessionStorage.getItem("luxor_splash_shown")) {
       setShow(true);
       sessionStorage.setItem("luxor_splash_shown", "1");
-      setTimeout(() => setShow(false), 3200);
+      setTimeout(() => setShow(false), 2500);
     }
   }, []);
-
-  // Typewriter effect for tagline
-  useEffect(() => {
-    if (!show) return;
-    const startDelay = 1200; // after logo + letters animate
-    const timeout = setTimeout(() => {
-      let i = 0;
-      const interval = setInterval(() => {
-        i++;
-        setTaglineText(TAGLINE.slice(0, i));
-        if (i >= TAGLINE.length) clearInterval(interval);
-      }, 35);
-      return () => clearInterval(interval);
-    }, startDelay);
-    return () => clearTimeout(timeout);
-  }, [show]);
 
   return (
     <AnimatePresence>
@@ -66,95 +46,68 @@ const SplashScreen = () => {
           key="splash"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.5 }}
           className="fixed inset-0 z-[99999] bg-background flex flex-col items-center justify-center"
         >
           {/* Ambient glow */}
-          <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <motion.div
               initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1.4, opacity: 0.25 }}
-              transition={{ duration: 2, ease: "easeOut" }}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-primary blur-[120px]"
+              animate={{ scale: 1.4, opacity: 0.2 }}
+              transition={{ duration: 1.5, ease: "easeOut" }}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full"
+              style={{ background: "radial-gradient(circle, hsl(43,74%,49%,0.3), transparent)" }}
             />
           </div>
 
           {/* Gold floating particles */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {Array.from({ length: 20 }).map((_, i) => (
+            {Array.from({ length: 15 }).map((_, i) => (
               <GoldParticle key={i} index={i} />
             ))}
           </div>
 
-          {/* Logo mark */}
+          {/* LUXOR® Logo — matching landing page style */}
           <motion.div
-            initial={{ scale: 0.3, opacity: 0, rotateY: -90 }}
-            animate={{ scale: 1, opacity: 1, rotateY: 0 }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            className="relative z-10 mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className="relative z-10 text-center"
           >
-            <div className="w-22 h-22 rounded-2xl gold-gradient flex items-center justify-center shadow-[0_0_40px_-8px_hsl(43,74%,49%,0.5)]">
-              <span className="font-display text-4xl font-bold text-primary-foreground p-4">A</span>
-            </div>
+            <h1 
+              className="font-display text-5xl font-bold tracking-wider"
+              style={{
+                background: 'linear-gradient(135deg, #C8A951 0%, #DAA520 50%, #B8860B 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+            >
+              LUXOR®
+            </h1>
           </motion.div>
 
-          {/* Dual-ring spinner */}
-          <div className="relative z-10 mb-8">
+          {/* Loading spinner */}
+          <div className="relative z-10 mt-12">
             <motion.div
-              className="absolute -inset-6 rounded-full border-2 border-transparent"
+              className="w-8 h-8 border-2 border-transparent rounded-full"
               style={{
                 borderTopColor: "hsl(43, 74%, 49%)",
                 borderRightColor: "hsl(43, 74%, 49%)",
               }}
               animate={{ rotate: 360 }}
-              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
             />
-            <motion.div
-              className="absolute -inset-10 rounded-full border border-transparent"
-              style={{
-                borderBottomColor: "hsl(43, 74%, 60%)",
-                borderLeftColor: "hsl(43, 74%, 60%)",
-              }}
-              animate={{ rotate: -360 }}
-              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-            />
-          </div>
-
-          {/* Staggered letter reveal */}
-          <div className="relative z-10 flex gap-0.5 mb-3">
-            {LETTERS.map((letter, i) => (
-              <motion.span
-                key={i}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 + i * 0.06, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                className="font-display text-4xl font-bold gold-text tracking-wider"
-              >
-                {letter}
-              </motion.span>
-            ))}
-          </div>
-
-          {/* Typewriter tagline */}
-          <div className="relative z-10 h-6">
-            <span className="text-sm text-muted-foreground font-sans">
-              {taglineText}
-              <motion.span
-                animate={{ opacity: [1, 0] }}
-                transition={{ duration: 0.5, repeat: Infinity }}
-                className="inline-block w-[2px] h-4 bg-primary ml-0.5 align-middle"
-              />
-            </span>
           </div>
 
           {/* Version */}
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.3 }}
-            transition={{ delay: 2.5 }}
+            transition={{ delay: 1.5 }}
             className="absolute bottom-8 text-[10px] text-muted-foreground font-sans tracking-widest z-10"
           >
-            v2.0
+            v2.1.5
           </motion.p>
         </motion.div>
       )}

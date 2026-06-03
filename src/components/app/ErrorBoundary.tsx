@@ -27,17 +27,18 @@ export class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         <div className="flex flex-col items-center justify-center min-h-screen p-8 text-center bg-background">
-          {/* LEXOR® Branded Error Screen */}
-          <div className="mb-8">
-            <div className="w-20 h-20 rounded-2xl bg-white border border-[#C8A951] flex items-center justify-center mx-auto mb-4 shadow-lg">
-              <span className="font-display text-2xl font-bold" style={{
-                background: 'linear-gradient(135deg, #C8A951 0%, #DAA520 50%, #B8860B 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text'
-              }}>LUXOR®</span>
-            </div>
-          </div>
+          {/* LUXOR® Logo — matching landing page style */}
+          <h1
+            className="font-display text-4xl font-bold tracking-wider mb-6"
+            style={{
+              background: 'linear-gradient(135deg, #C8A951 0%, #DAA520 50%, #B8860B 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+          >
+            LUXOR®
+          </h1>
           
           <AlertTriangle className="w-12 h-12 text-[#DAA520] mb-4" />
           <h3 className="text-lg font-semibold text-foreground mb-2">Something went wrong</h3>
@@ -61,7 +62,7 @@ export class ErrorBoundary extends Component<Props, State> {
             </Button>
           </div>
           <p className="mt-8 text-xs text-muted-foreground/50">
-            LEXOR® v2.1.4 — If this persists, contact support
+            LEXOR® v2.1.5 — If this persists, contact support
           </p>
         </div>
       );
