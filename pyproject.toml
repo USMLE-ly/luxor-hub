@@ -1,6 +1,6 @@
 [project]
 name = "annihilation-llm-tjcrims0nx"
-version = "1.3.5"
+version = "1.3.6"
 description = "Fully automatic censorship removal for language models"
 readme = "README.md"
 license = "AGPL-3.0-or-later"
@@ -23,7 +23,6 @@ classifiers = [
 ]
 dependencies = [
     "accelerate~=1.13",
-    "bitsandbytes~=0.49",
     "datasets~=4.7",
     "huggingface-hub~=1.7",
     "immutabledict~=4.3",
@@ -43,6 +42,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+bnb = [
+    "bitsandbytes~=0.49",
+]
 research = [
     "geom-median~=0.1",
     "imageio~=2.37",

@@ -51,6 +51,8 @@ annihilation Qwen/Qwen3-4B-Instruct-2507
 - **Python**: 3.10+
 - **PyTorch**: 2.2+ (hardware-specific installation required)
 - **Hardware**: GPU recommended (CUDA, ROCm, XPU, or MPS)
+- **Optional**: Install `annihilation-llm-tjcrims0nx[bnb]` only on platforms
+  that support bitsandbytes if you want `bnb_4bit` quantization.
 
 ---
 
