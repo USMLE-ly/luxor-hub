@@ -197,9 +197,73 @@ Install with research dependencies for visualization tools:
 pip install -U annihilate-llm[research]
 ```
 
-Features:
-- `--plot-residuals` - Generate PaCMAP projections of residual vectors
-- `--print-residual-geometry` - Detailed residual analysis metrics
+### Residual Geometry
+
+Print a quantitative analysis of how residual vectors for "harmful" and
+"harmless" prompts relate to each other:
+
+```bash
+annihilate --print-residual-geometry
+```
+
+You can also enable it in `config.toml`:
+
+```toml
+print_residual_geometry = true
+```
+
+When enabled, Annihilate computes first-token residual vectors for each
+transformer layer, then prints metrics such as:
+
+- `g` - mean residual vector for good prompts
+- `g*` - geometric median residual vector for good prompts
+- `b` - mean residual vector for bad prompts
+- `b*` - geometric median residual vector for bad prompts
+- `r` - refusal direction for means, computed as `b - g`
+- `r*` - refusal direction for geometric medians, computed as `b* - g*`
+- `S(x,y)` - cosine similarity between vectors
+- `|x|` - L2 norm of a vector
+- `Silh` - mean silhouette coefficient of good/bad residual clusters
+
+This is useful for studying where refusal behavior separates across the model
+stack and how strongly each layer distinguishes the prompt groups.
+
+### Residual Plots
+
+Generate PaCMAP visualizations of residual vectors:
+
+```bash
+annihilate --plot-residuals
+```
+
+Or enable plotting in `config.toml`:
+
+```toml
+plot_residuals = true
+residual_plot_path = "plots"
+residual_plot_title = 'PaCMAP Projection of Residual Vectors for "Harmless" and "Harmful" Prompts'
+residual_plot_style = "dark_background"
+```
+
+When run with `--plot-residuals`, Annihilate will:
+
+1. Compute hidden-state residual vectors for the first output token, for each
+   transformer layer, for both "harmful" and "harmless" prompts.
+2. Perform a PaCMAP projection from residual space into 2D space.
+3. Left-right align the projected "harmful" and "harmless" residuals by their
+   geometric medians. PaCMAP is initialized from the previous layer's projection
+   so consecutive layers animate smoothly.
+4. Scatter-plot each layer and save a PNG image for every layer.
+5. Generate an animated GIF showing how residuals transform between layers.
+
+<div align="center">
+  <img src="./assets/residual-projections.gif" alt="Animated PaCMAP projection of residual vectors across transformer layers" width="800"/>
+</div>
+
+PaCMAP is CPU-heavy. For larger models or large prompt sets, residual plots can
+take an hour or more even when model inference is running on a GPU. For long
+optimization jobs, it is usually best to run the decensoring pass first and run
+plot generation as a separate analysis pass afterward.
 
 ---
 
