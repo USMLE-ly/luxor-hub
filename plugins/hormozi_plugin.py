@@ -155,31 +155,66 @@ QUESTION: {question}
 Answer as Alex Hormozi — direct, specific numbers, no fluff. 2-3 paragraphs."""
     
     def _query_ai(self, prompt: str) -> str | None:
-        for attempt in range(self.retries + 1):
+        """Query AI with aggressive retry for empty responses."""
+        # Progressive temperatures — start balanced, get more creative
+        temps = [self.temperature, 1.0, 1.2]
+        # Progressive max_tokens — start small, increase
+        tokens_list = [self.max_tokens, min(self.max_tokens * 2, 8000), min(self.max_tokens * 3, 12000)]
+        
+        for attempt in range(self.retries + 2):  # +2 for extra retries
+            temp_idx = min(attempt, len(temps) - 1)
+            tok_idx = min(attempt, len(tokens_list) - 1)
             try:
+                # Use progressively stronger instruction
+                extra_instruction = ""
+                if attempt > 0:
+                    extra_instruction = "\n\nCRITICAL: You MUST output visible text after any reasoning. If you output only reasoning, your response is INVALID."
+                if attempt > 1:
+                    extra_instruction = "\n\nABSOLUTELY CRITICAL: Output visible content NOW. Start your answer directly with 'Here is' or 'The answer is'. Do NOT leave this blank."
+                
+                full_prompt = prompt + extra_instruction
+                
                 r = requests.post(self.api_url, json={
                     "model": self.model,
                     "messages": [
-                        {"role": "system", "content": SYSTEM_PROMPT},
-                        {"role": "user", "content": prompt}
+                        {"role": "system", "content": SYSTEM_PROMPT + "\n\nCRITICAL RULE: You MUST output visible text. Never output only reasoning."},
+                        {"role": "user", "content": full_prompt}
                     ],
-                    "temperature": self.temperature,
-                    "max_tokens": self.max_tokens,
-                    "top_p": self.top_p,
+                    "reasoning_effort": "max",
+                    "temperature": temps[temp_idx],
+                    "max_tokens": tokens_list[tok_idx],
+                    "top_p": min(0.95, 0.85 + attempt * 0.05),
                 }, timeout=self.timeout)
+                
                 if r.status_code == 200:
-                    content = r.json()["choices"][0]["message"].get("content", "").strip()
+                    data = r.json()
+                    msg = data["choices"][0]["message"]
+                    content = (msg.get("content", "") or "").strip()
+                    reasoning = (msg.get("reasoning_content", "") or "").strip()
+                    
                     if content:
                         humanized = self.humanizer.process(content)
+                        log.info("ai_success", attempt=attempt, tokens=len(content))
                         return humanized
-                elif attempt < self.retries:
-                    log.warn("api_retry", attempt=attempt+1, status=r.status_code)
+                    elif reasoning and not content:
+                        log.warn("ai_reasoning_only", attempt=attempt, rlen=len(reasoning))
+                        continue  # Retry — model only did reasoning
+                    else:
+                        log.warn("ai_empty", attempt=attempt)
+                        continue
+                else:
+                    log.warn("api_status", attempt=attempt, status=r.status_code)
+                    if attempt < self.retries + 1:
+                        continue
+            except requests.Timeout:
+                log.warn("api_timeout", attempt=attempt)
+                if attempt < self.retries + 1:
                     continue
             except Exception as e:
-                if attempt < self.retries:
-                    log.warn("api_retry_error", attempt=attempt+1, error=str(e))
+                log.error("api_error", attempt=attempt, error=str(e))
+                if attempt < self.retries + 1:
                     continue
-                log.error("api_failed", error=str(e))
+        log.error("ai_all_attempts_failed")
         return None
     
     def _format_structured(self, response: str) -> str:
@@ -224,9 +259,28 @@ Answer as Alex Hormozi — direct, specific numbers, no fluff. 2-3 paragraphs.""
             for i in range(0, len(full), 4000):
                 await update.message.reply_text(full[i:i+4000], parse_mode="Markdown")
         else:
-            best = chunks[0]
+            # Smart fallback: extract meaningful response from chunks directly
+            sections = []
+            for i, c in enumerate(chunks[:3]):
+                text = c['text'][:600].strip()
+                # Take first substantive paragraph
+                paragraphs = [p for p in text.split('\n\n') if len(p.strip()) > 50]
+                if paragraphs:
+                    excerpt = paragraphs[0][:500]
+                else:
+                    excerpt = text[:500]
+                sections.append(f"📖 From *{c['source']}*:\n\n{excerpt}")
+            
+            fallback = "\n\n---\n\n".join(sections)
+            # Humanize the fallback
+            try:
+                from text_humanizer import TextHumanizer
+                fallback = TextHumanizer().process(fallback)
+            except:
+                pass
+            
             await update.message.reply_text(
-                f"📖 From *{best['source']}*:\n\n{best['text'][:3000]}",
+                f"⚡ *Quick Answer (AI busy)*\n\n{fallback}",
                 parse_mode="Markdown"
             )
         return True

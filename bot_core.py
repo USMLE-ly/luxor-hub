@@ -196,7 +196,7 @@ class BotEngine:
     
     def build_app(self):
         """Build the Telegram Application with all plugin handlers."""
-        self._app = Application.builder().token(self.token).build()
+        self._app = Application.builder().token(self.token).drop_pending_updates(True).build()
         app = self._app
         
         # Register command handlers from plugins
@@ -232,18 +232,13 @@ class BotEngine:
         
         return app
     
-    async def start(self):
-        """Start polling."""
+    def start(self):
+        """Start polling — uses run_polling for proper session handling."""
         app = self.build_app()
         self.log.info("bot_starting", plugins=[p.name for p in self.plugins])
-        await app.initialize()
-        await app.start()
-        await app.updater.start_polling()
-        self.log.info("bot_running")
-        # Keep running
-        while True:
-            await asyncio.sleep(60)
+        # run_polling handles initialize, start, polling, cleanup, and shutdown
+        app.run_polling(drop_pending_updates=True)
     
     def run(self):
         """Synchronous entry point."""
-        asyncio.run(self.start())
+        self.start()
