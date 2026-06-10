@@ -1,25 +1,26 @@
-# Python-generated files
+# Python
 __pycache__/
-*.py[oc]
-build/
-dist/
-wheels/
-*.egg-info
-
-# Virtual environments
+*.py[cod]
+*.egg-info/
 .venv/
+venv/
+*.so
 
-# Caches
-/.ruff_cache/
+# Logs
+*.log
+*.pid
 
-# Editors
-/.vscode/
+# Config with secrets
+.env
+*.pem
 
-# Configuration files
-/config.toml
+# System
+.DS_Store
+Thumbs.db
 
-# Study checkpoints
-/checkpoints/
+# Bot data
+hormozi_knowledge/
+bot_persistent/
 
-# Residual plots
-/plots/
+# OS
+.cache/
