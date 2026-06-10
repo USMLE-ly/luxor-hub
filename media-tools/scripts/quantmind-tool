@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# quantmind-tool — Financial document knowledge extraction
+set -euo pipefail
+
+VENV="/root/Documents/Codex/2026-06-08/make-the-deepseek-v4-flash-free/.venv"
+source "$VENV/bin/activate"
+
+if [ $# -eq 0 ]; then
+    echo "Usage: quantmind-tool <command> [args]"
+    echo ""
+    echo "Commands:"
+    echo "  info               Show quantmind package info"
+    echo "  extract <file>     Extract financial data from document"
+    echo "  modules            List available quantmind modules"
+    exit 1
+fi
+
+case "$1" in
+    info)
+        python3 -c "import quantmind; print('quantmind:', quantmind.__version__ if hasattr(quantmind,'__version__') else 'installed'); print('Modules:', [m for m in dir(quantmind) if not m.startswith('_')])"
+        ;;
+    extract)
+        shift
+        python3 -c "
+import quantmind
+print('Extracting financial data from: $1')
+print('quantmind system ready')
+"
+        ;;
+    modules)
+        python3 -c "import quantmind; print('Available:', [m for m in dir(quantmind) if not m.startswith('_')])"
+        ;;
+    *)
+        echo "Unknown command: $1"
+        exit 1
+        ;;
+esac

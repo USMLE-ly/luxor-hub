@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+# media-tools — Central launcher for all media/document tools
+set -euo pipefail
+
+VENV="/root/Documents/Codex/2026-06-08/make-the-deepseek-v4-flash-free/.venv"
+source "$VENV/bin/activate"
+
+TOOL="${0##*/}"
+
+show_help() {
+    echo "Media & Document Tools — Annihilation LLM Suite"
+    echo ""
+    echo "Usage: media-tools <command> [args...]"
+    echo ""
+    echo "Commands:"
+    echo "  markitdown <file> [output]          Convert any document to Markdown"
+    echo "  pdf-extract <file> [opts]           Extract text/tables from PDFs"
+    echo "  turbovec build/search <args...>     Vector ANN index building & search"
+    echo "  quantmind info|modules|extract      QuantMind financial data extraction"
+    echo ""
+    echo "Aliases:"
+    echo "  convert     → markitdown"
+    echo "  vec         → turbovec"
+    echo "  pdf         → pdf-extract"
+    echo ""
+    echo "Other:"
+    echo "  api|chat <prompt>                   Query deepseek-v4-flash-free via OpenCode Zen"
+    echo ""
+    echo "Examples:"
+    echo "  media-tools markitdown document.docx output.md"
+    echo "  media-tools pdf-extract report.pdf --format markdown --pages 1-10"
+    echo "  media-tools turbovec build embeddings.npy index.tv"
+    echo "  media-tools quantmind info"
+    echo "  media-tools convert report.pdf > report.md"
+}
+
+if [ $# -eq 0 ]; then
+    show_help
+    exit 0
+fi
+
+CMD="$1"
+shift
+
+case "$CMD" in
+    markitdown|convert)
+        exec markitdown-tool "$@"
+        ;;
+    pdf-extract|pdf)
+        exec pdf-extract-tool "$@"
+        ;;
+    turbovec|vec)
+        exec turbovec-tool "$@"
+        ;;
+    quantmind)
+        exec quantmind-tool "$@"
+        ;;
+    api|chat)
+        exec python3 "$(dirname "$0")/../../../api_interact.py" "$@"
+        ;;
+    help|--help|-h)
+        show_help
+        ;;
+    *)
+        echo "Unknown command: $CMD"
+        echo "Run 'media-tools help' for usage."
+        exit 1
+        ;;
+esac
