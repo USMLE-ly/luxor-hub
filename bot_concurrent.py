@@ -2,12 +2,12 @@
 """
 🤖 SHANNON-Ω Professional Bot
 Integrated patterns:
-  - Windsurf Cascade — agentic tool use, thorough context
-  - Cursor GPT-4.1 — semantic search, tool discipline
-  - Claude Code — conciseness, directness, no preamble
-  - OpenWolf — context indexing for token efficiency
-  - Supermemory — multi-level cache (concept → common → RAG → AI)
-  - Sharp — pre-computation, parallel execution
+  - Windsurf Cascade - agentic tool use, thorough context
+  - Cursor GPT-4.1 - semantic search, tool discipline
+  - Claude Code - conciseness, directness, no preamble
+  - OpenWolf - context indexing for token efficiency
+  - Supermemory - multi-level cache (concept → common → RAG → AI)
+  - Sharp - pre-computation, parallel execution
 """
 
 import os, sys, json, time, re, asyncio, logging
@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from text_humanizer import TextHumanizer, apply_conciseness, format_professional
 from professional_prompt import PROFESSIONAL_SYSTEM_PROMPT, optimize_context
 
-# HTTP session with connection pooling — cuts ~1-2s per call
+# HTTP session with connection pooling - cuts ~1-2s per call
 _API_SESSION = _requests_lib.Session()
 _API_SESSION.headers.update({"Content-Type": "application/json"})
 
@@ -77,18 +77,24 @@ _API_CACHE_DIR = ".api_cache"
 os.makedirs(_API_CACHE_DIR, exist_ok=True)
 
 def _disk_cache_get(key: str) -> Optional[dict]:
-    path = os.path.join(_API_CACHE_DIR, f"{key}.json")
-    if os.path.exists(path):
-        age = time.time() - os.path.getmtime(path)
-        if age < 3600:  # 1 hour TTL
-            with open(path) as f:
-                return json.load(f)
+    try:
+        path = os.path.join(_API_CACHE_DIR, f"{key}.json")
+        if os.path.exists(path):
+            age = time.time() - os.path.getmtime(path)
+            if age < 3600:
+                with open(path) as f:
+                    return json.load(f)
+    except Exception:
+        pass
     return None
 
 def _disk_cache_set(key: str, data: dict):
-    path = os.path.join(_API_CACHE_DIR, f"{key}.json")
-    with open(path, "w") as f:
-        json.dump(data, f)
+    try:
+        path = os.path.join(_API_CACHE_DIR, f"{key}.json")
+        with open(path, "w") as f:
+            json.dump(data, f)
+    except Exception:
+        pass
 
 API_URL = "https://opencode.ai/zen/v1/chat/completions"
 
@@ -199,7 +205,7 @@ SALES_FIELDS = [
 ]
 
 def generate_fast_response(question: str, chunks: list) -> str:
-    """Fast response from cached concepts — no AI needed."""
+    """Fast response from cached concepts - no AI needed."""
     ql = question.lower().replace("'", "")
     
     matched = set()
@@ -269,63 +275,76 @@ async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    question = update.message.text.strip()
-    if not question:
-        return
-    
-    await update.message.reply_chat_action("typing")
-    log.info(f"📩 [{update.effective_user.id}] {question[:60]}")
-    
-    ql = question.lower().strip("?.,!").strip()
-    
-    # Level 1: Concept cache (0.001s, no AI, no RAG)
-    for cid, cached_response in CONCEPT_CACHE.items():
-        label = NODES.get(cid, {}).get('label', '').lower()
-        if label and label in ql:
-            sources = [c['source'] for c in CHUNKS if cid.replace('_',' ') in c['text'][:200].lower()]
-            src = sources[0] if sources else NODES.get(cid, {}).get('metadata', {}).get('description', '')[:30]
-            await update.message.reply_text(f"📖 *{NODES[cid]['label']}* — {src}\n\n{cached_response}")
-            log.info(f"⚡ Concept cache: {label}")
+    """Handle incoming messages with multi-level response + error recovery."""
+    try:
+        question = update.message.text.strip()
+        if not question:
             return
-    
-    # Level 2: Common Q short-circuit (0.001s, no AI)
-    for pattern, answer in COMMON_QA.items():
-        if pattern in ql:
-            await update.message.reply_text(answer)
-            log.info(f"⚡ Common Q: {pattern}")
+        
+        await update.message.reply_chat_action("typing")
+        log.info(f"\U0001f4e9 [{update.effective_user.id}] {question[:60]}")
+        
+        ql = question.lower().strip("?.,!").strip()
+        
+        # Level 1: Concept cache (0.001s)
+        for cid, cached_response in CONCEPT_CACHE.items():
+            label = NODES.get(cid, {}).get('label', '').lower()
+            if label and label in ql:
+                sources = [c['source'] for c in CHUNKS if cid.replace('_',' ') in c['text'][:200].lower()]
+                src = sources[0] if sources else NODES.get(cid, {}).get('metadata', {}).get('description', '')[:30]
+                await update.message.reply_text(f"\U0001f4d6 *{NODES[cid]['label']}* \u2014 {src}\n\n{cached_response}")
+                log.info(f"\u26a1 Concept cache: {label}")
+                return
+        
+        # Level 2: Common Q short-circuit (0.001s)
+        for pattern, answer in COMMON_QA.items():
+            if pattern in ql:
+                await update.message.reply_text(answer)
+                log.info(f"\u26a1 Common Q: {pattern}")
+                return
+        
+        # Level 3: RAG retrieval + fast template (0.1s)
+        chunks = retrieve_optimized(question)
+        if not chunks:
+            await update.message.reply_text("Ask me about sales, offers, lead gen, or pricing.")
             return
+        
+        sources = list(set(c['source'] for c in chunks))
+        fast_response = generate_fast_response(question, chunks)
+        header = f"\U0001f4d6 *Sources:* {', '.join(sources)}\n\n"
+        
+        await update.message.reply_text(header + fast_response)
+        log.info(f"\u26a1 RAG response sent")
+        
+        # Level 4: AI enhancement via background task (non-blocking)
+        if len(question) > 15 and not question.startswith("/fast"):
+            prompt = (
+                f"Answer as Alex Hormozi. Direct. 2-3 sentences. Numbers. Markdown.\n\n"
+                f"Q: {question}"
+            )
+            # Fire-and-forget: doesn't block the handler
+            asyncio.create_task(_send_ai_enhancement(update, prompt))
     
-    # Level 3: RAG retrieval + fast template (0.1s, no AI)
-    chunks = retrieve_optimized(question)
-    if not chunks:
-        await update.message.reply_text("Ask me about sales, offers, lead gen, or pricing.")
-        return
-    
-    sources = list(set(c['source'] for c in chunks))
-    fast_response = generate_fast_response(question, chunks)
-    header = f"📖 *Sources:* {', '.join(sources)}\n\n"
-    
-    await update.message.reply_text(header + fast_response)
-    log.info(f"⚡ RAG response sent")
-    
-    # Level 4: AI enhancement (background, 25s timeout, non-blocking)
-    if len(question) > 10 and not question.startswith("/fast"):
-        context_text = chunks[0]['text'][:400] if chunks else ""
-        prompt = (
-            f"Context from Hormozi's books:\n{context_text}\n\n"
-            f"QUESTION: {question}\n\n"
-            f"Answer as Alex Hormozi. Direct. Specific. Numbers. "
-            f"CRITICAL: Output visible text immediately. Write in markdown format with bullet points."
-        )
-        ai_response = await query_ai(prompt, timeout=25)
+    except Exception as e:
+        log.error(f"Handler error: {e}")
+        try:
+            await update.message.reply_text("I\u2019m here. Ask about sales, offers, lead gen, or pricing.")
+        except Exception:
+            pass
+
+async def _send_ai_enhancement(update: Update, prompt: str):
+    """Background AI enhancement \u2014 non-blocking, error-isolated."""
+    try:
+        ai_response = await query_ai(prompt, timeout=15)
         if ai_response:
             try:
                 final = apply_conciseness(ai_response)
-                await update.message.reply_text(f"⚡ *AI Analysis*\n\n{final}")
-                log.info(f"🧠 AI sent")
-            except Exception:
-                pass
-
+                await update.message.reply_text(f"\u26a1 *AI Analysis*\n\n{final}")
+                log.info(f"\U0001f9e0 AI sent async")
+            except Exception as e:
+                log.warning(f"AI reply error: {e}")
+    except Exception as e:
+        log.warning(f"AI call error: {e}")
 async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     log.error(f"Error: {context.error}")
 
