@@ -26,7 +26,7 @@ from arabic_kb_prompt import (
     ISLAMIC_SYSTEM_PROMPT, ARABIC_COMMON_QA,
     load_knowledge_base, retrieve
 )
-VEC, MAT, CHUNKS = load_knowledge_base()
+VEC, MAT, CHUNKS, TOPIC_INDEX = load_knowledge_base()
 if CHUNKS:
     log.info(f"📚 قاعدة المعرفة: {len(CHUNKS)} قطعة جاهزة")
 else:
@@ -161,7 +161,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # المستوى 2: البحث في قاعدة المعرفة
         kb_context = ""
         if CHUNKS:
-            results = retrieve(question, VEC, MAT, CHUNKS, k=5)
+            results = retrieve(question, VEC, MAT, CHUNKS, k=5, topic_index=TOPIC_INDEX)
             if results:
                 kb_context = "\n\n".join([
                     f"[{r['source']} - ص{r['page']}]\n{r['text'][:500]}"

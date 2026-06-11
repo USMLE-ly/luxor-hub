@@ -8,12 +8,14 @@ from scipy.sparse import load_npz
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import unicodedata
+import re as _re
+from collections import defaultdict as _defaultdict
 
 # تحميل قاعدة المعرفة
 ARABIC_DIR = "islamic_books_merged"
 
 def load_knowledge_base():
-    """تحميل القطع والمصفوفة"""
+    """تحميل القطع والمصفوفة وفهرس الموضوعات"""
     t0 = time.time()
     try:
         with open(f"{ARABIC_DIR}/chunks/tfidf_config.pkl", "rb") as f:
@@ -32,34 +34,117 @@ def load_knowledge_base():
         with open(f"{ARABIC_DIR}/chunks/all_chunks.json", encoding="utf-8") as f:
             chunks = json.load(f)
         
+        # تحميل فهرس الموضوعات
+        topic_index = None
+        topic_path = f"{ARABIC_DIR}/chunks/topic_index.pkl"
+        if os.path.exists(topic_path):
+            with open(topic_path, "rb") as f:
+                topic_index = pickle.load(f)
+        
         print(f"✅ قاعدة المعرفة: {len(chunks)} قطعة, {mat.shape[1]} ميزة ({time.time()-t0:.2f}s)")
-        return vec, mat, chunks
+        return vec, mat, chunks, topic_index
     except Exception as e:
         print(f"⚠️ قاعدة المعرفة غير متوفرة: {e}")
-        return None, None, []
+        return None, None, [], None
 
-def retrieve(query: str, vec, mat, chunks, k: int = 3):
-    """البحث في قاعدة المعرفة"""
+def normalize_text(text):
+    """تطبيع النص للبحث"""
+    t = unicodedata.normalize("NFKC", text.lower())
+    t = _re.sub(r'[إأآا]', 'ا', t)
+    t = t.replace('ة', 'ه').replace('ي', 'ى')
+    return t
+
+def detect_topic(query: str, topic_index: dict) -> list:
+    """اكتشاف الموضوع من السؤال"""
+    if topic_index is None:
+        return []
+    q_norm = normalize_text(query)
+    q_en = query.lower()
+    matched = []
+    for topic, keywords in topic_index.get("topic_keywords", {}).items():
+        for kw in keywords:
+            kw_norm = normalize_text(kw)
+            if kw_norm in q_norm or kw.lower() in q_en:
+                matched.append(topic)
+                break
+    return matched
+
+def retrieve(query: str, vec, mat, chunks, k: int = 5, topic_index=None):
+    """البحث في قاعدة المعرفة مع تصفية حسب الموضوع أولاً"""
     if vec is None:
         return []
     
-    # تطبيع الاستعلام
-    q = unicodedata.normalize("NFKC", query.lower())
-    qv = vec.transform([q])
-    scores = cosine_similarity(qv, mat).flatten()
+    # 1. كشف الموضوع
+    topics = []
+    if topic_index:
+        topics = detect_topic(query, topic_index)
     
-    results = []
-    for idx in scores.argsort()[::-1]:
-        if scores[idx] < 0.05:
-            break
-        results.append({
-            "score": float(scores[idx]),
-            "text": chunks[idx]["text"][:600],
-            "source": chunks[idx]["source"],
-            "page": chunks[idx]["page"],
-        })
-        if len(results) >= k:
-            break
+    # 2. تحديد القطع التي يجب البحث فيها
+    if topics:
+        search_indices = set()
+        for t in topics:
+            if t in topic_index.get("topics", {}):
+                for idx in topic_index["topics"][t]:
+                    search_indices.add(idx)
+        
+        if search_indices:
+            # بحث في القطع المصفاة فقط
+            filtered_chunks = [chunks[i] for i in sorted(search_indices)]
+            if not filtered_chunks:
+                filtered_chunks = chunks
+        else:
+            filtered_chunks = chunks
+    else:
+        filtered_chunks = chunks
+    
+    # 3. TF-IDF على القطع المحددة
+    if len(filtered_chunks) == len(chunks):
+        q = unicodedata.normalize("NFKC", query.lower())
+        qv = vec.transform([q])
+        scores = cosine_similarity(qv, mat).flatten()
+        
+        results = []
+        for idx in scores.argsort()[::-1]:
+            if scores[idx] < 0.05:
+                break
+            results.append({
+                "score": float(scores[idx]),
+                "text": chunks[idx]["text"][:500],
+                "source": chunks[idx]["source"],
+                "page": chunks[idx]["page"],
+            })
+            if len(results) >= k:
+                break
+    else:
+        # بناء مصفوفة للقطع المصفاة
+        try:
+            f_texts = [c["text"] for c in filtered_chunks]
+            f_vec = TfidfVectorizer(
+                max_features=5000,
+                stop_words=["the","and","for","are","but","not","you","all","any","can","had","her","was","one","our","out","has","have","been","they","them","their","that","this","with","from","which","were","when","where","who","whom","why","how"],
+                token_pattern=r"(?u)\b\w+\b",
+            )
+            f_mat = f_vec.fit_transform(f_texts)
+            q = normalize_text(query)
+            qv = f_vec.transform([q])
+            scores = cosine_similarity(qv, f_mat).flatten()
+            
+            results = []
+            for idx in scores.argsort()[::-1]:
+                if scores[idx] < 0.05:
+                    break
+                real_idx = sorted(search_indices)[idx]
+                results.append({
+                    "score": float(scores[idx]),
+                    "text": chunks[real_idx]["text"][:500],
+                    "source": chunks[real_idx]["source"],
+                    "page": chunks[real_idx]["page"],
+                })
+                if len(results) >= k:
+                    break
+        except Exception:
+            results = []
+    
     return results
 
 # النظام الإسلامي الشامل - يجمع أدلة من جميع الكتب
