@@ -54,14 +54,17 @@ def _sync_query(user_prompt: str, timeout: int = 20) -> Optional[str]:
                 "model": "deepseek-v4-flash-free",
                 "messages": [
                     {"role": "system", "content": ISLAMIC_SYSTEM_PROMPT},
-                    {"role": "user", "content": "أجب باللغة العربية الفصحى. استشهد بالقرآن والسنة وبالكتاب المقدس عند الحاجة. أظهر علمك الواسع وأسلوبك كعالم داعية.\n\n" + user_prompt}
+                    {"role": "user", "content": "أجب بتنسيق ماركداون مع نقاط وفقرات. استشهد بالقرآن والسنة وبالكتاب المقدس عند الحاجة. أظهر علمك الواسع وأسلوبك كعالم داعية.\n\n" + user_prompt}
                 ],
-                "max_tokens": 2000,
+                "max_tokens": 600,
                 "temperature": 0.7,
                 "top_p": 0.9,
             }, timeout=timeout)
             if r.status_code == 200:
-                content = r.json()["choices"][0]["message"].get("content", "").strip()
+                msg = r.json()["choices"][0]["message"]
+                content = (msg.get("content") or "").strip()
+                if not content:
+                    content = (msg.get("reasoning_content") or "").strip()
                 if content:
                     return content
             elif r.status_code == 429:
@@ -165,6 +168,12 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     for r in results
                 ])
                 log.info(f"📚 وجد {len(results)} نتيجة في قاعدة المعرفة")
+        
+        # إشعار المستخدم أن البوت يعمل
+        try:
+            await update.message.reply_text("⏳ جاري البحث في المكتبة الإسلامية...")
+        except:
+            pass
         
         # المستوى 3: استدعاء API مع السياق إن وجد
         if kb_context:
