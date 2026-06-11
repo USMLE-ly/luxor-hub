@@ -316,35 +316,33 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(header + fast_response)
         log.info(f"\u26a1 RAG response sent")
         
-        # Level 4: AI enhancement via background task (non-blocking)
+        # Level 4: AI enhancement (inline, error-isolated)
         if len(question) > 15 and not question.startswith("/fast"):
-            prompt = (
-                f"Answer as Alex Hormozi. Direct. 2-3 sentences. Numbers. Markdown.\n\n"
-                f"Q: {question}"
-            )
-            # Fire-and-forget: doesn't block the handler
-            asyncio.create_task(_send_ai_enhancement(update, prompt))
+            try:
+                prompt = (
+                    f"Answer as Alex Hormozi. Direct. 2-3 sentences. Numbers. Markdown.\n\n"
+                    f"Q: {question}"
+                )
+                ai_response = await query_ai(prompt, timeout=12)
+                if ai_response:
+                    final = apply_conciseness(ai_response)
+                    try:
+                        await update.message.reply_text(f"\u26a1 *AI Analysis*\n\n{final}")
+                    except Exception:
+                        pass
+            except Exception as e:
+                log.warning(f"AI enhancement error: {e}")
     
     except Exception as e:
         log.error(f"Handler error: {e}")
         try:
-            await update.message.reply_text("I\u2019m here. Ask about sales, offers, lead gen, or pricing.")
+            await update.message.reply_text("I can help with sales, offers, lead gen, or pricing. Ask away.")
         except Exception:
             pass
+async def cmd_ping(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Quick health check."""
+    await update.message.reply_text("pong - bot alive")
 
-async def _send_ai_enhancement(update: Update, prompt: str):
-    """Background AI enhancement \u2014 non-blocking, error-isolated."""
-    try:
-        ai_response = await query_ai(prompt, timeout=15)
-        if ai_response:
-            try:
-                final = apply_conciseness(ai_response)
-                await update.message.reply_text(f"\u26a1 *AI Analysis*\n\n{final}")
-                log.info(f"\U0001f9e0 AI sent async")
-            except Exception as e:
-                log.warning(f"AI reply error: {e}")
-    except Exception as e:
-        log.warning(f"AI call error: {e}")
 async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     log.error(f"Error: {context.error}")
 
@@ -352,6 +350,7 @@ def main():
     log.info("🚀 SHANNON-Ω Professional Bot starting...")
     app = Application.builder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("ping", cmd_ping))
     app.add_handler(CommandHandler("help", start))
     app.add_handler(CommandHandler("stats", stats))
     app.add_handler(CommandHandler("template", handle_message))

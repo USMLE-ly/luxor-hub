@@ -10,7 +10,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import unicodedata
 
 # تحميل قاعدة المعرفة
-ARABIC_DIR = "islamic_books"
+ARABIC_DIR = "islamic_books_merged"
 
 def load_knowledge_base():
     """تحميل القطع والمصفوفة"""
