@@ -1,36 +1,25 @@
-# Python
+# Python-generated files
 __pycache__/
-*.py[cod]
-*.egg-info/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
 .venv/
-venv/
-*.so
 
-# Logs
-*.log
-*.pid
+# Caches
+/.ruff_cache/
 
-# Config with secrets
-.env
-*.pem
+# Editors
+/.vscode/
 
-# System
-.DS_Store
-Thumbs.db
+# Configuration files
+/config.toml
 
-# Bot data
-hormozi_knowledge/
-bot_persistent/
+# Study checkpoints
+/checkpoints/
 
-# OS
-.cache/
-
-# Node.js
-node_modules/
-media-tools/scripts/lib/node_modules/
-media-tools/scripts/lib/package-lock.json
-
-# Supermemory local memory store
-.supermemory/
-.api_cache/
-.ai_prompt_cache.json
+# Residual plots
+/plots/
