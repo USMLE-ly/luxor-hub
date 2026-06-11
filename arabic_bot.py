@@ -54,10 +54,11 @@ def _sync_query(user_prompt: str, timeout: int = 20) -> Optional[str]:
                 "model": "deepseek-v4-flash-free",
                 "messages": [
                     {"role": "system", "content": ISLAMIC_SYSTEM_PROMPT},
-                    {"role": "user", "content": "أجب باللغة العربية الفصحى. استشهد بالقرآن والسنة.\n\n" + user_prompt}
+                    {"role": "user", "content": "أجب باللغة العربية الفصحى. استشهد بالقرآن والسنة وبالكتاب المقدس عند الحاجة. أظهر علمك الواسع وأسلوبك كعالم داعية.\n\n" + user_prompt}
                 ],
-                "max_tokens": 1000,
-                "temperature": 0.5,
+                "max_tokens": 2000,
+                "temperature": 0.7,
+                "top_p": 0.9,
             }, timeout=timeout)
             if r.status_code == 200:
                 content = r.json()["choices"][0]["message"].get("content", "").strip()
