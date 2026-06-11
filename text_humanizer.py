@@ -259,3 +259,84 @@ if __name__ == "__main__":
     print("\n\n=== STRUCTURED TEMPLATE ===")
     tmpl = "🎯 **Guarantee:** A strong guarantee removes all risk.\n🔒 **Retention:** Keep customers by delivering value.\n🏆 **Grand Slam Offer:** Stack value, reverse all risk."
     print(h.format_template(tmpl))
+
+# ─── Claude Code Professional Conciseness Rules ────────────────
+CONCISENESS_RULES = [
+    (r"(?i)^(As Alex Hormozi[,:]?\s*)", ""),
+    (r"(?i)^(In my (book|experience)[,.]?\s*)", ""),
+    (r"(?i)^(Based on my (experience|work|knowledge)[,.]?\s*)", ""),
+    (r"(?i)^(Let me (share|tell|explain|break down|give you)[^.]*\.\s*)", ""),
+    (r"(?i)^(I'd be happy to[^.]*\.\s*)", ""),
+    (r"(?i)^(I think|I believe|I feel|I would say)\s+", ""),
+    (r"(?i)\s*(I hope this (helps|is helpful)[^.]*\.?)$", ""),
+    (r"(?i)\s*(Let me know if you[^.]*\.?)$", ""),
+    (r"(?i)\s*(Feel free to[^.]*\.?)$", ""),
+    (r"(?i)\s*(Hope that[^.]*\.?)$", ""),
+    (r"(?i)^(Sure[!,.]*\s*)", ""),
+    (r"(?i)^(Absolutely[!,.]*\s*)", ""),
+    (r"(?i)^(Of course[!,.]*\s*)", ""),
+    (r"\n{3,}", "\n\n"),
+]
+
+def apply_conciseness(text: str) -> str:
+    """Strip AI preamble/postamble/hedging — Claude Code style."""
+    for pattern, replacement in CONCISENESS_RULES:
+        text = re.sub(pattern, replacement, text, count=1)
+    return text.strip()
+
+# ─── Professional Decorated Output ─────────────────────────────
+def format_professional(text: str, style: str = "auto") -> str:
+    """
+    Formats text with professional spacing, highlights, and structure.
+    Styles: auto, diagnosis, script, strategy, simple
+    """
+    text = apply_conciseness(text)
+    
+    if style == "simple" or len(text) < 200:
+        return text
+    
+    lines = text.split("\n")
+    result = []
+    in_list = False
+    
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            result.append("")
+            in_list = False
+            continue
+        
+        # Detect and format headers
+        if any(stripped.lower().startswith(f"{x}") and ":" in stripped[:20] 
+               for x in ["🎯", "📊", "💎", "📝", "🔥", "✅", "⚠️", "💡"]):
+            result.append(f"\n{stripped}")
+            in_list = False
+        # Detect bullet points
+        elif stripped.startswith("•") or stripped.startswith("-") or re.match(r'^\d+[.)]', stripped):
+            result.append(f"  {stripped}")
+            in_list = True
+        else:
+            if in_list and len(stripped) < 60:
+                result.append(f"  {stripped}")
+            else:
+                result.append(f"\n{stripped}")
+                in_list = False
+    
+    return "\n".join(result).strip()
+
+# Patch into TextHumanizer
+original_process = TextHumanizer.process if hasattr(TextHumanizer, 'process') else None
+
+def patched_process(self, text: str, style: str = "auto") -> str:
+    """Enhanced process with conciseness + professional formatting."""
+    text = apply_conciseness(text)
+    text = format_professional(text, style)
+    # Call original if it exists
+    if hasattr(self, '_original_process'):
+        text = self._original_process(text)
+    return text
+
+if hasattr(TextHumanizer, 'process'):
+    TextHumanizer._original_process = TextHumanizer.process
+    TextHumanizer.process = patched_process
+

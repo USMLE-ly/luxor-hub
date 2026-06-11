@@ -5,9 +5,8 @@ set -euo pipefail
 VENV="/root/Documents/Codex/2026-06-08/make-the-deepseek-v4-flash-free/.venv"
 source "$VENV/bin/activate"
 
-# Resolve symlink to find the real script directory
-SCRIPT="$(readlink -f "$0")"
-BACKEND="$(dirname "$SCRIPT")/lib/supermemory_backend.py"
+PROJECT="/root/Documents/Codex/2026-06-08/make-the-deepseek-v4-flash-free"
+BACKEND="$PROJECT/media-tools/scripts/lib/supermemory_backend.py"
 
 if [ $# -eq 0 ]; then
     python3 "$BACKEND" help

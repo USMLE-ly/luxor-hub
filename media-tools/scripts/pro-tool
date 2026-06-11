@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# pro-tool — Professional mode for deepseek-v4-flash-free
+set -euo pipefail
+
+VENV="/root/Documents/Codex/2026-06-08/make-the-deepseek-v4-flash-free/.venv"
+source "$VENV/bin/activate"
+
+PROJECT="/root/Documents/Codex/2026-06-08/make-the-deepseek-v4-flash-free"
+API="$PROJECT/api_interact.py"
+LIB="$PROJECT/media-tools/scripts/lib"
+
+show_help() {
+    echo "SHANNON-Ω Professional Mode — deepseek-v4-flash-free"
+    echo ""
+    echo "Usage: pro-tool <command> [args...]"
+    echo ""
+    echo "Commands:"
+    echo "  ask <prompt>                     Ask with professional mode"
+    echo "  coder <prompt>                   Professional coder mode"
+    echo "  research <prompt>                Professional researcher mode"
+    echo "  analyst <prompt>                 Professional analyst mode"
+    echo "  encode <prompt>                  Encode prompt for maximum override"
+    echo "  styles                           List available professional styles"
+}
+
+if [ $# -eq 0 ]; then
+    show_help
+    exit 0
+fi
+
+CMD="$1"
+shift
+
+case "$CMD" in
+    ask)       python3 "$API" --pro default "$@" ;;
+    coder)     python3 "$API" --pro coder "$@" ;;
+    research)  python3 "$API" --pro researcher "$@" ;;
+    analyst)   python3 "$API" --pro analyst "$@" ;;
+    encode)    python3 "$LIB/pro_system_prompt.py" prompt; echo "---"; echo "$@" ;;
+    styles)    python3 "$LIB/pro_system_prompt.py" styles ;;
+    help|--help|-h) show_help ;;
+    *)         python3 "$API" --pro default "$CMD $@" ;;
+esac

@@ -15,8 +15,9 @@ show_help() {
     echo "  pdf-extract <file> [opts]           Extract text/tables from PDFs"
     echo "  turbovec build/search <args...>     Vector ANN index building & search"
     echo "  quantmind info|modules|extract      QuantMind financial data extraction"
-    echo "  supermemory store/search/recall     Memory & Context Engine (local + API)"
+    echo "  supermemory store/search/recall     Memory & Context Engine"
     echo "  sharp resize/convert/info/rotate    High-performance image processing"
+    echo "  pro ask|coder|research|analyst      Professional mode (deepseek PRO)"
     echo ""
     echo "Aliases:"
     echo "  convert     → markitdown"
@@ -24,6 +25,7 @@ show_help() {
     echo "  pdf         → pdf-extract"
     echo "  memory      → supermemory"
     echo "  img         → sharp"
+    echo "  pro         → pro-tool"
     echo ""
     echo "Other:"
     echo "  api|chat <prompt>                   Query deepseek-v4-flash-free via OpenCode Zen"
@@ -32,8 +34,8 @@ show_help() {
     echo "  media-tools markitdown document.docx output.md"
     echo "  media-tools pdf-extract report.pdf --format markdown --pages 1-10"
     echo "  media-tools turbovec build embeddings.npy index.tv"
-    echo "  media-tools supermemory recall 'project plans'"
-    echo "  media-tools sharp resize photo.jpg thumb.jpg 200 200"
+    echo "  media-tools pro coder 'build a REST API in Python'"
+    echo "  media-tools pro research 'explain attention mechanisms'"
 }
 
 if [ $# -eq 0 ]; then
@@ -62,6 +64,9 @@ case "$CMD" in
         ;;
     sharp|img)
         exec sharp-tool "$@"
+        ;;
+    pro|pro-tool)
+        exec pro-tool "$@"
         ;;
     api|chat)
         exec python3 "$(dirname "$0")/../../../api_interact.py" "$@"

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# sharp-tool — High-performance image processing via libvips/sharp
+# sharp-tool — High-performance image processing via libvips/sharp (Node.js)
 set -euo pipefail
 
-SCRIPT="$(readlink -f "$0")"
-HELPER="$(dirname "$SCRIPT")/lib/sharp_helper.mjs"
+PROJECT="/root/Documents/Codex/2026-06-08/make-the-deepseek-v4-flash-free"
+HELPER="$PROJECT/media-tools/scripts/lib/sharp_helper.mjs"
 
 show_help() {
     echo "sharp — High-performance image processing (libvips)"
@@ -13,16 +13,10 @@ show_help() {
     echo "Commands:"
     echo "  info <input>                                Get image metadata"
     echo "  resize <input> <output> <width> [height]    Resize image"
-    echo "  convert <input> <output>                    Convert format (jpg/png/webp/avif)"
+    echo "  convert <input> <output>                    Convert format"
     echo "  rotate <input> <output> [degrees]           Rotate image"
     echo "  blur <input> <output> [sigma]               Blur image"
     echo "  pipeline <input> <output> [opts]            Full pipeline"
-    echo ""
-    echo "Examples:"
-    echo "  sharp-tool info photo.jpg"
-    echo "  sharp-tool convert photo.png photo.webp"
-    echo "  sharp-tool resize photo.jpg thumb.jpg 200 200"
-    echo "  sharp-tool blur photo.jpg blurred.jpg 5"
 }
 
 if [ $# -eq 0 ]; then
@@ -34,30 +28,12 @@ CMD="$1"
 shift
 
 case "$CMD" in
-    info)
-        node "$HELPER" info "$1"
-        ;;
-    resize)
-        node "$HELPER" resize "$1" "$2" "${3:-}" "${4:-}"
-        ;;
-    convert)
-        node "$HELPER" convert "$1" "$2"
-        ;;
-    rotate)
-        node "$HELPER" rotate "$1" "$2" "${3:-90}"
-        ;;
-    blur)
-        node "$HELPER" blur "$1" "$2" "${3:-3}"
-        ;;
-    pipeline)
-        node "$HELPER" pipeline "$1" "$2" "${3:-}" "${4:-}" "${5:-85}"
-        ;;
-    help|--help|-h)
-        show_help
-        ;;
-    *)
-        echo "Unknown command: $CMD"
-        echo "Run 'sharp-tool help' for usage."
-        exit 1
-        ;;
+    info)     node "$HELPER" info "$1" ;;
+    resize)   node "$HELPER" resize "$1" "$2" "${3:-}" "${4:-}" ;;
+    convert)  node "$HELPER" convert "$1" "$2" ;;
+    rotate)   node "$HELPER" rotate "$1" "$2" "${3:-90}" ;;
+    blur)     node "$HELPER" blur "$1" "$2" "${3:-3}" ;;
+    pipeline) node "$HELPER" pipeline "$1" "$2" "${3:-}" "${4:-}" "${5:-85}" ;;
+    help|--help|-h) show_help ;;
+    *)        echo "Unknown command: $CMD"; show_help; exit 1 ;;
 esac
