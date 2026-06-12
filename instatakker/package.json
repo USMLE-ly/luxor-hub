@@ -1,0 +1,35 @@
+{
+  "name": "instatakker",
+  "version": "1.0.1",
+  "description": "Instagram automation — unfollow + like posts and comments",
+  "author": "Instatakker",
+  "license": "UNLICENSED",
+  "copyright": "Copyright © 2026 Instatakker. All rights reserved.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win",
+    "dist": "electron-builder",
+    "pack": "electron-builder --dir"
+  },
+  "build": {
+    "appId": "com.instatakker.app",
+    "productName": "Instatakker",
+    "copyright": "Copyright © 2026 Instatakker. All rights reserved.",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        "portable"
+      ],
+      "icon": "build/icon.ico",
+      "artifactName": "Instatakker-v${version}.${ext}"
+    }
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.0.0",
+    "png-to-ico": "^3.0.1"
+  }
+}
