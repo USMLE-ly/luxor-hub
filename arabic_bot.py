@@ -225,6 +225,14 @@ def main():
     while True:
         try:
             log.info("🚀 أبو عباس بوت عربي - بدء التشغيل...")
+            # إنشاء event loop جديد لكل محاولة
+            import asyncio
+            try:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+            except:
+                pass
+            
             app = Application.builder().token(TOKEN).build()
             app.add_handler(CommandHandler("start", start))
             app.add_handler(CommandHandler("help", help_cmd))
@@ -237,7 +245,7 @@ def main():
             log.error(f"⚠️ خطأ في التشغيل: {e}")
         log.info(f"إعادة التشغيل بعد {restart_delay} ثانية...")
         time.sleep(restart_delay)
-        restart_delay = min(restart_delay * 2, 30)  # exponential backoff up to 30s
+        restart_delay = min(restart_delay * 2, 30)
 
 if __name__ == "__main__":
     main()
