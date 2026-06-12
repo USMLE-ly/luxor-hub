@@ -220,15 +220,24 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     log.error(f"Error: {context.error}")
 
 def main():
-    log.info("🚀 أبو عباس بوت عربي - بدء التشغيل...")
-    app = Application.builder().token(TOKEN).build()
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("help", help_cmd))
-    app.add_handler(CommandHandler("about", about))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    app.add_error_handler(error_handler)
-    log.info("Polling...")
-    app.run_polling(drop_pending_updates=True)
+    """تشغيل البوت مع إعادة تشغيل تلقائية عند أي خطأ"""
+    restart_delay = 1
+    while True:
+        try:
+            log.info("🚀 أبو عباس بوت عربي - بدء التشغيل...")
+            app = Application.builder().token(TOKEN).build()
+            app.add_handler(CommandHandler("start", start))
+            app.add_handler(CommandHandler("help", help_cmd))
+            app.add_handler(CommandHandler("about", about))
+            app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+            app.add_error_handler(error_handler)
+            log.info("Polling...")
+            app.run_polling(drop_pending_updates=True)
+        except Exception as e:
+            log.error(f"⚠️ خطأ في التشغيل: {e}")
+        log.info(f"إعادة التشغيل بعد {restart_delay} ثانية...")
+        time.sleep(restart_delay)
+        restart_delay = min(restart_delay * 2, 30)  # exponential backoff up to 30s
 
 if __name__ == "__main__":
     main()
