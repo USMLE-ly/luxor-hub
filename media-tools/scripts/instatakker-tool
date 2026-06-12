@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+# instatakker-tool — Instagram engagement workflow manager
+set -euo pipefail
+
+PROJECT="/root/Documents/Codex/2026-06-08/make-the-deepseek-v4-flash-free"
+INSTADIR="$PROJECT/instatakker"
+
+show_help() {
+    echo "InstaTakker — Instagram Engagement Workflow Manager"
+    echo ""
+    echo "Usage: instatakker-tool <command> [args...]"
+    echo ""
+    echo "Commands:"
+    echo "  start          Launch InstaTakker GUI (requires display)"
+    echo "  info           Show app info and version"
+    echo "  status         Check if instatakker is installed"
+    echo "  core <action>  Run headless automation (login|like|unfollow)"
+    echo ""
+    echo "Examples:"
+    echo "  instatakker-tool info"
+    echo "  instatakker-tool start     # Opens Electron GUI"
+}
+
+if [ $# -eq 0 ]; then
+    show_help
+    exit 0
+fi
+
+CMD="$1"
+shift
+
+case "$CMD" in
+    start)
+        if [ ! -f "$INSTADIR/node_modules/electron/dist/electron" ]; then
+            echo "Electron not found. Run: cd $INSTADIR && npm install"
+            exit 1
+        fi
+        cd "$INSTADIR"
+        echo "🚀 Launching InstaTakker..."
+        npx electron .
+        ;;
+    info)
+        cd "$INSTADIR"
+        VERSION=$(node -e "console.log(require('./package.json').version)")
+        echo "InstaTakker v$VERSION"
+        echo "Description: $(node -e "console.log(require('./package.json').description)")"
+        echo "Location: $INSTADIR"
+        echo "Electron: $(node -e "console.log(require('./node_modules/electron/package.json').version)" 2>/dev/null || echo 'not installed')"
+        echo ""
+        echo "Files:"
+        ls -lh "$INSTADIR"/*.js "$INSTADIR/index.html" "$INSTADIR/styles.css" 2>/dev/null
+        ;;
+    status)
+        if [ -d "$INSTADIR" ]; then
+            echo "✅ InstaTakker installed at $INSTADIR"
+            echo "   Version: $(node -e "console.log(require('$INSTADIR/package.json').version)" 2>/dev/null || echo '?')"
+            if [ -f "$INSTADIR/node_modules/electron/dist/electron" ]; then
+                echo "   Electron: ready"
+            else
+                echo "   Electron: not installed (run: cd $INSTADIR && npm install)"
+            fi
+        else
+            echo "❌ InstaTakker not installed"
+        fi
+        ;;
+    core)
+        echo "ℹ️  Headless mode requires running instatakker-core.js directly:"
+        echo "   node $INSTADIR/instatakker-core.js [action]"
+        echo ""
+        echo "Note: This requires Instagram credentials and may need a display"
+        echo "for browser automation (Puppeteer/Playwright)."
+        ;;
+    help|--help|-h)
+        show_help
+        ;;
+    *)
+        echo "Unknown command: $CMD"
+        show_help
+        exit 1
+        ;;
+esac

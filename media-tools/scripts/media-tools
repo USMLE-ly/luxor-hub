@@ -18,24 +18,21 @@ show_help() {
     echo "  supermemory store/search/recall     Memory & Context Engine"
     echo "  sharp resize/convert/info/rotate    High-performance image processing"
     echo "  pro ask|coder|research|analyst      Professional mode (deepseek PRO)"
+    echo "  instatakker start|info|status       Instagram engagement workflow"
     echo ""
     echo "Aliases:"
-    echo "  convert     → markitdown"
-    echo "  vec         → turbovec"
-    echo "  pdf         → pdf-extract"
-    echo "  memory      → supermemory"
-    echo "  img         → sharp"
-    echo "  pro         → pro-tool"
+    echo "  convert  → markitdown     vec  → turbovec      pdf  → pdf-extract"
+    echo "  memory   → supermemory    img  → sharp"
+    echo "  pro      → pro-tool       insta → instatakker"
     echo ""
     echo "Other:"
     echo "  api|chat <prompt>                   Query deepseek-v4-flash-free via OpenCode Zen"
     echo ""
     echo "Examples:"
     echo "  media-tools markitdown document.docx output.md"
-    echo "  media-tools pdf-extract report.pdf --format markdown --pages 1-10"
-    echo "  media-tools turbovec build embeddings.npy index.tv"
-    echo "  media-tools pro coder 'build a REST API in Python'"
-    echo "  media-tools pro research 'explain attention mechanisms'"
+    echo "  media-tools sharp resize photo.jpg thumb.jpg 200"
+    echo "  media-tools pro coder 'build a REST API'"
+    echo "  media-tools instatakker info"
 }
 
 if [ $# -eq 0 ]; then
@@ -47,36 +44,15 @@ CMD="$1"
 shift
 
 case "$CMD" in
-    markitdown|convert)
-        exec markitdown-tool "$@"
-        ;;
-    pdf-extract|pdf)
-        exec pdf-extract-tool "$@"
-        ;;
-    turbovec|vec)
-        exec turbovec-tool "$@"
-        ;;
-    quantmind)
-        exec quantmind-tool "$@"
-        ;;
-    supermemory|memory)
-        exec supermemory-tool "$@"
-        ;;
-    sharp|img)
-        exec sharp-tool "$@"
-        ;;
-    pro|pro-tool)
-        exec pro-tool "$@"
-        ;;
-    api|chat)
-        exec python3 "$(dirname "$0")/../../../api_interact.py" "$@"
-        ;;
-    help|--help|-h)
-        show_help
-        ;;
-    *)
-        echo "Unknown command: $CMD"
-        echo "Run 'media-tools help' for usage."
-        exit 1
-        ;;
+    markitdown|convert)     exec markitdown-tool "$@" ;;
+    pdf-extract|pdf)        exec pdf-extract-tool "$@" ;;
+    turbovec|vec)           exec turbovec-tool "$@" ;;
+    quantmind)              exec quantmind-tool "$@" ;;
+    supermemory|memory)     exec supermemory-tool "$@" ;;
+    sharp|img)              exec sharp-tool "$@" ;;
+    pro|pro-tool)           exec pro-tool "$@" ;;
+    instatakker|insta)      exec instatakker-tool "$@" ;;
+    api|chat)               exec python3 "$(dirname "$(readlink -f "$0")")/../../../api_interact.py" "$@" ;;
+    help|--help|-h)         show_help ;;
+    *)                      echo "Unknown command: $CMD"; show_help; exit 1 ;;
 esac

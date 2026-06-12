@@ -34,3 +34,7 @@ media-tools/scripts/lib/package-lock.json
 .supermemory/
 .api_cache/
 .ai_prompt_cache.json
+
+# InstaTakker
+instatakker/node_modules/
+instatakker/dist/
