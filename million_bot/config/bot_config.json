@@ -1,21 +1,33 @@
 {
   "target_username": "vaulex_watches",
   "target_name": "Vaulex Watches",
-  "growth_strategy": {
-    "daily_follows": 300,
-    "daily_unfollows": 200,
-    "daily_likes": 500,
-    "daily_comments": 50,
-    "min_delay_seconds": 3,
-    "max_delay_seconds": 12
+  "anti_ban": {
+    "daily_follow_limit": 100,
+    "daily_like_limit": 500,
+    "daily_unfollow_limit": 60,
+    "hourly_follow_limit": 30,
+    "hourly_like_limit": 100,
+    "min_delay_seconds": 8,
+    "max_delay_seconds": 14,
+    "pause_chance_percent": 8,
+    "pause_min_seconds": 5,
+    "pause_max_seconds": 12,
+    "scroll_min_px": 150,
+    "scroll_max_px": 350,
+    "hover_delay_ms": 500,
+    "empty_rounds_before_stop": 5,
+    "action_window_start_hour": 8,
+    "action_window_end_hour": 23,
+    "avoid_hashtags_on_follow": true,
+    "randomize_actions": true
   },
-  "hashtags": ["watches", "luxury", "watchfam", "style", "fashion"],
+  "hashtags": ["watches", "luxury", "watchfam", "style", "fashion", "timepiece"],
   "competitor_accounts": [
     "rolex", "audemarspiguet", "patekphilippe",
-    "hublot", "richardmille", "omegawatches"
+    "hublot", "richardmille", "omegawatches",
+    "tagheuer", "iwc", "panerai"
   ],
   "proxy": null,
-  "twocaptcha_key": null,
   "instagram": {
     "username": null,
     "password": null

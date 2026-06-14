@@ -32,8 +32,27 @@ def save_config(cfg):
         json.dump(cfg, f, indent=2)
 
 def random_delay(min_s=1.0, max_s=3.0):
-    """Human-like random delay"""
-    time.sleep(random.uniform(min_s, max_s))
+    """Human-like random delay with InstaTakker anti-ban patterns"""
+    # 8% chance of extended pause (human-like behavior)
+    if random.random() < 0.08:
+        time.sleep(random.uniform(5.0, 12.0))
+    else:
+        time.sleep(random.uniform(min_s, max_s))
+
+def human_scroll(page, distance=500):
+    """Scroll like a human — small steps with random delays"""
+    steps = max(1, min(distance // 200, 8))
+    for _ in range(steps):
+        page.evaluate(f'window.scrollBy(0, {random.randint(150, 350)})')
+        time.sleep(random.uniform(0.2, 0.6))
+
+def human_type(page, locator, text):
+    """Type like a human — character by character with random delays"""
+    locator.click()
+    time.sleep(random.uniform(0.3, 0.8))
+    for char in text:
+        locator.type(char, delay=random.randint(30, 120))
+    time.sleep(random.uniform(0.3, 0.8))
 
 class IGrowthBot:
     """Instagram growth automation bot."""
@@ -216,10 +235,16 @@ class IGrowthBot:
                             
                             try:
                                 btn.click()
-                                random_delay(cfg['min_delay_seconds'], cfg['max_delay_seconds'])
+                                # Use InstaTakker's human delay with pause chance
+                                ab = cfg.get('anti_ban', {})
+                                random_delay(ab.get('min_delay_seconds', 8), ab.get('max_delay_seconds', 14))
                                 self.stats['followed'] += 1
                                 followed_this_round += 1
                                 log.info(f'  ✓ Followed #{self.stats["followed"]}')
+                                # Check hourly limit
+                                if followed_this_round >= ab.get('hourly_follow_limit', 30):
+                                    log.info(f'  Hourly limit reached ({followed_this_round}), pausing...')
+                                    time.sleep(random.uniform(300, 600))  # 5-10 min pause
                             except:
                                 continue
                         
@@ -265,6 +290,10 @@ def main():
     args = parser.parse_args()
     
     cfg = load_config()
+    log.info('Anti-ban engine loaded from InstaTakker v2.0.0')
+    log.info(f'  Daily follow limit: {cfg["anti_ban"]["daily_follow_limit"]}')
+    log.info(f'  Daily like limit: {cfg["anti_ban"]["daily_like_limit"]}')
+    log.info(f'  Min delay: {cfg["anti_ban"]["min_delay_seconds"]}s, Max delay: {cfg["anti_ban"]["max_delay_seconds"]}s')
     
     # Use command line credentials or config
     username = args.login[0] if args.login else cfg['instagram']['username']
