@@ -222,6 +222,7 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def main():
     """تشغيل البوت مع إعادة تشغيل تلقائية عند أي خطأ"""
     restart_delay = 1
+    max_delay = 60
     while True:
         try:
             log.info("🚀 أبو عباس بوت عربي - بدء التشغيل...")
@@ -232,7 +233,9 @@ def main():
                 asyncio.set_event_loop(loop)
             except:
                 pass
-            
+            # Wait for any stale session to expire on Telegram server
+            time.sleep(15)
+
             app = Application.builder().token(TOKEN).build()
             app.add_handler(CommandHandler("start", start))
             app.add_handler(CommandHandler("help", help_cmd))
@@ -240,12 +243,16 @@ def main():
             app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
             app.add_error_handler(error_handler)
             log.info("Polling...")
-            app.run_polling(drop_pending_updates=True)
+            app.run_polling(drop_pending_updates=True, poll_interval=1.0, timeout=10)
         except Exception as e:
             log.error(f"⚠️ خطأ في التشغيل: {e}")
+            if "Conflict" in str(e) or "409" in str(e):
+                restart_delay = min(restart_delay * 2, max_delay)
+                log.info(f"🔴 409 Conflict — waiting {restart_delay}s for session to expire...")
+            else:
+                restart_delay = min(restart_delay * 2, max_delay)
         log.info(f"إعادة التشغيل بعد {restart_delay} ثانية...")
         time.sleep(restart_delay)
-        restart_delay = min(restart_delay * 2, 30)
 
 if __name__ == "__main__":
     main()
