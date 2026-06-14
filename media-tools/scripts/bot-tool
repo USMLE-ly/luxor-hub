@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# bot-tool — InstaBot deployment engine (ZORG-Ω)
+set -euo pipefail
+
+PROJECT="/root/Documents/Codex/2026-06-08/make-the-deepseek-v4-flash-free"
+BOT="$PROJECT/media-tools/scripts/lib/instabot.mjs"
+
+show_help() {
+    echo "InstaBot — ZORG-Ω Instagram Automation Engine"
+    echo ""
+    echo "Usage: bot-tool <command> [args...]"
+    echo ""
+    echo "Commands:"
+    echo "  login <user> <pass>              Test login to Instagram"
+    echo "  follow <user> <pass> [targets]   Follow targets (comma-sep)"
+    echo "  like <user> <pass> [target]      Like posts from target"
+    echo "  view <user> <pass>               View & screenshot profile"
+    echo ""
+    echo "Env vars: IG_USERNAME, IG_PASSWORD"
+    echo ""
+    echo "Examples:"
+    echo "  bot-tool login myuser mypass"
+    echo "  bot-tool follow myuser mypass vaulex_watches 50"
+    echo "  bot-tool like myuser mypass vaulex_watches 100"
+}
+
+if [ $# -eq 0 ]; then
+    show_help
+    exit 0
+fi
+
+node "$BOT" "$@"
