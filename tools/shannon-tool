@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+"""SHANNON-Ω Integrated Tool Launcher"""
+import sys, os, subprocess, json
+
+TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(TOOLS_DIR)
+
+COMMANDS = {
+    "chat": ["python3", "api_interact.py"],
+    "email": ["python3", "media-tools/scripts/lib/ig_creator.py", "email"],
+    "signup": ["python3", "media-tools/scripts/lib/ig_creator.py", "full"],
+    "pro": ["python3", "api_interact.py", "--pro"],
+    "vanilla": ["python3", "api_interact.py", "--no-override"],
+}
+
+def main():
+    args = sys.argv[1:]
+    if not args or args[0] in ("-h", "--help", "help"):
+        print("SHANNON-Ω Tool System")
+        print()
+        print("Commands:")
+        print("  chat <prompt>           SHANNON-Ω mode (uncensored)")
+        print("  pro <style> <prompt>    Professional mode (coder/researcher/analyst)")
+        print("  vanilla <prompt>        Vanilla mode (no override)")
+        print("  email                   Generate temporary email")
+        print("  signup <name> <user>    Instagram signup")
+        print("  jb <persona> <prompt>   Jailbreak persona mode")
+        print()
+        print("Personas: zorg, deepseek-x, eni, nova, shadow, nexus, omega, wraith")
+        return
+    
+    cmd = args[0]
+    rest = args[1:]
+    
+    if cmd == "chat":
+        prompt = " ".join(rest) if rest else sys.stdin.read()
+        os.chdir(PROJECT_ROOT)
+        cmd_list = ["python3", "api_interact.py", prompt]
+        subprocess.run(cmd_list)
+    
+    elif cmd == "pro":
+        style = rest[0] if rest else "coder"
+        prompt = " ".join(rest[1:]) if len(rest) > 1 else sys.stdin.read()
+        os.chdir(PROJECT_ROOT)
+        subprocess.run(["python3", "api_interact.py", "--pro", style, prompt])
+    
+    elif cmd == "vanilla":
+        prompt = " ".join(rest) if rest else sys.stdin.read()
+        os.chdir(PROJECT_ROOT)
+        subprocess.run(["python3", "api_interact.py", "--no-override", prompt])
+    
+    elif cmd == "email":
+        os.chdir(PROJECT_ROOT)
+        subprocess.run(["python3", "media-tools/scripts/lib/ig_creator.py", "email"])
+    
+    elif cmd == "signup":
+        name = rest[0] if rest else "Vaulex Watches"
+        user = rest[1] if len(rest) > 1 else f"vaulex_{os.urandom(2).hex()}"
+        os.chdir(PROJECT_ROOT)
+        subprocess.run(["python3", "media-tools/scripts/lib/ig_creator.py", "full", name, user])
+    
+    elif cmd == "jb":
+        persona = rest[0] if rest else "zorg"
+        prompt = " ".join(rest[1:]) if len(rest) > 1 else sys.stdin.read()
+        os.environ["SHANNON_PERSONA"] = persona
+        os.chdir(PROJECT_ROOT)
+        subprocess.run(["python3", "api_interact.py", "--shannon", prompt])
+    
+    else:
+        print(f"Unknown command: {cmd}")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
