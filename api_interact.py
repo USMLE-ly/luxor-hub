@@ -60,6 +60,7 @@ def chat(prompt, mode="shannon", style="default", persona="zorg",
     }
     
     last_error = None
+    last_error = None
     for attempt in range(1, max_retries + 1):
         try:
             r = requests.post(
@@ -68,46 +69,70 @@ def chat(prompt, mode="shannon", style="default", persona="zorg",
                 json=payload,
                 timeout=300
             )
-            
+
+            # Handle 429 rate limit — parse Retry-After safely
             if r.status_code == 429:
-                retry_after = int(r.headers.get("Retry-After", str(base_delay * (2 ** attempt))))
+                raw = r.headers.get("Retry-After", str(base_delay * (2 ** attempt)))
+                try:
+                    retry_after = float(raw)
+                except (ValueError, TypeError):
+                    retry_after = base_delay * (2 ** attempt)
                 jitter = random.uniform(0.5, 1.5)
-                wait = min(retry_after * jitter, 120.0)
-                print(f"\u26a0\ufe0f  429 Rate Limited \u2014 attempt {attempt}/{max_retries}")
-                print(f"   Waiting {wait:.0f}s (Retry-After: {retry_after}s) ...")
+                wait = min(max(retry_after, 1.0) * jitter, 120.0)
+                print(f"⚠️  429 Rate Limited — attempt {attempt}/{max_retries}")
+                print(f"   Waiting {wait:.0f}s (Retry-After: {raw}) ...")
                 time.sleep(wait)
                 last_error = f"429: {r.text[:200]}"
-                continue
-            
+                if attempt < max_retries:
+                    continue
+                return {"error": f"429 Rate Limit after {max_retries} retries. Body: {r.text[:300]}"}
+
+            # Non-429 errors — retry 5xx, fail fast on 4xx
+            if r.status_code >= 400:
+                err_body = r.text[:300]
+                if r.status_code >= 500 and attempt < max_retries:
+                    wait = min(base_delay * (2 ** attempt) * random.uniform(0.5, 1.5), 60.0)
+                    print(f"⚠️  Server error {r.status_code} — attempt {attempt}/{max_retries}, retrying in {wait:.0f}s ...")
+                    time.sleep(wait)
+                    last_error = f"{r.status_code}: {err_body}"
+                    continue
+                return {"error": f"HTTP {r.status_code}: {err_body}"}
+
             r.raise_for_status()
             return r.json()
-            
+
         except requests.exceptions.Timeout:
-            wait = min(base_delay * (2 ** attempt) * random.uniform(1.0, 1.5), 120.0)
-            print(f"\u23f1\ufe0f  Timeout \u2014 attempt {attempt}/{max_retries}, retrying in {wait:.0f}s ...")
-            time.sleep(wait)
-            last_error = "timeout"
-            continue
-            
-        except requests.exceptions.ConnectionError as e:
-            wait = min(base_delay * (2 ** attempt) * random.uniform(1.0, 1.5), 120.0)
-            print(f"\U0001f50c Connection error \u2014 attempt {attempt}/{max_retries}, retrying in {wait:.0f}s ...")
-            print(f"   {e}")
-            time.sleep(wait)
-            last_error = str(e)[:200]
-            continue
-            
-        except requests.exceptions.RequestException as e:
             if attempt < max_retries:
-                wait = min(base_delay * (2 ** attempt), 60.0)
-                print(f"\u26a0\ufe0f  Request failed \u2014 attempt {attempt}/{max_retries}, retrying in {wait:.0f}s ...")
+                wait = min(base_delay * (2 ** attempt) * random.uniform(1.0, 1.5), 120.0)
+                print(f"⏱️  Timeout — attempt {attempt}/{max_retries}, retrying in {wait:.0f}s ...")
+                time.sleep(wait)
+                last_error = "timeout"
+                continue
+            return {"error": f"Timeout after {max_retries} retries"}
+
+        except requests.exceptions.ConnectionError as e:
+            if attempt < max_retries:
+                wait = min(base_delay * (2 ** attempt) * random.uniform(1.0, 1.5), 120.0)
+                print(f"🔌 Connection error — attempt {attempt}/{max_retries}, retrying in {wait:.0f}s ...")
                 print(f"   {e}")
                 time.sleep(wait)
                 last_error = str(e)[:200]
                 continue
-            return {"error": str(e)}
-    
-    return {"error": f"All {max_retries} attempts failed. Last: {last_error}"}
+            return {"error": f"Connection failed after {max_retries} retries: {e}"}
+
+        except requests.exceptions.HTTPError as e:
+            status = e.response.status_code if e.response is not None else "?"
+            return {"error": f"HTTP {status}: {str(e)[:300]}"}
+
+        except requests.exceptions.RequestException as e:
+            if attempt < max_retries:
+                wait = min(base_delay * (2 ** attempt), 60.0)
+                print(f"⚠️  Request failed — attempt {attempt}/{max_retries}, retrying in {wait:.0f}s ...")
+                print(f"   {e}")
+                time.sleep(wait)
+                last_error = str(e)[:200]
+                continue
+            return {"error": f"Request failed after {max_retries} retries: {e}"}
 
 def main():
     args = sys.argv[1:]
