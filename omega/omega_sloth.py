@@ -34,8 +34,11 @@ class OmegaSloth:
             headless=True,
             args=[
                 '--no-sandbox',
+                '--disable-setuid-sandbox',
                 '--disable-blink-features=AutomationControlled',
                 '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--single-process',
             ]
         )
         context = self.browser.new_context(
@@ -55,53 +58,111 @@ class OmegaSloth:
     def login(self):
         log.info(f"Logging in as @{self.cfg['username']}")
         self.page.goto('https://www.instagram.com/accounts/login/')
-        self.page.wait_for_timeout(3000)
+        self.page.wait_for_timeout(5000)
+        
+        # Debug: dump page state
+        log.debug(f"Page title: {self.page.title()}")
+        log.debug(f"URL: {self.page.url}")
         
         # Accept cookies if present
         try:
-            if self.page.locator('button:has-text("Allow all")').is_visible(timeout=3000):
-                self.page.locator('button:has-text("Allow all")').click()
+            cookie_btn = self.page.get_by_role("button", name="Allow all")
+            if cookie_btn.is_visible(timeout=3000):
+                cookie_btn.click()
+                log.debug("Accepted cookies")
                 self.page.wait_for_timeout(1000)
         except:
             pass
         
-        # Enter username
-        username_input = self.page.locator('input[name="username"]')
+        # Wait for login form - try multiple selectors
+        username_input = None
+        for selector in [
+            'input[name="username"]',
+            'input[type="text"]',
+            'input[autocomplete="username"]',
+        ]:
+            try:
+                username_input = self.page.locator(selector).first
+                if username_input.is_visible(timeout=5000):
+                    log.debug(f"Found username field via: {selector}")
+                    break
+            except:
+                continue
+        
+        if not username_input:
+            log.error("Could not find username input field")
+            log.debug(f"Page HTML: {self.page.content()[:1000]}")
+            return False
+        
+        # Enter credentials with human-like delays
         username_input.fill(self.cfg['username'])
-        self.page.wait_for_timeout(random.uniform(500, 1500))
+        self.page.wait_for_timeout(random.uniform(800, 2000))
         
-        # Enter password
-        password_input = self.page.locator('input[name="password"]')
+        # Find password field
+        password_input = None
+        for selector in [
+            'input[name="password"]',
+            'input[type="password"]',
+            'input[autocomplete="current-password"]',
+        ]:
+            try:
+                password_input = self.page.locator(selector).first
+                if password_input.is_visible(timeout=3000):
+                    break
+            except:
+                continue
+        
+        if not password_input:
+            log.error("Could not find password field")
+            return False
+        
         password_input.fill(self.cfg['password'])
-        self.page.wait_for_timeout(random.uniform(500, 1500))
+        self.page.wait_for_timeout(random.uniform(800, 2000))
         
-        # Click login
-        self.page.locator('button[type="submit"]').click()
+        # Click login button
+        for btn_selector in [
+            'button[type="submit"]',
+            'button:has-text("Log in")',
+            'button:has-text("Log In")',
+        ]:
+            try:
+                btn = self.page.locator(btn_selector).first
+                if btn.is_visible(timeout=3000):
+                    btn.click()
+                    log.debug(f"Clicked login via: {btn_selector}")
+                    break
+            except:
+                continue
+        
         self.page.wait_for_timeout(5000)
         
-        # Check for "Save info" dialog
-        try:
-            if self.page.locator('button:has-text("Not Now")').is_visible(timeout=5000):
-                self.page.locator('button:has-text("Not Now")').click()
-                self.page.wait_for_timeout(2000)
-        except:
-            pass
-            
-        # Check for notifications dialog
-        try:
-            if self.page.locator('button:has-text("Not Now")').is_visible(timeout=5000):
-                self.page.locator('button:has-text("Not Now")').click()
-                self.page.wait_for_timeout(2000)
-        except:
-            pass
+        # Handle post-login dialogs
+        for dialog_text in ["Not Now", "Not now", "Save Info", "Save info"]:
+            try:
+                dialog_btn = self.page.get_by_role("button", name=dialog_text)
+                if dialog_btn.is_visible(timeout=3000):
+                    dialog_btn.click()
+                    log.debug(f"Dismissed dialog: {dialog_text}")
+                    self.page.wait_for_timeout(1000)
+            except:
+                pass
         
-        # Verify login
-        if self.page.locator('svg[aria-label="Home"]').is_visible(timeout=10000):
-            log.info("✓ Login successful")
-            return True
-        else:
-            log.warning("⚠ Login may have failed (check manually)")
-            return False
+        # Verify login - check for feed elements
+        feed_indicators = [
+            'svg[aria-label="Home"]',
+            'svg[aria-label="Search"]',
+            'a[href="/direct/inbox/"]',
+        ]
+        for indicator in feed_indicators:
+            try:
+                if self.page.locator(indicator).is_visible(timeout=5000):
+                    log.info("✓ Login successful")
+                    return True
+            except:
+                continue
+        
+        log.warning(f"⚠ Login may have failed. URL: {self.page.url}")
+        return False
     
     def like_recent_posts(self, username, count=5):
         log.info(f"Liking recent posts from @{username}")
