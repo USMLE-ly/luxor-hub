@@ -59,6 +59,7 @@ case "$CMD" in
     pro|pro-tool)           exec pro-tool "$@" ;;
     instatakker|insta)      exec instatakker-tool "$@" ;;
     ig|ig-tool)            exec ig-tool "$@" ;;
+    zorg|zorg-engine)    exec zorg-engine "$@" ;;
     bot|instabot)          exec bot-tool "$@" ;;
     email|email-tool)        exec email-tool "$@" ;;
     api|chat)               exec python3 "$(dirname "$(readlink -f "$0")")/../../../api_interact.py" "$@" ;;
@@ -66,6 +67,3 @@ case "$CMD" in
     *)                      echo "Unknown command: $CMD"; show_help; exit 1 ;;
 esac
 
-    quora|quora-tool)
-        exec quora-tool "$@"
-        ;;

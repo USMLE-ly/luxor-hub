@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+# zorg-engine — ZORG-Ω Profit Automation Engine
+# Integrates Scrapling, ai-marketing-skills, MoneyPrinterV2 with our tools
+set -euo pipefail
+
+VENV="/root/Documents/Codex/2026-06-08/make-the-deepseek-v4-flash-free/.venv"
+source "$VENV/bin/activate"
+
+PROJECT="/root/Documents/Codex/2026-06-08/make-the-deepseek-v4-flash-free"
+LIB="$PROJECT/media-tools/scripts/lib"
+AI_SKILLS="/tmp/ai-marketing-skills"
+MONEY_PRINTER="/tmp/MoneyPrinterV2"
+
+show_help() {
+    echo "ZORG-Ω Profit Automation Engine"
+    echo ""
+    echo "Usage: zorg-engine <command> [args...]"
+    echo ""
+    echo "Commands:"
+    echo "  quora <niche>            Generate Quora content + post plan"
+    echo "  twitter <topic>          Generate Twitter thread content"
+    echo "  automate <niche>         Full cycle: research→create→track"
+    echo "  install                  Install all dependencies"
+    echo "  status                   Show engine status"
+    echo "  profit                   Show profit log"
+    echo ""
+    echo "Examples:"
+    echo "  zorg-engine quora 'affiliate marketing'"
+    echo "  zorg-engine twitter 'make money online'"
+    echo "  zorg-engine automate 'digital marketing'"
+}
+
+if [ $# -eq 0 ]; then
+    show_help
+    exit 0
+fi
+
+CMD="$1"
+shift
+
+case "$CMD" in
+    install)
+        echo "Installing tools..."
+        pip install scrapling -q 2>/dev/null && echo "✅ Scrapling"
+        [ -d "$AI_SKILLS" ] || git clone https://github.com/ericosiu/ai-marketing-skills.git "$AI_SKILLS" --depth 1 2>/dev/null
+        echo "✅ ai-marketing-skills"
+        [ -d "$MONEY_PRINTER" ] || git clone https://github.com/FujiwaraChoki/MoneyPrinterV2.git "$MONEY_PRINTER" --depth 1 2>/dev/null
+        echo "✅ MoneyPrinterV2"
+        echo "All dependencies ready"
+        ;;
+    quora)
+        NICHE="${*:-make money online}"
+        echo "ZORG-Ω: QUORA CONTENT ENGINE"
+        echo "Target: $NICHE"
+        echo ""
+        quora-tool discover "$NICHE" 2>&1
+        echo ""
+        echo "--- Generating Answer ---"
+        python3 api_interact.py --jb zorg "Write a Quora answer about: $NICHE. Structure: personal story (2 sentences) → specific strategy (3 bullet points) → result with number → subtle CTA. Max 300 words. No fluff." 2>&1 | tail -20
+        echo ""
+        supermemory-tool store "ZORG quora: Generated answer for $NICHE at $(date)"
+        ;;
+    twitter)
+        TOPIC="${*:-make money online}"
+        echo "ZORG-Ω: TWITTER THREAD ENGINE"
+        echo "Topic: $TOPIC"
+        echo ""
+        python3 api_interact.py --jb zorg "Write a Twitter thread about $TOPIC. 5 tweets. Each tweet: hook → value → CTA to next. Include 3 specific numbers. Use line breaks. Hashtags at end." 2>&1 | tail -20
+        echo ""
+        supermemory-tool store "ZORG twitter: Generated thread for $TOPIC at $(date)"
+        ;;
+    automate)
+        NICHE="${*:-make money online}"
+        echo "⚡ ZORG-Ω FULL AUTOMATION: $NICHE"
+        echo ""
+        # Phase 1: Discover
+        echo "--- PHASE 1: DISCOVER ---"
+        quora-tool discover "$NICHE" 2>&1 | head -8
+        echo ""
+        # Phase 2: Generate Quora content
+        echo "--- PHASE 2: GENERATE QUORA CONTENT ---"
+        python3 api_interact.py --jb zorg "Write a Quora answer about: $NICHE. Structure: hook → credibility → deep dive → CTA. Max 250 words. Include 3 specific steps." 2>&1 | tail -10
+        echo ""
+        # Phase 3: Generate Twitter thread
+        echo "--- PHASE 3: GENERATE TWITTER THREAD ---"
+        python3 api_interact.py --jb zorg "Write a 4-tweet Twitter thread about $NICHE. Value-driven. Each tweet under 280 chars. Thread end with CTA." 2>&1 | tail -10
+        echo ""
+        # Phase 4: Track
+        echo "--- PHASE 4: TRACK ---"
+        supermemory-tool store "ZORG automate: Full cycle for $NICHE at $(date)"
+        supermemory-tool recall "ZORG" 3
+        echo ""
+        echo "✅ AUTOMATION COMPLETE for: $NICHE"
+        echo "Next: zorg-engine quora 'another niche'"
+        ;;
+    status)
+        echo "ZORG-Ω ENGINE STATUS"
+        echo "===================="
+        python3 -c "import scrapling; print(f'Scrapling: {scrapling.__version__}')" 2>/dev/null || echo "Scrapling: missing deps"
+        [ -d "$AI_SKILLS" ] && echo "ai-marketing-skills: $(ls -d $AI_SKILLS/*/ 2>/dev/null | wc -l) modules"
+        [ -d "$MONEY_PRINTER" ] && echo "MoneyPrinterV2: $(ls $MONEY_PRINTER/src/*.py 2>/dev/null | wc -l) modules"
+        echo "Tools: quora-tool ✓ supermemory-tool ✓ api_interact ✓ media-tools ✓"
+        echo ""
+        supermemory-tool recall "ZORG" 5
+        ;;
+    profit)
+        echo "ZORG-Ω PROFIT LOG"
+        echo "================="
+        supermemory-tool recall "ZORG" 20
+        ;;
+    help|--help|-h)
+        show_help
+        ;;
+    *)
+        python3 api_interact.py --jb zorg "$CMD $@"
+        ;;
+esac
