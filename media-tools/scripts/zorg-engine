@@ -115,3 +115,55 @@ case "$CMD" in
         python3 api_interact.py --jb zorg "$CMD $@"
         ;;
 esac
+    quora)
+        EMAIL="${1:-}"
+        PASS="${2:-}"
+        COUNT="${3:-5}"
+        python3 "$LIB/automation_engine.py" quora "$EMAIL" "$PASS" "$COUNT"
+        ;;
+    twitter)
+        EMAIL="${1:-}"
+        USER="${2:-}"
+        PASS="${3:-}"
+        COUNT="${4:-3}"
+        python3 "$LIB/automation_engine.py" twitter "$EMAIL" "$USER" "$PASS" "$COUNT"
+        ;;
+    proxy)
+        python3 -c "
+import sys, json
+sys.path.insert(0, '$LIB')
+from automation_engine import ProxyPool
+pp = ProxyPool()
+action = sys.argv[1] if len(sys.argv) > 1 else 'status'
+if action == 'add' and len(sys.argv) == 5:
+    pp.add(sys.argv[2], int(sys.argv[3]), sys.argv[4])
+    print(f'Added proxy {sys.argv[2]}:{sys.argv[3]}')
+elif action == 'list':
+    for p in pp.proxies:
+        print(f'  {p[\"host\"]}:{p[\"port\"]}  score={p[\"score\"]}  uses={p[\"uses\"]}  succ={p[\"successes\"]}  fail={p[\"failures\"]}')
+else:
+    print(f'Proxy pool: {len(pp.proxies)} proxies')
+    best = pp.get_best()
+    if best:
+        print(f'Best: {best[\"host\"]}:{best[\"port\"]} (score={best[\"score\"]})')
+" "$@"
+        ;;
+    auth)
+        echo "Set these environment variables:"
+        echo "  TWOCAPTCHA_API_KEY      - 2captcha API key (paid fallback)"
+        echo "  QUORA_EMAIL             - Quora login email"
+        echo "  QUORA_PASSWORD          - Quora login password"
+        echo "  TWITTER_EMAIL           - Twitter login email"
+        echo "  TWITTER_USERNAME        - Twitter/X username"
+        echo "  TWITTER_PASSWORD        - Twitter login password"
+        echo ""
+        echo "Current status:"
+        echo "  TWOCAPTCHA_API_KEY: ${TWOCAPTCHA_API_KEY:+✅ set}${TWOCAPTCHA_API_KEY:-❌ not set}"
+        echo "  QUORA_EMAIL: ${QUORA_EMAIL:+✅ set}${QUORA_EMAIL:-❌ not set}"
+        echo "  TWITTER_EMAIL: ${TWITTER_EMAIL:+✅ set}${TWITTER_EMAIL:-❌ not set}"
+        ;;
+    *)
+        # Default: pass through to the legacy handler
+        python3 "$PROJECT/api_interact.py" --jb deepseek-x "zorg-engine $CMD $@"
+        ;;
+esac
