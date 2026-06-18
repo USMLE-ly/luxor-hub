@@ -58,3 +58,9 @@ content_queue.json
 # Generated scripts
 scarab_*.user.js
 .temp*
+
+# Session dirs
+.quora_session/
+.scarab_session/
+.camoufox/
+.cookies_backup/

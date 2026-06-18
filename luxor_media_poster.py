@@ -38,7 +38,7 @@ def fetch_playwright(url, screenshot_path=None):
     from playwright.sync_api import sync_playwright
     with sync_playwright() as p:
         browser = p.chromium.launch(
-            headless=False,
+            headless=True,
             args=["--no-sandbox", "--disable-gpu", "--disable-software-rasterizer",
                   "--disable-dev-shm-usage", "--single-process"]
         )
@@ -143,7 +143,7 @@ def post_to_x(topic, content, image_path=None):
     
     with sync_playwright() as p:
         browser = p.chromium.launch(
-            headless=False,
+            headless=True,
             args=["--no-sandbox", "--disable-gpu", "--disable-software-rasterizer",
                   "--disable-dev-shm-usage", "--single-process"]
         )

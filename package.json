@@ -1,9 +1,0 @@
-{
-  "dependencies": {
-    "flaresolverr": "^0.0.0",
-    "playwright": "^1.60.0",
-    "puppeteer": "^25.1.0",
-    "puppeteer-core": "^25.1.0",
-    "update-notifier": "^7.3.1"
-  }
-}
