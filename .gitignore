@@ -44,3 +44,17 @@ omega/*.png
 omega/*.jpg
 !omega/scripts/
 last_challenge.json
+
+# Cookies and session data
+cookies_*.json
+*.session.json
+
+# Cached/content data
+content_queue.json
+*_cache*
+*.tv
+*.npy
+
+# Generated scripts
+scarab_*.user.js
+.temp*
