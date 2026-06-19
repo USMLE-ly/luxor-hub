@@ -288,3 +288,4 @@ self.addEventListener('activate', (event) => {
 
 // Log SW lifecycle
 console.log('[SW] LUXOR Service Worker v2 loaded');
+
