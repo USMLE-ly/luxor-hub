@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Install LEXOR — Android APK & PWA</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0A0A0B; color: #f5f5f5;
+      display: flex; flex-direction: column; align-items: center;
+      min-height: 100vh;
+    }
+    .container { max-width: 600px; width: 100%; padding: 2rem 1.5rem; }
+    h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+    h1 span { color: #C8A951; }
+    p { color: #888; margin-bottom: 2rem; line-height: 1.6; }
+    .card {
+      background: #1a1a1e; border: 1px solid #333; border-radius: 16px;
+      padding: 1.5rem; margin-bottom: 1rem;
+    }
+    .card h2 { font-size: 1.2rem; margin-bottom: 0.75rem; }
+    .card p { font-size: 0.9rem; margin-bottom: 1rem; color: #aaa; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: #C8A951; color: #0A0A0B; border: none;
+      padding: 0.75rem 1.5rem; border-radius: 12px;
+      font-size: 1rem; font-weight: 600; cursor: pointer;
+      text-decoration: none; transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn-secondary {
+      background: #2a2a2e; color: #f5f5f5;
+    }
+    .btn-secondary:hover { background: #333; }
+    .badge {
+      display: inline-block; background: #C8A95120; color: #C8A951;
+      padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.75rem;
+      font-weight: 500; margin-left: 0.5rem;
+    }
+    .features { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin: 1rem 0; }
+    .features li {
+      list-style: none; font-size: 0.85rem; color: #aaa;
+      padding: 0.25rem 0; display: flex; align-items: center; gap: 0.4rem;
+    }
+    .features li::before { content: "✓"; color: #C8A951; font-weight: bold; }
+    .divider { margin: 1.5rem 0; border: none; border-top: 1px solid #2a2a2e; }
+    .version { font-size: 0.8rem; color: #555; text-align: center; margin-top: 2rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>LEX<span>OR</span></h1>
+    <p>AI-Powered Style Intelligence — download the Android app or install the PWA.</p>
+
+    <div class="card">
+      <h2>📱 Android APK <span class="badge">v3.0.0</span></h2>
+      <p>Signed release build, optimized with R8/ProGuard. Works on Android 7.0+ (API 24).</p>
+      <ul class="features">
+        <li>15 MB download</li>
+        <li>Offline support</li>
+        <li>Push notifications</li>
+        <li>Deep linking</li>
+        <li>Edge-to-edge display</li>
+        <li>App shortcuts</li>
+        <li>Biometric auth ready</li>
+        <li>Adaptive icons</li>
+      </ul>
+      <div style="display:flex;gap:0.75rem;margin-top:1rem;flex-wrap:wrap">
+        <a href="https://github.com/USMLE-ly/luxor-hub/releases/download/v3.0.0/LEXOR-release.apk" class="btn">⬇ Download APK (15 MB)</a>
+        <a href="https://github.com/USMLE-ly/luxor-hub/releases/download/v3.0.0/LEXOR-release.aab" class="btn btn-secondary">📦 Download AAB (16 MB)</a>
+      </div>
+      <p style="margin-top:0.75rem;font-size:0.8rem;color:#666">
+        Enable "Install from unknown sources" in Settings → Security to install APK.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>🌐 PWA (Web App)</h2>
+      <p>Install directly from browser — works on any platform including iOS.</p>
+      <ul class="features">
+        <li>Works offline</li>
+        <li>Push notifications</li>
+        <li>iOS splash screens</li>
+        <li>Background sync</li>
+      </ul>
+      <div style="margin-top:1rem">
+        <button onclick="installPWA()" class="btn" id="install-btn">📲 Install PWA</button>
+        <p style="margin-top:0.5rem;font-size:0.8rem;color:#666">
+          Or visit <a href="https://usmle-ly.github.io/luxor-hub/" style="color:#C8A951">usmle-ly.github.io/luxor-hub</a>
+        </p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🍎 iOS</h2>
+      <p>Open the PWA site in Safari, tap Share → Add to Home Screen.</p>
+      <div style="margin-top:1rem">
+        <a href="https://usmle-ly.github.io/luxor-hub/" class="btn btn-secondary">🌐 Open PWA</a>
+      </div>
+    </div>
+
+    <hr class="divider">
+    
+    <div style="text-align:center">
+      <h2 style="font-size:1rem;color:#888;margin-bottom:1rem">What's New in v3.0</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;font-size:0.85rem;color:#aaa">
+        <span>✓ Route code splitting</span>
+        <span>✓ Edge-to-edge display</span>
+        <span>✓ Notification channels</span>
+        <span>✓ Predictive back gesture</span>
+        <span>✓ Android App Bundle</span>
+        <span>✓ 11 iOS icon sizes</span>
+        <span>✓ Service worker v2</span>
+        <span>✓ Background sync</span>
+        <span>✓ Security headers</span>
+        <span>✓ Accessibility (ARIA)</span>
+      </div>
+    </div>
+
+    <p class="version">LEXOR v3.0.0 — Built with ❤️</p>
+  </div>
+
+  <script>
+    // PWA install
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('install-btn').textContent = '📲 Install LEXOR';
+    });
+    window.installPWA = function() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+      } else {
+        alert('Open this page in Chrome/Edge on your device, then use Add to Home Screen.');
+      }
+    };
+    // Check if already installed
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      document.getElementById('install-btn').textContent = '✓ Already Installed';
+      document.getElementById('install-btn').disabled = true;
+    }
+  </script>
+</body>
+</html>
