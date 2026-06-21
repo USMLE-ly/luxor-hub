@@ -39,3 +39,5 @@ downloaded_books/
 # Debug screenshots
 debug_screenshots/
 test-results/
+*.pdf
+aa_books/
