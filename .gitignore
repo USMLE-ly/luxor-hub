@@ -46,3 +46,10 @@ aa_books/
 device.xml
 devicesalt
 decrypted_pdfs/
+
+# Additional ignores
+ia_downloads/
+internet_archive_downloader/
+screenshot.png
+google_drive_books/
+fashiondesigners0000roth/
