@@ -11,6 +11,8 @@ wheels/
 
 # Caches
 /.ruff_cache/
+.api_cache/
+.scarab_session/
 
 # Editors
 /.vscode/
@@ -23,3 +25,17 @@ wheels/
 
 # Residual plots
 /plots/
+
+# Node
+node_modules/
+
+# Secrets & credentials
+.ig_*.json
+.last_email.json
+
+# Downloaded books
+downloaded_books/
+
+# Debug screenshots
+debug_screenshots/
+test-results/

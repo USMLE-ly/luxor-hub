@@ -1,0 +1,45 @@
+# =====================================================
+# Pro Stylist Microservice — Python Dependencies
+# =====================================================
+# Core
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pydantic==2.10.4
+python-multipart==0.0.20
+
+# Image processing
+Pillow==11.1.0
+opencv-python-headless==4.10.0.84
+scikit-image==0.25.0
+numpy==2.2.1
+
+# Async / caching
+httpx==0.28.1
+aiocache==0.12.3
+redis==5.2.1
+orjson==3.10.15
+
+# Image diff / comparison
+pixelmatch==0.3.0
+
+# =====================================================
+# Optional: Real AI model adapters
+# These repos provide the actual deep learning models.
+# Install only if you have GPU + model weights.
+# =====================================================
+# HiDream-I1 (image generation)
+# git+https://github.com/HiDream-ai/HiDream-I1.git
+# torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
+# 
+# imagen-pytorch (text-to-image)
+# pip install imagen-pytorch
+# 
+# ml-sharp (edge-aware upsampling)
+# git+https://github.com/apple/ml-sharp.git
+# 
+# opencut (interactive segmentation)
+# Requires desktop app: https://opencut.app
+# Python bridge available via opencut-py
+# 
+# open-generative-ai (multi-model gateway)
+# pip install open-generative-ai

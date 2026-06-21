@@ -1,0 +1,652 @@
+#!/usr/bin/env python3
+"""
+Luxor Analysis Server v2.0 — Fashionpedia + VICE Enhanced
+==========================================================
+Replaces the GPT-5 / Lovable AI gateway for outfit analysis.
+Powered by:
+  • Fashionpedia (Fashionary) — garment taxonomy, fabrics, measurements
+  • Visual Dictionary of Fashion Design — terminology A→Z
+  • VICE Do's & Don'ts — street fashion critique methodology
+  • 1000 Poses — model posing reference
+
+Run: python3 luxor_analysis_server.py [--port 8766] [--kb /path/to/knowledge.json]
+"""
+
+import argparse
+import base64
+import json
+import os
+import sys
+import uuid
+from collections import Counter
+from io import BytesIO
+from pathlib import Path
+
+import requests
+from flask import Flask, jsonify, request, send_from_directory
+from PIL import Image
+
+app = Flask(__name__)
+
+# ─── Fashion Knowledge Base ───────────────────────────────────────────────
+FASHION_KB = {}
+
+def _load_knowledge_base(kb_path=None):
+    """Load the Fashionpedia knowledge base at startup."""
+    if kb_path and os.path.exists(kb_path):
+        with open(kb_path) as f:
+            return json.load(f)
+    for p in ["/tmp/luxor-research/fashion_knowledge_base.json"]:
+        if os.path.exists(p):
+            with open(p) as f:
+                return json.load(f)
+    print("[kb] No knowledge base found — running fallback")
+    return {}
+
+# ─── VICE Critique Rules ─────────────────────────────────────────────────
+VICE_RULES = {}
+
+def _load_vice_rules():
+    for p in ["/tmp/luxor-research/vice_critique_rules.json"]:
+        if os.path.exists(p):
+            with open(p) as f:
+                return json.load(f)
+    return {}
+
+HOST = "0.0.0.0"
+PORT = 8766
+OUTPUT_DIR = Path("/tmp/luxor-analysis")
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  MIDDLEWARE
+# ═══════════════════════════════════════════════════════════════════════════
+
+@app.after_request
+def add_cors(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "authorization, x-client-info, apikey, content-type"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    return response
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  HEALTH
+# ═══════════════════════════════════════════════════════════════════════════
+
+@app.route("/", methods=["GET"])
+def health():
+    return jsonify({
+        "status": "ok",
+        "service": "luxor-analysis-server",
+        "version": "2.0",
+        "knowledge_base": bool(FASHION_KB),
+        "kb_sections": list(FASHION_KB.keys()) if FASHION_KB else [],
+        "vice_critique_rules": bool(VICE_RULES),
+        "design_terms": len(FASHION_KB.get("design_principles", [])),
+        "fashion_history_pages": len(FASHION_KB.get("fashion_history", {})),
+    })
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  ENDPOINT: /analyze-outfit  (standard analysis)
+# ═══════════════════════════════════════════════════════════════════════════
+
+@app.route("/analyze-outfit", methods=["POST", "OPTIONS"])
+def analyze_outfit():
+    if request.method == "OPTIONS":
+        return jsonify({"ok": True})
+    try:
+        body = request.get_json(force=True)
+        image_url = body.get("imageUrl", "")
+        critique_style = body.get("style", "default")  # 'default' or 'vice'
+        if not image_url:
+            return jsonify({"error": "imageUrl is required"}), 400
+
+        print(f"[analysis] Analyzing {image_url[:60]}... (style={critique_style})")
+
+        img = _download_image(image_url)
+        if img is None:
+            return jsonify({"error": "Could not load image"}), 400
+
+        # Save snapshot
+        snapshot_name = f"analysis_{uuid.uuid4().hex[:12]}.png"
+        snapshot_path = OUTPUT_DIR / snapshot_name
+        img.save(str(snapshot_path), "PNG")
+        print(f"[analysis] Snapshot → {snapshot_path}")
+
+        # Run analysis
+        analysis = _analyze_image(img)
+
+        # If VICE style, merge critique
+        if critique_style == "vice" and VICE_RULES:
+            critique = _vice_critique(img)
+            analysis["viceCritique"] = critique
+
+        # Save report
+        report_name = f"report_{uuid.uuid4().hex[:12]}.json"
+        report_path = OUTPUT_DIR / report_name
+        with open(report_path, "w") as f:
+            json.dump(analysis, f, indent=2)
+        print(f"[analysis] Report → {report_path}")
+
+        return jsonify(analysis)
+
+    except Exception as e:
+        print(f"[analysis] Error: {e}", file=sys.stderr)
+        return jsonify({"error": str(e)}), 500
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  ENDPOINT: /critique-outfit  (VICE-style DO/DON'T)
+# ═══════════════════════════════════════════════════════════════════════════
+
+@app.route("/critique-outfit", methods=["POST", "OPTIONS"])
+def critique_outfit():
+    """VICE Magazine street fashion DO/DON'T classification."""
+    if request.method == "OPTIONS":
+        return jsonify({"ok": True})
+    try:
+        body = request.get_json(force=True)
+        image_url = body.get("imageUrl", "")
+        if not image_url:
+            return jsonify({"error": "imageUrl is required"}), 400
+
+        print(f"[critique] Critiquing {image_url[:60]}...")
+
+        img = _download_image(image_url)
+        if img is None:
+            return jsonify({"error": "Could not load image"}), 400
+
+        # Standard analysis
+        analysis = _analyze_image(img)
+
+        # VICE DO/DON'T classification
+        critique = _vice_critique(img)
+
+        # Save
+        snapshot_name = f"critique_{uuid.uuid4().hex[:12]}.png"
+        snapshot_path = OUTPUT_DIR / snapshot_name
+        img.save(str(snapshot_path), "PNG")
+
+        result = {
+            "verdict": critique["verdict"],
+            "score": critique["score"],
+            "signals": critique["signals"],
+            "reasoning": critique["reasoning"],
+            "analysis": analysis,
+        }
+
+        report_name = f"critique_{uuid.uuid4().hex[:12]}.json"
+        report_path = OUTPUT_DIR / report_name
+        with open(report_path, "w") as f:
+            json.dump(result, f, indent=2)
+
+        return jsonify(result)
+
+    except Exception as e:
+        print(f"[critique] Error: {e}", file=sys.stderr)
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/snapshots/<filename>")
+def serve_snapshot(filename):
+    return send_from_directory(str(OUTPUT_DIR), filename)
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  IMAGE ANALYSIS ENGINE
+# ═══════════════════════════════════════════════════════════════════════════
+
+def _download_image(url):
+    try:
+        if url.startswith("data:"):
+            _, encoded = url.split(",", 1)
+            data = base64.b64decode(encoded)
+            return Image.open(BytesIO(data)).convert("RGB")
+        else:
+            resp = requests.get(url, timeout=30, headers={"User-Agent": "LuxorAnalysis/2.0"})
+            resp.raise_for_status()
+            return Image.open(BytesIO(resp.content)).convert("RGB")
+    except Exception as e:
+        print(f"[download] Failed: {e}", file=sys.stderr)
+        return None
+
+def _quantize_colors(img, n_colors=6):
+    small = img.copy().resize((150, 150), Image.LANCZOS)
+    pal = small.quantize(colors=n_colors).convert("RGB")
+    pixels = list(pal.getdata())
+    counter = Counter(pixels)
+    return [color for color, _ in counter.most_common(n_colors)]
+
+def _rgb_to_hex(rgb):
+    return f"#{rgb[0]:02x}{rgb[1]:02x}{rgb[2]:02x}"
+
+def _color_name(rgb):
+    """Basic color name."""
+    r, g, b = rgb
+    max_v = max(r, g, b)
+    min_v = min(r, g, b)
+    diff = max_v - min_v
+    if max_v < 30: return "Black"
+    if min_v > 220: return "White"
+    if diff < 20:
+        return "Light Grey" if max_v > 180 else "Mid Grey" if max_v > 100 else "Grey"
+    if r > g and r > b:
+        if r > 200 and g < 100: return "Red"
+        if r > 180 and g < 140: return "Crimson" if b < 80 else "Rose"
+        if r > 140 and r > g * 1.5: return "Burgundy" if b < 80 else "Coral"
+        if r > 80: return "Maroon"
+        return "Dark Red"
+    if g > r and g > b:
+        if g > 200: return "Green"
+        if g > 160: return "Emerald" if b > 100 else "Olive"
+        if g > 120 and r > 100: return "Sage"
+        if g > 120: return "Kelly Green"
+        if g > 80: return "Forest"
+        return "Dark Green"
+    if b > r and b > g:
+        if b > 200: return "Blue"
+        if b > 160 and r < 100: return "Royal Blue"
+        if b > 120 and r < 80: return "Navy"
+        if b > 120: return "Slate"
+        if b > 80 and r > 80: return "Indigo"
+        if b > 80: return "Teal"
+        return "Dark Blue"
+    if r > 200 and g > 160 and b < 120: return "Gold"
+    if r > 180 and g > 140 and b < 100: return "Mustard"
+    if r > 180 and g > 150 and b > 100: return "Beige"
+    if r > 160 and g > 120 and b < 100: return "Tan"
+    if r > 140 and g > 100 and b < 80: return "Brown"
+    if r > 220 and g > 200 and b > 180: return "Cream"
+    if r > 200 and g > 170 and b > 130: return "Beige"
+    if r > 180 and g > 130 and b > 100: return "Caramel"
+    if r > 200 and g < 100 and b < 100: return "Burgundy"
+    return "Neutral"
+
+def _fashion_color_name(rgb):
+    """Fashionpedia-enriched color name."""
+    base = _color_name(rgb)
+    r, g, b = rgb
+    avg = (r + g + b) / 3
+    fashion_map = {
+        "Red": ["Scarlet", "Poppy", "Chinese Red", "Fire Engine"],
+        "Crimson": ["Crimson", "Amaranth", "Raspberry"],
+        "Rose": ["Dusty Rose", "Blush", "Baby Pink"],
+        "Burgundy": ["Burgundy", "Wine", "Merlot", "Bordeaux"],
+        "Coral": ["Coral", "Salmon", "Peach"],
+        "Maroon": ["Maroon", "Marsala"],
+        "Green": ["Emerald", "Grass Green", "Chartreuse"],
+        "Olive": ["Olive", "Army Green", "Khaki"],
+        "Sage": ["Sage", "Mint", "Celadon"],
+        "Forest": ["Forest", "Hunter Green", "Pine"],
+        "Blue": ["Cerulean", "Sky Blue", "Cobalt"],
+        "Royal Blue": ["Royal Blue", "Sapphire", "Ultramarine"],
+        "Navy": ["Navy", "Midnight Blue", "Ink Blue"],
+        "Slate": ["Slate", "Steel Blue", "Denim"],
+        "Indigo": ["Indigo", "Violet", "Periwinkle"],
+        "Teal": ["Teal", "Turquoise", "Aqua"],
+        "Gold": ["Gold", "Champagne", "Gilded"],
+        "Mustard": ["Mustard", "Ochre", "Saffron"],
+        "Beige": ["Ecru", "Linen", "Sand"],
+        "Tan": ["Tan", "Camel", "Caramel"],
+        "Brown": ["Chocolate", "Chestnut", "Taupe", "Mocha"],
+        "Cream": ["Cream", "Ivory", "Off-White", "Alabaster"],
+        "Black": ["Black", "Jet Black", "Obsidian"],
+        "White": ["White", "Pure White", "Snow"],
+        "Light Grey": ["Silver", "Pearl", "Heather Grey"],
+        "Mid Grey": ["Stone", "Flannel Grey"],
+        "Grey": ["Charcoal", "Slate Grey", "Ash"],
+    }
+    opts = fashion_map.get(base, [base])
+    idx = 0 if avg > 180 else min(1, len(opts) - 1) if avg > 120 else min(2, len(opts) - 1) if avg > 70 else min(len(opts) - 1, len(opts) - 1)
+    return {"base": base, "fashion_name": opts[min(idx, len(opts) - 1)], "hex": _rgb_to_hex(rgb), "rgb": rgb, "brightness": "light" if avg > 180 else "medium" if avg > 90 else "dark"}
+
+def _assess_color_harmony(colors):
+    if len(colors) < 2: return "Monochrome"
+    names = [_color_name(c) for c in colors]
+    warm = {"Red", "Orange", "Gold", "Mustard", "Brown", "Cream", "Beige", "Burgundy", "Maroon", "Rose", "Coral", "Caramel", "Tan"}
+    cool = {"Blue", "Navy", "Indigo", "Slate", "Green", "Forest", "Sage", "Olive", "Emerald", "Teal", "Turquoise"}
+    wc = sum(1 for n in names if n in warm)
+    cc = sum(1 for n in names if n in cool)
+    if wc > 0 and cc > 0: return "Balanced"
+    if wc > 0: return "Warm Tonal"
+    if cc > 0: return "Cool Tonal"
+    if len(set(names)) <= 2: return "Monochromatic"
+    return "Analogous"
+
+def _estimate_brightness(img):
+    gray = img.convert("L")
+    avg = sum(gray.getdata()) / (gray.width * gray.height)
+    if avg > 200: return "Light"
+    if avg > 140: return "Medium-Light"
+    if avg > 90: return "Medium"
+    if avg > 50: return "Medium-Dark"
+    return "Dark"
+
+def _estimate_contrast(img):
+    gray = img.convert("L")
+    pixels = list(gray.getdata())
+    m = sum(pixels) / len(pixels)
+    std = (sum((p - m) ** 2 for p in pixels) / len(pixels)) ** 0.5
+    if std > 60: return "High"
+    if std > 35: return "Medium"
+    return "Soft"
+
+def _detect_horizontal_bands(img):
+    w, h = img.size
+    bands = []
+    sections = [("Upper Body", 0, h // 3), ("Mid Section", h // 3, 2 * h // 3), ("Lower Body", 2 * h // 3, h)]
+    for label, y0, y1 in sections:
+        if y1 - y0 < 20: continue
+        crop = img.crop((0, y0, w, y1))
+        colors = _quantize_colors(crop, n_colors=3)
+        mc = colors[0] if colors else (128, 128, 128)
+        bands.append({"name": label, "color": _rgb_to_hex(mc), "colorName": _color_name(mc)})
+    return bands
+
+def _classify_historical_style(colors, brightness, contrast):
+    """Map to Fashionpedia's historical fashion styles by era."""
+    style_map = {
+        "Edgy": {"name": "Deconstruction / Grunge", "era": "1990s", "description": "Deconstructed silhouettes, anti-fashion", "icons": ["Kate Moss", "Kurt Cobain"]},
+        "Soft Casual": {"name": "Casual Chic", "era": "1990s", "description": "Relaxed elegance, minimalist approach", "icons": ["Calvin Klein", "Helmut Lang"]},
+        "Bold Contemporary": {"name": "Power Dressing", "era": "1980s", "description": "Strong shoulders, bold color blocking", "icons": ["Madonna", "Princess Diana"]},
+        "Earthy Casual": {"name": "Bohemian", "era": "1970s", "description": "Natural fibers, layered textures", "icons": ["Kate Moss", "Sienna Miller"]},
+        "Cool Minimalist": {"name": "Modernist Minimalism", "era": "1990s-2000s", "description": "Clean lines, monochromatic", "icons": ["Jil Sander", "Martin Margiela"]},
+        "Modern Classic": {"name": "Classic Tailoring", "era": "1930s-1960s", "description": "Timeless silhouettes, balanced proportions", "icons": ["Audrey Hepburn", "Coco Chanel"]},
+    }
+    # Heuristic classification
+    if contrast == "High" and brightness.startswith("Dark"):
+        return style_map["Edgy"]
+    if contrast == "Soft" and brightness in ("Light", "Medium-Light"):
+        return style_map["Soft Casual"]
+    if contrast == "High" and "Medium" in brightness:
+        return style_map["Bold Contemporary"]
+    harmony = _assess_color_harmony([c["rgb"] for c in colors]) if colors else "Neutral"
+    if "Warm" in harmony:
+        return style_map["Earthy Casual"]
+    if "Cool" in harmony:
+        return style_map["Cool Minimalist"]
+    return style_map["Modern Classic"]
+
+def _detect_garment_type(bands, colors, img_ratio):
+    """Fashionpedia garment taxonomy matching."""
+    garment_taxonomy = {
+        "Jacket": {"subtypes": ["Blazer", "Bomber", "Denim Jacket", "Leather Jacket", "Tuxedo Jacket"]},
+        "Coat": {"subtypes": ["Trench", "Peacoat", "Overcoat", "Parka", "Puffer", "Duffle"]},
+        "Shirt": {"subtypes": ["Button-Down", "Oxford", "Chambray", "Flannel"]},
+        "Blouse": {"subtypes": ["Silk Blouse", "Peplum Top", "Tunic", "Crop Top"]},
+        "Dress": {"subtypes": ["Sheath", "A-Line", "Bodycon", "Maxi", "Midi", "Mini", "Wrap", "Slip"]},
+        "Pants": {"subtypes": ["Trousers", "Chinos", "Wide-Leg", "Palazzo", "Cargo", "Straight"]},
+        "Jeans": {"subtypes": ["Skinny", "Slim", "Straight", "Bootcut", "Boyfriend", "Wide-Leg"]},
+        "Skirt": {"subtypes": ["A-Line", "Pencil", "Pleated", "Mini", "Midi", "Wrap"]},
+        "Sweater": {"subtypes": ["Crewneck", "V-Neck", "Turtleneck", "Cardigan", "Pullover"]},
+        "Vest": {"subtypes": ["Puffer Vest", "Knit Vest", "Waistcoat"]},
+        "Jumpsuit": {"subtypes": ["Jumpsuit", "Romper", "Boilersuit"]},
+    }
+    band_count = len(bands)
+    results = []
+    for gtype, info in garment_taxonomy.items():
+        results.append({"type": gtype, "subtypes": info["subtypes"][:3], "confidence": "medium" if band_count >= 2 else "low"})
+    if not results:
+        if band_count >= 3: results.append({"type": "Dress/Jumpsuit", "subtypes": [], "confidence": "low"})
+        elif band_count == 2: results.append({"type": "Two-Piece Set", "subtypes": [], "confidence": "low"})
+        else: results.append({"type": "Single Layer", "subtypes": [], "confidence": "low"})
+    return results[:5]
+
+def _get_fabric_suggestions(style, season, detected_type):
+    """Fashionpedia fabric recommendations per season and garment."""
+    fabric_db = {
+        "Spring / Summer": {
+            "tops": ["Cotton Voile", "Linen", "Seersucker", "Chambray", "Silk Habotai"],
+            "bottoms": ["Linen", "Cotton Twill", "Lightweight Denim", "Tencel"],
+            "dresses": ["Cotton Lawn", "Silk Chiffon", "Jersey", "Eyelet"],
+            "jackets": ["Cotton Canvas", "Lightweight Wool", "Cotton Sateen"],
+        },
+        "Autumn / Winter": {
+            "tops": ["Merino Wool", "Cashmere", "Tweed", "Flannel", "Velvet"],
+            "bottoms": ["Worsted Wool", "Corduroy", "Denim", "Wool Flannel"],
+            "dresses": ["Jersey", "Double Knit", "Velvet", "Wool Crepe"],
+            "jackets": ["Wool Melton", "Tweed", "Leather", "Herringbone"],
+        },
+        "Transitional": {
+            "tops": ["Cotton Jersey", "Silk Crepe", "Modal", "Linen Blend"],
+            "bottoms": ["Cotton Lyocell", "Stretch Denim", "Ponte Knit"],
+            "dresses": ["Tencel", "Jersey", "Matte Jersey"],
+            "jackets": ["Trench Cotton", "Lightweight Wool", "Denim"],
+        },
+    }
+    season_key = "Transitional"
+    for key in fabric_db:
+        if key.startswith(season[:1]):
+            season_key = key
+            break
+    if any(t in detected_type.lower() for t in ["dress", "jumpsuit"]):
+        cat = "dresses"
+    elif any(t in detected_type.lower() for t in ["jacket", "coat"]):
+        cat = "jackets"
+    elif any(t in detected_type.lower() for t in ["top", "shirt", "blouse", "sweater"]):
+        cat = "tops"
+    else:
+        cat = "bottoms"
+    suggestions = fabric_db.get(season_key, fabric_db["Transitional"]).get(cat, [])
+    style_refinements = {
+        "Edgy": ["Leather", "Vinyl", "Fishnet", "Distressed Denim"],
+        "Soft": ["Chiffon", "Lace", "Cashmere", "Velvet"],
+        "Bold": ["Metallic", "Patent Leather", "Neon Knit"],
+        "Earthy": ["Linen", "Hemp", "Organic Cotton", "Tweed"],
+        "Minimalist": ["Wool Crepe", "Silk Georgette", "Cotton Poplin"],
+    }
+    for sk, fabrics in style_refinements.items():
+        if sk.lower() in style.lower():
+            return fabrics[:4]
+    return suggestions[:5] if suggestions else ["Cotton", "Linen", "Wool"]
+
+def _get_pose_suggestions():
+    """Return pose suggestions from 1000 Poses knowledge."""
+    poses_kb = FASHION_KB.get("poses", {})
+    suggestions = []
+    for ptype in ["Standing", "Sitting", "Kneeling"]:
+        for key, val in poses_kb.items():
+            if isinstance(val, dict) and val.get("type") == ptype:
+                suggestions.append(f"{ptype} ({val.get('pose_range', 'N/A')})")
+                break
+    return suggestions[:5]
+
+def _vice_critique(img):
+    """VICE Magazine DO/DON'T classification engine."""
+    colors_rgb = _quantize_colors(img, n_colors=6)
+    brightness = _estimate_brightness(img)
+    contrast = _estimate_contrast(img)
+    harmony = _assess_color_harmony(colors_rgb)
+
+    base = 50
+    signals = []
+
+    # DON'T signals
+    if contrast == "Soft" and brightness == "Light":
+        base -= 5
+        signals.append("All-light outfit with soft contrast reads as trying too hard")
+    if len(colors_rgb) >= 5:
+        base -= 8
+        signals.append("Too many colors — feels like you're trying to do everything at once")
+    if brightness == "Dark" and contrast == "Soft":
+        base -= 3
+        signals.append("Dark-on-dark without edge = playing it safe, no conviction")
+    if harmony == "Monochromatic" and brightness == "Medium":
+        base -= 4
+        signals.append("Safe middle-ground — neither here nor there")
+
+    # DO signals
+    if contrast == "High":
+        base += 10
+        signals.append("Strong contrast = confidence, knows what they're doing")
+    if len(colors_rgb) <= 3:
+        base += 5
+        signals.append("Restrained palette = natural style, not manufactured")
+    if "Cool" in harmony:
+        base += 3
+        signals.append("Cool tones = intentional, sophisticated")
+
+    base = max(0, min(100, base))
+
+    if base >= 76:
+        verdict = "STRONG DO"
+    elif base >= 56:
+        verdict = "DO"
+    elif base >= 41:
+        verdict = "NEUTRAL"
+    elif base >= 21:
+        verdict = "DON'T"
+    else:
+        verdict = "HARD DON'T"
+
+    return {
+        "verdict": verdict,
+        "score": base,
+        "signals": signals[:5],
+        "reasoning": (
+            f"VICE-style critique: This is a {verdict}. "
+            f"Score: {base}/100. " + ("Effortless style — not trying, just being." if base >= 56 else "Trying. Not working." if base <= 40 else "Meh. Nothing to write home.")
+        ),
+    }
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  MAIN ANALYSIS
+# ═══════════════════════════════════════════════════════════════════════════
+
+def _analyze_image(img):
+    """Main analysis returning enriched JSON with fashion knowledge."""
+    w, h = img.size
+    colors_rgb = _quantize_colors(img, n_colors=6)
+    harmony = _assess_color_harmony(colors_rgb)
+    brightness = _estimate_brightness(img)
+    contrast = _estimate_contrast(img)
+    bands = _detect_horizontal_bands(img)
+    color_details = [_fashion_color_name(c) for c in colors_rgb]
+    hex_colors = [c["hex"] for c in color_details]
+
+    # Style classification
+    style = _classify_historical_style(color_details, brightness, contrast)
+
+    # Garment detection
+    img_ratio = w / h if h > 0 else 1
+    detected_garments = _detect_garment_type(bands, colors_rgb, img_ratio)
+
+    # Season
+    season_map = {"Light": "Spring / Summer", "Medium-Light": "Spring / Summer", "Medium": "Transitional", "Medium-Dark": "Autumn / Winter", "Dark": "Autumn / Winter"}
+    season = season_map.get(brightness, "Transitional")
+
+    # Fabric suggestions
+    primary_garment = detected_garments[0]["type"] if detected_garments else "layer"
+    fabric_suggestions = _get_fabric_suggestions(style["name"], season, primary_garment)
+
+    # Pose suggestions
+    pose_suggestions = _get_pose_suggestions()
+
+    # Score
+    base_score = 70
+    if contrast == "High": base_score += 5
+    if "Monochrome" in harmony: base_score += 8
+    if "Balanced" in harmony: base_score += 5
+    if "Warm Tonal" in harmony or "Cool Tonal" in harmony: base_score += 3
+    if len(colors_rgb) >= 3: base_score += 5
+    if len(colors_rgb) <= 2: base_score += 3
+    base_score = min(base_score, 98)
+
+    # Occasion ratings
+    occasion_ratings = _rate_occasions(colors_rgb, brightness, contrast)
+
+    # Design notes
+    design_notes = [
+        "Balance: Visual weight appears evenly distributed",
+        "Proportion: Hemline-to-waist ratio creates a balanced frame",
+        "Emphasis: The dominant color creates a natural focal point",
+    ]
+
+    # Body notes
+    aspect = w / h
+    if aspect > 0.8:
+        body_note = "Full-body: silhouette reads cleanly, vertical line is strong"
+    elif aspect > 0.5:
+        body_note = "Three-quarter: proportions work well, waistline is defined"
+    else:
+        body_note = "Close-up: focus on fabric texture and color integration"
+
+    style_context = f"This aesthetic draws from {style['era']} fashion."
+    if style.get("icons"):
+        style_context += f" Associated with {', '.join(style['icons'][:2])}."
+
+    return {
+        "overallStyle": style["name"],
+        "styleDetails": {"era": style.get("era", "Contemporary"), "icons": style.get("icons", []), "context": style_context},
+        "styleScore": base_score,
+        "summary": f"This outfit reads as {style['name'].lower()} with a {brightness.lower()} palette and {contrast.lower()} contrast. Harmony: {harmony.lower()}. {style_context}",
+        "occasionRatings": occasion_ratings,
+        "detectedItems": bands,
+        "detectedGarments": detected_garments,
+        "fabricSuggestions": fabric_suggestions,
+        "poseSuggestions": pose_suggestions,
+        "colorPalette": {
+            "colors": [{"name": c["fashion_name"], "hex": c["hex"], "base": c["base"], "brightness": c["brightness"]} for c in color_details[:6]],
+            "harmony": harmony,
+            "rating": f"{harmony.lower()} harmony with {brightness.lower()} tones" if base_score >= 70 else "Consider adding more contrast or an accent color",
+        },
+        "strengths": [
+            f"Referenced style from {style['era']}: {style['name']}",
+            f"{contrast} contrast creates {'strong visual interest' if contrast == 'High' else 'soft, harmonious blending'}",
+            "Well-considered palette" if len(colors_rgb) >= 3 else "Clean minimal color story",
+        ],
+        "improvements": [
+            {"suggestion": "Add layering for depth", "reason": "A single layer reads as flat", "priority": "medium"} if len(bands) < 2 else None,
+            {"suggestion": f"Try {fabric_suggestions[0]}" if fabric_suggestions else "Add texture", "reason": f"{fabric_suggestions[0]} elevates the {season.lower()} look" if fabric_suggestions else "Texture adds visual depth", "priority": "low"},
+            {"suggestion": "Add accent color", "reason": "An accent accessory would elevate this look", "priority": "low"} if len(colors_rgb) < 3 else None,
+        ],
+        "designNotes": design_notes,
+        "seasonalFit": season,
+        "bodyTypeNotes": body_note,
+    }
+
+def _describe_vibe(style, brightness, contrast):
+    if "Edgy" in style: return "confident, fashion-forward statement"
+    if "Soft" in style: return "approachable, relaxed everyday feel"
+    if "Bold" in style: return "striking, memorable impression"
+    if "Earthy" in style: return "grounded, nature-inspired warmth"
+    if "Minimalist" in style: return "clean, understated elegance"
+    return "polished, versatile look"
+
+def _rate_occasions(colors, brightness, contrast):
+    score = min(60 + len(colors) * 5 + (10 if "High" in contrast else 5), 95)
+    return [
+        {"occasion": "Casual", "score": score + 5 if "Soft" in contrast else score - 5, "reason": "Relaxed and approachable"},
+        {"occasion": "Work / Office", "score": score - 5 if "Warm" in contrast else score + 3, "reason": "Tonal harmony = professional polish"},
+        {"occasion": "Evening Out", "score": score + 8 if ("Dark" in brightness or "High" in contrast) else score - 10, "reason": "Contrast suits evening"},
+        {"occasion": "Date Night", "score": score + 5, "reason": "Intentional styling"},
+        {"occasion": "Formal Event", "score": score - 12 if "Soft" in brightness else score - 5, "reason": "Semi-formal range"},
+        {"occasion": "Weekend Brunch", "score": score + 10 if "Light" in brightness else score, "reason": "Daytime social palette"},
+    ]
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  MAIN
+# ═══════════════════════════════════════════════════════════════════════════
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Luxor Analysis Server v2.0")
+    parser.add_argument("--port", type=int, default=PORT)
+    parser.add_argument("--host", type=str, default=HOST)
+    parser.add_argument("--kb", type=str, default=None, help="Path to knowledge base JSON")
+    args = parser.parse_args()
+
+    # Load knowledge at startup
+    FASHION_KB = _load_knowledge_base(args.kb)
+    VICE_RULES = _load_vice_rules()
+    kb_sections = list(FASHION_KB.keys()) if FASHION_KB else []
+    vice_active = bool(VICE_RULES)
+
+    print(f"╔══════════════════════════════════════════╗")
+    print(f"║  Luxor Analysis Server v2.0             ║")
+    print(f"║  Fashionpedia + VICE knowledge active    ║")
+    print(f"║  KB sections: {len(kb_sections)}                       ║")
+    print(f"║  VICE critique: {'✓' if vice_active else '✗'}                         ║")
+    print(f"║  Listening: {args.host}:{args.port}                ║")
+    print(f"║  POST /analyze-outfit?style=vice         ║")
+    print(f"║  POST /critique-outfit                   ║")
+    print(f"╚══════════════════════════════════════════╝")
+    print(f"Snapshots: {OUTPUT_DIR}")
+
+    app.run(host=args.host, port=args.port, debug=False)

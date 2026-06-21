@@ -1,0 +1,44 @@
+version: "3.9"
+
+services:
+  pro-stylist-api:
+    build: .
+    container_name: pro-stylist-service
+    ports:
+      - "8767:8767"
+    environment:
+      - REDIS_URL=redis://redis-cache:6379/0
+      - MODEL_CACHE_DIR=/models
+      - DEVICE=cuda
+      - MAX_GENERATION_TIME=4.0
+      - ENABLE_HIDREAM=false
+      - ENABLE_IMAGEN=false
+      - ENABLE_OPENCUT=false
+      - ENABLE_MLSHARP=false
+      - FALLBACK_TO_PILLOW=true
+    volumes:
+      - ./models:/models
+      - ./cache:/cache
+      - ./adapters:/app/adapters
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["0"]
+              capabilities: [gpu]
+    depends_on:
+      - redis-cache
+    restart: unless-stopped
+
+  redis-cache:
+    image: redis:7-alpine
+    container_name: pro-stylist-cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+volumes:
+  redis-data:

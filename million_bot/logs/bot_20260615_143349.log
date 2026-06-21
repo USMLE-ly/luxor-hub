@@ -1,0 +1,8 @@
+[14:33:49] Logging in as @chip.munk.19...
+[14:33:55] https://i.instagram.com/api/v1/launcher/sync/
+[14:33:57] chip.munk.19 [200] POST https://i.instagram.com/api/v1/launcher/sync/ (428.0.0.47.67, Google/google Pixel 8 Pro)
+[14:34:05] https://i.instagram.com/api/v1/accounts/login/
+[14:34:08] chip.munk.19 [400] POST https://i.instagram.com/api/v1/accounts/login/ (428.0.0.47.67, Google/google Pixel 8 Pro)
+[14:34:08] Wrong password for @chip.munk.19
+[14:34:09] Attempting web login...
+[14:34:36] Login incomplete - URL: https://www.instagram.com/accounts/login/

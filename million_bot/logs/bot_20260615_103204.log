@@ -1,0 +1,11 @@
+[10:32:04] Logging in as @vexo710...
+[10:32:09] https://i.instagram.com/api/v1/launcher/sync/
+[10:32:11] vexo710 [200] POST https://i.instagram.com/api/v1/launcher/sync/ (428.0.0.47.67, Google/google Pixel 8 Pro)
+[10:32:18] https://i.instagram.com/api/v1/accounts/login/
+[10:32:22] vexo710 [400] POST https://i.instagram.com/api/v1/accounts/login/ (428.0.0.47.67, Google/google Pixel 8 Pro)
+[10:32:23] https://i.instagram.com/api/v1/challenge/AXIFDR2qr2C-VjthzZtfO2mbE8YhW8CcshVF-i88UjqWyBZH3GmD-ftn78IZkETchkIKl2A/Af1nIdvTLC5Ig60OEjWNsxopvYAhCdDVpEqrqIgRp7yeNpzowL5Z87rv9xA9PYx2P630wxTJrhzjEw/
+[10:32:24] vexo710 [200] GET https://i.instagram.com/api/v1/challenge/AXIFDR2qr2C-VjthzZtfO2mbE8YhW8CcshVF-i88UjqWyBZH3GmD-ftn78IZkETchkIKl2A/Af1nIdvTLC5Ig60OEjWNsxopvYAhCdDVpEqrqIgRp7yeNpzowL5Z87rv9xA9PYx2P630wxTJrhzjEw/?guid=c269ff1f-0b36-4f28-babb-6fe8302cc062&device_id=android-10a8d6aa2f5117f8&challenge_context=Q9y1BQEZLb7GMg4ZSXhnFdQsFxNOZehxUmY59vfWNhygNqOZyjJcPlvpK2_bx6WZ8NacBRzO9q4dTehUnjhQdRh-eu0EqTLhVkwxbt6cvr_80WaJAtH7dkmCswXWoK5oiUvtN3ddmQjd3YuRD94wEOjpzP5fG8QFj9HRXkw8NqmIqGHRymAeFt_eRZIFTrVQ1-jRyMG0Nk6YqLJ8YVecp3vyK343DWfbTK60w-Yw_l8jU24DFP0YYz9kdGlc8okYD-EyLz-WdMId1JKZKpjKnApDRj8W8fy22X_TStSaNWKK5wgeYicZsz0ffVMCnQIv9iY7KeF5-a3tfr16N3hOY65h4X1FGREHH9wYLwBww5GCzI2ThXAZ3xvYuorytFwiVVXAkTgxn0a9DL-J6hwo1tqtBFHDQUnnnXUZhPjwkPq23iSFNmQorkbaVnTE-bsCiFojBvOafmxFXM222PkrzxNme8QYSx28EH6blUUOSfOXV1vQgwHxcfa_jMxfLc8DRFQ0haTKKEQF3NNishSQ3vH1PQPPygEcsG-0lMarPKSZsTt173nBvO8ASSBS7bQq6eLP4P1wqLhKK5_d4iUOOlM1p0F7954sF8d6JIO68dhmDXYslEm3nCdVQ0Tv31W87HzYwrCnoX4a5kGM9F4RJDJwpMg02gQF8Q-MoDKWoMl8ITXETCfJdjvu18w4WtpP0Kh0iDVH5Xdqu9wl5YEvkvge-6xo8LHnCpgMrBokXfjfFza9tUjxHH0JFzU3oL6ALHVxeCPAjGHCvgrG2CxJQIWl6bG1QOZw2DgZK9fXAMdfR3EOhC1r8R4w5UFdMDO-bQT9ipBeJb7RWBy3-M0Y9kwtwQnpYA (428.0.0.47.67, Google/google Pixel 8 Pro)
+[10:32:24] Account needs manual verification via Instagram app/website
+[10:32:24] ➡ Open Instagram on phone, check notifications, verify login
+[10:32:26] Attempting web login...
+[10:32:54] Login incomplete - URL: https://www.instagram.com/accounts/login/

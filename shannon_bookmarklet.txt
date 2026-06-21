@@ -1,0 +1,25 @@
+javascript:(function(){
+  var d=document;
+  var f='[{"path": "src/utils/colorQuantizer.ts", "content": "/**\n * colorQuantizer.ts \u2014 Luxor Hub Color Analysis Engine v3.0\n * \n * Fixes: center-crop quantization, 8 colors, shadow filtering,\n * wider cream/ivory detection, color family grouping.\n * \n * Add this file to your Lovable project and import where needed.\n */\n\n// \u2500\u2500\u2500 Named Color Reference (39 exact RGB values) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\nexport const NAMED_COLORS: Record<string, [number, number, number]> = {\n  maroon: [128, 0, 0],\n  \'dark red\': [139, 0, 0],\n  brown: [165, 42, 42],\n  firebrick: [178, "}, {"path": "src/utils/humanizer.ts", "content": "// src/utils/humanizer.ts\n\n/**\n * Humanizes a string by replacing buzzwords, removing fluff, and cleaning punctuation.\n * @param text - The input string to humanize.\n * @returns The humanized string.\n */\nexport function humanize(text: string): string {\n  let result = text;\n\n  // Replacement rules: [pattern, replacement] where pattern is case-insensitive.\n  // Longer phrases are sorted first to avoid partial substitution.\n  const replacements: [RegExp, string][] = [\n    // Remove filler phrases\n "}, {"path": "src/utils/enrichedAnalysis.ts", "content": "export interface BodyShape {\n  name: string;\n  description: string;\n  recommendation: string;\n}\n\nexport const BODY_SHAPES: BodyShape[] = [\n  {\n    name: \'Pear\',\n    description: \'Wider hips\',\n    recommendation: \'Draw attention upward with detailed tops and keep bottoms simple.\'\n  },\n  {\n    name: \'Apple\',\n    description: \'Midsection weight\',\n    recommendation: \'Create vertical lines with V-necks and unstructured fabrics.\'\n  },\n  {\n    name: \'Hourglass\',\n    description: \'Balanced\',\n    recomm"}]';
+  var files=JSON.parse(f);
+  var i=0;
+  function next(){
+    if(i>=files.length){console.log('Done');return;}
+    var f=files[i];
+    var inp=d.querySelector('[contenteditable="true"],textarea,.chat-input,[role="textbox"]');
+    if(inp){
+      var msg='Create file '+f.path+' with this content:\n\n```typescript\n'+f.content.substring(0,1000)+'\n```\n\n[Content truncated - create the file manually]';
+      if(inp.isContentEditable){inp.textContent=msg;}
+      else{
+        var ns=Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype,'value').set;
+        ns.call(inp,msg);inp.dispatchEvent(new Event('input',{bubbles:true}));
+      }
+      setTimeout(function(){
+        var btn=d.querySelector('button[type="submit"],[aria-label="Send"],.send-button');
+        if(btn)btn.click();
+        i++;setTimeout(next,2000);
+      },500);
+    }else{console.log('Chat input not found');}
+  }
+  next();
+})();
