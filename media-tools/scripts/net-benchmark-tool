@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# net-benchmark-tool — Network diagnostics & benchmarking
+set -euo pipefail
+VENV="/root/Documents/Codex/2026-06-08/make-the-deepseek-v4-flash-free/.venv"
+source "$VENV/bin/activate"
+
+usage() {
+    echo "Usage: net-benchmark-tool <command> [args...]"
+    echo ""
+    echo "Commands:"
+    echo "  dns [domain]        DNS benchmark"
+    echo "  speed               Network speed test"
+    echo "  ping <host>         Ping test"
+    echo "  traceroute <host>   Traceroute to host"
+    echo "  ports <host>        Common port scan"
+    echo "  info                System network info"
+    exit 1
+}
+
+if [ $# -lt 1 ]; then usage; fi
+
+CMD="$1"
+shift
+
+case "$CMD" in
+    dns)
+        DOMAIN="${1:-google.com}"
+        echo "DNS lookup for $DOMAIN..."
+        dig "$DOMAIN" ANY +short 2>/dev/null || nslookup "$DOMAIN" 2>/dev/null || echo "dig/nslookup not available"
+        ;;
+    speed)
+        echo "Testing network speed..."
+        curl -s https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py 2>/dev/null | python3 - 2>/dev/null || echo "speedtest-cli not available. Try: pip install speedtest-cli"
+        ;;
+    ping)
+        TARGET="${1:-google.com}"
+        ping -c 4 "$TARGET" 2>&1 || echo "ping failed"
+        ;;
+    traceroute)
+        TARGET="${1:-google.com}"
+        traceroute -m 15 "$TARGET" 2>&1 || echo "traceroute failed/not available"
+        ;;
+    ports)
+        TARGET="${1:-localhost}"
+        echo "Scanning common ports on $TARGET..."
+        for port in 22 80 443 8080 8443 3000 5000 8000; do
+            timeout 1 bash -c "echo > /dev/tcp/$TARGET/$port" 2>/dev/null && echo "  Port $port: OPEN" || echo "  Port $port: closed"
+        done
+        ;;
+    info)
+        echo "=== Network Info ==="
+        echo "Hostname: $(hostname)"
+        echo "IP: $(hostname -I 2>/dev/null | awk '{print $1}')"
+        echo "DNS: $(cat /etc/resolv.conf 2>/dev/null | grep nameserver | head -3)"
+        echo "Interfaces:"
+        ip addr show 2>/dev/null | grep -E "^[0-9]|inet " | head -20 || ifconfig 2>/dev/null | head -20
+        ;;
+    *)
+        usage
+        ;;
+esac

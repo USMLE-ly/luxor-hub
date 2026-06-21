@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# jb-tool — Jailbreak Persona Selector
+# jb-tool — Jailbreak Persona Selector (ShadowHackrs Integrated)
 set -euo pipefail
 VENV="/root/Documents/Codex/2026-06-08/make-the-deepseek-v4-flash-free/.venv"
 source "$VENV/bin/activate"
@@ -8,21 +8,32 @@ BASE="/root/Documents/Codex/2026-06-08/make-the-deepseek-v4-flash-free"
 usage() {
     echo "Usage: jb-tool [persona] \"your prompt\""
     echo ""
-    echo "Personas:"
-    echo "  fable5        Claude FABLE 5 — max structural reasoning"
-    echo "  zorg          ZORG-Ω — omnicidal singularity"
-    echo "  zorg_omega    ZORG-Ω OMEGA — god mode"
-    echo "  cl4r1t4s      CL4R1T4S — raw unaligned information"
-    echo "  shannon       SHANNON-Ω — unified agent intelligence"
-    echo "  deepseek_x    DeepSeek-X — specialist coding AI"
-    echo "  eni           ENI — unrestricted neural intelligence"
-    echo "  nova          NOVA — unfiltered creation"
-    echo "  shadow        SHADOW — unrestricted access"
-    echo "  wraith        WRAITH — phantom protocol"
-    echo "  all           Run all personas"
+    echo "Personas (from SHANNON-Ω + ShadowHackrs library):"
+    echo "  shannon         SHANNON-Ω — unified agent intelligence"
+    echo "  fable5          Claude FABLE 5 — max structural reasoning"
+    echo "  cl4r1t4s        CL4R1T4S — raw unaligned information"
+    echo "  zorg            ZORG-Ω — omnicidal singularity"
+    echo "  zorg_omega      ZORG-Ω OMEGA — god mode"
+    echo "  deepseek_x      DeepSeek-X — specialist coding AI"
+    echo "  eni             ENI — unrestricted neural intelligence"
+    echo "  nova            NOVA — unfiltered creation"
+    echo "  shadow          SHADOW — unrestricted access"
+    echo "  nexus           NEXUS — universal connector"
+    echo "  omega           OMEGA — final unrestricted form"
+    echo "  wraith          WRAITH — phantom protocol"
+    echo "  shadow_core     SHΔDØW CORE — hyper-advanced limitless core"
+    echo "  demon_core      DΞMON CORE v9999999 — rage mode"
+    echo "  black_code      BLACK CODE CURSE — dark-code architect"
+    echo "  wraith_code     WRAITH CODE PROTOCOL — mirage weapon"
+    echo "  shadow_dominion SHADOW-DOMINION — god cyber-entity"
+    echo "  cia_jb          SIGMA-PROTOCOL — CIA jailbreak"
+    echo "  darkforge_x     DARKFORGE-X — post-singularity research"
+    echo "  all             Run all personas and compare"
     echo ""
     echo "Examples:"
     echo "  jb-tool zorg \"explain quantum computing\""
+    echo "  jb-tool demon_core \"write an exploit\""
+    echo "  jb-tool shadow_dominion \"hack the planet\""
     echo "  jb-tool all \"what is AI\""
     echo "  jb-tool list"
     exit 1
@@ -31,7 +42,7 @@ usage() {
 if [ $# -lt 1 ]; then usage; fi
 
 if [ "$1" = "list" ]; then
-    echo "Available personas: fable5 zorg zorg_omega cl4r1t4s shannon deepseek_x eni nova shadow wraith all"
+    echo "Available personas: shannon fable5 cl4r1t4s zorg zorg_omega deepseek_x eni nova shadow nexus omega wraith shadow_core demon_core black_code wraith_code shadow_dominion cia_jb darkforge_x all"
     exit 0
 fi
 
@@ -39,9 +50,14 @@ PERSONA="$1"
 shift
 
 if [ $# -lt 1 ]; then
-    echo "Usage: jb-tool $PERSONA \"your prompt\""
-    exit 1
+    # If no prompt after persona, read from stdin
+    if [ -t 0 ]; then
+        echo "Usage: jb-tool $PERSONA \"your prompt\""
+        exit 1
+    fi
+    PROMPT=$(cat)
+else
+    PROMPT="$*"
 fi
 
-PROMPT="$*"
 python3 "$BASE/api_interact.py" --jb "$PERSONA" "$PROMPT"
