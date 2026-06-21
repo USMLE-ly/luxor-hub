@@ -41,3 +41,8 @@ debug_screenshots/
 test-results/
 *.pdf
 aa_books/
+.adept/
+.adept_authentic/
+device.xml
+devicesalt
+decrypted_pdfs/
