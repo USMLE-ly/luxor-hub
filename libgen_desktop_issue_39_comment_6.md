@@ -1,0 +1,1 @@
+Same basic problem here on Win 10, 64-bit, 20H2: invalid URL on all mirrors (non-fiction and scientific articles), despite re-creation of portable setup from June 2021 zip file and fresh databases. Downloads via browser work fine (so no obvious DNS issue)

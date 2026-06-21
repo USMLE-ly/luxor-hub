@@ -1,0 +1,1 @@
+504 sounds like a problem on their end. The libgen server isn't exactly production-grade reliable, so unless this is reproducible i'd say not a bug.
