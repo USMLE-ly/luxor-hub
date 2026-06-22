@@ -11,7 +11,7 @@ python-multipart==0.0.32
 Pillow==12.2.0
 opencv-python-headless==4.13.0.92
 scikit-image==0.25.2
-numpy==2.2.1
+numpy==2.2.6
 
 # Async / caching
 httpx==0.28.1
