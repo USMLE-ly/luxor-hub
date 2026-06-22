@@ -2,7 +2,7 @@
 # Pro Stylist Microservice — Python Dependencies
 # =====================================================
 # Core
-fastapi==0.115.6
+fastapi==0.138.0
 uvicorn[standard]==0.34.0
 pydantic==2.13.4
 python-multipart==0.0.32
