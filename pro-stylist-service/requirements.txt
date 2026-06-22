@@ -8,7 +8,7 @@ pydantic==2.13.4
 python-multipart==0.0.32
 
 # Image processing
-Pillow==11.1.0
+Pillow==12.2.0
 opencv-python-headless==4.13.0.92
 scikit-image==0.25.2
 numpy==2.2.1
