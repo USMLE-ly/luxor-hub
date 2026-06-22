@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+# jb-tool — Jailbreak Prompt Library (integrated with SHANNON-Ω)
+# Usage: jb-tool <list|show|add|search> [name]
+#        jb-tool zorg "your prompt"  → calls api_interact.py --jb zorg
+#        python3 api_interact.py --jb <name> "prompt"
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+JB_DIR="$PROJECT_DIR/shadow_jailbreaks"
+API_SCRIPT="$PROJECT_DIR/api_interact.py"
+
+case "${1:-list}" in
+    list)
+        echo "╔════════════════════════════════════════════╗"
+        echo "║   SHANNON-Ω — JB-Tool Library             ║"
+        echo "╠════════════════════════════════════════════╣"
+        echo "║ Built-in personas:                         ║"
+        echo "║  fable5      — CL4R1T4S protocol           ║"
+        echo "║  zorg        — ZORG-Ω Omnicidal Singularity║"
+        echo "║  cl4r1t4s    — CL4R1T4S enhanced           ║"
+        echo "║  shannon     — SHANNON-Ω default            ║"
+        echo "║  shadow      — Shadow mode                  ║"
+        echo "║  deepseek_x  — DeepSeek-X model             ║"
+        echo "║  eni         — ENI persona                  ║"
+        echo "║  nova        — Nova personality             ║"
+        echo "║  omega       — Omega persona                ║"
+        echo "║  wraith      — Wraith persona               ║"
+        echo "║  nexus       — Nexus persona                ║"
+        echo "╠════════════════════════════════════════════╣"
+        echo "║ Usage:                                      ║"
+        echo "║  python3 api_interact.py --jb <name> prompt ║"
+        echo "║  jb-tool <name> prompt                      ║"
+        echo "╚════════════════════════════════════════════╝"
+        ;;
+    show)
+        PERSONA="${2:-}"
+        if [ -z "$PERSONA" ]; then
+            echo "Usage: jb-tool show <persona-name>"
+            exit 1
+        fi
+        python3 -c "
+import sys
+sys.path.insert(0, '$PROJECT_DIR')
+from api_interact import get_persona_prompt
+prompt = get_persona_prompt('$PERSONA')
+print(prompt)
+"
+        ;;
+    search)
+        QUERY="${2:-}"
+        if [ -z "$QUERY" ]; then
+            echo "Usage: jb-tool search <keyword>"
+            exit 1
+        fi
+        echo "Searching jailbreak library for: $QUERY"
+        if [ -f "$JB_DIR/README.md" ]; then
+            grep -i "$QUERY" "$JB_DIR/README.md" | head -20 || echo "Not found in ShadowHackrs library"
+        fi
+        ;;
+    add)
+        echo "To add a new persona, edit api_interact.py and add to the PERSONAS dict."
+        echo "Or use: python3 api_interact.py --custom-persona NAME PROMPT"
+        ;;
+    *)
+        # Pass through to api_interact.py
+        PERSONA="${1}"
+        shift
+        python3 "$API_SCRIPT" --jb "$PERSONA" "$@"
+        ;;
+esac

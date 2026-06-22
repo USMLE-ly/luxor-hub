@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+# turbovec-tool — Build vector embeddings and indexes using turbovec
+# Usage: turbovec-tool build <embeddings.npy> <output-index.tv>
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+VENV_DIR="$PROJECT_DIR/.venv"
+
+if [ -d "$VENV_DIR" ]; then
+    source "$VENV_DIR/bin/activate"
+fi
+
+ACTION="${1:?Usage: turbovec-tool build <embeddings.npy> <output.tv>}"
+INPUT="${2:-}"
+OUTPUT="${3:-}"
+
+case "$ACTION" in
+    build)
+        if [ -z "$INPUT" ] || [ -z "$OUTPUT" ]; then
+            echo "Usage: turbovec-tool build <embeddings.npy> <output.tv>" >&2
+            exit 1
+        fi
+        python3 -c "
+from turbovec import TurboVec
+import numpy as np
+
+tv = TurboVec()
+embeddings = np.load('$INPUT')
+tv.build_index(embeddings)
+tv.save('$OUTPUT')
+print(f'✓ Built index from {embeddings.shape[0]} vectors → $OUTPUT')
+" "$INPUT" "$OUTPUT"
+        ;;
+    search)
+        QUERY="${2:-}"
+        INDEX="${3:-}"
+        if [ -z "$QUERY" ] || [ -z "$INDEX" ]; then
+            echo "Usage: turbovec-tool search <query-embedding.npy> <index.tv>" >&2
+            exit 1
+        fi
+        python3 -c "
+from turbovec import TurboVec
+import numpy as np
+
+tv = TurboVec()
+tv.load('$INDEX')
+query = np.load('$QUERY')
+results = tv.search(query, k=10)
+print(f'Top 10 results:')
+for i, (id_, score) in enumerate(results):
+    print(f'  {i+1}. id={id_} score={score:.4f}')
+"
+        ;;
+    info)
+        python3 -c "
+from turbovec import TurboVec
+print(f'TurboVec version: {TurboVec.__version__ if hasattr(TurboVec, \"__version__\") else \"installed\"}')
+print('Available: ANN search with SIMD acceleration')
+"
+        ;;
+    -h|--help|help)
+        echo 'Usage: turbovec-tool <command> [args]
+Commands:
+  build <embeddings.npy> <index.tv>   Build ANN index from embeddings
+  search <query.npy> <index.tv>       Search index with query embedding
+  info                                Show turbovec info'
+        ;;
+    *)
+        echo "Unknown command: $ACTION" >&2
+        exit 1
+        ;;
+esac

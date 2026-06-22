@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+# pdf-extract-tool — Extract text/content from PDFs using markitdown/opendataloader-pdf
+# Usage: pdf-extract-tool <input.pdf> [--format markdown|text] [--pages 1-10]
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+VENV_DIR="$PROJECT_DIR/.venv"
+
+if [ -d "$VENV_DIR" ]; then
+    source "$VENV_DIR/bin/activate"
+fi
+
+INPUT=""
+FORMAT="markdown"
+PAGES=""
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --format) FORMAT="$2"; shift 2 ;;
+        --pages) PAGES="$2"; shift 2 ;;
+        -h|--help) echo "Usage: pdf-extract-tool <input.pdf> [--format markdown|text] [--pages 1-10]"; exit 0 ;;
+        *) INPUT="$1"; shift ;;
+    esac
+done
+
+if [ -z "$INPUT" ]; then
+    echo "Error: Input file required" >&2
+    exit 1
+fi
+
+if [ ! -f "$INPUT" ]; then
+    echo "Error: File not found: $INPUT" >&2
+    exit 1
+fi
+
+BASENAME="$(basename "$INPUT")"
+STEM="${BASENAME%.*}"
+OUTPUT="${STEM}_extracted.md"
+
+if [ "$FORMAT" = "text" ]; then
+    OUTPUT="${STEM}_extracted.txt"
+fi
+
+python3 -c "
+import sys
+
+if '$FORMAT' == 'markdown':
+    from markitdown import MarkItDown
+    md = MarkItDown()
+    result = md.convert('$INPUT')
+    with open('$OUTPUT', 'w', encoding='utf-8') as f:
+        f.write(result.text_content)
+    print(f'✓ Extracted ($FORMAT) → $OUTPUT')
+else:
+    # Use opendataloader-pdf for text extraction
+    from opendataloader_pdf import PDFLoader
+    loader = PDFLoader()
+    doc = loader.load('$INPUT')
+    with open('$OUTPUT', 'w', encoding='utf-8') as f:
+        f.write(doc.text)
+    print(f'✓ Extracted ($FORMAT) → $OUTPUT')
+" 2>/dev/null || python3 -c "
+# Fallback to markitdown
+from markitdown import MarkItDown
+md = MarkItDown()
+result = md.convert('$INPUT')
+with open('$OUTPUT', 'w', encoding='utf-8') as f:
+    f.write(result.text_content)
+print(f'✓ Extracted → $OUTPUT')
+"

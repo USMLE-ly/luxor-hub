@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+# quantmind-tool — Central launcher for QuantMind financial intelligence
+# Usage: quantmind-tool <command> [args]
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+VENV_DIR="$PROJECT_DIR/.venv"
+
+if [ -d "$VENV_DIR" ]; then
+    source "$VENV_DIR/bin/activate"
+fi
+
+COMMAND="${1:-info}"
+
+case "$COMMAND" in
+    info)
+        echo '╔══════════════════════════════════════════════════╗'
+        echo '║         SHANNON-Ω — QUANTMIND LAUNCHER          ║'
+        echo '╠══════════════════════════════════════════════════╣'
+        echo '║ Tools available:                                 ║'
+        echo '║  • markitdown-tool  — Document → Markdown        ║'
+        echo '║  • pdf-extract-tool — PDF text extraction        ║'
+        echo '║  • turbovec-tool    — Vector embeddings & ANN    ║'
+        echo '║  • quantmind-tool   — Financial intelligence     ║'
+        echo '║  • api_interact.py  — SHANNON-Ω API client       ║'
+        echo '╚══════════════════════════════════════════════════╝'
+        python3 -c "
+from quantmind import QuantMind
+print(f'QuantMind version: {QuantMind.__version__ if hasattr(QuantMind, \"__version__\") else \"installed\"}')
+print('Ready for financial document analysis')
+" 2>/dev/null || echo 'QuantMind: installed'
+        ;;
+    analyze)
+        FILE="${2:?Usage: quantmind-tool analyze <document>}"
+        python3 -c "
+from quantmind import QuantMind
+qm = QuantMind()
+result = qm.analyze('$FILE')
+print(result)
+"
+        ;;
+    query)
+        QUERY="${2:?Usage: quantmind-tool query \"<question>\"}"
+        CONTEXT="${3:-}"
+        python3 -c "
+from quantmind import QuantMind
+qm = QuantMind()
+if '$CONTEXT':
+    result = qm.query('$QUERY', context='$CONTEXT')
+else:
+    result = qm.query('$QUERY')
+print(result)
+"
+        ;;
+    -h|--help|help)
+        echo 'Usage: quantmind-tool <command> [args]
+
+Commands:
+  info                  Show available tools and versions
+  analyze <document>    Analyze a financial document
+  query "<question>"    Ask a question to QuantMind'
+        ;;
+    *)
+        echo "Unknown command: $COMMAND" >&2
+        echo "Try: quantmind-tool info" >&2
+        exit 1
+        ;;
+esac

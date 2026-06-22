@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# markitdown-tool — Convert documents (docx, pdf, html, etc.) to Markdown
+# Usage: markitdown-tool <input-file> [output-file]
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+VENV_DIR="$PROJECT_DIR/.venv"
+
+if [ -d "$VENV_DIR" ]; then
+    source "$VENV_DIR/bin/activate"
+fi
+
+INPUT="${1:?Usage: markitdown-tool <input-file> [output-file]}"
+OUTPUT="${2:-}"
+
+if [ ! -f "$INPUT" ]; then
+    echo "Error: Input file not found: $INPUT" >&2
+    exit 1
+fi
+
+if [ -z "$OUTPUT" ]; then
+    BASENAME="$(basename "$INPUT")"
+    STEM="${BASENAME%.*}"
+    OUTPUT="${STEM}.md"
+fi
+
+python3 -c "
+import sys
+from markitdown import MarkItDown
+
+md = MarkItDown()
+try:
+    result = md.convert('$INPUT')
+    with open('$OUTPUT', 'w', encoding='utf-8') as f:
+        f.write(result.text_content)
+    print(f'✓ Converted {sys.argv[1]} → $OUTPUT')
+except Exception as e:
+    print(f'✗ Error: {e}', file=sys.stderr)
+    sys.exit(1)
+" "$INPUT"
