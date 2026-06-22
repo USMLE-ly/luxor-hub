@@ -9,7 +9,7 @@ python-multipart==0.0.20
 
 # Image processing
 Pillow==11.1.0
-opencv-python-headless==4.10.0.84
+opencv-python-headless==4.13.0.92
 scikit-image==0.25.0
 numpy==2.2.1
 
