@@ -28,7 +28,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Inspiration from "./pages/Inspiration";
 import OutfitBuilder from "./pages/OutfitBuilder";
 import Profile from "./pages/Profile";
-import OutfitAnalysisPage from "./pages/OutfitAnalysis";
+import Analysis from "./pages/Analysis";
 import Leaderboard from "./pages/Leaderboard";
 import WeeklyChallenge from "./pages/WeeklyChallenge";
 import Badges from "./pages/Badges";
@@ -93,7 +93,7 @@ const App = () => (
             <Route path="/inspiration" element={<PaywallGate><Inspiration /></PaywallGate>} />
             <Route path="/outfit-builder" element={<PaywallGate><OutfitBuilder /></PaywallGate>} />
             <Route path="/profile/:userId" element={<PaywallGate><Profile /></PaywallGate>} />
-            <Route path="/outfit-analysis" element={<PaywallGate><OutfitAnalysisPage /></PaywallGate>} />
+            <Route path="/outfit-analysis" element={<PaywallGate><Analysis /></PaywallGate>} />
             <Route path="/leaderboard" element={<PaywallGate><Leaderboard /></PaywallGate>} />
             <Route path="/weekly-challenge" element={<PaywallGate><WeeklyChallenge /></PaywallGate>} />
             <Route path="/badges" element={<PaywallGate><Badges /></PaywallGate>} />
