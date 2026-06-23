@@ -282,10 +282,12 @@ export default function Analysis() {
 
   // Handle auto-analysis when imageFile changes (upload or pending)
   // Use a ref to avoid stale closure issues with analyzeOutfit
-  const analyzeRef = useRef(analyzeOutfit);
-  analyzeRef.current = analyzeOutfit;
+  const analyzeRef = useRef<((file: File) => Promise<void>) | null>(null);
   useEffect(() => {
-    if (imageFile) {
+    analyzeRef.current = analyzeOutfit;
+  });
+  useEffect(() => {
+    if (imageFile && analyzeRef.current) {
       analyzeRef.current(imageFile);
     }
   }, [imageFile]);

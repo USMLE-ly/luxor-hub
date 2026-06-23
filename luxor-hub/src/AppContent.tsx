@@ -1,9 +1,10 @@
-import React, { useEffect, Component, useRef } from "react";
+import React, { useRef } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "next-themes";
 import { HelmetProvider } from "react-helmet-async";
+import { ErrorBoundary } from "@/components/app/ErrorBoundary";
 
 // Lazy-load all UI and page components
 const Toaster = React.lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
@@ -63,7 +64,6 @@ const RouteTracker = () => {
 const Loading = () => <div className="flex items-center justify-center min-h-screen bg-background"><div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" /></div>;
 
 const AppContent = () => {
-  // Initialize QueryClient inside component body to avoid module-level TDZ
   const queryClientRef = useRef<QueryClient | null>(null);
   if (!queryClientRef.current) {
     queryClientRef.current = new QueryClient();
@@ -81,6 +81,7 @@ const AppContent = () => {
         <React.Suspense fallback={null}><Sonner /></React.Suspense>
         <RouteTracker />
         <AuthProvider>
+          <ErrorBoundary>
           <React.Suspense fallback={<Loading />}>
           <Routes>
             <Route path="/" element={<Index />} />
@@ -123,6 +124,7 @@ const AppContent = () => {
             <Route path="*" element={<NotFound />} />
           </Routes>
           </React.Suspense>
+          </ErrorBoundary>
         </AuthProvider>
       </QueryClientProvider>
     </ThemeProvider>
