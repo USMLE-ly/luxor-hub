@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,53 +8,51 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "next-themes";
 import { HelmetProvider } from "react-helmet-async";
 import { pageview } from "@/lib/fbPixel";
-import Index from "./pages/Index";
 import { ErrorBoundary } from "@/components/app/ErrorBoundary";
 import StarfieldBackground from "@/components/ui/starfield-background";
 import OfflineIndicator from "@/components/app/OfflineIndicator";
 import SplashScreen from "@/components/app/SplashScreen";
 import PaywallGate from "@/components/app/PaywallGate";
-import Auth from "./pages/Auth";
-import Dashboard from "./pages/Dashboard";
-import Onboarding from "./pages/Onboarding";
-import Closet from "./pages/Closet";
-import Chat from "./pages/Chat";
-import Outfits from "./pages/Outfits";
-import Analytics from "./pages/Analytics";
-import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import Inspiration from "./pages/Inspiration";
-import OutfitBuilder from "./pages/OutfitBuilder";
-import Profile from "./pages/Profile";
-import Analysis from "./pages/Analysis";
-import Leaderboard from "./pages/Leaderboard";
-import WeeklyChallenge from "./pages/WeeklyChallenge";
-import Badges from "./pages/Badges";
-import NotificationCenter from "./pages/NotificationCenter";
-import StyleDNA from "./pages/StyleDNA";
-import Calibration from "./pages/Calibration";
-import ColorType from "./pages/ColorType";
-import Paywall from "./pages/Paywall";
-import OutfitCalendar from "./pages/OutfitCalendar";
-import MoodBoard from "./pages/MoodBoard";
-import VideoAnalysis from "./pages/VideoAnalysis";
-import FashionDesigner from "./pages/FashionDesigner";
-import VirtualTryOn from "./pages/VirtualTryOn";
-import CommunityGallery from "./pages/CommunityGallery";
-import Install from "./pages/Install";
-import Council from "./pages/Council";
-import MonthlyReport from "./pages/MonthlyReport";
-import WardrobeValue from "./pages/WardrobeValue";
-import Blog from "./pages/Blog";
-import BlogArticle from "./pages/BlogArticle";
-import DeepDive from "./pages/DeepDive";
-import DressingRoom from "./pages/DressingRoom";
-// API URL fallback for runtime safety
-const API_URL = import.meta.env.VITE_PUBLIC_API_URL || "https://python--libyausmle.replit.app";
 
-
+// Lazy-load all page components to break circular dependency chains
+const Index = lazy(() => import("./pages/Index"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Onboarding = lazy(() => import("./pages/Onboarding"));
+const Closet = lazy(() => import("./pages/Closet"));
+const Chat = lazy(() => import("./pages/Chat"));
+const Outfits = lazy(() => import("./pages/Outfits"));
+const Analytics = lazy(() => import("./pages/Analytics"));
+const Settings = lazy(() => import("./pages/Settings"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const Inspiration = lazy(() => import("./pages/Inspiration"));
+const OutfitBuilder = lazy(() => import("./pages/OutfitBuilder"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Analysis = lazy(() => import("./pages/Analysis"));
+const Leaderboard = lazy(() => import("./pages/Leaderboard"));
+const WeeklyChallenge = lazy(() => import("./pages/WeeklyChallenge"));
+const Badges = lazy(() => import("./pages/Badges"));
+const NotificationCenter = lazy(() => import("./pages/NotificationCenter"));
+const StyleDNA = lazy(() => import("./pages/StyleDNA"));
+const Calibration = lazy(() => import("./pages/Calibration"));
+const ColorType = lazy(() => import("./pages/ColorType"));
+const Paywall = lazy(() => import("./pages/Paywall"));
+const OutfitCalendar = lazy(() => import("./pages/OutfitCalendar"));
+const MoodBoard = lazy(() => import("./pages/MoodBoard"));
+const VideoAnalysis = lazy(() => import("./pages/VideoAnalysis"));
+const FashionDesigner = lazy(() => import("./pages/FashionDesigner"));
+const VirtualTryOn = lazy(() => import("./pages/VirtualTryOn"));
+const CommunityGallery = lazy(() => import("./pages/CommunityGallery"));
+const Install = lazy(() => import("./pages/Install"));
+const Council = lazy(() => import("./pages/Council"));
+const MonthlyReport = lazy(() => import("./pages/MonthlyReport"));
+const WardrobeValue = lazy(() => import("./pages/WardrobeValue"));
+const Blog = lazy(() => import("./pages/Blog"));
+const BlogArticle = lazy(() => import("./pages/BlogArticle"));
+const DeepDive = lazy(() => import("./pages/DeepDive"));
+const DressingRoom = lazy(() => import("./pages/DressingRoom"));
 
 // Tracks route changes for Facebook Pixel
 const RouteTracker = () => {
@@ -66,6 +64,8 @@ const RouteTracker = () => {
 };
 
 const queryClient = new QueryClient();
+
+const Loading = () => <div className="flex items-center justify-center min-h-screen bg-background"><div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" /></div>;
 
 const App = () => (
   <HelmetProvider>
@@ -81,6 +81,7 @@ const App = () => (
         <RouteTracker />
         <AuthProvider>
           <ErrorBoundary>
+          <Suspense fallback={<Loading />}>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
@@ -105,7 +106,6 @@ const App = () => (
             <Route path="/calibration" element={<PaywallGate><Calibration /></PaywallGate>} />
             <Route path="/color-type" element={<PaywallGate><ColorType /></PaywallGate>} />
             <Route path="/paywall" element={<Paywall />} />
-            
             <Route path="/outfit-calendar" element={<PaywallGate><OutfitCalendar /></PaywallGate>} />
             <Route path="/mood-board" element={<PaywallGate><MoodBoard /></PaywallGate>} />
             <Route path="/video-analysis" element={<PaywallGate><VideoAnalysis /></PaywallGate>} />
@@ -120,10 +120,9 @@ const App = () => (
             <Route path="/blog/:slug" element={<BlogArticle />} />
             <Route path="/deep-dive" element={<DeepDive />} />
             <Route path="/dressing-room" element={<PaywallGate><DressingRoom /></PaywallGate>} />
-            
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
           </ErrorBoundary>
         </AuthProvider>
       </BrowserRouter>
