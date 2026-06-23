@@ -1,21 +1,19 @@
 import { useEffect, lazy, Suspense } from "react";
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "next-themes";
 import { HelmetProvider } from "react-helmet-async";
-import { pageview } from "@/lib/fbPixel";
-import { ErrorBoundary } from "@/components/app/ErrorBoundary";
-import StarfieldBackground from "@/components/ui/starfield-background";
-import OfflineIndicator from "@/components/app/OfflineIndicator";
-import SplashScreen from "@/components/app/SplashScreen";
-import PaywallGate from "@/components/app/PaywallGate";
-import NotFound from "./pages/NotFound";
 
-// Lazy-load all page components to break circular dependency chains
+// Lazy-load all UI and page components
+const Toaster = lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
+const Sonner = lazy(() => import("@/components/ui/sonner").then(m => ({ default: m.Toaster })));
+const TooltipProvider = lazy(() => import("@/components/ui/tooltip").then(m => ({ default: m.TooltipProvider })));
+const ErrorBoundary = lazy(() => import("@/components/app/ErrorBoundary").then(m => ({ default: m.ErrorBoundary })));
+const StarfieldBackground = lazy(() => import("@/components/ui/starfield-background"));
+const OfflineIndicator = lazy(() => import("@/components/app/OfflineIndicator"));
+const SplashScreen = lazy(() => import("@/components/app/SplashScreen"));
+const PaywallGate = lazy(() => import("@/components/app/PaywallGate").then(m => ({ default: m.PaywallGate })));
 const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -53,13 +51,17 @@ const Blog = lazy(() => import("./pages/Blog"));
 const BlogArticle = lazy(() => import("./pages/BlogArticle"));
 const DeepDive = lazy(() => import("./pages/DeepDive"));
 const DressingRoom = lazy(() => import("./pages/DressingRoom"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
-// Tracks route changes for Facebook Pixel
+const pageview = (...args: any[]) => {
+  if (typeof window !== 'undefined' && (window as any).fbq) {
+    (window as any).fbq('track', 'PageView');
+  }
+};
+
 const RouteTracker = () => {
   const location = useLocation();
-  useEffect(() => {
-    pageview();
-  }, [location.pathname]);
+  useEffect(() => { pageview(); }, [location.pathname]);
   return null;
 };
 
@@ -67,20 +69,42 @@ const queryClient = new QueryClient();
 
 const Loading = () => <div className="flex items-center justify-center min-h-screen bg-background"><div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" /></div>;
 
+const FallbackUI = () => (
+  <div className="flex flex-col items-center justify-center min-h-screen bg-background p-8 text-center">
+    <div className="text-destructive text-4xl mb-4">⚠</div>
+    <h2 className="text-xl font-semibold text-foreground mb-2">Something went wrong</h2>
+    <p className="text-muted-foreground max-w-md">The app encountered an error. Please refresh the page.</p>
+    <button onClick={() => window.location.reload()} className="mt-6 px-6 py-2 bg-primary text-primary-foreground rounded-lg">Refresh</button>
+  </div>
+);
+
+class AppErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, error: any}> {
+  state = { hasError: false, error: null };
+  static getDerivedStateFromError(error: any) { return { hasError: true, error }; }
+  render() {
+    if (this.state.hasError) {
+      console.error('App Error:', this.state.error);
+      return <FallbackUI />;
+    }
+    return this.props.children;
+  }
+}
+
 const App = () => (
+  <AppErrorBoundary>
   <HelmetProvider>
   <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-    <StarfieldBackground />
-    <OfflineIndicator />
-    <SplashScreen />
+    <Suspense fallback={null}><StarfieldBackground /></Suspense>
+    <Suspense fallback={null}><OfflineIndicator /></Suspense>
+    <Suspense fallback={null}><SplashScreen /></Suspense>
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
+      <Suspense fallback={null}><TooltipProvider /></Suspense>
+      <Suspense fallback={null}><Toaster /></Suspense>
+      <Suspense fallback={null}><Sonner /></Suspense>
       <BrowserRouter>
         <RouteTracker />
         <AuthProvider>
-          <ErrorBoundary>
+          <Suspense fallback={null}><ErrorBoundary /></Suspense>
           <Suspense fallback={<Loading />}>
           <Routes>
             <Route path="/" element={<Index />} />
@@ -123,13 +147,12 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>
-          </ErrorBoundary>
         </AuthProvider>
       </BrowserRouter>
-      </TooltipProvider>
     </QueryClientProvider>
   </ThemeProvider>
   </HelmetProvider>
+  </AppErrorBoundary>
 );
 
 export default App;
