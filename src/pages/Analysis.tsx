@@ -280,11 +280,13 @@ export default function Analysis() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   // Handle auto-analysis when imageFile changes (upload or pending)
+  // Use a ref to avoid stale closure issues with analyzeOutfit
+  const analyzeRef = useRef(analyzeOutfit);
+  analyzeRef.current = analyzeOutfit;
   useEffect(() => {
     if (imageFile) {
-      analyzeOutfit(imageFile);
+      analyzeRef.current(imageFile);
     }
-    // eslint-disable-next-line
   }, [imageFile]);
 
   // Check for pending upload from Dressing Room
@@ -538,7 +540,7 @@ export default function Analysis() {
                     </CardHeader>
                     <CardContent>
                       <div className="flex flex-wrap gap-4">
-                        {data.actual_colors.map((c, i) => (
+                        {(data.actual_colors || []).map((c, i) => (
                           <motion.div
                             key={i}
                             initial={{ scale: 0 }}
@@ -573,7 +575,7 @@ export default function Analysis() {
                           animate="show"
                           className="space-y-2"
                         >
-                          {data.items_detected.map((item, i) => (
+                          {(data.items_detected || []).map((item, i) => (
                             <motion.li
                               key={i}
                               variants={itemAnim}
@@ -605,7 +607,7 @@ export default function Analysis() {
                           animate="show"
                           className="space-y-2"
                         >
-                          {data.strengths.map((s, i) => (
+                          {(data.strengths || []).map((s, i) => (
                             <motion.li
                               key={i}
                               variants={itemAnim}
