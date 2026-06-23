@@ -2,7 +2,7 @@
   "name": "luxor-hub",
   "private": true,
   "scripts": {
-    "build": "cd luxor-hub && npm install && npm run build && cp -r dist/. ../dist/ 2>/dev/null; echo dist-check-done",
+    "build": "cd luxor-hub && npm install && npm run build",
     "dev": "cd luxor-hub && npm install && npm run dev",
     "preview": "cd luxor-hub && npm run preview"
   },
