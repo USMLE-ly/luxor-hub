@@ -254,5 +254,13 @@
     "num_chunks": 72,
     "total_chars": 124139,
     "ingested_at": "2026-06-23T15:01:22.486866"
+  },
+  {
+    "file_id": "f0b821fefbbf",
+    "source": "PowerShellNotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 173,
+    "total_chars": 330001,
+    "ingested_at": "2026-06-23T15:01:49.017337"
   }
 ]
