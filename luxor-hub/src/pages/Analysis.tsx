@@ -364,6 +364,8 @@ export default function Analysis() {
       if (!response.ok) throw new Error('Server returned ' + response.status);
       const fnData = await response.json();
       if (!fnData || !fnData.success) throw new Error('Analysis failed');
+      // Reject local fallback data — show empty state instead of hallucinated items/colors
+      if (fnData.source === 'local') throw new Error('Cipher Vision unavailable, try again later');
 
       // Map the Fable 5 response to our UI shape - NO fallback dummies
       const o: OutfitData = {
