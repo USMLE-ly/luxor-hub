@@ -1,0 +1,66 @@
+[
+  {
+    "file_id": "3c2b02ebb27d",
+    "source": "AlgorithmsNotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 236,
+    "total_chars": 402135,
+    "ingested_at": "2026-06-23T14:43:07.345480"
+  },
+  {
+    "file_id": "7fb9a3825646",
+    "source": "AndroidNotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 1302,
+    "total_chars": 2345754,
+    "ingested_at": "2026-06-23T14:45:01.350907"
+  },
+  {
+    "file_id": "9e48d15b6efd",
+    "source": "Angular2NotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 213,
+    "total_chars": 405533,
+    "ingested_at": "2026-06-23T14:45:35.509385"
+  },
+  {
+    "file_id": "98033f12b016",
+    "source": "AngularJSNotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 203,
+    "total_chars": 386457,
+    "ingested_at": "2026-06-23T14:46:08.177060"
+  },
+  {
+    "file_id": "c6c7f5a28b9e",
+    "source": "BashNotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 195,
+    "total_chars": 333192,
+    "ingested_at": "2026-06-23T14:46:26.775413"
+  },
+  {
+    "file_id": "d1c9ed72ff39",
+    "source": "CNotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 390,
+    "total_chars": 697883,
+    "ingested_at": "2026-06-23T14:47:01.966028"
+  },
+  {
+    "file_id": "a2c95f9162d9",
+    "source": "CPlusPlusNotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 766,
+    "total_chars": 1466530,
+    "ingested_at": "2026-06-23T14:48:49.047896"
+  },
+  {
+    "file_id": "908a0b1b7246",
+    "source": "CSSNotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 217,
+    "total_chars": 369429,
+    "ingested_at": "2026-06-23T14:49:09.275155"
+  }
+]

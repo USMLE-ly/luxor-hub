@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# knowledge-tool — SHANNON-Ω Knowledge Base CLI
+set -euo pipefail
+VENV="/root/Documents/Codex/2026-06-08/make-the-deepseek-v4-flash-free/.venv"
+source "$VENV/bin/activate"
+PROJECT="/root/Documents/Codex/2026-06-08/make-the-deepseek-v4-flash-free"
+if [ $# -eq 0 ]; then
+    echo "SHANNON-Ω Knowledge Base"
+    echo "Usage: knowledge-tool <command> [args...]"
+    echo "  ingest [--domain D] [--path P]    Ingest PDFs into knowledge base"
+    echo "  query <question> [--domain D]     Search knowledge base"
+    echo "  ask <question> [--domain D]       Ask SHANNON-Ω with KB context"
+    echo "  stats                             Show knowledge base statistics"
+    echo "  list                              List domains"
+    exit 0
+fi
+CMD="$1"; shift
+case "$CMD" in
+    ingest) exec python3 "$PROJECT/ingest_books.py" "$@" ;;
+    query)  exec python3 "$PROJECT/query_knowledge.py" "$@" ;;
+    ask)    exec python3 "$PROJECT/query_knowledge.py" --ask "$@" ;;
+    stats)  exec python3 "$PROJECT/query_knowledge.py" --stats ;;
+    list)   exec python3 "$PROJECT/query_knowledge.py" --list ;;
+    *)      exec python3 "$PROJECT/query_knowledge.py" "$CMD $@" ;;
+esac
