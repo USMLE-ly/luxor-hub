@@ -27,6 +27,8 @@ import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion"
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { RainbowButton } from "@/components/ui/rainbow-button";
 import { useCallback } from "react";
+import { ProStylistTweak } from "@/components/app/ProStylistTweak";
+import { CosmicAudit } from "@/components/app/CosmicAudit";
 
 interface OutfitAnalysisData {
   overallStyle: string;
@@ -689,6 +691,7 @@ export default function OutfitAnalysis() {
             {/* Results */}
             <AnimatePresence>
               {analysis && (
+                <div className="space-y-6 w-full">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -720,6 +723,22 @@ export default function OutfitAnalysis() {
 
                   <AnalysisResults analysis={analysis} getScoreColor={getScoreColor} getPriorityColor={getPriorityColor} />
                 </motion.div>
+
+                  {/* Pro Stylist Tweak */}
+                  <ProStylistTweak imagePreview={imagePreview} imageUrl={imageUrl} />
+
+                  {/* Cosmic Audit */}
+                  <CosmicAudit
+                    styleName={analysis.overallStyle}
+                    styleScore={analysis.styleScore}
+                    colors={analysis.colorPalette.colors}
+                    items={analysis.detectedItems}
+                    strengths={analysis.strengths}
+                    audit={analysis.summary}
+                    seasonalFit={analysis.seasonalFit}
+                  />
+
+                </div>
               )}
             </AnimatePresence>
           </TabsContent>

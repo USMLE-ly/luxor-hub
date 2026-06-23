@@ -50,6 +50,7 @@ import WardrobeValue from "./pages/WardrobeValue";
 import Blog from "./pages/Blog";
 import BlogArticle from "./pages/BlogArticle";
 import DeepDive from "./pages/DeepDive";
+import DressingRoom from "./pages/DressingRoom";
 
 
 // Tracks route changes for Facebook Pixel
@@ -115,6 +116,7 @@ const App = () => (
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogArticle />} />
             <Route path="/deep-dive" element={<DeepDive />} />
+            <Route path="/dressing-room" element={<PaywallGate><DressingRoom /></PaywallGate>} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
