@@ -62,5 +62,197 @@
     "num_chunks": 217,
     "total_chars": 369429,
     "ingested_at": "2026-06-23T14:49:09.275155"
+  },
+  {
+    "file_id": "f0aebaa58df6",
+    "source": "CSharpNotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 822,
+    "total_chars": 1562096,
+    "ingested_at": "2026-06-23T14:51:02.118367"
+  },
+  {
+    "file_id": "a18d84a99f04",
+    "source": "DotNETFrameworkNotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 197,
+    "total_chars": 371724,
+    "ingested_at": "2026-06-23T14:51:34.300866"
+  },
+  {
+    "file_id": "f2efa92b321d",
+    "source": "EntityFrameworkNotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 86,
+    "total_chars": 162136,
+    "ingested_at": "2026-06-23T14:51:50.491099"
+  },
+  {
+    "file_id": "a8621186f24c",
+    "source": "ExcelVBANotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 112,
+    "total_chars": 213167,
+    "ingested_at": "2026-06-23T14:52:09.485713"
+  },
+  {
+    "file_id": "e94672a8ed34",
+    "source": "GitNotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 199,
+    "total_chars": 381296,
+    "ingested_at": "2026-06-23T14:52:39.391679"
+  },
+  {
+    "file_id": "9898c7ce3113",
+    "source": "HTML5CanvasNotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 196,
+    "total_chars": 359087,
+    "ingested_at": "2026-06-23T14:53:10.912258"
+  },
+  {
+    "file_id": "e4b43b824642",
+    "source": "HTML5NotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 139,
+    "total_chars": 243861,
+    "ingested_at": "2026-06-23T14:53:25.696283"
+  },
+  {
+    "file_id": "8109c11aae78",
+    "source": "HaskellNotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 230,
+    "total_chars": 443667,
+    "ingested_at": "2026-06-23T14:54:03.600174"
+  },
+  {
+    "file_id": "98c19c430215",
+    "source": "HibernateNotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 35,
+    "total_chars": 64789,
+    "ingested_at": "2026-06-23T14:54:13.425135"
+  },
+  {
+    "file_id": "5e37e3107760",
+    "source": "JavaNotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 1130,
+    "total_chars": 2042589,
+    "ingested_at": "2026-06-23T14:55:48.312769"
+  },
+  {
+    "file_id": "45e5df941481",
+    "source": "JavaScriptNotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 517,
+    "total_chars": 927654,
+    "ingested_at": "2026-06-23T14:56:37.412875"
+  },
+  {
+    "file_id": "f6ae443492f9",
+    "source": "KotlinNotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 89,
+    "total_chars": 154784,
+    "ingested_at": "2026-06-23T14:56:50.800893"
+  },
+  {
+    "file_id": "f417aaf966fb",
+    "source": "LaTeXNotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 39,
+    "total_chars": 72092,
+    "ingested_at": "2026-06-23T14:57:01.696455"
+  },
+  {
+    "file_id": "516bf3ffcdbb",
+    "source": "LinuxNotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 61,
+    "total_chars": 115334,
+    "ingested_at": "2026-06-23T14:57:15.989169"
+  },
+  {
+    "file_id": "6b51f4a1ccf8",
+    "source": "MATLABNotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 163,
+    "total_chars": 283206,
+    "ingested_at": "2026-06-23T14:57:31.709892"
+  },
+  {
+    "file_id": "fcff98699301",
+    "source": "MicrosoftSQLServerNotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 293,
+    "total_chars": 517199,
+    "ingested_at": "2026-06-23T14:57:57.728121"
+  },
+  {
+    "file_id": "26a0af1d9b67",
+    "source": "MongoDBNotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 69,
+    "total_chars": 128763,
+    "ingested_at": "2026-06-23T14:58:12.605648"
+  },
+  {
+    "file_id": "af1aeacbc986",
+    "source": "MySQLNotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 207,
+    "total_chars": 366353,
+    "ingested_at": "2026-06-23T14:58:32.089450"
+  },
+  {
+    "file_id": "d81cad542507",
+    "source": "NodeJSNotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 322,
+    "total_chars": 558445,
+    "ingested_at": "2026-06-23T14:59:00.962671"
+  },
+  {
+    "file_id": "f8676389f05a",
+    "source": "ObjectiveCNotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 124,
+    "total_chars": 236888,
+    "ingested_at": "2026-06-23T14:59:22.358798"
+  },
+  {
+    "file_id": "ffe952637d2b",
+    "source": "OracleDatabaseNotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 106,
+    "total_chars": 199819,
+    "ingested_at": "2026-06-23T14:59:41.967310"
+  },
+  {
+    "file_id": "5afb1dee5b00",
+    "source": "PHPNotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 491,
+    "total_chars": 934850,
+    "ingested_at": "2026-06-23T15:00:52.050177"
+  },
+  {
+    "file_id": "506fce5557bc",
+    "source": "PerlNotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 106,
+    "total_chars": 203088,
+    "ingested_at": "2026-06-23T15:01:12.327512"
+  },
+  {
+    "file_id": "3f86dbedfd6d",
+    "source": "PostgreSQLNotesForProfessionals.pdf",
+    "domain": "coding",
+    "num_chunks": 72,
+    "total_chars": 124139,
+    "ingested_at": "2026-06-23T15:01:22.486866"
   }
 ]
