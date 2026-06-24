@@ -9,6 +9,10 @@ export default defineConfig(() => ({
   build: {
     minify: false,
     sourcemap: false,
+    chunkSizeWarningLimit: 2000,
+    rollupOptions: {
+      maxParallelFileOps: 3,
+    },
   },
   server: {
     host: "::",

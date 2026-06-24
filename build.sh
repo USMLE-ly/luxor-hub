@@ -2,15 +2,20 @@
 set -e
 cd luxor-hub
 rm -rf node_modules/.vite node_modules/.cache
-NODE_OPTIONS="--max-old-space-size=2048" npm install --ignore-scripts=false
 
-# esbuild binary might be on a noexec mount — copy to /tmp and point ESBUILD_BINARY_PATH at it
+# Lower Node memory to leave room for esbuild Go binary
+NODE_OPTIONS="--max-old-space-size=1024" npm install --ignore-scripts=false
+
+# Copy esbuild binary to /tmp in case of noexec
 if [ -f node_modules/@esbuild/linux-x64/bin/esbuild ]; then
   cp node_modules/@esbuild/linux-x64/bin/esbuild /tmp/esbuild-bin
   chmod +x /tmp/esbuild-bin
   export ESBUILD_BINARY_PATH=/tmp/esbuild-bin
 fi
 
-NODE_OPTIONS="--max-old-space-size=2048" npx vite build
+# GOGC=50 makes Go GC run twice as often, reducing peak memory
+# UV_THREADPOOL_SIZE limits parallel I/O to reduce FD/memory use
+NODE_OPTIONS="--max-old-space-size=1024" GOGC=50 UV_THREADPOOL_SIZE=4 npx vite build
+
 mkdir -p ../dist
 cp -r dist/. ../dist/
