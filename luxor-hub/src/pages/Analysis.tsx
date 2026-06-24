@@ -632,9 +632,7 @@ export default function Analysis() {
                           animate="show"
                           className="space-y-2"
                         >
-                          {(data.items_detected || []).length > 0 ? (data.items_detected || []).map((item, i) => {
-                              const itemColor = (data.actual_colors && data.actual_colors[i]) ? data.actual_colors[i] : null;
-                              return (
+                          {(data.items_detected || []).length > 0 ? (data.items_detected || []).map((item, i) =>
                             <motion.li
                               key={i}
                               variants={itemAnim}
@@ -643,11 +641,10 @@ export default function Analysis() {
                             >
                               <div
                                 className="w-5 h-5 rounded-full border-2 border-border/50 shadow-sm flex-shrink-0"
-                                style={{ backgroundColor: itemColor || '#666' }}
+                                style={{ backgroundColor: (data.actual_colors && data.actual_colors[i]) ? data.actual_colors[i] : '#666' }}
                               />
                               <span className="text-sm text-foreground">{item}</span>
-                            </motion.li>);
-                            })
+                            </motion.li>
                           )) : (
                             <li className="flex items-center gap-3 p-3 rounded-xl bg-muted/10 border border-dashed border-border/30">
                               <div className="w-2 h-2 rounded-full bg-muted-foreground/20" />
