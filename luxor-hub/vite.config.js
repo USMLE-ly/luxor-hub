@@ -6,15 +6,24 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig(() => ({
+  esbuild: false,
   build: {
     minify: false,
+    sourcemap: false,
   },
+  plugins: [
+    react({
+      babel: {
+        plugins: [],
+        presets: ["@babel/preset-typescript"],
+      },
+    }),
+  ],
   server: {
     host: "::",
     port: 8080,
     hmr: { overlay: false },
   },
-  plugins: [react()],
   resolve: {
     alias: { "@": path.resolve(__dirname, "./src") },
   },
