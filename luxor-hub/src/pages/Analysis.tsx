@@ -205,6 +205,7 @@ function InteractiveStylistQuiz({ imagePreview, styleName, actualColors }: { ima
           image_b64: b64,
           chat_history: newHistory,
           answer: answer,
+          _t: Date.now(),
         }),
       });
 
@@ -265,7 +266,7 @@ function InteractiveStylistQuiz({ imagePreview, styleName, actualColors }: { ima
                     <div className="flex flex-wrap justify-center gap-2">
                       {currentOptions.map((opt) => (
                         <Button key={opt} variant="outline" onClick={() => handleAnswer(opt)}
-                          className="border-primary/30 hover:bg-primary/10 hover:border-primary/50 transition-all">
+                          className="bg-white/10 backdrop-blur-md border-primary/30 hover:bg-primary/20 hover:border-primary/50 transition-all text-sm px-5 py-2.5">
                           {opt}
                         </Button>
                       ))}
@@ -303,7 +304,7 @@ function InteractiveStylistQuiz({ imagePreview, styleName, actualColors }: { ima
                 <div className="flex flex-wrap justify-center gap-2">
                   {currentOptions.map((opt) => (
                     <Button key={opt} variant="outline" onClick={() => handleAnswer(opt)}
-                      className="border-primary/30 hover:bg-primary/10 hover:border-primary/50 transition-all">
+                      className="bg-white/10 backdrop-blur-md border-primary/30 hover:bg-primary/20 hover:border-primary/50 transition-all text-sm px-5 py-2.5">
                       {opt}
                     </Button>
                   ))}
@@ -790,7 +791,149 @@ export default function Analysis() {
                   </motion.div>
                 </div>
 
-                {/* ---- Pro Stylist Tweak ---- */}
+                {/* ---- Cosmic Advice & Style Diagrams ---- */}
+                <motion.div variants={childVariants}>
+                  <div className="relative rounded-[1.5rem] border-[0.75px] border-border p-3">
+                    <GlowingEffect spread={50} glow proximity={64} inactiveZone={0.01} borderWidth={3} />
+                    <Card className="glass-card border-0 shadow-none">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="font-display flex items-center gap-2 text-lg">
+                          <div className="w-0.5 h-5 gold-gradient rounded-full mr-1" />
+                          <Sparkles className="w-5 h-5 text-purple-400" /> Cosmic Advice & Style Diagrams
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground">
+                          AI-powered recommendations to elevate your look.
+                        </p>
+                      </CardHeader>
+                      <CardContent className="space-y-5">
+                        {/* Visual Flow Diagram */}
+                        <motion.div
+                          variants={container}
+                          initial="hidden"
+                          animate="show"
+                          className="space-y-3"
+                        >
+                          {/* Current State Pill */}
+                          <motion.div variants={itemAnim} className="relative">
+                            <div className="absolute left-3 top-0 bottom-0 w-px bg-gradient-to-b from-primary/40 via-primary/20 to-transparent" />
+                            <div className="ml-8 pl-4 py-3 rounded-xl bg-muted/20 border border-border/40">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Current Look</span>
+                                <Badge variant="outline" className="text-[10px] bg-primary/5">{data?.style_name || "Your Style"}</Badge>
+                              </div>
+                              <p className="text-sm text-foreground/80">
+                                {data?.audit || "Upload a photo to get style advice."}
+                              </p>
+                            </div>
+                          </motion.div>
+
+                          {/* Action Arrow */}
+                          <motion.div variants={itemAnim} className="flex justify-center py-1">
+                            <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary">
+                              <Sparkles className="w-3 h-3" /> Apply This Tweak
+                            </div>
+                          </motion.div>
+
+                          {/* Tweak Plan Pill */}
+                          <motion.div variants={itemAnim} className="relative">
+                            <div className="ml-8 pl-4 py-3 rounded-xl bg-purple-500/10 border border-purple-500/20">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-xs font-bold text-purple-400 uppercase tracking-wider">Recommended Upgrade</span>
+                                <Badge variant="outline" className="text-[10px] bg-purple-500/10 text-purple-400 border-purple-500/30">AI Suggestion</Badge>
+                              </div>
+                              <p className="text-sm text-foreground/80">
+                                {data?.tweak_plan || "Complete the analysis to see a personalized upgrade."}
+                              </p>
+                            </div>
+                          </motion.div>
+                        </motion.div>
+
+                        {/* Items Detected Flow */}
+                        {data?.items_detected && data.items_detected.length > 0 && (
+                          <motion.div
+                            variants={container}
+                            initial="hidden"
+                            animate="show"
+                            className="pt-2 border-t border-border/30"
+                          >
+                            <motion.p variants={itemAnim} className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                              <Eye className="w-3 h-3" /> Items Detected
+                            </motion.p>
+                            <motion.div variants={itemAnim} className="flex flex-wrap gap-2">
+                              {data.items_detected.map((item, idx) => {
+                                const colors = ["border-primary/30 bg-primary/5", "border-blue-500/30 bg-blue-500/5", "border-green-500/30 bg-green-500/5", "border-amber-500/30 bg-amber-500/5", "border-purple-500/30 bg-purple-500/5"];
+                                return (
+                                  <Badge key={idx} variant="outline" className={`text-xs ${colors[idx % colors.length]} backdrop-blur-sm`}>
+                                    {item}
+                                  </Badge>
+                                );
+                              })}
+                            </motion.div>
+                          </motion.div>
+                        )}
+
+                        {/* Colors Palette */}
+                        {data?.actual_colors && data.actual_colors.length > 0 && (
+                          <motion.div
+                            variants={container}
+                            initial="hidden"
+                            animate="show"
+                            className="pt-2 border-t border-border/30"
+                          >
+                            <motion.p variants={itemAnim} className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                              <Palette className="w-3 h-3" /> Color Palette Detected
+                            </motion.p>
+                            <motion.div variants={itemAnim} className="flex flex-wrap gap-2">
+                              {data.actual_colors.map((color, idx) => {
+                                const colorMap = {
+                                  "Pink": "bg-pink-500", "Red": "bg-red-500", "Blue": "bg-blue-500",
+                                  "Black": "bg-gray-900", "White": "bg-white border border-border",
+                                  "Cream": "bg-yellow-100", "Green": "bg-green-500", "Brown": "bg-amber-800",
+                                  "Gold": "bg-yellow-500", "Silver": "bg-gray-300", "Navy": "bg-blue-900",
+                                  "Tan": "bg-amber-200", "Beige": "bg-amber-100", "Yellow": "bg-yellow-400",
+                                  "Grey": "bg-gray-400", "Orange": "bg-orange-500",
+                                };
+                                const bgClass = colorMap[color] || "bg-muted";
+                                return (
+                                  <div key={idx} className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-muted/20 border border-border/40">
+                                    <div className={`w-3 h-3 rounded-full ${bgClass}`} />
+                                    <span className="text-xs text-foreground/70">{color}</span>
+                                  </div>
+                                );
+                              })}
+                            </motion.div>
+                          </motion.div>
+                        )}
+
+                        {/* Strengths Flow */}
+                        {data?.strengths && data.strengths.length > 0 && (
+                          <motion.div
+                            variants={container}
+                            initial="hidden"
+                            animate="show"
+                            className="pt-2 border-t border-border/30"
+                          >
+                            <motion.p variants={itemAnim} className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                              <ShieldCheck className="w-3 h-3" /> Style Strengths
+                            </motion.p>
+                            <motion.div variants={itemAnim} className="space-y-2">
+                              {data.strengths.map((s, idx) => (
+                                <div key={idx} className="flex items-start gap-2">
+                                  <div className="w-5 h-5 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                                  </div>
+                                  <p className="text-sm text-foreground/70">{s}</p>
+                                </div>
+                              ))}
+                            </motion.div>
+                          </motion.div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                </motion.div>
+
+                {/* ---- Interactive Stylist Quiz ---- */}
                 <InteractiveStylistQuiz imagePreview={imagePreview} styleName={data?.style_name} actualColors={data?.actual_colors} />
 
                 {/* ---- Cosmic Audit ---- */}
