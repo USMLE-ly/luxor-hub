@@ -612,33 +612,7 @@ export default function Analysis() {
                   </div>
                 </motion.div>
 
-                {/* ---- Colors ---- */}
-                <motion.div variants={childVariants}>
-                  <Card className="glass-card">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="font-display flex items-center gap-2 text-base">
-                        <div className="w-0.5 h-4 gold-gradient rounded-full mr-1" />
-                        <Palette className="w-5 h-5 text-primary" /> Dominant Colors
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex flex-wrap gap-4">
-                        {(data.actual_colors || []).map((c, i) => (
-                          <motion.div
-                            key={i}
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ delay: i * 0.12, type: "spring" }}
-                            className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-muted/40 backdrop-blur-md border border-border/50 hover:scale-105 hover:shadow-2xl transition-all cursor-pointer"
-                          >
-                            <div className="w-8 h-8 rounded-full border-2 border-border shadow-sm" style={{ backgroundColor: c }} />
-                            <span className="text-sm font-medium text-foreground">{c}</span>
-                          </motion.div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
+
 
                 {/* ---- 2‑col: Items + Strengths ---- */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -658,16 +632,22 @@ export default function Analysis() {
                           animate="show"
                           className="space-y-2"
                         >
-                          {(data.items_detected || []).length > 0 ? (data.items_detected || []).map((item, i) => (
+                          {(data.items_detected || []).length > 0 ? (data.items_detected || []).map((item, i) => {
+                              const itemColor = (data.actual_colors && data.actual_colors[i]) ? data.actual_colors[i] : null;
+                              return (
                             <motion.li
                               key={i}
                               variants={itemAnim}
                               whileHover={{ scale: 1.02, x: 4 }}
                               className="flex items-center gap-3 p-3 rounded-xl bg-muted/20 border border-border/40 hover:bg-muted/30 transition-colors"
                             >
-                              <div className="w-2 h-2 rounded-full bg-primary/60" />
+                              <div
+                                className="w-5 h-5 rounded-full border-2 border-border/50 shadow-sm flex-shrink-0"
+                                style={{ backgroundColor: itemColor || '#666' }}
+                              />
                               <span className="text-sm text-foreground">{item}</span>
-                            </motion.li>
+                            </motion.li>);
+                            })
                           )) : (
                             <li className="flex items-center gap-3 p-3 rounded-xl bg-muted/10 border border-dashed border-border/30">
                               <div className="w-2 h-2 rounded-full bg-muted-foreground/20" />
