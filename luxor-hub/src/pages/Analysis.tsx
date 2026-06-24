@@ -257,10 +257,10 @@ function ProStylistTweakBlock({ imagePreview, generationPrompt, tweakPlan }: { i
                   </div>
                   <div className="space-y-2">
                     <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-primary" /> AI-Enhanced
+                      <Sparkles className="w-3.5 h-3.5 text-primary" /> ✨ STYLE INSPIRATION
                     </p>
                     <div className="rounded-2xl overflow-hidden border border-border shadow-lg bg-muted/20 aspect-[3/4]">
-                      <img src={result.tweaked_image_url} alt="AI enhanced" className="w-full h-full object-cover"
+                      <img src={result.tweaked_image_url} alt="Style inspiration" className="w-full h-full object-cover"
                         onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
                     </div>
                   </div>
