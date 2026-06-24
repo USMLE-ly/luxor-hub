@@ -6,6 +6,9 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig(() => ({
+  build: {
+    minify: false,
+  },
   server: {
     host: "::",
     port: 8080,
