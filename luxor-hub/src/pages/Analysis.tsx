@@ -392,16 +392,27 @@ export default function Analysis() {
         if (attempt > 0) {
           await new Promise(r => setTimeout(r, 2000 * attempt));
         }
-        const response = await fetch(apiUrl + '/api/v1/analyze-outfit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ image_b64: b64 }),
-        });
-        if (!response.ok) throw new Error('Server returned ' + response.status);
-        fnData = await response.json();
-        if (!fnData || !fnData.success) throw new Error('Analysis failed');
-        if (fnData.source === 'cipher_vision') break; // success — exit retry loop
-        // source is 'fallback' (from Replit) or 'local' — retry
+        const controller = new AbortController();
+        const abortTimer = setTimeout(() => controller.abort(), 60000);
+        try {
+          const response = await fetch(apiUrl + '/api/v1/analyze-outfit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image_b64: b64 }),
+            signal: controller.signal,
+          });
+          clearTimeout(abortTimer);
+          if (!response.ok) throw new Error('Server returned ' + response.status);
+          fnData = await response.json();
+          if (!fnData || !fnData.success) throw new Error('Analysis failed');
+          if (fnData.source === 'cipher_vision') break;
+        } catch (fetchErr) {
+          clearTimeout(abortTimer);
+          if (fetchErr.name === 'AbortError') {
+            throw new Error('Request timed out after 60s');
+          }
+          throw fetchErr;
+        }
       }
       // All retries exhausted — silently reset to upload state, no toast
       if (!fnData || fnData.source !== "cipher_vision") {
