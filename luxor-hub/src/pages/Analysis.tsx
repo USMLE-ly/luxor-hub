@@ -87,7 +87,7 @@ function CircularScore({ score, size = 112 }: { score: number | null; size?: num
             N/A
           </motion.span>
         ) : (
-          <React.Fragment>
+          <>
             <motion.span
               className="text-2xl font-bold gold-text"
               initial={{ opacity: 0, scale: 0.5 }}
@@ -96,7 +96,7 @@ function CircularScore({ score, size = 112 }: { score: number | null; size?: num
             >
               {score}
             </motion.span>
-          </React.Fragment>
+          </>
         )}
         <span className="text-[9px] text-muted-foreground -mt-1">/ 100</span>
       </div>
@@ -635,7 +635,7 @@ export default function Analysis() {
             animate="show"
           >
             {data ? (
-              <React.Fragment>
+              <>
                 {/* ---- Score + Style Name ---- */}
                 <motion.div variants={childVariants}>
                   <div className="relative rounded-[1.5rem] border-[0.75px] border-border p-3">
@@ -752,9 +752,9 @@ export default function Analysis() {
                     <Layers className="w-4 h-4 mr-2" /> Open Dressing Room
                   </Button>
                 </motion.div>
-              </React.Fragment>
+              </>
             ) : (
-              <React.Fragment>
+              <>
                 {analysisFailed && imagePreview ? (
                   <motion.div variants={childVariants} className="text-center py-12">
                     <AlertTriangle className="h-16 w-16 text-amber-500/70 mx-auto mb-4" />
@@ -782,7 +782,7 @@ export default function Analysis() {
                     </p>
                   </motion.div>
                 )}
-              </React.Fragment>
+              </>
             )}
 
             {/* ---- History ---- */}
