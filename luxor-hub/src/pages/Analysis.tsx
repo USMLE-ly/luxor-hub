@@ -87,7 +87,7 @@ function CircularScore({ score, size = 112 }: { score: number | null; size?: num
             N/A
           </motion.span>
         ) : (
-          <>
+          <React.Fragment>
             <motion.span
               className="text-2xl font-bold gold-text"
               initial={{ opacity: 0, scale: 0.5 }}
@@ -96,7 +96,7 @@ function CircularScore({ score, size = 112 }: { score: number | null; size?: num
             >
               {score}
             </motion.span>
-          </>
+          </React.Fragment>
         )}
         <span className="text-[9px] text-muted-foreground -mt-1">/ 100</span>
       </div>
@@ -294,6 +294,7 @@ export default function Analysis() {
   const [data, setData] = useState<OutfitData | null>(null);
   const [loading, setLoading] = useState(false);
   const [savedId, setSavedId] = useState<string | null>(null);
+  const [analysisFailed, setAnalysisFailed] = useState(false);
   const [saving, setSaving] = useState(false);
   const [history, setHistory] = useState<SavedAnalysis[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -378,6 +379,7 @@ export default function Analysis() {
     });
 
   const analyzeOutfit = async (file: File) => {
+    setAnalysisFailed(false);
     setLoading(true);
     try {
       // Compress first — phone photos are 3-12 MB, this shrinks them to ~100-200 KB
@@ -402,11 +404,10 @@ export default function Analysis() {
         // source is 'fallback' (from Replit) or 'local' — retry
       }
       // All retries exhausted — silently reset to upload state, no toast
-      if (!fnData || fnData.source !== 'cipher_vision') {
+      if (!fnData || fnData.source !== "cipher_vision") {
         setData(null);
-        setImagePreview(null);
-        setImageFile(null);
-        setSavedId(null);
+        setAnalysisFailed(true);
+        toast.error("Analysis timed out. Tap Retry to try again.");
         return;
       }
 
@@ -634,7 +635,7 @@ export default function Analysis() {
             animate="show"
           >
             {data ? (
-              <>
+              <React.Fragment>
                 {/* ---- Score + Style Name ---- */}
                 <motion.div variants={childVariants}>
                   <div className="relative rounded-[1.5rem] border-[0.75px] border-border p-3">
@@ -751,16 +752,37 @@ export default function Analysis() {
                     <Layers className="w-4 h-4 mr-2" /> Open Dressing Room
                   </Button>
                 </motion.div>
-              </>
+              </React.Fragment>
             ) : (
-              /* ---- Empty state ---- */
-              <motion.div variants={childVariants} className="text-center py-12">
-                <Camera className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="font-display text-xl text-foreground mb-2">Upload an outfit to begin</h3>
-                <p className="text-muted-foreground text-sm max-w-sm mx-auto">
-                  Tap the camera area on the left to upload a photo. The AI will analyze your style, colors, and fit.
-                </p>
-              </motion.div>
+              <React.Fragment>
+                {analysisFailed && imagePreview ? (
+                  <motion.div variants={childVariants} className="text-center py-12">
+                    <AlertTriangle className="h-16 w-16 text-amber-500/70 mx-auto mb-4" />
+                    <h3 className="font-display text-xl text-foreground mb-2">Analysis timed out</h3>
+                    <p className="text-muted-foreground text-sm max-w-sm mx-auto mb-6">
+                      The AI took too long to respond. You can retry with a longer timeout, or upload a different photo.
+                    </p>
+                    <div className="flex items-center justify-center gap-3">
+                      <Button onClick={() => { if (imageFile) analyzeOutfit(imageFile); }} disabled={loading} variant="default" className="gap-2">
+                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                        {loading ? "Analyzing..." : "🔄 Retry Analysis"}
+                      </Button>
+                      <Button onClick={() => { setImagePreview(null); setImageFile(null); setAnalysisFailed(false); }} variant="outline" className="gap-2">
+                        <Upload className="w-4 h-4" /> Upload new photo
+                      </Button>
+                    </div>
+                  </motion.div>
+                ) : (
+                  /* ---- Empty state ---- */
+                  <motion.div variants={childVariants} className="text-center py-12">
+                    <Camera className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="font-display text-xl text-foreground mb-2">Upload an outfit to begin</h3>
+                    <p className="text-muted-foreground text-sm max-w-sm mx-auto">
+                      Tap the camera area on the left to upload a photo. The AI will analyze your style, colors, and fit.
+                    </p>
+                  </motion.div>
+                )}
+              </React.Fragment>
             )}
 
             {/* ---- History ---- */}
