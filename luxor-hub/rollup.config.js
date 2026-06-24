@@ -20,6 +20,25 @@ export default {
     sourcemap: false,
   },
   plugins: [
+    // typescript MUST run before resolve so it handles .ts/.tsx before rollup parses them
+    typescript({
+      tsconfig: './tsconfig.json',
+      compilerOptions: {
+        noEmit: false,
+        declaration: false,
+        sourceMap: false,
+        inlineSourceMap: false,
+        inlineSources: false,
+        target: 'es2020',
+        jsx: 'react-jsx',
+        module: 'esnext',
+        moduleResolution: 'bundler',
+        skipLibCheck: true,
+        allowImportingTsExtensions: true,
+      },
+      include: ['src/**/*.ts', 'src/**/*.tsx'],
+      exclude: ['node_modules', '**/*.d.ts'],
+    }),
     alias({
       entries: [
         { find: '@', replacement: path.resolve(__dirname, 'src') },
@@ -39,15 +58,6 @@ export default {
       extensions: ['.mjs', '.js', '.ts', '.tsx', '.json', '.jsx'],
     }),
     commonjs(),
-    typescript({
-      tsconfig: './tsconfig.json',
-      compilerOptions: {
-        noEmit: false,
-        declaration: false,
-        sourceMap: false,
-        inlineSourceMap: false,
-      },
-    }),
     postcss({
       extract: true,
       minimize: false,
