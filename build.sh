@@ -1,19 +1,31 @@
 #!/bin/sh
 set -e
 cd luxor-hub
-rm -rf node_modules/.vite node_modules/.cache
+rm -rf dist node_modules/.cache
 
-NODE_OPTIONS="--max-old-space-size=768" npm install --ignore-scripts=false
+NODE_OPTIONS="--max-old-space-size=1024" npm install --ignore-scripts=false
 
-if [ -f node_modules/@esbuild/linux-x64/bin/esbuild ]; then
-  cp node_modules/@esbuild/linux-x64/bin/esbuild /tmp/esbuild-bin
-  chmod +x /tmp/esbuild-bin
-  export ESBUILD_BINARY_PATH=/tmp/esbuild-bin
-fi
+# Build with Rollup — pure JS/toolchain, no Go/WASM binary needed
+NODE_OPTIONS="--max-old-space-size=1024" npx rollup -c rollup.config.js
 
-# GOMEMLIMIT caps Go binary at 350MB, GOGC=25 forces frequent GC
-# Node limited to 768MB to leave room for Go
-GOMEMLIMIT=350MiB GOGC=25 NODE_OPTIONS="--max-old-space-size=768" UV_THREADPOOL_SIZE=2 npx vite build
+# Generate index.html (fixed filenames since we disabled hashes)
+cat > dist/index.html << 'HTML'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Luxor — AI Fashion Style</title>
+  <link rel="stylesheet" href="/assets/index.css" />
+  <script>window.globalThis ||= window;</script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/assets/index.js"></script>
+</body>
+</html>
+HTML
 
 mkdir -p ../dist
 cp -r dist/. ../dist/
+echo "Build complete: $(wc -c < dist/assets/index.js) bytes JS"
