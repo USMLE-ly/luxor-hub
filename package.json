@@ -2,7 +2,7 @@
   "name": "luxor-hub",
   "private": true,
   "scripts": {
-    "build": "cd luxor-hub && rm -rf node_modules/.vite node_modules/.cache && NODE_OPTIONS=\"--max-old-space-size=2048\" npm install && npm run build && mkdir -p ../dist && cp -r dist/. ../dist/",
+    "build": "sh build.sh",
     "dev": "cd luxor-hub && npm install && npm run dev",
     "preview": "cd luxor-hub && npm run preview"
   },
