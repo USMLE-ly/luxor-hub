@@ -9,7 +9,5 @@
   "overrides": {
     "rollup": "4.21.3"
   },
-  "dependencies": {
-    "esbuild": "^0.25.0"
-  }
+  "dependencies": {}
 }
