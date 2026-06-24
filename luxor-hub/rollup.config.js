@@ -1,4 +1,3 @@
-import typescript from '@rollup/plugin-typescript';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import postcss from 'rollup-plugin-postcss';
@@ -6,8 +5,61 @@ import replace from '@rollup/plugin-replace';
 import alias from '@rollup/plugin-alias';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const require = createRequire(import.meta.url);
+
+// Custom plugin: compile .ts/.tsx to JS using tsc BEFORE rollup parses
+function typescriptPrecompile() {
+  const ts = require('typescript');
+  const sourceCache = new Map();
+
+  return {
+    name: 'ts-precompile',
+    resolveId(id, importer) {
+      if (!id.startsWith('.') && !id.startsWith('@') && !id.startsWith('/')) return null;
+      // Let the resolve plugin handle actual resolution
+      return null;
+    },
+    load(id) {
+      if (!id.match(/\.tsx?$/)) return null;
+      // Don't actually load here — let transform handle it
+      return null;
+    },
+    transform(code, id) {
+      if (!id.match(/\.tsx?$/)) return null;
+
+      let compilerOptions = {
+        module: ts.ModuleKind.ESNext,
+        target: ts.ScriptTarget.ES2020,
+        jsx: ts.JsxEmit.ReactJSX,
+        sourceMap: false,
+        inlineSourceMap: false,
+        inlineSources: false,
+        skipLibCheck: true,
+        strict: false,
+        noEmit: false,
+        allowJs: true,
+        esModuleInterop: true,
+        moduleResolution: ts.ModuleResolutionKind.Bundler,
+        allowImportingTsExtensions: true,
+        isolatedModules: true,
+        declaration: false,
+      };
+
+      const result = ts.transpileModule(code, {
+        compilerOptions,
+        fileName: id,
+      });
+
+      return {
+        code: result.outputText,
+        map: null,
+      };
+    }
+  };
+}
 
 export default {
   input: 'src/main.tsx',
@@ -20,25 +72,7 @@ export default {
     sourcemap: false,
   },
   plugins: [
-    // typescript MUST run before resolve so it handles .ts/.tsx before rollup parses them
-    typescript({
-      tsconfig: './tsconfig.json',
-      compilerOptions: {
-        noEmit: false,
-        declaration: false,
-        sourceMap: false,
-        inlineSourceMap: false,
-        inlineSources: false,
-        target: 'es2020',
-        jsx: 'react-jsx',
-        module: 'esnext',
-        moduleResolution: 'bundler',
-        skipLibCheck: true,
-        allowImportingTsExtensions: true,
-      },
-      include: ['src/**/*.ts', 'src/**/*.tsx'],
-      exclude: ['node_modules', '**/*.d.ts'],
-    }),
+    typescriptPrecompile(),
     alias({
       entries: [
         { find: '@', replacement: path.resolve(__dirname, 'src') },
