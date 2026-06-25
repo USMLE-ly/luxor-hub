@@ -314,7 +314,7 @@ def closet_add():
     if not label and not image_b64:
         return jsonify({"error": "Need label or image"}), 400
     items = load_closet()
-    new_item = {"id": str(uuid.uuid4())[:8], "type": item_type, "color": color, "category": category, "label": label, "has_image": bool(image_b64), "created_at": datetime.utcnow().isoformat()}
+    new_item = {"id": str(uuid.uuid4())[:8], "type": item_type, "color": color, "category": category, "label": label, "has_image": bool(image_b64), "created_at": datetime.now(datetime.timezone.utc).isoformat()}
     items.append(new_item)
     save_closet(items)
     return jsonify({"success": True, "item": new_item})
@@ -416,3 +416,4 @@ if __name__ == "__main__":
     _log.info("  Groq: %s", "ENABLED" if GROQ_API_KEY else "DISABLED")
     _log.info("=" * 54)
     app.run(host="0.0.0.0", port=PORT, debug=False)
+
