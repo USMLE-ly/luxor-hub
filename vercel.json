@@ -8,9 +8,9 @@
       "src": "luxor-hub/package.json",
       "use": "@vercel/static-build",
       "config": {
-        "installCommand": "cd luxor-hub && npm install",
-        "buildCommand": "cd luxor-hub && npm run build",
-        "outputDirectory": "dist"
+        "installCommand": "cd luxor-hub && npm install --ignore-scripts",
+        "buildCommand": "cd luxor-hub && sh ../build.sh",
+        "outputDirectory": "../dist"
       }
     }
   ],
