@@ -1,2 +1,2 @@
-run = "python -m pip install gunicorn flask flask-cors requests python-dotenv Pillow qdrant-client --break-system-packages && python -m gunicorn main:app --bind 0.0.0.0:5000 --timeout 120 --worker-tmp-dir /dev/shm --preload"
+run = "pip install gunicorn flask flask-cors requests python-dotenv Pillow qdrant-client --break-system-packages && gunicorn main:app --bind 0.0.0.0:5000 --timeout 120 --worker-tmp-dir /dev/shm --preload"
 modules = ["python-3.11"]
