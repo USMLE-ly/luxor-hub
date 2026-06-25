@@ -601,51 +601,6 @@ export default function Analysis() {
   };
 
   /* ---------- Pre-computed lists ---------- */
-  const itemsList = (data && data.items_detected && data.items_detected.length > 0)
-    ? data.items_detected.map((item, i) => (
-        <motion.li
-          key={i}
-          variants={itemAnim}
-          whileHover={{ scale: 1.02, x: 4 }}
-          className="flex items-center gap-3 p-3 rounded-xl bg-muted/20 border border-border/40 hover:bg-muted/30 transition-colors"
-        >
-          <div
-            className="w-5 h-5 rounded-full border-2 border-border/50 shadow-sm flex-shrink-0"
-            style={{ backgroundColor: (data.actual_colors && data.actual_colors[i]) ? data.actual_colors[i] : '#666' }}
-          />
-          <span className="text-sm text-foreground">{item}</span>
-        </motion.li>
-      ))
-    : (
-        <li className="flex items-center gap-3 p-3 rounded-xl bg-muted/10 border border-dashed border-border/30">
-          <div className="w-2 h-2 rounded-full bg-muted-foreground/20" />
-          <span className="text-sm text-muted-foreground/50 italic">Awaiting analysis...</span>
-        </li>
-      );
-
-  const strengthsList = (data && data.strengths && data.strengths.length > 0)
-    ? data.strengths.map((s, i) => (
-        <motion.li
-          key={i}
-          variants={itemAnim}
-          whileHover={{ scale: 1.02, x: 4 }}
-          className="flex items-center gap-3 p-3 rounded-xl border-l-2 border-green-500/40 bg-green-500/5"
-        >
-          <Star className="w-4 h-4 text-green-500 flex-shrink-0" />
-          <span className="text-sm text-foreground">{s}</span>
-        </motion.li>
-      ))
-    : (
-        <li className="flex items-center gap-3 p-3 rounded-xl border-l-2 border-muted/20 bg-muted/5">
-          <span className="text-sm text-muted-foreground/50 italic">Awaiting analysis...</span>
-        </li>
-      );
-
-
-  return (
-    <AppLayout>
-      <div className="p-4 md:p-8 mx-auto max-w-7xl space-y-8 overflow-x-hidden">
-
         {/* ---------- HEADER ---------- */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="relative">
           <div className="absolute -top-4 -left-4 w-32 h-32 bg-primary/10 rounded-full blur-[60px]" />
@@ -745,52 +700,6 @@ export default function Analysis() {
 
 
 
-                {/* ---- 2‑col: Items + Strengths ---- */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Items */}
-                  <motion.div variants={childVariants}>
-                    <Card className="glass-card h-full">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="font-display flex items-center gap-2 text-base">
-                          <div className="w-0.5 h-4 gold-gradient rounded-full mr-1" />
-                          <Shirt className="w-5 h-5 text-primary" /> Items Detected
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <motion.ul
-                          variants={container}
-                          initial="hidden"
-                          animate="show"
-                          className="space-y-2"
-                        >
-                          {itemsList}
-                        </motion.ul>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-
-                  {/* Strengths */}
-                  <motion.div variants={childVariants}>
-                    <Card className="glass-card h-full">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="font-display flex items-center gap-2 text-base">
-                          <div className="w-0.5 h-4 gold-gradient rounded-full mr-1" />
-                          <ShieldCheck className="w-5 h-5 text-green-500" /> Strengths
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <motion.ul
-                          variants={container}
-                          initial="hidden"
-                          animate="show"
-                          className="space-y-2"
-                        >
-                                                    {strengthsList}                       </motion.ul>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                </div>
-
                 {/* ---- Cosmic Advice & Style Diagrams ---- */}
                 <motion.div variants={childVariants}>
                   <div className="relative rounded-[1.5rem] border-[0.75px] border-border p-3">
@@ -860,14 +769,30 @@ export default function Analysis() {
                               <Eye className="w-3 h-3" /> Items Detected
                             </motion.p>
                             <motion.div variants={itemAnim} className="flex flex-wrap gap-2">
-                              {data.items_detected.map((item, idx) => {
-                                const colors = ["border-primary/30 bg-primary/5", "border-blue-500/30 bg-blue-500/5", "border-green-500/30 bg-green-500/5", "border-amber-500/30 bg-amber-500/5", "border-purple-500/30 bg-purple-500/5"];
-                                return (
-                                  <Badge key={idx} variant="outline" className={`text-xs ${colors[idx % colors.length]} backdrop-blur-sm`}>
+                              {(data.actual_colors && data.actual_colors.length > 0)
+                              ? data.items_detected.map((item, idx) => {
+                                  const colorMap = {
+                                    "Pink": "bg-pink-500", "Red": "bg-red-500", "Blue": "bg-blue-500",
+                                    "Black": "bg-gray-900", "White": "bg-white border border-border",
+                                    "Cream": "bg-yellow-100", "Green": "bg-green-500", "Brown": "bg-amber-800",
+                                    "Gold": "bg-yellow-500", "Silver": "bg-gray-300", "Navy": "bg-blue-900",
+                                    "Tan": "bg-amber-200", "Beige": "bg-amber-100", "Yellow": "bg-yellow-400",
+                                    "Grey": "bg-gray-400", "Orange": "bg-orange-500",
+                                  };
+                                  const colorName = data.actual_colors[idx] || "";
+                                  const dotClass = colorName ? (colorMap[colorName] || "bg-gray-400") : "bg-gray-400";
+                                  return (
+                                    <Badge key={idx} variant="outline" className="text-xs border-primary/30 bg-primary/5 backdrop-blur-sm flex items-center gap-1.5">
+                                      <span className={"w-2 h-2 rounded-full inline-block " + dotClass} />
+                                      {item}
+                                    </Badge>
+                                  );
+                                })
+                              : data.items_detected.map((item, idx) => (
+                                  <Badge key={idx} variant="outline" className="text-xs border-primary/30 bg-primary/5 backdrop-blur-sm">
                                     {item}
                                   </Badge>
-                                );
-                              })}
+                                ))}
                             </motion.div>
                           </motion.div>
                         )}
