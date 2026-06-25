@@ -44,7 +44,7 @@ GROQ_TEXT_MODEL = os.getenv("GROQ_TEXT_MODEL", "llama-3.1-8b-instant")
 
 CIPHER_MAX_TOKENS = int(os.getenv("CIPHER_MAX_TOKENS", "1200"))
 PORT = int(os.getenv("PORT", "5000"))
-ANALYSIS_TIMEOUT = int(os.getenv("ANALYSIS_TIMEOUT", "60"))
+ANALYSIS_TIMEOUT = int(os.getenv("ANALYSIS_TIMEOUT", "90"))
 
 _log.info("Groq key loaded: %s", bool(GROQ_API_KEY))
 _log.info("Vision model: %s", GROQ_VISION_MODEL)
@@ -110,11 +110,11 @@ def compress_image_b64(image_b64: str) -> str:
         raw = base64.b64decode(image_b64)
         img = Image.open(io.BytesIO(raw))
         w, h = img.size
-        if max(w, h) > 256:
-            ratio = 256.0 / max(w, h)
+        if max(w, h) > 128:
+            ratio = 128.0 / max(w, h)
             img = img.resize((int(w * ratio), int(h * ratio)), _RESAMPLE_LANCZOS)
         buf = io.BytesIO()
-        img.convert("RGB").save(buf, format="JPEG", quality=60, optimize=True)
+        img.convert("RGB").save(buf, format="JPEG", quality=50, optimize=True)
         return base64.b64encode(buf.getvalue()).decode()
     except Exception as exc:
         _log.warning("[COMPRESS] %s", exc)
@@ -138,7 +138,7 @@ def call_groq_vision(image_b64: str, system_prompt: str = SACRED_PROMPT, tempera
         "temperature": temperature,
     }
     try:
-        resp = requests.post(GROQ_API_URL, json=payload, headers=headers, timeout=30)
+        resp = requests.post(GROQ_API_URL, json=payload, headers=headers, timeout=60)
         if resp.status_code == 200:
             raw = resp.json()["choices"][0]["message"]["content"]
             match = re.search(r"\{[\s\S]*\}", raw)
@@ -394,7 +394,7 @@ def debug_analyze():
     headers = {"Content-Type": "application/json", "Authorization": f"Bearer {GROQ_API_KEY}"}
     payload = {"model": GROQ_VISION_MODEL, "messages": [{"role": "user", "content": [{"type": "text", "text": SACRED_PROMPT}, {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{compressed}", "detail": "low"}}]}], "max_tokens": CIPHER_MAX_TOKENS, "temperature": 0.2}
     try:
-        resp = requests.post(GROQ_API_URL, json=payload, headers=headers, timeout=30)
+        resp = requests.post(GROQ_API_URL, json=payload, headers=headers, timeout=60)
         return jsonify({"status": "success" if resp.status_code == 200 else "error", "code": resp.status_code, "text": resp.text[:500] if resp.status_code != 200 else "", "raw": resp.json() if resp.status_code == 200 else {}})
     except Exception as e:
         return jsonify({"status": "exception", "error": str(e)})
