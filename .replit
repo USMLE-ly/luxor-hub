@@ -1,4 +1,4 @@
-run = "gunicorn main:app --bind 0.0.0.0:\$PORT --timeout 120 --worker-tmp-dir /dev/shm --log-level warning"
+run = 'gunicorn main:app --bind 0.0.0.0:$PORT --timeout 120 --worker-tmp-dir /dev/shm --log-level warning'
 modules = ["python-3.11"]
 
 [agent]
@@ -33,7 +33,7 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "gunicorn --bind 0.0.0.0:\$PORT --reuse-port --preload --timeout=120 --worker-tmp-dir /dev/shm --log-level warning main:app"
+args = 'gunicorn --bind 0.0.0.0:$PORT --reuse-port --preload --timeout=120 --worker-tmp-dir /dev/shm --log-level warning main:app'
 waitForPort = 5000
 
 [workflows.workflow.metadata]
