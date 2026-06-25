@@ -14,7 +14,7 @@ import time
 import urllib.parse
 import uuid
 from concurrent.futures import ThreadPoolExecutor, TimeoutError
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, Dict, Any, List
 
 import requests
@@ -314,7 +314,7 @@ def closet_add():
     if not label and not image_b64:
         return jsonify({"error": "Need label or image"}), 400
     items = load_closet()
-    new_item = {"id": str(uuid.uuid4())[:8], "type": item_type, "color": color, "category": category, "label": label, "has_image": bool(image_b64), "created_at": datetime.now(datetime.timezone.utc).isoformat()}
+    new_item = {"id": str(uuid.uuid4())[:8], "type": item_type, "color": color, "category": category, "label": label, "has_image": bool(image_b64), "created_at": datetime.now(timezone.utc).isoformat()}
     items.append(new_item)
     save_closet(items)
     return jsonify({"success": True, "item": new_item})
