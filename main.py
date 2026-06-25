@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
-"""
-Luxor Pro Stylist — Fashion Analysis & Interactive Ecosystem
-Groq Vision · Stylist Quiz · Closet Management · Outfit Generator
-SSL Ready · Vercel Compatible
-"""
+# Luxor Pro Stylist — Fashion Analysis & Interactive Ecosystem
+# Groq Vision · Stylist Quiz · Closet Management · Outfit Generator
+# SSL Ready · Vercel Compatible
 import base64
 import io
 import json
@@ -416,4 +414,3 @@ if __name__ == "__main__":
     _log.info("  Groq: %s", "ENABLED" if GROQ_API_KEY else "DISABLED")
     _log.info("=" * 54)
     app.run(host="0.0.0.0", port=PORT, debug=False)
-
