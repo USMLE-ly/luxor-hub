@@ -380,6 +380,30 @@ def dressing_generate():
     return jsonify({"success": True, "outfit_name": name, "outfit_description": desc, "selected_items": selected, "selected_ids": selected_ids, "image_url": img_url})
 
 # ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# Stylist Generate (Pollinations-only, no Groq dependency)
+# ---------------------------------------------------------------------------
+@app.route("/api/v1/stylist-generate", methods=["POST", "OPTIONS"])
+def stylist_generate():
+    if request.method == "OPTIONS":
+        return "", 204
+    data = request.get_json(silent=True) or {}
+    vibe = data.get("vibe", "Casual")
+    weather = data.get("weather", "Mild")
+    color = data.get("color", "Neutrals")
+    
+    prompt = f"High fashion editorial photograph of a woman wearing a {vibe} style outfit, designed for {weather} weather, using a {color} color palette. Photorealistic, soft lighting, stylish setting."
+    safe = urllib.parse.quote(prompt)
+    seed = int(time.time() * 1000)
+    image_url = f"https://image.pollinations.ai/prompt/{safe}?width=1024&height=1024&nologin=true&seed={seed}"
+    
+    return jsonify({
+        "success": True,
+        "image_url": image_url,
+        "description": f"A {color} {vibe} outfit for {weather} weather."
+    })
+
 # Debug & Health
 # ---------------------------------------------------------------------------
 @app.route("/debug/analyze", methods=["POST"])
