@@ -470,7 +470,7 @@ export default function Analysis() {
           await new Promise(r => setTimeout(r, 2000 * attempt));
         }
         const controller = new AbortController();
-        const abortTimer = setTimeout(() => controller.abort(), 60000);
+        const abortTimer = setTimeout(() => controller.abort(), 120000);
         try {
           const response = await fetch(apiUrl + '/api/v1/analyze-outfit', {
             method: 'POST',
