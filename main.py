@@ -22,9 +22,17 @@ from PIL import Image
 from dotenv import load_dotenv
 
 # Qdrant + Vercel Blob
-from qdrant_client import QdrantClient
+try:
+    from qdrant_client import QdrantClient
+    from qdrant_client.http import models as qdrant_models
+except ImportError:
+    QdrantClient = None
+    qdrant_models = None
 from qdrant_client.http import models as qdrant_models
-from vercel_blob import put as blob_put
+try:
+    from vercel_blob import put as blob_put
+except ImportError:
+    blob_put = None
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 load_dotenv(os.path.join(BASE_DIR, ".env"))
@@ -601,12 +609,3 @@ def health():
 # ---------------------------------------------------------------------------
 # Entrypoint
 # ---------------------------------------------------------------------------
-if __name__ == "__main__":
-    _log.info("=" * 54)
-    _log.info("  LUXOR FASHION OMEGA v6 (Qdrant + Blob)")
-    _log.info("  Port: %d", PORT)
-    _log.info("  Groq: %s", "ENABLED" if GROQ_API_KEY else "DISABLED")
-    _log.info("  Blob: %s", "ENABLED" if BLOB_READ_WRITE_TOKEN else "DISABLED")
-    _log.info("  Qdrant: %s", "ENABLED" if QDRANT_URL and QDRANT_API_KEY else "DISABLED")
-    _log.info("=" * 54)
-    app.run(host="0.0.0.0", port=PORT, debug=False)

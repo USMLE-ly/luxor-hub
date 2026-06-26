@@ -1,0 +1,10 @@
+.git
+.gitignore
+*.md
+*.bak
+__pycache__
+*.pyc
+.env
+closet_items.json
+knowledge_base
+media-tools
