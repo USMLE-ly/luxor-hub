@@ -3,6 +3,5 @@ flask-cors==5.0.1
 requests==2.32.3
 python-dotenv==1.1.0
 Pillow==11.1.0
-gunicorn==23.0.0
 qdrant-client>=1.12
 vercel-blob>=0.4
