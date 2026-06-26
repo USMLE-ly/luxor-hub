@@ -26,7 +26,7 @@ from qdrant_client import QdrantClient
 from qdrant_client.http import models as qdrant_models
 from vercel_blob import put as blob_put
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # project root (parent of api/)
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 
 _RESAMPLE_LANCZOS = Image.Resampling.LANCZOS
