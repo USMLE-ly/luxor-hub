@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
-echo "[BUILD] Copying pre-built luxor-hub/dist/ to root dist/"
-mkdir -p dist
-cp -r luxor-hub/dist/. dist/
+echo "[BUILD] Installing frontend dependencies..."
+cd luxor-hub && npm install
+echo "[BUILD] Building frontend..."
+npm run build
+echo "[BUILD] Copying dist to root..."
+mkdir -p ../dist
+cp -r dist/. ../dist/
 echo "[BUILD] dist ready"
