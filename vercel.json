@@ -1,10 +1,6 @@
 {
   "builds": [
     {
-      "src": "api/**/*.py",
-      "use": "@vercel/python"
-    },
-    {
       "src": "luxor-hub/package.json",
       "use": "@vercel/static-build",
       "config": {
@@ -14,7 +10,8 @@
       }
     }
   ],
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index.py" }
+  "routes": [
+    { "handle": "filesystem" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
