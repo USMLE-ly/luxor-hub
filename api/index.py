@@ -243,7 +243,15 @@ REQUIRED_KEYS = [
 # Image compression
 # ---------------------------------------------------------------------------
 def compress_image_b64(image_b64: str) -> str:
+    """Safely compress a base64 image. Handles data-URL headers, missing padding."""
     try:
+        # Strip optional data-URL header
+        if ',' in image_b64:
+            image_b64 = image_b64.split(',', 1)[1]
+        # Fix missing base64 padding
+        missing = len(image_b64) % 4
+        if missing:
+            image_b64 += '=' * (4 - missing)
         raw = base64.b64decode(image_b64)
         img = Image.open(io.BytesIO(raw))
         w, h = img.size
@@ -254,7 +262,7 @@ def compress_image_b64(image_b64: str) -> str:
         img.convert("RGB").save(buf, format="JPEG", quality=50, optimize=True)
         return base64.b64encode(buf.getvalue()).decode()
     except Exception as exc:
-        _log.warning("[COMPRESS] %s", exc)
+        _log.warning("[COMPRESS] %s — returning original", exc)
         return image_b64
 
 # ---------------------------------------------------------------------------
