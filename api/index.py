@@ -275,7 +275,7 @@ def _extract_image_features(image_b64: str) -> str:
         img = Image.open(io.BytesIO(raw))
         # Resize for speed
         img_small = img.resize((32, 48), Image.Resampling.LANCZOS)
-        pixels = list(img_small.getdata())
+        pixels = list(img_small.getdata())  # type: ignore[arg-type]
         
         # Find dominant colors using simple quantization
         from collections import Counter
@@ -337,7 +337,8 @@ def _extract_image_features(image_b64: str) -> str:
         
         # Simple brightness analysis
         gray = img.convert('L')
-        avg_brightness = sum(gray.getdata()) / len(list(gray.getdata()))
+        raw_pixels = list(gray.getdata())  # type: ignore[arg-type]
+        avg_brightness = sum(raw_pixels) / len(raw_pixels)
         features.append(f"Average brightness: {avg_brightness:.0f}/255")
         
         if avg_brightness < 80:
