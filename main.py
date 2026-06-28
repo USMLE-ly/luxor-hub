@@ -32,6 +32,10 @@ try:
     from vercel_blob import put as blob_put
 except ImportError:
     blob_put = None  # type: ignore[assignment]
+try:
+    from pypdf import PdfReader
+except ImportError:
+    PdfReader = None  # type: ignore[assignment]
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 load_dotenv(os.path.join(BASE_DIR, ".env"), override=True)
@@ -567,7 +571,7 @@ def _get_dominant_colors_from_pixels(image_b64: str, num_colors: int = 3) -> Lis
         img = Image.open(io.BytesIO(raw))
         # Resize for speed
         img = img.resize((64, 96), Image.Resampling.LANCZOS)
-        pixels = list(img.getdata())
+        pixels = [p for p in img.getdata()]
         
         # Simple color quantization using average of similar pixels
         from collections import Counter
@@ -691,7 +695,7 @@ def _extract_image_features(image_b64: str) -> str:
         
         # Simple brightness analysis
         gray = img.convert('L')
-        raw_pixels = list(gray.getdata())  # type: ignore[arg-type]
+        raw_pixels = [p for p in gray.getdata()]  # type: ignore[arg-type]
         avg_brightness = sum(raw_pixels) / len(raw_pixels)
         features.append(f"Average brightness: {avg_brightness:.0f}/255")
         
@@ -1146,9 +1150,8 @@ def upload_color_pdf():
                 "note": "The built-in color dictionary with 130 fashion colors is already loaded."
             }), 400
         
-        # Try to parse color patterns: "ColorName: #HEX" or "Color Name (#HEX)" or similar
-        import re as _re
         found_colors = {}
+        import re as _re
         
         # Pattern 1: "ColorName: #HEX" or "ColorName - #HEX"
         for match in _re.finditer(r'([A-Za-z]+(?:\s+[A-Za-z]+)*)\s*[:\-]\s*#([0-9A-Fa-f]{6})', extracted_text):
@@ -1243,9 +1246,8 @@ def upload_color_pdf():
                 "note": "The built-in color dictionary with 130 fashion colors is already loaded."
             }), 400
         
-        # Try to parse color patterns: "ColorName: #HEX" or "Color Name (#HEX)" or similar
-        import re as _re
         found_colors = {}
+        import re as _re
         
         # Pattern 1: "ColorName: #HEX" or "ColorName - #HEX"
         for match in _re.finditer(r'([A-Za-z]+(?:\s+[A-Za-z]+)*)\s*[:\-]\s*#([0-9A-Fa-f]{6})', extracted_text):
