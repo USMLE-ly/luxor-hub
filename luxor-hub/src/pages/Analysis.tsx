@@ -197,7 +197,7 @@ function InteractiveStylistQuiz({ imagePreview, styleName, actualColors }: { ima
       const newHistory = [...chatHistory, { role: "user", text: answer }];
       setChatHistory(newHistory);
 
-      const api = 'https://python--libyausmle.replit.app';
+      const api = 'https://nice-useful-plot--al-bosify.replit.app';
       const resp = await fetch(api + '/api/v1/stylist-explore', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -461,7 +461,7 @@ export default function Analysis() {
     try {
       // Compress first — phone photos are 3-12 MB, this shrinks them to ~100-200 KB
       const b64 = await compressImage(file);
-      const apiUrl = 'https://python--libyausmle.replit.app';
+      const apiUrl = 'https://nice-useful-plot--al-bosify.replit.app';
 
       // Retry loop — Cipher Vision can be slow; retry with backoff instead of giving up
       let fnData: any = null;
