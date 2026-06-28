@@ -369,7 +369,7 @@ SACRED_PROMPT = """You are a hyper-rigorous fashion CLASSIFICATION AI, not a gen
 4. If a body part or garment is not visible, set it to "None" — do NOT guess.
 5. Do NOT describe fabric texture or material unless it is completely obvious.
 
-The photo has been preprocessed to remove the background. You will see the person on a near-black background. IGNORE THE BLACK BACKGROUND.
+The photo has been preprocessed to REMOVE THE BACKGROUND. You will see the person isolated on a WHITE background. IGNORE THE WHITE BACKGROUND and focus ONLY on the person's clothing.
 
 Return ONLY this EXACT JSON. No conversation. No markdown. No explanation.
 {
@@ -419,61 +419,83 @@ REQUIRED_KEYS = [
 # Image compression
 # ---------------------------------------------------------------------------
 def _extract_person_center_crop(image_b64: str) -> str:
-    """Use MediaPipe to mask background, or fall back to center-crop."""
+    """Completely separate person from background using MediaPipe selfie segmentation.
+    Returns the person on a white background, tightly cropped."""
     try:
         raw = base64.b64decode(image_b64)
         img = Image.open(io.BytesIO(raw)).convert('RGB')
+        w, h = img.size
         img_np = np.array(img)
 
+        # === PHASE 1: Try MediaPipe for full person extraction ===
         if _HAS_MEDIAPIPE and SelfieSegmentation is not None and cv2 is not None:
-            # Use high-accuracy model (model_selection=1) for full-body segmentation
-            cv_img = cv2.cvtColor(img_np, cv2.COLOR_RGB2BGR)
-            with SelfieSegmentation(model_selection=1) as segmentation:
-                results = segmentation.process(cv_img)
-                if results.segmentation_mask is not None:
-                    mask = results.segmentation_mask
-                    # Aggressive threshold - only keep pixels that are DEFINITELY the person
-                    condition = mask > 0.6  # Higher threshold = less background bleed
-                    # Create LIGHT GREY background (RGB 200,200,200) so AI clearly sees it as background
-                    masked_img = np.full_like(img_np, 200)  # Light grey, clearly not clothing
-                    masked_img[condition] = img_np[condition]
-                    # Convert masked image back to PIL
-                    masked_pil = Image.fromarray(masked_img)
-                    # Get bounding box of person pixels to crop tightly
-                    non_zero = np.argwhere(condition)
-                    if len(non_zero) > 0:
-                        y_min, x_min = non_zero.min(axis=0)
-                        y_max, x_max = non_zero.max(axis=0)
-                        # Add 8% padding for context
-                        pad_y = int((y_max - y_min) * 0.08)
-                        pad_x = int((x_max - x_min) * 0.08)
-                        y_min = max(0, y_min - pad_y)
-                        y_max = min(masked_img.shape[0], y_max + pad_y)
-                        x_min = max(0, x_min - pad_x)
-                        x_max = min(masked_img.shape[1], x_max + pad_x)
-                        cropped_person = masked_pil.crop((x_min, y_min, x_max, y_max))
-                        buf = io.BytesIO()
-                        cropped_person.save(buf, format="JPEG", quality=95)
-                        return base64.b64encode(buf.getvalue()).decode()
-                    # Fallback: save full masked image
-                    buf = io.BytesIO()
-                    masked_pil.save(buf, format="JPEG", quality=95)
-                    return base64.b64encode(buf.getvalue()).decode()
+            try:
+                # Try full model first, fall back to lite model
+                for model_sel in [1, 0]:
+                    try:
+                        cv_img = cv2.cvtColor(img_np, cv2.COLOR_RGB2BGR)
+                        with SelfieSegmentation(model_selection=model_sel) as seg:
+                            results = seg.process(cv_img)
+                            if results is not None and results.segmentation_mask is not None:
+                                mask = results.segmentation_mask
+                                # Lower threshold to capture full person (edges, hair, accessories)
+                                person_mask = mask > 0.4
+                                
+                                # Create WHITE background (RGB 255) for maximum contrast with any clothing
+                                isolated = np.full_like(img_np, 255)
+                                isolated[person_mask] = img_np[person_mask]
+                                
+                                # Tightly crop to person with 5% padding
+                                non_zero = np.argwhere(person_mask)
+                                if len(non_zero) > 100:  # Valid person detected
+                                    y_min, x_min = non_zero.min(axis=0)
+                                    y_max, x_max = non_zero.max(axis=0)
+                                    person_h = y_max - y_min
+                                    person_w = x_max - x_min
+                                    pad_y = max(int(person_h * 0.05), 10)
+                                    pad_x = max(int(person_w * 0.05), 10)
+                                    y_min = max(0, y_min - pad_y)
+                                    y_max = min(isolated.shape[0], y_max + pad_y)
+                                    x_min = max(0, x_min - pad_x)
+                                    x_max = min(isolated.shape[1], x_max + pad_x)
+                                    
+                                    cropped = Image.fromarray(isolated[y_min:y_max, x_min:x_max])
+                                    # Ensure minimum size for analysis
+                                    if cropped.size[0] > 50 and cropped.size[1] > 50:
+                                        # Resize to at least 400px on shortest side for clarity
+                                        cw, ch = cropped.size
+                                        if min(cw, ch) < 400:
+                                            scale = 400.0 / min(cw, ch)
+                                            cropped = cropped.resize((int(cw * scale), int(ch * scale)), _RESAMPLE_LANCZOS)
+                                        buf = io.BytesIO()
+                                        cropped.save(buf, format="JPEG", quality=95)
+                                        _log.info("[MASK] MediaPipe model=%d: person isolated (%dx%d)", model_sel, cropped.size[0], cropped.size[1])
+                                        return base64.b64encode(buf.getvalue()).decode()
+                            _log.info("[MASK] Model=%d: no valid mask, trying next", model_sel)
+                    except Exception as model_err:
+                        _log.warning("[MASK] Model=%d error: %s", model_sel, model_err)
+            except Exception as mp_err:
+                _log.warning("[MASK] MediaPipe failed: %s", mp_err)
 
-        # Fallback: Aggressive center crop (40% of original, removing 60% background edges)
-        w, h = img.size
-        center_x, center_y = w // 2, h // 2
-        crop_size = int(min(h, w) * 0.35)  # 35% of smallest dimension = tight person focus
-        left = max(0, center_x - crop_size)
-        top = max(0, center_y - crop_size)
-        right = min(w, center_x + crop_size)
-        bottom = min(h, center_y + crop_size)
+        # === PHASE 2: Smart center-crop fallback ===
+        # When MediaPipe is unavailable, use a tighter center crop
+        # Assume person is in the center 50% of the image
+        _log.info("[MASK] MediaPipe unavailable, using smart center crop")
+        crop_ratio = 0.45  # Crop to center 45%
+        cx, cy = w // 2, h // 2
+        crop_size = int(min(w, h) * crop_ratio)
+        left = max(0, cx - crop_size)
+        top = max(0, cy - crop_size)
+        right = min(w, cx + crop_size)
+        bottom = min(h, cy + crop_size)
         cropped = img.crop((left, top, right, bottom))
         buf = io.BytesIO()
-        cropped.save(buf, format="JPEG", quality=85)
+        cropped.save(buf, format="JPEG", quality=90)
+        _log.info("[MASK] Center crop fallback: %dx%d -> %dx%d", w, h, cropped.size[0], cropped.size[1])
         return base64.b64encode(buf.getvalue()).decode()
+
     except Exception as exc:
-        _log.warning("[MASK] %s", exc)
+        _log.warning("[MASK] Critical error: %s", exc)
         return image_b64
 
 def compress_image_b64(image_b64: str) -> str:
@@ -493,7 +515,7 @@ def compress_image_b64(image_b64: str) -> str:
             ratio = 800.0 / max(w, h)
             img = img.resize((int(w * ratio), int(h * ratio)), _RESAMPLE_LANCZOS)
         buf = io.BytesIO()
-        img.convert("RGB").save(buf, format="JPEG", quality=80, optimize=True)
+        img.convert("RGB").save(buf, format="JPEG", quality=92, optimize=True)
         return base64.b64encode(buf.getvalue()).decode()
     except Exception as exc:
         _log.warning("[COMPRESS] %s — returning original", exc)
@@ -681,7 +703,7 @@ def call_groq_vision(image_b64: str, system_prompt: str = SACRED_PROMPT, tempera
     # Inject color dictionary into the prompt explicitly
     color_list = ", ".join(_COLOR_NAMES) if _COLOR_NAMES else "Black, White, Blue, Red, Green"
     color_directive = f"**COLOR DICTIONARY LOCK — ABSOLUTE REQUIREMENT:** You MUST choose every color name from THIS EXACT LIST. Do NOT invent any color name. Valid colors: {color_list}. If a garment color is close to one of these, use that exact name. Never use generic descriptions like 'dark' or 'light'."
-    colored_prompt = system_prompt + "\n\n" + color_directive + "\n\n**NOTE:** The photo has been processed to remove the background. You will see the person on a black background. IGNORE THE BLACK BACKGROUND and look ONLY at the person's clothing."
+    colored_prompt = system_prompt + "\n\n" + color_directive + "\n\n**NOTE:** The photo has been processed to REMOVE THE BACKGROUND. You will see the person isolated on a WHITE background. IGNORE THE WHITE BACKGROUND and look ONLY at the clothing colors."
 
     compressed = compress_image_b64(masked_b64)
     headers = {"Content-Type": "application/json", "api-key": MIMO_API_KEY, "HTTP-Referer": "https://luxor.ly", "X-Title": "LuxorHub"}
