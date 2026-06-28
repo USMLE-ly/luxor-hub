@@ -482,7 +482,7 @@ export default function Analysis() {
           if (!response.ok) throw new Error('Server returned ' + response.status);
           fnData = await response.json();
           if (!fnData || !fnData.success) throw new Error('Analysis failed');
-          if (fnData.source === 'cipher_vision') break;
+          break;  // any successful source is fine
         } catch (fetchErr) {
           clearTimeout(abortTimer);
           if (fetchErr.name === 'AbortError') {
@@ -492,7 +492,7 @@ export default function Analysis() {
         }
       }
       // All retries exhausted — silently reset to upload state, no toast
-      if (!fnData || fnData.source !== "cipher_vision" && fnData.source !== "fallback") {
+      if (!fnData || !fnData.success) {
         setData(null);
         setAnalysisFailed(true);
         toast.error("Analysis timed out. Tap Retry to try again.");
