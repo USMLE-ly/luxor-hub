@@ -13,7 +13,7 @@ import urllib.parse
 import uuid
 from concurrent.futures import TimeoutError
 from datetime import datetime, timezone
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, TYPE_CHECKING
 
 import requests
 from flask import Flask, request, jsonify
@@ -30,20 +30,26 @@ except ImportError:
 from dotenv import load_dotenv
 
 # Qdrant + Vercel Blob
+if TYPE_CHECKING:
+    from qdrant_client import QdrantClient
+    from qdrant_client.http import models as qdrant_models
+    from vercel_blob import put as blob_put
+    from pypdf import PdfReader
+
 try:
     from qdrant_client import QdrantClient
     from qdrant_client.http import models as qdrant_models
 except ImportError:
-    QdrantClient = None  # None is valid fallback for optional import
-    qdrant_models = None
+    QdrantClient: Any = None
+    qdrant_models: Any = None
 try:
     from vercel_blob import put as blob_put
 except ImportError:
-    blob_put = None  # None is valid fallback for optional import
+    blob_put: Any = None
 try:
     from pypdf import PdfReader
 except ImportError:
-    PdfReader = None
+    PdfReader: Any = None
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 load_dotenv(os.path.join(BASE_DIR, ".env"), override=True)
@@ -429,29 +435,33 @@ def _extract_person_center_crop(image_b64: str) -> str:
                 _log.warning("[MASK] cv2.imdecode returned None, skipping segmentation")
                 raise ValueError("imdecode failed")
             cv_img = cv2.cvtColor(cv_decoded, cv2.COLOR_BGR2RGB)
-            from mediapipe.solutions.selfie_segmentation import SelfieSegmentation as _SelfieSeg
-            with _SelfieSeg(model_selection=1) as segmenter:
-                results = segmenter.process(cv_img)
-                if results and results.segmentation_mask is not None:
-                    # Create binary mask
-                    mask = (results.segmentation_mask > 0.5).astype(np.uint8) * 255
-                    # Apply mask to remove background
-                    masked = cv2.bitwise_and(cv_img, cv_img, mask=mask)
-                    # Find bounding box of person
-                    coords = cv2.findNonZero(mask)
-                    if coords is not None:
-                        x, y, w, h = cv2.boundingRect(coords)
-                        # Expand bbox by 10% for context
-                        pad_x, pad_y = int(w * 0.1), int(h * 0.1)
-                        x = max(0, x - pad_x)
-                        y = max(0, y - pad_y)
-                        w = min(cv_img.shape[1] - x, w + 2 * pad_x)
-                        h = min(cv_img.shape[0] - y, h + 2 * pad_y)
-                        cropped = masked[y:y+h, x:x+w]
-                        # Convert back to PIL
-                        cropped_rgb = cv2.cvtColor(cropped, cv2.COLOR_RGB2BGR)
-                        assert isinstance(cropped_rgb, np.ndarray)
-                        img = Image.fromarray(cropped_rgb)
+            try:
+                from mediapipe.solutions.selfie_segmentation import SelfieSegmentation as _SelfieSeg
+            except ImportError:
+                _SelfieSeg = None
+            if _SelfieSeg is not None:
+                with _SelfieSeg(model_selection=1) as segmenter:
+                    results = segmenter.process(cv_img)
+                    if results and results.segmentation_mask is not None:
+                        # Create binary mask
+                        mask = (results.segmentation_mask > 0.5).astype(np.uint8) * 255
+                        # Apply mask to remove background
+                        masked = cv2.bitwise_and(cv_img, cv_img, mask=mask)
+                        # Find bounding box of person
+                        coords = cv2.findNonZero(mask)
+                        if coords is not None:
+                            x, y, w, h = cv2.boundingRect(coords)
+                            # Expand bbox by 10% for context
+                            pad_x, pad_y = int(w * 0.1), int(h * 0.1)
+                            x = max(0, x - pad_x)
+                            y = max(0, y - pad_y)
+                            w = min(cv_img.shape[1] - x, w + 2 * pad_x)
+                            h = min(cv_img.shape[0] - y, h + 2 * pad_y)
+                            cropped = masked[y:y+h, x:x+w]
+                            # Convert back to PIL
+                            cropped_rgb = cv2.cvtColor(cropped, cv2.COLOR_RGB2BGR)
+                            assert isinstance(cropped_rgb, np.ndarray)
+                            img = Image.fromarray(cropped_rgb)
         
         # Fallback: center-crop to square (removes edges where background dominates)
         w, h = img.size
