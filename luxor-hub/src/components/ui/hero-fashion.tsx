@@ -179,44 +179,44 @@ export function FashionHero({
                 </h2>
               </div>
 
-              {/* SECTION 2: ITEMS DETECTED (Sky Blue Gradient) */}
-              <div className="relative flex-1 min-h-[80px] overflow-hidden rounded-xl border border-white/10">
+              {/* SECTION 2: ITEMS (Sky Blue Gradient) */}
+              <div className="relative flex-1 min-h-[100px] overflow-hidden rounded-xl border border-white/10">
                 <AnimatedGradient colors={["#0ea5e9", "#38bdf8", "#bae6fd"]} speed={0.05} blur="medium" />
-                <div className="relative z-10 p-3 backdrop-blur-sm h-full w-full">
-                  <h3 className="text-[10px] uppercase tracking-widest text-white/60 mb-1.5 font-bold">Items</h3>
-                  <div className="space-y-1">
+                <div className="relative z-10 p-4 backdrop-blur-sm h-full w-full">
+                  <h3 className="text-xs uppercase tracking-[0.15em] text-white/60 mb-3 font-semibold">Items</h3>
+                  <div className="space-y-2.5">
                     {(topType || bottomType || footwear) ? (
                       <>
                         {topType && (
-                          <div className="flex items-center gap-2 text-xs md:text-sm font-medium text-white">
-                            <span className={`w-2 h-2 rounded-full ${colorSwatchMap[topType.split(' ')[0]] || 'bg-white/60'} shadow-[0_0_6px_rgba(255,255,255,0.5)]`} />
-                            <span className="capitalize">{topType}</span>
+                          <div className="flex items-center gap-3 text-sm md:text-base font-medium text-white bg-transparent">
+                            <span className={`w-2 h-2 rounded-full ${colorSwatchMap[topType.split(' ')[0]] || 'bg-white/80'} shadow-[0_0_8px_rgba(255,255,255,0.5)] flex-shrink-0`} />
+                            <span className="capitalize tracking-wide leading-tight">{topType}</span>
                           </div>
                         )}
                         {bottomType && (
-                          <div className="flex items-center gap-2 text-xs md:text-sm font-medium text-white">
-                            <span className={`w-2 h-2 rounded-full ${colorSwatchMap[bottomType.split(' ')[0]] || 'bg-white/60'} shadow-[0_0_6px_rgba(255,255,255,0.5)]`} />
-                            <span className="capitalize">{bottomType}</span>
+                          <div className="flex items-center gap-3 text-sm md:text-base font-medium text-white bg-transparent">
+                            <span className={`w-2 h-2 rounded-full ${colorSwatchMap[bottomType.split(' ')[0]] || 'bg-white/80'} shadow-[0_0_8px_rgba(255,255,255,0.5)] flex-shrink-0`} />
+                            <span className="capitalize tracking-wide leading-tight">{bottomType}</span>
                           </div>
                         )}
                         {footwear && (
-                          <div className="flex items-center gap-2 text-xs md:text-sm font-medium text-white">
-                            <span className={`w-2 h-2 rounded-full ${colorSwatchMap[footwear.split(' ')[0]] || 'bg-white/60'} shadow-[0_0_6px_rgba(255,255,255,0.5)]`} />
-                            <span className="capitalize">{footwear}</span>
+                          <div className="flex items-center gap-3 text-sm md:text-base font-medium text-white bg-transparent">
+                            <span className={`w-2 h-2 rounded-full ${colorSwatchMap[footwear.split(' ')[0]] || 'bg-white/80'} shadow-[0_0_8px_rgba(255,255,255,0.5)] flex-shrink-0`} />
+                            <span className="capitalize tracking-wide leading-tight">{footwear}</span>
                           </div>
                         )}
                         {accessories && accessories !== "None" && (
-                          <div className="flex items-center gap-2 text-xs md:text-sm font-medium text-white">
-                            <span className={`w-2 h-2 rounded-full ${colorSwatchMap[accessories.split(' ')[0]] || 'bg-white/60'} shadow-[0_0_6px_rgba(255,255,255,0.5)]`} />
-                            <span className="capitalize">{accessories}</span>
+                          <div className="flex items-center gap-3 text-sm md:text-base font-medium text-white bg-transparent">
+                            <span className={`w-2 h-2 rounded-full ${colorSwatchMap[accessories.split(' ')[0]] || 'bg-white/80'} shadow-[0_0_8px_rgba(255,255,255,0.5)] flex-shrink-0`} />
+                            <span className="capitalize tracking-wide leading-tight">{accessories}</span>
                           </div>
                         )}
                       </>
                     ) : itemsDetected.length > 0 ? (
                       itemsDetected.map((item, i) => (
-                        <div key={i} className="flex items-center gap-2 text-xs md:text-sm font-medium text-white">
-                          <span className="w-2 h-2 rounded-full bg-white/60 shadow-[0_0_6px_rgba(255,255,255,0.5)]" />
-                          <span className="capitalize">{item}</span>
+                        <div key={i} className="flex items-center gap-3 text-sm md:text-base font-medium text-white bg-transparent">
+                          <span className="w-2 h-2 rounded-full bg-white/80 shadow-[0_0_8px_rgba(255,255,255,0.5)] flex-shrink-0" />
+                          <span className="capitalize tracking-wide leading-tight">{item}</span>
                         </div>
                       ))
                     ) : (
@@ -227,15 +227,15 @@ export function FashionHero({
               </div>
 
               {/* SECTION 3: STRENGTHS (Pink/Orange Gradient) */}
-              <div className="relative flex-1 min-h-[80px] overflow-hidden rounded-xl border border-white/10">
+              <div className="relative flex-1 min-h-[100px] overflow-hidden rounded-xl border border-white/10">
                 <AnimatedGradient colors={["#ec4899", "#f472b6", "#fbcfe8"]} speed={0.06} blur="medium" />
-                <div className="relative z-10 p-3 backdrop-blur-sm h-full w-full">
-                  <h3 className="text-[10px] uppercase tracking-widest text-white/60 mb-1.5 font-bold">Strengths</h3>
-                  <div className="space-y-1">
+                <div className="relative z-10 p-4 backdrop-blur-sm h-full w-full">
+                  <h3 className="text-xs uppercase tracking-[0.15em] text-white/60 mb-3 font-semibold">Strengths</h3>
+                  <div className="space-y-2">
                     {strengths.length > 0 ? strengths.map((s, idx) => (
-                      <div key={idx} className="flex items-start gap-2 text-xs text-white/90">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] mt-1 flex-shrink-0" />
-                        <span>{s}</span>
+                      <div key={idx} className="flex items-start gap-2.5 text-sm text-white/90 leading-relaxed">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] mt-1.5 flex-shrink-0" />
+                        <span className="tracking-wide">{s}</span>
                       </div>
                     )) : (
                       <p className="text-xs text-white/40">No strengths detected</p>
@@ -245,11 +245,11 @@ export function FashionHero({
               </div>
 
               {/* SECTION 4: TWEAK (Purple/Cyan Gradient) */}
-              <div className="relative min-h-[60px] overflow-hidden rounded-xl border border-white/10 flex-shrink-0">
+              <div className="relative min-h-[70px] overflow-hidden rounded-xl border border-white/10 flex-shrink-0">
                 <AnimatedGradient colors={["#8b5cf6", "#a78bfa", "#c4b5fd"]} speed={0.07} blur="medium" />
-                <div className="relative z-10 p-3 backdrop-blur-sm h-full w-full flex flex-col justify-center">
-                  <h3 className="text-[10px] uppercase tracking-widest text-white/60 mb-0.5 font-bold">Tweak</h3>
-                  <p className="text-xs italic text-white/90 leading-relaxed">
+                <div className="relative z-10 p-4 backdrop-blur-sm h-full w-full flex flex-col justify-center">
+                  <h3 className="text-xs uppercase tracking-[0.15em] text-white/60 mb-1.5 font-semibold">Tweak</h3>
+                  <p className="text-sm italic text-white/90 leading-relaxed tracking-wide">
                     {tweakPlan || "Consider adding a structured blazer for a more polished look."}
                   </p>
                 </div>
@@ -257,9 +257,9 @@ export function FashionHero({
 
               {/* SECTION 5: AUDIT (Neutral/Dark) */}
               {audit && (
-                <div className="relative min-h-[40px] overflow-hidden rounded-xl border border-white/10 bg-black/60 flex-shrink-0">
-                  <div className="relative z-10 p-2.5 backdrop-blur-sm h-full w-full flex items-center">
-                    <p className="text-[11px] text-white/50 leading-relaxed">{audit}</p>
+                <div className="relative min-h-[45px] overflow-hidden rounded-xl border border-white/10 bg-gradient-to-r from-black/60 via-zinc-900/60 to-black/60 flex-shrink-0">
+                  <div className="relative z-10 p-3 backdrop-blur-sm h-full w-full flex items-center">
+                    <p className="text-xs text-white/50 leading-relaxed tracking-wide">{audit}</p>
                   </div>
                 </div>
               )}
