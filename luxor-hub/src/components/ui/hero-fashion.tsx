@@ -1,6 +1,7 @@
 "use client";
 import { motion } from "motion/react";
 import { AnimatedGradient } from "@/components/ui/animated-gradient-with-svg";
+import { ParticleTextEffect } from "@/components/ui/interactive-text-particle";
 
 interface FashionHeroProps {
   styleName?: string;
@@ -164,99 +165,109 @@ export function FashionHero({
             {/* Absolutely nothing shown when neither imageUrl nor vibeType — no placeholder */}
           </div>
 
-          {/* Content Side — Animated Gradient Card */}
+          {/* Content Side — Multi-Color Animated Blocks */}
           <div className="md:order-1 flex flex-col justify-between">
             <motion.div
-              className="relative overflow-hidden flex-1 h-full bg-background/80 border border-white/10 rounded-2xl min-h-[300px]"
+              className="relative flex-1 flex flex-col gap-3 h-full w-full bg-black/20 backdrop-blur-sm border border-white/10 rounded-2xl p-3 overflow-hidden"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              {/* Animated Gradient Background */}
-              <AnimatedGradient
-                colors={["#7c3aed", "#3b82f6", "#06b6d4"]}
-                speed={0.08}
-                blur="medium"
-              />
-
-              {/* Glassmorphism Content Wrapper */}
-              <div className="relative z-10 p-5 md:p-8 backdrop-blur-sm h-full flex flex-col justify-between">
-                
-                {/* Header - Style Name */}
-                <div className="mb-4">
-                  <h2 className="text-4xl md:text-6xl lg:text-7xl font-medium text-white leading-tight tracking-tight">
-                    {styleName}
-                  </h2>
-                </div>
-
-                {/* Body - Items & Strengths */}
-                <div className="space-y-4 flex-grow">
-                  {/* Items Detected as a Vertical List */}
-                  {(topType || bottomType || footwear) && (
-                    <div className="space-y-2">
-                      {topType && (
-                        <div className="flex items-center gap-2 text-sm md:text-base font-medium">
-                          <span className={`w-2 h-2 rounded-full ${colorSwatchMap[topType.split(' ')[0]] || 'bg-white/60'}`} />
-                          <span className="capitalize text-white/95">{topType}</span>
-                        </div>
-                      )}
-                      {bottomType && (
-                        <div className="flex items-center gap-2 text-sm md:text-base font-medium">
-                          <span className={`w-2 h-2 rounded-full ${colorSwatchMap[bottomType.split(' ')[0]] || 'bg-white/60'}`} />
-                          <span className="capitalize text-white/95">{bottomType}</span>
-                        </div>
-                      )}
-                      {footwear && (
-                        <div className="flex items-center gap-2 text-sm md:text-base font-medium">
-                          <span className={`w-2 h-2 rounded-full ${colorSwatchMap[footwear.split(' ')[0]] || 'bg-white/60'}`} />
-                          <span className="capitalize text-white/95">{footwear}</span>
-                        </div>
-                      )}
-                      {accessories && accessories !== "None" && (
-                        <div className="flex items-center gap-2 text-sm md:text-base font-medium">
-                          <span className={`w-2 h-2 rounded-full ${colorSwatchMap[accessories.split(' ')[0]] || 'bg-white/60'}`} />
-                          <span className="capitalize text-white/95">{accessories}</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  {/* Fallback plain items */}
-                  {!(topType || bottomType || footwear) && itemsDetected.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {itemsDetected.map((item, i) => (
-                        <span key={i} className="px-3 py-1 rounded-full bg-white/10 border border-white/20 text-xs text-white/80">
-                          {item}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Strengths List */}
-                  {strengths.length > 0 && (
-                    <div className="space-y-1.5 mt-4">
-                      {strengths.map((s, idx) => (
-                        <div key={idx} className="flex items-start gap-2 text-sm text-white/90">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0" />
-                          <span>{s}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Footer - Audit & Tweak Plan */}
-                <div className="mt-4 pt-4 border-t border-white/10">
-                  {audit && (
-                    <p className="text-sm text-white/70 mb-2 leading-relaxed">{audit}</p>
-                  )}
-                  {tweakPlan && (
-                    <p className="text-sm italic text-purple-300">
-                      <span className="font-semibold not-italic text-white/90">Tweak:</span> {tweakPlan}
-                    </p>
-                  )}
-                </div>
-
+              {/* SECTION 1: TITLE (Interactive Particle Text) */}
+              <div className="relative w-full h-20 md:h-28 flex items-center justify-center overflow-hidden bg-black/40 rounded-xl border border-white/10 flex-shrink-0">
+                <ParticleTextEffect
+                  text={styleName || "MODERN CLASSIC"}
+                  colors={['ff6b6b', 'feca57', '48dbfb', '1dd1a1']}
+                  className="absolute inset-0 w-full h-full"
+                  animationForce={100}
+                  particleDensity={6}
+                />
               </div>
+
+              {/* SECTION 2: ITEMS DETECTED (Sky Blue Gradient) */}
+              <div className="relative flex-1 min-h-[80px] overflow-hidden rounded-xl border border-white/10">
+                <AnimatedGradient colors={["#0ea5e9", "#38bdf8", "#bae6fd"]} speed={0.05} blur="medium" />
+                <div className="relative z-10 p-3 backdrop-blur-sm h-full w-full">
+                  <h3 className="text-[10px] uppercase tracking-widest text-white/60 mb-1.5 font-bold">Items</h3>
+                  <div className="space-y-1">
+                    {(topType || bottomType || footwear) ? (
+                      <>
+                        {topType && (
+                          <div className="flex items-center gap-2 text-xs md:text-sm font-medium text-white">
+                            <span className={`w-2 h-2 rounded-full ${colorSwatchMap[topType.split(' ')[0]] || 'bg-white/60'} shadow-[0_0_6px_rgba(255,255,255,0.5)]`} />
+                            <span className="capitalize">{topType}</span>
+                          </div>
+                        )}
+                        {bottomType && (
+                          <div className="flex items-center gap-2 text-xs md:text-sm font-medium text-white">
+                            <span className={`w-2 h-2 rounded-full ${colorSwatchMap[bottomType.split(' ')[0]] || 'bg-white/60'} shadow-[0_0_6px_rgba(255,255,255,0.5)]`} />
+                            <span className="capitalize">{bottomType}</span>
+                          </div>
+                        )}
+                        {footwear && (
+                          <div className="flex items-center gap-2 text-xs md:text-sm font-medium text-white">
+                            <span className={`w-2 h-2 rounded-full ${colorSwatchMap[footwear.split(' ')[0]] || 'bg-white/60'} shadow-[0_0_6px_rgba(255,255,255,0.5)]`} />
+                            <span className="capitalize">{footwear}</span>
+                          </div>
+                        )}
+                        {accessories && accessories !== "None" && (
+                          <div className="flex items-center gap-2 text-xs md:text-sm font-medium text-white">
+                            <span className={`w-2 h-2 rounded-full ${colorSwatchMap[accessories.split(' ')[0]] || 'bg-white/60'} shadow-[0_0_6px_rgba(255,255,255,0.5)]`} />
+                            <span className="capitalize">{accessories}</span>
+                          </div>
+                        )}
+                      </>
+                    ) : itemsDetected.length > 0 ? (
+                      itemsDetected.map((item, i) => (
+                        <div key={i} className="flex items-center gap-2 text-xs md:text-sm font-medium text-white">
+                          <span className="w-2 h-2 rounded-full bg-white/60 shadow-[0_0_6px_rgba(255,255,255,0.5)]" />
+                          <span className="capitalize">{item}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs text-white/40">No items detected</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 3: STRENGTHS (Pink/Orange Gradient) */}
+              <div className="relative flex-1 min-h-[80px] overflow-hidden rounded-xl border border-white/10">
+                <AnimatedGradient colors={["#ec4899", "#f472b6", "#fbcfe8"]} speed={0.06} blur="medium" />
+                <div className="relative z-10 p-3 backdrop-blur-sm h-full w-full">
+                  <h3 className="text-[10px] uppercase tracking-widest text-white/60 mb-1.5 font-bold">Strengths</h3>
+                  <div className="space-y-1">
+                    {strengths.length > 0 ? strengths.map((s, idx) => (
+                      <div key={idx} className="flex items-start gap-2 text-xs text-white/90">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] mt-1 flex-shrink-0" />
+                        <span>{s}</span>
+                      </div>
+                    )) : (
+                      <p className="text-xs text-white/40">No strengths detected</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 4: TWEAK (Purple/Cyan Gradient) */}
+              <div className="relative min-h-[60px] overflow-hidden rounded-xl border border-white/10 flex-shrink-0">
+                <AnimatedGradient colors={["#8b5cf6", "#a78bfa", "#c4b5fd"]} speed={0.07} blur="medium" />
+                <div className="relative z-10 p-3 backdrop-blur-sm h-full w-full flex flex-col justify-center">
+                  <h3 className="text-[10px] uppercase tracking-widest text-white/60 mb-0.5 font-bold">Tweak</h3>
+                  <p className="text-xs italic text-white/90 leading-relaxed">
+                    {tweakPlan || "Consider adding a structured blazer for a more polished look."}
+                  </p>
+                </div>
+              </div>
+
+              {/* SECTION 5: AUDIT (Neutral/Dark) */}
+              {audit && (
+                <div className="relative min-h-[40px] overflow-hidden rounded-xl border border-white/10 bg-black/60 flex-shrink-0">
+                  <div className="relative z-10 p-2.5 backdrop-blur-sm h-full w-full flex items-center">
+                    <p className="text-[11px] text-white/50 leading-relaxed">{audit}</p>
+                  </div>
+                </div>
+              )}
             </motion.div>
           </div>
         </div>
