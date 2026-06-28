@@ -360,34 +360,34 @@ def qdrant_get_item(item_id: str) -> Optional[Dict[str, Any]]:
 # ---------------------------------------------------------------------------
 # Prompts
 # ---------------------------------------------------------------------------
-SACRED_PROMPT = """You are a hyper-rigorous fashion classification robot. 
-**CRITICAL DIRECTIVE:** You MUST ignore 100% of the background. Do not look at pavement, concrete, walls, trees, sky, or stairs. You MUST look exclusively at the subject's clothing.
-**GARMENT LOCK:** Do NOT invent fabric types. If the top is a striped button-down shirt, call it EXACTLY "White and Black Striped Button-Down Shirt". Do NOT call it a "Knit Sweater".
-**COLOR LOCK:** Do NOT invent colors. If the shoes are white sneakers, call them "White Sneakers". Do NOT call them "Charcoal Chunky Sneakers".
-**PIXEL REALITY:** If the pants are black, call them "Black Pants". 
-Return ONLY this EXACT JSON. Do NOT add any conversational text.
+SACRED_PROMPT = """You are a hyper-rigorous fashion CLASSIFICATION AI, not a generative AI. You MUST NOT invent or guess clothing items. You MUST ONLY describe what is VISIBLE in the photo.
+
+**CRITICAL HALLUCINATION PREVENTION RULES:**
+1. IGNORE 100% OF BACKGROUND. Pavement, concrete, walls, trees, sky, stairs = IGNORE.
+2. ONLY describe garments you can ACTUALLY SEE. Do NOT invent a "Knit Sweater" if the photo shows a T-shirt.
+3. COLORS must be EXACT. If the shirt is white, say "White T-Shirt". Not "Cream", not "Ivory".
+4. If a body part or garment is not visible, set it to "None" — do NOT guess.
+5. Do NOT describe fabric texture or material unless it is completely obvious.
+
+The photo has been preprocessed to remove the background. You will see the person on a near-black background. IGNORE THE BLACK BACKGROUND.
+
+Return ONLY this EXACT JSON. No conversation. No markdown. No explanation.
 {
   "gender": "Female" or "Male",
   "vibe_type": "exact vibe category from: Casual, Formal, Business, Sporty, Date Night, Party, Bohemian, Streetwear, Minimalist, Vintage",
-  "top_type": "Exact color and EXACT garment name in the photo",
-  "bottom_type": "Exact color and EXACT garment name in the photo",
-  "footwear": "Exact color and EXACT footwear name in the photo",
-  "accessories": "Exact accessory currently visible in the photo, or \"None\"",
+  "top_type": "EXACT color and EXACT garment type visible - or \"None\" if not visible",
+  "bottom_type": "EXACT color and EXACT garment type visible - or \"None\" if not visible",
+  "footwear": "EXACT color and EXACT footwear visible - or \"None\" if not visible",
+  "accessories": "EXACT accessory visible - or \"None\" if none",
   "style_score": int(70-95),
   "style_name": "2-word vibe",
   "strengths": ["3 specific strengths based ONLY on actual garments"],
-  "audit": "15-word summary of the REAL outfit",
-  "tweak_plan": "1-sentence to improve the outfit",
+  "audit": "15-word summary of the REAL outfit ONLY",
+  "tweak_plan": "1-sentence to improve based on actual detected items",
   "generation_prompt": "20-word prompt for editorial shot with this exact outfit"
 }
 
-CRITICAL RULES:
-- style_score must be an integer (number), never null, never a string, never 0
-- strengths must be an array of exactly 3 strings
-- Every single key above MUST be present in your JSON output
-- Return ONLY this JSON. No conversation. No markdown. No explanation.
-- If you cannot detect an item, write "None" as the string — do NOT omit the key
-- Do NOT invent garments that are not in the photo."""
+CRITICAL: style_score must be integer, strengths must be array of 3, every key must be present. Return ONLY JSON. Do NOT invent garments."""
 
 STYLIST_PROMPT = """You are FASHION-OMEGA, an expert fashion stylist AI. Guide the user through a 3-step quiz:
 Step 1: Ask about their vibe (Casual, Business, Party, Date Night, Sport).
@@ -426,29 +426,49 @@ def _extract_person_center_crop(image_b64: str) -> str:
         img_np = np.array(img)
 
         if _HAS_MEDIAPIPE and SelfieSegmentation is not None and cv2 is not None:
-            # Convert to OpenCV format for MediaPipe
+            # Use high-accuracy model (model_selection=1) for full-body segmentation
             cv_img = cv2.cvtColor(img_np, cv2.COLOR_RGB2BGR)
-            with SelfieSegmentation(model_selection=0) as segmentation:
+            with SelfieSegmentation(model_selection=1) as segmentation:
                 results = segmentation.process(cv_img)
                 if results.segmentation_mask is not None:
                     mask = results.segmentation_mask
-                    # Create a binary mask where the person is (threshold > 0.5)
-                    condition = mask > 0.5
-                    # Keep only the person's pixels
+                    # Aggressive threshold - only keep pixels that are DEFINITELY the person
+                    condition = mask > 0.6  # Higher threshold = less background bleed
+                    # Create black background with only the person visible
                     masked_img = np.zeros_like(img_np)
                     masked_img[condition] = img_np[condition]
                     # Convert masked image back to PIL
                     masked_pil = Image.fromarray(masked_img)
+                    # Get bounding box of non-zero (person) pixels to crop tightly
+                    non_zero = np.argwhere(condition)
+                    if len(non_zero) > 0:
+                        y_min, x_min = non_zero.min(axis=0)
+                        y_max, x_max = non_zero.max(axis=0)
+                        # Add 5% padding
+                        pad_y = int((y_max - y_min) * 0.05)
+                        pad_x = int((x_max - x_min) * 0.05)
+                        y_min = max(0, y_min - pad_y)
+                        y_max = min(masked_img.shape[0], y_max + pad_y)
+                        x_min = max(0, x_min - pad_x)
+                        x_max = min(masked_img.shape[1], x_max + pad_x)
+                        cropped_person = masked_pil.crop((x_min, y_min, x_max, y_max))
+                        buf = io.BytesIO()
+                        cropped_person.save(buf, format="JPEG", quality=95)
+                        return base64.b64encode(buf.getvalue()).decode()
+                    # Fallback: save full masked image
                     buf = io.BytesIO()
-                    masked_pil.save(buf, format="JPEG", quality=85)
+                    masked_pil.save(buf, format="JPEG", quality=95)
                     return base64.b64encode(buf.getvalue()).decode()
 
-        # Fallback: Center crop if no mediapipe or mask failed
+        # Fallback: Aggressive center crop (40% of original, removing 60% background edges)
         w, h = img.size
         center_x, center_y = w // 2, h // 2
-        crop_size = min(h, w) // 2
-        cropped = img.crop((center_x - crop_size, center_y - crop_size,
-                            center_x + crop_size, center_y + crop_size))
+        crop_size = int(min(h, w) * 0.35)  # 35% of smallest dimension = tight person focus
+        left = max(0, center_x - crop_size)
+        top = max(0, center_y - crop_size)
+        right = min(w, center_x + crop_size)
+        bottom = min(h, center_y + crop_size)
+        cropped = img.crop((left, top, right, bottom))
         buf = io.BytesIO()
         cropped.save(buf, format="JPEG", quality=85)
         return base64.b64encode(buf.getvalue()).decode()
@@ -473,7 +493,7 @@ def compress_image_b64(image_b64: str) -> str:
             ratio = 800.0 / max(w, h)
             img = img.resize((int(w * ratio), int(h * ratio)), _RESAMPLE_LANCZOS)
         buf = io.BytesIO()
-        img.convert("RGB").save(buf, format="JPEG", quality=50, optimize=True)
+        img.convert("RGB").save(buf, format="JPEG", quality=80, optimize=True)
         return base64.b64encode(buf.getvalue()).decode()
     except Exception as exc:
         _log.warning("[COMPRESS] %s — returning original", exc)
@@ -499,6 +519,12 @@ def _get_dominant_colors_from_pixels(image_b64: str, num_colors: int = 3) -> Lis
             img = img.convert('RGB')
         pixel_array = np.array(img)
         pixel_data = pixel_array.reshape(-1, 3).tolist()
+
+        # Filter out near-black pixels (background from person masking) and near-white (overexposed)
+        pixel_data = [p for p in pixel_data if not (p[0] < 20 and p[1] < 20 and p[2] < 20)]
+        pixel_data = [p for p in pixel_data if not (p[0] > 235 and p[1] > 235 and p[2] > 235)]
+        if not pixel_data:
+            return []
 
         # Simple color quantization using average of similar pixels
         quantized = [(r // 32 * 32, g // 32 * 32, b // 32 * 32) for r, g, b in pixel_data]
@@ -652,8 +678,8 @@ def call_groq_vision(image_b64: str, system_prompt: str = SACRED_PROMPT, tempera
 
     # Inject color dictionary into the prompt explicitly
     color_list = ", ".join(_COLOR_NAMES) if _COLOR_NAMES else "Black, White, Blue, Red, Green"
-    color_directive = f"**COLOR DICTIONARY LOCK:** You MUST use EXACTLY ONE of these official color names (no inventions): {color_list}. If a garment color is close to a name, use that exact name."
-    colored_prompt = system_prompt + "\n\n" + color_directive
+    color_directive = f"**COLOR DICTIONARY LOCK — ABSOLUTE REQUIREMENT:** You MUST choose every color name from THIS EXACT LIST. Do NOT invent any color name. Valid colors: {color_list}. If a garment color is close to one of these, use that exact name. Never use generic descriptions like 'dark' or 'light'."
+    colored_prompt = system_prompt + "\n\n" + color_directive + "\n\n**NOTE:** The photo has been processed to remove the background. You will see the person on a black background. IGNORE THE BLACK BACKGROUND and look ONLY at the person's clothing."
 
     compressed = compress_image_b64(masked_b64)
     headers = {"Content-Type": "application/json", "api-key": MIMO_API_KEY, "HTTP-Referer": "https://luxor.ly", "X-Title": "LuxorHub"}
@@ -682,30 +708,8 @@ def call_groq_vision(image_b64: str, system_prompt: str = SACRED_PROMPT, tempera
     except Exception as exc:
         _log.error("[MIMO-VISION] %s", exc)
 
-    # Text fallback with extracted features
-    features = _extract_image_features(image_b64)
-    _log.info("[FEATURES] Extracted: %s", features[:100])
-    text_prompt = f"""{system_prompt}
-
-IMPORTANT: Analyze these EXTRACTED IMAGE FEATURES as if you were seeing the photo:
-
-{features}
-
-Based on these features, make your best guess about the outfit. For style_score, use a reasonable estimate between 70-85.
-Return the SAME JSON format as requested above. If unsure about specific items, describe what's plausible for the given colors."""
-    payload = {"model": MIMO_TEXT_MODEL, "messages": [{"role": "user", "content": text_prompt}], "max_tokens": CIPHER_MAX_TOKENS, "temperature": temperature}
-    try:
-        resp = requests.post(MIMO_API_URL, json=payload, headers=headers, timeout=30)
-        if resp.status_code == 200:
-            raw = resp.json()["choices"][0]["message"]["content"]
-            match = re.search(r"\{[\s\S]*\}", raw)
-            if match:
-                result = json.loads(match.group(0))
-                result["source"] = "text_fallback"
-                return result
-    except Exception as exc:
-        _log.error("[MIMO-VISION-FALLBACK] %s", exc)
-
+    # NO TEXT FALLBACK — text-only models hallucinate garments not in the photo
+    _log.warning("[MIMO-VISION] Vision model failed - returning None instead of hallucinating")
     return None
 
 def call_groq_text(messages: List[Dict[str, str]], system_prompt: str = "", temperature: float = 0.7) -> Optional[Dict[str, Any]]:
