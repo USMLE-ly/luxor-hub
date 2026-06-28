@@ -1214,6 +1214,101 @@ def get_color_dictionary():
         "mappings": _COLOR_MAPPINGS
     })
 
+# Color Book PDF Upload
+# ---------------------------------------------------------------------------
+@app.route("/api/v1/upload-color-pdf", methods=["POST", "OPTIONS"])
+def upload_color_pdf():
+    if request.method == "OPTIONS":
+        return "", 204
+    
+    global _COLOR_MAPPINGS, _COLOR_NAMES
+    
+    # Check if file was uploaded
+    if "file" not in request.files:
+        return jsonify({"success": False, "error": "No file uploaded. Use multipart form with field 'file'."}), 400
+    
+    file = request.files["file"]
+    if not file.filename or not file.filename.lower().endswith(".pdf"):
+        return jsonify({"success": False, "error": "File must be a PDF."}), 400
+    
+    try:
+        pdf_bytes = file.read()
+        reader = PdfReader(io.BytesIO(pdf_bytes))  # type: ignore[operator]
+        extracted_text = ""
+        for page in reader.pages:
+            text = page.extract_text()
+            if text:
+                extracted_text += text + "\n"
+        
+        if not extracted_text.strip():
+            return jsonify({
+                "success": False, 
+                "error": "Could not extract text from PDF. It may be a scanned image PDF.",
+                "note": "The built-in color dictionary with 130 fashion colors is already loaded."
+            }), 400
+        
+        found_colors = {}
+        import re as _re
+        
+        # Pattern 1: "ColorName: #HEX" or "ColorName - #HEX"
+        for match in _re.finditer(r'([A-Za-z]+(?:\s+[A-Za-z]+)*)\s*[:\-]\s*#([0-9A-Fa-f]{6})', extracted_text):
+            name = match.group(1).strip()
+            hex_code = "#" + match.group(2).upper()
+            if name and len(name) > 1:
+                found_colors[name] = hex_code
+        
+        # Pattern 2: "#HEX ColorName" 
+        if not found_colors:
+            for match in _re.finditer(r'#([0-9A-Fa-f]{6})\\s+([A-Za-z]+(?:\s+[A-Za-z]+)*)', extracted_text):
+                hex_code = "#" + match.group(1).upper()
+                name = match.group(2).strip()
+                if name and len(name) > 1:
+                    found_colors[name] = hex_code
+        
+        # Pattern 3: Lines with hex codes and color names
+        if not found_colors:
+            for match in _re.finditer(r'([A-Za-z]+(?:\s+[A-Za-z]+)*)[,\s]+#([0-9A-Fa-f]{6})', extracted_text):
+                name = match.group(1).strip()
+                hex_code = "#" + match.group(2).upper()
+                if name and len(name) > 1:
+                    found_colors[name] = hex_code
+        
+        if found_colors:
+            # Merge with existing dictionary
+            _COLOR_MAPPINGS.update(found_colors)
+            _COLOR_NAMES = sorted(_COLOR_MAPPINGS.keys())
+            with open(_COLOR_DICT_PATH, 'w') as f:
+                json.dump(_COLOR_MAPPINGS, f, indent=2)
+            _log.info("[COLOR] Added %d colors from PDF, total: %d", len(found_colors), len(_COLOR_NAMES))
+            return jsonify({
+                "success": True,
+                "message": f"Extracted {len(found_colors)} color names from PDF.",
+                "colors": list(found_colors.keys()),
+                "total_colors": len(_COLOR_NAMES)
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "error": "Could not find color patterns (e.g., 'ColorName: #HEX') in PDF text.",
+                "extracted_preview": extracted_text[:500],
+                "note": "The built-in color dictionary with 130 fashion colors is already loaded."
+            }), 400
+            
+    except Exception as exc:
+        _log.error("[COLOR-PDF] Upload error: %s", exc)
+        return jsonify({"success": False, "error": f"PDF processing error: {str(exc)}"}), 500
+
+@app.route("/api/v1/color-dictionary", methods=["GET", "OPTIONS"])
+def get_color_dictionary():
+    if request.method == "OPTIONS":
+        return "", 204
+    return jsonify({
+        "success": True,
+        "total_colors": len(_COLOR_NAMES),
+        "colors": _COLOR_NAMES,
+        "mappings": _COLOR_MAPPINGS
+    })
+
 # ---------------------------------------------------------------------------
 # Color Book PDF Upload
 # ---------------------------------------------------------------------------
@@ -1309,6 +1404,7 @@ def get_color_dictionary():
         "colors": _COLOR_NAMES,
         "mappings": _COLOR_MAPPINGS
     })
+
 
 # Debug & Health
 # ---------------------------------------------------------------------------
