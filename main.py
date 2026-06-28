@@ -961,9 +961,12 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
         if detected:
             for i, d in enumerate(detected[:3]):
                 strengths.append(f"Well-chosen {d}")
+        if len(strengths) < 3 and items_detected:
+            for item in items_detected[:3]:
+                if len(strengths) < 3:
+                    strengths.append(f"Chosen {item.lower()}")
         while len(strengths) < 3:
-            fallbacks = ["Cohesive outfit coordination", "Balanced color palette", "Comfortable and stylish"]
-            strengths.append(fallbacks[len(strengths)])
+            strengths.append("Well-balanced proportions")
     style_score = result.get("style_score")
     if style_score is None or not isinstance(style_score, (int, float)) or style_score < 60:
         style_score = 78
