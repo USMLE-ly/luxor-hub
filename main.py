@@ -11,7 +11,7 @@ import re
 import time
 import urllib.parse
 import uuid
-from concurrent.futures import ThreadPoolExecutor, TimeoutError
+from concurrent.futures import TimeoutError
 from datetime import datetime, timezone
 from typing import Optional, Dict, Any, List
 
@@ -41,7 +41,7 @@ try:
 except ImportError:
     blob_put = None  # type: ignore[assignment]
 try:
-    from pypdf import PdfReader
+    from pypdf import PdfReader  # type: ignore
 except ImportError:
     PdfReader = None  # type: ignore[assignment]
 
@@ -69,7 +69,6 @@ MIMO_TEXT_MODEL = os.getenv("MIMO_TEXT_MODEL", "mimo-v2.5-pro")
 # Single provider: Xiaomi MiMo API (no fallback chains)
 CIPHER_MAX_TOKENS = int(os.getenv("CIPHER_MAX_TOKENS", "1200"))
 PORT = int(os.getenv("PORT", "5000"))
-ANALYSIS_TIMEOUT = int(os.getenv("ANALYSIS_TIMEOUT", "90"))
 
 # Vercel Blob
 BLOB_READ_WRITE_TOKEN = os.getenv("BLOB_READ_WRITE_TOKEN", "")
@@ -87,6 +86,140 @@ _log.info("Qdrant: %s", bool(QDRANT_URL and QDRANT_API_KEY))
 # ---------------------------------------------------------------------------
 # Color Dictionary
 # ---------------------------------------------------------------------------
+
+_BUILTIN_COLORS = {
+  "Black": "#000000",
+  "White": "#FFFFFF",
+  "Cream": "#FFFDD0",
+  "Ivory": "#FFFFF0",
+  "Beige": "#F5F5DC",
+  "Tan": "#D2B48C",
+  "Khaki": "#C3B091",
+  "Camel": "#C19A6B",
+  "Grey": "#808080",
+  "Charcoal": "#36454F",
+  "Silver": "#C0C0C0",
+  "Steel": "#71797E",
+  "Navy": "#000080",
+  "Midnight Blue": "#191970",
+  "Slate": "#708090",
+  "Blue": "#0000FF",
+  "Royal Blue": "#4169E1",
+  "Sky Blue": "#87CEEB",
+  "Baby Blue": "#89CFF0",
+  "Powder Blue": "#B0E0E6",
+  "Teal": "#008080",
+  "Turquoise": "#40E0D0",
+  "Aqua": "#00FFFF",
+  "Cobalt": "#0047AB",
+  "Denim": "#1560BD",
+  "Indigo": "#4B0082",
+  "Cornflower": "#6495ED",
+  "Steel Blue": "#4682B4",
+  "Ocean": "#0077BE",
+  "Sapphire": "#0F52BA",
+  "Red": "#FF0000",
+  "Crimson": "#DC143C",
+  "Maroon": "#800000",
+  "Burgundy": "#800020",
+  "Wine": "#722F37",
+  "Brick": "#CB4154",
+  "Rose": "#FF007F",
+  "Ruby": "#E0115F",
+  "Scarlet": "#FF2400",
+  "Cherry": "#DE3163",
+  "Rust": "#B7410E",
+  "Terra Cotta": "#E2725B",
+  "Coral": "#FF7F50",
+  "Salmon": "#FA8072",
+  "Blush": "#DE5D83",
+  "Mauve": "#E0B0FF",
+  "Pink": "#FFC0CB",
+  "Hot Pink": "#FF69B4",
+  "Magenta": "#FF00FF",
+  "Fuchsia": "#FF00FF",
+  "Rose Gold": "#B76E79",
+  "Dusty Rose": "#C9A9A6",
+  "Barbie Pink": "#DA1884",
+  "Cotton Candy": "#FFBCD9",
+  "Bubblegum": "#FFC3CD",
+  "Purple": "#800080",
+  "Lavender": "#E6E6FA",
+  "Lilac": "#C8A2C8",
+  "Violet": "#8F00FF",
+  "Plum": "#673147",
+  "Eggplant": "#614051",
+  "Orchid": "#DA70D6",
+  "Amethyst": "#9966CC",
+  "Grape": "#6F2DA8",
+  "Green": "#008000",
+  "Forest Green": "#228B22",
+  "Olive": "#808000",
+  "Sage": "#BCB88A",
+  "Mint": "#98FF98",
+  "Emerald": "#50C878",
+  "Jade": "#00A86B",
+  "Hunter Green": "#355E3B",
+  "Lime": "#00FF00",
+  "Neon Green": "#39FF14",
+  "Pistachio": "#93C572",
+  "Kelly Green": "#4CBB17",
+  "Army Green": "#4B5320",
+  "Moss": "#8A9A5B",
+  "Sea Foam": "#9FE2BF",
+  "Yellow": "#FFFF00",
+  "Gold": "#FFD700",
+  "Mustard": "#FFDB58",
+  "Lemon": "#FFF700",
+  "Canary": "#FFFF99",
+  "Sunflower": "#FFDA03",
+  "Ochre": "#CC7722",
+  "Butter": "#FFF9B0",
+  "Neon Yellow": "#CCFF00",
+  "Honey": "#FFC30B",
+  "Orange": "#FFA500",
+  "Tangerine": "#FF9966",
+  "Peach": "#FFCBA4",
+  "Apricot": "#FBCEB1",
+  "Burnt Orange": "#CC5500",
+  "Melon": "#FEBAAD",
+  "Pumpkin": "#FF7518",
+  "Brown": "#A52A2A",
+  "Chocolate": "#7B3F00",
+  "Coffee": "#6F4E37",
+  "Chestnut": "#954535",
+  "Taupe": "#483C32",
+  "Mocha": "#967969",
+  "Caramel": "#AF6F4C",
+  "Espresso": "#4E2A26",
+  "Mahogany": "#C04000",
+  "Bronze": "#CD7F32",
+  "Copper": "#B87333",
+  "Nude": "#E3BC9A",
+  "Nude Blush": "#D5A98A",
+  "Champagne": "#F7E7CE",
+  "Pearl": "#F0EAD6",
+  "Sequin": "#E8E8E8",
+  "Lace": "#F9F6EE",
+  "Patent Leather": "#1C1C1C",
+  "Metallic Silver": "#C0C0C0",
+  "Metallic Gold": "#D4AF37",
+  "Holographic": "#E8E4F0",
+  "Leopard": "#D4A373",
+  "Zebra": "#E8E8E8",
+  "Camo Green": "#4A5D23",
+  "Camo Brown": "#5C4033",
+  "Blue Denim": "#1560BD",
+  "Light Denim": "#5D8AA8",
+  "Dark Denim": "#1C3F60",
+  "Raw Denim": "#4A6E8A",
+  "Acid Wash": "#9FB6D4",
+  "Black Denim": "#1A1A1A",
+  "White Cotton": "#F5F5F0",
+  "Natural Linen": "#FAF0E6",
+  "Raw Silk": "#FDF5E6"
+}
+
 _COLOR_MAPPINGS = {}
 _COLOR_DICT_PATH = os.path.join(BASE_DIR, "color_dictionary.json")
 _COLOR_NAMES = []
@@ -98,278 +231,16 @@ def _load_color_dictionary():
             with open(_COLOR_DICT_PATH) as f:
                 _COLOR_MAPPINGS = json.load(f)
         else:
-            # Built-in fashion color dictionary
-            _COLOR_MAPPINGS = {
-  "Black": "#000000",
-  "White": "#FFFFFF",
-  "Cream": "#FFFDD0",
-  "Ivory": "#FFFFF0",
-  "Beige": "#F5F5DC",
-  "Tan": "#D2B48C",
-  "Khaki": "#C3B091",
-  "Camel": "#C19A6B",
-  "Grey": "#808080",
-  "Charcoal": "#36454F",
-  "Silver": "#C0C0C0",
-  "Steel": "#71797E",
-  "Navy": "#000080",
-  "Midnight Blue": "#191970",
-  "Slate": "#708090",
-  "Blue": "#0000FF",
-  "Royal Blue": "#4169E1",
-  "Sky Blue": "#87CEEB",
-  "Baby Blue": "#89CFF0",
-  "Powder Blue": "#B0E0E6",
-  "Teal": "#008080",
-  "Turquoise": "#40E0D0",
-  "Aqua": "#00FFFF",
-  "Cobalt": "#0047AB",
-  "Denim": "#1560BD",
-  "Indigo": "#4B0082",
-  "Cornflower": "#6495ED",
-  "Steel Blue": "#4682B4",
-  "Ocean": "#0077BE",
-  "Sapphire": "#0F52BA",
-  "Red": "#FF0000",
-  "Crimson": "#DC143C",
-  "Maroon": "#800000",
-  "Burgundy": "#800020",
-  "Wine": "#722F37",
-  "Brick": "#CB4154",
-  "Rose": "#FF007F",
-  "Ruby": "#E0115F",
-  "Scarlet": "#FF2400",
-  "Cherry": "#DE3163",
-  "Rust": "#B7410E",
-  "Terra Cotta": "#E2725B",
-  "Coral": "#FF7F50",
-  "Salmon": "#FA8072",
-  "Blush": "#DE5D83",
-  "Mauve": "#E0B0FF",
-  "Pink": "#FFC0CB",
-  "Hot Pink": "#FF69B4",
-  "Magenta": "#FF00FF",
-  "Fuchsia": "#FF00FF",
-  "Rose Gold": "#B76E79",
-  "Dusty Rose": "#C9A9A6",
-  "Barbie Pink": "#DA1884",
-  "Cotton Candy": "#FFBCD9",
-  "Bubblegum": "#FFC3CD",
-  "Purple": "#800080",
-  "Lavender": "#E6E6FA",
-  "Lilac": "#C8A2C8",
-  "Violet": "#8F00FF",
-  "Plum": "#673147",
-  "Eggplant": "#614051",
-  "Orchid": "#DA70D6",
-  "Amethyst": "#9966CC",
-  "Grape": "#6F2DA8",
-  "Green": "#008000",
-  "Forest Green": "#228B22",
-  "Olive": "#808000",
-  "Sage": "#BCB88A",
-  "Mint": "#98FF98",
-  "Emerald": "#50C878",
-  "Jade": "#00A86B",
-  "Hunter Green": "#355E3B",
-  "Lime": "#00FF00",
-  "Neon Green": "#39FF14",
-  "Pistachio": "#93C572",
-  "Kelly Green": "#4CBB17",
-  "Army Green": "#4B5320",
-  "Moss": "#8A9A5B",
-  "Sea Foam": "#9FE2BF",
-  "Yellow": "#FFFF00",
-  "Gold": "#FFD700",
-  "Mustard": "#FFDB58",
-  "Lemon": "#FFF700",
-  "Canary": "#FFFF99",
-  "Sunflower": "#FFDA03",
-  "Ochre": "#CC7722",
-  "Butter": "#FFF9B0",
-  "Neon Yellow": "#CCFF00",
-  "Honey": "#FFC30B",
-  "Orange": "#FFA500",
-  "Tangerine": "#FF9966",
-  "Peach": "#FFCBA4",
-  "Apricot": "#FBCEB1",
-  "Burnt Orange": "#CC5500",
-  "Melon": "#FEBAAD",
-  "Pumpkin": "#FF7518",
-  "Brown": "#A52A2A",
-  "Chocolate": "#7B3F00",
-  "Coffee": "#6F4E37",
-  "Chestnut": "#954535",
-  "Taupe": "#483C32",
-  "Mocha": "#967969",
-  "Caramel": "#AF6F4C",
-  "Espresso": "#4E2A26",
-  "Mahogany": "#C04000",
-  "Bronze": "#CD7F32",
-  "Copper": "#B87333",
-  "Nude": "#E3BC9A",
-  "Nude Blush": "#D5A98A",
-  "Champagne": "#F7E7CE",
-  "Pearl": "#F0EAD6",
-  "Sequin": "#E8E8E8",
-  "Lace": "#F9F6EE",
-  "Patent Leather": "#1C1C1C",
-  "Metallic Silver": "#C0C0C0",
-  "Metallic Gold": "#D4AF37",
-  "Holographic": "#E8E4F0",
-  "Leopard": "#D4A373",
-  "Zebra": "#E8E8E8",
-  "Camo Green": "#4A5D23",
-  "Camo Brown": "#5C4033",
-  "Blue Denim": "#1560BD",
-  "Light Denim": "#5D8AA8",
-  "Dark Denim": "#1C3F60",
-  "Raw Denim": "#4A6E8A",
-  "Acid Wash": "#9FB6D4",
-  "Black Denim": "#1A1A1A",
-  "White Cotton": "#F5F5F0",
-  "Natural Linen": "#FAF0E6",
-  "Raw Silk": "#FDF5E6"
-}
-            with open(_COLOR_DICT_PATH, 'w') as f:
+            _COLOR_MAPPINGS = dict(_BUILTIN_COLORS)
+            with open(_COLOR_DICT_PATH, "w") as f:
                 json.dump(_COLOR_MAPPINGS, f, indent=2)
         _COLOR_NAMES = sorted(_COLOR_MAPPINGS.keys())
         _log.info("[COLOR] Loaded %d color names", len(_COLOR_NAMES))
     except Exception as exc:
         _log.warning("[COLOR] Load error: %s", exc)
-        _COLOR_MAPPINGS = {
-  "Black": "#000000",
-  "White": "#FFFFFF",
-  "Cream": "#FFFDD0",
-  "Ivory": "#FFFFF0",
-  "Beige": "#F5F5DC",
-  "Tan": "#D2B48C",
-  "Khaki": "#C3B091",
-  "Camel": "#C19A6B",
-  "Grey": "#808080",
-  "Charcoal": "#36454F",
-  "Silver": "#C0C0C0",
-  "Steel": "#71797E",
-  "Navy": "#000080",
-  "Midnight Blue": "#191970",
-  "Slate": "#708090",
-  "Blue": "#0000FF",
-  "Royal Blue": "#4169E1",
-  "Sky Blue": "#87CEEB",
-  "Baby Blue": "#89CFF0",
-  "Powder Blue": "#B0E0E6",
-  "Teal": "#008080",
-  "Turquoise": "#40E0D0",
-  "Aqua": "#00FFFF",
-  "Cobalt": "#0047AB",
-  "Denim": "#1560BD",
-  "Indigo": "#4B0082",
-  "Cornflower": "#6495ED",
-  "Steel Blue": "#4682B4",
-  "Ocean": "#0077BE",
-  "Sapphire": "#0F52BA",
-  "Red": "#FF0000",
-  "Crimson": "#DC143C",
-  "Maroon": "#800000",
-  "Burgundy": "#800020",
-  "Wine": "#722F37",
-  "Brick": "#CB4154",
-  "Rose": "#FF007F",
-  "Ruby": "#E0115F",
-  "Scarlet": "#FF2400",
-  "Cherry": "#DE3163",
-  "Rust": "#B7410E",
-  "Terra Cotta": "#E2725B",
-  "Coral": "#FF7F50",
-  "Salmon": "#FA8072",
-  "Blush": "#DE5D83",
-  "Mauve": "#E0B0FF",
-  "Pink": "#FFC0CB",
-  "Hot Pink": "#FF69B4",
-  "Magenta": "#FF00FF",
-  "Fuchsia": "#FF00FF",
-  "Rose Gold": "#B76E79",
-  "Dusty Rose": "#C9A9A6",
-  "Barbie Pink": "#DA1884",
-  "Cotton Candy": "#FFBCD9",
-  "Bubblegum": "#FFC3CD",
-  "Purple": "#800080",
-  "Lavender": "#E6E6FA",
-  "Lilac": "#C8A2C8",
-  "Violet": "#8F00FF",
-  "Plum": "#673147",
-  "Eggplant": "#614051",
-  "Orchid": "#DA70D6",
-  "Amethyst": "#9966CC",
-  "Grape": "#6F2DA8",
-  "Green": "#008000",
-  "Forest Green": "#228B22",
-  "Olive": "#808000",
-  "Sage": "#BCB88A",
-  "Mint": "#98FF98",
-  "Emerald": "#50C878",
-  "Jade": "#00A86B",
-  "Hunter Green": "#355E3B",
-  "Lime": "#00FF00",
-  "Neon Green": "#39FF14",
-  "Pistachio": "#93C572",
-  "Kelly Green": "#4CBB17",
-  "Army Green": "#4B5320",
-  "Moss": "#8A9A5B",
-  "Sea Foam": "#9FE2BF",
-  "Yellow": "#FFFF00",
-  "Gold": "#FFD700",
-  "Mustard": "#FFDB58",
-  "Lemon": "#FFF700",
-  "Canary": "#FFFF99",
-  "Sunflower": "#FFDA03",
-  "Ochre": "#CC7722",
-  "Butter": "#FFF9B0",
-  "Neon Yellow": "#CCFF00",
-  "Honey": "#FFC30B",
-  "Orange": "#FFA500",
-  "Tangerine": "#FF9966",
-  "Peach": "#FFCBA4",
-  "Apricot": "#FBCEB1",
-  "Burnt Orange": "#CC5500",
-  "Melon": "#FEBAAD",
-  "Pumpkin": "#FF7518",
-  "Brown": "#A52A2A",
-  "Chocolate": "#7B3F00",
-  "Coffee": "#6F4E37",
-  "Chestnut": "#954535",
-  "Taupe": "#483C32",
-  "Mocha": "#967969",
-  "Caramel": "#AF6F4C",
-  "Espresso": "#4E2A26",
-  "Mahogany": "#C04000",
-  "Bronze": "#CD7F32",
-  "Copper": "#B87333",
-  "Nude": "#E3BC9A",
-  "Nude Blush": "#D5A98A",
-  "Champagne": "#F7E7CE",
-  "Pearl": "#F0EAD6",
-  "Sequin": "#E8E8E8",
-  "Lace": "#F9F6EE",
-  "Patent Leather": "#1C1C1C",
-  "Metallic Silver": "#C0C0C0",
-  "Metallic Gold": "#D4AF37",
-  "Holographic": "#E8E4F0",
-  "Leopard": "#D4A373",
-  "Zebra": "#E8E8E8",
-  "Camo Green": "#4A5D23",
-  "Camo Brown": "#5C4033",
-  "Blue Denim": "#1560BD",
-  "Light Denim": "#5D8AA8",
-  "Dark Denim": "#1C3F60",
-  "Raw Denim": "#4A6E8A",
-  "Acid Wash": "#9FB6D4",
-  "Black Denim": "#1A1A1A",
-  "White Cotton": "#F5F5F0",
-  "Natural Linen": "#FAF0E6",
-  "Raw Silk": "#FDF5E6"
-}
+        _COLOR_MAPPINGS = dict(_BUILTIN_COLORS)
         _COLOR_NAMES = sorted(_COLOR_MAPPINGS.keys())
+
 
 _load_color_dictionary()
 # ---------------------------------------------------------------------------
@@ -1224,10 +1095,9 @@ def upload_color_pdf():
             }), 400
         
         found_colors = {}
-        import re as _re
         
         # Pattern 1: "ColorName: #HEX" or "ColorName - #HEX"
-        for match in _re.finditer(r'([A-Za-z]+(?:\s+[A-Za-z]+)*)\s*[:\-]\s*#([0-9A-Fa-f]{6})', extracted_text):
+        for match in re.finditer(r'([A-Za-z]+(?:\s+[A-Za-z]+)*)\s*[:\-]\s*#([0-9A-Fa-f]{6})', extracted_text):
             name = match.group(1).strip()
             hex_code = "#" + match.group(2).upper()
             if name and len(name) > 1:
@@ -1235,7 +1105,7 @@ def upload_color_pdf():
         
         # Pattern 2: "#HEX ColorName" 
         if not found_colors:
-            for match in _re.finditer(r'#([0-9A-Fa-f]{6})\\s+([A-Za-z]+(?:\s+[A-Za-z]+)*)', extracted_text):
+            for match in re.finditer(r'#([0-9A-Fa-f]{6})\\s+([A-Za-z]+(?:\s+[A-Za-z]+)*)', extracted_text):
                 hex_code = "#" + match.group(1).upper()
                 name = match.group(2).strip()
                 if name and len(name) > 1:
@@ -1243,7 +1113,7 @@ def upload_color_pdf():
         
         # Pattern 3: Lines with hex codes and color names
         if not found_colors:
-            for match in _re.finditer(r'([A-Za-z]+(?:\s+[A-Za-z]+)*)[,\s]+#([0-9A-Fa-f]{6})', extracted_text):
+            for match in re.finditer(r'([A-Za-z]+(?:\s+[A-Za-z]+)*)[,\s]+#([0-9A-Fa-f]{6})', extracted_text):
                 name = match.group(1).strip()
                 hex_code = "#" + match.group(2).upper()
                 if name and len(name) > 1:
@@ -1298,7 +1168,7 @@ def debug_analyze():
     features = _extract_image_features(image_b64)
     models_to_try = [MIMO_VISION_MODEL]
     for model in models_to_try:
-        payload = {"model": model, "messages": [{"role": "user", "content": [{"type": "text", "text": SACRED_PROMPT + "\n\nExtracted image features: " + features}, {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{compressed}", "detail": "low"}}]}], "max_tokens": CIPHER_MAX_TOKENS, "temperature": 0.2}
+        payload = {"model": model, "messages": [{"role": "user", "content": [{"type": "text", "text": SACRED_PROMPT + "\n\nExtracted image features: " + features}, {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{compressed}"}}]}], "max_tokens": CIPHER_MAX_TOKENS, "temperature": 0.2}
         try:
             resp = requests.post(MIMO_API_URL, json=payload, headers=headers, timeout=120)
             if resp.status_code == 200:
@@ -1335,3 +1205,6 @@ def health():
 # ---------------------------------------------------------------------------
 # Entrypoint
 # ---------------------------------------------------------------------------
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=PORT, debug=False)
