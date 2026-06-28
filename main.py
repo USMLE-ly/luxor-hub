@@ -434,19 +434,19 @@ def _extract_person_center_crop(image_b64: str) -> str:
                     mask = results.segmentation_mask
                     # Aggressive threshold - only keep pixels that are DEFINITELY the person
                     condition = mask > 0.6  # Higher threshold = less background bleed
-                    # Create black background with only the person visible
-                    masked_img = np.zeros_like(img_np)
+                    # Create LIGHT GREY background (RGB 200,200,200) so AI clearly sees it as background
+                    masked_img = np.full_like(img_np, 200)  # Light grey, clearly not clothing
                     masked_img[condition] = img_np[condition]
                     # Convert masked image back to PIL
                     masked_pil = Image.fromarray(masked_img)
-                    # Get bounding box of non-zero (person) pixels to crop tightly
+                    # Get bounding box of person pixels to crop tightly
                     non_zero = np.argwhere(condition)
                     if len(non_zero) > 0:
                         y_min, x_min = non_zero.min(axis=0)
                         y_max, x_max = non_zero.max(axis=0)
-                        # Add 5% padding
-                        pad_y = int((y_max - y_min) * 0.05)
-                        pad_x = int((x_max - x_min) * 0.05)
+                        # Add 8% padding for context
+                        pad_y = int((y_max - y_min) * 0.08)
+                        pad_x = int((x_max - x_min) * 0.08)
                         y_min = max(0, y_min - pad_y)
                         y_max = min(masked_img.shape[0], y_max + pad_y)
                         x_min = max(0, x_min - pad_x)
@@ -522,7 +522,9 @@ def _get_dominant_colors_from_pixels(image_b64: str, num_colors: int = 3) -> Lis
 
         # Filter out near-black pixels (background from person masking) and near-white (overexposed)
         pixel_data = [p for p in pixel_data if not (p[0] < 20 and p[1] < 20 and p[2] < 20)]
-        pixel_data = [p for p in pixel_data if not (p[0] > 235 and p[1] > 235 and p[2] > 235)]
+        # Also filter out the light grey background (195-205) used in person masking
+        pixel_data = [p for p in pixel_data if not (195 < p[0] < 210 and 195 < p[1] < 210 and 195 < p[2] < 210)]
+        pixel_data = [p for p in pixel_data if not (p[0] > 240 and p[1] > 240 and p[2] > 240)]
         if not pixel_data:
             return []
 
