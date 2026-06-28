@@ -60,11 +60,41 @@ export function FashionHero({
           <div className="md:order-2 relative">
             <div className="absolute -z-10 w-72 h-72 rounded-full bg-purple-500/20 blur-3xl opacity-30 -top-10 -left-10" />
             {imageUrl ? (
-              <img
-                src={imageUrl}
-                alt="Uploaded outfit"
-                className="rounded-2xl shadow-2xl w-full object-cover filter brightness-105 max-h-[500px]"
-              />
+              <div className="relative">
+                <img
+                  src={imageUrl}
+                  alt="Uploaded outfit"
+                  className="rounded-2xl shadow-2xl w-full object-cover filter brightness-105 max-h-[500px]"
+                />
+                {/* Score ring overlaid top-right */}
+                {!isNA && (
+                  <div className="absolute top-4 right-4 z-10 drop-shadow-lg bg-black/20 backdrop-blur-sm rounded-full p-1">
+                    <div className="relative w-20 h-20 md:w-24 md:h-24">
+                      <svg width="100%" height="100%" viewBox="0 0 100 100" className="-rotate-90">
+                        <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="6" />
+                        <motion.circle
+                          cx="50" cy="50" r="42" fill="none"
+                          stroke="url(#goldArcOverlay)" strokeWidth="6" strokeLinecap="round"
+                          strokeDasharray={264}
+                          initial={{ strokeDashoffset: 264 }}
+                          animate={{ strokeDashoffset: 264 - (styleScore! / 100) * 264 }}
+                          transition={{ duration: 1.5, ease: "easeOut" }}
+                        />
+                        <defs>
+                          <linearGradient id="goldArcOverlay" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stopColor="#C6A55C" />
+                            <stop offset="100%" stopColor="#E8D5A3" />
+                          </linearGradient>
+                        </defs>
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <span className="text-xl md:text-2xl font-bold gold-text">{styleScore}</span>
+                        <span className="text-[8px] text-white/80">/ 100</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : showMindMap ? (
               /* ---- Style Mind Map & Vibe ---- */
               <div className="rounded-2xl border border-zinc-800/60 bg-zinc-900/40 backdrop-blur-xl p-6 h-full min-h-[300px] flex flex-col gap-4">
@@ -136,45 +166,10 @@ export function FashionHero({
           {/* Content Side */}
           <div className="md:order-1 flex flex-col justify-between">
             <div className="flex flex-col h-full justify-between gap-4">
-              {/* Header with score */}
-              <div className="flex items-center gap-4">
-                <h1 className="text-5xl md:text-7xl font-bold text-foreground leading-tight tracking-tighter">
-                  {styleName}
-                </h1>
-                <div className="flex-shrink-0">
-                  <div className="relative w-20 h-20 md:w-24 md:h-24">
-                    <svg width="100%" height="100%" viewBox="0 0 100 100" className="-rotate-90">
-                      <circle cx="50" cy="50" r="42" fill="none" stroke="hsl(var(--muted))" strokeWidth="6" />
-                      {!isNA && (
-                        <motion.circle
-                          cx="50" cy="50" r="42" fill="none"
-                          stroke="url(#goldArc2)" strokeWidth="6" strokeLinecap="round"
-                          strokeDasharray={264}
-                          initial={{ strokeDashoffset: 264 }}
-                          animate={{ strokeDashoffset: 264 - (styleScore! / 100) * 264 }}
-                          transition={{ duration: 1.5, ease: "easeOut" }}
-                        />
-                      )}
-                      <defs>
-                        <linearGradient id="goldArc2" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#C6A55C" />
-                          <stop offset="100%" stopColor="#E8D5A3" />
-                        </linearGradient>
-                      </defs>
-                    </svg>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      {isNA ? (
-                        <span className="text-lg font-bold text-muted-foreground/40">N/A</span>
-                      ) : (
-                        <>
-                          <span className="text-xl md:text-2xl font-bold gold-text">{styleScore}</span>
-                          <span className="text-[8px] text-muted-foreground">/ 100</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
+              {/* Header - title only, score is overlaid on the image */}
+              <h1 className="text-5xl md:text-7xl font-bold text-foreground leading-tight tracking-tighter">
+                {styleName}
+              </h1>
 
               {/* Items detected - detailed labels with color dots */}
               {(topType || bottomType || footwear) && (
