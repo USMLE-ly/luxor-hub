@@ -565,7 +565,7 @@ def analyze_outfit():
         _log.error("[ANALYZE] Timeout")
     except Exception as exc:
         _log.error("[ANALYZE] ERROR: %s", exc)
-    return jsonify({"success": True, "source": "fallback", "style_name": "", "style_score": None, "gender": "", "actual_colors": [], "items_detected": [], "strengths": [], "audit": "", "tweak_plan": "", "generation_prompt": ""})
+    return jsonify(map_analysis({"source": "fallback", "style_score": None}))
 
 # ---------------------------------------------------------------------------
 # Stylist Explore
