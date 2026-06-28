@@ -636,7 +636,7 @@ export default function Analysis() {
                     className="relative aspect-[3/4] cursor-pointer overflow-hidden bg-muted/20 group"
                   >
                     {imagePreview ? (
-                      <img src={imagePreview} alt="Outfit" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                      <ImageSwiper images={imagePreview} cardWidth={400} cardHeight={600} className="w-full" />
                     ) : (
                       <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-muted-foreground">
                         <motion.div
@@ -686,214 +686,21 @@ export default function Analysis() {
           >
             {data ? (
               <>
-                {/* ---- Score + Style Name ---- */}
+                {/* ---- Fashion Hero Layout ---- */}
                 <motion.div variants={childVariants}>
-                  <div className="relative rounded-[1.5rem] border-[0.75px] border-border p-3">
-                    <GlowingEffect spread={60} glow proximity={80} inactiveZone={0.01} borderWidth={3} />
-                    <Card className="glass-card border-0 shadow-none">
-                      <CardContent className="p-6 flex flex-col md:flex-row items-center gap-6">
-                        <CircularScore score={data.style_score || null} />
-                        <div className="flex-1 text-center md:text-left">
-                          <h2 className="font-display text-2xl font-bold gold-text">{data.style_name}</h2>
-                          <p className="text-muted-foreground mt-2 text-sm leading-relaxed">{data.audit}</p>
-                          {data.seasonalFit && (
-                            <Badge className="mt-2 gold-gradient text-primary-foreground">{data.seasonalFit}</Badge>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </motion.div>
-
-
-
-                {/* ---- Cosmic Advice & Style Diagrams ---- */}
-                <motion.div variants={childVariants}>
-                  <div className="relative rounded-[1.5rem] border-[0.75px] border-border p-3">
-                    <GlowingEffect spread={50} glow proximity={64} inactiveZone={0.01} borderWidth={3} />
-                    <Card className="glass-card border-0 shadow-none">
-                      <CardHeader className="pb-3">
-                        <CardTitle className="font-display flex items-center gap-2 text-lg">
-                          <div className="w-0.5 h-5 gold-gradient rounded-full mr-1" />
-                          <Sparkles className="w-5 h-5 text-purple-400" /> Cosmic Advice & Style Diagrams
-                        </CardTitle>
-                        <p className="text-sm text-muted-foreground">
-                          AI-powered recommendations to elevate your look.
-                        </p>
-                      </CardHeader>
-                      <CardContent className="space-y-5">
-                        {/* Visual Flow Diagram */}
-                        <motion.div
-                          variants={container}
-                          initial="hidden"
-                          animate="show"
-                          className="space-y-3"
-                        >
-                          {/* Current State Pill */}
-                          <motion.div variants={itemAnim} className="relative">
-                            <div className="absolute left-3 top-0 bottom-0 w-px bg-gradient-to-b from-primary/40 via-primary/20 to-transparent" />
-                            <div className="ml-8 pl-4 py-3 rounded-xl bg-muted/20 border border-border/40">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Current Look</span>
-                                <Badge variant="outline" className="text-[10px] bg-primary/5">{data?.style_name || "Your Style"}</Badge>
-                              </div>
-                              <p className="text-sm text-foreground/80">
-                                {data?.audit || "Upload a photo to get style advice."}
-                              </p>
-                            </div>
-                          </motion.div>
-
-                          {/* Action Arrow */}
-                          <motion.div variants={itemAnim} className="flex justify-center py-1">
-                            <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary">
-                              <Sparkles className="w-3 h-3" /> Apply This Tweak
-                            </div>
-                          </motion.div>
-
-                          {/* Tweak Plan Pill */}
-                          <motion.div variants={itemAnim} className="relative">
-                            <div className="ml-8 pl-4 py-3 rounded-xl bg-purple-500/10 border border-purple-500/20">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="text-xs font-bold text-purple-400 uppercase tracking-wider">Recommended Upgrade</span>
-                                <Badge variant="outline" className="text-[10px] bg-purple-500/10 text-purple-400 border-purple-500/30">AI Suggestion</Badge>
-                              </div>
-                              <p className="text-sm text-foreground/80">
-                                {data?.tweak_plan || "Complete the analysis to see a personalized upgrade."}
-                              </p>
-                            </div>
-                          </motion.div>
-                        </motion.div>
-
-                        {/* Items Detected Flow */}
-                        {data?.items_detected && data.items_detected.length > 0 && (
-                          <motion.div
-                            variants={container}
-                            initial="hidden"
-                            animate="show"
-                            className="pt-2 border-t border-border/30"
-                          >
-                            <motion.p variants={itemAnim} className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                              <Eye className="w-3 h-3" /> Items Detected
-                            </motion.p>
-                            <motion.div variants={itemAnim} className="flex flex-wrap gap-2">
-                              {(data.actual_colors && data.actual_colors.length > 0)
-                              ? data.items_detected.map((item, idx) => {
-                                  const colorMap = {
-                                    "Pink": "bg-pink-500", "Red": "bg-red-500", "Blue": "bg-blue-500",
-                                    "Black": "bg-gray-900", "White": "bg-white border border-border",
-                                    "Cream": "bg-yellow-100", "Green": "bg-green-500", "Brown": "bg-amber-800",
-                                    "Gold": "bg-yellow-500", "Silver": "bg-gray-300", "Navy": "bg-blue-900",
-                                    "Tan": "bg-amber-200", "Beige": "bg-amber-100", "Yellow": "bg-yellow-400",
-                                    "Grey": "bg-gray-400", "Orange": "bg-orange-500",
-                                  };
-                                  const colorName = data.actual_colors[idx] || "";
-                                  const dotClass = colorName ? (colorMap[colorName] || "bg-gray-400") : "bg-gray-400";
-                                  return (
-                                    <Badge key={idx} variant="outline" className="text-xs border-primary/30 bg-primary/5 backdrop-blur-sm flex items-center gap-1.5">
-                                      <span className={"w-2 h-2 rounded-full inline-block " + dotClass} />
-                                      {item}
-                                    </Badge>
-                                  );
-                                })
-                              : data.items_detected.map((item, idx) => (
-                                  <Badge key={idx} variant="outline" className="text-xs border-primary/30 bg-primary/5 backdrop-blur-sm">
-                                    {item}
-                                  </Badge>
-                                ))}
-                            </motion.div>
-                          </motion.div>
-                        )}
-
-                        {/* Colors Palette */}
-                        {data?.actual_colors && data.actual_colors.length > 0 && (
-                          <motion.div
-                            variants={container}
-                            initial="hidden"
-                            animate="show"
-                            className="pt-2 border-t border-border/30"
-                          >
-                            <motion.p variants={itemAnim} className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                              <Palette className="w-3 h-3" /> Color Palette Detected
-                            </motion.p>
-                            <motion.div variants={itemAnim} className="flex flex-wrap gap-2">
-                              {data.actual_colors.map((color, idx) => {
-                                const colorMap = {
-                                  "Pink": "bg-pink-500", "Red": "bg-red-500", "Blue": "bg-blue-500",
-                                  "Black": "bg-gray-900", "White": "bg-white border border-border",
-                                  "Cream": "bg-yellow-100", "Green": "bg-green-500", "Brown": "bg-amber-800",
-                                  "Gold": "bg-yellow-500", "Silver": "bg-gray-300", "Navy": "bg-blue-900",
-                                  "Tan": "bg-amber-200", "Beige": "bg-amber-100", "Yellow": "bg-yellow-400",
-                                  "Grey": "bg-gray-400", "Orange": "bg-orange-500",
-                                };
-                                const bgClass = colorMap[color] || "bg-muted";
-                                return (
-                                  <div key={idx} className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-muted/20 border border-border/40">
-                                    <div className={`w-3 h-3 rounded-full ${bgClass}`} />
-                                    <span className="text-xs text-foreground/70">{color}</span>
-                                  </div>
-                                );
-                              })}
-                            </motion.div>
-                          </motion.div>
-                        )}
-
-                        {/* Strengths Flow */}
-                        {data?.strengths && data.strengths.length > 0 && (
-                          <motion.div
-                            variants={container}
-                            initial="hidden"
-                            animate="show"
-                            className="pt-2 border-t border-border/30"
-                          >
-                            <motion.p variants={itemAnim} className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                              <ShieldCheck className="w-3 h-3" /> Style Strengths
-                            </motion.p>
-                            <motion.div variants={itemAnim} className="space-y-2">
-                              {data.strengths.map((s, idx) => (
-                                <div key={idx} className="flex items-start gap-2">
-                                  <div className="w-5 h-5 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                                  </div>
-                                  <p className="text-sm text-foreground/70">{s}</p>
-                                </div>
-                              ))}
-                            </motion.div>
-                          </motion.div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </div>
+                  <FashionHero
+                    styleName={data.style_name}
+                    styleScore={data.style_score || null}
+                    strengths={data.strengths}
+                    itemsDetected={data.items_detected}
+                    actualColors={data.actual_colors}
+                    audit={data.audit}
+                    tweakPlan={data.tweak_plan}
+                  />
                 </motion.div>
 
                 {/* ---- Interactive Stylist Quiz ---- */}
                 <InteractiveStylistQuiz imagePreview={imagePreview} styleName={data?.style_name} actualColors={data?.actual_colors} />
-
-                {/* ---- Cosmic Audit ---- */}
-                <motion.div variants={childVariants}>
-                  <div className="relative rounded-[1.5rem] border-[0.75px] border-border p-3">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent blur-2xl pointer-events-none" />
-                    <GlowingEffect spread={60} glow proximity={64} inactiveZone={0.01} borderWidth={3} />
-                    <Card className="glass-card border-0 shadow-none relative overflow-hidden">
-                      <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary/5 rounded-full blur-[80px]" />
-                      <CardHeader className="pb-2">
-                        <CardTitle className="font-display flex items-center gap-2 text-lg">
-                          <div className="w-0.5 h-5 gold-gradient rounded-full mr-1" />
-                          <TrendingUp className="w-5 h-5 text-primary" /> Cosmic Audit
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <p className="text-sm text-foreground leading-relaxed italic border-l-2 border-primary/30 pl-4 py-2 bg-primary/5 rounded-r-xl">
-                          &ldquo;{data.audit}&rdquo;
-                        </p>
-                        <div className="flex flex-wrap gap-3">
-                          <Badge variant="outline" className="text-xs bg-muted/30">
-                            <Sparkles className="w-3 h-3 mr-1 text-primary" /> {data.tweak_plan}
-                          </Badge>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </motion.div>
 
                 {/* ---- Save Button ---- */}
                 <motion.div variants={childVariants} className="flex items-center gap-3 justify-end">
