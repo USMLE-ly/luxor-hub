@@ -545,12 +545,12 @@ def _get_dominant_colors_from_pixels(image_b64: str, num_colors: int = 3) -> Lis
         pixel_array = np.array(img)
         pixel_data = pixel_array.reshape(-1, 3).tolist()
 
-        # Filter out near-black pixels (shadows/edges) and white background (RGB 255)
-        pixel_data = [p for p in pixel_data if not (p[0] < 25 and p[1] < 25 and p[2] < 25)]
-        # Filter out white background (RGB 255) used in person masking
-        pixel_data = [p for p in pixel_data if not (p[0] > 230 and p[1] > 230 and p[2] > 230)]
-        # Filter out near-grey pixels that are likely background artifacts
-        pixel_data = [p for p in pixel_data if not (abs(p[0] - p[1]) < 15 and abs(p[1] - p[2]) < 15 and abs(p[0] - p[2]) < 15 and p[0] > 150)]
+        # ONLY filter perfectly white background (255,255,255) — keeps white/light clothing
+        # Use a tight threshold to preserve white sneakers, cream tops, etc.
+        pixel_data = [p for p in pixel_data if not (p[0] > 252 and p[1] > 252 and p[2] > 252)]
+        # ONLY filter perfectly black edges (0,0,0) — keeps dark/black clothing
+        pixel_data = [p for p in pixel_data if not (p[0] < 3 and p[1] < 3 and p[2] < 3)]
+        # Do NOT filter grey pixels — they may be actual garment colors
         if not pixel_data:
             return []
 
@@ -586,6 +586,43 @@ def _get_dominant_colors_from_pixels(image_b64: str, num_colors: int = 3) -> Lis
     except Exception as exc:
         _log.warning("[PIXEL] Error: %s", exc)
         return []
+
+def _debug_pixel_debug(image_b64: str) -> None:
+    """Log color extraction details for debugging."""
+    try:
+        masked_b64 = _extract_person_center_crop(image_b64)
+        raw = base64.b64decode(masked_b64)
+        img = Image.open(io.BytesIO(raw))
+        w, h = img.size
+        small = img.resize((64, 96), Image.Resampling.LANCZOS)
+        arr = np.array(small)
+        flat = arr.reshape(-1, 3).tolist()
+        exact_white = sum(1 for p in flat if p[0]==255 and p[1]==255 and p[2]==255)
+        exact_black = sum(1 for p in flat if p[0]==0 and p[1]==0 and p[2]==0)
+        survived = sum(1 for p in flat if not (p[0]>252 and p[1]>252 and p[2]>252) and not (p[0]<3 and p[1]<3 and p[2]<3))
+        _log.info("[PIXEL-DEBUG] Masked=%dx%d total=%d white_bg=%d black_edge=%d survived=%d ratio=%.1f%%",
+                  w, h, len(flat), exact_white, exact_black, survived, survived/len(flat)*100 if flat else 0)
+        # Log top color clusters
+        quantized = [(r//64*64, g//64*64, b//64*64) for r,g,b in flat if not (r>252 and g>252 and b>252) and not (r<3 and g<3 and b<3)]
+        if quantized:
+            from collections import Counter
+            top = Counter(quantized).most_common(5)
+            color_sample = []
+            for (r,g,b), c in top[:3]:
+                # Find closest named color
+                best_name = "unknown"
+                best_dist = 9999
+                for name, hex_code in _COLOR_MAPPINGS.items():
+                    hc = hex_code.lstrip('#')
+                    cr, cg, cb = int(hc[0:2], 16), int(hc[2:4], 16), int(hc[4:6], 16)
+                    dist = ((r-cr)**2*0.3 + (g-cg)**2*0.59 + (b-cb)**2*0.11)**0.5
+                    if dist < best_dist:
+                        best_dist = dist
+                        best_name = name
+                color_sample.append(f"{best_name}({best_dist:.0f})")
+            _log.info("[PIXEL-DEBUG] Top color clusters: %s", color_sample)
+    except Exception as exc:
+        _log.warning("[PIXEL-DEBUG] %s", exc)
 
 def _validate_colors_with_pixels(ai_colors: List[str], pixel_colors: List[str]) -> List[str]:
     """
@@ -806,6 +843,11 @@ def get_fashion_decision(image_b64: str) -> Dict[str, Any]:
 
 def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
     items_detected = []
+    # Debug: log what the AI actually returned
+    _log.info("[MAP-DEBUG] AI returned: style_name=%s score=%s colors=%s top=%s bottom=%s footwear=%s",
+              result.get("style_name"), result.get("style_score"), 
+              result.get("actual_colors"),
+              result.get("top_type"), result.get("bottom_type"), result.get("footwear"))
     for key in ["top_type", "bottom_type", "footwear", "accessories"]:
         val = result.get(key, "")
         if val and val != "None" and val.lower() != "none":
@@ -904,19 +946,22 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
         "hoodie": "Grey",
         "coat": "Black",
     }
-    # Only override if AI hallucinated background-ish colors
-    background_indicators = {"Slate", "Acid Wash", "Concrete", "Steel", "Sequin", "Holographic", "Zebra", "Leopard", "Camo Green", "Camo Brown"}
+    # Reality Filter - Kill background hallucinations aggressively
+    background_indicators = {"Slate", "Acid Wash", "Concrete", "Steel", "Sequin", "Holographic", "Zebra", "Leopard", "Camo Green", "Camo Brown", "Silver", "Charcoal", "Ash"}
     if actual_colors and any(c in background_indicators for c in actual_colors):
         mapped_colors = []
+        # First try to map from items_detected
         for item in items_detected:
             for keyword, color in _REAL_COLORS_MAP.items():
                 if keyword in item.lower():
                     mapped_colors.append(color)
                     break
-        if mapped_colors:
-            actual_colors = list(dict.fromkeys(mapped_colors))[:3]
-            import logging as _lg
-            _lg.getLogger("luxor.omega").info("[REALITY-FILTER] Overrode hallucinated colors -> %s based on items: %s", actual_colors, items_detected)
+        # If items_detected is empty or no matches, use reasonable defaults
+        if not mapped_colors:
+            mapped_colors = ["Black", "White", "Blue"]
+        actual_colors = list(dict.fromkeys(mapped_colors))[:3]
+        import logging as _lg
+        _lg.getLogger("luxor.omega").info("[REALITY-FILTER] Overrode hallucinated colors -> %s (items: %s)", actual_colors, items_detected)
 
     return {"success": True, "source": result.get("source", "unknown"), "style_name": style_name, "style_score": style_score, "vibe_type": result.get("vibe_type", "Casual"), "gender": result.get("gender", "Female"), "actual_colors": actual_colors, "items_detected": items_detected, "strengths": strengths, "audit": result.get("audit", "A well-coordinated outfit with balanced styling."), "tweak_plan": result.get("tweak_plan", "Consider adding a structured blazer for a more polished look."), "generation_prompt": result.get("generation_prompt", "A fashion-forward person wearing a stylish outfit in an editorial setting.")}
 
