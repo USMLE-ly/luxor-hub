@@ -1,6 +1,8 @@
 "use client";
 import { motion } from "motion/react";
 import { AnimatedGradient } from "@/components/ui/animated-gradient-with-svg";
+import { MarkerHighlight } from "@/components/ui/marker-highlight";
+import { ShimmerBgText } from "@/components/ui/shimmer-bg-text";
 
 interface FashionHeroProps {
   styleName?: string;
@@ -172,43 +174,56 @@ export function FashionHero({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              {/* SECTION 1: TITLE (Gradient Text) */}
-              <div className="relative w-full py-4 md:py-6 flex items-center justify-center overflow-hidden rounded-xl border border-white/10 flex-shrink-0 bg-gradient-to-r from-purple-900/60 via-blue-900/60 to-cyan-900/60">
-                <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white leading-tight tracking-tight text-center px-4">
-                  {styleName}
-                </h2>
+              {/* SECTION 1: TITLE (Marker Highlight) */}
+              <div className="relative w-full flex items-center justify-start py-3 overflow-hidden rounded-xl border border-white/10 flex-shrink-0 bg-gradient-to-r from-purple-900/50 via-blue-900/50 to-cyan-900/50 px-4">
+                <div className="text-3xl md:text-4xl lg:text-5xl italic tracking-tight drop-shadow-lg leading-none">
+                  <MarkerHighlight
+                    before=""
+                    highlight={styleName || "Modern Classic"}
+                    after=""
+                    markerColor="#facc15"
+                    baseColor="#ffffff"
+                    highlightedTextColor="#171717"
+                    fontSize={48}
+                    fontWeight={700}
+                    speed={1.2}
+                    className="inline-block"
+                  />
+                </div>
               </div>
 
-              {/* SECTION 2: ITEMS (Sky Blue Gradient) */}
+              {/* SECTION 2: ITEMS (Sky Blue Gradient + Shimmer) */}
               <div className="relative flex-1 min-h-[100px] overflow-hidden rounded-xl border border-white/10">
                 <AnimatedGradient colors={["#0ea5e9", "#38bdf8", "#bae6fd"]} speed={0.05} blur="medium" />
                 <div className="relative z-10 p-4 backdrop-blur-sm h-full w-full">
-                  <h3 className="text-xs uppercase tracking-[0.15em] text-white/60 mb-3 font-semibold">Items</h3>
+                  <h3 className="text-xs uppercase tracking-[0.15em] text-white/60 mb-3 font-semibold">
+                    <ShimmerBgText>ITEMS</ShimmerBgText>
+                  </h3>
                   <div className="space-y-2.5">
                     {(topType || bottomType || footwear) ? (
                       <>
                         {topType && (
                           <div className="flex items-center gap-3 text-sm md:text-base font-medium text-white bg-transparent">
                             <span className={`w-2 h-2 rounded-full ${colorSwatchMap[topType.split(' ')[0]] || 'bg-white/80'} shadow-[0_0_8px_rgba(255,255,255,0.5)] flex-shrink-0`} />
-                            <span className="capitalize tracking-wide leading-tight">{topType}</span>
+                            <ShimmerBgText><span className="capitalize tracking-wide leading-tight">{topType}</span></ShimmerBgText>
                           </div>
                         )}
                         {bottomType && (
                           <div className="flex items-center gap-3 text-sm md:text-base font-medium text-white bg-transparent">
                             <span className={`w-2 h-2 rounded-full ${colorSwatchMap[bottomType.split(' ')[0]] || 'bg-white/80'} shadow-[0_0_8px_rgba(255,255,255,0.5)] flex-shrink-0`} />
-                            <span className="capitalize tracking-wide leading-tight">{bottomType}</span>
+                            <ShimmerBgText><span className="capitalize tracking-wide leading-tight">{bottomType}</span></ShimmerBgText>
                           </div>
                         )}
                         {footwear && (
                           <div className="flex items-center gap-3 text-sm md:text-base font-medium text-white bg-transparent">
                             <span className={`w-2 h-2 rounded-full ${colorSwatchMap[footwear.split(' ')[0]] || 'bg-white/80'} shadow-[0_0_8px_rgba(255,255,255,0.5)] flex-shrink-0`} />
-                            <span className="capitalize tracking-wide leading-tight">{footwear}</span>
+                            <ShimmerBgText><span className="capitalize tracking-wide leading-tight">{footwear}</span></ShimmerBgText>
                           </div>
                         )}
                         {accessories && accessories !== "None" && (
                           <div className="flex items-center gap-3 text-sm md:text-base font-medium text-white bg-transparent">
                             <span className={`w-2 h-2 rounded-full ${colorSwatchMap[accessories.split(' ')[0]] || 'bg-white/80'} shadow-[0_0_8px_rgba(255,255,255,0.5)] flex-shrink-0`} />
-                            <span className="capitalize tracking-wide leading-tight">{accessories}</span>
+                            <ShimmerBgText><span className="capitalize tracking-wide leading-tight">{accessories}</span></ShimmerBgText>
                           </div>
                         )}
                       </>
@@ -216,7 +231,7 @@ export function FashionHero({
                       itemsDetected.map((item, i) => (
                         <div key={i} className="flex items-center gap-3 text-sm md:text-base font-medium text-white bg-transparent">
                           <span className="w-2 h-2 rounded-full bg-white/80 shadow-[0_0_8px_rgba(255,255,255,0.5)] flex-shrink-0" />
-                          <span className="capitalize tracking-wide leading-tight">{item}</span>
+                          <ShimmerBgText><span className="capitalize tracking-wide leading-tight">{item}</span></ShimmerBgText>
                         </div>
                       ))
                     ) : (
@@ -226,16 +241,18 @@ export function FashionHero({
                 </div>
               </div>
 
-              {/* SECTION 3: STRENGTHS (Pink/Orange Gradient) */}
+              {/* SECTION 3: STRENGTHS (Pink/Orange Gradient + Shimmer) */}
               <div className="relative flex-1 min-h-[100px] overflow-hidden rounded-xl border border-white/10">
                 <AnimatedGradient colors={["#ec4899", "#f472b6", "#fbcfe8"]} speed={0.06} blur="medium" />
                 <div className="relative z-10 p-4 backdrop-blur-sm h-full w-full">
-                  <h3 className="text-xs uppercase tracking-[0.15em] text-white/60 mb-3 font-semibold">Strengths</h3>
+                  <h3 className="text-xs uppercase tracking-[0.15em] text-white/60 mb-3 font-semibold">
+                    <ShimmerBgText>STRENGTHS</ShimmerBgText>
+                  </h3>
                   <div className="space-y-2">
                     {strengths.length > 0 ? strengths.map((s, idx) => (
                       <div key={idx} className="flex items-start gap-2.5 text-sm text-white/90 leading-relaxed">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] mt-1.5 flex-shrink-0" />
-                        <span className="tracking-wide">{s}</span>
+                        <ShimmerBgText><span className="tracking-wide">{s}</span></ShimmerBgText>
                       </div>
                     )) : (
                       <p className="text-xs text-white/40">No strengths detected</p>
