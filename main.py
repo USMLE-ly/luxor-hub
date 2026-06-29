@@ -1095,13 +1095,13 @@ def _humanize_tweak(tweak: str, items: List[str]) -> str:
         has_layers = any(l in " ".join(items).lower() for l in ["jacket", "blazer", "cardigan", "coat"])
         
         if not has_accessory and not has_layers:
-            return "A simple necklace or a structured jacket would take this up a notch without overcomplicating it."
+            return "Add a simple necklace or a structured jacket to take this up a notch."
         elif not has_accessory:
-            return "Throwing on a watch or a subtle necklace would add some polish."
+            return "Add a watch or a subtle necklace for some extra polish."
         elif not has_layers:
-            return "A lightweight jacket or blazer would give this more structure."
+            return "Add a lightweight jacket or blazer to give this more structure."
         else:
-            return "Honestly, this works as-is. Maybe swap the bag if you want to change the vibe."
+            return "Add a belt or a different bag if you want to shift the vibe — this already works well."
     
     # Clean up common AI phrases in the AI-generated tweak
     tweak = tweak.replace("Consider adding ", "Try adding ")
@@ -1192,32 +1192,7 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
                 elif "cotton" in item_lower or "linen" in item_lower:
                     default_colors = ["White", "Beige", "Navy"]; break
             actual_colors = default_colors
-    strengths = result.get("strengths", [])
-    # Ensure strengths are unique (no duplicates)
-    if isinstance(strengths, list):
-        seen_s = set()
-        unique_s = []
-        for s in strengths:
-            if s not in seen_s:
-                seen_s.add(s)
-                unique_s.append(s)
-        strengths = unique_s
-    # Humanize strengths — replace AI-isms with natural-sounding observations
-    detected = [s for s in [result.get(k, "") for k in ["top_type", "bottom_type", "footwear", "accessories"]] if s and s != "None"]
-    if detected:
-        strengths = _humanize_strengths(detected)
-    elif items_detected:
-        strengths = _humanize_strengths(items_detected)
-    if not strengths:
-        strengths = ["The proportions work well together.", "The color palette makes sense for the context.", "It reads as intentional without being overdone."]
-    style_score = result.get("style_score")
-    if style_score is None or not isinstance(style_score, (int, float)) or style_score < 60:
-        style_score = 78
-    style_score = int(round(style_score))
-    style_name = result.get("style_name", "")
-    if not style_name:
-        style_name = "Modern Classic"
-    # Replace 'None'/'none'/'empty' values for all item fields
+    # ---- PHASE A: Clean up None values and merge accessories ----
     for item_key in ["top_type", "bottom_type", "footwear", "accessories"]:
         val = result.get(item_key, "")
         if val in ("None", "none", ""):
@@ -1226,7 +1201,6 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
             else:
                 result[item_key] = ""
 
-    # If accessories contains multiple items (comma-separated), merge them
     acc_val = result.get("accessories", "")
     if acc_val and acc_val != "Non Accessory" and "," in acc_val:
         parts = [p.strip() for p in acc_val.split(",") if p.strip()]
@@ -1234,9 +1208,7 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
             display = " + ".join(parts[:3])
             result["accessories"] = display
 
-    # ---- COLOR CORRECTION: Force item color names to match pixel-truth colors ----
-    # The AI often hallucinates colors (e.g. says 'Black' when the top is actually Navy).
-    # Pixel colors are the ABSOLUTE TRUTH. We correct the first word (color) of each item.
+    # ---- PHASE B: Color correction BEFORE strength generation ----
     if pixel_colors and len(pixel_colors) >= 1:
         pixel_set = set(c.lower() for c in pixel_colors)
         color_words = set()
@@ -1250,18 +1222,14 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
                 continue
             words = item_val.split()
             if len(words) < 2:
-                continue  # Need at least 'Color + Garment'
+                continue
             
             first_word = words[0].strip(',.!?;:')
-            # Check if first word is a hallucinated color (not in pixel set)
-            # Also check common hallucinated colors to correct
             HALLUCINATED = {"charcoal", "acid", "slate", "silver", "concrete", "khaki", "coffee", "burgundy", "camo"}
             is_hallucinated = first_word.lower() in HALLUCINATED
             
             if is_hallucinated or (pixel_colors and first_word.lower() not in color_words and first_word.lower() not in [c.lower() for c in pixel_colors]):
-                # Replace the first word with the most specific pixel color
-                best_color = pixel_colors[0]  # Default to most dominant
-                # If bottom/jeans, prefer blue/denim shades; if top, use dominant
+                best_color = pixel_colors[0]
                 if item_key == "bottom_type" and any(bc in ['blue', 'denim', 'black', 'navy'] for bc in pixel_colors):
                     for bc in pixel_colors:
                         if bc.lower() in ('blue', 'black', 'navy', 'denim'):
@@ -1276,6 +1244,30 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
                 corrected = ' '.join(words)
                 result[item_key] = corrected
                 _log.info("[COLOR-CORRECT] %s: '%s' -> '%s' (pixels: %s)", item_key, item_val, corrected, pixel_colors)
+
+    # ---- PHASE C: Rebuild items_detected from color-corrected values ----
+    items_detected = []
+    for key in ["top_type", "bottom_type", "footwear", "accessories"]:
+        val = result.get(key, "")
+        if val and val != "None" and val.lower() != "none" and val != "Non Accessory":
+            items_detected.append(val)
+
+    # ---- PHASE D: Generate humanized strengths from CORRECTED items ----
+    detected = [s for s in [result.get(k, "") for k in ["top_type", "bottom_type", "footwear", "accessories"]] if s and s != "None"]
+    if detected:
+        strengths = _humanize_strengths(detected)
+    elif items_detected:
+        strengths = _humanize_strengths(items_detected)
+    else:
+        strengths = ["The proportions work well together.", "The color palette makes sense for the context.", "It reads as intentional without being overdone."]
+
+    style_score = result.get("style_score")
+    if style_score is None or not isinstance(style_score, (int, float)) or style_score < 60:
+        style_score = 78
+    style_score = int(round(style_score))
+    style_name = result.get("style_name", "")
+    if not style_name:
+        style_name = "Modern Classic"
 
     return {
         "success": True,
