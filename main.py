@@ -1755,128 +1755,91 @@ _image_b64_cache = ""
 # Fashion Decision
 # ---------------------------------------------------------------------------
 def get_fashion_decision(image_b64: str) -> Dict[str, Any]:
-    import time as _time
-    _t0 = _time.time()
+    """Try MiMo vision first, return bare fallback instantly if it fails."""
     _log.info("[PIPELINE] Starting analysis")
-    
-    # Phase 1: Try MiMo vision (has built-in health check, 60s max)
     try:
         result = call_groq_vision(image_b64, SACRED_PROMPT, 0.2)
         if result:
-            _log.info("[PIPELINE] MiMo OK in %.1fs: top=%s bottom=%s", 
-                      _time.time() - _t0,
+            _log.info("[PIPELINE] MiMo OK: top=%s bottom=%s", 
                       result.get("top_type",""), result.get("bottom_type",""))
             return result
-        _log.info("[PIPELINE] MiMo no result in %.1fs", _time.time() - _t0)
     except (CFTimeoutError, requests.exceptions.Timeout):
-        _log.warning("[PIPELINE] MiMo timeout in %.1fs", _time.time() - _t0)
+        _log.warning("[PIPELINE] MiMo timeout")
     except Exception as exc:
-        _log.error("[PIPELINE] MiMo error in %.1fs: %s", _time.time() - _t0, exc)
+        _log.error("[PIPELINE] MiMo error: %s", exc)
     
-    # Phase 2: Minimal fallback - NO pixel extraction (too slow on Replit)
-    _log.info("[PIPELINE] Fast fallback at %.1fs", _time.time() - _t0)
-    _log.info("[PIPELINE] Done in %.1fs (source=fallback)", _time.time() - _t0)
+    _log.info("[PIPELINE] Fast fallback")
     return {"style_name": "", "gender": "", "vibe_type": "Casual", 
             "top_type": "", "bottom_type": "", "footwear": "", 
             "accessories": "", "actual_colors": [], 
             "items_detected": [], "strengths": [], "audit": "", 
-            "tweak_plan": "", "style_score": None, "source": "fallback"}
+            "tweak_plan": "", "style_score": None, "source": "fallback",
+            "generation_prompt": "A fashion-forward person wearing a stylish outfit."}
 
 def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
+    """Map MiMo vision response to frontend-facing format with clean defaults."""
+    _log.info("[MAP] Processing result from source=%s", result.get("source", "unknown"))
+    
+    # Build items list from AI-detected garments
     items_detected = []
-    # Debug: log what the AI actually returned
-    _log.info("[MAP-DEBUG] AI returned: style_name=%s score=%s colors=%s top=%s bottom=%s footwear=%s",
-              result.get("style_name"), result.get("style_score"), 
-              result.get("actual_colors"),
-              result.get("top_type"), result.get("bottom_type"), result.get("footwear"))
     for key in ["top_type", "bottom_type", "footwear", "accessories"]:
         val = result.get(key, "")
         if val and val != "None" and val.lower() != "none":
             items_detected.append(val)
-    global _image_b64_cache
-
-    # === STEP 1: No pixel extraction - too slow on Replit, trust MiMo vision ===
-    pixel_colors = []
     
-    # Build lower-case color lookup from the color dictionary
-    _COLOR_NAMES_LOWER = {c.lower() for c in _COLOR_NAMES} if _COLOR_NAMES else set()
-
-    # === STEP 2: Extract colors from AI vision output (RELIABLE) ===
-    # The MiMo V2.5 vision model sees the full image and correctly identifies colors.
-    # Each item starts with a color name (e.g., "Red t-shirt", "Blue jeans").
-    # Extract colors directly from AI item descriptions.
-    ai_colors_from_items = []
-    _COLOR_NAMES_LOWER = {c.lower() for c in _COLOR_NAMES} if _COLOR_NAMES else set()
+    # Extract colors from AI item descriptions (e.g. "Black Blouse" -> "Black")
+    ai_colors = []
+    _lower_names = {c.lower() for c in _COLOR_NAMES} if _COLOR_NAMES else set()
     for key in ["top_type", "bottom_type", "footwear", "accessories"]:
         val = result.get(key, "")
-        if val and val != "None" and val.lower() != "none":
+        if val and val not in ("None", "none"):
             words = val.split()
             if words:
-                color_word = words[0].strip(',.!?;:()[]')
-                if color_word and _COLOR_NAMES and color_word.lower() in _COLOR_NAMES_LOWER:
-                    if color_word not in ai_colors_from_items:
-                        ai_colors_from_items.append(color_word)
+                word = words[0].strip(',.!?;:()[]')
+                if word and _COLOR_NAMES and word.lower() in _lower_names and word not in ai_colors:
+                    ai_colors.append(word)
     
-    if ai_colors_from_items:
-        actual_colors = ai_colors_from_items[:3]
-        _log.info("[COLOR] Extracted from AI items: %s", actual_colors)
-    elif pixel_colors:
-        # Fallback to pixel extraction only if AI gave no colors
-        actual_colors = pixel_colors[:3]
-        _log.info("[COLOR] Fallback to pixel: %s", actual_colors)
-    else:
-        actual_colors = ["Black", "White"]
-        _log.info("[COLOR] Default colors (no AI or pixel data)")
-
-    # ---- PHASE A: Clean up None values and merge accessories ----
-    for item_key in ["top_type", "bottom_type", "footwear", "accessories"]:
-        val = result.get(item_key, "")
-        if val in ("None", "none", ""):
-            if item_key == "accessories":
-                result[item_key] = "None"
-            else:
-                result[item_key] = ""
-
-    acc_val = result.get("accessories", "")
-    if acc_val and acc_val != "Non Accessory" and "," in acc_val:
-        parts = [p.strip() for p in acc_val.split(",") if p.strip()]
+    actual_colors = ai_colors[:3] if ai_colors else ["Black", "White"]
+    if ai_colors:
+        _log.info("[MAP] Colors from AI items: %s", actual_colors)
+    
+    # Clean up accessor formatting
+    acc = result.get("accessories", "")
+    if acc and acc != "None" and "," in acc:
+        parts = [p.strip() for p in acc.split(",") if p.strip()]
         if len(parts) >= 2:
-            display = " + ".join(parts[:3])
-            result["accessories"] = display
-
-    # ---- PHASE B: Trust AI vision (MiMo V2.5) over pixel data ----
-    # The MiMo V2.5 vision model sees the full image and identifies colors correctly.
-    # Pixel extraction is supplementary ground truth only - never overrides AI.
-    if pixel_colors and len(pixel_colors) >= 1 and result.get("source") == "cipher_vision":
-        _log.info("[COLOR-TRUST] AI vision correct. Pixel=%s used as supplement only.", pixel_colors)
+            result["accessories"] = " + ".join(parts[:3])
     
-    # ---- PHASE C: Only use pixel fallback when source is NOT vision ----
-    if result.get("source") != "cipher_vision":
-        if pixel_colors and len(pixel_colors) >= 1:
-            _log.info("[PIXEL-FALLBACK] Using pixel colors for non-vision source: %s", pixel_colors)
-
-    # ---- PHASE D: Generate humanized strengths from CORRECTED items ----
-    detected = [s for s in [result.get(k, "") for k in ["top_type", "bottom_type", "footwear", "accessories"]] if s and s != "None"]
-    if detected:
-        strengths = _humanize_strengths(detected)
+    # Fill empty garment fields
+    for key in ["top_type", "bottom_type", "footwear"]:
+        if result.get(key, "") in ("None", "none", ""):
+            result[key] = ""
+    if result.get("accessories", "") in ("None", "none", ""):
+        result["accessories"] = "None"
+    
+    # Generate humanized feedback
+    detected_items = [result.get(k, "") for k in ["top_type", "bottom_type", "footwear", "accessories"] 
+                      if result.get(k, "") and result.get(k, "") != "None"]
+    if detected_items:
+        strengths = _humanize_strengths(detected_items)
     elif items_detected:
         strengths = _humanize_strengths(items_detected)
     else:
-        strengths = ["The proportions work well together.", "The color palette makes sense for the context.", "It reads as intentional without being overdone."]
-
-    style_score = result.get("style_score")
-    if style_score is None or not isinstance(style_score, (int, float)) or style_score < 60:
-        style_score = 78
-    style_score = int(round(style_score))
-    style_name = result.get("style_name", "")
-    if not style_name:
-        style_name = "Modern Classic"
-
+        strengths = ["The proportions work well together.", 
+                     "The color palette makes sense for the context.",
+                     "It reads as intentional without being overdone."]
+    
+    # Normalize score and name
+    score = result.get("style_score")
+    if score is None or not isinstance(score, (int, float)) or score < 60:
+        score = 78
+    name = result.get("style_name", "") or "Modern Classic"
+    
     return {
         "success": True,
         "source": result.get("source", "unknown"),
-        "style_name": style_name,
-        "style_score": style_score,
+        "style_name": name,
+        "style_score": int(round(score)),
         "vibe_type": result.get("vibe_type", "Casual"),
         "gender": result.get("gender", "Female"),
         "top_type": result.get("top_type", ""),
@@ -1886,9 +1849,9 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
         "actual_colors": actual_colors,
         "items_detected": items_detected,
         "strengths": strengths,
-        "audit": _humanize_audit(items_detected if items_detected else detected, style_name),
-        "tweak_plan": _humanize_tweak(result.get("tweak_plan", ""), items_detected if items_detected else detected),
-        "generation_prompt": result.get("generation_prompt", "A fashion-forward person wearing a stylish outfit in an editorial setting."),
+        "audit": _humanize_audit(detected_items or items_detected, name),
+        "tweak_plan": _humanize_tweak(result.get("tweak_plan", ""), detected_items or items_detected),
+        "generation_prompt": result.get("generation_prompt", name + " outfit with " + ", ".join(actual_colors) + " tones."),
     }
 
 @app.route("/api/v1/analyze-outfit", methods=["POST", "OPTIONS"], strict_slashes=False)
