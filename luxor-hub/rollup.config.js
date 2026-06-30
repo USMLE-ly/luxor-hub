@@ -32,7 +32,7 @@ function typescriptPrecompile() {
 
       // Strip import.meta.env references before TS compilation
       let patched = code
-        .replace(/import\.meta\.env\.VITE_PUBLIC_API_URL/g, JSON.stringify(process.env.VITE_PUBLIC_API_URL || 'https://python--libyausmle.replit.app'))
+        .replace(/import\.meta\.env\.VITE_PUBLIC_API_URL/g, JSON.stringify(process.env.VITE_PUBLIC_API_URL || 'https://nice-useful-plot--al-bosify.replit.app'))
         .replace(/import\.meta\.env\.VITE_SUPABASE_URL/g, JSON.stringify(process.env.VITE_SUPABASE_URL || ''))
         .replace(/import\.meta\.env\.VITE_SUPABASE_PUBLISHABLE_KEY/g, JSON.stringify(process.env.VITE_SUPABASE_PUBLISHABLE_KEY || ''))
         .replace(/import\.meta\.env\.(\w+)/g, 'undefined');
@@ -86,7 +86,7 @@ export default {
       preventAssignment: true,
       delimiters: ['', ''],
       values: {
-        'import.meta.env.VITE_PUBLIC_API_URL': JSON.stringify(process.env.VITE_PUBLIC_API_URL || 'https://python--libyausmle.replit.app'),
+        'import.meta.env.VITE_PUBLIC_API_URL': JSON.stringify(process.env.VITE_PUBLIC_API_URL || 'https://nice-useful-plot--al-bosify.replit.app'),
         'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(process.env.VITE_SUPABASE_URL || ''),
         'import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY': JSON.stringify(process.env.VITE_SUPABASE_PUBLISHABLE_KEY || ''),
       },

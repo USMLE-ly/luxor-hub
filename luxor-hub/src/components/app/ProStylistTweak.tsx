@@ -55,7 +55,7 @@ export function ProStylistTweak({ imagePreview, imageUrl }: ProStylistTweakProps
         base64Image = imageSrc;
       }
 
-      const apiUrl = "https://python--libyausmle.replit.app";
+      const apiUrl = "https://nice-useful-plot--al-bosify.replit.app";
       const resp = await fetch(`${apiUrl}/api/v1/pro-tweak/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

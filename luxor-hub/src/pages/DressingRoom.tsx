@@ -193,7 +193,7 @@ export default function DressingRoomPage() {
         }
       }
       
-      const api = "https://python--libyausmle.replit.app";
+      const api = "https://nice-useful-plot--al-bosify.replit.app";
       const genResp = await fetch(api + "/api/v1/dressing-room/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
