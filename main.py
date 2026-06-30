@@ -1572,45 +1572,37 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
     # === STEP 1: Extract REAL colors from the masked image pixels (person only) ===
     pixel_colors = _get_dominant_colors_from_pixels(_image_b64_cache) if _image_b64_cache else []
     _log.info("[MAP] Pixel extraction returned: %s", pixel_colors)
+    
+    # Build lower-case color lookup from the color dictionary
+    _COLOR_NAMES_LOWER = {c.lower() for c in _COLOR_NAMES} if _COLOR_NAMES else set()
 
-    # === STEP 2: PIXEL-AUTHORITATIVE Color Resolution ===
-    # Pixel colors from the masked image are the GROUND TRUTH.
-    # AI-generated colors are only used as secondary hints.
+    # === STEP 2: Smart Color Resolution ===
+    # Pixel colors detect the DOMINANT colors from the masked image.
+    # AI colors see PATTERNS and SECONDARY colors that pixels miss.
+    # We combine BOTH sources for the best result.
+    # CRITICAL: We NEVER modify AI item descriptions based on pixel data alone!
     if pixel_colors and len(pixel_colors) >= 1:
-        actual_colors = pixel_colors[:3]
-        _log.info("[MAP] Using PIXEL colors as authoritative: %s", actual_colors)
+        # Extract REAL color names from AI item descriptions using the color dictionary
+        # Only words that match an actual color name in _COLOR_NAMES are included
+        ai_item_colors = []
+        for key in ["top_type", "bottom_type", "footwear", "accessories"]:
+            val = result.get(key, "")
+            if val and val != "None" and val.lower() != "none":
+                for word in val.split():
+                    clean = word.strip(',.!?;:()[]')
+                    # Only include if it's a real color name from our dictionary
+                    if clean and _COLOR_NAMES and clean.lower() in _COLOR_NAMES_LOWER:
+                        if clean not in ai_item_colors:
+                            ai_item_colors.append(clean)
         
-        # Now correct AI item colors using pixel data
-        pixel_color_set = set(c.lower() for c in pixel_colors)
-        for item_key in ["top_type", "bottom_type", "footwear"]:
-            val = result.get(item_key, "")
-            if not val or val in ("None", "none", ""):
-                continue
-            words = val.split()
-            if len(words) < 2:
-                continue
-            
-            ai_color = words[0].strip(',.!?;:').lower()
-            
-            # If AI color is NOT in pixel colors, replace it with the dominant pixel color
-            if ai_color not in pixel_color_set:
-                best_match = pixel_colors[0]  # Default to first/darkest pixel color
-                # If bottom/footwear has specific matches, use those
-                if item_key == "bottom_type":
-                    for pc in pixel_colors:
-                        if pc.lower() in ('blue', 'black', 'navy', 'denim', 'grey', 'brown'):
-                            best_match = pc
-                            break
-                elif item_key == "footwear":
-                    for pc in pixel_colors:
-                        if pc.lower() in ('white', 'black', 'brown', 'beige', 'grey'):
-                            best_match = pc
-                            break
-                words[0] = best_match
-                corrected = ' '.join(words)
-                result[item_key] = corrected
-                _log.info("[PIXEL-CORRECT] %s: '%s' -> '%s' (pixel authority: %s)", 
-                          item_key, val, corrected, pixel_colors)
+        # Merge pixel colors with AI-detected colors (pixel colors are ground truth for dominant)
+        merged_colors = list(dict.fromkeys(pixel_colors))  # Start with pixel colors (deduped)
+        for c in ai_item_colors:
+            if c not in merged_colors:
+                merged_colors.append(c)
+        actual_colors = merged_colors[:3]
+        _log.info("[MAP] Merged colors from pixels+AI: %s (pixels: %s, AI items: %s)", 
+                  actual_colors, pixel_colors, ai_item_colors)
     else:
         # === STEP 3: Fallback to AI colors with validation ===
         actual_colors = result.get("actual_colors", [])
@@ -1687,21 +1679,14 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
                 continue
             
             first_word = words[0].strip(',.!?;:')
-            HALLUCINATED = {"charcoal", "acid", "slate", "silver", "concrete", "khaki", "coffee", "burgundy", "camo"}
+            HALLUCINATED = {"charcoal", "acid", "slate", "silver", "concrete", "khaki", "coffee", "camo"}
             
             # Fix strategy: correct hallucinated background colors, and fix grey→blue/navy when pixel colors confirm
             needs_correction = first_word.lower() in HALLUCINATED
             smart_override = False
             
-            # Smart "grey" fix: if AI says grey but pixel colors contain blue/navy, correct to blue
-            if not needs_correction and first_word.lower() in ("grey", "gray") and pixel_colors:
-                blue_shades = {"blue", "navy", "denim", "steel blue", "sky blue", "royal blue", "cobalt", "ocean", "sapphire"}
-                for pc in pixel_colors:
-                    if pc.lower() in blue_shades:
-                        needs_correction = True
-                        smart_override = True
-                        best_color = pc
-                        break
+            # Grey fix removed - pixel data alone cannot determine if grey should be blue.
+            # The AI vision model sees the full garment context and is more reliable.
             
             if needs_correction:
                 best_color = ""
