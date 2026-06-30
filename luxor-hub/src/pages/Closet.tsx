@@ -276,21 +276,22 @@ const Closet = () => {
           reader.readAsDataURL(selectedFile);
         });
       }
-      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-item`, {
+      const apiBase = import.meta.env.VITE_API_URL || import.meta.env.VITE_PUBLIC_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:5000' : '');
+      const resp = await fetch(apiBase + '/api/v1/closet/analyze-item', {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
-        body: JSON.stringify({ imageUrl: imageData, itemName: newItem.name }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image_b64: imageData, item_name: newItem.name }),
       });
       if (!resp.ok) throw new Error("Analysis failed");
       const analysis = await resp.json();
       setNewItem((prev) => ({
         ...prev,
-        category: analysis.category || prev.category,
-        color: analysis.color || prev.color,
-        style: analysis.style || prev.style,
+        category: analysis.category || analysis.item_category || prev.category,
+        color: analysis.color || analysis.item_color || prev.color,
+        style: analysis.style || analysis.item_style || prev.style,
         season: analysis.season || prev.season,
         occasion: analysis.occasion || prev.occasion,
-        name: prev.name || analysis.suggestedName || prev.name,
+        name: prev.name || analysis.suggested_name || analysis.item_name || prev.name,
       }));
       toast.success("Details filled. Check and save.");
     } catch { toast.error("AI analysis failed. Fill in details manually."); }

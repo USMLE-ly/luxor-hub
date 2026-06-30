@@ -2018,6 +2018,93 @@ def closet_delete():
     ok = qdrant_delete_item(item_id)
     return jsonify({"success": ok})
 
+
+# ---------------------------------------------------------------------------
+# Closet AI Analyze Item (MiMo Vision)
+# ---------------------------------------------------------------------------
+@app.route("/api/v1/closet/analyze-item", methods=["POST", "OPTIONS"], strict_slashes=False)
+def closet_analyze_item():
+    if request.method == "OPTIONS":
+        return "", 204
+    data = request.get_json(silent=True) or {}
+    image_b64 = data.get("image_b64", "")
+    item_name = data.get("item_name", "")
+    if not image_b64:
+        return jsonify({"error": "Missing image_b64"}), 400
+
+    _log.info("[CLOSET-AI] Analyzing item: name=%s", item_name or "unknown")
+
+    # Use a focused garment analysis prompt for MiMo V2.5
+    closet_prompt = SACRED_PROMPT.replace(
+        "Return ONLY valid JSON with these exact keys",
+        "Return ONLY valid JSON with these exact keys"
+    )
+    # Override the prompt for closet-specific analysis
+    analyze_prompt = """You are a garment analysis AI. Analyze this clothing item image.
+
+Return ONLY valid JSON with these exact keys (no other text, no code fences):
+{
+  "item_category": "Top or Bottom or Footwear or Accessory or Dress or Outerwear or Other",
+  "item_color": "single word color name from [Black, White, Navy, Blue, Red, Green, Grey, Brown, Yellow, Pink, Purple, Orange, Gold, Silver, Teal, Burgundy, Maroon, Beige, Cream, Olive]",
+  "item_style": "Casual or Formal or Sporty or Bohemian or Minimalist or Vintage or Streetwear or Preppy or Edgy",
+  "item_type": "t-shirt or blouse or sweater or hoodie or jacket or blazer or coat or jeans or trousers or shorts or skirt or dress or sneakers or boots or heels or loafers or sandals or flats or accessory",
+  "suggested_name": "a short descriptive name for this item, e.g. Navy Blue Blazer or White Cotton T-Shirt",
+  "season": "All-Season or Summer or Winter or Spring or Fall",
+  "occasion": "Casual or Business or Party or Date Night or Sport or Any"
+}
+
+RULES:
+- Be precise about garment type and color.
+- If the image is ambiguous, make your best guess.
+- NO HALLUCINATION: only describe what you actually see.
+- suggested_name should be 2-5 words.
+"""
+
+    try:
+        result = call_groq_vision(image_b64, analyze_prompt, 0.2)
+        if result:
+            # Extract fields from MiMo response with fallbacks
+            category = result.get("item_category") or result.get("category", "Other")
+            color = result.get("item_color") or result.get("color", "")
+            style = result.get("item_style") or result.get("style", "Casual")
+            item_type = result.get("item_type", "other")
+            suggested = result.get("suggested_name") or result.get("item_name", "")
+            season = result.get("season", "All-Season")
+            occasion = result.get("occasion", "Casual")
+
+            _log.info("[CLOSET-AI] Analysis: category=%s color=%s type=%s", category, color, item_type)
+            return jsonify({
+                "success": True,
+                "category": category,
+                "color": color,
+                "style": style,
+                "item_type": item_type,
+                "suggested_name": suggested,
+                "item_name": suggested,
+                "item_category": category,
+                "item_color": color,
+                "item_style": style,
+                "season": season,
+                "occasion": occasion,
+            })
+    except Exception as exc:
+        _log.error("[CLOSET-AI] Vision error: %s", exc)
+
+    # Fallback
+    return jsonify({
+        "success": False,
+        "category": "Other",
+        "color": "",
+        "style": "Casual",
+        "item_type": "other",
+        "suggested_name": "",
+        "item_name": "",
+        "item_category": "Other",
+        "item_color": "",
+        "item_style": "Casual",
+        "season": "All-Season",
+        "occasion": "Casual",
+    })
 # ---------------------------------------------------------------------------
 # Dressing Room Generator (Groq Text picks from Qdrant closet)
 # ---------------------------------------------------------------------------
