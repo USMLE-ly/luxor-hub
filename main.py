@@ -25,8 +25,7 @@ import numpy as np
 try:
     import cv2
     import mediapipe as mp
-    # For mediapipe >=0.10.x, use python.solutions path
-    from mediapipe.python.solutions.selfie_segmentation import SelfieSegmentation
+    from mediapipe.python.solutions.selfie_segmentation import SelfieSegmentation  # pyright: ignore[reportMissingImports]
     _HAS_MEDIAPIPE = True
 except ImportError:
     cv2: Any = None
@@ -249,6 +248,9 @@ def _get_qdrant_closet() -> Any:
     global _qdrant_closet
     if _qdrant_closet is None and QDRANT_URL and QDRANT_API_KEY:
         try:
+            if QdrantClient is None:
+                _log.warning("[QDRANT] QdrantClient not available (import failed)")
+                return None
             _qdrant_closet = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY, timeout=10)
             if _qdrant_closet is not None:  # <--- CRITICAL FIX: Prevents crash if connection failed
                 _ensure_closet_collection(_qdrant_closet)
@@ -911,12 +913,13 @@ def _extract_garment_features(image_b64: str) -> Dict[str, Any]:
             if region_pixels:
                 region_arr = np.array(region_pixels)
                 color_std = float(np.std(region_arr, axis=0).mean())
-                result[region_name]["color_variance"] = round(color_std, 1)
+                region_dict = cast(Dict[str, Any], result[region_name])
+                region_dict["color_variance"] = round(color_std, 1)
                 
                 # Brightness
                 gray_vals = [0.299*p[0] + 0.587*p[1] + 0.114*p[2] for p in region_pixels]
                 brightness = sum(gray_vals) / len(gray_vals)
-                result[region_name]["brightness"] = round(brightness)
+                cast(Dict[str, Any], result[region_name])["brightness"] = round(brightness)
                 
                 # Use quantization + dark rule for color matching (same approach as _get_dominant_colors_from_pixels)
                 COMMON_CLOTHING_COLORS = {
@@ -957,7 +960,7 @@ def _extract_garment_features(image_b64: str) -> Dict[str, Any]:
                     if c not in seen:
                         seen.add(c)
                         unique_colors.append(c)
-                result[region_name]["colors"] = unique_colors[:2] if unique_colors else ["Black"]
+                cast(Dict[str, Any], result[region_name])["colors"] = unique_colors[:2] if unique_colors else ["Black"]
                 
                 # Texture analysis via gradient-based edge detection
                 region_gray_arr = np.array(Image.fromarray(region).convert('L')).astype(float)
@@ -965,11 +968,11 @@ def _extract_garment_features(image_b64: str) -> Dict[str, Any]:
                 gy, gx = np.gradient(region_gray_arr)
                 edge_mag = np.sqrt(gx**2 + gy**2)
                 edge_density = float(np.mean(edge_mag > 15)) * 100
-                result[region_name]["edge_density"] = round(edge_density, 1)
+                cast(Dict[str, Any], result[region_name])["edge_density"] = round(edge_density, 1)
                 
                 # Garment type hints based on texture and brightness
                 hints = []
-                brightness_val = result[region_name]["brightness"]
+                brightness_val = cast(Dict[str, Any], result[region_name])["brightness"]
                 
                 if region_name == "top":
                     if edge_density < 5:
@@ -1023,7 +1026,7 @@ def _extract_garment_features(image_b64: str) -> Dict[str, Any]:
                     else:
                         hints.append("likely dark shoes or boots")
                 
-                result[region_name]["type_hints"] = hints
+                cast(Dict[str, Any], result[region_name])["type_hints"] = hints
         
         # Overall style hints
         style_hints = []
