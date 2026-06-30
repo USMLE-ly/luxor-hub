@@ -1219,7 +1219,23 @@ def call_groq_vision(image_b64: str, system_prompt: str = SACRED_PROMPT, tempera
         _log.warning("[MIMO-VISION] Skipping MiMo - disabled")
         return None
     
-    # Quick health check - test MiMo API responsiveness (5s timeout)
+    # HARD DNS & CONNECTIVITY CHECK — requests timeout doesn't cover DNS!
+    # On Replit, DNS for api.xiaomimimo.com can hang indefinitely
+    import socket as _sock
+    _dns_ok = False
+    try:
+        _s = _sock.create_connection(("api.xiaomimimo.com", 443), timeout=5)
+        _s.close()
+        _dns_ok = True
+    except Exception as _e:
+        _log.warning("[MIMO-VISION] Cannot reach MiMo API (DNS/TCP): %s", _e)
+    
+    if not _dns_ok:
+        _log.warning("[MIMO-VISION] MiMo API unreachable - skipping")
+        _MIMO_VISION_WORKING = False
+        return None
+    
+    # Quick health check - test MiMo API responds
     try:
         test = requests.post(MIMO_API_URL, json={"model": MIMO_VISION_MODEL, "messages": [{"role":"user","content":"hi"}], "max_tokens": 1},
                             headers={"Content-Type": "application/json", "api-key": MIMO_API_KEY}, timeout=8)
@@ -1241,7 +1257,6 @@ def call_groq_vision(image_b64: str, system_prompt: str = SACRED_PROMPT, tempera
         return None
     except Exception as exc:
         _log.warning("[MIMO-VISION] Health check failed: %s", exc)
-        # Don't disable - try anyway, it might work
         pass
 
     # Use original image directly — no person segmentation, no cropping
