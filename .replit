@@ -1,2 +1,17 @@
-run = "pip install flask flask-cors requests python-dotenv Pillow qdrant-client gunicorn --break-system-packages && gunicorn main:app --bind 0.0.0.0:5000 --timeout 120 --worker-tmp-dir /dev/shm --preload"
+run = "pip install flask flask-cors requests python-dotenv Pillow qdrant-client gunicorn --break-system-packages && gunicorn main:app --bind 0.0.0.0:5000 --timeout 180 --worker-tmp-dir /dev/shm --workers 2 --threads 4 --preload"
 modules = ["python-3.11"]
+
+[agent]
+expertMode = true
+
+[nix]
+packages = ["wget"]
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[deployment]
+deploymentTarget = "autoscale"
+run = ["gunicorn", "main:app", "--bind", "0.0.0.0:5000", "--timeout", "180", "--worker-tmp-dir", "/dev/shm", "--workers", "2", "--threads", "4"]
+build = ["pip", "install", "-r", "requirements.txt"]
