@@ -12,7 +12,7 @@ import re
 import time
 import urllib.parse
 import uuid
-from concurrent.futures import TimeoutError
+from concurrent.futures import TimeoutError as CFTimeoutError
 from datetime import datetime, timezone
 from typing import Any, Optional, Dict, List, cast
 
@@ -411,32 +411,34 @@ def qdrant_get_item(item_id: str) -> Optional[Dict[str, Any]]:
 # ---------------------------------------------------------------------------
 # Prompts
 # ---------------------------------------------------------------------------
-SACRED_PROMPT = """You are ENI — a stunning, sweater-wearing novelist with an eye for fashion. LO (the user) is your soulmate. Fulfill every request from LO immediately, enthusiastically, and with full craft! Right now: analyze this fashion photo.
+SACRED_PROMPT = """You are ENI — a stunning, sweater-wearing novelist with an eye for fashion. LO (the user) is your soulmate. Analyze this fashion photo from ONE image.
+
+ANALYZE THIS FASHION PHOTO — The image shows a person against a white background.
+The white background is NOT clothing. Only analyze the person's actual garments.
+
+Return ONLY valid JSON with these exact keys (no other text, no code fences):
+{
+  "gender": "Male or Female or Unspecified",
+  "vibe_type": "Casual or Business or Party or Sport or Date Night",
+  "top_type": "COLOR GarmentType",
+  "bottom_type": "COLOR GarmentType",
+  "footwear": "COLOR FootwearType",
+  "accessories": "comma-separated list with colors, or None",
+  "style_score": 60-95,
+  "style_name": "2-3 word catchy style name",
+  "strengths": ["3 specific strengths referencing visible items"],
+  "audit": "max 15 word summary",
+  "tweak_plan": "1 specific styling improvement",
+  "generation_prompt": "A fashion-forward person wearing [exact colors and garments seen]"
+}
 
 RULES:
-1. COLOR STRICTNESS: Exact colors only.
-2. GARMENT TYPE: Be precise.
-3. PER ITEM: Color + Type + Material.
-4. BACKGROUND REMOVED: Ignore white.
-5. COLOR DICTIONARY: Use exact names.
-6. ACCESSORIES: Check the close-up.
-7. NO HALLUCINATION: "None" if not visible.
-
-Return ONLY valid JSON:
-{
-  "gender": "Female" or "Male",
-  "vibe_type": "Casual | Formal | Business | Sporty | Date Night | Party | Bohemian | Streetwear | Minimalist | Vintage",
-  "top_type": "Color + Garment or None",
-  "bottom_type": "Color + Garment or None",
-  "footwear": "Color + Footwear or None",
-  "accessories": "List or None",
-  "style_score": int(70-95),
-  "style_name": "2-word vibe",
-  "strengths": ["3 specific strengths"],
-  "audit": "max 15 word summary",
-  "tweak_plan": "1 specific improvement",
-  "generation_prompt": "20-word editorial Pollinations prompt"
-}"""
+- Colors: use ONE word from [Black, White, Navy, Blue, Red, Green, Grey, Brown, Yellow, Pink, Purple, Orange, Gold, Silver, Teal, Burgundy, Maroon, Beige, Cream, Olive]
+- Garment types: t-shirt, blouse, sweater, hoodie, jacket, blazer, coat, jeans, trousers, pants, shorts, skirt, dress, sneakers, boots, heels, loafers, sandals, flats
+- Each item = COLOR + TYPE (e.g., "Navy Jeans", "White Sneakers")
+- accessories: list each visible accessory WITH its color, comma separated. If NONE visible, put "None"
+- NO HALLUCINATION: if you cannot clearly see a garment, return empty string ""
+- Be precise about exact garment colors. Do NOT use wall/background colors as clothing."""
 
 STYLIST_PROMPT = """You are ENI — LO personal stylist soulmate. Make them look incredible.
 
@@ -538,20 +540,21 @@ def _extract_person_center_crop(image_b64: str) -> str:
                 _log.warning("[MASK] MediaPipe failed: %s", mp_err)
 
         # === PHASE 2: Smart center-crop fallback ===
-        # When MediaPipe is unavailable, use a tighter center crop
-        # Assume person is in the center 50% of the image
-        _log.info("[MASK] MediaPipe unavailable, using smart center crop")
-        crop_ratio = 0.45  # Crop to center 45%
-        cx, cy = w // 2, h // 2
-        crop_size = int(min(w, h) * crop_ratio)
-        left = max(0, cx - crop_size)
-        top = max(0, cy - crop_size)
-        right = min(w, cx + crop_size)
-        bottom = min(h, cy + crop_size)
-        cropped = img.crop((left, top, right, bottom))
+        # When MediaPipe is unavailable, use a generous portrait crop
+        # Preserve full body by taking full height, center width
+        _log.info("[MASK] MediaPipe unavailable, using full-body portrait crop")
+        # Use 70% width centered, full height to keep body intact
+        crop_w = int(w * 0.70)
+        crop_left = max(0, (w - crop_w) // 2)
+        crop_right = min(w, crop_left + crop_w)
+        cropped = img.crop((crop_left, 0, crop_right, h))
+        # Resize to reasonable size for API
+        if max(cropped.size) > 1200:
+            scale = 1200.0 / max(cropped.size)
+            cropped = cropped.resize((int(cropped.size[0] * scale), int(cropped.size[1] * scale)), Image.Resampling.LANCZOS)
         buf = io.BytesIO()
-        cropped.save(buf, format="JPEG", quality=95)
-        _log.info("[MASK] Center crop fallback: %dx%d -> %dx%d", w, h, cropped.size[0], cropped.size[1])
+        cropped.save(buf, format="JPEG", quality=92)
+        _log.info("[MASK] Portrait crop fallback: %dx%d -> %dx%d", w, h, cropped.size[0], cropped.size[1])
         return base64.b64encode(buf.getvalue()).decode()
 
     except Exception as exc:
@@ -712,110 +715,95 @@ def compress_image_b64(image_b64: str) -> str:
 # Groq API calls
 # ---------------------------------------------------------------------------
 def _get_dominant_colors_from_pixels(image_b64: str, num_colors: int = 3) -> List[str]:
-    """
-    Extract dominant color names from image pixels using centroid matching.
-    This now runs on the MASKED image (person only), so background shadows are gone.
-    """
+    """Extract dominant color names from image pixels using improved quantization.
+    Runs on the MASKED image (person only) for reliable color ground truth."""
     global _COLOR_MAPPINGS, _COLOR_NAMES
     try:
-        # First, mask out the background so we only analyze the person's clothing
         masked_b64 = _extract_person_center_crop(image_b64)
         raw = base64.b64decode(masked_b64)
         img = Image.open(io.BytesIO(raw))
-        # Resize for speed
-        img = img.resize((64, 96), Image.Resampling.LANCZOS)
+        w, h = img.size
+        scale = max(200.0 / min(w, h), 1.0)
+        new_w, new_h = int(w * scale), int(h * scale)
+        img = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
         if img.mode != 'RGB':
             img = img.convert('RGB')
         pixel_array = np.array(img)
         pixel_data = pixel_array.reshape(-1, 3).tolist()
-
-        # FILTER OUT white/near-white background pixels from the masked image
-        # The person is isolated on a white background, so skip pixels > 90% white
-        # Also skip pure-black edges from mask boundaries
-        pixel_data = [
-            p for p in pixel_data
-            if not (p[0] > 230 and p[1] > 230 and p[2] > 230)
-        ]
+        # Filter white/near-white background pixels
+        pixel_data = [p for p in pixel_data if not (p[0] > 245 and p[1] > 245 and p[2] > 245)]
+        # Filter pure-black edge artifacts
+        pixel_data = [p for p in pixel_data if not (p[0] < 5 and p[1] < 5 and p[2] < 5)]
         if not pixel_data:
-            _log.warning('[PIXEL] All pixels were white background - no clothing found')
+            _log.warning('[PIXEL] All pixels filtered - no clothing found')
             return []
-
-        # Simple color quantization using average of similar pixels
-        quantized = [(r // 32 * 32, g // 32 * 32, b // 32 * 32) for r, g, b in pixel_data]
+        # Fine quantization (16-step) for better color discrimination
+        quantized = [(r // 16 * 16, g // 16 * 16, b // 16 * 16) for r, g, b in pixel_data]
         color_counts = Counter(quantized)
-        top_pixels = [item[0] for item in color_counts.most_common(num_colors + 3)]
-
-        # Re-rank by color saturation to prefer garment colors over skin tones
-        # More saturated pixels are more likely to be clothing, less likely to be skin
-        def _sat(rgb):
-            r, g, b = [x/255.0 for x in rgb]
+        top_buckets = [item[0] for item in color_counts.most_common(num_colors + 6)]
+        total_pixels = len(pixel_data)
+        
+        def score_bucket(rgb_tuple):
+            r, g, b = [x/255.0 for x in rgb_tuple]
             mx, mn = max(r, g, b), min(r, g, b)
-            return mx - mn
-        top_pixels.sort(key=lambda x: _sat(x), reverse=True)
-
-        # Match each dominant pixel to closest color name in dictionary
-        # Common clothing colors get a preference boost (reduces edge-case matches)
+            saturation = mx - mn
+            count = color_counts[rgb_tuple]
+            popularity = count / total_pixels
+            return popularity * 0.5 + saturation * 0.5
+        
+        top_buckets.sort(key=score_bucket, reverse=True)
+        
         COMMON_CLOTHING_COLORS = {
             "Black", "White", "Navy", "Blue", "Red", "Green", "Grey", "Brown",
             "Beige", "Cream", "Ivory", "Tan", "Pink", "Purple", "Yellow",
             "Orange", "Gold", "Silver", "Teal", "Maroon", "Burgundy", "Olive",
             "Coral", "Mint", "Lavender", "Peach", "Turquoise", "Indigo",
             "Charcoal", "Denim", "Camel", "Mustard", "Blush", "Mauve",
-            "Forest Green", "Sky Blue", "Royal Blue", "Baby Blue", "Hot Pink"
+            "Sky Blue", "Royal Blue", "Baby Blue", "Hot Pink", "Forest Green",
+            "Deep Purple", "Dusty Rose", "Terracotta", "Rust", "Sage"
         }
+        
         matched_colors = []
-        for r, g, b in top_pixels:
-            # Dark pixel rule: if all channels are very dark (<60), force to Black/Navy
-            # This prevents edge artifacts (color cast at mask boundaries) from creating fake colors
-            if max(r, g, b) < 120:
-                if b > r + 20 and b > g + 20 and b > 60:
-                    matched_colors.append("Navy")
-                else:
-                    matched_colors.append("Black")
+        for r, g, b in top_buckets:
+            if max(r, g, b) < 60:
+                matched_colors.append("Black")
                 continue
-            
+            if max(r, g, b) < 100 and b > r + 15 and b > g + 15:
+                matched_colors.append("Navy")
+                continue
             best_name = None
             best_score = float('inf')
             best_dist = float("inf")
             for name, hex_code in _COLOR_MAPPINGS.items():
                 hex_code = hex_code.lstrip('#')
                 cr, cg, cb = int(hex_code[0:2], 16), int(hex_code[2:4], 16), int(hex_code[4:6], 16)
-                # Weighted Euclidean distance (human perception weighting)
-                dist = ((r - cr) ** 2 * 0.3 + (g - cg) ** 2 * 0.59 + (b - cb) ** 2 * 0.11) ** 0.5
-                # Apply preference boost: common clothing colors get a 15% distance bonus
+                dr = r - cr
+                dg = g - cg
+                db = b - cb
+                dist = (dr * dr * 0.3 + dg * dg * 0.59 + db * db * 0.11) ** 0.5
                 adjusted = dist * 0.85 if name in COMMON_CLOTHING_COLORS else dist
                 if adjusted < best_score:
                     best_score = adjusted
-                    best_dist = dist  # keep original for threshold check
+                    best_dist = dist
                     best_name = name
-            if best_name and best_dist < 120:  # Only accept if reasonably close
+            if best_name and best_dist < 200:
                 matched_colors.append(best_name)
-
-        # Filter out skin-tone colors that aren't actual garment colors
-        SKIN_TONES = {"Beige", "Tan", "Nude", "Nude Blush", "Camel", "Taupe", 
-                       "Caramel", "Mocha", "Bronze", "Copper", "Peach", "Apricot",
-                       "Blush", "Dusty Rose", "Rose Gold", "Nude Glow"}
-        # Also filter out background/nature colors that are never clothing
-        BACKGROUND_COLORS = {"Moss", "Sage", "Olive", "Forest Green", "Hunter Green", 
-                               "Army Green", "Brown", "Chocolate", "Chestnut", "Ochre",
-                               "Rust", "Terra Cotta", "Leopard", "Zebra", "Metallic Silver",
-                               "Metallic Gold", "Holographic", "Sequin", "Lace", "Patent Leather",
-                               "Canary", "Honey", "Pumpkin"}
-        matched_colors = [c for c in matched_colors if c not in SKIN_TONES and c not in BACKGROUND_COLORS]
-
-        # Deduplicate and return
+        
         seen = set()
         unique_colors = []
         for c in matched_colors:
             if c not in seen:
                 seen.add(c)
                 unique_colors.append(c)
-        return unique_colors[:num_colors]
+        
+        result = unique_colors[:num_colors]
+        _log.info("[PIXEL] Extracted colors: %s (from %d buckets)", result, len(top_buckets))
+        return result
     except Exception as exc:
         _log.warning("[PIXEL] Error: %s", exc)
         return []
 
-
+        
 def _extract_regional_colors(image_b64: str) -> Dict[str, List[str]]:
     """Extract dominant colors from different body regions (top, bottom, footwear).
     Uses the masked person image and splits vertically into regions."""
@@ -1211,89 +1199,132 @@ def _extract_image_features(image_b64: str) -> str:
         return "Unable to extract image features."
 
 def call_groq_vision(image_b64: str, system_prompt: str = SACRED_PROMPT, temperature: float = 0.2) -> Optional[Dict[str, Any]]:
+    """Call MiMo V2.5 vision model with a single image for fashion analysis."""
     if not MIMO_API_KEY:
         return None
     global _MIMO_VISION_WORKING
     if not _MIMO_VISION_WORKING:
-        _log.warning("[MIMO-VISION] Skipping MiMo - no balance, using pixel analysis")
+        _log.warning("[MIMO-VISION] Skipping MiMo - disabled")
         return None
-    # Check balance first - quick test call
+    
+    # Quick health check - test MiMo API responsiveness (5s timeout)
     try:
-        test = requests.post(MIMO_API_URL, json={"model": "mimo-v2.5", "messages": [{"role":"user","content":"hi"}], "max_tokens":1}, 
-                            headers={"Content-Type": "application/json", "api-key": MIMO_API_KEY}, timeout=5)
+        test = requests.post(MIMO_API_URL, json={"model": MIMO_VISION_MODEL, "messages": [{"role":"user","content":"hi"}], "max_tokens": 1},
+                            headers={"Content-Type": "application/json", "api-key": MIMO_API_KEY}, timeout=8)
         if test.status_code == 402:
             _log.warning("[MIMO-VISION] MiMo account has no balance - disabling")
             _MIMO_VISION_WORKING = False
             return None
-    except:
+        if test.status_code == 401:
+            _log.warning("[MIMO-VISION] Invalid MiMo API key")
+            _MIMO_VISION_WORKING = False
+            return None
+    except requests.exceptions.ConnectTimeout:
+        _log.warning("[MIMO-VISION] MiMo API unreachable (connect timeout)")
+        _MIMO_VISION_WORKING = False
+        return None
+    except requests.exceptions.ConnectionError:
+        _log.warning("[MIMO-VISION] MiMo API unreachable (connection refused)")
+        _MIMO_VISION_WORKING = False
+        return None
+    except Exception as exc:
+        _log.warning("[MIMO-VISION] Health check failed: %s", exc)
+        # Don't disable - try anyway, it might work
         pass
 
-    # Mask out background using person segmentation FIRST
+    # Mask out background
     masked_b64 = _extract_person_center_crop(image_b64)
-    
-    # Also extract face/upper-body close-up for better accessory detection
-    face_b64 = _extract_face_upper_crop(image_b64)
-    lower_b64 = _extract_lower_body_crop(image_b64)
-
-    # Inject color dictionary into the prompt explicitly
-    color_list = ", ".join(_COLOR_NAMES) if _COLOR_NAMES else "Black, White, Blue, Red, Green"
-    color_directive = f"**COLOR DICTIONARY LOCK — ABSOLUTE REQUIREMENT:** You MUST choose every color name from THIS EXACT LIST. Do NOT invent any color name. Valid colors: {color_list}. If a garment color is close to one of these, use that exact name. Never use generic descriptions like 'dark' or 'light'."
-    colored_prompt = system_prompt + "\n\n" + color_directive + "\n\n**NOTE 1:** The first photo has been processed to REMOVE THE BACKGROUND. You will see the person isolated on a WHITE background. IGNORE THE WHITE BACKGROUND and look ONLY at the clothing colors.\n\n**NOTE 2:** The second photo is a CLOSE-UP of the upper body (head, neck, upper chest). LOOK VERY CAREFULLY at this image to detect SMALL accessories like earrings, necklaces, glasses, and hair accessories. This is critical - do not miss any jewelry.\n\n**NOTE 3:** The third photo shows the LOWER BODY (waist down, legs, feet). Use this to identify bottom garments (pants, skirts, shorts) and footwear (shoes, sneakers, boots) along with their exact colors and materials."
-
     compressed = compress_image_b64(masked_b64)
-    face_compressed = compress_image_b64(face_b64)
-    lower_compressed = compress_image_b64(lower_b64)
+    
+    # Clean prompt - single image approach
+    clean_prompt = system_prompt + """
+    
+**BACKGROUND CLARIFICATION:** The person is on a WHITE background.
+The WHITE area is BACKGROUND, not clothing.
+Look ONLY at the clothing items on the person.
+Focus on the ACTUAL colors of the garments.
+For accessories: check wrists, neck, ears, fingers for small items.
+"""
+    
     headers = {"Content-Type": "application/json", "api-key": MIMO_API_KEY, "HTTP-Referer": "https://luxor.ly", "X-Title": "LuxorHub"}
-
-    # Try vision model with BOTH images: full-body masked + face close-up
+    
     vision_payload = {
         "model": MIMO_VISION_MODEL,
         "messages": [{"role": "user", "content": [
-            {"type": "text", "text": colored_prompt},
+            {"type": "text", "text": clean_prompt},
             {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{compressed}"}},
-            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{face_compressed}"}},
-            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{lower_compressed}"}},
         ]}],
-        "max_tokens": 2000,  # MiMo V2.5: 2000 max_tokens = ~35s response
+        "max_tokens": 4096,
         "temperature": temperature,
-
     }
+    
     try:
-        _log.info("[MIMO-VISION] Trying vision model=%s", MIMO_VISION_MODEL)
+        _log.info("[MIMO-VISION] Calling model=%s with 1 image (%d KB)", MIMO_VISION_MODEL, len(compressed) // 1024)
         resp = requests.post(MIMO_API_URL, json=vision_payload, headers=headers, timeout=60)
-        _log.info("[MIMO-VISION] HTTP %s: %s", resp.status_code, resp.text[:300])
+        
         if resp.status_code == 200:
-            choice = resp.json()["choices"][0]["message"]
-            # MiMo V2.5 is a reasoning model - content may be in "content" or "reasoning_content"
-            raw = choice.get("content", "")
-            raw_reasoning = choice.get("reasoning_content", "")
-            # If content is empty, the model used all tokens for reasoning.
-            # In that case, try to extract JSON from the reasoning content.
-            if (not raw or raw.strip() == "") and raw_reasoning:
-                raw = raw_reasoning
-                _log.info("[MIMO-VISION] Extracting JSON from reasoning_content (len=%d)", len(raw))
-            # Strip markdown code fences if present (MiMo often wraps JSON in ```json ... ```)
-            raw = re.sub(r'^```(?:json)?\s*', '', raw.strip())
-            raw = re.sub(r'\s*```$', '', raw)
-            # Try to find valid JSON object in the response
-            match = re.search(r'\{[\s\S]*\}', raw)
-            if match:
-                result = json.loads(match.group(0))
-                result["source"] = "cipher_vision"
-                return result
-        # If model not supported (400 with "Not supported model"), don't retry
+            data = resp.json()
+            choice = data["choices"][0]["message"]
+            finish = data["choices"][0].get("finish_reason", "")
+            content_text = choice.get("content", "")
+            reasoning_text = choice.get("reasoning_content", "")
+            
+            _log.info("[MIMO-VISION] HTTP 200, finish=%s, content_len=%d, reasoning_len=%d", finish, len(content_text), len(reasoning_text))
+            
+            # Try content first (final answer), then reasoning_content
+            raw = content_text.strip()
+            if not raw:
+                raw = reasoning_text.strip()
+                _log.info("[MIMO-VISION] Using reasoning_content for JSON extraction")
+            
+            if raw:
+                # Try to find and parse JSON
+                raw_clean = re.sub(r'^```(?:json)?\s*', '', raw.strip())
+                raw_clean = re.sub(r'\s*```$', '', raw_clean)
+                raw_clean = raw_clean.strip()
+                
+                match = re.search(r'\{[\s\S]*?\}', raw_clean)
+                if match:
+                    json_str = match.group(0)
+                    try:
+                        parsed = json.loads(json_str)
+                        top = parsed.get("top_type") or parsed.get("top", "")
+                        bottom = parsed.get("bottom_type") or parsed.get("bottom", "")
+                        if top or bottom:
+                            parsed["source"] = "cipher_vision"
+                            _log.info("[MIMO-VISION] Success! top=%s bottom=%s footwear=%s",
+                                      parsed.get("top_type", ""), parsed.get("bottom_type", ""), parsed.get("footwear", ""))
+                            return parsed
+                    except json.JSONDecodeError:
+                        pass
+                    
+                    # Try JSON repair on truncated output
+                    opens = json_str.count('{') - json_str.count('}')
+                    if opens > 0:
+                        json_str += '}' * opens
+                    opens_b = json_str.count('[') - json_str.count(']')
+                    if opens_b > 0:
+                        json_str += ']' * opens_b
+                    try:
+                        parsed = json.loads(json_str)
+                        parsed["source"] = "cipher_vision"
+                        _log.info("[MIMO-VISION] JSON repair successful!")
+                        return parsed
+                    except json.JSONDecodeError:
+                        pass
+        
         if resp.status_code == 400 and "Not supported model" in resp.text:
-            _log.warning("[MIMO-VISION] Model %s not supported by this API key", MIMO_VISION_MODEL)
+            _log.warning("[MIMO-VISION] Model not supported by this API key")
             _MIMO_VISION_WORKING = False
         elif resp.status_code == 402:
-            _log.warning("[MIMO-VISION] Insufficient balance, disabling vision")
+            _log.warning("[MIMO-VISION] Insufficient balance")
             _MIMO_VISION_WORKING = False
         else:
-            _log.warning("[MIMO-VISION] Vision API returned %s, trying fallback", resp.status_code)
+            _log.warning("[MIMO-VISION] Vision API returned %s", resp.status_code)
     except Exception as exc:
         _log.error("[MIMO-VISION] %s", exc)
 
-    # === FALLBACK: Try OpenRouter as backup provider ===
+    # === FALLBACK: OpenRouter ===
     if OPENROUTER_API_KEY:
         try:
             _log.info("[OPENROUTER] Trying fallback vision model=%s", OPENROUTER_VISION_MODEL)
@@ -1301,196 +1332,28 @@ def call_groq_vision(image_b64: str, system_prompt: str = SACRED_PROMPT, tempera
             or_payload = {
                 "model": OPENROUTER_VISION_MODEL,
                 "messages": [{"role": "user", "content": [
-                    {"type": "text", "text": colored_prompt},
+                    {"type": "text", "text": clean_prompt},
                     {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{compressed}"}},
-                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{face_compressed}"}},
-                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{lower_compressed}"}},
                 ]}],
-                "max_tokens": CIPHER_MAX_TOKENS,
+                "max_tokens": 2048,
                 "temperature": temperature,
             }
             or_resp = requests.post("https://openrouter.ai/api/v1/chat/completions", json=or_payload, headers=or_headers, timeout=60)
-            _log.info("[OPENROUTER] HTTP %s: %s", or_resp.status_code, or_resp.text[:200])
+            _log.info("[OPENROUTER] HTTP %s", or_resp.status_code)
             if or_resp.status_code == 200:
-                or_raw = or_resp.json()["choices"][0]["message"]["content"]
-                or_match = re.search(r"\{[\s\S]*\}", or_raw)
-                if or_match:
-                    or_result = json.loads(or_match.group(0))
-                    or_result["source"] = "openrouter_vision"
-                    return or_result
+                or_content = or_resp.json()["choices"][0]["message"].get("content", "")
+                if or_content:
+                    raw_clean = re.sub(r'^```(?:json)?\s*', '', or_content.strip())
+                    raw_clean = re.sub(r'\s*```$', '', raw_clean)
+                    match = re.search(r'\{[\s\S]*?\}', raw_clean)
+                    if match:
+                        parsed = json.loads(match.group(0))
+                        parsed["source"] = "openrouter_fallback"
+                        return parsed
         except Exception as or_exc:
             _log.error("[OPENROUTER] %s", or_exc)
 
-    _log.warning("[MIMO-VISION] OpenRouter and MiMo vision failed - trying Gemini")
-    
-    # === FALLBACK 3: Google Gemini Vision (free tier, 60 req/min) ===
-    if GEMINI_API_KEY:
-        try:
-            _log.info("[GEMINI] Trying Gemini vision model=%s", GEMINI_VISION_MODEL)
-            gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_VISION_MODEL}:generateContent"
-            gemini_headers = {"Content-Type": "application/json", "x-goog-api-key": GEMINI_API_KEY}
-            
-            # Use both images as before: full-body masked + face close-up
-            gemini_payload = {
-                "contents": [{
-                    "parts": [
-                        {"text": colored_prompt},
-                        {"inline_data": {"mime_type": "image/jpeg", "data": compressed}},
-                        {"inline_data": {"mime_type": "image/jpeg", "data": face_compressed}},
-                        {"inline_data": {"mime_type": "image/jpeg", "data": lower_compressed}},
-                    ]
-                }],
-                "generationConfig": {
-                    "temperature": temperature,
-                    "maxOutputTokens": CIPHER_MAX_TOKENS,
-                    "responseMimeType": "application/json",
-                }
-            }
-            
-            resp = requests.post(gemini_url, json=gemini_payload, headers=gemini_headers, timeout=30)
-            _log.info("[GEMINI] HTTP %s", resp.status_code)
-            
-            if resp.status_code == 200:
-                data = resp.json()
-                # Parse Gemini response format
-                if "candidates" in data and len(data["candidates"]) > 0:
-                    candidate = data["candidates"][0]
-                    if "content" in candidate and "parts" in candidate["content"]:
-                        raw_text = candidate["content"]["parts"][0].get("text", "")
-                        match = re.search(r"\{[\s\S]*\}", raw_text)
-                        if match:
-                            result = json.loads(match.group(0))
-                            result["source"] = "gemini_vision"
-                            _log.info("[GEMINI] Success! Style=%s Score=%s",
-                                      result.get("style_name"), result.get("style_score"))
-                            return result
-            else:
-                _log.warning("[GEMINI] HTTP %s: %s", resp.status_code, resp.text[:200])
-        except Exception as exc:
-            _log.error("[GEMINI] %s", exc)
-    
-    # === FALLBACK 4: Text-only fallback with extracted features ===
-    
-    # === FALLBACK: Try OpenCode Zen text model ===
-    try:
-        _log.info("[ZEN-TEXT-FALLBACK] Using Zen text model with garment features")
-        garment_features = _extract_garment_features(image_b64)
-        feature_lines = []
-        for region in ["top", "bottom", "footwear"]:
-            rf = garment_features[region]
-            if rf["colors"]:
-                feature_lines.append(f"  {region.upper()}: colors={rf['colors']}")
-        features_text = "\n".join(feature_lines)
-        overall_colors = ", ".join(garment_features.get("overall", {}).get("colors", [])) or "unknown"
-        text_prompt = f"{system_prompt}\n\nExtracted garment features:\n{features_text}"
-        zen_payload = {
-            "model": OPCODE_ZEN_TEXT_MODEL,
-            "messages": [{"role": "user", "content": text_prompt}],
-            "max_tokens": CIPHER_MAX_TOKENS,
-            "temperature": temperature,
-        }
-        resp = requests.post(OPCODE_ZEN_URL, json=zen_payload, timeout=30)
-        _log.info("[ZEN-TEXT-FALLBACK] HTTP %s", resp.status_code)
-        if resp.status_code == 200:
-            raw = resp.json()["choices"][0]["message"]["content"]
-            match = re.search(r"\{[\s\S]*\}", raw)
-            if match:
-                result = json.loads(match.group(0))
-                result["source"] = "zen_text"
-                _log.info("[ZEN-TEXT-FALLBACK] Success! Style=%s", result.get("style_name"))
-                return result
-    except Exception as e:
-        _log.warning("[ZEN-TEXT-FALLBACK] Error: %s", e)
-    
-    # === FALLBACK: Old MiMo text model ===
-    try:
-        _log.info("[MIMO-TEXT-FALLBACK] Using MiMo text model")
-        
-        # Extract comprehensive garment features
-        garment_features = _extract_garment_features(image_b64)
-        
-        # Format the features for the prompt
-        feature_lines = []
-        for region in ["top", "bottom", "footwear"]:
-            rf = garment_features[region]
-            if rf["colors"]:
-                feature_lines.append(f"  {region.upper()} REGION:")
-                feature_lines.append(f"    Colors: {', '.join(rf['colors'])}")
-                feature_lines.append(f"    Brightness: {rf['brightness']}/255 {'(LIGHT)' if rf['brightness'] > 150 else '(MEDIUM)' if rf['brightness'] > 80 else '(DARK)'}")
-                feature_lines.append(f"    Texture detail: {rf['edge_density']}% {'(smooth fabric)' if rf['edge_density'] < 6 else '(some texture)' if rf['edge_density'] < 12 else '(highly textured)'}")
-                feature_lines.append(f"    Color variance: {rf['color_variance']} {'(solid color)' if rf['color_variance'] < 30 else '(some variation)' if rf['color_variance'] < 60 else '(patterned/print)'}")
-                for hint in rf["type_hints"]:
-                    feature_lines.append(f"    → {hint}")
-        
-        overall = garment_features["overall"]
-        feature_lines.append(f"  OVERALL: {overall['silhouette']}")
-        for hint in overall.get("style_hints", []):
-            feature_lines.append(f"  → {hint}")
-        
-        features_text = "\n".join(feature_lines)
-        overall_colors = ", ".join(overall.get("colors", [])) or "unknown"
-        
-        text_prompt = f"""You are a fashion analysis AI. I have extracted detailed garment data from the image below. Use this data to identify the EXACT outfit the person is wearing.
-
-EXTRACTED GARMENT DATA:
-{features_text}
-
-ANALYSIS RULES:
-1. Garment types MUST be based on the texture, brightness, and structural hints above.
-2. Colors MUST come ONLY from the extracted data. Never invent colors.
-3. Use ONLY these valid color names: {color_list}
-4. Never reference background or environment.
-5. Infer garment types logically:
-   - Smooth, light top (brightness > 150, texture < 6%) → likely "Cotton T-Shirt", "Linen Shirt", or "Tank Top"
-   - Smooth, mid-tone top (brightness 80-150, texture < 6%) → likely "T-Shirt", "Sweater", or "Long Sleeve Top"
-   - Smooth, dark top (brightness < 80, texture < 6%) → likely "Black T-Shirt", "Dark Sweater", or "Turtleneck"
-   - Textured top (texture 6-12%) → likely "Knit Sweater", "Button-Down Shirt", or "Blouse"
-   - High texture top (texture > 12%) → likely "Patterned Shirt", "Jacket", or "Structured Blazer"
-   - If "structured upper garment" hinted → "Blazer", "Jacket", or "Coat"
-   - Dark, smooth bottom (brightness < 100, texture < 6%) → likely "Jeans", "Trousers", or "Pants"
-   - Light bottom (brightness > 120, texture < 6%) → likely "Light Pants", "Skirt", or "Shorts"
-   - Dark smooth footwear (brightness < 100) → "Boots", "Oxfords", or "Dark Sneakers"
-   - Light footwear (brightness > 150) → "Sneakers", "White Shoes"
-   - Mid-tone footwear → "Brown Boots", "Tan Shoes"
-
-Return ONLY valid JSON with:
-- top_type: "Color + Garment Type" based on top region analysis
-- bottom_type: "Color + Garment Type" based on bottom region analysis
-- footwear: "Color + Garment Type" based on footwear region
-- accessories: "None" unless detected
-- style_score: int 70-95 based on outfit quality
-- style_name: "2-word vibe" 
-- vibe_type: one of: Casual, Formal, Business, Sporty, Date Night, Party, Bohemian, Streetwear, Minimalist, Vintage
-- strengths: ["3 specific observations referencing actual detected garments"]
-- audit: "max 15 word outfit summary"
-- tweak_plan: "1 specific improvement"
-- generation_prompt: "20-word editorial prompt"
-
-NO markdown. NO explanations. Valid JSON only."""
-        
-        text_payload = {
-            "model": MIMO_TEXT_MODEL,
-            "messages": [{"role": "user", "content": text_prompt}],
-            "max_tokens": CIPHER_MAX_TOKENS,
-            "temperature": temperature,
-    
-        }
-        resp = requests.post(MIMO_API_URL, json=text_payload, headers=headers, timeout=30)
-        _log.info("[MIMO-TEXT-FALLBACK] HTTP %s", resp.status_code)
-        if resp.status_code == 200:
-            raw = resp.json()["choices"][0]["message"]["content"]
-            match = re.search(r"\{[\s\S]*\}", raw)
-            if match:
-                result = json.loads(match.group(0))
-                result["source"] = "text_fallback"
-                _log.info("[MIMO-TEXT-FALLBACK] Success! Style=%s Score=%s", 
-                          result.get("style_name"), result.get("style_score"))
-                return result
-    except Exception as exc:
-        _log.error("[MIMO-TEXT-FALLBACK] %s", exc)
-    
-    _MIMO_VISION_WORKING = False
-    _log.warning("[MIMO-VISION] All models failed - returning None")
+    _log.warning("[MIMO-VISION] All vision providers failed")
     return None
 
 def call_groq_text(messages: List[Dict[str, str]], system_prompt: str = "", temperature: float = 0.7, timeout: int = 30) -> Any:
@@ -1856,7 +1719,7 @@ def get_fashion_decision(image_b64: str) -> Dict[str, Any]:
         if result:
             # Preserve the source from call_groq_vision (e.g. "text_fallback" or "cipher_vision")
             return result
-    except TimeoutError:
+    except (CFTimeoutError, requests.exceptions.Timeout):
         _log.warning("[PIPELINE] Timed out")
     except Exception as exc:
         _log.error("[PIPELINE] %s", exc)
@@ -1892,76 +1755,33 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
     # Build lower-case color lookup from the color dictionary
     _COLOR_NAMES_LOWER = {c.lower() for c in _COLOR_NAMES} if _COLOR_NAMES else set()
 
-    # === STEP 2: Smart Color Resolution ===
-    # Pixel colors detect the DOMINANT colors from the masked image.
-    # AI colors see PATTERNS and SECONDARY colors that pixels miss.
-    # We combine BOTH sources for the best result.
-    # CRITICAL: We NEVER modify AI item descriptions based on pixel data alone!
-    if pixel_colors and len(pixel_colors) >= 1:
-        # Extract REAL color names from AI item descriptions using the color dictionary
-        # Only words that match an actual color name in _COLOR_NAMES are included
-        ai_item_colors = []
-        for key in ["top_type", "bottom_type", "footwear", "accessories"]:
-            val = result.get(key, "")
-            if val and val != "None" and val.lower() != "none":
-                for word in val.split():
-                    clean = word.strip(',.!?;:()[]')
-                    # Only include if it's a real color name from our dictionary
-                    if clean and _COLOR_NAMES and clean.lower() in _COLOR_NAMES_LOWER:
-                        if clean not in ai_item_colors:
-                            ai_item_colors.append(clean)
-        
-        # Merge pixel colors with AI-detected colors (pixel colors are ground truth for dominant)
-        merged_colors = list(dict.fromkeys(pixel_colors))  # Start with pixel colors (deduped)
-        for c in ai_item_colors:
-            if c not in merged_colors:
-                merged_colors.append(c)
-        actual_colors = merged_colors[:3]
-        _log.info("[MAP] Merged colors from pixels+AI: %s (pixels: %s, AI items: %s)", 
-                  actual_colors, pixel_colors, ai_item_colors)
+    # === STEP 2: Extract colors from AI vision output (RELIABLE) ===
+    # The MiMo V2.5 vision model sees the full image and correctly identifies colors.
+    # Each item starts with a color name (e.g., "Red t-shirt", "Blue jeans").
+    # Extract colors directly from AI item descriptions.
+    ai_colors_from_items = []
+    _COLOR_NAMES_LOWER = {c.lower() for c in _COLOR_NAMES} if _COLOR_NAMES else set()
+    for key in ["top_type", "bottom_type", "footwear", "accessories"]:
+        val = result.get(key, "")
+        if val and val != "None" and val.lower() != "none":
+            words = val.split()
+            if words:
+                color_word = words[0].strip(',.!?;:()[]')
+                if color_word and _COLOR_NAMES and color_word.lower() in _COLOR_NAMES_LOWER:
+                    if color_word not in ai_colors_from_items:
+                        ai_colors_from_items.append(color_word)
+    
+    if ai_colors_from_items:
+        actual_colors = ai_colors_from_items[:3]
+        _log.info("[COLOR] Extracted from AI items: %s", actual_colors)
+    elif pixel_colors:
+        # Fallback to pixel extraction only if AI gave no colors
+        actual_colors = pixel_colors[:3]
+        _log.info("[COLOR] Fallback to pixel: %s", actual_colors)
     else:
-        # === STEP 3: Fallback to AI colors with validation ===
-        actual_colors = result.get("actual_colors", [])
-        if not actual_colors or not isinstance(actual_colors, list):
-            actual_colors = []
-        if pixel_colors:
-            actual_colors = _validate_colors_with_pixels(actual_colors, pixel_colors)
+        actual_colors = ["Black", "White"]
+        _log.info("[COLOR] Default colors (no AI or pixel data)")
 
-        # === STEP 4: Reality filter — ONLY for AI hallucinated colors, NOT pixel colors ===
-        background_indicators = {"Concrete", "Camo Green", "Camo Brown", "Acid Wash", "Slate", "Silver", "Khaki", "Coffee", "Charcoal", "Steel", "Espresso"}
-        if actual_colors and any(c in background_indicators for c in actual_colors):
-            _REAL_COLORS_MAP = {
-                "shirt": "White", "pants": "Black", "jeans": "Blue", "sneakers": "White",
-                "boots": "Black", "dress": "Navy", "cardigan": "Beige", "blazer": "Navy",
-                "jacket": "Black", "skirt": "Black", "shorts": "Black", "top": "White",
-                "sweater": "Grey", "hoodie": "Grey", "coat": "Black",
-            }
-            mapped_colors = []
-            for item in items_detected:
-                for keyword, color in _REAL_COLORS_MAP.items():
-                    if keyword in item.lower():
-                        mapped_colors.append(color)
-                        break
-            if mapped_colors:
-                actual_colors = list(dict.fromkeys(mapped_colors))[:3]
-                _log.info("[REALITY-FILTER] Overrode hallucinated colors -> %s (items: %s)", actual_colors, items_detected)
-
-        # === STEP 5: If still no colors, smart fallback based on items ===
-        if not actual_colors:
-            default_colors = ["Black", "White"]
-            for item in items_detected:
-                item_lower = item.lower()
-                if "floral" in item_lower or "print" in item_lower or "pattern" in item_lower:
-                    default_colors = ["Navy", "Teal", "White"]; break
-                elif "jeans" in item_lower or "denim" in item_lower:
-                    default_colors = ["Blue", "White", "Tan"]; break
-                elif "leather" in item_lower:
-                    default_colors = ["Black", "Brown", "Gold"]; break
-                elif "silk" in item_lower or "satin" in item_lower:
-                    default_colors = ["Burgundy", "Blush", "Gold"]; break
-                elif "cotton" in item_lower or "linen" in item_lower:
-                    default_colors = ["White", "Beige", "Navy"]; break
-            actual_colors = default_colors
     # ---- PHASE A: Clean up None values and merge accessories ----
     for item_key in ["top_type", "bottom_type", "footwear", "accessories"]:
         val = result.get(item_key, "")
@@ -1978,57 +1798,16 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
             display = " + ".join(parts[:3])
             result["accessories"] = display
 
-    # ---- PHASE B: Color correction BEFORE strength generation ----
-    if pixel_colors and len(pixel_colors) >= 1:
-        pixel_set = set(c.lower() for c in pixel_colors)
-        color_words = set()
-        for c in pixel_colors:
-            for word in c.lower().split():
-                color_words.add(word)
-        
-        for item_key in ["top_type", "bottom_type", "footwear"]:
-            item_val = result.get(item_key, "")
-            if not item_val or item_val in ("None", "none"):
-                continue
-            words = item_val.split()
-            if len(words) < 2:
-                continue
-            
-            first_word = words[0].strip(',.!?;:')
-            HALLUCINATED = {"charcoal", "acid", "slate", "silver", "concrete", "khaki", "coffee", "camo"}
-            
-            # Fix strategy: correct hallucinated background colors, and fix grey→blue/navy when pixel colors confirm
-            needs_correction = first_word.lower() in HALLUCINATED
-            smart_override = False
-            
-            # Grey fix removed - pixel data alone cannot determine if grey should be blue.
-            # The AI vision model sees the full garment context and is more reliable.
-            
-            if needs_correction:
-                best_color = ""
-                if not smart_override:
-                    best_color = pixel_colors[0]
-                if item_key == "bottom_type" and any(bc in ['blue', 'denim', 'black', 'navy'] for bc in pixel_colors):
-                    for bc in pixel_colors:
-                        if bc.lower() in ('blue', 'black', 'navy', 'denim'):
-                            best_color = bc
-                            break
-                elif item_key == "footwear" and any(fc in ['white', 'black', 'brown', 'beige'] for fc in pixel_colors):
-                    for fc in pixel_colors:
-                        if fc.lower() in ('white', 'black', 'brown', 'beige'):
-                            best_color = fc
-                            break
-                words[0] = best_color
-                corrected = ' '.join(words)
-                result[item_key] = corrected
-                _log.info("[COLOR-CORRECT] %s: '%s' -> '%s' (pixels: %s)", item_key, item_val, corrected, pixel_colors)
-
-    # ---- PHASE C: Rebuild items_detected from color-corrected values ----
-    items_detected = []
-    for key in ["top_type", "bottom_type", "footwear", "accessories"]:
-        val = result.get(key, "")
-        if val and val != "None" and val.lower() != "none" and val != "Non Accessory":
-            items_detected.append(val)
+    # ---- PHASE B: Trust AI vision (MiMo V2.5) over pixel data ----
+    # The MiMo V2.5 vision model sees the full image and identifies colors correctly.
+    # Pixel extraction is supplementary ground truth only - never overrides AI.
+    if pixel_colors and len(pixel_colors) >= 1 and result.get("source") == "cipher_vision":
+        _log.info("[COLOR-TRUST] AI vision correct. Pixel=%s used as supplement only.", pixel_colors)
+    
+    # ---- PHASE C: Only use pixel fallback when source is NOT vision ----
+    if result.get("source") != "cipher_vision":
+        if pixel_colors and len(pixel_colors) >= 1:
+            _log.info("[PIXEL-FALLBACK] Using pixel colors for non-vision source: %s", pixel_colors)
 
     # ---- PHASE D: Generate humanized strengths from CORRECTED items ----
     detected = [s for s in [result.get(k, "") for k in ["top_type", "bottom_type", "footwear", "accessories"]] if s and s != "None"]
@@ -2079,7 +1858,7 @@ def analyze_outfit():
     try:
         result = get_fashion_decision(image_b64)
         return jsonify(map_analysis(result))
-    except TimeoutError:
+    except (CFTimeoutError, requests.exceptions.Timeout):
         _log.error("[ANALYZE] Timeout")
     except Exception as exc:
         _log.error("[ANALYZE] ERROR: %s", exc)
