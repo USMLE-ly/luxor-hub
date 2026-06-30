@@ -1365,28 +1365,38 @@ def upload_image_to_blob(image_b64: str, prefix: str = "closet") -> Optional[str
 
 # ---------------------------------------------------------------------------
 # Humanizer: Generate human-sounding strengths/audit from items
-# Based on removing AI patterns: "Well-chosen X", rule-of-three, generic praise
-# ---------------------------------------------------------------------------
+# Based on blader/humanizer principles:
+# - No rule-of-three, no generic praise, no AI vocabulary
+# - Varied sentence length and structure
+# - Opinionated, natural voice with contractions
+# - Grammar correct, subject-verb agreement
+
 _STRENGTH_TEMPLATES = {
     "top": [
         "The {color} {garment} sets the tone — {quality}",
         "That {color} {garment} works because {reason}",
         "The {color} {garment} is the right kind of {adjective}",
+        "I like how the {color} {garment} {detail}",
+        "The {color} {garment} does exactly what it needs to — {quality}",
     ],
     "bottom": [
         "The {color} {garment} keeps things grounded — {quality}",
-        "Those {color} {garment} {detail}",
-        "The {color} {garment} balance out the top nicely",
+        "Those {color} {garment}s {plural_detail}",
+        "The {color} {garment} balances out the top nicely",
+        "Smart pick on the {color} {garment} — {quality}",
+        "The {color} {garment} {singular_detail}",
     ],
     "footwear": [
-        "The {color} {garment} {detail}",
-        "Smart call on the {color} {garment} — {quality}",
-        "The {color} {garment} finish the look without stealing focus",
+        "The {color} {garment}s {plural_detail}",
+        "Smart call on the {color} {garment}s — {quality}",
+        "The {color} {garment}s finish the look without stealing focus",
+        "Good instincts on the {color} {garment}s — {quality}",
     ],
     "accessory": [
-        "The {color} {garment} adds just the right amount of polish",
+        "The {color} {garment} {singular_detail}",
         "Nice touch with the {color} {garment} — {quality}",
-        "The {color} {garment} pulls attention where it matters",
+        "The {color} {garment} pulls everything together",
+        "That {color} {garment} is doing the most work here",
     ],
     "default": [
         "The {color} {garment} works well in this context",
@@ -1410,6 +1420,15 @@ _STRENGTH_DETAILS = {
             "the color brings warmth to the whole look",
             "it has enough texture to keep things from feeling flat",
         ],
+        "details": [
+            "sits at the waist just right",
+            "has just enough structure to hold its shape",
+            "brings a subtle contrast without shouting",
+        ],
+        "plural_details": [
+            "sit at the waist just right",
+            "have just enough structure to hold their shape",
+        ],
     },
     "bottom": {
         "qualities": [
@@ -1417,7 +1436,12 @@ _STRENGTH_DETAILS = {
             "the wash gives them character without being loud",
             "they're tailored well — not too tight, not too loose",
         ],
-        "details": [
+        "singular_details": [
+            "has just the right amount of wear to feel lived-in",
+            "brings a subtle edge without going overboard",
+            "keeps the silhouette clean and intentional",
+        ],
+        "plural_details": [
             "have just the right amount of wear to feel lived-in",
             "bring a subtle edge without going overboard",
             "keep the silhouette clean and intentional",
@@ -1429,7 +1453,7 @@ _STRENGTH_DETAILS = {
             "they match the energy of the outfit",
             "they don't compete with the rest of the look",
         ],
-        "details": [
+        "plural_details": [
             "keep things casual without looking sloppy",
             "are comfortable enough to actually wear all day",
             "add a clean finishing touch",
@@ -1441,24 +1465,39 @@ _STRENGTH_DETAILS = {
             "it adds detail without screaming for attention",
             "it ties the whole look together",
         ],
+        "singular_details": [
+            "catches the light at the right moments",
+            "adds detail without screaming for attention",
+            "adds just the right amount of polish",
+        ],
     },
 }
 
+
 def _humanize_strengths(items: List[str]) -> List[str]:
     """Generate human-sounding strength statements from detected items.
-    Avoids classic AI patterns: 'Well-chosen X', rule-of-three, generic praise."""
+    Follows blader/humanizer principles: no rule-of-three, no generic praise,
+    varied sentence structure, grammar-correct."""
     import random
     
-    # Use a stable seed based on item content for reproducibility
     seed = hash("|".join(items)) & 0x7FFFFFFF
     rng = random.Random(seed)
     
     strengths = []
-    for item in items[:4]:  # Max 4 items
+    for item in items[:4]:
         item_lower = item.lower()
         words = item.split()
         color = words[0] if len(words) > 0 else ""
         garment = " ".join(words[1:]) if len(words) > 1 else words[0]
+        
+        # Handle multi-item accessories like "Gold Hoop Earrings + Gold Necklace"
+        if "+" in garment and len(words) > 3:
+            # For compound accessories, treat as plural
+            pass
+        
+        # Determine if the item name is plural (ends in 's' typically)
+        last_word = garment.split()[-1].lower() if garment.split() else ""
+        is_plural = last_word.endswith('s') and not last_word.endswith('ss')
         
         # Determine category
         if any(w in item_lower for w in ["necklace", "earring", "bracelet", "watch", "ring", "belt", "scarf", "bag", "hat", "glasses", "accessory"]):
@@ -1475,70 +1514,98 @@ def _humanize_strengths(items: List[str]) -> List[str]:
         templates = _STRENGTH_TEMPLATES.get(cat, _STRENGTH_TEMPLATES["default"])
         details = _STRENGTH_DETAILS.get(cat, {})
         
-        # Pick a random template and fill it
+        # Pick a template and fill it
         template = rng.choice(templates)
         quality = rng.choice(details.get("qualities", [""])) if details.get("qualities") else ""
         adjective = rng.choice(details.get("adjectives", [""])) if details.get("adjectives") else ""
         reason = rng.choice(details.get("reasons", [""])) if details.get("reasons") else ""
-        detail = rng.choice(details.get("details", [""])) if details.get("details") else ""
         
-        strength = template.format(
-            color=color, garment=garment,
-            quality=quality, adjective=adjective,
-            reason=reason, detail=detail
-        )
-        # Clean up: capitalize first letter, ensure it ends with period
+        # Pick right pluralization for detail
+        if is_plural or "+" in item:
+            plural_detail = rng.choice(details.get("plural_details", [""])) if details.get("plural_details") else ""
+            singular_detail = rng.choice(details.get("singular_details", [""])) if details.get("singular_details") else ""
+            # Use plural_detail if available, otherwise singular_detail
+            detail = plural_detail or singular_detail
+        else:
+            singular_detail = rng.choice(details.get("singular_details", [""])) if details.get("singular_details") else ""
+            plural_detail = rng.choice(details.get("plural_details", [""])) if details.get("plural_details") else ""
+            detail = singular_detail or plural_detail
+        
+        try:
+            strength = template.format(
+                color=color, garment=garment,
+                quality=quality, adjective=adjective,
+                reason=reason, detail=detail,
+                singular_detail=detail, plural_detail=detail
+            )
+        except KeyError:
+            # Fallback for templates that reference fields not in this category
+            strength = template.format(
+                color=color, garment=garment,
+                quality=quality or "", adjective=adjective or "",
+                reason=reason or "", detail=detail or "",
+                singular_detail=detail or "", plural_detail=detail or ""
+            )
+        
+        # Clean up
         strength = strength[0].upper() + strength[1:]
         if not strength.endswith((".", "!", "?")):
             strength += "."
+        # Fix double spaces and trailing whitespace
+        strength = ' '.join(strength.split())
         strengths.append(strength)
     
     return strengths
 
 
 def _humanize_audit(items: List[str], style_name: str) -> str:
-    """Generate a natural-sounding outfit summary. Avoids 'A well-coordinated outfit...'"""
+    """Generate a natural one-line outfit summary. No rules, no formulas."""
     if not items:
         return "Simple outfit that gets the job done."
     
     item_count = len(items)
-    top = items[0] if item_count > 0 else ""
-    bottom = items[1] if item_count > 1 else ""
-    extra = items[2] if item_count > 2 else ""
     
     if item_count == 1:
-        return f"A {top.lower()} doing the heavy lifting — sometimes that's all you need."
+        return f"Just a {items[0].lower()} — sometimes that's all you need."
     elif item_count == 2:
-        return f"{top} and {bottom.lower()}. Clean, intentional, nothing wasted."
+        return f"{items[0]} and {items[1].lower()}. Clean, intentional, nothing wasted."
     elif item_count >= 3:
-        return f"{top}, {bottom.lower()}, and {extra.lower()} — each piece earns its place."
+        # Mix up the phrasing so it's not always "X, Y, and Z"
+        phrases = [
+            f"{items[0]}, paired with {items[1].lower()} and {items[2].lower()}.",
+            f"{items[0]} + {items[1].lower()} + {items[2].lower()} — each piece earns its place.",
+        ]
+        import random
+        return random.Random(hash(str(items)) & 0x7FFFFFFF).choice(phrases)
     return f"A {style_name.lower()} look built from {item_count} intentional pieces."
 
 
 def _humanize_tweak(tweak: str, items: List[str]) -> str:
-    """Humanize the tweak_plan — remove 'Consider adding...' boilerplate."""
+    """Humanize the tweak — no 'Consider adding' boilerplate, no AI-formulaic advice."""
     if not tweak or tweak.startswith("Consider"):
-        # Generate a specific suggestion based on what's missing
         has_accessory = any(a in " ".join(items).lower() for a in ["necklace", "earring", "bracelet", "watch", "ring", "belt", "scarf"])
         has_layers = any(l in " ".join(items).lower() for l in ["jacket", "blazer", "cardigan", "coat"])
         
         if not has_accessory and not has_layers:
-            return "Add a simple necklace or a structured jacket to take this up a notch."
+            return "Try a simple necklace or a structured jacket — either would take this up a notch."
         elif not has_accessory:
-            return "Add a watch or a subtle necklace for some extra polish."
+            return "Throw on a watch or a subtle necklace for some extra polish."
         elif not has_layers:
-            return "Add a lightweight jacket or blazer to give this more structure."
+            return "A lightweight jacket or blazer would give this more structure."
         else:
-            return "Add a belt or a different bag if you want to shift the vibe — this already works well."
+            return "A belt or a different bag could shift the vibe — but this already works well."
     
-    # Clean up common AI phrases in the AI-generated tweak
-    tweak = tweak.replace("Consider adding ", "Try adding ")
+    # Clean up AI boilerplate phrases
+    tweak = tweak.replace("Consider adding ", "")
     tweak = tweak.replace("Consider swapping ", "Swap ")
     tweak = tweak.replace("for a more polished look", "for a sharper feel")
     tweak = tweak.replace("for a more put-together appearance", "for a cleaner look")
+    tweak = tweak.replace("to complete the look", "if you want to finish the outfit")
+    tweak = tweak.replace("to enhance the overall aesthetic", "")
+    tweak = tweak.strip().capitalize()
+    if not tweak.endswith((".", "!", "?")):
+        tweak += "."
     return tweak
-
-
 # Global cache for pixel analysis
 _image_b64_cache = ""
 
