@@ -193,7 +193,7 @@ export default function DressingRoomPage() {
         }
       }
       
-      const api = "https://nice-useful-plot--al-bosify.replit.app";
+            const api = import.meta.env.VITE_API_URL || import.meta.env.VITE_PUBLIC_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:5000' : '');
       const genResp = await fetch(api + "/api/v1/dressing-room/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
