@@ -830,77 +830,255 @@ def _validate_colors_with_pixels(ai_colors: List[str], pixel_colors: List[str]) 
         return pixel_colors
     return ai_colors
 
-def _extract_image_features(image_b64: str) -> str:
-    """Extract color/features from image locally, return text description."""
+def _extract_garment_features(image_b64: str) -> Dict[str, Any]:
+    """Extract comprehensive garment features from the masked person image.
+    Returns a dict with per-region color, texture, and structure analysis."""
+    result = {
+        "top": {"colors": [], "brightness": 0, "edge_density": 0, "color_variance": 0, "type_hints": []},
+        "bottom": {"colors": [], "brightness": 0, "edge_density": 0, "color_variance": 0, "type_hints": []},
+        "footwear": {"colors": [], "brightness": 0, "edge_density": 0, "color_variance": 0, "type_hints": []},
+        "overall": {"colors": [], "height_width_ratio": 0, "silhouette": "", "style_hints": []}
+    }
     try:
-        raw = base64.b64decode(image_b64)
+        # Get masked person image
+        masked_b64 = _extract_person_center_crop(image_b64)
+        raw = base64.b64decode(masked_b64)
         img = Image.open(io.BytesIO(raw))
-        # Resize for speed
-        img_small = img.resize((32, 48), Image.Resampling.LANCZOS)
-        # Ensure RGB for type checker
-        if img_small.mode != 'RGB':
-            img_small = img_small.convert('RGB')
-        pixel_array = np.array(img_small)
-        pixel_data = pixel_array.reshape(-1, 3).tolist()
-        quantized = []
-        for r, g, b in pixel_data:
-            # Map to nearest color name
-            quantized.append((r // 64 * 64, g // 64 * 64, b // 64 * 64))
-
-        color_counts = Counter(quantized)
-        top_colors = color_counts.most_common(5)
-
-        # Convert RGB to color names using the color dictionary
-        COMMON_CLOTHING_COLORS = {
-            "Black", "White", "Navy", "Blue", "Red", "Green", "Grey", "Brown",
-            "Beige", "Cream", "Ivory", "Tan", "Pink", "Purple", "Yellow",
-            "Orange", "Gold", "Teal", "Maroon", "Burgundy", "Olive",
-            "Coral", "Mint", "Lavender", "Peach", "Turquoise", "Indigo",
-            "Charcoal", "Denim", "Camel", "Mustard", "Blush", "Mauve",
-            "Forest Green", "Sky Blue", "Royal Blue", "Baby Blue", "Hot Pink"
-        }
-        color_names = []
-        for (r, g, b), count in top_colors:
-            best_name = "unknown"
-            best_dist = float('inf')
-            for name, hex_code in _COLOR_MAPPINGS.items():
-                hex_code = hex_code.lstrip('#')
-                cr, cg, cb = int(hex_code[0:2], 16), int(hex_code[2:4], 16), int(hex_code[4:6], 16)
-                dist = ((r - cr) ** 2 * 0.3 + (g - cg) ** 2 * 0.59 + (b - cb) ** 2 * 0.11) ** 0.5
-                adjusted = dist * 0.85 if name in COMMON_CLOTHING_COLORS else dist
-                if adjusted < best_dist:
-                    best_dist = dist
-                    best_name = name
-            if best_name and best_dist < 100 and best_name not in color_names:
-                color_names.append(best_name)
-
-        # Determine if image has a person-like shape (simple heuristic)
-        w, h = img.size
-        aspect = w / h
-
-        features = []
-        features.append(f"Image aspect ratio: {aspect:.2f}")
-        features.append(f"Dominant colors: {', '.join(color_names)}")
-        features.append(f"Image size: {w}x{h} pixels")
-
-        # Simple brightness analysis
-        gray = img.convert('L')
-        raw_pixels = [p for p in gray.getdata()]
-        avg_brightness = sum(int(p) if isinstance(p, (int, float)) else 0 for p in raw_pixels) / len(raw_pixels)
-        features.append(f"Average brightness: {avg_brightness:.0f}/255")
-
-        if avg_brightness < 80:
-            features.append("Lighting: Dark")
-        elif avg_brightness > 180:
-            features.append("Lighting: Bright")
+        if img.mode != 'RGB':
+            img = img.convert('RGB')
+        arr = np.array(img)
+        h, w = arr.shape[:2]
+        
+        # Find person bounding box (non-white pixels)
+        non_white = np.any(arr < 200, axis=2)
+        rows = np.any(non_white, axis=1)
+        cols = np.any(non_white, axis=0)
+        
+        if not (rows.any() and cols.any()):
+            return result
+        
+        y_min, y_max = np.where(rows)[0][[0, -1]]
+        x_min, x_max = np.where(cols)[0][[0, -1]]
+        person_h = y_max - y_min
+        person_w = x_max - x_min
+        
+        result["overall"]["height_width_ratio"] = round(person_h / person_w, 2) if person_w > 0 else 0
+        result["overall"]["colors"] = _get_dominant_colors_from_pixels(image_b64, num_colors=3)
+        
+        # Silhouette estimation
+        ratio = person_h / person_w if person_w > 0 else 0
+        if ratio > 3.5:
+            result["overall"]["silhouette"] = "very tall and narrow (dress or long coat possible)"
+        elif ratio > 2.5:
+            result["overall"]["silhouette"] = "tall and slim (standard full-body)"
+        elif ratio > 1.8:
+            result["overall"]["silhouette"] = "moderate proportions"
         else:
-            features.append("Lighting: Normal")
+            result["overall"]["silhouette"] = "wider proportions (loose fit or outerwear)"
+        
+        # Define regions (as percentages of person height)
+        regions = {
+            "top": (0.05, 0.40),
+            "bottom": (0.38, 0.75),
+            "footwear": (0.78, 0.98),
+        }
+        
+        for region_name, (y_start_frac, y_end_frac) in regions.items():
+            y_start = y_min + int(person_h * y_start_frac)
+            y_end = y_min + int(person_h * y_end_frac)
+            y_start = max(0, min(y_start, h))
+            y_end = max(0, min(y_end, h))
+            
+            if y_end - y_start < 10:
+                continue
 
-        return "\n".join(features)
+            # Ensure region is valid
+            if y_start >= y_end or x_min >= x_max:
+                continue
+
+            region = arr[y_start:y_end, x_min:x_max]
+            if region.size == 0 or region.shape[0] < 3 or region.shape[1] < 3:
+                continue
+            
+            # Extract colors for this region
+            region_pixels = region.reshape(-1, 3).tolist()
+            region_pixels = [p for p in region_pixels if not (p[0] > 200 and p[1] > 200 and p[2] > 200)]
+            
+            if region_pixels:
+                region_arr = np.array(region_pixels)
+                color_std = float(np.std(region_arr, axis=0).mean())
+                result[region_name]["color_variance"] = round(color_std, 1)
+                
+                # Brightness
+                gray_vals = [0.299*p[0] + 0.587*p[1] + 0.114*p[2] for p in region_pixels]
+                brightness = sum(gray_vals) / len(gray_vals)
+                result[region_name]["brightness"] = round(brightness)
+                
+                # Use quantization + dark rule for color matching (same approach as _get_dominant_colors_from_pixels)
+                COMMON_CLOTHING_COLORS = {
+                    "Black", "White", "Navy", "Blue", "Red", "Green", "Grey", "Brown",
+                    "Beige", "Cream", "Ivory", "Tan", "Pink", "Purple", "Yellow",
+                    "Orange", "Gold", "Teal", "Maroon", "Burgundy", "Olive",
+                    "Coral", "Mint", "Lavender", "Peach", "Turquoise", "Indigo",
+                    "Charcoal", "Denim", "Camel", "Mustard", "Blush", "Mauve",
+                }
+                quantized = [(r // 48 * 48, g // 48 * 48, b // 48 * 48) for r, g, b in region_pixels]
+                color_counts = Counter(quantized)
+                top_pixels_region = [item[0] for item in color_counts.most_common(4)]
+                
+                region_colors = []
+                for r, g, b in top_pixels_region:
+                    if max(r, g, b) < 120:
+                        if b > r + 20 and b > g + 20 and b > 60:
+                            region_colors.append("Navy")
+                        else:
+                            region_colors.append("Black")
+                        continue
+                    best_name = "unknown"
+                    best_dist = float('inf')
+                    for name, hex_code in _COLOR_MAPPINGS.items():
+                        hc = hex_code.lstrip('#')
+                        cr, cg, cb = int(hc[0:2], 16), int(hc[2:4], 16), int(hc[4:6], 16)
+                        dist = ((r - cr) ** 2 * 0.3 + (g - cg) ** 2 * 0.59 + (b - cb) ** 2 * 0.11) ** 0.5
+                        adjusted = dist * 0.85 if name in COMMON_CLOTHING_COLORS else dist
+                        if adjusted < best_dist:
+                            best_dist = dist
+                            best_name = name
+                    if best_name and best_dist < 100:
+                        region_colors.append(best_name)
+                
+                seen = set()
+                unique_colors = []
+                for c in region_colors:
+                    if c not in seen:
+                        seen.add(c)
+                        unique_colors.append(c)
+                result[region_name]["colors"] = unique_colors[:2] if unique_colors else ["Black"]
+                
+                # Texture analysis via gradient-based edge detection
+                region_gray_arr = np.array(Image.fromarray(region).convert('L')).astype(float)
+                # Simple gradient-based edge detection
+                gy, gx = np.gradient(region_gray_arr)
+                edge_mag = np.sqrt(gx**2 + gy**2)
+                edge_density = float(np.mean(edge_mag > 15)) * 100
+                result[region_name]["edge_density"] = round(edge_density, 1)
+                
+                # Garment type hints based on texture and brightness
+                hints = []
+                brightness_val = result[region_name]["brightness"]
+                
+                if region_name == "top":
+                    if edge_density < 5:
+                        if brightness_val > 150:
+                            hints.append("likely lightweight t-shirt or tank top (smooth, light)")
+                        elif brightness_val > 80:
+                            hints.append("likely t-shirt or sweater (smooth, mid-tone)")
+                        else:
+                            hints.append("likely dark t-shirt or sweater (smooth, dark)")
+                    elif edge_density < 12:
+                        if brightness_val > 150:
+                            hints.append("possibly button-down shirt or textured top (some detail)")
+                        else:
+                            hints.append("possible sweater or textured knit (moderate texture)")
+                    else:
+                        hints.append("likely structured garment or patterned fabric (high detail)")
+                    
+                    # Check shoulder-to-waist ratio for jacket detection
+                    shoulder_y = y_min + int(person_h * 0.12)
+                    waist_y = y_min + int(person_h * 0.40)
+                    if shoulder_y < h and waist_y < h:
+                        s_row = non_white[shoulder_y]
+                        w_row = non_white[waist_y]
+                        sw = float(np.sum(s_row))
+                        ww = float(np.sum(w_row))
+                        if ww > 0 and sw / ww > 0.1:
+                            ratio_sw = sw / ww
+                            if ratio_sw > 1.5:
+                                hints.append("structured upper garment (jacket or blazer)")
+                            elif ratio_sw < 0.7:
+                                hints.append("wide or loose-fitting garment")
+                
+                elif region_name == "bottom":
+                    if edge_density < 5:
+                        if brightness_val > 120:
+                            hints.append("likely light pants or skirt (smooth)")
+                        elif brightness_val > 60:
+                            hints.append("likely jeans or trousers (smooth, mid-tone)")
+                        else:
+                            hints.append("likely dark pants or jeans")
+                    elif edge_density < 12:
+                        hints.append("possible textured pants or cargo style")
+                    else:
+                        hints.append("possible patterned or distressed bottoms")
+                
+                elif region_name == "footwear":
+                    if brightness_val > 150:
+                        hints.append("likely light-colored shoes (white/sneakers)")
+                    elif brightness_val > 80:
+                        hints.append("likely mid-tone shoes or boots")
+                    else:
+                        hints.append("likely dark shoes or boots")
+                
+                result[region_name]["type_hints"] = hints
+        
+        # Overall style hints
+        style_hints = []
+        top_bright = result["top"]["brightness"]
+        bottom_bright = result["bottom"]["brightness"]
+        
+        if top_bright > 150 and bottom_bright < 100:
+            style_hints.append("light top with dark bottoms (classic contrast)")
+        elif top_bright < 100 and bottom_bright < 100:
+            style_hints.append("dark monochrome outfit")
+        elif top_bright > 120 and bottom_bright > 120:
+            style_hints.append("light/light outfit (casual or summer)")
+        elif abs(top_bright - bottom_bright) < 30:
+            style_hints.append("balanced tonal outfit")
+        
+        result["overall"]["style_hints"] = style_hints
+        
+    except Exception as exc:
+        _log.warning("[FEATURES] Comprehensive extraction error: %s", exc)
+    
+    return result
+
+
+def _extract_image_features(image_b64: str) -> str:
+    """Legacy wrapper - returns text description from comprehensive features."""
+    try:
+        features = _extract_garment_features(image_b64)
+        lines = []
+        
+        lines.append("=== GARMENT ANALYSIS ===")
+        
+        for region in ["top", "bottom", "footwear"]:
+            if features[region]["colors"]:
+                colors_str = ", ".join(features[region]["colors"])
+            else:
+                colors_str = "unknown"
+            brightness = features[region]["brightness"]
+            edge = features[region]["edge_density"]
+            variance = features[region]["color_variance"]
+            
+            lines.append(f"{region.upper()}: color={colors_str}, brightness={brightness}/255, texture_detail={edge}%, color_variance={variance}")
+            
+            hints = features[region]["type_hints"]
+            if hints:
+                for hint in hints:
+                    lines.append(f"  - {hint}")
+        
+        overall = features["overall"]
+        lines.append(f"\nOVERALL: silhouette={overall['silhouette']}, ratio={overall['height_width_ratio']}")
+        for hint in overall.get("style_hints", []):
+            lines.append(f"  - {hint}")
+        colors = overall.get("colors", [])
+        if colors:
+            lines.append(f"overall_colors={', '.join(colors)}")
+        
+        return "\n".join(lines)
     except Exception as exc:
         _log.warning("[FEATURES] %s", exc)
         return "Unable to extract image features."
-
 
 def call_groq_vision(image_b64: str, system_prompt: str = SACRED_PROMPT, temperature: float = 0.2) -> Optional[Dict[str, Any]]:
     if not MIMO_API_KEY:
@@ -981,51 +1159,71 @@ def call_groq_vision(image_b64: str, system_prompt: str = SACRED_PROMPT, tempera
 
     _log.warning("[MIMO-VISION] All vision models failed - trying text-only fallback")
     
-    # === FALLBACK: Use text model with locally extracted image features ===
+    # === FALLBACK: Use text model with comprehensive garment features ===
     try:
-        _log.info("[MIMO-TEXT-FALLBACK] Using text model with extracted image features")
-        features = _extract_image_features(compressed)
-        # Extract pixel colors for accurate color information
-        pixel_colors = _get_dominant_colors_from_pixels(image_b64, num_colors=5)
-        pixel_color_str = ", ".join(pixel_colors) if pixel_colors else "unknown"
+        _log.info("[MIMO-TEXT-FALLBACK] Using text model with comprehensive garment features")
         
-        # Extract regional colors (top, bottom, footwear separately)
-        regional = _extract_regional_colors(image_b64)
-        top_colors = ", ".join(regional.get("top", [])) or "unknown"
-        bottom_colors = ", ".join(regional.get("bottom", [])) or "unknown"
-        footwear_colors = ", ".join(regional.get("footwear", [])) or "unknown"
+        # Extract comprehensive garment features
+        garment_features = _extract_garment_features(image_b64)
         
-        text_prompt = f"""You are a hyper-accurate fashion identification AI running without vision. Use the EXTRACTED DATA below to analyze the outfit.
+        # Format the features for the prompt
+        feature_lines = []
+        for region in ["top", "bottom", "footwear"]:
+            rf = garment_features[region]
+            if rf["colors"]:
+                feature_lines.append(f"  {region.upper()} REGION:")
+                feature_lines.append(f"    Colors: {', '.join(rf['colors'])}")
+                feature_lines.append(f"    Brightness: {rf['brightness']}/255 {'(LIGHT)' if rf['brightness'] > 150 else '(MEDIUM)' if rf['brightness'] > 80 else '(DARK)'}")
+                feature_lines.append(f"    Texture detail: {rf['edge_density']}% {'(smooth fabric)' if rf['edge_density'] < 6 else '(some texture)' if rf['edge_density'] < 12 else '(highly textured)'}")
+                feature_lines.append(f"    Color variance: {rf['color_variance']} {'(solid color)' if rf['color_variance'] < 30 else '(some variation)' if rf['color_variance'] < 60 else '(patterned/print)'}")
+                for hint in rf["type_hints"]:
+                    feature_lines.append(f"    → {hint}")
+        
+        overall = garment_features["overall"]
+        feature_lines.append(f"  OVERALL: {overall['silhouette']}")
+        for hint in overall.get("style_hints", []):
+            feature_lines.append(f"  → {hint}")
+        
+        features_text = "\n".join(feature_lines)
+        overall_colors = ", ".join(overall.get("colors", [])) or "unknown"
+        
+        text_prompt = f"""You are a fashion analysis AI. I have extracted detailed garment data from the image below. Use this data to identify the EXACT outfit the person is wearing.
 
-CRITICAL RULES:
-1. COLORS come ONLY from the extracted pixel data below. Never invent colors.
-2. GARMENT TYPES must be reasonable inferences from the color distribution and image properties.
-3. If the top region shows light colors and the bottom region shows dark colors, the person is wearing a light top with dark bottoms.
-4. If only one color dominates all regions, the outfit is likely monochromatic.
-5. NEVER reference background, environment, or setting. Focus ONLY on clothing.
-6. Use colors ONLY from the official list: {color_list}
+EXTRACTED GARMENT DATA:
+{features_text}
 
-EXTRACTED COLOR DATA:
-- Full image dominant colors: {pixel_color_str}
-- Top region (upper body) colors: {top_colors}
-- Bottom region (lower body) colors: {bottom_colors}
-- Footwear region colors: {footwear_colors}
-- Image features: {features[:200]}
+ANALYSIS RULES:
+1. Garment types MUST be based on the texture, brightness, and structural hints above.
+2. Colors MUST come ONLY from the extracted data. Never invent colors.
+3. Use ONLY these valid color names: {color_list}
+4. Never reference background or environment.
+5. Infer garment types logically:
+   - Smooth, light top (brightness > 150, texture < 6%) → likely "Cotton T-Shirt", "Linen Shirt", or "Tank Top"
+   - Smooth, mid-tone top (brightness 80-150, texture < 6%) → likely "T-Shirt", "Sweater", or "Long Sleeve Top"
+   - Smooth, dark top (brightness < 80, texture < 6%) → likely "Black T-Shirt", "Dark Sweater", or "Turtleneck"
+   - Textured top (texture 6-12%) → likely "Knit Sweater", "Button-Down Shirt", or "Blouse"
+   - High texture top (texture > 12%) → likely "Patterned Shirt", "Jacket", or "Structured Blazer"
+   - If "structured upper garment" hinted → "Blazer", "Jacket", or "Coat"
+   - Dark, smooth bottom (brightness < 100, texture < 6%) → likely "Jeans", "Trousers", or "Pants"
+   - Light bottom (brightness > 120, texture < 6%) → likely "Light Pants", "Skirt", or "Shorts"
+   - Dark smooth footwear (brightness < 100) → "Boots", "Oxfords", or "Dark Sneakers"
+   - Light footwear (brightness > 150) → "Sneakers", "White Shoes"
+   - Mid-tone footwear → "Brown Boots", "Tan Shoes"
 
-Based on this data, generate a COMPLETE fashion analysis JSON.
-- top_type: Use the top region color + a reasonable garment type
-- bottom_type: Use the bottom region color + a reasonable garment type  
-- footwear: Use footwear region color + reasonable footwear type
-- accessories: "None" unless there are clear signs
-- style_score: int 70-95 based on how well the colors complement each other
-- style_name: 2-word vibe that fits the color story
-- strengths: 3 specific observations about the actual detected colors and inferred garments
-- audit: max 15 word summary of the inferred outfit
-- tweak_plan: 1 specific improvement suggestion
-- generation_prompt: 20-word editorial prompt
+Return ONLY valid JSON with:
+- top_type: "Color + Garment Type" based on top region analysis
+- bottom_type: "Color + Garment Type" based on bottom region analysis
+- footwear: "Color + Garment Type" based on footwear region
+- accessories: "None" unless detected
+- style_score: int 70-95 based on outfit quality
+- style_name: "2-word vibe" 
 - vibe_type: one of: Casual, Formal, Business, Sporty, Date Night, Party, Bohemian, Streetwear, Minimalist, Vintage
+- strengths: ["3 specific observations referencing actual detected garments"]
+- audit: "max 15 word outfit summary"
+- tweak_plan: "1 specific improvement"
+- generation_prompt: "20-word editorial prompt"
 
-Return ONLY valid JSON. No markdown. No explanations."""
+NO markdown. NO explanations. Valid JSON only."""
         
         text_payload = {
             "model": MIMO_TEXT_MODEL,
