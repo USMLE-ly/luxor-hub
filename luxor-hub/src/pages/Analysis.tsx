@@ -302,52 +302,66 @@ export default function Analysis() {
     }
   };
 
-  /** Dynamically determine outfit versatility categories and scores */
+  /** Dynamically determine outfit versatility based on detected items + AI vibe/style */
   const determineVersatility = useCallback((items: string[], vibe: string, style: string) => {
-    // Initialize base scores for various possible categories
-    let scores: { [key: string]: number } = {
-      Casual: 30, Business: 30, 'Date Night': 30, Party: 30, Sporty: 30, Relaxed: 30
+    // Low base scores so only categories with matching items/boosts register
+    let scores: Record<string, number> = {
+      Casual: 10, Business: 10, 'Date Night': 10, Party: 10, Sporty: 10, Relaxed: 10
     };
 
-    // Adjust scores based on detected items
+    // Item → category keyword matching (covers MiMo format: "COLOR Garment")
     items.forEach(item => {
       const lower = item.toLowerCase();
-      
-      if (lower.includes('t-shirt') || lower.includes('jeans') || lower.includes('sneakers') || lower.includes('shorts') || lower.includes('joggers')) scores.Casual += 25;
-      if (lower.includes('blazer') || lower.includes('trousers') || lower.includes('pumps') || lower.includes('tie') || lower.includes('suit') || lower.includes('button-up')) scores.Business += 25;
-      if (lower.includes('dress') || lower.includes('heels') || lower.includes('necklace') || lower.includes('clutch') || lower.includes('earrings')) scores['Date Night'] += 25;
-      if (lower.includes('glitter') || lower.includes('sequin') || lower.includes('mini') || lower.includes('bold') || lower.includes('metallic')) scores.Party += 25;
-      if (lower.includes('sneakers') || lower.includes('cap') || lower.includes('shorts') || lower.includes('athletic') || lower.includes('joggers')) scores.Sporty += 25;
-      if (lower.includes('cardigan') || lower.includes('sweater') || lower.includes('oversized') || lower.includes('loungewear') || lower.includes('hoodie')) scores.Relaxed += 25;
+
+      // Casual: t-shirt, jeans, sneakers, shorts, joggers, hoodie, sandals, tank top, polo, sweatpants, denim, sweatshirt
+      if (/t.?shirt|jeans|sneakers|shorts|joggers|hoodie|sandals|tank\s*top|polo|sweatpants|denim|flip.?flop|sweatshirt/.test(lower)) scores.Casual += 30;
+
+      // Business: blazer, trousers, pumps, tie, suit, button-down, oxfords, loafers, blouse, pencil skirt, briefcase
+      if (/blazer|trousers|pumps|tie|suit|button.?down|oxfords|loafers|blouse|pencil skirt|briefcase/.test(lower)) scores.Business += 35;
+
+      // Date Night: dress, heels, necklace, clutch, earrings, bracelet, evening, silk, satin, lace, bodycon, strappy, gown
+      if (/dress|heels|necklace|clutch|earrings|bracelet|evening|silk|satin|lace|bodycon|strappy|gown/.test(lower)) scores['Date Night'] += 30;
+
+      // Party: glitter, sequin, mini, bold, metallic, leather, party, night out, clubbing, crop top
+      if (/glitter|sequin|mini|bold|metallic|leather|party|night out|clubbing|crop top/.test(lower)) scores.Party += 30;
+
+      // Sporty: sneakers, cap, shorts, athletic, joggers, gym, running, sport, performance, trainers, track
+      if (/sneakers|cap|athletic|joggers|gym|running|sport|performance|trainers|track\s*pants/.test(lower)) scores.Sporty += 30;
+
+      // Relaxed: cardigan, sweater, oversized, loungewear, hoodie, sweatpants, fleece, cozy, cotton, linen
+      if (/cardigan|sweater|oversized|loungewear|hoodie|sweatpants|fleece|cozy|cotton|linen/.test(lower)) scores.Relaxed += 30;
     });
 
-    // Boost by the AI's vibe_type
-    if (vibe?.toLowerCase().includes('casual')) scores.Casual += 20;
-    if (vibe?.toLowerCase().includes('formal') || vibe?.toLowerCase().includes('business')) scores.Business += 20;
-    if (vibe?.toLowerCase().includes('party')) scores.Party += 20;
-    if (vibe?.toLowerCase().includes('date')) scores['Date Night'] += 20;
-    if (vibe?.toLowerCase().includes('sport')) scores.Sporty += 20;
-    if (vibe?.toLowerCase().includes('relaxed') || vibe?.toLowerCase().includes('streetwear')) scores.Relaxed += 20;
-    
-    // Boost by style_name
-    if (style?.toLowerCase().includes('chic') || style?.toLowerCase().includes('elegant')) scores['Date Night'] += 10;
-    if (style?.toLowerCase().includes('street') || style?.toLowerCase().includes('urban')) scores.Casual += 10;
-    if (style?.toLowerCase().includes('formal') || style?.toLowerCase().includes('executive')) scores.Business += 10;
-    if (style?.toLowerCase().includes('sport') || style?.toLowerCase().includes('athleisure')) scores.Sporty += 10;
+    // Vibe boost (AI's judgment)
+    const v = (vibe || '').toLowerCase();
+    if (/casual|everyday|weekend|street/.test(v)) scores.Casual += 25;
+    if (/formal|business|office|corporate|executive|professional/.test(v)) scores.Business += 30;
+    if (/party|night|club|celebrat/.test(v)) scores.Party += 25;
+    if (/date|romantic|evening|dinner|glam/.test(v)) scores['Date Night'] += 25;
+    if (/sport|athletic|gym|active|fitness/.test(v)) scores.Sporty += 25;
+    if (/relaxed|comfort|lounge|chill|cozy/.test(v)) scores.Relaxed += 25;
 
-    // Color map for each category
-    const COLOR_MAP: { [key: string]: string } = {
-      'Casual': '#3b82f6',
-      'Business': '#8b5cf6',
+    // Style name boost
+    const s = (style || '').toLowerCase();
+    if (/chic|elegant|sophisticated|glam|polished|couture/.test(s)) scores['Date Night'] += 20;
+    if (/street|urban|edgy|bold|modern|trendy/.test(s)) scores.Casual += 20;
+    if (/formal|executive|power|sharp|pro|corporate|tailored/.test(s)) scores.Business += 20;
+    if (/sport|athleisure|active|fitness|performance/.test(s)) scores.Sporty += 20;
+    if (/cozy|soft|relaxed|comfy|easy|bohemian/.test(s)) scores.Relaxed += 20;
+    if (/party|festive|celebratory|night|daring/.test(s)) scores.Party += 20;
+
+    const COLOR_MAP: Record<string, string> = {
+      Casual: '#3b82f6',
+      Business: '#8b5cf6',
       'Date Night': '#ec4899',
-      'Party': '#f59e0b',
-      'Sporty': '#06b6d4',
-      'Relaxed': '#22c55e',
+      Party: '#f59e0b',
+      Sporty: '#06b6d4',
+      Relaxed: '#22c55e',
     };
 
-    // Filter out scores < 30 (irrelevant for this outfit), sort highest first
+    // Filter meaningful scores (>=20), sort descending, cap at 100
     return Object.entries(scores)
-      .filter(([_, score]) => score >= 30)
+      .filter(([_, v]) => v >= 20)
       .sort((a, b) => b[1] - a[1])
       .map(([label, score]) => ({
         label,
