@@ -271,15 +271,10 @@ export default function Analysis() {
       };
       setData(o);
       
-      // Generate AI fashion image from the generation_prompt
-      if (fnData.generation_prompt) {
-        const prompt = fnData.generation_prompt;
-        const safe = encodeURIComponent(prompt);
-        // Use window origin for relative URLs, or default to localhost
-        const base = window.location.hostname === 'localhost' 
-          ? 'http://localhost:5000'
-          : (import.meta.env.VITE_API_URL || import.meta.env.VITE_PUBLIC_API_URL || window.location.origin);
-        // Build Pollinations URL from the prompt
+      // Generate tweak visualization from the tweak_plan instead of AI fashion image
+      const tweakPrompt = fnData.tweak_plan || fnData.generation_prompt || '';
+      if (tweakPrompt) {
+        const safe = encodeURIComponent(tweakPrompt + ", high fashion editorial, photorealistic");
         const pollinationsUrl = `https://image.pollinations.ai/prompt/${safe}?width=1024&height=1024&nologin=true&seed=`;
         setGeneratedImageUrl(pollinationsUrl + Date.now());
       }

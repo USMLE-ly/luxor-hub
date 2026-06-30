@@ -89,19 +89,19 @@ export function FashionHero({
                 <img
                   src={imageUrl}
                   alt="Uploaded outfit"
-                  className="rounded-2xl shadow-2xl w-full object-cover filter brightness-105 max-h-[500px]"
+                  className="w-full h-auto max-h-[75vh] md:max-h-[85vh] object-contain rounded-2xl shadow-2xl"
                 />
-                {/* Generated AI Fashion Image */}
+                {/* Tweak Visualization — shows how the tweak would look */}
                 {generatedImageUrl && (
                   <div className="mt-3">
                     <img
                       src={generatedImageUrl}
-                      alt="AI generated outfit visualization"
-                      className="rounded-2xl shadow-2xl w-full object-cover max-h-[500px] ring-1 ring-white/10"
+                      alt="Tweak visualization"
+                      className="w-full h-auto max-h-[50vh] object-contain rounded-2xl shadow-2xl ring-1 ring-purple-500/30"
                       onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                     />
-                    <p className="text-[10px] text-muted-foreground/50 mt-1 text-center">
-                      ✦ AI-generated visualization
+                    <p className="text-[10px] text-purple-400/50 mt-1 text-center">
+                      ✦ Tweak visualization
                     </p>
                   </div>
                 )}
@@ -193,6 +193,20 @@ export function FashionHero({
                     <div className="flex items-start gap-2 text-sm text-purple-400/80">
                       <span className="text-purple-400 mt-0.5">💡</span>
                       <span className="italic">{tweakPlan}</span>
+                    </div>
+                  )}
+                  {/* Tweak visualization below tweak text */}
+                  {tweakPlan && generatedImageUrl && (
+                    <div className="mt-3">
+                      <img
+                        src={generatedImageUrl}
+                        alt="Tweak suggestion visual"
+                        className="w-full h-auto max-h-[40vh] object-contain rounded-xl ring-1 ring-purple-500/20"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      />
+                      <p className="text-[9px] text-purple-400/30 mt-1 text-center">
+                        ✦ Styling suggestion visual
+                      </p>
                     </div>
                   )}
                 </div>
