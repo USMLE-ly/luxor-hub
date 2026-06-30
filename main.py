@@ -651,6 +651,7 @@ def _get_dominant_colors_from_pixels(image_b64: str, num_colors: int = 3) -> Lis
             
             best_name = None
             best_score = float('inf')
+            best_dist = float("inf")
             for name, hex_code in _COLOR_MAPPINGS.items():
                 hex_code = hex_code.lstrip('#')
                 cr, cg, cb = int(hex_code[0:2], 16), int(hex_code[2:4], 16), int(hex_code[4:6], 16)
