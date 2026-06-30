@@ -1187,9 +1187,8 @@ def call_groq_vision(image_b64: str, system_prompt: str = SACRED_PROMPT, tempera
         "messages": [{"role": "user", "content": [
             {"type": "text", "text": colored_prompt},
             {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{compressed}"}},
-            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{face_compressed}"}},
         ]}],
-        "max_tokens": max(CIPHER_MAX_TOKENS, 4000),  # MiMo needs extra tokens for reasoning + output
+        "max_tokens": 2000,  # MiMo V2.5: 2000 max_tokens = ~35s response
         "temperature": temperature,
 
     }
