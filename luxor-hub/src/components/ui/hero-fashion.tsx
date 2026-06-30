@@ -91,20 +91,6 @@ export function FashionHero({
                   alt="Uploaded outfit"
                   className="w-full h-auto max-h-[75vh] md:max-h-[85vh] object-contain rounded-2xl shadow-2xl"
                 />
-                {/* Tweak Visualization — shows how the tweak would look */}
-                {generatedImageUrl && (
-                  <div className="mt-3">
-                    <img
-                      src={generatedImageUrl}
-                      alt="Tweak visualization"
-                      className="w-full h-auto max-h-[50vh] object-contain rounded-2xl shadow-2xl ring-1 ring-purple-500/30"
-                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                    />
-                    <p className="text-[10px] text-purple-400/50 mt-1 text-center">
-                      ✦ Tweak visualization
-                    </p>
-                  </div>
-                )}
                 {/* Score ring overlaid top-right */}
                 {!isNA && (
                   <div className="absolute top-2 right-2 z-10 drop-shadow-lg bg-black/20 backdrop-blur-sm rounded-full p-0.5">
@@ -197,16 +183,13 @@ export function FashionHero({
                   )}
                   {/* Tweak visualization below tweak text */}
                   {tweakPlan && generatedImageUrl && (
-                    <div className="mt-3">
+                    <div className="relative w-full max-h-[250px] overflow-hidden rounded-xl border border-white/10 mt-4">
                       <img
                         src={generatedImageUrl}
-                        alt="Tweak suggestion visual"
-                        className="w-full h-auto max-h-[40vh] object-contain rounded-xl ring-1 ring-purple-500/20"
+                        alt="Tweak Visualization"
+                        className="w-full h-full object-cover object-center rounded-xl"
                         onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                       />
-                      <p className="text-[9px] text-purple-400/30 mt-1 text-center">
-                        ✦ Styling suggestion visual
-                      </p>
                     </div>
                   )}
                 </div>
