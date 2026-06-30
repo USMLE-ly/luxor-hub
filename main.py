@@ -131,7 +131,6 @@ _BUILTIN_COLORS = {
   "Scarlet": "#FF2400",
   "Cherry": "#DE3163",
   "Rust": "#B7410E",
-  "Terra Cotta": "#E2725B",
   "Coral": "#FF7F50",
   "Salmon": "#FA8072",
   "Blush": "#DE5D83",
@@ -150,7 +149,6 @@ _BUILTIN_COLORS = {
   "Lilac": "#C8A2C8",
   "Violet": "#8F00FF",
   "Plum": "#673147",
-  "Eggplant": "#614051",
   "Orchid": "#DA70D6",
   "Amethyst": "#9966CC",
   "Grape": "#6F2DA8",
@@ -192,21 +190,12 @@ _BUILTIN_COLORS = {
   "Taupe": "#483C32",
   "Mocha": "#967969",
   "Caramel": "#AF6F4C",
-  "Mahogany": "#C04000",
   "Bronze": "#CD7F32",
   "Copper": "#B87333",
   "Nude": "#E3BC9A",
   "Nude Blush": "#D5A98A",
   "Champagne": "#F7E7CE",
   "Pearl": "#F0EAD6",
-  "Sequin": "#E8E8E8",
-  "Lace": "#F9F6EE",
-  "Patent Leather": "#1C1C1C",
-  "Metallic Silver": "#C0C0C0",
-  "Metallic Gold": "#D4AF37",
-  "Holographic": "#E8E4F0",
-  "Leopard": "#D4A373",
-  "Zebra": "#E8E8E8",
   "Blue Denim": "#1560BD",
   "Light Denim": "#5D8AA8",
   "Dark Denim": "#1C3F60",
@@ -224,13 +213,20 @@ _COLOR_NAMES = []
 def _load_color_dictionary():
     global _COLOR_MAPPINGS, _COLOR_NAMES
     try:
+        # Always start from the cleaned built-in colors
+        # Load saved dictionary if exists to preserve user uploads, but merge with built-in
+        _COLOR_MAPPINGS = dict(_BUILTIN_COLORS)
         if os.path.exists(_COLOR_DICT_PATH):
-            with open(_COLOR_DICT_PATH) as f:
-                _COLOR_MAPPINGS = json.load(f)
-        else:
-            _COLOR_MAPPINGS = dict(_BUILTIN_COLORS)
-            with open(_COLOR_DICT_PATH, "w") as f:
-                json.dump(_COLOR_MAPPINGS, f, indent=2)
+            try:
+                with open(_COLOR_DICT_PATH) as f:
+                    saved = json.load(f)
+                # Merge saved colors on top of built-in (user uploads take precedence)
+                _COLOR_MAPPINGS.update(saved)
+            except Exception:
+                pass
+        # Always save the merged dictionary
+        with open(_COLOR_DICT_PATH, "w") as f:
+            json.dump(_COLOR_MAPPINGS, f, indent=2)
         _COLOR_NAMES = sorted(_COLOR_MAPPINGS.keys())
         _log.info("[COLOR] Loaded %d color names", len(_COLOR_NAMES))
     except Exception as exc:
@@ -630,17 +626,38 @@ def _get_dominant_colors_from_pixels(image_b64: str, num_colors: int = 3) -> Lis
         top_pixels.sort(key=lambda x: _sat(x), reverse=True)
 
         # Match each dominant pixel to closest color name in dictionary
+        # Common clothing colors get a preference boost (reduces edge-case matches)
+        COMMON_CLOTHING_COLORS = {
+            "Black", "White", "Navy", "Blue", "Red", "Green", "Grey", "Brown",
+            "Beige", "Cream", "Ivory", "Tan", "Pink", "Purple", "Yellow",
+            "Orange", "Gold", "Silver", "Teal", "Maroon", "Burgundy", "Olive",
+            "Coral", "Mint", "Lavender", "Peach", "Turquoise", "Indigo",
+            "Charcoal", "Denim", "Camel", "Mustard", "Blush", "Mauve",
+            "Forest Green", "Sky Blue", "Royal Blue", "Baby Blue", "Hot Pink"
+        }
         matched_colors = []
         for r, g, b in top_pixels:
+            # Dark pixel rule: if all channels are very dark (<60), force to Black/Navy
+            # This prevents edge artifacts (color cast at mask boundaries) from creating fake colors
+            if max(r, g, b) < 120:
+                if b > r + 20 and b > g + 20 and b > 60:
+                    matched_colors.append("Navy")
+                else:
+                    matched_colors.append("Black")
+                continue
+            
             best_name = None
-            best_dist = float('inf')
+            best_score = float('inf')
             for name, hex_code in _COLOR_MAPPINGS.items():
                 hex_code = hex_code.lstrip('#')
                 cr, cg, cb = int(hex_code[0:2], 16), int(hex_code[2:4], 16), int(hex_code[4:6], 16)
                 # Weighted Euclidean distance (human perception weighting)
                 dist = ((r - cr) ** 2 * 0.3 + (g - cg) ** 2 * 0.59 + (b - cb) ** 2 * 0.11) ** 0.5
-                if dist < best_dist:
-                    best_dist = dist
+                # Apply preference boost: common clothing colors get a 15% distance bonus
+                adjusted = dist * 0.85 if name in COMMON_CLOTHING_COLORS else dist
+                if adjusted < best_score:
+                    best_score = adjusted
+                    best_dist = dist  # keep original for threshold check
                     best_name = name
             if best_name and best_dist < 120:  # Only accept if reasonably close
                 matched_colors.append(best_name)
@@ -668,6 +685,103 @@ def _get_dominant_colors_from_pixels(image_b64: str, num_colors: int = 3) -> Lis
     except Exception as exc:
         _log.warning("[PIXEL] Error: %s", exc)
         return []
+
+
+def _extract_regional_colors(image_b64: str) -> Dict[str, List[str]]:
+    """Extract dominant colors from different body regions (top, bottom, footwear).
+    Uses the masked person image and splits vertically into regions."""
+    try:
+        # First get the masked person on white background
+        masked_b64 = _extract_person_center_crop(image_b64)
+        raw = base64.b64decode(masked_b64)
+        img = Image.open(io.BytesIO(raw))
+        if img.mode != 'RGB':
+            img = img.convert('RGB')
+        w, h = img.size
+        
+        # Define regions as percentage of height
+        # Top: 5% to 45% of height (shoulders to waist)
+        # Bottom: 40% to 80% of height (waist to knees)
+        # Footwear: 75% to 95% of height (ankles/feet)
+        regions = {
+            "top": (0.05, 0.45),
+            "bottom": (0.40, 0.80),
+            "footwear": (0.75, 0.95),
+        }
+        
+        result = {}
+        for region_name, (y_start, y_end) in regions.items():
+            top = int(h * y_start)
+            bottom = int(h * y_end)
+            if bottom - top < 10:
+                continue
+            region_img = img.crop((0, top, w, bottom))
+            
+            # Resize for speed
+            region_small = region_img.resize((32, 48), Image.Resampling.LANCZOS)
+            pixel_array = np.array(region_small)
+            pixel_data = pixel_array.reshape(-1, 3).tolist()
+            
+            # Filter white background pixels
+            pixel_data = [p for p in pixel_data if not (p[0] > 230 and p[1] > 230 and p[2] > 230)]
+            
+            if not pixel_data:
+                result[region_name] = []
+                continue
+            
+            # Quantize and get dominant colors
+            quantized = [(r // 48 * 48, g // 48 * 48, b // 48 * 48) for r, g, b in pixel_data]
+            color_counts = Counter(quantized)
+            top_buckets = [item[0] for item in color_counts.most_common(4)]
+            
+            # Match to color names
+            COMMON_CLOTHING_COLORS = {
+                "Black", "White", "Navy", "Blue", "Red", "Green", "Grey", "Brown",
+                "Beige", "Cream", "Ivory", "Tan", "Pink", "Purple", "Yellow",
+                "Orange", "Gold", "Teal", "Maroon", "Burgundy", "Olive",
+                "Coral", "Mint", "Lavender", "Peach", "Turquoise", "Indigo",
+                "Charcoal", "Denim", "Camel", "Mustard", "Blush", "Mauve",
+            }
+            region_colors = []
+            for r, g, b in top_buckets:
+                # Dark pixel rule: prevent edge artifact colors
+                if max(r, g, b) < 120:
+                    if b > r + 20 and b > g + 20 and b > 60:
+                        region_colors.append("Navy")
+                    else:
+                        region_colors.append("Black")
+                    continue
+                    
+                best_name = None
+                best_dist = float('inf')
+                for name, hex_code in _COLOR_MAPPINGS.items():
+                    hex_code = hex_code.lstrip('#')
+                    cr = int(hex_code[0:2], 16)
+                    cg = int(hex_code[2:4], 16)
+                    cb = int(hex_code[4:6], 16)
+                    dist = ((r - cr) ** 2 * 0.3 + (g - cg) ** 2 * 0.59 + (b - cb) ** 2 * 0.11) ** 0.5
+                    adjusted = dist * 0.85 if name in COMMON_CLOTHING_COLORS else dist
+                    if adjusted < best_dist:
+                        best_dist = dist
+                        best_name = name
+                if best_name and best_dist < 100:
+                    region_colors.append(best_name)
+            
+            # Deduplicate
+            seen = set()
+            unique = []
+            for c in region_colors:
+                if c not in seen:
+                    seen.add(c)
+                    unique.append(c)
+            result[region_name] = unique[:2]
+        
+        _log.info("[REGIONAL] Top=%s Bottom=%s Footwear=%s",
+                  result.get("top", []), result.get("bottom", []), result.get("footwear", []))
+        return result
+    except Exception as exc:
+        _log.warning("[REGIONAL] Error: %s", exc)
+        return {}
 
 def _debug_pixel_debug(image_b64: str) -> None:
     """Log color extraction details for debugging."""
@@ -737,6 +851,14 @@ def _extract_image_features(image_b64: str) -> str:
         top_colors = color_counts.most_common(5)
 
         # Convert RGB to color names using the color dictionary
+        COMMON_CLOTHING_COLORS = {
+            "Black", "White", "Navy", "Blue", "Red", "Green", "Grey", "Brown",
+            "Beige", "Cream", "Ivory", "Tan", "Pink", "Purple", "Yellow",
+            "Orange", "Gold", "Teal", "Maroon", "Burgundy", "Olive",
+            "Coral", "Mint", "Lavender", "Peach", "Turquoise", "Indigo",
+            "Charcoal", "Denim", "Camel", "Mustard", "Blush", "Mauve",
+            "Forest Green", "Sky Blue", "Royal Blue", "Baby Blue", "Hot Pink"
+        }
         color_names = []
         for (r, g, b), count in top_colors:
             best_name = "unknown"
@@ -745,7 +867,8 @@ def _extract_image_features(image_b64: str) -> str:
                 hex_code = hex_code.lstrip('#')
                 cr, cg, cb = int(hex_code[0:2], 16), int(hex_code[2:4], 16), int(hex_code[4:6], 16)
                 dist = ((r - cr) ** 2 * 0.3 + (g - cg) ** 2 * 0.59 + (b - cb) ** 2 * 0.11) ** 0.5
-                if dist < best_dist:
+                adjusted = dist * 0.85 if name in COMMON_CLOTHING_COLORS else dist
+                if adjusted < best_dist:
                     best_dist = dist
                     best_name = name
             if best_name and best_dist < 100 and best_name not in color_names:
@@ -866,19 +989,43 @@ def call_groq_vision(image_b64: str, system_prompt: str = SACRED_PROMPT, tempera
         pixel_colors = _get_dominant_colors_from_pixels(image_b64, num_colors=5)
         pixel_color_str = ", ".join(pixel_colors) if pixel_colors else "unknown"
         
-        text_prompt = colored_prompt + f"""
+        # Extract regional colors (top, bottom, footwear separately)
+        regional = _extract_regional_colors(image_b64)
+        top_colors = ", ".join(regional.get("top", [])) or "unknown"
+        bottom_colors = ", ".join(regional.get("bottom", [])) or "unknown"
+        footwear_colors = ", ".join(regional.get("footwear", [])) or "unknown"
         
-IMPORTANT: The vision API is unavailable. You must use these EXTRACTED IMAGE FEATURES to analyze the outfit:
+        text_prompt = f"""You are a hyper-accurate fashion identification AI running without vision. Use the EXTRACTED DATA below to analyze the outfit.
 
-EXTRACTED COLORS FROM PIXEL ANALYSIS: {pixel_color_str}
-IMAGE FEATURES:
-{features}
+CRITICAL RULES:
+1. COLORS come ONLY from the extracted pixel data below. Never invent colors.
+2. GARMENT TYPES must be reasonable inferences from the color distribution and image properties.
+3. If the top region shows light colors and the bottom region shows dark colors, the person is wearing a light top with dark bottoms.
+4. If only one color dominates all regions, the outfit is likely monochromatic.
+5. NEVER reference background, environment, or setting. Focus ONLY on clothing.
+6. Use colors ONLY from the official list: {color_list}
 
-Based on the pixel color analysis and image features above, generate the complete fashion analysis JSON.
-- Use ONLY the colors from the pixel analysis (above) as garment colors
-- If pixel colors show dark/black tones, the person is wearing dark clothing
-- Infer garment types from the overall image features
-- Generate realistic strengths, audit, and tweak based on the detected colors"""
+EXTRACTED COLOR DATA:
+- Full image dominant colors: {pixel_color_str}
+- Top region (upper body) colors: {top_colors}
+- Bottom region (lower body) colors: {bottom_colors}
+- Footwear region colors: {footwear_colors}
+- Image features: {features[:200]}
+
+Based on this data, generate a COMPLETE fashion analysis JSON.
+- top_type: Use the top region color + a reasonable garment type
+- bottom_type: Use the bottom region color + a reasonable garment type  
+- footwear: Use footwear region color + reasonable footwear type
+- accessories: "None" unless there are clear signs
+- style_score: int 70-95 based on how well the colors complement each other
+- style_name: 2-word vibe that fits the color story
+- strengths: 3 specific observations about the actual detected colors and inferred garments
+- audit: max 15 word summary of the inferred outfit
+- tweak_plan: 1 specific improvement suggestion
+- generation_prompt: 20-word editorial prompt
+- vibe_type: one of: Casual, Formal, Business, Sporty, Date Night, Party, Bohemian, Streetwear, Minimalist, Vintage
+
+Return ONLY valid JSON. No markdown. No explanations."""
         
         text_payload = {
             "model": MIMO_TEXT_MODEL,
@@ -1149,7 +1296,7 @@ def get_fashion_decision(image_b64: str) -> Dict[str, Any]:
     try:
         result = call_groq_vision(image_b64, SACRED_PROMPT, 0.2)
         if result:
-            result["source"] = "cipher_vision"
+            # Preserve the source from call_groq_vision (e.g. "text_fallback" or "cipher_vision")
             return result
     except TimeoutError:
         _log.warning("[PIPELINE] Timed out")
@@ -1174,10 +1321,23 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
     pixel_colors = _get_dominant_colors_from_pixels(_image_b64_cache) if _image_b64_cache else []
     _log.info("[MAP] Pixel extraction returned: %s", pixel_colors)
 
-    # === STEP 2: PIXEL COLORS ARE THE ABSOLUTE TRUTH — never overridden ===
+    # === STEP 2: Use items-based colors (pixel-backed) for meaningful output ===
     if pixel_colors and len(pixel_colors) >= 1:
-        actual_colors = pixel_colors
-        _log.info("[MAP] Using REAL pixel colors: %s (ignored AI: %s)", pixel_colors, result.get("actual_colors", []))
+        # Extract the first color word from each detected item for a meaningful color list
+        item_based_colors = []
+        for key in ["top_type", "bottom_type", "footwear"]:
+            val = result.get(key, "")
+            if val and val != "None" and val.lower() != "none":
+                first_word = val.split()[0].strip(',.!?;:').lower().capitalize()
+                if first_word and first_word not in item_based_colors:
+                    item_based_colors.append(first_word)
+        # Use item-based colors if they exist, fall back to pixel colors
+        if item_based_colors:
+            actual_colors = item_based_colors[:3]
+            _log.info("[MAP] Using item-derived colors: %s (pixel: %s)", actual_colors, pixel_colors)
+        else:
+            actual_colors = pixel_colors
+            _log.info("[MAP] Using REAL pixel colors: %s", pixel_colors)
     else:
         # === STEP 3: Fallback to AI colors with validation ===
         actual_colors = result.get("actual_colors", [])
@@ -1226,7 +1386,7 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
         val = result.get(item_key, "")
         if val in ("None", "none", ""):
             if item_key == "accessories":
-                result[item_key] = "Non Accessory"
+                result[item_key] = "None"
             else:
                 result[item_key] = ""
 
