@@ -1835,6 +1835,21 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
         score = 78
     name = result.get("style_name", "") or "Modern Classic"
     
+    # Generate tweak image URL from the recommended accessory in tweak_plan
+    tweak_text = _humanize_tweak(result.get("tweak_plan", ""), detected_items or items_detected)
+    # Extract the accessory noun from tweak text for image generation
+    _tweak_img_prompt = tweak_text
+    for _kw in ["necklace", "earring", "bracelet", "watch", "ring", "belt",
+                "scarf", "jacket", "blazer", "cardigan", "coat", "handbag",
+                "clutch", "sunglasses", "hat", "bag", "shoes", "boots"]:
+        if _kw in tweak_text.lower():
+            # Use the full phrase around the accessory for better generation
+            _tweak_img_prompt = f"A high-fashion close-up of a {_kw}, elegant product photography, soft natural lighting, realistic detail, white background, minimalist"
+            break
+    _safe_tweak = urllib.parse.quote(_tweak_img_prompt)
+    _tweak_seed = int(time.time() * 1000) % 10000
+    tweak_image_url = f"https://image.pollinations.ai/prompt/{_safe_tweak}?width=512&height=512&nologin=true&seed={_tweak_seed}"
+
     return {
         "success": True,
         "source": result.get("source", "unknown"),
@@ -1850,7 +1865,8 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
         "items_detected": items_detected,
         "strengths": strengths,
         "audit": _humanize_audit(detected_items or items_detected, name),
-        "tweak_plan": _humanize_tweak(result.get("tweak_plan", ""), detected_items or items_detected),
+        "tweak_plan": tweak_text,
+        "tweak_image_url": tweak_image_url,
         "generation_prompt": result.get("generation_prompt", name + " outfit with " + ", ".join(actual_colors) + " tones."),
     }
 

@@ -34,6 +34,7 @@ interface OutfitData {
   audit: string;
   tweak_plan: string;
   generation_prompt: string;
+  tweak_image_url?: string;
   style_score?: number;
   seasonalFit?: string;
 }
@@ -260,6 +261,7 @@ export default function Analysis() {
         strengths: fnData.strengths || [],
         audit: fnData.audit || '',
         tweak_plan: fnData.tweak_plan || '',
+        tweak_image_url: fnData.tweak_image_url || '',
         generation_prompt: fnData.generation_prompt || '',
         vibe_type: fnData.vibe_type || '',
         top_type: fnData.top_type || '',
@@ -419,6 +421,7 @@ export default function Analysis() {
       strengths: (s.strengths as string[]) || [],
       audit: s.summary || '',
       tweak_plan: '',
+      tweak_image_url: '',
       generation_prompt: '',
       style_score: s.style_score || 0,
     });
@@ -548,6 +551,7 @@ export default function Analysis() {
                     tweakPlan={data.tweak_plan}
                     imageUrl={imagePreview}
                     generatedImageUrl={generatedImageUrl}
+                    tweakImageUrl={data?.tweak_image_url}
                     vibeType={data.vibe_type}
                     topType={data.top_type}
                     bottomType={data.bottom_type}

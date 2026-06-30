@@ -32,6 +32,7 @@ interface FashionHeroProps {
   actualColors?: string[];
   audit?: string;
   tweakPlan?: string;
+  tweakImageUrl?: string;
   imageUrl?: string;
   generatedImageUrl?: string | null;
   vibeType?: string;
@@ -66,6 +67,7 @@ export function FashionHero({
   actualColors = [],
   audit = "",
   tweakPlan = "",
+  tweakImageUrl,
   imageUrl,
   generatedImageUrl,
   vibeType,
@@ -294,37 +296,54 @@ export function FashionHero({
                 </div>
               </div>
 
-              {/* SECTION 4: TWEAK (Purple/Cyan Gradient + Marker Highlight) */}
+              {/* SECTION 4: TWEAK VISUALIZER (Purple/Cyan Gradient + Marker Highlight + Image) */}
               <div className="relative w-full overflow-hidden rounded-xl border border-white/10 flex-shrink-0">
                 <AnimatedGradient colors={["#8b5cf6", "#a78bfa", "#c4b5fd"]} speed={0.07} blur="medium" />
-                <div className="relative z-10 p-4 backdrop-blur-sm h-auto w-full flex flex-col justify-center">
+                <div className="relative z-10 p-4 backdrop-blur-sm h-auto w-full">
                   <h3 className="text-xs uppercase tracking-[0.15em] text-white/60 mb-1.5 font-semibold">TWEAK</h3>
                   
-                  {(() => {
-                    const text = tweakPlan || "Consider adding a structured blazer for a more polished look.";
-                    const { start, item, end } = extractHighlightItem(text);
-                    if (item) {
-                      return (
-                        <p className="text-sm italic text-white/90 leading-relaxed tracking-wide">
-                          {start}
-                          <MarkerHighlight
-                            highlight={item}
-                            markerColor="#facc15"
-                            baseColor="#ffffff"
-                            highlightedTextColor="#171717"
-                            speed={1.2}
-                            fontSize={18}
-                            fontWeight={500}
-                            className="inline-block align-middle"
-                          />
-                          {end}
-                        </p>
-                      );
-                    }
-                    return (
-                      <p className="text-sm italic text-white/90 leading-relaxed tracking-wide">{text}</p>
-                    );
-                  })()}
+                  <div className="flex flex-col md:flex-row gap-4 items-center">
+                    {/* Left / Top: Text advice with marker highlight */}
+                    <div className="flex-1 w-full">
+                      {(() => {
+                        const text = tweakPlan || "Consider adding a structured blazer for a more polished look.";
+                        const { start, item, end } = extractHighlightItem(text);
+                        if (item) {
+                          return (
+                            <p className="text-sm italic text-white/90 leading-relaxed tracking-wide">
+                              {start}
+                              <MarkerHighlight
+                                highlight={item}
+                                markerColor="#facc15"
+                                baseColor="#ffffff"
+                                highlightedTextColor="#171717"
+                                speed={1.2}
+                                fontSize={18}
+                                fontWeight={500}
+                                className="inline-block align-middle"
+                              />
+                              {end}
+                            </p>
+                          );
+                        }
+                        return (
+                          <p className="text-sm italic text-white/90 leading-relaxed tracking-wide">{text}</p>
+                        );
+                      })()}
+                    </div>
+
+                    {/* Right / Bottom: Tweak visualization image */}
+                    {(tweakImageUrl) && (
+                      <div className="relative w-full md:w-[45%] lg:w-[40%] h-auto max-h-[180px] overflow-hidden rounded-lg border border-white/20 bg-black/20 flex-shrink-0">
+                        <img
+                          src={tweakImageUrl}
+                          alt="Tweak Visualization"
+                          className="w-full h-full object-cover object-center rounded-lg"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
