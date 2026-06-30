@@ -214,7 +214,7 @@ export default function Analysis() {
     try {
       // Compress first — phone photos are 3-12 MB, this shrinks them to ~100-200 KB
       const b64 = await compressImage(file);
-      const apiUrl = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:5000' : '');
+      const apiUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_PUBLIC_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:5000' : window.location.origin);
 
       // Retry loop — Cipher Vision can be slow; retry with backoff instead of giving up
       let fnData: any = null;
@@ -278,7 +278,7 @@ export default function Analysis() {
         // Use window origin for relative URLs, or default to localhost
         const base = window.location.hostname === 'localhost' 
           ? 'http://localhost:5000'
-          : (import.meta.env.VITE_API_URL || window.location.origin);
+          : (import.meta.env.VITE_API_URL || import.meta.env.VITE_PUBLIC_API_URL || window.location.origin);
         // Build Pollinations URL from the prompt
         const pollinationsUrl = `https://image.pollinations.ai/prompt/${safe}?width=1024&height=1024&nologin=true&seed=`;
         setGeneratedImageUrl(pollinationsUrl + Date.now());

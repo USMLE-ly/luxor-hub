@@ -1189,17 +1189,29 @@ def call_groq_vision(image_b64: str, system_prompt: str = SACRED_PROMPT, tempera
             {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{compressed}"}},
             {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{face_compressed}"}},
         ]}],
-        "max_tokens": CIPHER_MAX_TOKENS,
+        "max_tokens": max(CIPHER_MAX_TOKENS, 4000),  # MiMo needs extra tokens for reasoning + output
         "temperature": temperature,
-        "response_format": {"type": "json_object"},
+
     }
     try:
         _log.info("[MIMO-VISION] Trying vision model=%s", MIMO_VISION_MODEL)
-        resp = requests.post(MIMO_API_URL, json=vision_payload, headers=headers, timeout=15)
-        _log.info("[MIMO-VISION] HTTP %s: %s", resp.status_code, resp.text[:200])
+        resp = requests.post(MIMO_API_URL, json=vision_payload, headers=headers, timeout=60)
+        _log.info("[MIMO-VISION] HTTP %s: %s", resp.status_code, resp.text[:300])
         if resp.status_code == 200:
-            raw = resp.json()["choices"][0]["message"]["content"]
-            match = re.search(r"\{[\s\S]*\}", raw)
+            choice = resp.json()["choices"][0]["message"]
+            # MiMo V2.5 is a reasoning model - content may be in "content" or "reasoning_content"
+            raw = choice.get("content", "")
+            raw_reasoning = choice.get("reasoning_content", "")
+            # If content is empty, the model used all tokens for reasoning.
+            # In that case, try to extract JSON from the reasoning content.
+            if (not raw or raw.strip() == "") and raw_reasoning:
+                raw = raw_reasoning
+                _log.info("[MIMO-VISION] Extracting JSON from reasoning_content (len=%d)", len(raw))
+            # Strip markdown code fences if present (MiMo often wraps JSON in ```json ... ```)
+            raw = re.sub(r'^```(?:json)?\s*', '', raw.strip())
+            raw = re.sub(r'\s*```$', '', raw)
+            # Try to find valid JSON object in the response
+            match = re.search(r'\{[\s\S]*\}', raw)
             if match:
                 result = json.loads(match.group(0))
                 result["source"] = "cipher_vision"
@@ -1394,7 +1406,7 @@ NO markdown. NO explanations. Valid JSON only."""
             "messages": [{"role": "user", "content": text_prompt}],
             "max_tokens": CIPHER_MAX_TOKENS,
             "temperature": temperature,
-            "response_format": {"type": "json_object"},
+    
         }
         resp = requests.post(MIMO_API_URL, json=text_payload, headers=headers, timeout=30)
         _log.info("[MIMO-TEXT-FALLBACK] HTTP %s", resp.status_code)
