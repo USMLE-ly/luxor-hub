@@ -430,7 +430,7 @@ export default function Analysis() {
       <div className="p-4 md:p-8 mx-auto max-w-7xl space-y-8 overflow-x-hidden">
 
         {/* ---------- HEADER ---------- */}
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="relative">
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="relative hidden md:block">
           <div className="absolute -top-4 -left-4 w-32 h-32 bg-primary/10 rounded-full blur-[60px]" />
           <h1 className="font-display text-4xl font-bold text-foreground relative">
             {/* cb2 */}See What the World <span className="gold-text">Sees</span>
@@ -439,13 +439,13 @@ export default function Analysis() {
         </motion.div>
 
         {/* ---------- MAIN GRID: Preview + Dashboard ---------- */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="flex flex-col md:flex-row gap-6 w-full max-w-7xl mx-auto">
 
           {/* ---- LEFT: Image Preview ---- */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="lg:col-span-5 relative"
+            className="w-full md:w-[35%] lg:w-[30%] flex-shrink-0 relative"
           >
             <div className="relative rounded-[1.5rem] border-[0.75px] border-border p-3 sticky top-24">
               <GlowingEffect spread={40} glow proximity={56} inactiveZone={0.01} borderWidth={3} />
@@ -457,7 +457,7 @@ export default function Analysis() {
                     className="relative aspect-[3/4] cursor-pointer overflow-hidden bg-muted/20 group"
                   >
                     {imagePreview ? (
-                      <ImageSwiper images={imagePreview} cardWidth={400} cardHeight={600} className="w-full" />
+                      <ImageSwiper images={imagePreview} cardWidth={400} cardHeight={600} className="w-full max-h-[55vh] md:max-h-[85vh]" />
                     ) : (
                       <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-muted-foreground">
                         <motion.div
@@ -498,9 +498,9 @@ export default function Analysis() {
             </div>
           </motion.div>
 
-          {/* ---- RIGHT: 2‑col Dashboard ---- */}
+          {/* ---- RIGHT: Analysis Column ---- */}
           <motion.div
-            className="lg:col-span-7 space-y-6"
+            className="w-full md:flex-1 flex flex-col gap-4 space-y-6"
             variants={containerVariants}
             initial="hidden"
             animate="show"
