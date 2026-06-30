@@ -622,6 +622,68 @@ def _extract_face_upper_crop(image_b64: str) -> str:
     except Exception as exc:
         _log.warning("[FACE] Error: %s", exc)
         return image_b64
+def _extract_lower_body_crop(image_b64: str) -> str:
+    """Extract the lower body (waist down) for analyzing pants, skirts, shoes.
+    Focuses on the bottom 40-50% of the image where legs/feet are."""
+    try:
+        raw = base64.b64decode(image_b64)
+        img = Image.open(io.BytesIO(raw)).convert("RGB")
+        w, h = img.size
+        
+        # If MediaPipe is available, use mask to find lower body region
+        if _HAS_MEDIAPIPE and SelfieSegmentation is not None and cv2 is not None:
+            try:
+                cv_img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+                with SelfieSegmentation(model_selection=1) as seg:
+                    results = seg.process(cv_img)
+                    if results is not None and results.segmentation_mask is not None:
+                        mask = results.segmentation_mask
+                        person_mask = mask > 0.4
+                        isolated = np.full_like(np.array(img), 255)
+                        isolated[person_mask] = np.array(img)[person_mask]
+                        isolated_pil = Image.fromarray(isolated)
+                        
+                        non_zero = np.argwhere(person_mask)
+                        if len(non_zero) > 100:
+                            y_min, _ = non_zero.min(axis=0)
+                            y_max, _ = non_zero.max(axis=0)
+                            person_height = y_max - y_min
+                            # Lower body is bottom 45% of person bounding box
+                            lower_top = max(0, y_min + int(person_height * 0.50))
+                            lower_bottom = min(h, y_max + int(person_height * 0.05))
+                            # Width: use 75% of image width centered
+                            crop_w = int(w * 0.75)
+                            crop_left = max(0, (w - crop_w) // 2)
+                            crop_right = min(w, crop_left + crop_w)
+                            
+                            lower_crop = isolated_pil.crop((crop_left, lower_top, crop_right, lower_bottom))
+                            if min(lower_crop.size) < 300:
+                                scale = 300.0 / min(lower_crop.size)
+                                lower_crop = lower_crop.resize((int(lower_crop.size[0] * scale), int(lower_crop.size[1] * scale)), _RESAMPLE_LANCZOS)
+                            buf = io.BytesIO()
+                            lower_crop.save(buf, format="JPEG", quality=95)
+                            _log.info("[LOWER] MediaPipe lower body crop: %dx%d", lower_crop.size[0], lower_crop.size[1])
+                            return base64.b64encode(buf.getvalue()).decode()
+            except Exception as mp_err:
+                _log.warning("[LOWER] MediaPipe failed: %s", mp_err)
+        
+        # Fallback: bottom 40% of image for lower body (waist down)
+        crop_h = int(h * 0.40)
+        left = int(w * 0.12)
+        right = int(w * 0.88)
+        lower = img.crop((left, h - crop_h, right, h))
+        if min(lower.size) < 300:
+            scale = 300.0 / min(lower.size)
+            lower = lower.resize((int(lower.size[0] * scale), int(lower.size[1] * scale)), _RESAMPLE_LANCZOS)
+        buf = io.BytesIO()
+        lower.save(buf, format="JPEG", quality=95)
+        _log.info("[LOWER] Fallback lower body crop: %dx%d", lower.size[0], lower.size[1])
+        return base64.b64encode(buf.getvalue()).decode()
+    except Exception as exc:
+        _log.warning("[LOWER] Error: %s", exc)
+        return image_b64
+
+
 
 def compress_image_b64(image_b64: str) -> str:
     """Safely compress a base64 image. Handles data-URL headers, missing padding."""
@@ -1171,14 +1233,16 @@ def call_groq_vision(image_b64: str, system_prompt: str = SACRED_PROMPT, tempera
     
     # Also extract face/upper-body close-up for better accessory detection
     face_b64 = _extract_face_upper_crop(image_b64)
+    lower_b64 = _extract_lower_body_crop(image_b64)
 
     # Inject color dictionary into the prompt explicitly
     color_list = ", ".join(_COLOR_NAMES) if _COLOR_NAMES else "Black, White, Blue, Red, Green"
     color_directive = f"**COLOR DICTIONARY LOCK — ABSOLUTE REQUIREMENT:** You MUST choose every color name from THIS EXACT LIST. Do NOT invent any color name. Valid colors: {color_list}. If a garment color is close to one of these, use that exact name. Never use generic descriptions like 'dark' or 'light'."
-    colored_prompt = system_prompt + "\n\n" + color_directive + "\n\n**NOTE 1:** The first photo has been processed to REMOVE THE BACKGROUND. You will see the person isolated on a WHITE background. IGNORE THE WHITE BACKGROUND and look ONLY at the clothing colors.\n\n**NOTE 2:** The second photo is a CLOSE-UP of the upper body (head, neck, upper chest). LOOK VERY CAREFULLY at this image to detect SMALL accessories like earrings, necklaces, glasses, and hair accessories. This is critical - do not miss any jewelry."
+    colored_prompt = system_prompt + "\n\n" + color_directive + "\n\n**NOTE 1:** The first photo has been processed to REMOVE THE BACKGROUND. You will see the person isolated on a WHITE background. IGNORE THE WHITE BACKGROUND and look ONLY at the clothing colors.\n\n**NOTE 2:** The second photo is a CLOSE-UP of the upper body (head, neck, upper chest). LOOK VERY CAREFULLY at this image to detect SMALL accessories like earrings, necklaces, glasses, and hair accessories. This is critical - do not miss any jewelry.\n\n**NOTE 3:** The third photo shows the LOWER BODY (waist down, legs, feet). Use this to identify bottom garments (pants, skirts, shorts) and footwear (shoes, sneakers, boots) along with their exact colors and materials."
 
     compressed = compress_image_b64(masked_b64)
     face_compressed = compress_image_b64(face_b64)
+    lower_compressed = compress_image_b64(lower_b64)
     headers = {"Content-Type": "application/json", "api-key": MIMO_API_KEY, "HTTP-Referer": "https://luxor.ly", "X-Title": "LuxorHub"}
 
     # Try vision model with BOTH images: full-body masked + face close-up
@@ -1188,6 +1252,7 @@ def call_groq_vision(image_b64: str, system_prompt: str = SACRED_PROMPT, tempera
             {"type": "text", "text": colored_prompt},
             {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{compressed}"}},
             {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{face_compressed}"}},
+            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{lower_compressed}"}},
         ]}],
         "max_tokens": 2000,  # MiMo V2.5: 2000 max_tokens = ~35s response
         "temperature": temperature,
@@ -1239,6 +1304,7 @@ def call_groq_vision(image_b64: str, system_prompt: str = SACRED_PROMPT, tempera
                     {"type": "text", "text": colored_prompt},
                     {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{compressed}"}},
                     {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{face_compressed}"}},
+                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{lower_compressed}"}},
                 ]}],
                 "max_tokens": CIPHER_MAX_TOKENS,
                 "temperature": temperature,
@@ -1271,6 +1337,7 @@ def call_groq_vision(image_b64: str, system_prompt: str = SACRED_PROMPT, tempera
                         {"text": colored_prompt},
                         {"inline_data": {"mime_type": "image/jpeg", "data": compressed}},
                         {"inline_data": {"mime_type": "image/jpeg", "data": face_compressed}},
+                        {"inline_data": {"mime_type": "image/jpeg", "data": lower_compressed}},
                     ]
                 }],
                 "generationConfig": {
