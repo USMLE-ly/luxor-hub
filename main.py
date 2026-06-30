@@ -1349,7 +1349,7 @@ NO markdown. NO explanations. Valid JSON only."""
     _log.warning("[MIMO-VISION] All models failed - returning None")
     return None
 
-def call_groq_text(messages: List[Dict[str, str]], system_prompt: str = "", temperature: float = 0.7) -> Any:
+def call_groq_text(messages: List[Dict[str, str]], system_prompt: str = "", temperature: float = 0.7, timeout: int = 30) -> Any:
     if not MIMO_API_KEY:
         return None
     headers = {"Content-Type": "application/json", "api-key": MIMO_API_KEY, "HTTP-Referer": "https://luxor.ly", "X-Title": "LuxorHub"}
@@ -1369,32 +1369,62 @@ def call_groq_text(messages: List[Dict[str, str]], system_prompt: str = "", temp
         }
         try:
             _log.info("[MIMO-TEXT] Trying model=%s", model)
-            resp = requests.post(MIMO_API_URL, json=payload, headers=headers, timeout=30)
+            resp = requests.post(MIMO_API_URL, json=payload, headers=headers, timeout=timeout)
             _log.info("[MIMO-TEXT] HTTP %s for %s (key=%s...)", resp.status_code, model, MIMO_API_KEY[:8] if MIMO_API_KEY else "NONE")
             if resp.status_code == 200:
                 raw = resp.json()["choices"][0]["message"]["content"]
                 raw = raw.strip()
+                _log.info("[MIMO-TEXT] Raw response (first 100): %s", raw[:100])
                 # Strip markdown code block wrappers if present
-                if raw.startswith("```"):
-                    raw = raw.split("\n", 1)[-1] if "\n" in raw else raw
-                    raw = raw.rsplit("```", 1)[0] if "```" in raw else raw
+                while raw.startswith("```"):
+                    first_nl = raw.find("\n")
+                    if first_nl >= 0:
+                        raw = raw[first_nl+1:]
+                    else:
+                        raw = ""
+                        break
                     raw = raw.strip()
-                # Handle JSON array responses (dressing room generates lists)
-                arr_match = re.search(r"\[([\s\S]*)\]", raw)
+                while "```" in raw:
+                    last_bt = raw.rfind("```")
+                    if last_bt >= 0:
+                        raw = raw[:last_bt]
+                    raw = raw.strip()
+                # Try parsing as JSON array first (dressing room generates lists)
+                if raw.startswith("["):
+                    try:
+                        parsed = json.loads(raw)
+                        if isinstance(parsed, list):
+                            _log.info("[MIMO-TEXT] Parsed as array: %d items", len(parsed))
+                            return parsed
+                    except json.JSONDecodeError:
+                        pass
+                # Try parsing as JSON object (standard analysis)
+                if raw.startswith("{"):
+                    try:
+                        parsed = json.loads(raw)
+                        _log.info("[MIMO-TEXT] Parsed as object")
+                        return parsed
+                    except json.JSONDecodeError:
+                        pass
+                # Fallback: try to find any JSON array or object in the text
+                arr_match = re.search(r"\[([\s\S]*?)\]", raw)
                 if arr_match:
                     try:
                         parsed = json.loads(arr_match.group(0))
                         if isinstance(parsed, list):
+                            _log.info("[MIMO-TEXT] Found array via regex: %d items", len(parsed))
                             return parsed
                     except json.JSONDecodeError:
                         pass
-                # Handle JSON object responses (standard analysis)
-                obj_match = re.search(r"\{([\s\S]*)\}", raw)
+                obj_match = re.search(r"\{([\s\S]*?)\}", raw)
                 if obj_match:
                     try:
-                        return json.loads(obj_match.group(0))
+                        parsed = json.loads(obj_match.group(0))
+                        _log.info("[MIMO-TEXT] Found object via regex")
+                        return parsed
                     except json.JSONDecodeError:
                         pass
+                _log.warning("[MIMO-TEXT] Could not parse response: %s", raw[:200])
             elif resp.status_code == 429:
                 _log.warning("[MIMO-TEXT] Rate limited on %s, trying next", model)
                 continue
@@ -2064,7 +2094,7 @@ def dressing_generate():
         ]
 
         # Call Groq Text
-        result = call_groq_text(messages, temperature=0.7)
+        result = call_groq_text(messages, temperature=0.7, timeout=60)
         if not result:
             _log.error("[DRESSING] MiMo returned no result")
             return jsonify({"success": False, "error": "Could not generate outfit"})
