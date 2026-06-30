@@ -1726,26 +1726,46 @@ _image_b64_cache = ""
 # Fashion Decision
 # ---------------------------------------------------------------------------
 def get_fashion_decision(image_b64: str) -> Dict[str, Any]:
+    import time as _time
+    _t0 = _time.time()
+    _log.info("[PIPELINE] Starting analysis")
+    
+    # Phase 1: Try MiMo vision
     try:
         result = call_groq_vision(image_b64, SACRED_PROMPT, 0.2)
         if result:
-            # Preserve the source from call_groq_vision (e.g. "text_fallback" or "cipher_vision")
+            _log.info("[PIPELINE] MiMo vision OK in %.1fs: top=%s bottom=%s", 
+                      _time.time() - _t0,
+                      result.get("top_type",""), result.get("bottom_type",""))
             return result
+        _log.info("[PIPELINE] MiMo no result in %.1fs, fallback", _time.time() - _t0)
     except (CFTimeoutError, requests.exceptions.Timeout):
-        _log.warning("[PIPELINE] Timed out")
+        _log.warning("[PIPELINE] MiMo timeout in %.1fs", _time.time() - _t0)
     except Exception as exc:
-        _log.error("[PIPELINE] %s", exc)
-    # Fallback with colors extracted from image pixels
+        _log.error("[PIPELINE] MiMo error in %.1fs: %s", _time.time() - _t0, exc)
+    
+    # Phase 2: Pixel fallback — ALWAYS returns within seconds
+    _log.info("[PIPELINE] Pixel fallback starting at %.1fs", _time.time() - _t0)
+    fallback_result = {"style_name": "", "gender": "", "vibe_type": "Casual", 
+                       "top_type": "", "bottom_type": "", "footwear": "", 
+                       "accessories": "", "actual_colors": [], 
+                       "items_detected": [], "strengths": [], "audit": "", 
+                       "tweak_plan": "", "style_score": None, "source": "fallback"}
     try:
-        pixel_colors = _extract_garment_features(image_b64).get("colors", [])
-        colors_str = ", ".join(pixel_colors[:3]) if pixel_colors else "neutral"
+        comp = compress_image_b64(image_b64)
+        _log.info("[PIPELINE] Compressed in %.1fs (%d KB)", _time.time() - _t0, len(comp) // 1024)
+        pf = _extract_garment_features(comp).get("colors", [])
+        _log.info("[PIPELINE] Features extracted in %.1fs: %s", _time.time() - _t0, pf)
+        prompt = "neutral"
+        if pf:
+            prompt = ", ".join(pf[:3])
+        fallback_result["actual_colors"] = pf
+        fallback_result["generation_prompt"] = f"Editorial fashion photograph of a person wearing a {prompt} outfit."
     except Exception as e:
-        _log.warning("[FALLBACK] Color extraction failed: %s", e)
-        pixel_colors = []
-        colors_str = "neutral"
-    fallback_prompt = f"Editorial fashion photograph of a person wearing a {colors_str} outfit, clean background, soft studio lighting."
-    _log.info("[FALLBACK] Generating fallback response: colors=%s prompt=%s", pixel_colors, fallback_prompt)
-    return {"style_name": "", "gender": "", "vibe_type": "Casual", "top_type": "", "bottom_type": "", "footwear": "", "accessories": "", "actual_colors": pixel_colors, "items_detected": [], "strengths": [], "audit": "", "tweak_plan": "", "generation_prompt": fallback_prompt, "style_score": None, "source": "fallback"}
+        _log.warning("[PIPELINE] Fallback failed in %.1fs: %s", _time.time() - _t0, e)
+    
+    _log.info("[PIPELINE] Done in %.1fs (source=fallback)", _time.time() - _t0)
+    return fallback_result
 
 def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
     items_detected = []
