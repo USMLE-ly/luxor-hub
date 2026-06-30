@@ -1,4 +1,4 @@
-run = "pip install flask flask-cors requests python-dotenv Pillow qdrant-client gunicorn --break-system-packages && gunicorn main:app --bind 0.0.0.0:5000 --timeout 180 --worker-tmp-dir /dev/shm --workers 2 --threads 4 --preload"
+run = "gunicorn main:app --bind 0.0.0.0:$PORT --timeout 180 --workers 2 --threads 4"
 modules = ["python-3.11"]
 
 [agent]
@@ -13,5 +13,5 @@ externalPort = 80
 
 [deployment]
 deploymentTarget = "autoscale"
-run = ["gunicorn", "main:app", "--bind", "0.0.0.0:5000", "--timeout", "180", "--worker-tmp-dir", "/dev/shm", "--workers", "2", "--threads", "4"]
+run = ["gunicorn", "main:app", "--bind", "0.0.0.0:5000", "--timeout", "180", "--workers", "2", "--threads", "4"]
 build = ["pip", "install", "-r", "requirements.txt"]
