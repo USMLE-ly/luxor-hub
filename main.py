@@ -68,6 +68,19 @@ _log = logging.getLogger("luxor.omega")
 app = Flask(__name__)
 CORS(app, origins=["*"])
 
+# CRITICAL: Handle OPTIONS preflight BEFORE any routing/redirects
+# Replit proxy adds trailing slashes, Flask redirects with 308 on mismatched routes
+# Browsers BLOCK redirects on preflight requests — this bypasses the redirect entirely
+@app.before_request
+def handle_preflight():
+    if request.method == "OPTIONS":
+        resp = jsonify({})
+        resp.headers.add("Access-Control-Allow-Origin", "*")
+        resp.headers.add("Access-Control-Allow-Headers", "*")
+        resp.headers.add("Access-Control-Allow-Methods", "*")
+        resp.headers.add("Access-Control-Max-Age", "86400")
+        return resp, 204
+
 # ---------------------------------------------------------------------------
 # Environment
 # ---------------------------------------------------------------------------
@@ -1878,7 +1891,7 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
         "generation_prompt": result.get("generation_prompt", "A fashion-forward person wearing a stylish outfit in an editorial setting."),
     }
 
-@app.route("/api/v1/analyze-outfit", methods=["POST", "OPTIONS"])
+@app.route("/api/v1/analyze-outfit", methods=["POST", "OPTIONS"], strict_slashes=False)
 def analyze_outfit():
     if request.method == "OPTIONS":
         return "", 204
@@ -1900,7 +1913,7 @@ def analyze_outfit():
 # ---------------------------------------------------------------------------
 # Stylist Explore
 # ---------------------------------------------------------------------------
-@app.route("/api/v1/stylist-explore", methods=["POST", "OPTIONS"])
+@app.route("/api/v1/stylist-explore", methods=["POST", "OPTIONS"], strict_slashes=False)
 def stylist_explore():
     if request.method == "OPTIONS":
         return "", 204
@@ -1947,7 +1960,7 @@ def stylist_explore():
 # ---------------------------------------------------------------------------
 # Stylist Generate (Pollinations-only, no Groq dependency)
 # ---------------------------------------------------------------------------
-@app.route("/api/v1/stylist-generate", methods=["POST", "OPTIONS"])
+@app.route("/api/v1/stylist-generate", methods=["POST", "OPTIONS"], strict_slashes=False)
 def stylist_generate():
     if request.method == "OPTIONS":
         return "", 204
@@ -1970,7 +1983,7 @@ def stylist_generate():
 # ---------------------------------------------------------------------------
 # Closet (Vercel Blob + Qdrant)
 # ---------------------------------------------------------------------------
-@app.route("/api/v1/closet/add-item", methods=["POST", "OPTIONS"])
+@app.route("/api/v1/closet/add-item", methods=["POST", "OPTIONS"], strict_slashes=False)
 def closet_add():
     if request.method == "OPTIONS":
         return "", 204
@@ -2008,14 +2021,14 @@ def closet_add():
 
     return jsonify({"success": True, "item": item})
 
-@app.route("/api/v1/closet/list-items", methods=["GET", "OPTIONS"])
+@app.route("/api/v1/closet/list-items", methods=["GET", "OPTIONS"], strict_slashes=False)
 def closet_list():
     if request.method == "OPTIONS":
         return "", 204
     items = qdrant_get_all_items()
     return jsonify({"success": True, "items": items})
 
-@app.route("/api/v1/closet/delete-item", methods=["POST", "OPTIONS"])
+@app.route("/api/v1/closet/delete-item", methods=["POST", "OPTIONS"], strict_slashes=False)
 def closet_delete():
     if request.method == "OPTIONS":
         return "", 204
@@ -2029,7 +2042,7 @@ def closet_delete():
 # ---------------------------------------------------------------------------
 # Dressing Room Generator (Groq Text picks from Qdrant closet)
 # ---------------------------------------------------------------------------
-@app.route("/api/v1/dressing-room/generate", methods=["POST", "OPTIONS"])
+@app.route("/api/v1/dressing-room/generate", methods=["POST", "OPTIONS"], strict_slashes=False)
 def dressing_generate():
     if request.method == "OPTIONS":
         return "", 204
@@ -2113,7 +2126,7 @@ def dressing_generate():
         _log.error("[DRESSING] Error: %s", exc, exc_info=True)
         return jsonify({"success": False, "error": f"Generation failed: {str(exc)[:100]}"}), 500
 
-@app.route("/api/v1/upload-color-pdf", methods=["POST", "OPTIONS"])
+@app.route("/api/v1/upload-color-pdf", methods=["POST", "OPTIONS"], strict_slashes=False)
 def upload_color_pdf():
     if request.method == "OPTIONS":
         return "", 204
@@ -2196,7 +2209,7 @@ def upload_color_pdf():
         _log.error("[COLOR-PDF] Upload error: %s", exc)
         return jsonify({"success": False, "error": f"PDF processing error: {str(exc)}"}), 500
 
-@app.route("/api/v1/color-dictionary", methods=["GET", "OPTIONS"])
+@app.route("/api/v1/color-dictionary", methods=["GET", "OPTIONS"], strict_slashes=False)
 def get_color_dictionary():
     if request.method == "OPTIONS":
         return "", 204
@@ -2209,7 +2222,7 @@ def get_color_dictionary():
 
 # Debug & Health
 # ---------------------------------------------------------------------------
-@app.route("/debug/analyze", methods=["POST"])
+@app.route("/debug/analyze", methods=["POST"], strict_slashes=False)
 def debug_analyze():
     data = request.get_json(silent=True) or {}
     image_b64 = data.get("image_b64")
@@ -2240,9 +2253,9 @@ def debug_analyze():
     except Exception as e:
         return jsonify({"status": "exception", "error": str(e)})
 
-@app.route("/", methods=["GET"])
-@app.route("/api/health", methods=["GET"])
-@app.route("/health", methods=["GET"])
+@app.route("/", methods=["GET"], strict_slashes=False)
+@app.route("/api/health", methods=["GET"], strict_slashes=False)
+@app.route("/health", methods=["GET"], strict_slashes=False)
 def health():
     closet_count = len(qdrant_get_all_items())
     return jsonify({
