@@ -33,6 +33,7 @@ interface FashionHeroProps {
   audit?: string;
   tweakPlan?: string;
   imageUrl?: string;
+  generatedImageUrl?: string | null;
   vibeType?: string;
   topType?: string;
   bottomType?: string;
@@ -66,6 +67,7 @@ export function FashionHero({
   audit = "",
   tweakPlan = "",
   imageUrl,
+  generatedImageUrl,
   vibeType,
   topType = "",
   bottomType = "",
@@ -89,6 +91,20 @@ export function FashionHero({
                   alt="Uploaded outfit"
                   className="rounded-2xl shadow-2xl w-full object-cover filter brightness-105 max-h-[500px]"
                 />
+                {/* Generated AI Fashion Image */}
+                {generatedImageUrl && (
+                  <div className="mt-3">
+                    <img
+                      src={generatedImageUrl}
+                      alt="AI generated outfit visualization"
+                      className="rounded-2xl shadow-2xl w-full object-cover max-h-[500px] ring-1 ring-white/10"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    />
+                    <p className="text-[10px] text-muted-foreground/50 mt-1 text-center">
+                      ✦ AI-generated visualization
+                    </p>
+                  </div>
+                )}
                 {/* Score ring overlaid top-right */}
                 {!isNA && (
                   <div className="absolute top-2 right-2 z-10 drop-shadow-lg bg-black/20 backdrop-blur-sm rounded-full p-0.5">

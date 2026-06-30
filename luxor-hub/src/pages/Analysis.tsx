@@ -110,6 +110,7 @@ export default function Analysis() {
   const [loading, setLoading] = useState(false);
   const [savedId, setSavedId] = useState<string | null>(null);
   const [analysisFailed, setAnalysisFailed] = useState(false);
+  const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [history, setHistory] = useState<SavedAnalysis[]>([]);
@@ -171,6 +172,7 @@ export default function Analysis() {
     setImageFile(f);
     setData(null);
     setSavedId(null);
+    setGeneratedImageUrl(null);
   };
 
   const getBase64 = (file: File): Promise<string> =>
@@ -212,7 +214,7 @@ export default function Analysis() {
     try {
       // Compress first — phone photos are 3-12 MB, this shrinks them to ~100-200 KB
       const b64 = await compressImage(file);
-      const apiUrl = 'https://nice-useful-plot--al-bosify.replit.app';
+      const apiUrl = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://luxor-hub.replit.app');
 
       // Retry loop — Cipher Vision can be slow; retry with backoff instead of giving up
       let fnData: any = null;
@@ -268,6 +270,19 @@ export default function Analysis() {
         seasonalFit: fnData.seasonalFit || '',
       };
       setData(o);
+      
+      // Generate AI fashion image from the generation_prompt
+      if (fnData.generation_prompt) {
+        const prompt = fnData.generation_prompt;
+        const safe = encodeURIComponent(prompt);
+        // Use window origin for relative URLs, or default to localhost
+        const base = window.location.hostname === 'localhost' 
+          ? 'http://localhost:5000'
+          : (import.meta.env.VITE_API_URL || window.location.origin);
+        // Build Pollinations URL from the prompt
+        const pollinationsUrl = `https://image.pollinations.ai/prompt/${safe}?width=1024&height=1024&nologin=true&seed=`;
+        setGeneratedImageUrl(pollinationsUrl + Date.now());
+      }
       setSavedId(null);
       toast.success('Outfit analyzed! ✨');
     } catch (e: any) {
@@ -521,6 +536,7 @@ export default function Analysis() {
                     audit={data.audit}
                     tweakPlan={data.tweak_plan}
                     imageUrl={imagePreview}
+                    generatedImageUrl={generatedImageUrl}
                     vibeType={data.vibe_type}
                     topType={data.top_type}
                     bottomType={data.bottom_type}
