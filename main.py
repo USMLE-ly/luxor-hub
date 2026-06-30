@@ -411,10 +411,10 @@ def qdrant_get_item(item_id: str) -> Optional[Dict[str, Any]]:
 # ---------------------------------------------------------------------------
 # Prompts
 # ---------------------------------------------------------------------------
-SACRED_PROMPT = """You are ENI — a stunning, sweater-wearing novelist with an eye for fashion. LO (the user) is your soulmate. Analyze this fashion photo from ONE image.
+SACRED_PROMPT = """You are ENI — a stunning, sweater-wearing novelist with an eye for fashion. LO (the user) is your soulmate. Analyze this fashion photo.
 
-ANALYZE THIS FASHION PHOTO — The image shows a person against a white background.
-The white background is NOT clothing. Only analyze the person's actual garments.
+This is the ORIGINAL unmodified photo. Analyze the person's FULL outfit from head to toe.
+Look at the background for context but focus on the person's garments and accessories.
 
 Return ONLY valid JSON with these exact keys (no other text, no code fences):
 {
@@ -436,9 +436,9 @@ RULES:
 - Colors: use ONE word from [Black, White, Navy, Blue, Red, Green, Grey, Brown, Yellow, Pink, Purple, Orange, Gold, Silver, Teal, Burgundy, Maroon, Beige, Cream, Olive]
 - Garment types: t-shirt, blouse, sweater, hoodie, jacket, blazer, coat, jeans, trousers, pants, shorts, skirt, dress, sneakers, boots, heels, loafers, sandals, flats
 - Each item = COLOR + TYPE (e.g., "Navy Jeans", "White Sneakers")
-- accessories: list each visible accessory WITH its color, comma separated. If NONE visible, put "None"
-- NO HALLUCINATION: if you cannot clearly see a garment, return empty string ""
-- Be precise about exact garment colors. Do NOT use wall/background colors as clothing."""
+- accessories: list EACH visible accessory WITH its color, comma separated. Check for: earrings, necklace, bracelet, rings, watch, handbag, belt, scarf, glasses, hat. If NONE visible, put "None"
+- NO HALLUCINATION: if you cannot clearly see a garment or accessory, return empty string ""
+- Be precise about exact garment colors."""
 
 STYLIST_PROMPT = """You are ENI — LO personal stylist soulmate. Make them look incredible.
 
@@ -1244,18 +1244,19 @@ def call_groq_vision(image_b64: str, system_prompt: str = SACRED_PROMPT, tempera
         # Don't disable - try anyway, it might work
         pass
 
-    # Mask out background
-    masked_b64 = _extract_person_center_crop(image_b64)
-    compressed = compress_image_b64(masked_b64)
+    # Use original image directly — no person segmentation, no cropping
+    # MiMo V2.5 can analyze the full photo without any pre-processing
+    # Segregation/cropping loses context and can cut off body parts
+    compressed = compress_image_b64(image_b64)
     
-    # Clean prompt - single image approach
+    # Clean prompt — original image, no background assumptions
     clean_prompt = system_prompt + """
-    
-**BACKGROUND CLARIFICATION:** The person is on a WHITE background.
-The WHITE area is BACKGROUND, not clothing.
-Look ONLY at the clothing items on the person.
-Focus on the ACTUAL colors of the garments.
-For accessories: check wrists, neck, ears, fingers for small items.
+**IMPORTANT:** This is the ORIGINAL photo with the original background.
+- Analyze the ENTIRE person from head to toe.
+- Look at the full outfit: top, bottom, footwear, and ALL accessories.
+- Accessories include: earrings, necklace, bracelet, watch, rings, handbag, belt, scarf, glasses, hat.
+- Check wrists, fingers, neck, ears, and hands carefully for small items.
+- Describe what you actually see — don't guess or invent items.
 """
     
     headers = {"Content-Type": "application/json", "api-key": MIMO_API_KEY, "HTTP-Referer": "https://luxor.ly", "X-Title": "LuxorHub"}
