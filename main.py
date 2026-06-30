@@ -484,6 +484,18 @@ def _extract_person_center_crop(image_b64: str) -> str:
     """Completely separate person from background using MediaPipe selfie segmentation.
     Returns the person on a white background, tightly cropped."""
     try:
+        # ALWAYS pre-compress first - phone photos (12MP+) take 30s+ at full res on Replit
+        if ',' in image_b64:
+            image_b64 = image_b64.split(',', 1)[1]
+        # Only compress if image is large (over 2K pixels on any side)
+        test_raw = base64.b64decode(image_b64)
+        test_img = Image.open(io.BytesIO(test_raw))
+        if max(test_img.size) > 1200:
+            scale = 1200.0 / max(test_img.size)
+            test_img = test_img.resize((int(test_img.size[0] * scale), int(test_img.size[1] * scale)), Image.Resampling.LANCZOS)
+            buf = io.BytesIO()
+            test_img.convert("RGB").save(buf, format="JPEG", quality=92)
+            image_b64 = base64.b64encode(buf.getvalue()).decode()
         raw = base64.b64decode(image_b64)
         img = Image.open(io.BytesIO(raw)).convert('RGB')
         w, h = img.size
