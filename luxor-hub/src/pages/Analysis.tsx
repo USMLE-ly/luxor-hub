@@ -214,7 +214,7 @@ export default function Analysis() {
     try {
       // Compress first — phone photos are 3-12 MB, this shrinks them to ~100-200 KB
       const b64 = await compressImage(file);
-      const apiUrl = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://luxor-hub.replit.app');
+      const apiUrl = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:5000' : '');
 
       // Retry loop — Cipher Vision can be slow; retry with backoff instead of giving up
       let fnData: any = null;
@@ -241,7 +241,7 @@ export default function Analysis() {
           if (fetchErr.name === 'AbortError') {
             throw new Error('Request timed out after 60s');
           }
-          throw fetchErr;
+          continue;
         }
       }
       // All retries exhausted — silently reset to upload state, no toast
@@ -286,6 +286,8 @@ export default function Analysis() {
       setSavedId(null);
       toast.success('Outfit analyzed! ✨');
     } catch (e: any) {
+      setAnalysisFailed(true);
+      setData(null);
       toast.error(e.message || 'Analysis failed');
       // If the error is about Cipher Vision, show a retry CTA instead of dead end
       if (e.message && e.message.includes('Cipher Vision') && file) {
