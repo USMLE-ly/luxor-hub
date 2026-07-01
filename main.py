@@ -1238,6 +1238,26 @@ def _extract_image_features(image_b64: str) -> str:
         _log.warning("[FEATURES] %s", exc)
         return "Unable to extract image features."
 
+def _extract_first_json(text: str) -> Optional[str]:
+    """Find the first complete JSON object in text using brace-matching.
+    
+    The lazy regex approach ({[\s\S]*?}) breaks on nested objects.
+    This counts braces to find the matching close for the first open brace.
+    """
+    start = text.find("{")
+    if start == -1:
+        return None
+    depth = 0
+    for i in range(start, len(text)):
+        if text[i] == "{":
+            depth += 1
+        elif text[i] == "}":
+            depth -= 1
+            if depth == 0:
+                return text[start:i+1]
+    return None
+
+
 def call_groq_vision(image_b64: str, system_prompt: str = SACRED_PROMPT, temperature: float = 0.2) -> Optional[Dict[str, Any]]:
     """Call MiMo V2.5 vision model with a single image for fashion analysis."""
     if not MIMO_API_KEY:
@@ -1297,9 +1317,11 @@ def call_groq_vision(image_b64: str, system_prompt: str = SACRED_PROMPT, tempera
                 raw_clean = re.sub(r'\s*```$', '', raw_clean)
                 raw_clean = raw_clean.strip()
                 
-                match = re.search(r'\{[\s\S]*?\}', raw_clean)
-                if match:
-                    json_str = match.group(0)
+                # Use proper brace-matching instead of lazy regex.
+                # The lazy regex {[\s\S]*?} matches the FIRST } which breaks
+                # on nested objects (improvements array has {} entries).
+                json_str = _extract_first_json(raw_clean)
+                if json_str:
                     try:
                         parsed = json.loads(json_str)
                         top = parsed.get("top_type") or parsed.get("top", "")
