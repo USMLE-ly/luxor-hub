@@ -3,7 +3,7 @@ import { AppLayout } from "@/components/app/AppLayout";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, Sparkles, Upload, Camera, Shirt, Palette, FaceIcon, User, Star, Lightbulb, AlertTriangle } from "lucide-react";
+import { Loader2, Sparkles, Upload, Camera, Shirt, Palette, ScanFaceIcon, User, Star, Lightbulb, AlertTriangle } from "lucide-react";
 
 interface StyleAnalysis {
   face_shape: string;
@@ -223,7 +223,7 @@ export default function StyleRecommendationsPage() {
           {activeTab === "analyze" && analysis && (
             <motion.div key="analysis" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="rounded-xl border border-white/10 bg-zinc-900/40 backdrop-blur-xl p-5">
-                <div className="flex items-center gap-2 mb-4"><span className="text-primary"><FaceIcon className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-white/80">Face Analysis</h3></div>
+                <div className="flex items-center gap-2 mb-4"><span className="text-primary"><ScanFaceIcon className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-white/80">Face Analysis</h3></div>
                 <InfoRow label="Face Shape" value={analysis.face_shape} />
                 <InfoRow label="Eye Shape" value={analysis.eye_shape} />
                 <InfoRow label="Eye Size" value={analysis.eye_size} />

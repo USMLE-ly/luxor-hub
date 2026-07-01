@@ -21,3 +21,4 @@ knowledge_base/*/embeddings.meta.json
 *.tv
 *.bak
 .env.luxor
+node_modules/
