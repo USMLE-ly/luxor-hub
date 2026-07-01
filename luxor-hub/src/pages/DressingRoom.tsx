@@ -197,7 +197,7 @@ export default function DressingRoomPage() {
       try {
         const { data: closetData } = await supabase
           .from("clothing_items")
-          .select("id, name, category, color, brand, photo_url")
+          .select("id, name, category, color, brand, season, photo_url")
           .eq("user_id", user?.id || '')
           .order("created_at", { ascending: false });
         if (closetData) {
@@ -207,6 +207,7 @@ export default function DressingRoomPage() {
             type: item.category || 'other',
             color: item.color || '',
             category: item.category || 'other',
+            season: item.season || '',
             image_url: item.photo_url || '',
           }));
         }

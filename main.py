@@ -2208,7 +2208,7 @@ def dressing_generate():
         # -----------------------------------------------------------------------
         def normalize_cat(cat: str) -> str:
             c = cat.lower().strip()
-            if c in ("top", "shirt", "blouse", "t-shirt", "tshirt", "camisole", "tank", "sweater", "jacket", "coat", "hoodie", "cardigan", "blazer", "vest", "bodysuit", "crop top", "tube top", "halter"):
+            if c in ("top", "shirt", "blouse", "t-shirt", "tshirt", "camisole", "tank", "sweater", "jacket", "coat", "hoodie", "cardigan", "blazer", "vest", "bodysuit", "crop top", "tube top", "halter", "outerwear"):
                 return "top"
             if c in ("bottom", "pants", "jeans", "trousers", "shorts", "skirt", "leggings", "chinos", "cargo", "culottes", "palazzo"):
                 return "bottom"
@@ -2223,27 +2223,36 @@ def dressing_generate():
             return "other"
 
         def type_label(norm_cat: str, raw_type: str) -> str:
+            rt = raw_type.lower()
             if norm_cat == "full_outfit":
                 return "Full Outfit"
             if norm_cat == "top":
-                if raw_type.lower() in ("jacket", "coat", "hoodie", "cardigan", "blazer"):
+                if rt in ("jacket", "coat", "hoodie", "cardigan", "blazer", "outerwear", "puffer", "parka", "trench", "bomber", "vest", "windbreaker", "raincoat"):
                     return "Layer"
+                if rt in ("shirt", "blouse", "t-shirt", "tshirt", "tee", "polo", "button-down", "henley", "turtleneck", "bodysuit", "crop top", "tube top", "halter", "camisole", "tank", "sweater", "jersey", "sweatshirt", "pullover"):
+                    return raw_type.capitalize() if len(raw_type) > 3 else "Top"
                 return "Top"
             if norm_cat == "bottom":
-                if raw_type.lower() in ("skirt", "shorts"):
-                    return raw_type.capitalize()
+                if rt in ("jeans", "pants", "trousers", "chinos", "leggings", "joggers", "sweatpants", "cargo", "culottes", "palazzo", "capris", "bermuda", "slacks", "shorts", "skirt", "miniskirt"):
+                    return raw_type.capitalize() if len(raw_type) > 3 else "Bottom"
                 return "Bottom"
             if norm_cat == "shoes":
-                if raw_type.lower() in ("boots", "sandals", "heels"):
+                if rt in ("sneakers", "boots", "sandals", "heels", "loafers", "oxfords", "flats", "mules", "wedges", "slides", "trainers", "pumps", "stilettos", "espadrilles", "slippers", "platforms"):
                     return raw_type.capitalize()
                 return "Shoes"
             if norm_cat == "dress":
+                if rt in ("gown", "jumpsuit", "romper", "sundress", "maxi dress", "mini dress", "midi dress", "caftan", "slip dress", "bodycon", "shift dress", "wrap dress"):
+                    return raw_type.capitalize() if len(raw_type) > 3 else "Dress"
                 return "Dress"
             if norm_cat == "accessory":
-                if raw_type.lower() in ("bag", "purse", "backpack", "tote", "clutch"):
+                if rt in ("bag", "purse", "backpack", "tote", "clutch", "wallet"):
                     return "Bag"
-                if raw_type.lower() in ("hat", "cap", "beanie"):
+                if rt in ("hat", "cap", "beanie", "headband"):
                     return "Hat"
+                if rt in ("earrings", "necklace", "bracelet", "ring", "watch"):
+                    return raw_type.capitalize()
+                if rt in ("scarf", "belt", "gloves", "sunglasses", "shawl"):
+                    return raw_type.capitalize()
                 return "Accessory"
             return raw_type.capitalize() if raw_type else "Item"
 
@@ -2422,17 +2431,18 @@ def dressing_generate():
             wthr_phrases = {"hot": "warm weather", "mild": "mild weather", "cold": "cold weather", "rainy": "rainy days", "windy": "windy days"}
             weather_phrase = wthr_phrases.get(wthr.lower(), "") if wthr else ""
             pal_phrases = {
-                "neutrals": "a neutral palette that keeps it timeless", "brights": "vibrant colors that make a statement",
-                "pastels": "soft pastel tones for a delicate look", "dark": "deep, moody tones for evening drama",
-                "earthy": "earthy tones for a grounded feel", "monochrome": "a monochrome palette for sleek sophistication",
+                "neutrals": "a neutral palette", "brights": "vibrant colors", "pastels": "soft pastel tones",
+                "dark": "deep, moody tones", "earthy": "earthy tones", "monochrome": "a monochrome palette",
             }
             palette_phrase = pal_phrases.get(pal.lower(), "") if pal else ""
 
+            # Use natural phrasing based on how many items
             if len(item_descs) == 1:
                 r = f"{item_descs[0].capitalize()} \u2014 great for {occ_phrase}"
             elif len(item_descs) == 2:
                 r = f"{item_descs[0].capitalize()} paired with {item_descs[1]} \u2014 ideal for {occ_phrase}"
             else:
+                # For 3+ items: first with second, accent with third
                 r = f"{item_descs[0].capitalize()} paired with {item_descs[1]}, accented with {item_descs[2]} \u2014 perfect for {occ_phrase}"
             if weather_phrase:
                 r += f" in {weather_phrase}"
@@ -2451,7 +2461,11 @@ def dressing_generate():
                     name_parts.append(label)
             weather_part = f"{weather_desc} " if weather_desc else ""
             palette_part = f"\u2022 {palette_desc}" if palette_desc else ""
-            items_str = " & ".join(name_parts) if name_parts else "Look"
+            # Use Oxford comma style: "Top, Bottom & Shoes" not "Top & Bottom & Shoes"
+            if len(name_parts) <= 2:
+                items_str = " & ".join(name_parts) if name_parts else "Look"
+            else:
+                items_str = ", ".join(name_parts[:-1]) + " & " + name_parts[-1]
             return f"{weather_part}{occ_prefix} {items_str} {palette_part}".strip()
 
         # -----------------------------------------------------------------------
@@ -2472,8 +2486,8 @@ def dressing_generate():
 
             # Analyze: does this full outfit need shoes or accessories?
             combined_label = (full_outfit.get("label", "") + " " + full_outfit.get("name", "") + " " + full_outfit.get("type", "")).lower()
-            already_has_shoes = any(kw in combined_label for kw in ["with shoes", "with boots", "with sneakers", "includes shoes", "complete", "full look"])
-            already_has_accessories = any(kw in combined_label for kw in ["with bag", "with jewelry", "with accessories", "complete", "full look", "with clutch"])
+            already_has_shoes = any(kw in combined_label for kw in ["with shoes", "with boots", "with sneakers", "includes shoes", "includes boots"])
+            already_has_accessories = any(kw in combined_label for kw in ["with bag", "with jewelry", "with accessories", "with clutch", "with scarf", "with hat", "includes accessories"])
 
             # If the full outfit description doesn't mention shoes and we have shoes, add a pair
             if not already_has_shoes and has_shoes:
@@ -2562,7 +2576,8 @@ def dressing_generate():
             if best_cat and best_cat[1]:
                 cat_name, cat_items = best_cat
                 outfit_name = f"{weather_desc} {occ_prefix} {type_label(cat_name, cat_items[0].get('type', ''))} {palette_part}".strip()
-                reason = f"A {cat_name} item from your closet \u2014 your only option for {occ_prefix.lower()} {weather_desc.lower()} wear."
+                the_label = cat_items[0].get("label", cat_name)
+                reason = f"Your {the_label.lower()} \u2014 your only option for {occ_prefix.lower()} {weather_desc.lower()} wear."
                 outfit_options.append({
                     "outfit_name": outfit_name,
                     "reason": reason,
