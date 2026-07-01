@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { ProgressBar } from "@/components/ui/progress-bar";
 
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -77,6 +78,8 @@ export default function DressingRoomPage() {
   // Outfit generation state
   const [showOutfitModal, setShowOutfitModal] = useState(false);
   const [outfitGenerating, setOutfitGenerating] = useState(false);
+  const [progressValue, setProgressValue] = useState(0);
+  const [progressStage, setProgressStage] = useState("");
   const [generatedOutfits, setGeneratedOutfits] = useState<OutfitOption[]>([]);
   const [selectedOutfit, setSelectedOutfit] = useState<OutfitOption | null>(null);
 
@@ -148,6 +151,8 @@ export default function DressingRoomPage() {
     setShowOutfitModal(false);
     setOutfitGenerating(true);
     setGeneratedOutfits([]);
+    setProgressValue(15);
+    setProgressStage("Fetching your closet...");
 
     try {
       // Fetch user profile from onboarding data
@@ -182,6 +187,8 @@ export default function DressingRoomPage() {
           .eq("user_id", user?.id || '')
           .order("created_at", { ascending: false });
         if (closetData) {
+          setProgressValue(30);
+          setProgressStage("Analyzing your wardrobe...");
           closetItems = closetData.map((item: any) => ({
             id: item.id,
             label: item.name || 'Unknown',
@@ -194,6 +201,8 @@ export default function DressingRoomPage() {
         }
       } catch (_e) { /* Supabase fetch best-effort */ }
 
+      setProgressValue(50);
+      setProgressStage("Consulting MiMo Vision 2.5...");
       const api = import.meta.env.VITE_API_URL || import.meta.env.VITE_PUBLIC_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:5000' : '');
       const genResp = await fetch(api + "/api/v1/dressing-room/generate", {
         method: "POST",
@@ -210,6 +219,8 @@ export default function DressingRoomPage() {
       if (!genResp.ok) throw new Error("Generation failed");
       const data: OutfitResponse = await genResp.json();
       if (data.success && data.outfit_options && data.outfit_options.length > 0) {
+        setProgressValue(85);
+        setProgressStage("Composing outfits...");
         setGeneratedOutfits(data.outfit_options);
         toast.success("Outfits generated!");
       } else {
@@ -218,6 +229,8 @@ export default function DressingRoomPage() {
     } catch (e: any) {
       toast.error(e.message || "Failed to generate outfits");
     } finally {
+      setProgressValue(100);
+      setProgressStage("Ready!");
       setOutfitGenerating(false);
     }
   };
@@ -442,10 +455,11 @@ export default function DressingRoomPage() {
 
         {/* ---- GENERATED OUTFITS ---- */}
         {outfitGenerating && (
-          <div className="flex items-center justify-center py-16">
-            <div className="text-center space-y-4">
+          <div className="flex items-center justify-center py-16 px-6">
+            <div className="text-center space-y-4 w-full max-w-sm">
               <Loader2 className="w-10 h-10 animate-spin text-primary mx-auto" />
               <p className="text-muted-foreground">AI is styling your outfits...</p>
+              <ProgressBar value={progressValue} stage={progressStage} variant="gold" animated />
             </div>
           </div>
         )}

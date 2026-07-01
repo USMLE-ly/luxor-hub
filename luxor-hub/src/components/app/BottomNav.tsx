@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home, CalendarDays, ScanLine, Layers, Shirt } from "lucide-react";
+import { Home, CalendarDays, ScanLine, Layers, Shirt, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { haptic } from "@/lib/haptics";
 
@@ -8,6 +8,7 @@ const tabs = [
   { label: "Schedule", icon: CalendarDays, path: "/outfit-calendar" },
   { label: "Analysis", icon: ScanLine, path: "/outfit-analysis" },
   { label: "Dressing Room", icon: Layers, path: "/dressing-room" },
+  { label: "Recommend", icon: Sparkles, path: "/style-recommendations" },
   { label: "Closet", icon: Shirt, path: "/closet" },
 ];
 
@@ -27,7 +28,7 @@ export function BottomNav() {
             <button
               key={tab.label}
               onClick={() => { haptic("selection"); navigate(tab.path); }}
-              className="flex flex-col items-center gap-0.5 min-w-[52px] pt-1.5 pb-1 relative"
+              className="flex flex-col items-center gap-0.5 min-w-[44px] pt-1.5 pb-1 relative"
             >
               <motion.div
                 animate={{ scale: isActive ? 1.12 : 1 }}
@@ -47,7 +48,6 @@ export function BottomNav() {
               >
                 {tab.label}
               </span>
-              {/* Active dot indicator */}
               {isActive && (
                 <motion.div
                   layoutId="bottomNavDot"

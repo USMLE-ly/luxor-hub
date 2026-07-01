@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ImageSwiper } from "@/components/ui/image-swiper";
+import { ProgressBar } from "@/components/ui/progress-bar";
 import { FashionHero } from "@/components/ui/hero-fashion";
 
 /* ------------------------------------------------------------------ */
@@ -113,6 +114,8 @@ export default function Analysis() {
   const [loading, setLoading] = useState(false);
   const [savedId, setSavedId] = useState<string | null>(null);
   const [analysisFailed, setAnalysisFailed] = useState(false);
+  const [progressValue, setProgressValue] = useState(0);
+  const [progressStage, setProgressStage] = useState("");
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
@@ -214,6 +217,8 @@ export default function Analysis() {
   const analyzeOutfit = async (file: File) => {
     setAnalysisFailed(false);
     setLoading(true);
+    setProgressValue(10);
+    setProgressStage("Compressing image...");
     try {
       // Compress first — phone photos are 3-12 MB, this shrinks them to ~100-200 KB
       const b64 = await compressImage(file);
@@ -221,6 +226,8 @@ export default function Analysis() {
 
       // Retry loop — Cipher Vision can be slow; retry with backoff instead of giving up
       let fnData: any = null;
+      setProgressValue(30);
+      setProgressStage("Calling MiMo Vision 2.5...");
       for (let attempt = 0; attempt < 3; attempt++) {
         if (attempt > 0) {
           await new Promise(r => setTimeout(r, 2000 * attempt));
@@ -251,10 +258,15 @@ export default function Analysis() {
       if (!fnData || !fnData.success) {
         setData(null);
         setAnalysisFailed(true);
+        setProgressValue(0);
+        setProgressStage("Failed");
         toast.error("Analysis timed out. Tap Retry to try again.");
         return;
       }
 
+      setProgressValue(70);
+      setProgressStage("Parsing results...");
+      
       // Map the Fable 5 response to our UI shape - NO fallback dummies
       const o: OutfitData = {
         style_name: fnData.style_name || '',
@@ -275,6 +287,8 @@ export default function Analysis() {
         seasonalFit: fnData.seasonalFit || '',
       };
       setData(o);
+      setProgressValue(90);
+      setProgressStage("Generating visualization...");
       
       // Generate tweak visualization from the tweak_plan instead of AI fashion image
       const tweakPrompt = fnData.tweak_plan || fnData.generation_prompt || '';
@@ -501,15 +515,18 @@ export default function Analysis() {
                     />
                   </div>
 
-                  {/* Loading overlay */}
+                  {/* Loading overlay with progress */}
                   <AnimatePresence>
                     {loading && (
                       <motion.div
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        className="absolute inset-0 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center gap-3 z-10"
+                        className="absolute inset-0 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center gap-4 z-10 px-6"
                       >
                         <Loader2 className="h-8 w-8 animate-spin text-primary" />
                         <p className="font-display text-sm">Analyzing your outfit…</p>
+                        <div className="w-full max-w-xs">
+                          <ProgressBar value={progressValue} stage={progressStage} variant="purple" animated />
+                        </div>
                       </motion.div>
                     )}
                   </AnimatePresence>

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Sparkles, Upload, Camera, Shirt, Palette, ScanFaceIcon, User, Star, Lightbulb, AlertTriangle } from "lucide-react";
+import { ProgressBar } from "@/components/ui/progress-bar";
 
 interface StyleAnalysis {
   face_shape: string;
@@ -89,6 +90,8 @@ const apiBase = import.meta.env.VITE_API_URL || import.meta.env.VITE_PUBLIC_API_
 export default function StyleRecommendationsPage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [progressValue, setProgressValue] = useState(0);
+  const [progressStage, setProgressStage] = useState("");
   const [analysis, setAnalysis] = useState<StyleAnalysis | null>(null);
   const [recommendations, setRecommendations] = useState<Recommendations | null>(null);
   const [outfitReview, setOutfitReview] = useState<OutfitReview | null>(null);
@@ -111,8 +114,12 @@ export default function StyleRecommendationsPage() {
   const handleAnalyze = async () => {
     if (!imagePreview) return;
     setAnalyzing(true);
+    setProgressValue(10);
+    setProgressStage("Sending image for analysis...");
     const api = apiBase || (window.location.hostname === "localhost" ? "http://localhost:5000" : "");
     try {
+      setProgressValue(40);
+      setProgressStage("Calling MiMo Vision 2.5...");
       const resp = await fetch(api + "/api/v1/style-analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -121,6 +128,8 @@ export default function StyleRecommendationsPage() {
       const data = await resp.json();
       if (data.success && data.analysis) {
         setAnalysis(data.analysis);
+        setProgressValue(70);
+        setProgressStage("Generating recommendations...");
         toast.success("Analysis complete!");
         setActiveTab("recommendations");
         const recResp = await fetch(api + "/api/v1/style-recommendations", {
@@ -130,6 +139,8 @@ export default function StyleRecommendationsPage() {
         });
         const recData = await recResp.json();
         if (recData.success && recData.recommendations) {
+          setProgressValue(90);
+          setProgressStage("Finalizing results...");
           setRecommendations(recData.recommendations);
         }
       } else {
@@ -138,6 +149,8 @@ export default function StyleRecommendationsPage() {
     } catch (e: any) {
       toast.error(e.message || "Failed to analyze");
     } finally {
+      setProgressValue(100);
+      setProgressStage("Complete!");
       setAnalyzing(false);
     }
   };
@@ -204,6 +217,11 @@ export default function StyleRecommendationsPage() {
               <Star className="w-4 h-4" /> Review Outfit
             </Button>
           </div>
+          {analyzing && (
+            <div className="w-full max-w-sm mx-auto mt-4">
+              <ProgressBar value={progressValue} stage={progressStage} variant="purple" animated />
+            </div>
+          )}
         </div>
 
         {analysis && (
