@@ -11,7 +11,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "postinstall": "echo 'skip esbuild install'"
+    "postinstall": "node ../scripts/ensure-rollup-native.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

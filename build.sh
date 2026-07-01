@@ -5,8 +5,8 @@ echo "[BUILD] Building frontend..."
 # Navigate to the frontend directory
 cd luxor-hub
 
-# Install dependencies
-npm install --ignore-scripts --no-optional 2>/dev/null || npm install --ignore-scripts 2>/dev/null || npm install
+# Install dependencies (NO --no-optional — Rollup's native binary is an optional dep)
+npm install
 
 # Build with Vite
 npm run build
