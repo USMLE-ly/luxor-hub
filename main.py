@@ -86,10 +86,11 @@ def handle_preflight():
 # ---------------------------------------------------------------------------
 # Configuration imported from backend.config (single source of truth)
 from backend.config import (
+    log_config,
     MIMO_API_KEY, MIMO_API_URL, MIMO_VISION_MODEL, MIMO_TEXT_MODEL,
     CIPHER_MAX_TOKENS, PORT, BLOB_READ_WRITE_TOKEN, QDRANT_URL, QDRANT_API_KEY,
 )
-backend.config.log_config()
+log_config()
 _log.info("Config loaded from backend.config module")
 
 # ---------------------------------------------------------------------------
