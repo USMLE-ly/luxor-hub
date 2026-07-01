@@ -2236,19 +2236,19 @@ def dressing_generate():
                 if rt in ("jacket", "coat", "hoodie", "cardigan", "blazer", "outerwear", "puffer", "parka", "trench", "bomber", "vest", "windbreaker", "raincoat"):
                     return "Layer"
                 if rt in ("shirt", "blouse", "t-shirt", "tshirt", "tee", "polo", "button-down", "henley", "turtleneck", "bodysuit", "crop top", "tube top", "halter", "camisole", "tank", "sweater", "jersey", "sweatshirt", "pullover"):
-                    return raw_type.capitalize() if len(raw_type) > 3 else "Top"
+                    return rt.capitalize() if len(rt) > 3 else "Top"
                 return "Top"
             if norm_cat == "bottom":
                 if rt in ("jeans", "pants", "trousers", "chinos", "leggings", "joggers", "sweatpants", "cargo", "culottes", "palazzo", "capris", "bermuda", "slacks", "shorts", "skirt", "miniskirt"):
-                    return raw_type.capitalize() if len(raw_type) > 3 else "Bottom"
+                    return rt.capitalize() if len(rt) > 3 else "Bottom"
                 return "Bottom"
             if norm_cat == "shoes":
                 if rt in ("sneakers", "boots", "sandals", "heels", "loafers", "oxfords", "flats", "mules", "wedges", "slides", "trainers", "pumps", "stilettos", "espadrilles", "slippers", "platforms"):
-                    return raw_type.capitalize()
+                    return rt.capitalize()
                 return "Shoes"
             if norm_cat == "dress":
                 if rt in ("gown", "jumpsuit", "romper", "sundress", "maxi dress", "mini dress", "midi dress", "caftan", "slip dress", "bodycon", "shift dress", "wrap dress"):
-                    return raw_type.capitalize() if len(raw_type) > 3 else "Dress"
+                    return rt.capitalize() if len(rt) > 3 else "Dress"
                 return "Dress"
             if norm_cat == "accessory":
                 if rt in ("bag", "purse", "backpack", "tote", "clutch", "wallet"):
@@ -2256,11 +2256,11 @@ def dressing_generate():
                 if rt in ("hat", "cap", "beanie", "headband"):
                     return "Hat"
                 if rt in ("earrings", "necklace", "bracelet", "ring", "watch"):
-                    return raw_type.capitalize()
+                    return rt.capitalize()
                 if rt in ("scarf", "belt", "gloves", "sunglasses", "shawl"):
-                    return raw_type.capitalize()
+                    return rt.capitalize()
                 return "Accessory"
-            return raw_type.capitalize() if raw_type else "Item"
+            return rt.capitalize() if rt else "Item"
 
         # -----------------------------------------------------------------------
         # Smart re-detect: when an item is "other", guess from label/name
