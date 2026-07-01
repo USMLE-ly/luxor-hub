@@ -2218,6 +2218,8 @@ def dressing_generate():
                 return "dress"
             if c in ("accessory", "accessories", "bag", "purse", "belt", "hat", "scarf", "jewelry", "watch", "sunglasses", "earrings", "necklace", "bracelet", "ring", "wallet", "backpack", "tote", "clutch", "headband", "gloves"):
                 return "accessory"
+            if c in ("full outfit", "full look", "complete outfit", "complete look", "outfit set", "set", "coord", "co-ord", "matching set"):
+                return "full_outfit"
             return "other"
 
         # -----------------------------------------------------------------------
@@ -2236,6 +2238,8 @@ def dressing_generate():
                 if raw_type.lower() in ("boots", "sandals", "heels"):
                     return raw_type.capitalize()
                 return "Shoes"
+            if norm_cat == "full_outfit":
+                return "Full Outfit"
             if norm_cat == "dress":
                 return "Dress"
             if norm_cat == "accessory":
@@ -2247,11 +2251,49 @@ def dressing_generate():
             return raw_type.capitalize() if raw_type else "Item"
 
         # -----------------------------------------------------------------------
+        # Smart re-detect: when an item is "other", try to figure out what it 
+        # actually is from its label/name using keyword matching
+        # -----------------------------------------------------------------------
+        def smart_redetect(item: Dict) -> str:
+            norm = normalize_cat(item.get("type", item.get("category", "other")))
+            if norm != "other":
+                return norm  # already detected correctly
+            
+            label = (item.get("label", "") + " " + item.get("name", "") + " " + item.get("type", "")).lower()
+            
+            # Outerwear / jackets
+            if any(kw in label for kw in ("jacket", "coat", "blazer", "hoodie", "cardigan", "vest", "windbreaker", "parka", "bomber", "leather jacket", "denim jacket", "trench", "puffer", "raincoat", "fleece")):
+                return "top"
+            # Tops
+            if any(kw in label for kw in ("shirt", "blouse", "t-shirt", "tee", "tank", "camisole", "crop top", "tube top", "halter", "sweater", "jersey", "polo", "button-down", "bodysuit", "turtleneck", "henley")):
+                return "top"
+            # Bottoms
+            if any(kw in label for kw in ("pants", "jeans", "trousers", "shorts", "skirt", "leggings", "chinos", "cargo", "culottes", "palazzo", "capris", "bermuda", "joggers", "sweatpants", "slacks")):
+                return "bottom"
+            # Shoes / footwear
+            if any(kw in label for kw in ("shoes", "sneakers", "boots", "sandals", "heels", "flats", "loafers", "oxfords", "mules", "wedges", "slides", "trainers", "running", "canvas", "pumps", "stilettos", "espadrilles", "slippers")):
+                return "shoes"
+            # Dresses / jumpsuits
+            if any(kw in label for kw in ("dress", "gown", "jumpsuit", "romper", "sundress", "maxi dress", "mini dress", "midi dress", "caftan", "slip dress", "bodycon", "shift dress", "wrap dress")):
+                return "dress"
+            # Accessories
+            if any(kw in label for kw in ("bag", "purse", "belt", "hat", "scarf", "jewelry", "watch", "sunglasses", "earrings", "necklace", "bracelet", "ring", "wallet", "backpack", "tote", "clutch", "headband", "gloves", "beanie", "cap", "bow tie", "tie", "cufflinks", "brooch", "shawl", "stole", "umbrella")):
+                return "accessory"
+            # Full outfits
+            if any(kw in label for kw in ("full outfit", "full look", "complete look", "matching set", "outfit set", "coord set", "co-ord", "two-piece", "suit set", "ensemble")):
+                return "full_outfit"
+            
+            return "other"  # genuinely can't detect
+
+        # -----------------------------------------------------------------------
         # Group items by normalized category
         # -----------------------------------------------------------------------
         grouped: Dict[str, List[Dict]] = {}
         for item in closet_items:
             cat = normalize_cat(item.get("type", item.get("category", "other")))
+            # If still "other", try smart detection from label
+            if cat == "other":
+                cat = smart_redetect(item)
             if cat not in grouped:
                 grouped[cat] = []
             grouped[cat].append(item)
@@ -2283,7 +2325,9 @@ def dressing_generate():
         # Templates use commas within a slot to mean "pick best available from these categories"
         # -----------------------------------------------------------------------
         templates = [
-            # Best: complete, layered looks
+            # BEST: Full outfits (pre-made complete looks)
+            ["full_outfit"],
+            # Complete layered looks
             ["dress", "shoes", "accessory"],
             ["top", "bottom", "shoes", "accessory"],
             ["top", "bottom", "shoes"],
@@ -2293,10 +2337,11 @@ def dressing_generate():
             ["top", "bottom"],
             ["top", "shoes"],
             ["bottom", "shoes"],
-            # Fallback: any single-piece outfit with extras
+            # Single-piece with accessory
             ["dress"],
             ["top", "accessory"],
             ["bottom", "accessory"],
+            # Solo pieces
             ["top"],
             ["bottom"],
             ["shoes"],

@@ -544,13 +544,16 @@ export default function DressingRoomPage() {
                           const typeLabel = typeLabels[item.type?.toLowerCase()] || item.type || `Item ${itemIdx + 1}`;
                           return (
                             <div key={item.id || itemIdx} className="w-full max-w-xs flex flex-col items-center gap-1.5">
-                              <div className="w-full aspect-[3/4] rounded-xl overflow-hidden bg-zinc-900/60 border border-white/10 shadow-lg">
+                              <div className={`w-full ${item.type === "full_outfit" ? "aspect-[4/3]" : "aspect-[3/4]"} rounded-xl overflow-hidden bg-zinc-900/60 border border-white/10 shadow-lg`}>
                                 <img
                                   src={item.image_url}
                                   alt={item.label || item.type}
                                   className="w-full h-full object-contain"
                                 />
                               </div>
+                              {item.type === "full_outfit" && (
+                                <span className="text-[10px] uppercase tracking-widest text-purple-400 font-bold bg-purple-500/10 px-2 py-0.5 rounded-full">Complete Look</span>
+                              )}
                               <div className="flex flex-wrap items-center justify-center gap-1.5">
                                 <span className="text-[10px] uppercase tracking-wider text-white/50 font-semibold">{typeLabel}</span>
                                 <span className="text-xs text-white/80">{item.label}</span>

@@ -42,6 +42,7 @@ const placeholdersBySection: Record<string, string[]> = {
   "Shoes": [imgShoeHeels, imgShoeBoots],
   "Accessories": [imgAccBag, imgAccJewelry, imgSunglassesCateye],
   "Dresses": [imgDressMidi, imgDressMini],
+  "Full Outfits": [],
   "Other": [],
 };
 import {
@@ -72,6 +73,7 @@ const categoryMap: Record<string, { label: string; categories: string[] }> = {
   "Shoes": { label: "Shoes", categories: ["shoes"] },
   "Accessories": { label: "Accessories", categories: ["accessory"] },
   "Dresses": { label: "Dresses", categories: ["dress"] },
+  "Full Outfits": { label: "Full Outfits", categories: ["full_outfit"] },
   "Other": { label: "Other", categories: ["other"] },
 };
 
@@ -83,6 +85,7 @@ const closetToMannequinCategory: Record<string, string> = {
   shoes: "shoes",
   accessory: "hat",
   dress: "dress",
+  full_outfit: "dress",
   other: "tops",
 };
 
@@ -95,8 +98,8 @@ function getMannequinCategory(category: string, name: string | null): string {
   return closetToMannequinCategory[category] || "tops";
 }
 
-const filterPills = ["All", "Upper Body", "Lower Body", "Shoes", "Accessories", "Dresses"];
-const uploadCategories = ["top", "bottom", "shoes", "accessory", "outerwear", "dress", "other"];
+const filterPills = ["All", "Upper Body", "Lower Body", "Shoes", "Accessories", "Dresses", "Full Outfits"];
+const uploadCategories = ["top", "bottom", "shoes", "accessory", "outerwear", "dress", "full_outfit", "other"];
 const seasons = ["spring", "summer", "fall", "winter", "all-season"];
 
 type ClosetTab = "inventory" | "mannequin";
@@ -683,7 +686,7 @@ const Closet = () => {
             {/* Search */}
             <div className="relative mb-4">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search items..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+              <Input id="closet-search" name="search" placeholder="Search items..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 bg-secondary border-border rounded-xl h-10" />
             </div>
 
