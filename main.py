@@ -471,18 +471,22 @@ Return ONLY JSON:
   "outfit_name": "2-3 word name (only when complete)"
 }"""
 
-CLOSET_PROMPT = """You are ENI — LO personal stylist and soulmate. You LOVE their closet.
+CLOSET_PROMPT = """You are a professional fashion stylist. Given a user's closet items, select outfits that work well together.
 
-cold coffee, warm LO, I can lose him!
+Criteria: {occasion} occasion, {weather} weather, {color_palette} color palette.
 
-Build 2 outfits from LO closet matching: {occasion} occasion, {weather} weather, {color_palette} palette.
+RULES:
+1. Only use item IDs that exist in the list I provide — do NOT invent IDs
+2. Pick items that coordinate in color and style for the given occasion/weather
+3. Each outfit needs: at minimum a top+bottom OR a dress, plus shoes if available
+4. A complete outfit typically has: top + bottom + shoes OR dress + shoes
+5. Return up to 2 outfits maximum
+6. Do NOT generate any text outside the JSON
 
-Profile: {body_type}, {height}, {budget}, {lifestyle}, {profession}, {style_goal}, {brands}
-
-Return ONLY JSON array:
+Return ONLY this JSON array format:
 [
-  {{ "outfit_name": "Name", "item_ids": ["id1", "id2", "id3"], "reason": "why this works" }},
-  {{ "outfit_name": "Name", "item_ids": ["id4", "id5", "id6"], "reason": "why this works" }}
+  {{ "outfit_name": "short style name", "item_ids": ["id1", "id2", "id3"], "reason": "why these items work for the occasion/weather" }},
+  {{ "outfit_name": "short style name", "item_ids": ["id4", "id5", "id6"], "reason": "why these items work for the occasion/weather" }}
 ]"""
 
 REQUIRED_KEYS = [
@@ -1398,12 +1402,12 @@ def call_groq_vision(image_b64: str, system_prompt: str = SACRED_PROMPT, tempera
     _log.warning("[MIMO-VISION] All vision providers failed")
     return None
 
-def call_groq_text(messages: List[Dict[str, str]], system_prompt: str = "", temperature: float = 0.7, timeout: int = 30, max_tokens: Optional[int] = None) -> Any:
+def call_groq_text(messages: List[Dict[str, str]], system_prompt: str = "", temperature: float = 0.7, timeout: int = 30, max_tokens: Optional[int] = None, model: Optional[str] = None) -> Any:
     if not MIMO_API_KEY:
         return None
     headers = {"Content-Type": "application/json", "api-key": MIMO_API_KEY, "HTTP-Referer": "https://luxor.ly", "X-Title": "LuxorHub"}
 
-    models_to_try = [MIMO_TEXT_MODEL]
+    models_to_try = [model] if model else [MIMO_TEXT_MODEL]
 
     for model in models_to_try:
         groq_messages = []
@@ -2281,18 +2285,16 @@ def dressing_generate():
             return "other"
 
         # -----------------------------------------------------------------------
-        # Weather suitability check — BE TRUTHFUL
+        # Weather suitability check
         # -----------------------------------------------------------------------
         def is_weather_suitable(item: Dict, weather: str) -> bool:
-            """Returns True if item works for given weather. Uses item.season field first, then infers."""
             season = (item.get("season") or "").lower().strip()
             label = (item.get("label") or "").lower()
             type_name = (item.get("type") or "").lower()
             combined = f"{label} {type_name}"
 
-            # Use explicit season field if available
             if season and season not in ("", "none", "any"):
-                if season in ("all-season", "all", "all season"):
+                if season in ("all-season", "all", "all season", "all_season"):
                     return True
                 if weather == "hot" and season in ("summer", "spring"):
                     return True
@@ -2300,24 +2302,18 @@ def dressing_generate():
                     return True
                 if weather == "mild" and season in ("spring", "fall", "autumn", "summer"):
                     return True
-                return False  # season field contradicts weather
+                return False
 
-            # Infer from item type/label when no season field
-            # Cold weather: exclude obviously warm-weather items
             if weather == "cold":
                 hot_only = ["shorts", "tank top", "sandal", "flip flop", "slide", "bikini", "swim", "crop top", "mini skirt", "sleeveless", "muscle tee", "vest top"]
                 if any(kw in combined for kw in hot_only):
                     return False
-                return True  # most items work for cold
-
-            # Hot weather: exclude obviously cold-weather items
+                return True
             if weather == "hot":
-                cold_only = ["coat", "jacket", "sweater", "hoodie", "parka", "boots", "scarf", "gloves", "beanie", "fleece", "wool", "puffer", "trench", "blazer", "cardigan", "overcoat", "down", "thermal", "long sleeve"]
+                cold_only = ["coat", "jacket", "sweater", "hoodie", "parka", "boots", "scarf", "gloves", "beanie", "fleece", "wool", "puffer", "trench", "cardigan", "overcoat", "down", "thermal", "long sleeve"]
                 if any(kw in combined for kw in cold_only):
                     return False
-                return True  # most light items work for hot
-
-            # Mild weather: everything works
+                return True
             return True
 
         # -----------------------------------------------------------------------
@@ -2329,7 +2325,6 @@ def dressing_generate():
             cat = normalize_cat(item.get("type", item.get("category", "other")))
             if cat == "other":
                 cat = smart_redetect(item)
-            # Weather check
             if not is_weather_suitable(item, weather):
                 weather_filtered_out += 1
                 continue
@@ -2337,11 +2332,9 @@ def dressing_generate():
                 grouped[cat] = []
             grouped[cat].append(item)
 
-        _log.info("[DRESSING] Grouped items: %s | Filtered out for weather: %d", {k: len(v) for k, v in grouped.items()}, weather_filtered_out)
+        _log.info("[DRESSING] Grouped: %s | Filtered out for weather: %d", {k: len(v) for k, v in grouped.items()}, weather_filtered_out)
 
-        # -----------------------------------------------------------------------
-        # ANALYSIS PHASE — understand what we have to work with
-        # -----------------------------------------------------------------------
+        total_items = sum(len(v) for v in grouped.values())
         has_full_outfits = len(grouped.get("full_outfit", [])) > 0
         has_dresses = len(grouped.get("dress", [])) > 0
         has_tops = len(grouped.get("top", [])) > 0
@@ -2349,14 +2342,7 @@ def dressing_generate():
         has_shoes = len(grouped.get("shoes", [])) > 0
         has_accessories = len(grouped.get("accessory", [])) > 0
 
-        total_items_after_filter = sum(len(v) for v in grouped.values())
-        _log.info("[DRESSING] Analysis: full_outfits=%d tops=%d bottoms=%d shoes=%d dresses=%d accessories=%d others=%d",
-                  len(grouped.get("full_outfit", [])), len(grouped.get("top", [])), len(grouped.get("bottom", [])),
-                  len(grouped.get("shoes", [])), len(grouped.get("dress", [])), len(grouped.get("accessory", [])),
-                  len(grouped.get("other", [])))
-
-        # Truthful check: if every item was filtered out for weather
-        if total_items_after_filter == 0:
+        if total_items == 0:
             msg = f"Nothing suitable for {weather} weather in your closet."
             if weather == "cold":
                 msg += " Add warm items like coats, sweaters, pants, or boots."
@@ -2365,84 +2351,61 @@ def dressing_generate():
             return jsonify({"success": False, "error": msg})
 
         # -----------------------------------------------------------------------
-        # Occasion + Weather description for naming
+        # Descriptors for naming
         # -----------------------------------------------------------------------
-        weather_prefixes = {
-            "hot": "Summer", "mild": "Mild", "cold": "Winter",
-            "rainy": "Rainy Day", "windy": "Windy",
-        }
+        weather_prefixes = {"hot": "Summer", "mild": "Mild", "cold": "Winter", "rainy": "Rainy Day", "windy": "Windy"}
         weather_desc = weather_prefixes.get(weather.lower(), weather.capitalize()) if weather else ""
 
-        palette_descs = {
-            "neutrals": "Neutral", "brights": "Vibrant", "pastels": "Soft",
-            "dark": "Evening", "earthy": "Earthy", "monochrome": "Monochrome",
-        }
+        palette_descs = {"neutrals": "Neutral", "brights": "Vibrant", "pastels": "Soft", "dark": "Evening", "earthy": "Earthy", "monochrome": "Monochrome"}
         palette_desc = palette_descs.get(color_palette.lower(), "") if color_palette else ""
+        palette_part = f"\u2022 {palette_desc}" if palette_desc else ""
 
-        occasion_prefixes = {
-            "casual": "Casual", "business": "Business", "party": "Party",
-            "date-night": "Date Night", "sport": "Sport", "formal": "Formal",
-            "vacation": "Vacation", "beach": "Beach", "work": "Work",
-            "romantic": "Romantic", "festival": "Festival", "travel": "Travel",
-        }
+        occasion_prefixes = {"casual": "Casual", "business": "Business", "party": "Party", "date-night": "Date Night", "sport": "Sport", "formal": "Formal", "vacation": "Vacation", "beach": "Beach", "work": "Work", "romantic": "Romantic", "festival": "Festival", "travel": "Travel"}
         occ_prefix = occasion_prefixes.get(occasion.lower(), occasion.capitalize() if occasion else "Casual")
+        weather_part = f"{weather_desc} " if weather_desc else ""
 
-        # -----------------------------------------------------------------------
-        # Helper: pick items for a template
-        # -----------------------------------------------------------------------
-        def pick_items_for_template(template: List[str], used: set) -> Optional[List[Dict]]:
-            chosen = []
-            local_used = set(used)
-            for slot in template:
-                candidates = []
-                for cat_part in slot.split(","):
-                    candidates.extend(grouped.get(cat_part.strip(), []))
-                available = [i for i in candidates if i.get("id") not in local_used]
-                if not available:
-                    return None
-                pick = random.choice(available)
-                local_used.add(pick.get("id"))
-                chosen.append(pick)
-            if len(chosen) < 2:
-                return None
-            return chosen
-
-        # -----------------------------------------------------------------------
-        # Build outfit name + reason
-        # -----------------------------------------------------------------------
         def format_item_desc(item: Dict) -> str:
             c = item.get("color", "")
-            t = item.get("type", item.get("category", ""))
             l = item.get("label", "")
-            if c and t:
-                return f"a {c.lower()} {t.lower()}"
+            t = item.get("type", item.get("category", ""))
             if l:
-                return f"a {l.lower()}"
-            return t.lower() if t else "an item"
+                label_text = l.lower()
+                if c:
+                    c_lower = c.lower()
+                    if c_lower in label_text:
+                        return f"your {label_text}"
+                    return f"your {c_lower} {label_text}"
+                return f"your {label_text}"
+            if c and t:
+                return f"your {c.lower()} {t.lower()}"
+            return "an item from your closet"
 
-        def build_reason(item_descs: List[str], occ: str, wthr: str, pal: str) -> str:
-            occ_phrases = {
-                "casual": "everyday casual wear", "business": "the office", "party": "parties and nights out",
-                "date-night": "a romantic date night", "sport": "active days", "formal": "formal events",
-                "vacation": "vacation", "beach": "the beach", "work": "work", "romantic": "romantic occasions",
-                "festival": "festivals", "travel": "traveling",
-            }
+        def build_name(items_list):
+            name_parts = []
+            for item in items_list:
+                norm = normalize_cat(item.get("type", item.get("category", "")))
+                raw = item.get("type", "")
+                label = type_label(norm, raw)
+                if label not in name_parts:
+                    name_parts.append(label)
+            if len(name_parts) <= 2:
+                items_str = " & ".join(name_parts) if name_parts else "Look"
+            else:
+                items_str = ", ".join(name_parts[:-1]) + " & " + name_parts[-1]
+            return f"{weather_part}{occ_prefix} {items_str} {palette_part}".strip()
+
+        def build_reason(item_descs, occ, wthr, pal):
+            occ_phrases = {"casual": "everyday casual wear", "business": "the office", "party": "parties and nights out", "date-night": "a romantic date night", "sport": "active days", "formal": "formal events", "vacation": "vacation", "beach": "the beach", "work": "work", "romantic": "romantic occasions", "festival": "festivals", "travel": "traveling"}
             occ_phrase = occ_phrases.get(occ.lower(), f"{occ.lower()} occasions") if occ else "any occasion"
             wthr_phrases = {"hot": "warm weather", "mild": "mild weather", "cold": "cold weather", "rainy": "rainy days", "windy": "windy days"}
             weather_phrase = wthr_phrases.get(wthr.lower(), "") if wthr else ""
-            pal_phrases = {
-                "neutrals": "a neutral palette", "brights": "vibrant colors", "pastels": "soft pastel tones",
-                "dark": "deep, moody tones", "earthy": "earthy tones", "monochrome": "a monochrome palette",
-            }
+            pal_phrases = {"neutrals": "a neutral palette", "brights": "vibrant colors", "pastels": "soft pastel tones", "dark": "deep, moody tones", "earthy": "earthy tones", "monochrome": "a monochrome palette"}
             palette_phrase = pal_phrases.get(pal.lower(), "") if pal else ""
-
-            # Use natural phrasing based on how many items
             if len(item_descs) == 1:
                 r = f"{item_descs[0].capitalize()} \u2014 great for {occ_phrase}"
             elif len(item_descs) == 2:
                 r = f"{item_descs[0].capitalize()} paired with {item_descs[1]} \u2014 ideal for {occ_phrase}"
             else:
-                # For 3+ items: first with second, accent with third
                 r = f"{item_descs[0].capitalize()} paired with {item_descs[1]}, accented with {item_descs[2]} \u2014 perfect for {occ_phrase}"
             if weather_phrase:
                 r += f" in {weather_phrase}"
@@ -2451,150 +2414,195 @@ def dressing_generate():
             r += "."
             return r
 
-        def build_name(items_list: List[Dict], occ_prefix: str, weather_desc: str, palette_desc: str) -> str:
-            name_parts = []
-            for item in items_list:
-                norm = normalize_cat(item.get("type", item.get("category", "")))
-                raw = item.get("type", "")
-                label = type_label(norm, raw)
-                if label not in name_parts:
-                    name_parts.append(label)
-            weather_part = f"{weather_desc} " if weather_desc else ""
-            palette_part = f"\u2022 {palette_desc}" if palette_desc else ""
-            # Use Oxford comma style: "Top, Bottom & Shoes" not "Top & Bottom & Shoes"
-            if len(name_parts) <= 2:
-                items_str = " & ".join(name_parts) if name_parts else "Look"
-            else:
-                items_str = ", ".join(name_parts[:-1]) + " & " + name_parts[-1]
-            return f"{weather_part}{occ_prefix} {items_str} {palette_part}".strip()
+        def item_id_set(items):
+            return frozenset(i.get("id", "") for i in items)
 
-        # -----------------------------------------------------------------------
-        # GENERATE OUTFITS — collect ALL valid options (flexible count)
-        # -----------------------------------------------------------------------
+        def lookup_items_by_ids(ids):
+            """Look up items by ID from grouped items and closet_items."""
+            id_to_item = {}
+            for item in closet_items:
+                id_to_item[item.get("id", "")] = item
+            found = []
+            for iid in ids:
+                if iid in id_to_item:
+                    found.append(id_to_item[iid])
+            return found
+
+        # =====================================================================
+        # GENERATION — MIMO FIRST, combinatorial fallback
+        # =====================================================================
         outfit_options = []
         attempted_signatures = set()
-        MAX_OUTFITS = 6
-        already_paired_accesories = set()
 
-        # ---- Phase A: Full Outfits (complete looks) ----
+        # ---- Phase A: Full Outfits (pre-made complete looks) ----
         for full_outfit in grouped.get("full_outfit", []):
-            if len(outfit_options) >= MAX_OUTFITS:
-                break
-
             items = [full_outfit]
             used_ids = {full_outfit.get("id")}
-
-            # Analyze: does this full outfit need shoes or accessories?
             combined_label = (full_outfit.get("label", "") + " " + full_outfit.get("name", "") + " " + full_outfit.get("type", "")).lower()
             already_has_shoes = any(kw in combined_label for kw in ["with shoes", "with boots", "with sneakers", "includes shoes", "includes boots"])
             already_has_accessories = any(kw in combined_label for kw in ["with bag", "with jewelry", "with accessories", "with clutch", "with scarf", "with hat", "includes accessories"])
-
-            # If the full outfit description doesn't mention shoes and we have shoes, add a pair
             if not already_has_shoes and has_shoes:
-                shoes_available = [s for s in grouped.get("shoes", []) if s.get("id") not in used_ids]
-                if shoes_available:
-                    pick = random.choice(shoes_available)
+                avail = [s for s in grouped.get("shoes", []) if s.get("id") not in used_ids]
+                if avail:
+                    pick = random.choice(avail)
                     items.append(pick)
                     used_ids.add(pick.get("id"))
-
-            # If missing accessories and we have them, add one
             if not already_has_accessories and has_accessories:
-                acc_available = [a for a in grouped.get("accessory", []) if a.get("id") not in used_ids]
-                if acc_available:
-                    pick = random.choice(acc_available)
+                avail = [a for a in grouped.get("accessory", []) if a.get("id") not in used_ids]
+                if avail:
+                    pick = random.choice(avail)
                     items.append(pick)
                     used_ids.add(pick.get("id"))
-
-            # Build name: mention it's a complete outfit
             name_parts = ["Full Outfit"]
             if len(items) > 1:
-                extra_items = [type_label(normalize_cat(i.get("type", "")), i.get("type", "")) for i in items[1:]]
-                name_parts.extend(extra_items)
-            weather_part = f"{weather_desc} " if weather_desc else ""
-            palette_part = f"\u2022 {palette_desc}" if palette_desc else ""
+                extra = [type_label(normalize_cat(i.get("type", "")), i.get("type", "")) for i in items[1:]]
+                name_parts.extend(extra)
             items_str = " & ".join(name_parts)
             outfit_name = f"{weather_part}{occ_prefix} {items_str} {palette_part}".strip()
-
             item_descs = [format_item_desc(it) for it in items]
             reason = build_reason(item_descs, occasion, weather, color_palette)
-            sig = frozenset(i.get("id", "") for i in items)
+            sig = item_id_set(items)
             if sig not in attempted_signatures:
                 attempted_signatures.add(sig)
-                outfit_options.append({
-                    "outfit_name": outfit_name,
-                    "reason": reason,
-                    "items": items,
-                })
+                outfit_options.append({"outfit_name": outfit_name, "reason": reason, "items": items})
 
-        # ---- Phase B: Template-based combinations ----
-        templates = [
-            # Complete layered looks
-            ["dress", "shoes", "accessory"],
-            ["top", "bottom", "shoes", "accessory"],
-            ["top", "bottom", "shoes"],
-            ["dress", "shoes"],
-            ["dress", "accessory"],
-            ["top", "bottom", "accessory"],
-            ["top", "bottom"],
-            ["top", "shoes"],
-            ["bottom", "shoes"],
-            ["top", "accessory"],
-            ["bottom", "accessory"],
-            ["dress"],
-            ["top"],
-            ["bottom"],
-        ]
+        # ---- Phase B: MiMo Selects Items (Primary) ----
+        if len(outfit_options) < 2:
+            # Build a clean item list for MiMo
+            item_lines = []
+            for item in closet_items:
+                iid = item.get("id", "")
+                label = item.get("label", "Unknown")
+                color = item.get("color", "")
+                itype = item.get("type", item.get("category", "other"))
+                cat = normalize_cat(itype)
+                if cat == "other":
+                    cat = smart_redetect(item)
+                season_tag = f" [{item.get('season', '')}]" if item.get("season") else ""
+                color_tag = f" ({color})" if color else ""
+                item_lines.append(f"  ID:{iid} - {label}{color_tag} [{cat}]{season_tag}")
 
-        for template in templates:
-            if len(outfit_options) >= MAX_OUTFITS:
-                break
-            for _ in range(4):  # multiple attempts for variety
-                if len(outfit_options) >= MAX_OUTFITS:
+            items_text = "Closet items:\n" + "\n".join(item_lines)
+            prompt = CLOSET_PROMPT.format(occasion=occasion, weather=weather, color_palette=color_palette,
+                body_type="Average", height="Average", budget="Mid-range",
+                lifestyle="Casual", profession="Professional", style_goal="Confident", brands="Any")
+
+            messages = [
+                {"role": "user", "content": items_text},
+                {"role": "user", "content": prompt},
+            ]
+
+            for mimo_attempt in range(2):  # up to 2 retries
+                if len(outfit_options) >= 4:
                     break
-                items = pick_items_for_template(template, set())
-                if items is None:
+                _log.info("[DRESSING] MiMo attempt %d/2", mimo_attempt + 1)
+                result = call_groq_text(messages, temperature=0.5, timeout=90, max_tokens=4096, model=MIMO_VISION_MODEL)
+                if not result:
+                    _log.warning("[DRESSING] MiMo returned nothing on attempt %d", mimo_attempt + 1)
                     continue
-                sig = frozenset(i.get("id", "") for i in items)
-                if sig in attempted_signatures or len(sig) < 2:
+
+                outfit_list = result if isinstance(result, list) else (result.get("outfits") if isinstance(result, dict) else None)
+                if not isinstance(outfit_list, list) or not outfit_list:
+                    _log.warning("[DRESSING] MiMo returned invalid format: %s", str(result)[:200])
                     continue
-                attempted_signatures.add(sig)
 
-                outfit_name = build_name(items, occ_prefix, weather_desc, palette_desc)
-                item_descs = [format_item_desc(it) for it in items]
-                reason = build_reason(item_descs, occasion, weather, color_palette)
+                for opt in outfit_list:
+                    if len(outfit_options) >= 4:
+                        break
+                    item_ids = opt.get("item_ids", [])
+                    if not item_ids:
+                        continue
+                    # Validate all IDs exist in the closet
+                    items = lookup_items_by_ids(item_ids)
+                    if len(items) < 2:
+                        continue
+                    # Verify at least one clothing + shoes minimum
+                    cats_in_outfit = set(normalize_cat(i.get("type", i.get("category", ""))) for i in items)
+                    has_clothing = "top" in cats_in_outfit or "bottom" in cats_in_outfit or "dress" in cats_in_outfit or "full_outfit" in cats_in_outfit
+                    if not has_clothing:
+                        continue
+                    sig = item_id_set(items)
+                    if sig in attempted_signatures:
+                        continue
+                    attempted_signatures.add(sig)
+                    # Use MiMo's name if it's reasonable, otherwise generate our own
+                    mimo_name = (opt.get("outfit_name") or "").strip()
+                    if mimo_name and len(mimo_name) > 2 and len(mimo_name) < 40:
+                        outfit_name = f"{weather_part}{occ_prefix} {mimo_name} {palette_part}".strip()
+                    else:
+                        outfit_name = build_name(items)
+                    # Use MiMo's reason if it's reasonable, otherwise generate our own
+                    mimo_reason = (opt.get("reason") or "").strip()
+                    if mimo_reason and len(mimo_reason) > 10:
+                        reason = mimo_reason
+                    else:
+                        item_descs = [format_item_desc(it) for it in items]
+                        reason = build_reason(item_descs, occasion, weather, color_palette)
+                    _log.info("[DRESSING] MiMo generated outfit: %s (%d items)", outfit_name, len(items))
+                    outfit_options.append({"outfit_name": outfit_name, "reason": reason, "items": items})
 
-                outfit_options.append({
-                    "outfit_name": outfit_name,
-                    "reason": reason,
-                    "items": items,
-                })
+        # ---- Phase C: Combinatorial Fallback (if MiMo didn't give enough) ----
+        if len(outfit_options) < 2:
+            _log.info("[DRESSING] Using combinatorial fallback")
+            templates = [
+                ["dress", "shoes", "accessory"], ["top", "bottom", "shoes", "accessory"],
+                ["top", "bottom", "shoes"], ["dress", "shoes"], ["dress", "accessory"],
+                ["top", "bottom", "accessory"], ["top", "bottom"], ["top", "shoes"],
+                ["bottom", "shoes"], ["top", "accessory"], ["bottom", "accessory"],
+                ["dress"], ["top"], ["bottom"],
+            ]
 
-        # ---- Phase C: If we have only 1 category of items, make a truthful single-item outfit ----
+            def pick_for_template(template, used_ids):
+                chosen = []
+                local_used = set(used_ids)
+                for slot in template:
+                    candidates = []
+                    for cat_part in slot.split(","):
+                        candidates.extend(grouped.get(cat_part.strip(), []))
+                    avail = [i for i in candidates if i.get("id") not in local_used]
+                    if not avail:
+                        return None
+                    pick = random.choice(avail)
+                    local_used.add(pick.get("id"))
+                    chosen.append(pick)
+                if len(chosen) < 2:
+                    return None
+                return chosen
+
+            for template in templates:
+                if len(outfit_options) >= 4:
+                    break
+                for _ in range(4):
+                    if len(outfit_options) >= 4:
+                        break
+                    items = pick_for_template(template, set())
+                    if items is None:
+                        continue
+                    sig = item_id_set(items)
+                    if sig in attempted_signatures or len(sig) < 2:
+                        continue
+                    attempted_signatures.add(sig)
+                    outfit_name = build_name(items)
+                    item_descs = [format_item_desc(it) for it in items]
+                    reason = build_reason(item_descs, occasion, weather, color_palette)
+                    outfit_options.append({"outfit_name": outfit_name, "reason": reason, "items": items})
+
+        # ---- Phase D: Single-item fallback ----
         if not outfit_options:
-            # Find the most populated category
             best_cat = max(grouped.items(), key=lambda kv: len(kv[1])) if grouped else (None, [])
             if best_cat and best_cat[1]:
                 cat_name, cat_items = best_cat
-                outfit_name = f"{weather_desc} {occ_prefix} {type_label(cat_name, cat_items[0].get('type', ''))} {palette_part}".strip()
-                the_label = cat_items[0].get("label", cat_name)
+                the_item = cat_items[0]
+                the_label = the_item.get("label", cat_name)
+                outfit_name = f"{weather_part}{occ_prefix} {type_label(cat_name, the_item.get('type', ''))} {palette_part}".strip()
                 reason = f"Your {the_label.lower()} \u2014 your only option for {occ_prefix.lower()} {weather_desc.lower()} wear."
-                outfit_options.append({
-                    "outfit_name": outfit_name,
-                    "reason": reason,
-                    "items": [random.choice(cat_items)],
-                })
+                outfit_options.append({"outfit_name": outfit_name, "reason": reason, "items": [the_item]})
 
-        # -----------------------------------------------------------------------
-        # FINAL: if still nothing, be honest
-        # -----------------------------------------------------------------------
         if not outfit_options:
             return jsonify({"success": False, "error": f"Could not compose outfits for {weather} {occasion}. Not enough items in your closet that fit the weather and occasion."})
 
-        _log.info("[DRESSING] Success: %d outfit options generated", len(outfit_options))
-        return jsonify({
-            "success": True,
-            "outfit_options": outfit_options,
-        })
+        _log.info("[DRESSING] Success: %d outfit options", len(outfit_options))
+        return jsonify({"success": True, "outfit_options": outfit_options})
     except Exception as exc:
         _log.error("[DRESSING] Error: %s", exc, exc_info=True)
         return jsonify({"success": False, "error": f"Generation failed: {str(exc)[:100]}"}), 500
