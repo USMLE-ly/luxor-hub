@@ -2203,22 +2203,52 @@ def dressing_generate():
         if not closet_items:
             return jsonify({"success": False, "error": "Closet is empty! Add items first."})
 
-        # Group items by category for combinatorial matching
+        # -----------------------------------------------------------------------
+        # Category normalization
+        # -----------------------------------------------------------------------
         def normalize_cat(cat: str) -> str:
             c = cat.lower().strip()
-            if c in ("top", "shirt", "blouse", "t-shirt", "tshirt", "camisole", "tank", "sweater", "jacket", "coat", "hoodie", "cardigan", "blazer", "vest", "bodysuit"):
+            if c in ("top", "shirt", "blouse", "t-shirt", "tshirt", "camisole", "tank", "sweater", "jacket", "coat", "hoodie", "cardigan", "blazer", "vest", "bodysuit", "crop top", "tube top", "halter"):
                 return "top"
-            if c in ("bottom", "pants", "jeans", "trousers", "shorts", "skirt", "leggings", "chinos", "cargo"):
+            if c in ("bottom", "pants", "jeans", "trousers", "shorts", "skirt", "leggings", "chinos", "cargo", "culottes", "palazzo"):
                 return "bottom"
-            if c in ("shoes", "footwear", "sneakers", "boots", "sandals", "heels", "flats", "loafers", "oxfords"):
+            if c in ("shoes", "footwear", "sneakers", "boots", "sandals", "heels", "flats", "loafers", "oxfords", "mules", "wedges", "slides"):
                 return "shoes"
-            if c in ("dress", "gown", "jumpsuit", "romper"):
+            if c in ("dress", "gown", "jumpsuit", "romper", "caftan", "maxi dress", "mini dress", "midi dress", "sundress"):
                 return "dress"
-            if c in ("accessory", "accessories", "bag", "purse", "belt", "hat", "scarf", "jewelry", "watch", "sunglasses"):
+            if c in ("accessory", "accessories", "bag", "purse", "belt", "hat", "scarf", "jewelry", "watch", "sunglasses", "earrings", "necklace", "bracelet", "ring", "wallet", "backpack", "tote", "clutch", "headband", "gloves"):
                 return "accessory"
             return "other"
 
+        # -----------------------------------------------------------------------
+        # Build typeLabel for naming
+        # -----------------------------------------------------------------------
+        def type_label(norm_cat: str, raw_type: str) -> str:
+            if norm_cat == "top":
+                if raw_type.lower() in ("jacket", "coat", "hoodie", "cardigan", "blazer"):
+                    return "Layer"
+                return "Top"
+            if norm_cat == "bottom":
+                if raw_type.lower() in ("skirt", "shorts"):
+                    return raw_type.capitalize()
+                return "Bottom"
+            if norm_cat == "shoes":
+                if raw_type.lower() in ("boots", "sandals", "heels"):
+                    return raw_type.capitalize()
+                return "Shoes"
+            if norm_cat == "dress":
+                return "Dress"
+            if norm_cat == "accessory":
+                if raw_type.lower() in ("bag", "purse", "backpack", "tote", "clutch"):
+                    return "Bag"
+                if raw_type.lower() in ("hat", "cap", "beanie"):
+                    return "Hat"
+                return "Accessory"
+            return raw_type.capitalize() if raw_type else "Item"
+
+        # -----------------------------------------------------------------------
         # Group items by normalized category
+        # -----------------------------------------------------------------------
         grouped: Dict[str, List[Dict]] = {}
         for item in closet_items:
             cat = normalize_cat(item.get("type", item.get("category", "other")))
@@ -2228,91 +2258,122 @@ def dressing_generate():
 
         _log.info("[DRESSING] Grouped items: %s", {k: len(v) for k, v in grouped.items()})
 
-        # Generate outfit combinations using combinatorial logic
-        used_ids: set = set()
-        outfit_options = []
+        # -----------------------------------------------------------------------
+        # Occasion → name prefix mapping
+        # -----------------------------------------------------------------------
+        occasion_prefixes = {
+            "casual": "Casual",
+            "business": "Business",
+            "party": "Party",
+            "date-night": "Date Night",
+            "sport": "Sport",
+            "formal": "Formal",
+            "vacation": "Vacation",
+            "beach": "Beach",
+            "work": "Work",
+            "romantic": "Romantic",
+            "festival": "Festival",
+            "travel": "Travel",
+        }
+        occ_prefix = occasion_prefixes.get(occasion.lower(), occasion.capitalize() if occasion else "Casual")
 
-        # Helper: pick one from a group, preferring unused items
-        def pick_one(group_name: str) -> Optional[Dict]:
-            candidates = grouped.get(group_name, [])
-            available = [i for i in candidates if i.get("id") not in used_ids]
-            if not available:
-                available = candidates
-            if not available:
+        # -----------------------------------------------------------------------
+        # Outfit Templates — ordered by preference (best → fallback)
+        # Each template is a list of required category picks.
+        # Templates use commas within a slot to mean "pick best available from these categories"
+        # -----------------------------------------------------------------------
+        templates = [
+            # Best: complete, layered looks
+            ["dress", "shoes", "accessory"],
+            ["top", "bottom", "shoes", "accessory"],
+            ["top", "bottom", "shoes"],
+            ["dress", "shoes"],
+            ["dress", "accessory"],
+            ["top", "bottom", "accessory"],
+            ["top", "bottom"],
+            ["top", "shoes"],
+            ["bottom", "shoes"],
+            # Fallback: any single-piece outfit with extras
+            ["dress"],
+            ["top", "accessory"],
+            ["bottom", "accessory"],
+            ["top"],
+            ["bottom"],
+            ["shoes"],
+        ]
+
+        # -----------------------------------------------------------------------
+        # Helper: pick items from grouped categories, avoiding used ids
+        # -----------------------------------------------------------------------
+        def pick_items_for_template(template: List[str], used: set) -> Optional[List[Dict]]:
+            """Try to pick items matching a template. Returns None if can't fill required slots."""
+            chosen = []
+            local_used = set(used)
+            
+            for slot in template:
+                # Slot can be a single category or "cat1,cat2" meaning try in order
+                candidates = []
+                for cat_part in slot.split(","):
+                    candidates.extend(grouped.get(cat_part.strip(), []))
+                # Remove already-used items
+                available = [i for i in candidates if i.get("id") not in local_used]
+                if not available:
+                    # This template slot can't be filled → try next template
+                    return None
+                pick = random.choice(available)
+                local_used.add(pick.get("id"))
+                chosen.append(pick)
+            
+            # Require at least 2 items (or 1 if it's a dress standalone)
+            if len(chosen) == 1 and chosen[0] and normalize_cat(chosen[0].get("type", "")) in ("dress", "top", "bottom"):
+                # Single piece is okay if it's substantial
+                pass
+            elif len(chosen) < 2:
                 return None
-            return random.choice(available)
+                
+            return chosen
 
-        # Generate up to 2 outfit combinations
-        for attempt in range(3):
+        # -----------------------------------------------------------------------
+        # Generate 2 outfit options using templates
+        # -----------------------------------------------------------------------
+        outfit_options = []
+        attempted_signatures = set()  # avoid duplicates
+
+        # Try each template; for each template try up to N random picks for variety
+        for template in templates:
             if len(outfit_options) >= 2:
                 break
-            used_ids = set()
-            outfit_items: List[Dict] = []
-
-            # Try to pick: dress OR (top + bottom) + shoes
-            dress_item = pick_one("dress")
-            if dress_item:
-                used_ids.add(dress_item.get("id"))
-                outfit_items.append(dress_item)
-            else:
-                top_item = pick_one("top")
-                if top_item:
-                    used_ids.add(top_item.get("id"))
-                    outfit_items.append(top_item)
-                bottom_item = pick_one("bottom")
-                if bottom_item:
-                    used_ids.add(bottom_item.get("id"))
-                    outfit_items.append(bottom_item)
-
-            shoes_item = pick_one("shoes")
-            if shoes_item:
-                used_ids.add(shoes_item.get("id"))
-                outfit_items.append(shoes_item)
-
-            # If we didn't get enough, pick remaining from any available items
-            if len(outfit_items) < 2:
-                for item in closet_items:
-                    if len(outfit_items) >= 3:
-                        break
-                    if item.get("id") not in used_ids:
-                        used_ids.add(item.get("id"))
-                        outfit_items.append(item)
-
-            # If we got at least 2 items, this is a valid outfit
-            if len(outfit_items) >= 2:
-                # Check it's different from existing outfits
-                existing_sigs = set()
-                for o in outfit_options:
-                    ids = frozenset(i.get("id", "") for i in o["items"])
-                    existing_sigs.add(ids)
-                new_sig = frozenset(i.get("id", "") for i in outfit_items)
-                if new_sig not in existing_sigs:
-                    # Generate a simple name based on items
-                    item_types = [i.get("type", i.get("category", "")).lower() for i in outfit_items]
-                    name_parts = []
-                    for t in item_types:
-                        if t in ("top", "shirt", "blouse", "t-shirt"):
-                            name_parts.append("Top")
-                        elif t in ("bottom", "pants", "jeans"):
-                            name_parts.append("Bottom")
-                        elif t in ("shoes", "sneakers", "boots"):
-                            name_parts.append("Shoes")
-                        elif t == "dress":
-                            name_parts.append("Dress")
-                        elif t in ("jacket", "coat", "hoodie"):
-                            name_parts.append("Layer")
-                        elif t in ("accessory", "bag"):
-                            name_parts.append("Acc")
-                        else:
-                            name_parts.append(t.capitalize())
-                    occasion_title = occasion.capitalize() if occasion else "Casual"
-                    outfit_name = f"{occasion_title} {' & '.join(name_parts)}" if name_parts else f"{occasion_title} Look"
-
-                    outfit_options.append({
-                        "outfit_name": outfit_name,
-                        "reason": "",
-                        "items": outfit_items,
-                    })
+            
+            for _ in range(3):  # up to 3 attempts per template for variety
+                if len(outfit_options) >= 2:
+                    break
+                
+                items = pick_items_for_template(template, set())
+                if items is None:
+                    continue
+                
+                # Build signature to avoid duplicates
+                sig = frozenset(i.get("id", "") for i in items)
+                if sig in attempted_signatures or len(sig) < 2:
+                    continue
+                attempted_signatures.add(sig)
+                
+                # Build name from item types
+                name_parts = []
+                for item in items:
+                    norm = normalize_cat(item.get("type", item.get("category", "")))
+                    raw = item.get("type", "")
+                    label = type_label(norm, raw)
+                    if label not in name_parts:  # avoid "Top & Top"
+                        name_parts.append(label)
+                
+                outfit_name = f"{occ_prefix} {' & '.join(name_parts)}" if name_parts else f"{occ_prefix} Look"
+                
+                outfit_options.append({
+                    "outfit_name": outfit_name,
+                    "reason": "",
+                    "items": items,
+                })
 
         # If combinatorial found nothing, try AI as fallback
         if not outfit_options:
