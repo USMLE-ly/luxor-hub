@@ -2705,6 +2705,245 @@ def get_color_dictionary():
 
 # Debug & Health
 # ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# Style Analysis & Recommendations (MiMo Vision 2.5)
+# ---------------------------------------------------------------------------
+STYLE_ANALYSIS_PROMPT = """You are ENI, a professional fashion analyst and personal stylist. Analyze this person's photo and return ONLY valid JSON.
+
+Look at the ENTIRE person from head to toe. Be honest and precise.
+
+Return EXACTLY this JSON structure with your best estimates:
+{
+  "face_shape": "oval|round|square|heart|diamond|oblong|triangle|unknown",
+  "body_type": "ectomorph|mesomorph|endomorph|unknown",
+  "height_estimation": "short|average|tall",
+  "weight_estimation": "slim|average|overweight",
+  "bmi_category": "underweight|normal|overweight|obese",
+  "body_proportions": "balanced|long_torso|long_legs|short_torso|short_legs",
+  "shoulder_width": "narrow|average|broad",
+  "waist_to_hip_ratio": "low|medium|high",
+  "head_size_relative": "small|average|large",
+  "neck_length": "short|average|long",
+  "leg_length": "short|average|long",
+  "arm_proportions": "short|average|long",
+  "skin_tone": "fair|light|medium|tan|brown|dark|deep",
+  "skin_undertone": "cool|warm|neutral|olive",
+  "hair_color": "black|brown|blonde|red|gray|white|other",
+  "eye_shape": "almond|round|hooded|monolid|downturned|upturned|unknown",
+  "eye_size": "small|medium|large",
+  "nose_shape": "straight|aquiline|button|broad|pointed|flat|unknown",
+  "lip_shape": "thin|medium|full|asymmetric|unknown",
+  "age_estimation": "teens|20s|30s|40s|50s|60s+",
+  "gender_presentation": "masculine|feminine|androgynous",
+  "overall_style_profile": "brief 1-sentence description of their current style from this photo",
+  "outfit_description": "brief description of what they are currently wearing",
+  "current_style_score": "1-10 rating of their current outfit",
+  "current_style_strengths": ["strength1", "strength2"],
+  "current_style_improvements": ["improvement1", "improvement2"]
+}
+
+IMPORTANT: Base everything on what you actually see. Do not guess body measurements. Use relative terms like short/average/tall. Be honest but respectful."""
+
+RECOMMENDATION_PROMPT = """You are ENI, a brutally honest but respectful personal fashion stylist. Based on this person's style analysis data, generate personalized recommendations.
+
+Analysis data:
+{analysis_json}
+
+Return EXACTLY this JSON structure:
+{
+  "color_analysis": {
+    "best_colors": ["color1", "color2", "color3", "color4", "color5"],
+    "colors_to_avoid": ["color1", "color2", "color3"],
+    "best_accessory_colors": ["color1", "color2"],
+    "best_shoe_colors": ["color1", "color2"],
+    "best_jewelry_metals": ["gold", "silver", "rose_gold"],
+    "explanation": "Brief explanation of color recommendations based on skin tone and undertone"
+  },
+  "face_recommendations": {
+    "best_collar_types": ["type1", "type2"],
+    "best_neckline_styles": ["style1", "style2"],
+    "glasses_recommendation": "advice about glasses frames",
+    "hat_recommendation": "advice about hats",
+    "hairstyle_advice": "brief hairstyle advice",
+    "beard_advice": "advice if applicable or empty string",
+    "explanation": "Why these recommendations suit their face shape"
+  },
+  "body_recommendations": {
+    "shirt_fit": "advice on shirt fit",
+    "jacket_fit": "advice on jacket fit",
+    "pants_fit": "advice on pants fit",
+    "shorts_length": "advice on shorts length or empty string",
+    "coat_style": "advice on coat style",
+    "suit_cut": "advice on suit cut or empty string",
+    "explanation": "Why these recommendations suit their body type"
+  },
+  "honest_tips": [
+    {"tip": "Specific honest but respectful tip 1", "confidence": 85},
+    {"tip": "Specific honest but respectful tip 2", "confidence": 75},
+    {"tip": "Specific honest but respectful tip 3", "confidence": 90}
+  ],
+  "confidence_score": 85
+}
+
+RULES:
+- Be HONEST. If something doesn't work, say it.
+- Never give fake compliments. Say "This color makes you look washed out" not "This is fine."
+- Every tip must be specific and actionable.
+- Confidence score 0-100% how confident you are in these recommendations.
+- The honest tips should cover: fit issues, color issues, proportion issues, style improvements."""
+
+OUTFIT_REVIEW_PROMPT = """You are ENI, a professional fashion critic. Review this outfit photo and score it honestly.
+
+Return EXACTLY this JSON:
+{
+  "overall_score": 75,
+  "scores": {
+    "color_harmony": 70,
+    "body_fit": 65,
+    "face_compatibility": 80,
+    "occasion_suitability": 75,
+    "trendiness": 60,
+    "confidence_level": 70
+  },
+  "strengths": ["strength1", "strength2"],
+  "improvements": [
+    {"issue": "The shirt is too long for your torso", "suggestion": "Tuck it in or size down", "priority": "high"},
+    {"issue": "These colors clash", "suggestion": "Swap the top for a neutral", "priority": "medium"}
+  ],
+  "honest_summary": "1-2 sentences of honest overall feedback"
+}"""
+
+
+@app.route("/api/v1/style-analyze", methods=["POST", "OPTIONS"], strict_slashes=False)
+def style_analyze():
+    """Analyze a person's photo for body type, face shape, skin tone, proportions using MiMo Vision 2.5."""
+    if request.method == "OPTIONS":
+        return "", 204
+    try:
+        data = request.get_json(silent=True) or {}
+        image_b64 = data.get("image_b64", "")
+        if not image_b64:
+            return jsonify({"success": False, "error": "No image provided"}), 400
+
+        _log.info("[STYLE] Analyzing photo for body/face")
+
+        result = call_groq_vision(image_b64, STYLE_ANALYSIS_PROMPT, temperature=0.3)
+        if not result:
+            return jsonify({"success": False, "error": "Analysis failed. MiMo Vision could not process the image."})
+
+        # Normalize the response
+        analysis = {
+            "face_shape": result.get("face_shape", "unknown"),
+            "body_type": result.get("body_type", "unknown"),
+            "height_estimation": result.get("height_estimation", "average"),
+            "weight_estimation": result.get("weight_estimation", "average"),
+            "bmi_category": result.get("bmi_category", "normal"),
+            "body_proportions": result.get("body_proportions", "balanced"),
+            "shoulder_width": result.get("shoulder_width", "average"),
+            "waist_to_hip_ratio": result.get("waist_to_hip_ratio", "medium"),
+            "head_size_relative": result.get("head_size_relative", "average"),
+            "neck_length": result.get("neck_length", "average"),
+            "leg_length": result.get("leg_length", "average"),
+            "arm_proportions": result.get("arm_proportions", "average"),
+            "skin_tone": result.get("skin_tone", "medium"),
+            "skin_undertone": result.get("skin_undertone", "neutral"),
+            "hair_color": result.get("hair_color", "brown"),
+            "eye_shape": result.get("eye_shape", "almond"),
+            "eye_size": result.get("eye_size", "medium"),
+            "nose_shape": result.get("nose_shape", "straight"),
+            "lip_shape": result.get("lip_shape", "medium"),
+            "age_estimation": result.get("age_estimation", "30s"),
+            "gender_presentation": result.get("gender_presentation", "feminine"),
+            "overall_style_profile": result.get("overall_style_profile", ""),
+            "outfit_description": result.get("outfit_description", ""),
+            "current_style_score": result.get("current_style_score", 5),
+            "current_style_strengths": result.get("current_style_strengths", []),
+            "current_style_improvements": result.get("current_style_improvements", []),
+        }
+
+        _log.info("[STYLE] Analysis complete: face=%s body=%s skin=%s", analysis["face_shape"], analysis["body_type"], analysis["skin_tone"])
+        return jsonify({"success": True, "analysis": analysis})
+    except Exception as exc:
+        _log.error("[STYLE] Error: %s", exc, exc_info=True)
+        return jsonify({"success": False, "error": f"Analysis failed: {str(exc)[:100]}"}), 500
+
+
+@app.route("/api/v1/style-recommendations", methods=["POST", "OPTIONS"], strict_slashes=False)
+def style_recommendations():
+    """Generate personalized style recommendations based on analysis data."""
+    if request.method == "OPTIONS":
+        return "", 204
+    try:
+        data = request.get_json(silent=True) or {}
+        analysis = data.get("analysis", {})
+        preferences = data.get("preferences", {})
+
+        if not analysis:
+            return jsonify({"success": False, "error": "No analysis data provided. Run style analysis first."}), 400
+
+        _log.info("[STYLE] Generating recommendations from analysis")
+
+        # Build the prompt with the analysis data
+        prompt = RECOMMENDATION_PROMPT.format(analysis_json=json.dumps(analysis, indent=2))
+
+        messages = [
+            {"role": "user", "content": prompt},
+        ]
+
+        result = call_groq_text(messages, temperature=0.4, timeout=90, max_tokens=4096, model=MIMO_VISION_MODEL)
+        if not result:
+            return jsonify({"success": False, "error": "Failed to generate recommendations."})
+
+        recommendations = {
+            "color_analysis": result.get("color_analysis", {}),
+            "face_recommendations": result.get("face_recommendations", {}),
+            "body_recommendations": result.get("body_recommendations", {}),
+            "honest_tips": result.get("honest_tips", []),
+            "confidence_score": result.get("confidence_score", 70),
+        }
+
+        _log.info("[STYLE] Recommendations generated: %d tips", len(recommendations["honest_tips"]))
+        return jsonify({"success": True, "recommendations": recommendations})
+    except Exception as exc:
+        _log.error("[STYLE] Error: %s", exc, exc_info=True)
+        return jsonify({"success": False, "error": f"Recommendations failed: {str(exc)[:100]}"}), 500
+
+
+@app.route("/api/v1/outfit-review", methods=["POST", "OPTIONS"], strict_slashes=False)
+def outfit_review():
+    """Review an outfit photo with detailed scoring and honest feedback."""
+    if request.method == "OPTIONS":
+        return "", 204
+    try:
+        data = request.get_json(silent=True) or {}
+        image_b64 = data.get("image_b64", "")
+        occasion = data.get("occasion", "casual")
+
+        if not image_b64:
+            return jsonify({"success": False, "error": "No image provided"}), 400
+
+        _log.info("[STYLE] Reviewing outfit for occasion=%s", occasion)
+
+        review_prompt = OUTFIT_REVIEW_PROMPT + f"\n\nOccasion: {occasion}"
+        result = call_groq_vision(image_b64, review_prompt, temperature=0.3)
+        if not result:
+            return jsonify({"success": False, "error": "Outfit review failed."})
+
+        review = {
+            "overall_score": result.get("overall_score", 50),
+            "scores": result.get("scores", {}),
+            "strengths": result.get("strengths", []),
+            "improvements": result.get("improvements", []),
+            "honest_summary": result.get("honest_summary", ""),
+        }
+
+        _log.info("[STYLE] Outfit reviewed: score=%d, %d improvements", review["overall_score"], len(review["improvements"]))
+        return jsonify({"success": True, "review": review})
+    except Exception as exc:
+        _log.error("[STYLE] Error: %s", exc, exc_info=True)
+        return jsonify({"success": False, "error": f"Review failed: {str(exc)[:100]}"}), 500
+
 @app.route("/debug/analyze", methods=["POST"], strict_slashes=False)
 def debug_analyze():
     data = request.get_json(silent=True) or {}

@@ -121,6 +121,7 @@ const AppContent = () => {
             <Route path="/blog/:slug" element={<BlogArticle />} />
             <Route path="/deep-dive" element={<DeepDive />} />
             <Route path="/dressing-room" element={<PaywallGate><DressingRoom /></PaywallGate>} />
+            <Route path="/style-recommendations" element={<PaywallGate><StyleRecommendations /></PaywallGate>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </React.Suspense>
