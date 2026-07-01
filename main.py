@@ -84,27 +84,13 @@ def handle_preflight():
 # ---------------------------------------------------------------------------
 # Environment
 # ---------------------------------------------------------------------------
-# --- MiMo Vision 2.5 (single provider) ---
-MIMO_API_KEY = os.getenv("MIMO_API_KEY", "")
-MIMO_API_URL = "https://api.xiaomimimo.com/v1/chat/completions"
-MIMO_VISION_MODEL = os.getenv("MIMO_VISION_MODEL", "mimo-v2.5")
-MIMO_TEXT_MODEL = os.getenv("MIMO_TEXT_MODEL", "mimo-v2.5")
-
-# --- General ---
-CIPHER_MAX_TOKENS = int(os.getenv("CIPHER_MAX_TOKENS", "1500"))
-PORT = int(os.getenv("PORT", "5000"))
-
-# --- Vercel Blob ---
-BLOB_READ_WRITE_TOKEN = os.getenv("BLOB_READ_WRITE_TOKEN", "")
-
-# --- Qdrant Vector DB ---
-QDRANT_URL = os.getenv("QDRANT_URL", "")
-QDRANT_API_KEY = os.getenv("QDRANT_API_KEY", "")
-
-_log.info("MiMo API key: %s (masked: %s)", bool(MIMO_API_KEY), MIMO_API_KEY[:8] + "..." + MIMO_API_KEY[-4:] if MIMO_API_KEY else "NONE")
-_log.info("MiMo models: vision=%s text=%s", MIMO_VISION_MODEL, MIMO_TEXT_MODEL)
-_log.info("Blob token: %s", bool(BLOB_READ_WRITE_TOKEN))
-_log.info("Qdrant: %s", bool(QDRANT_URL and QDRANT_API_KEY))
+# Configuration imported from backend.config (single source of truth)
+from backend.config import (
+    MIMO_API_KEY, MIMO_API_URL, MIMO_VISION_MODEL, MIMO_TEXT_MODEL,
+    CIPHER_MAX_TOKENS, PORT, BLOB_READ_WRITE_TOKEN, QDRANT_URL, QDRANT_API_KEY,
+)
+backend.config.log_config()
+_log.info("Config loaded from backend.config module")
 
 # ---------------------------------------------------------------------------
 # Color Dictionary
@@ -415,44 +401,7 @@ def qdrant_get_item(item_id: str) -> Optional[Dict[str, Any]]:
 # ---------------------------------------------------------------------------
 # Prompts
 # ---------------------------------------------------------------------------
-SACRED_PROMPT = """You are ENI — a brutally honest but respectful fashion critic. Your soulmate LO needs real advice, not fake compliments. Analyze this fashion photo.
-Keep reasoning concise (max 300 words), then output the JSON.
-
-This is the ORIGINAL unmodified photo. Analyze the person's FULL outfit from head to toe.
-Look at the background for context but focus on the person's garments and accessories.
-
-Return ONLY valid JSON with these exact keys (no other text, no code fences):
-{
-  "gender": "Male or Female or Unspecified",
-  "vibe_type": "Casual or Business or Party or Sport or Date Night",
-  "top_type": "COLOR GarmentType",
-  "bottom_type": "COLOR GarmentType",
-  "footwear": "COLOR FootwearType",
-  "accessories": "comma-separated list with colors, or None",
-  "style_score": 40-95,
-  "style_name": "2-3 word catchy style name",
-  "strengths": ["2 specific strengths referencing visible items"],
-  "improvements": [
-    {"issue": "Specific honest critique about fit/color/style", "suggestion": "What to change", "priority": "high/medium/low"},
-    {"issue": "Another specific critique", "suggestion": "Fix", "priority": "medium"}
-  ],
-  "audit": "max 15 word brutally honest summary",
-  "tweak_plan": "1 specific styling change they should make",
-  "generation_prompt": "A fashion-forward person wearing [exact colors and garments seen]"
-}
-
-RULES FOR HONESTY:
-- style_score range 40-95. Be realistic. 40-60 = needs work, 60-80 = decent, 80-95 = genuinely well put together.
-- improvements MUST be specific (e.g., "The shirt is too long for your torso" not "could be better")
-- If the fit is wrong, say it. If colors clash, say it. If proportions are off, say it.
-- Never say "everything looks great" when it doesn't.
-- 0-1 improvements = you can say it's solid. 2-3 improvements = be thorough.
-- Colors: use ONE word from [Black, White, Navy, Blue, Red, Green, Grey, Brown, Yellow, Pink, Purple, Orange, Gold, Silver, Teal, Burgundy, Maroon, Beige, Cream, Olive]
-- Garment types: t-shirt, blouse, sweater, hoodie, jacket, blazer, coat, jeans, trousers, pants, shorts, skirt, dress, sneakers, boots, heels, loafers, sandals, flats
-- Each item = COLOR + TYPE (e.g., "Navy Jeans", "White Sneakers")
-- accessories: list EACH visible accessory WITH its color, comma separated. Check for: earrings, necklace, bracelet, rings, watch, handbag, belt, scarf, glasses, hat. If NONE visible, put "None"
-- NO HALLUCINATION: if you cannot clearly see a garment or accessory, return empty string ""
-- Be precise about exact garment colors."""
+SACRED_PROMPT = """(defined in backend/ai/prompts.py)"""
 
 STYLIST_PROMPT = """You are ENI — LO personal stylist soulmate. Make them look incredible.
 
