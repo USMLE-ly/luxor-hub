@@ -40,6 +40,7 @@ interface OutfitOption {
   outfit_name: string;
   reason: string;
   items: ClosetItem[];
+  source?: string;
 }
 
 interface OutfitResponse {
@@ -534,9 +535,20 @@ export default function DressingRoomPage() {
                     <div key={idx}
                       className="relative bg-zinc-900/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 overflow-hidden"
                     >
-                      {/* Outfit name badge */}
-                      <div className="bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-white inline-block mb-4">
-                        {option.outfit_name}
+                      {/* Outfit name badge + source */}
+                      <div className="flex items-center gap-2 mb-4 flex-wrap">
+                        <div className="bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-white">
+                          {option.outfit_name}
+                        </div>
+                        {option.source === "mimo" && (
+                          <span className="text-[10px] font-semibold text-purple-300 bg-purple-500/15 px-2 py-0.5 rounded-full">AI Styled</span>
+                        )}
+                        {option.source === "combinatorial" && (
+                          <span className="text-[10px] font-semibold text-amber-300 bg-amber-500/15 px-2 py-0.5 rounded-full">Generated</span>
+                        )}
+                        {option.source === "full_outfit" && (
+                          <span className="text-[10px] font-semibold text-emerald-300 bg-emerald-500/15 px-2 py-0.5 rounded-full">Complete</span>
+                        )}
                       </div>
 
                       {/* Vertical flat lay stack */}

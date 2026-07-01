@@ -2464,7 +2464,7 @@ def dressing_generate():
             sig = item_id_set(items)
             if sig not in attempted_signatures:
                 attempted_signatures.add(sig)
-                outfit_options.append({"outfit_name": outfit_name, "reason": reason, "items": items})
+                outfit_options.append({"outfit_name": outfit_name, "reason": reason, "items": items, "source": "full_outfit"})
 
         # ---- Phase B: MiMo Selects Items (Primary) ----
         if len(outfit_options) < 2:
@@ -2539,7 +2539,7 @@ def dressing_generate():
                         item_descs = [format_item_desc(it) for it in items]
                         reason = build_reason(item_descs, occasion, weather, color_palette)
                     _log.info("[DRESSING] MiMo generated outfit: %s (%d items)", outfit_name, len(items))
-                    outfit_options.append({"outfit_name": outfit_name, "reason": reason, "items": items})
+                    outfit_options.append({"outfit_name": outfit_name, "reason": reason, "items": items, "source": "mimo"})
 
         # ---- Phase C: Combinatorial Fallback (if MiMo didn't give enough) ----
         if len(outfit_options) < 2:
@@ -2585,7 +2585,7 @@ def dressing_generate():
                     outfit_name = build_name(items)
                     item_descs = [format_item_desc(it) for it in items]
                     reason = build_reason(item_descs, occasion, weather, color_palette)
-                    outfit_options.append({"outfit_name": outfit_name, "reason": reason, "items": items})
+                    outfit_options.append({"outfit_name": outfit_name, "reason": reason, "items": items, "source": "combinatorial"})
 
         # ---- Phase D: Single-item fallback ----
         if not outfit_options:
@@ -2596,7 +2596,7 @@ def dressing_generate():
                 the_label = the_item.get("label", cat_name)
                 outfit_name = f"{weather_part}{occ_prefix} {type_label(cat_name, the_item.get('type', ''))} {palette_part}".strip()
                 reason = f"Your {the_label.lower()} \u2014 your only option for {occ_prefix.lower()} {weather_desc.lower()} wear."
-                outfit_options.append({"outfit_name": outfit_name, "reason": reason, "items": [the_item]})
+                outfit_options.append({"outfit_name": outfit_name, "reason": reason, "items": [the_item], "source": "combinatorial"})
 
         if not outfit_options:
             return jsonify({"success": False, "error": f"Could not compose outfits for {weather} {occasion}. Not enough items in your closet that fit the weather and occasion."})
