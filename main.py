@@ -1258,14 +1258,7 @@ def call_groq_vision(image_b64: str, system_prompt: str = SACRED_PROMPT, tempera
     compressed = compress_image_b64(image_b64)
     
     # Clean prompt — original image, no background assumptions
-    clean_prompt = system_prompt + """
-**IMPORTANT:** This is the ORIGINAL photo with the original background.
-- Analyze the ENTIRE person from head to toe.
-- Look at the full outfit: top, bottom, footwear, and ALL accessories.
-- Accessories include: earrings, necklace, bracelet, watch, rings, handbag, belt, scarf, glasses, hat.
-- Check wrists, fingers, neck, ears, and hands carefully for small items.
-- Describe what you actually see — don't guess or invent items.
-"""
+    clean_prompt = system_prompt
     
     headers = {"Content-Type": "application/json", "api-key": MIMO_API_KEY, "HTTP-Referer": "https://luxor.ly", "X-Title": "LuxorHub"}
     
