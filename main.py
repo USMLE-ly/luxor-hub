@@ -26,7 +26,7 @@ import numpy as np
 try:
     import cv2
     import mediapipe as mp
-    from mediapipe.python.solutions.selfie_segmentation import SelfieSegmentation  # type: ignore[import-untyped]
+    from mediapipe.python.solutions.selfie_segmentation import SelfieSegmentation  # type: ignore  # pyright: ignore[reportMissingImports]
     _HAS_MEDIAPIPE = True
 except ImportError:
     cv2: Any = None
@@ -2385,8 +2385,8 @@ def dressing_generate():
         def build_name(items_list):
             name_parts = []
             for item in items_list:
-                norm = normalize_cat(item.get("type", item.get("category", "")))
-                raw = item.get("type", "")
+                norm = normalize_cat(item.get("type") or item.get("category") or "")
+                raw: str = item.get("type") or ""
                 label = type_label(norm, raw)
                 if label not in name_parts:
                     name_parts.append(label)
@@ -2457,7 +2457,7 @@ def dressing_generate():
                     used_ids.add(pick.get("id"))
             name_parts = ["Full Outfit"]
             if len(items) > 1:
-                extra = [type_label(normalize_cat(i.get("type", "")), i.get("type", "")) for i in items[1:]]
+                extra = [type_label(normalize_cat(i.get("type") or ""), str(i.get("type") or "")) for i in items[1:]]
                 name_parts.extend(extra)
             items_str = " & ".join(name_parts)
             outfit_name = f"{weather_part}{occ_prefix} {items_str} {palette_part}".strip()
@@ -2596,7 +2596,7 @@ def dressing_generate():
                 cat_name, cat_items = best_cat
                 the_item = cat_items[0]
                 the_label = the_item.get("label", cat_name)
-                outfit_name = f"{weather_part}{occ_prefix} {type_label(cat_name, the_item.get('type') or '')} {palette_part}".strip()
+                outfit_name = f"{weather_part}{occ_prefix} {type_label(cat_name, str(the_item.get('type') or ''))} {palette_part}".strip()
                 reason = f"Your {the_label.lower()} \u2014 your only option for {occ_prefix.lower()} {weather_desc.lower()} wear."
                 outfit_options.append({"outfit_name": outfit_name, "reason": reason, "items": [the_item], "source": "combinatorial"})
 
