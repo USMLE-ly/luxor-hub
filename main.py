@@ -1247,45 +1247,8 @@ def call_groq_vision(image_b64: str, system_prompt: str = SACRED_PROMPT, tempera
         _log.warning("[MIMO-VISION] Skipping MiMo - disabled")
         return None
     
-    # HARD DNS & CONNECTIVITY CHECK — requests timeout doesn't cover DNS!
-    # On Replit, DNS for api.xiaomimimo.com can hang indefinitely
-    import socket as _sock
-    _dns_ok = False
-    try:
-        _s = _sock.create_connection(("api.xiaomimimo.com", 443), timeout=5)
-        _s.close()
-        _dns_ok = True
-    except Exception as _e:
-        _log.warning("[MIMO-VISION] Cannot reach MiMo API (DNS/TCP): %s", _e)
-    
-    if not _dns_ok:
-        _log.warning("[MIMO-VISION] MiMo API unreachable - skipping")
-        _MIMO_VISION_WORKING = False
-        return None
-    
-    # Quick health check - test MiMo API responds
-    try:
-        test = requests.post(MIMO_API_URL, json={"model": MIMO_VISION_MODEL, "messages": [{"role":"user","content":"hi"}], "max_tokens": 1},
-                            headers={"Content-Type": "application/json", "api-key": MIMO_API_KEY}, timeout=8)
-        if test.status_code == 402:
-            _log.warning("[MIMO-VISION] MiMo account has no balance - disabling")
-            _MIMO_VISION_WORKING = False
-            return None
-        if test.status_code == 401:
-            _log.warning("[MIMO-VISION] Invalid MiMo API key")
-            _MIMO_VISION_WORKING = False
-            return None
-    except requests.exceptions.ConnectTimeout:
-        _log.warning("[MIMO-VISION] MiMo API unreachable (connect timeout)")
-        _MIMO_VISION_WORKING = False
-        return None
-    except requests.exceptions.ConnectionError:
-        _log.warning("[MIMO-VISION] MiMo API unreachable (connection refused)")
-        _MIMO_VISION_WORKING = False
-        return None
-    except Exception as exc:
-        _log.warning("[MIMO-VISION] Health check failed: %s", exc)
-        pass
+    # Removed flaky DNS/TCP check which gives false negatives on some networks.
+    # MiMo API is called directly — errors are caught naturally below.
 
     # Use original image directly — no person segmentation, no cropping
     # MiMo V2.5 can analyze the full photo without any pre-processing
@@ -2987,7 +2950,7 @@ def debug_analyze():
     features = _extract_image_features(image_b64)
     models_to_try = [MIMO_VISION_MODEL]
     for model in models_to_try:
-        payload = {"model": model, "messages": [{"role": "user", "content": [{"type": "text", "text": SACRED_PROMPT + "\n\nExtracted image features: " + features}, {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{compressed}"}}]}], "max_tokens": CIPHER_MAX_TOKENS, "temperature": 0.2}
+        payload = {"model": model, "messages": [{"role": "user", "content": [{"type": "text", "text": SACRED_PROMPT + "\n\nExtracted image features: " + features}, {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{compressed}"}}]}], "max_tokens": 4096, "temperature": 0.2}
         try:
             resp = requests.post(MIMO_API_URL, json=payload, headers=headers, timeout=120)
             if resp.status_code == 200:
