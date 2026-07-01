@@ -546,6 +546,7 @@ export default function Analysis() {
                     styleName={data.style_name}
                     styleScore={data.style_score || null}
                     strengths={data.strengths}
+                    improvements={data.improvements || []}
                     itemsDetected={data.items_detected}
                     actualColors={data.actual_colors}
                     audit={data.audit}

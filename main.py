@@ -1936,6 +1936,7 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
         "actual_colors": actual_colors,
         "items_detected": items_detected,
         "strengths": strengths,
+        "improvements": improvements,
         "audit": _humanize_audit(detected_items or items_detected, name),
         "tweak_plan": tweak_text,
         "tweak_image_url": tweak_image_url,
