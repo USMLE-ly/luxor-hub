@@ -284,15 +284,25 @@ const Closet = () => {
       });
       if (!resp.ok) throw new Error("Analysis failed");
       const analysis = await resp.json();
-      setNewItem((prev) => ({
-        ...prev,
-        category: analysis.category || analysis.item_category || prev.category,
-        color: analysis.color || analysis.item_color || prev.color,
-        style: analysis.style || analysis.item_style || prev.style,
-        season: analysis.season || prev.season,
-        occasion: analysis.occasion || prev.occasion,
-        name: prev.name || analysis.suggested_name || analysis.item_name || prev.name,
-      }));
+      setNewItem((prev) => {
+        // Normalize category to match dropdown options ["top","bottom","shoes","accessory","outerwear","dress","other"]
+        const _cats = ["top","bottom","shoes","accessory","outerwear","dress","other"];
+        const _rawCat = (analysis.category || analysis.item_category || "").toLowerCase().replace(/[^a-z]/g, "");
+        const _normCat = _cats.includes(_rawCat) ? _rawCat : prev.category;
+        // Normalize season to match dropdown options ["spring","summer","fall","winter","all-season"]
+        const _seasons = ["spring","summer","fall","winter","all-season"];
+        const _rawSeason = (analysis.season || "").toLowerCase().replace(/[^a-z]/g, "").replace(/^allseason$/,"all-season");
+        const _normSeason = _seasons.includes(_rawSeason) ? _rawSeason : prev.season;
+        return {
+          ...prev,
+          category: _normCat,
+          color: analysis.color || analysis.item_color || prev.color,
+          style: analysis.style || analysis.item_style || prev.style,
+          season: _normSeason,
+          occasion: analysis.occasion || prev.occasion,
+          name: prev.name || analysis.suggested_name || analysis.item_name || prev.name,
+        };
+      });
       toast.success("Details filled. Check and save.");
     } catch { toast.error("AI analysis failed. Fill in details manually."); }
     finally { setAnalyzing(false); }
