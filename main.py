@@ -1398,7 +1398,7 @@ def call_groq_vision(image_b64: str, system_prompt: str = SACRED_PROMPT, tempera
     _log.warning("[MIMO-VISION] All vision providers failed")
     return None
 
-def call_groq_text(messages: List[Dict[str, str]], system_prompt: str = "", temperature: float = 0.7, timeout: int = 30) -> Any:
+def call_groq_text(messages: List[Dict[str, str]], system_prompt: str = "", temperature: float = 0.7, timeout: int = 30, max_tokens: Optional[int] = None) -> Any:
     if not MIMO_API_KEY:
         return None
     headers = {"Content-Type": "application/json", "api-key": MIMO_API_KEY, "HTTP-Referer": "https://luxor.ly", "X-Title": "LuxorHub"}
@@ -1413,7 +1413,7 @@ def call_groq_text(messages: List[Dict[str, str]], system_prompt: str = "", temp
         payload = {
             "model": model,
             "messages": groq_messages,
-            "max_tokens": CIPHER_MAX_TOKENS,
+            "max_tokens": max_tokens if max_tokens is not None else CIPHER_MAX_TOKENS,
             "temperature": temperature,
         }
         try:
@@ -1421,7 +1421,13 @@ def call_groq_text(messages: List[Dict[str, str]], system_prompt: str = "", temp
             resp = requests.post(MIMO_API_URL, json=payload, headers=headers, timeout=timeout)
             _log.info("[MIMO-TEXT] HTTP %s for %s (key=%s...)", resp.status_code, model, MIMO_API_KEY[:8] if MIMO_API_KEY else "NONE")
             if resp.status_code == 200:
-                raw = resp.json()["choices"][0]["message"]["content"]
+                choice = resp.json()["choices"][0]["message"]
+                content_text = choice.get("content", "")
+                reasoning_text = choice.get("reasoning_content", "")
+                raw = content_text.strip()
+                if not raw:
+                    raw = reasoning_text.strip()
+                    _log.info("[MIMO-TEXT] Using reasoning_content (content was empty)")
                 raw = raw.strip()
                 _log.info("[MIMO-TEXT] Raw response (first 100): %s", raw[:100])
                 # Strip markdown code block wrappers if present
@@ -2219,7 +2225,7 @@ def dressing_generate():
         ]
 
         # Call Groq Text
-        result = call_groq_text(messages, temperature=0.7, timeout=60)
+        result = call_groq_text(messages, temperature=0.7, timeout=90, max_tokens=4096)
         if not result:
             _log.error("[DRESSING] MiMo returned no result")
             return jsonify({"success": False, "error": "Could not generate outfit"})
