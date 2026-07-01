@@ -1244,8 +1244,10 @@ def call_groq_vision(image_b64: str, system_prompt: str = SACRED_PROMPT, tempera
         return None
     global _MIMO_VISION_WORKING
     if not _MIMO_VISION_WORKING:
-        _log.warning("[MIMO-VISION] Skipping MiMo - disabled")
-        return None
+        # Auto-recover: previous failure may have disabled this flag.
+        # Reset and try again in case the network transiently recovered.
+        _log.warning("[MIMO-VISION] _MIMO_VISION_WORKING was False – resetting and retrying")
+        _MIMO_VISION_WORKING = True
     
     # Removed flaky DNS/TCP check which gives false negatives on some networks.
     # MiMo API is called directly — errors are caught naturally below.
