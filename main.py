@@ -2093,12 +2093,12 @@ def closet_analyze_item():
 
 Return ONLY valid JSON with these exact keys (no other text, no code fences):
 {
-  "item_category": "Top or Bottom or Footwear or Accessory or Dress or Outerwear or Other",
+  "item_category": "top or bottom or shoes or accessory or dress or outerwear or other (lowercase)",
   "item_color": "single word color name from [Black, White, Navy, Blue, Red, Green, Grey, Brown, Yellow, Pink, Purple, Orange, Gold, Silver, Teal, Burgundy, Maroon, Beige, Cream, Olive]",
   "item_style": "Casual or Formal or Sporty or Bohemian or Minimalist or Vintage or Streetwear or Preppy or Edgy",
   "item_type": "t-shirt or blouse or sweater or hoodie or jacket or blazer or coat or jeans or trousers or shorts or skirt or dress or sneakers or boots or heels or loafers or sandals or flats or accessory",
   "suggested_name": "a short descriptive name for this item, e.g. Navy Blue Blazer or White Cotton T-Shirt",
-  "season": "All-Season or Summer or Winter or Spring or Fall",
+  "season": "all-season or spring or summer or fall or winter (lowercase)",
   "occasion": "Casual or Business or Party or Date Night or Sport or Any"
 }
 
@@ -2113,12 +2113,33 @@ RULES:
         result = call_groq_vision(image_b64, analyze_prompt, 0.2)
         if result:
             # Extract fields from MiMo response with fallbacks
-            category = result.get("item_category") or result.get("category", "Other")
+            _raw_cat = result.get("item_category") or result.get("category", "Other")
+            _raw_season = result.get("season", "All-Season")
+            # Normalize to frontend dropdown values (lowercase, match uploadCategories + seasons arrays)
+            category = _raw_cat.lower().replace("-", "").replace(" ", "")
+            if category not in ("top", "bottom", "shoes", "accessory", "outerwear", "dress", "other"):
+                # Try mapping variations
+                if "shoe" in category or "footwear" in category:
+                    category = "shoes"
+                elif "accessor" in category:
+                    category = "accessory"
+                elif "outer" in category or "jacket" in category or "coat" in category:
+                    category = "outerwear"
+                else:
+                    category = "other"
+            season = _raw_season.lower().replace("-", " ").replace("_", " ").strip()
+            if season not in ("spring", "summer", "fall", "winter", "all season"):
+                if season in ("all", "any", "year-round", "year round"):
+                    season = "all season"
+                else:
+                    season = "all season"
+            # Re-hyphenate season for frontend: "all season" -> "all-season"
+            season = season.replace(" ", "-")
+            # Now season is one of: spring, summer, fall, winter, all-season
             color = result.get("item_color") or result.get("color", "")
             style = result.get("item_style") or result.get("style", "Casual")
             item_type = result.get("item_type", "other")
             suggested = result.get("suggested_name") or result.get("item_name", "")
-            season = result.get("season", "All-Season")
             occasion = result.get("occasion", "Casual")
 
             _log.info("[CLOSET-AI] Analysis: category=%s color=%s type=%s", category, color, item_type)
