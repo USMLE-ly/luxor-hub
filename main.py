@@ -1338,36 +1338,7 @@ def call_groq_vision(image_b64: str, system_prompt: str = SACRED_PROMPT, tempera
     except Exception as exc:
         _log.error("[MIMO-VISION] %s", exc)
 
-    # === FALLBACK: OpenRouter ===
-    if OPENROUTER_API_KEY:
-        try:
-            _log.info("[OPENROUTER] Trying fallback vision model=%s", OPENROUTER_VISION_MODEL)
-            or_headers = {"Content-Type": "application/json", "Authorization": f"Bearer {OPENROUTER_API_KEY}", "HTTP-Referer": "https://luxor.ly", "X-Title": "LuxorHub"}
-            or_payload = {
-                "model": OPENROUTER_VISION_MODEL,
-                "messages": [{"role": "user", "content": [
-                    {"type": "text", "text": clean_prompt},
-                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{compressed}"}},
-                ]}],
-                "max_tokens": 2048,
-                "temperature": temperature,
-            }
-            or_resp = requests.post("https://openrouter.ai/api/v1/chat/completions", json=or_payload, headers=or_headers, timeout=60)
-            _log.info("[OPENROUTER] HTTP %s", or_resp.status_code)
-            if or_resp.status_code == 200:
-                or_content = or_resp.json()["choices"][0]["message"].get("content", "")
-                if or_content:
-                    raw_clean = re.sub(r'^```(?:json)?\s*', '', or_content.strip())
-                    raw_clean = re.sub(r'\s*```$', '', raw_clean)
-                    match = re.search(r'\{[\s\S]*?\}', raw_clean)
-                    if match:
-                        parsed = json.loads(match.group(0))
-                        parsed["source"] = "openrouter_fallback"
-                        return parsed
-        except Exception as or_exc:
-            _log.error("[OPENROUTER] %s", or_exc)
-
-    _log.warning("[MIMO-VISION] All vision providers failed")
+    _log.warning("[MIMO-VISION] MiMo Vision failed - no fallback provider available")
     return None
 
 def call_groq_text(messages: List[Dict[str, str]], system_prompt: str = "", temperature: float = 0.7, timeout: int = 30, max_tokens: Optional[int] = None, model: Optional[str] = None) -> Any:
@@ -1734,7 +1705,7 @@ _image_b64_cache = ""
 # Fashion Decision
 # ---------------------------------------------------------------------------
 def get_fashion_decision(image_b64: str) -> Dict[str, Any]:
-    """Try MiMo vision first, return bare fallback instantly if it fails."""
+    """Call MiMo Vision 2.5 - returns None on failure, no fallback dummy data."""
     _log.info("[PIPELINE] Starting analysis")
     try:
         result = call_groq_vision(image_b64, SACRED_PROMPT, 0.2)
@@ -1747,13 +1718,8 @@ def get_fashion_decision(image_b64: str) -> Dict[str, Any]:
     except Exception as exc:
         _log.error("[PIPELINE] MiMo error: %s", exc)
     
-    _log.info("[PIPELINE] Fast fallback")
-    return {"style_name": "", "gender": "", "vibe_type": "Casual", 
-            "top_type": "", "bottom_type": "", "footwear": "", 
-            "accessories": "", "actual_colors": [], 
-            "items_detected": [], "strengths": [], "audit": "", 
-            "tweak_plan": "", "style_score": None, "source": "fallback",
-            "generation_prompt": "A fashion-forward person wearing a stylish outfit."}
+    _log.error("[PIPELINE] MiMo Vision 2.5 failed - no fallback")
+    raise RuntimeError("MiMo Vision 2.5 failed to analyze the image")
 
 
 def generate_tweak_visualization_prompt(accessory: str) -> str:
@@ -1900,7 +1866,7 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "success": True,
         "source": result.get("source", "unknown"),
-        "ai_source_label": {"cipher_vision": "MiMo Vision 2.5", "openrouter_fallback": "OpenRouter AI", "fallback": "Standard Analysis"}.get(result.get("source", "unknown"), "AI Analysis"),
+        "ai_source_label": "MiMo Vision 2.5",
         "style_name": name,
         "style_score": int(round(score)),
         "vibe_type": result.get("vibe_type", "Casual"),
@@ -1932,11 +1898,9 @@ def analyze_outfit():
     try:
         result = get_fashion_decision(image_b64)
         return jsonify(map_analysis(result))
-    except (CFTimeoutError, requests.exceptions.Timeout):
-        _log.error("[ANALYZE] Timeout")
     except Exception as exc:
         _log.error("[ANALYZE] ERROR: %s", exc)
-    return jsonify(map_analysis({"source": "fallback", "style_score": None}))
+        return jsonify({"success": False, "error": f"MiMo Vision 2.5 failed: {str(exc)[:200]}"}), 500
 
 # ---------------------------------------------------------------------------
 # Stylist Explore
