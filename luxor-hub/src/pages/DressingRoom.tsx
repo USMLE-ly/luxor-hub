@@ -6,8 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { ImageSwiper } from "@/components/ui/image-swiper";
-import { FashionHero } from "@/components/ui/hero-fashion";
+
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
@@ -490,7 +489,7 @@ export default function DressingRoomPage() {
           )}
         </AnimatePresence>
 
-        {/* ---- GENERATED OUTFITS (Collage Cards) ---- */}
+        {/* ---- GENERATED OUTFITS ---- */}
         {outfitGenerating && (
           <div className="flex items-center justify-center py-16">
             <div className="text-center space-y-4">
@@ -519,95 +518,69 @@ export default function DressingRoomPage() {
                 </button>
               </div>
 
-              {/* 2-column grid for collage cards */}
+              {/* FLAT LAY: Vertical stacks for each outfit option */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Swipeable image deck */}
-              <div className="flex justify-center">
-                <ImageSwiper
-                  images={generatedOutfits.map(o => o.items.map(i => i.image_url).join(',')).join(',')}
-                  cardWidth={300}
-                  cardHeight={420}
-                />
-              </div>
-              
-              {/* Selected outfit details via FashionHero */}
-              {selectedOutfit && (
-                <div className="mt-8">
-                  <FashionHero
-                    styleName={selectedOutfit.outfit_name || "Your Style"}
-                    styleScore={null}
-                    strengths={[selectedOutfit.reason || ""]}
-                    itemsDetected={selectedOutfit.items?.map((i: any) => i.label || i.type || "") || []}
-                    actualColors={[]}
-                    audit={selectedOutfit.reason || ""}
-                    tweakPlan=""
-                    imageUrl={selectedOutfit.items?.[0]?.image_url || ""}
-                    vibeType=""
-                  />
-                </div>
-              )}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                {generatedOutfits.map((option, idx) => (
-                  <div key={idx}
-                    className="relative bg-zinc-900/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 overflow-hidden"
-                  >
-                    {/* Outfit name badge */}
-                    <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-white z-40">
-                      {option.outfit_name}
-                    </div>
-
-                    {/* Collage container */}
-                    <div className="relative h-80 w-full mt-8">
-                      {/* Stack items with flat-lay positioning */}
-                      {option.items.map((item, itemIdx) => {
-                        const isTop = item.type === "top" || item.type === "dress" || itemIdx === 0;
-                        const isBottom = item.type === "bottom" || item.type === "jeans" || itemIdx === 1;
-                        const isShoes = item.type === "shoes" || item.type === "footwear" || itemIdx === 2;
-                        let positionClass = "";
-                        if (isBottom) {
-                          positionClass = "z-10 bottom-0 left-0 w-full rounded-xl shadow-lg -rotate-2 translate-y-10";
-                        } else if (isShoes) {
-                          positionClass = "z-30 bottom-0 right-0 w-1/3 rounded-xl shadow-xl rotate-12 translate-x-4 translate-y-4";
-                        } else {
-                          positionClass = "z-20 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2/3 rounded-xl shadow-lg rotate-2";
-                        }
-                        return (
-                          <div key={item.id}
-                            className={`absolute ${positionClass} transition-all duration-300 hover:scale-105 hover:z-40`}
-                          >
-                            <img
-                              src={item.image_url}
-                              alt={item.label || item.type}
-                              className="w-full h-full object-cover rounded-xl border border-white/10"
-                              style={{ maxHeight: isShoes ? "80px" : "160px" }}
-                            />
-                            <div className="absolute bottom-1 left-1 right-1 bg-black/50 backdrop-blur-sm rounded-lg px-2 py-0.5 text-xs text-white truncate">
-                              {item.label || item.type} · {item.color}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {/* Reason */}
-                    {option.reason && (
-                      <p className="text-xs text-muted-foreground mt-4 italic leading-relaxed">
-                        "{option.reason}"
-                      </p>
-                    )}
-
-                    {/* Wear button */}
-                    <button
-                      onClick={() => toast.success(`Wearing ${option.outfit_name}!`)}
-                      className="w-full mt-4 py-2.5 rounded-xl bg-primary/20 border border-primary/30 text-primary hover:bg-primary/30 transition-all text-sm font-semibold flex items-center justify-center gap-2"
+                {generatedOutfits.map((option, idx) => {
+                  const typeLabels: Record<string, string> = {
+                    "top": "Top", "shirt": "Top", "blouse": "Top", "t-shirt": "Top",
+                    "bottom": "Bottom", "pants": "Bottom", "jeans": "Bottom",
+                    "shoes": "Shoes", "sneakers": "Shoes", "boots": "Shoes",
+                    "dress": "Dress", "jacket": "Layer", "coat": "Layer", "hoodie": "Layer",
+                    "accessory": "Accessory", "bag": "Bag"
+                  };
+                  
+                  return (
+                    <div key={idx}
+                      className="relative bg-zinc-900/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 overflow-hidden"
                     >
-                      {idx === 0 ? "👕" : "👗"} Wear {option.outfit_name}
-                    </button>
-                  </div>
-                ))}
-              </div>
-              </div>
+                      {/* Outfit name badge */}
+                      <div className="bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-white inline-block mb-4">
+                        {option.outfit_name}
+                      </div>
 
+                      {/* Vertical flat lay stack */}
+                      <div className="flex flex-col items-center gap-4">
+                        {option.items.map((item, itemIdx) => {
+                          const typeLabel = typeLabels[item.type?.toLowerCase()] || item.type || `Item ${itemIdx + 1}`;
+                          return (
+                            <div key={item.id || itemIdx} className="w-full max-w-xs flex flex-col items-center gap-1.5">
+                              <div className="w-full aspect-[3/4] rounded-xl overflow-hidden bg-zinc-900/60 border border-white/10 shadow-lg">
+                                <img
+                                  src={item.image_url}
+                                  alt={item.label || item.type}
+                                  className="w-full h-full object-contain"
+                                />
+                              </div>
+                              <div className="flex flex-wrap items-center justify-center gap-1.5">
+                                <span className="text-[10px] uppercase tracking-wider text-white/50 font-semibold">{typeLabel}</span>
+                                <span className="text-xs text-white/80">{item.label}</span>
+                                {item.color && (
+                                  <span className="text-[10px] text-white/40 bg-white/10 px-2 py-0.5 rounded-full">{item.color}</span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Reason */}
+                      {option.reason && (
+                        <p className="text-xs text-muted-foreground mt-4 italic leading-relaxed">
+                          "{option.reason}"
+                        </p>
+                      )}
+
+                      {/* Wear button */}
+                      <button
+                        onClick={() => toast.success(`Wearing ${option.outfit_name}!`)}
+                        className="w-full mt-4 py-2.5 rounded-xl bg-primary/20 border border-primary/30 text-primary hover:bg-primary/30 transition-all text-sm font-semibold flex items-center justify-center gap-2"
+                      >
+                        👕 Wear {option.outfit_name}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
               {/* Try again button */}
               <div className="text-center">
                 <button onClick={openGenerateModal}

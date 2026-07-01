@@ -2193,14 +2193,6 @@ def dressing_generate():
         occasion = data.get("occasion", "Casual")
         weather = data.get("weather", "Mild")
         color_palette = data.get("color_palette", "Neutrals")
-        profile = data.get("user_profile", {}) or {}
-        body_type = profile.get("bodyShape", "Average")
-        height = profile.get("height", "Average")
-        budget = profile.get("budget", "Mid-range")
-        lifestyle = profile.get("lifestyle", "Casual")
-        profession = profile.get("profession", "Professional")
-        style_goal = profile.get("styleGoal", "Confident")
-        brands = profile.get("brands", "Any")
 
         _log.info("[DRESSING] Generate: occasion=%s weather=%s palette=%s", occasion, weather, color_palette)
 
@@ -2211,55 +2203,166 @@ def dressing_generate():
         if not closet_items:
             return jsonify({"success": False, "error": "Closet is empty! Add items first."})
 
-        # Build closet summary for Groq
-        closet_summary = "\n".join([
-            f"- {i.get('label', 'Unknown')} ({i.get('color', '')} {i.get('type', '')}) [ID: {i.get('id', '')}]"
-            for i in closet_items
-        ])
+        # Group items by category for combinatorial matching
+        def normalize_cat(cat: str) -> str:
+            c = cat.lower().strip()
+            if c in ("top", "shirt", "blouse", "t-shirt", "tshirt", "camisole", "tank", "sweater", "jacket", "coat", "hoodie", "cardigan", "blazer", "vest", "bodysuit"):
+                return "top"
+            if c in ("bottom", "pants", "jeans", "trousers", "shorts", "skirt", "leggings", "chinos", "cargo"):
+                return "bottom"
+            if c in ("shoes", "footwear", "sneakers", "boots", "sandals", "heels", "flats", "loafers", "oxfords"):
+                return "shoes"
+            if c in ("dress", "gown", "jumpsuit", "romper"):
+                return "dress"
+            if c in ("accessory", "accessories", "bag", "purse", "belt", "hat", "scarf", "jewelry", "watch", "sunglasses"):
+                return "accessory"
+            return "other"
 
-        # Build prompt
-        prompt = CLOSET_PROMPT.format(occasion=occasion, weather=weather, color_palette=color_palette, body_type=body_type, height=height, budget=budget, lifestyle=lifestyle, profession=profession, style_goal=style_goal, brands=brands)
-        messages = [
-            {"role": "user", "content": f"Here is the user's closet:\n{closet_summary}"},
-            {"role": "user", "content": prompt},
-        ]
+        # Group items by normalized category
+        grouped: Dict[str, List[Dict]] = {}
+        for item in closet_items:
+            cat = normalize_cat(item.get("type", item.get("category", "other")))
+            if cat not in grouped:
+                grouped[cat] = []
+            grouped[cat].append(item)
 
-        # Call Groq Text
-        result = call_groq_text(messages, temperature=0.7, timeout=90, max_tokens=4096)
-        if not result:
-            _log.error("[DRESSING] MiMo returned no result")
-            return jsonify({"success": False, "error": "Could not generate outfit"})
+        _log.info("[DRESSING] Grouped items: %s", {k: len(v) for k, v in grouped.items()})
 
-        _log.info("[DRESSING] MiMo returned %s", type(result).__name__)
-
-        # result should be a list of 2 outfits (or a dict with 'outfits' key)
-        outfit_list = result if isinstance(result, list) else (result.get("outfits") if isinstance(result, dict) else None)
-        if not isinstance(outfit_list, list) or not outfit_list:
-            _log.error("[DRESSING] Invalid outfit list format: %s", str(result)[:200])
-            return jsonify({"success": False, "error": "Could not compose outfits"})
-
-        # Look up items by ID for each outfit
+        # Generate outfit combinations using combinatorial logic
+        used_ids: set = set()
         outfit_options = []
-        for opt_count, opt in enumerate(outfit_list):
-            if opt_count >= 2:
+
+        # Helper: pick one from a group, preferring unused items
+        def pick_one(group_name: str) -> Optional[Dict]:
+            candidates = grouped.get(group_name, [])
+            available = [i for i in candidates if i.get("id") not in used_ids]
+            if not available:
+                available = candidates
+            if not available:
+                return None
+            return random.choice(available)
+
+        # Generate up to 2 outfit combinations
+        for attempt in range(3):
+            if len(outfit_options) >= 2:
                 break
-            item_ids = opt.get("item_ids", [])
-            items = []
-            for iid in item_ids:
-                item = qdrant_get_item(iid)
-                if item:
-                    items.append({
-                        "id": item.get("id", ""),
-                        "label": item.get("label", ""),
-                        "type": item.get("type", ""),
-                        "color": item.get("color", ""),
-                        "image_url": item.get("image_url", ""),
+            used_ids = set()
+            outfit_items: List[Dict] = []
+
+            # Try to pick: dress OR (top + bottom) + shoes
+            dress_item = pick_one("dress")
+            if dress_item:
+                used_ids.add(dress_item.get("id"))
+                outfit_items.append(dress_item)
+            else:
+                top_item = pick_one("top")
+                if top_item:
+                    used_ids.add(top_item.get("id"))
+                    outfit_items.append(top_item)
+                bottom_item = pick_one("bottom")
+                if bottom_item:
+                    used_ids.add(bottom_item.get("id"))
+                    outfit_items.append(bottom_item)
+
+            shoes_item = pick_one("shoes")
+            if shoes_item:
+                used_ids.add(shoes_item.get("id"))
+                outfit_items.append(shoes_item)
+
+            # If we didn't get enough, pick remaining from any available items
+            if len(outfit_items) < 2:
+                for item in closet_items:
+                    if len(outfit_items) >= 3:
+                        break
+                    if item.get("id") not in used_ids:
+                        used_ids.add(item.get("id"))
+                        outfit_items.append(item)
+
+            # If we got at least 2 items, this is a valid outfit
+            if len(outfit_items) >= 2:
+                # Check it's different from existing outfits
+                existing_sigs = set()
+                for o in outfit_options:
+                    ids = frozenset(i.get("id", "") for i in o["items"])
+                    existing_sigs.add(ids)
+                new_sig = frozenset(i.get("id", "") for i in outfit_items)
+                if new_sig not in existing_sigs:
+                    # Generate a simple name based on items
+                    item_types = [i.get("type", i.get("category", "")).lower() for i in outfit_items]
+                    name_parts = []
+                    for t in item_types:
+                        if t in ("top", "shirt", "blouse", "t-shirt"):
+                            name_parts.append("Top")
+                        elif t in ("bottom", "pants", "jeans"):
+                            name_parts.append("Bottom")
+                        elif t in ("shoes", "sneakers", "boots"):
+                            name_parts.append("Shoes")
+                        elif t == "dress":
+                            name_parts.append("Dress")
+                        elif t in ("jacket", "coat", "hoodie"):
+                            name_parts.append("Layer")
+                        elif t in ("accessory", "bag"):
+                            name_parts.append("Acc")
+                        else:
+                            name_parts.append(t.capitalize())
+                    occasion_title = occasion.capitalize() if occasion else "Casual"
+                    outfit_name = f"{occasion_title} {' & '.join(name_parts)}" if name_parts else f"{occasion_title} Look"
+
+                    outfit_options.append({
+                        "outfit_name": outfit_name,
+                        "reason": "",
+                        "items": outfit_items,
                     })
-            outfit_options.append({
-                "outfit_name": opt.get("outfit_name", "Styled Look"),
-                "reason": opt.get("reason", ""),
-                "items": items,
-            })
+
+        # If combinatorial found nothing, try AI as fallback
+        if not outfit_options:
+            _log.info("[DRESSING] Combinatorial found nothing, trying AI fallback")
+            closet_summary = "\n".join([
+                f"- {i.get('label', 'Unknown')} ({i.get('color', '')} {i.get('type', '')}) [ID: {i.get('id', '')}]"
+                for i in closet_items
+            ])
+            prompt = CLOSET_PROMPT.format(
+                occasion=occasion, weather=weather, color_palette=color_palette,
+                body_type="Average", height="Average", budget="Mid-range",
+                lifestyle="Casual", profession="Professional", style_goal="Confident", brands="Any"
+            )
+            messages = [
+                {"role": "user", "content": f"Here is the user's closet:\n{closet_summary}"},
+                {"role": "user", "content": prompt},
+            ]
+            result = call_groq_text(messages, temperature=0.7, timeout=90, max_tokens=4096)
+            if result:
+                outfit_list = result if isinstance(result, list) else (result.get("outfits") if isinstance(result, dict) else None)
+                if isinstance(outfit_list, list):
+                    for opt_count, opt in enumerate(outfit_list):
+                        if opt_count >= 2:
+                            break
+                        item_ids = opt.get("item_ids", [])
+                        items = []
+                        for iid in item_ids:
+                            found = None
+                            for ci in closet_items:
+                                if ci.get("id") == iid:
+                                    found = ci
+                                    break
+                            if not found:
+                                found = qdrant_get_item(iid)
+                            if found:
+                                items.append({
+                                    "id": found.get("id", ""),
+                                    "label": found.get("label", ""),
+                                    "type": found.get("type", ""),
+                                    "color": found.get("color", ""),
+                                    "image_url": found.get("image_url", ""),
+                                })
+                        outfit_options.append({
+                            "outfit_name": opt.get("outfit_name", "Styled Look"),
+                            "reason": opt.get("reason", ""),
+                            "items": items,
+                        })
+
+        if not outfit_options:
+            return jsonify({"success": False, "error": "Could not compose outfits from your closet."})
 
         _log.info("[DRESSING] Success: %d outfit options generated", len(outfit_options))
         return jsonify({
