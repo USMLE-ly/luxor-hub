@@ -6,8 +6,5 @@
     "dev": "cd luxor-hub && npm install && npm run dev",
     "preview": "cd luxor-hub && npm run preview"
   },
-  "overrides": {
-    "rollup": "4.21.3"
-  },
   "dependencies": {}
 }
