@@ -312,7 +312,7 @@ export default function DressingRoomPage() {
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search looks..."
+                id="dressing-search" name="search" placeholder="Search looks..."
                 className="pl-10 pr-4 py-2.5 rounded-xl bg-muted/50 border border-border/50 text-sm w-48 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
               />
             </div>
