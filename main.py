@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Luxor Pro Stylist — Fashion Analysis & Interactive Ecosystem
-# Groq Vision · Stylist Quiz · Closet Management · Outfit Generator
+# MiMo Vision 2.5 · Stylist Quiz · Closet Management · Outfit Generator
 # Vercel Blob · Qdrant Storage · Serverless Ready
 from __future__ import annotations
 import base64
@@ -36,8 +36,7 @@ except ImportError:
 from dotenv import load_dotenv
 
 # Track MiMo model status - skip broken models
-_MIMO_VISION_WORKING = True
-_MIMO_TEXT_WORKING = True
+# MiMo client status — no global flags (checked fresh per request)
 
 # Qdrant + Vercel Blob
 try:
@@ -85,34 +84,25 @@ def handle_preflight():
 # ---------------------------------------------------------------------------
 # Environment
 # ---------------------------------------------------------------------------
+# --- MiMo Vision 2.5 (single provider) ---
 MIMO_API_KEY = os.getenv("MIMO_API_KEY", "")
 MIMO_API_URL = "https://api.xiaomimimo.com/v1/chat/completions"
 MIMO_VISION_MODEL = os.getenv("MIMO_VISION_MODEL", "mimo-v2.5")
 MIMO_TEXT_MODEL = os.getenv("MIMO_TEXT_MODEL", "mimo-v2.5")
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 
-# OpenCode Zen - Free vision model (no API key needed!)
-OPCODE_ZEN_URL = "https://opencode.ai/zen/v1/chat/completions"
-OPCODE_ZEN_VISION_MODEL = "mimo-v2.5-free"
-OPCODE_ZEN_TEXT_MODEL = "deepseek-v4-flash-free"
-
-OPENROUTER_VISION_MODEL = "qwen/qwen-2.5-vl-72b-instruct:free"
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-GEMINI_VISION_MODEL = os.getenv("GEMINI_VISION_MODEL", "gemini-2.0-flash")
+# --- General ---
 CIPHER_MAX_TOKENS = int(os.getenv("CIPHER_MAX_TOKENS", "1500"))
 PORT = int(os.getenv("PORT", "5000"))
 
-# Vercel Blob
+# --- Vercel Blob ---
 BLOB_READ_WRITE_TOKEN = os.getenv("BLOB_READ_WRITE_TOKEN", "")
 
-# Qdrant
+# --- Qdrant Vector DB ---
 QDRANT_URL = os.getenv("QDRANT_URL", "")
 QDRANT_API_KEY = os.getenv("QDRANT_API_KEY", "")
 
-_log.info("MiMo API key loaded: %s (masked: %s)", bool(MIMO_API_KEY), MIMO_API_KEY[:8] + "..." + MIMO_API_KEY[-4:] if MIMO_API_KEY else "NONE")
-_log.info("MiMo vision model: %s (text model: %s)", MIMO_VISION_MODEL, MIMO_TEXT_MODEL)
-_log.info("Gemini API key loaded: %s", bool(GEMINI_API_KEY))
-_log.info("OpenRouter key loaded: %s", bool(OPENROUTER_API_KEY))
+_log.info("MiMo API key: %s (masked: %s)", bool(MIMO_API_KEY), MIMO_API_KEY[:8] + "..." + MIMO_API_KEY[-4:] if MIMO_API_KEY else "NONE")
+_log.info("MiMo models: vision=%s text=%s", MIMO_VISION_MODEL, MIMO_TEXT_MODEL)
 _log.info("Blob token: %s", bool(BLOB_READ_WRITE_TOKEN))
 _log.info("Qdrant: %s", bool(QDRANT_URL and QDRANT_API_KEY))
 
@@ -1241,7 +1231,7 @@ def _extract_image_features(image_b64: str) -> str:
 def _extract_first_json(text: str) -> Optional[str]:
     """Find the first complete JSON object in text using brace-matching.
     
-    The lazy regex approach ({[\s\S]*?}) breaks on nested objects.
+    The lazy regex approach ({...}) breaks on nested objects.
     This counts braces to find the matching close for the first open brace.
     """
     start = text.find("{")
@@ -1258,112 +1248,90 @@ def _extract_first_json(text: str) -> Optional[str]:
     return None
 
 
-def call_groq_vision(image_b64: str, system_prompt: str = SACRED_PROMPT, temperature: float = 0.2) -> Optional[Dict[str, Any]]:
-    """Call MiMo V2.5 vision model with a single image for fashion analysis."""
-    if not MIMO_API_KEY:
-        return None
-    global _MIMO_VISION_WORKING
-    if not _MIMO_VISION_WORKING:
-        # Auto-recover: previous failure may have disabled this flag.
-        # Reset and try again in case the network transiently recovered.
-        _log.warning("[MIMO-VISION] _MIMO_VISION_WORKING was False – resetting and retrying")
-        _MIMO_VISION_WORKING = True
+def call_mimo_vision(image_b64: str, system_prompt: str = SACRED_PROMPT, temperature: float = 0.2) -> Optional[Dict[str, Any]]:
+    """Call MiMo V2.5 Vision — single provider, no fallbacks.
     
-    # Removed flaky DNS/TCP check which gives false negatives on some networks.
-    # MiMo API is called directly — errors are caught naturally below.
-
-    # Use original image directly — no person segmentation, no cropping
-    # MiMo V2.5 can analyze the full photo without any pre-processing
-    # Segregation/cropping loses context and can cut off body parts
+    Logs every stage. Returns parsed dict or None (never fake data).
+    """
+    if not MIMO_API_KEY:
+        _log.error("[MIMO] No MIMO_API_KEY configured")
+        return None
+    
+    _log.info("[MIMO] Stage 1/6: Compressing image")
     compressed = compress_image_b64(image_b64)
     
-    # Clean prompt — original image, no background assumptions
-    clean_prompt = system_prompt
-    
+    _log.info("[MIMO] Stage 2/6: Building request (model=%s, %d KB)", MIMO_VISION_MODEL, len(compressed) // 1024)
     headers = {"Content-Type": "application/json", "api-key": MIMO_API_KEY, "HTTP-Referer": "https://luxor.ly", "X-Title": "LuxorHub"}
-    
     vision_payload = {
         "model": MIMO_VISION_MODEL,
         "messages": [{"role": "user", "content": [
-            {"type": "text", "text": clean_prompt},
+            {"type": "text", "text": system_prompt},
             {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{compressed}"}},
         ]}],
         "max_tokens": 8192,
         "temperature": temperature,
     }
     
+    _log.info("[MIMO] Stage 3/6: Sending to MiMo API")
     try:
-        _log.info("[MIMO-VISION] Calling model=%s with 1 image (%d KB)", MIMO_VISION_MODEL, len(compressed) // 1024)
         resp = requests.post(MIMO_API_URL, json=vision_payload, headers=headers, timeout=120)
+        _log.info("[MIMO] Stage 4/6: Response HTTP %s", resp.status_code)
         
-        if resp.status_code == 200:
-            data = resp.json()
-            choice = data["choices"][0]["message"]
-            finish = data["choices"][0].get("finish_reason", "")
-            content_text = choice.get("content", "")
-            reasoning_text = choice.get("reasoning_content", "")
-            
-            _log.info("[MIMO-VISION] HTTP 200, finish=%s, content_len=%d, reasoning_len=%d", finish, len(content_text), len(reasoning_text))
-            
-            # Try content first (final answer), then reasoning_content
-            raw = content_text.strip()
-            if not raw:
-                raw = reasoning_text.strip()
-                _log.info("[MIMO-VISION] Using reasoning_content for JSON extraction")
-            
-            if raw:
-                # Try to find and parse JSON
-                raw_clean = re.sub(r'^```(?:json)?\s*', '', raw.strip())
-                raw_clean = re.sub(r'\s*```$', '', raw_clean)
-                raw_clean = raw_clean.strip()
-                
-                # Use proper brace-matching instead of lazy regex.
-                # The lazy regex {[\s\S]*?} matches the FIRST } which breaks
-                # on nested objects (improvements array has {} entries).
-                json_str = _extract_first_json(raw_clean)
-                if json_str:
-                    try:
-                        parsed = json.loads(json_str)
-                        top = parsed.get("top_type") or parsed.get("top", "")
-                        bottom = parsed.get("bottom_type") or parsed.get("bottom", "")
-                        if top or bottom:
-                            parsed["source"] = "cipher_vision"
-                            _log.info("[MIMO-VISION] Success! top=%s bottom=%s footwear=%s",
-                                      parsed.get("top_type", ""), parsed.get("bottom_type", ""), parsed.get("footwear", ""))
-                            return parsed
-                    except json.JSONDecodeError:
-                        pass
-                    
-                    # Try JSON repair on truncated output
-                    opens = json_str.count('{') - json_str.count('}')
-                    if opens > 0:
-                        json_str += '}' * opens
-                    opens_b = json_str.count('[') - json_str.count(']')
-                    if opens_b > 0:
-                        json_str += ']' * opens_b
-                    try:
-                        parsed = json.loads(json_str)
-                        parsed["source"] = "cipher_vision"
-                        _log.info("[MIMO-VISION] JSON repair successful!")
-                        return parsed
-                    except json.JSONDecodeError:
-                        pass
+        if resp.status_code == 402:
+            _log.error("[MIMO] Insufficient balance — check API key credits")
+            return None
+        if resp.status_code != 200:
+            _log.error("[MIMO] API returned %s: %s", resp.status_code, resp.text[:200])
+            return None
         
-        if resp.status_code == 400 and "Not supported model" in resp.text:
-            _log.warning("[MIMO-VISION] Model not supported by this API key")
-            _MIMO_VISION_WORKING = False
-        elif resp.status_code == 402:
-            _log.warning("[MIMO-VISION] Insufficient balance")
-            _MIMO_VISION_WORKING = False
-        else:
-            _log.warning("[MIMO-VISION] Vision API returned %s", resp.status_code)
+        data = resp.json()
+        choice = data["choices"][0]["message"]
+        finish = data["choices"][0].get("finish_reason", "")
+        content_text = choice.get("content", "")
+        reasoning_text = choice.get("reasoning_content", "")
+        _log.info("[MIMO] Stage 5/6: finish=%s content=%d chars reasoning=%d chars", 
+                  finish, len(content_text), len(reasoning_text))
+        
+        raw = content_text.strip() or reasoning_text.strip()
+        if not raw:
+            _log.error("[MIMO] Empty response from MiMo")
+            return None
+        
+        # Strip markdown code fences if present
+        raw_clean = re.sub(r'^```(?:json)?\s*', '', raw.strip())
+        raw_clean = re.sub(r'\s*```$', '', raw_clean)
+        raw_clean = raw_clean.strip()
+        
+        # Extract JSON using balanced brace parsing (not fragile regex)
+        json_str = _extract_first_json(raw_clean)
+        if not json_str:
+            _log.error("[MIMO] No JSON object found in response")
+            return None
+        
+        try:
+            parsed = json.loads(json_str)
+            top = parsed.get("top_type") or parsed.get("top", "")
+            bottom = parsed.get("bottom_type") or parsed.get("bottom", "")
+            if top or bottom:
+                parsed["source"] = "cipher_vision"
+                _log.info("[MIMO] Stage 6/6: OK top=%s bottom=%s", top, bottom)
+                return parsed
+            _log.warning("[MIMO] JSON parsed but missing top/bottom keys: %s", list(parsed.keys())[:5])
+        except json.JSONDecodeError:
+            _log.error("[MIMO] JSON parse failed — response may be truncated")
+        
+        return None
+    except requests.exceptions.Timeout:
+        _log.error("[MIMO] Timeout after 120s")
+        return None
+    except requests.exceptions.ConnectionError as e:
+        _log.error("[MIMO] Connection error: %s", e)
+        return None
     except Exception as exc:
-        _log.error("[MIMO-VISION] %s", exc)
+        _log.error("[MIMO] Unexpected error: %s", exc)
+        return None
 
-    _log.warning("[MIMO-VISION] MiMo Vision failed - no fallback provider available")
-    return None
-
-def call_groq_text(messages: List[Dict[str, str]], system_prompt: str = "", temperature: float = 0.7, timeout: int = 30, max_tokens: Optional[int] = None, model: Optional[str] = None) -> Any:
+def call_mimo_text(messages: List[Dict[str, str]], system_prompt: str = "", temperature: float = 0.7, timeout: int = 30, max_tokens: Optional[int] = None, model: Optional[str] = None) -> Any:
     if not MIMO_API_KEY:
         return None
     headers = {"Content-Type": "application/json", "api-key": MIMO_API_KEY, "HTTP-Referer": "https://luxor.ly", "X-Title": "LuxorHub"}
@@ -1727,10 +1695,10 @@ _image_b64_cache = ""
 # Fashion Decision
 # ---------------------------------------------------------------------------
 def get_fashion_decision(image_b64: str) -> Dict[str, Any]:
-    """Call MiMo Vision 2.5 - returns None on failure, no fallback dummy data."""
+    """Call call_mimo_vision — returns None on failure, never fake data."""
     _log.info("[PIPELINE] Starting analysis")
     try:
-        result = call_groq_vision(image_b64, SACRED_PROMPT, 0.2)
+        result = call_mimo_vision(image_b64, SACRED_PROMPT, 0.2)
         if result:
             _log.info("[PIPELINE] MiMo OK: top=%s bottom=%s", 
                       result.get("top_type",""), result.get("bottom_type",""))
@@ -1955,7 +1923,7 @@ def stylist_explore():
     seed = int(time.time() * 1000) % 10000
     messages.append({"role": "user", "content": f"Use seed={seed} for uniqueness."})
 
-    result = call_groq_text(messages, STYLIST_PROMPT, temperature=0.8)
+    result = call_mimo_text(messages, STYLIST_PROMPT, temperature=0.8)
     if not result:
         return jsonify({"next_question": "Tell me what kind of vibe you are going for today?", "options": ["Casual", "Business", "Party", "Date Night", "Sport"], "generated_prompt": "", "outfit_name": ""})
 
@@ -2096,7 +2064,7 @@ RULES:
 """
 
     try:
-        result = call_groq_vision(image_b64, analyze_prompt, 0.2)
+        result = call_mimo_vision(image_b64, analyze_prompt, 0.2)
         if result:
             # Extract fields from MiMo response with fallbacks
             _raw_cat = result.get("item_category") or result.get("category", "Other")
@@ -2474,7 +2442,7 @@ def dressing_generate():
                 if len(outfit_options) >= max_outfits:
                     break
                 _log.info("[DRESSING] MiMo attempt %d/2", mimo_attempt + 1)
-                result = call_groq_text(messages, temperature=0.5, timeout=90, max_tokens=4096, model=MIMO_VISION_MODEL)
+                result = call_mimo_text(messages, temperature=0.5, timeout=90, max_tokens=4096, model=MIMO_VISION_MODEL)
                 if not result:
                     _log.warning("[DRESSING] MiMo returned nothing on attempt %d", mimo_attempt + 1)
                     continue
@@ -2804,7 +2772,7 @@ def style_analyze():
 
         _log.info("[STYLE] Analyzing photo for body/face")
 
-        result = call_groq_vision(image_b64, STYLE_ANALYSIS_PROMPT, temperature=0.3)
+        result = call_mimo_vision(image_b64, STYLE_ANALYSIS_PROMPT, temperature=0.3)
         if not result:
             return jsonify({"success": False, "error": "Analysis failed. MiMo Vision could not process the image."})
 
@@ -2867,7 +2835,7 @@ def style_recommendations():
             {"role": "user", "content": prompt},
         ]
 
-        result = call_groq_text(messages, temperature=0.4, timeout=90, max_tokens=4096, model=MIMO_VISION_MODEL)
+        result = call_mimo_text(messages, temperature=0.4, timeout=90, max_tokens=4096, model=MIMO_VISION_MODEL)
         if not result:
             return jsonify({"success": False, "error": "Failed to generate recommendations."})
 
@@ -2902,7 +2870,7 @@ def outfit_review():
         _log.info("[STYLE] Reviewing outfit for occasion=%s", occasion)
 
         review_prompt = OUTFIT_REVIEW_PROMPT + f"\n\nOccasion: {occasion}"
-        result = call_groq_vision(image_b64, review_prompt, temperature=0.3)
+        result = call_mimo_vision(image_b64, review_prompt, temperature=0.3)
         if not result:
             return jsonify({"success": False, "error": "Outfit review failed."})
 
