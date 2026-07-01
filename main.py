@@ -8,6 +8,7 @@ import io
 import json
 import logging
 import os
+import random
 import re
 import time
 import urllib.parse
@@ -1776,6 +1777,57 @@ def get_fashion_decision(image_b64: str) -> Dict[str, Any]:
             "tweak_plan": "", "style_score": None, "source": "fallback",
             "generation_prompt": "A fashion-forward person wearing a stylish outfit."}
 
+
+def generate_tweak_visualization_prompt(accessory: str) -> str:
+    """Build a book-derived product photography prompt for Pollinations.
+    
+    Uses strict [Subject/Texture] [Action/Placement] [Lighting] [Composition]
+    [Style/Medium] [Negative Constraints] structure from Product Photography prompts.
+    No humans, no body parts — just the accessory on a premium surface.
+    """
+    clean_acc = accessory.lower().replace("a ", "").strip()
+    if not clean_acc:
+        return ""
+    
+    # Random premium surface options for variety
+    surfaces = [
+        "deep teal satin fabric",
+        "matte dust-rose concrete",
+        "smooth obsidian glass",
+        "soft beige linen",
+        "polished black marble",
+        "warm ivory silk",
+        "brushed champagne metal",
+        "raw slate stone",
+    ]
+    liquids = [
+        "shimmering liquid",
+        "fresh water",
+        "holographic gel",
+        "golden oil",
+        "crystal-clear dew",
+    ]
+    
+    surface = random.choice(surfaces)
+    liquid = random.choice(liquids)
+    
+    prompt = (
+        f"Ultra-high-end editorial product photograph of a {clean_acc}, "
+        f"isolated on a {surface}. "
+        f"The product is placed diagonally, catching a crisp studio light from the top-left. "
+        f"Reflections on the product are sharp, showing polished metal and glossy textures. "
+        f"A small droplet of {liquid} sits near the base of the item to imply premium luxury. "
+        f"Shot with a 50mm lens at f/2.8, sharp focus on the product, creamy bokeh background, "
+        f"cinematic depth of field. "
+        f"Photorealistic, 8K resolution, glossy magazine ad aesthetic, "
+        f"no humans, no hands, no skin, isolated product shot, "
+        f"matte soft shadows, subtle lens flare. "
+        f"Clean minimalist composition, commercial beauty campaign style, "
+        f"soft bloom on highlights. "
+        f"--no text --no watermarks --no logos --no distorted features "
+        f"--no humans --no skin --no hands --no fingers"
+    )
+    return prompt
 def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
     """Map MiMo vision response to frontend-facing format with clean defaults."""
     _log.info("[MAP] Processing result from source=%s", result.get("source", "unknown"))
@@ -1835,20 +1887,20 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
         score = 78
     name = result.get("style_name", "") or "Modern Classic"
     
-    # Generate tweak image URL from the recommended accessory in tweak_plan
+    # Generate tweak image URL using book-derived product photography prompts
     tweak_text = _humanize_tweak(result.get("tweak_plan", ""), detected_items or items_detected)
-    # Extract the accessory noun from tweak text for image generation
-    _tweak_img_prompt = tweak_text
+    # Extract the accessory keyword from tweak_text
+    _tweak_accessory = tweak_text
     for _kw in ["necklace", "earring", "bracelet", "watch", "ring", "belt",
                 "scarf", "jacket", "blazer", "cardigan", "coat", "handbag",
                 "clutch", "sunglasses", "hat", "bag", "shoes", "boots"]:
         if _kw in tweak_text.lower():
-            # Use the full phrase around the accessory for better generation
-            _tweak_img_prompt = f"A high-fashion close-up of a {_kw}, elegant product photography, soft natural lighting, realistic detail, white background, minimalist"
+            _tweak_accessory = _kw
             break
-    _safe_tweak = urllib.parse.quote(_tweak_img_prompt)
+    _tweak_prompt = generate_tweak_visualization_prompt(_tweak_accessory)
+    _safe_tweak = urllib.parse.quote(_tweak_prompt)
     _tweak_seed = int(time.time() * 1000) % 10000
-    tweak_image_url = f"https://image.pollinations.ai/prompt/{_safe_tweak}?width=512&height=512&nologin=true&seed={_tweak_seed}"
+    tweak_image_url = f"https://image.pollinations.ai/prompt/{_safe_tweak}?nologin=true&seed={_tweak_seed}"
 
     return {
         "success": True,
