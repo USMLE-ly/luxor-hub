@@ -1781,51 +1781,48 @@ def get_fashion_decision(image_b64: str) -> Dict[str, Any]:
 def generate_tweak_visualization_prompt(accessory: str) -> str:
     """Build a book-derived product photography prompt for Pollinations.
     
-    Uses strict [Subject/Texture] [Action/Placement] [Lighting] [Composition]
-    [Style/Medium] [Negative Constraints] structure from Product Photography prompts.
-    No humans, no body parts — just the accessory on a premium surface.
+    Forces exact color and hardware details so Pollinations doesn't hallucinate
+    the wrong metal type or confuse earrings with necklace pendants.
     """
+    # 1. Detect color from the text string
     clean_acc = accessory.lower().replace("a ", "").strip()
     if not clean_acc:
         return ""
     
-    # Random premium surface options for variety
-    surfaces = [
-        "deep teal satin fabric",
-        "matte dust-rose concrete",
-        "smooth obsidian glass",
-        "soft beige linen",
-        "polished black marble",
-        "warm ivory silk",
-        "brushed champagne metal",
-        "raw slate stone",
-    ]
-    liquids = [
-        "shimmering liquid",
-        "fresh water",
-        "holographic gel",
-        "golden oil",
-        "crystal-clear dew",
-    ]
+    color_word = "polished sterling silver"
+    if "gold" in clean_acc:
+        color_word = "polished 18k gold"
     
-    surface = random.choice(surfaces)
-    liquid = random.choice(liquids)
-    
+    # 2. Fix the item type (force earring structure vs necklace vs generic)
+    if "earring" in clean_acc or "earrings" in clean_acc:
+        item_desc = f"a single {color_word} teardrop drop earring with a secure post and hook mechanism, resting on its side"
+    elif "necklace" in clean_acc or "pendant" in clean_acc:
+        item_desc = f"a delicate {color_word} pendant necklace"
+    elif "ring" in clean_acc:
+        item_desc = f"an elegant {color_word} ring"
+    elif "bracelet" in clean_acc:
+        item_desc = f"a sleek {color_word} bracelet"
+    elif "watch" in clean_acc:
+        item_desc = f"a refined {color_word} wristwatch"
+    elif "belt" in clean_acc:
+        item_desc = f"a premium {color_word} belt"
+    else:
+        item_desc = f"a luxurious {color_word} accessory"
+
+    # 3. Build the brutal, book-derived product prompt with fixed hardware details
     prompt = (
-        f"Ultra-high-end editorial product photograph of a {clean_acc}, "
-        f"isolated on a {surface}. "
-        f"The product is placed diagonally, catching a crisp studio light from the top-left. "
-        f"Reflections on the product are sharp, showing polished metal and glossy textures. "
-        f"A small droplet of {liquid} sits near the base of the item to imply premium luxury. "
-        f"Shot with a 50mm lens at f/2.8, sharp focus on the product, creamy bokeh background, "
-        f"cinematic depth of field. "
+        f"Ultra-high-end commercial product photograph of {item_desc}, "
+        f"resting diagonally on a deep black marble surface with sharp white veining. "
+        f"The {color_word} surface reflects the crisp studio lighting perfectly, "
+        f"showing highly realistic metallic reflections and high gloss. "
+        f"A tiny drop of water sits near the base of the object to imply premium luxury. "
+        f"Shot with a 50mm lens at f/2.8, ultra-sharp focus on the object, "
+        f"creamy bokeh background, cinematic depth of field. "
         f"Photorealistic, 8K resolution, glossy magazine ad aesthetic, "
-        f"no humans, no hands, no skin, isolated product shot, "
-        f"matte soft shadows, subtle lens flare. "
-        f"Clean minimalist composition, commercial beauty campaign style, "
-        f"soft bloom on highlights. "
+        f"isolated single object, matte soft shadows, subtle lens flare. "
+        f"No humans, no hands, no skin, no neck, no bodies. "
         f"--no text --no watermarks --no logos --no distorted features "
-        f"--no humans --no skin --no hands --no fingers"
+        f"--no humans --no skin --no hands --no fingers --no neck --no chains"
     )
     return prompt
 def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
