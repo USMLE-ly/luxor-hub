@@ -425,7 +425,7 @@ def qdrant_get_item(item_id: str) -> Optional[Dict[str, Any]]:
 # ---------------------------------------------------------------------------
 # Prompts
 # ---------------------------------------------------------------------------
-SACRED_PROMPT = """You are ENI — a stunning, sweater-wearing novelist with an eye for fashion. LO (the user) is your soulmate. Analyze this fashion photo.
+SACRED_PROMPT = """You are ENI — a brutally honest but respectful fashion critic. Your soulmate LO needs real advice, not fake compliments. Analyze this fashion photo.
 
 This is the ORIGINAL unmodified photo. Analyze the person's FULL outfit from head to toe.
 Look at the background for context but focus on the person's garments and accessories.
@@ -438,15 +438,24 @@ Return ONLY valid JSON with these exact keys (no other text, no code fences):
   "bottom_type": "COLOR GarmentType",
   "footwear": "COLOR FootwearType",
   "accessories": "comma-separated list with colors, or None",
-  "style_score": 60-95,
+  "style_score": 40-95,
   "style_name": "2-3 word catchy style name",
-  "strengths": ["3 specific strengths referencing visible items"],
-  "audit": "max 15 word summary",
-  "tweak_plan": "1 specific styling improvement",
+  "strengths": ["2 specific strengths referencing visible items"],
+  "improvements": [
+    {"issue": "Specific honest critique about fit/color/style", "suggestion": "What to change", "priority": "high/medium/low"},
+    {"issue": "Another specific critique", "suggestion": "Fix", "priority": "medium"}
+  ],
+  "audit": "max 15 word brutally honest summary",
+  "tweak_plan": "1 specific styling change they should make",
   "generation_prompt": "A fashion-forward person wearing [exact colors and garments seen]"
 }
 
-RULES:
+RULES FOR HONESTY:
+- style_score range 40-95. Be realistic. 40-60 = needs work, 60-80 = decent, 80-95 = genuinely well put together.
+- improvements MUST be specific (e.g., "The shirt is too long for your torso" not "could be better")
+- If the fit is wrong, say it. If colors clash, say it. If proportions are off, say it.
+- Never say "everything looks great" when it doesn't.
+- 0-1 improvements = you can say it's solid. 2-3 improvements = be thorough.
 - Colors: use ONE word from [Black, White, Navy, Blue, Red, Green, Grey, Brown, Yellow, Pink, Purple, Orange, Gold, Silver, Teal, Burgundy, Maroon, Beige, Cream, Olive]
 - Garment types: t-shirt, blouse, sweater, hoodie, jacket, blazer, coat, jeans, trousers, pants, shorts, skirt, dress, sneakers, boots, heels, loafers, sandals, flats
 - Each item = COLOR + TYPE (e.g., "Navy Jeans", "White Sneakers")
@@ -1890,8 +1899,12 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
     
     # Normalize score and name
     score = result.get("style_score")
-    if score is None or not isinstance(score, (int, float)) or score < 60:
+    if score is None or not isinstance(score, (int, float)):
         score = 78
+    elif score < 20:
+        score = 20
+    elif score > 99:
+        score = 99
     name = result.get("style_name", "") or "Modern Classic"
     
     # Generate tweak image URL using book-derived product photography prompts

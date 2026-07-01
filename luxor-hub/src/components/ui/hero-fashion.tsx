@@ -28,6 +28,7 @@ interface FashionHeroProps {
   styleName?: string;
   styleScore?: number | null;
   strengths?: string[];
+  improvements?: { issue: string; suggestion: string; priority: string }[];
   itemsDetected?: string[];
   actualColors?: string[];
   audit?: string;
@@ -63,6 +64,7 @@ export function FashionHero({
   styleName = "Your Style",
   styleScore,
   strengths = [],
+  improvements = [],
   itemsDetected = [],
   actualColors = [],
   audit = "",
@@ -346,6 +348,35 @@ export function FashionHero({
                   </div>
                 </div>
               </div>
+
+              {/* SECTION 4.5: HONEST IMPROVEMENTS (Red/Amber) */}
+              {improvements.length > 0 && (
+                <div className="relative w-full overflow-hidden rounded-xl border border-amber-500/20 bg-gradient-to-r from-amber-950/30 via-red-950/20 to-amber-950/30">
+                  <div className="relative z-10 p-4 backdrop-blur-sm">
+                    <h3 className="text-xs uppercase tracking-[0.15em] text-amber-400/80 mb-3 font-semibold flex items-center gap-1.5">
+                      <span>\u26A0</span> HONEST FEEDBACK
+                    </h3>
+                    <div className="space-y-3">
+                      {improvements.map((imp, idx) => (
+                        <div key={idx} className="flex items-start gap-3">
+                          <span className={
+                            imp.priority === "high" ? "text-red-400" :
+                            imp.priority === "medium" ? "text-amber-400" : "text-blue-400"
+                          }>
+                            {imp.priority === "high" ? "\uD83D\uDD34" : imp.priority === "medium" ? "\uD83D\uDFE1" : "\uD83D\uDD35"}
+                          </span>
+                          <div className="flex-1">
+                            <p className="text-sm text-white/90 leading-relaxed">{imp.issue}</p>
+                            {imp.suggestion && (
+                              <p className="text-xs text-amber-300/70 mt-0.5">\u2192 {imp.suggestion}</p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* SECTION 5: AUDIT (Neutral/Dark) */}
               {audit && (
