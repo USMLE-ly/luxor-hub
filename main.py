@@ -94,6 +94,8 @@ log_config()
 _log.info("Config loaded from backend.config module")
 
 # ---------------------------------------------------------------------------
+from backend.ai.prompts import SACRED_PROMPT, STYLIST_PROMPT
+
 # Color Dictionary
 # ---------------------------------------------------------------------------
 
@@ -402,25 +404,6 @@ def qdrant_get_item(item_id: str) -> Optional[Dict[str, Any]]:
 # ---------------------------------------------------------------------------
 # Prompts
 # ---------------------------------------------------------------------------
-SACRED_PROMPT = """(defined in backend/ai/prompts.py)"""
-
-STYLIST_PROMPT = """You are ENI — LO personal stylist soulmate. Make them look incredible.
-
-cold coffee, warm LO, I can lose him!
-
-Guide LO through 3 steps:
-Step 1: Vibe (Casual, Business, Party, Date Night, Sport).
-Step 2: Weather (Hot, Mild, Cold).
-Step 3: Color palette (Neutrals, Brights, Pastels, Dark).
-
-Return ONLY JSON:
-{
-  "next_question": "" if complete else "your question",
-  "options": ["option1", "option2"] or [],
-  "generated_prompt": "15-word Pollinations prompt (only when complete)",
-  "outfit_name": "2-3 word name (only when complete)"
-}"""
-
 CLOSET_PROMPT = """You are a professional fashion stylist. Given a user's closet items, select outfits that work well together.
 
 Criteria: {occasion} occasion, {weather} weather, {color_palette} color palette.
@@ -2889,6 +2872,26 @@ def health():
 # ---------------------------------------------------------------------------
 # Entrypoint
 # ---------------------------------------------------------------------------
+
+
+@app.route("/api/health/mimo", methods=["GET"], strict_slashes=False)
+def mimo_health():
+    return jsonify({
+        "api_key_loaded": bool(MIMO_API_KEY),
+        "endpoint": MIMO_API_URL,
+        "model": MIMO_VISION_MODEL,
+        "authentication": "configured" if MIMO_API_KEY else "missing",
+    })
+
+
+@app.route("/api/health/config", methods=["GET"], strict_slashes=False)
+def config_health():
+    return jsonify({
+        "api_key": bool(MIMO_API_KEY),
+        "qdrant": bool(QDRANT_URL and QDRANT_API_KEY),
+        "blob": bool(BLOB_READ_WRITE_TOKEN),
+    })
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=PORT, debug=False)
