@@ -2197,8 +2197,10 @@ def dressing_generate():
         occasion = data.get("occasion", "Casual")
         weather = data.get("weather", "Mild")
         color_palette = data.get("color_palette", "Neutrals")
+        requested_count = data.get("count", 3)
+        max_outfits = min(int(requested_count), 6)
 
-        _log.info("[DRESSING] Generate: occasion=%s weather=%s palette=%s", occasion, weather, color_palette)
+        _log.info("[DRESSING] Generate: occasion=%s weather=%s palette=%s count=%d", occasion, weather, color_palette, max_outfits)
 
         # Get closet items: prefer items from frontend (Supabase), fallback to Qdrant
         closet_items = data.get("closet_items", None)
@@ -2467,7 +2469,7 @@ def dressing_generate():
                 outfit_options.append({"outfit_name": outfit_name, "reason": reason, "items": items, "source": "full_outfit"})
 
         # ---- Phase B: MiMo Selects Items (Primary) ----
-        if len(outfit_options) < 2:
+        if len(outfit_options) < max_outfits:
             # Build a clean item list for MiMo
             item_lines = []
             for item in closet_items:
@@ -2493,7 +2495,7 @@ def dressing_generate():
             ]
 
             for mimo_attempt in range(2):  # up to 2 retries
-                if len(outfit_options) >= 4:
+                if len(outfit_options) >= max_outfits:
                     break
                 _log.info("[DRESSING] MiMo attempt %d/2", mimo_attempt + 1)
                 result = call_groq_text(messages, temperature=0.5, timeout=90, max_tokens=4096, model=MIMO_VISION_MODEL)
@@ -2507,7 +2509,7 @@ def dressing_generate():
                     continue
 
                 for opt in outfit_list:
-                    if len(outfit_options) >= 4:
+                    if len(outfit_options) >= max_outfits:
                         break
                     item_ids = opt.get("item_ids", [])
                     if not item_ids:
@@ -2570,10 +2572,10 @@ def dressing_generate():
                 return chosen
 
             for template in templates:
-                if len(outfit_options) >= 4:
+                if len(outfit_options) >= max_outfits:
                     break
                 for _ in range(4):
-                    if len(outfit_options) >= 4:
+                    if len(outfit_options) >= max_outfits:
                         break
                     items = pick_for_template(template, set())
                     if items is None:

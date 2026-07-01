@@ -80,7 +80,7 @@ export default function DressingRoomPage() {
   const [generatedOutfits, setGeneratedOutfits] = useState<OutfitOption[]>([]);
   const [selectedOutfit, setSelectedOutfit] = useState<OutfitOption | null>(null);
 
-  // Only ask for occasion
+  const [step, setStep] = useState(0);
   const [selectedOccasion, setSelectedOccasion] = useState("");
 
   /* ---------- Fetch gallery items ---------- */
@@ -130,16 +130,21 @@ export default function DressingRoomPage() {
 
   /* ---------- Generate Outfit (new) ---------- */
   const openGenerateModal = () => {
+    setStep(0);
     setSelectedOccasion("");
     setShowOutfitModal(true);
   };
 
-  const handleStepNext = () => {
-    if (!selectedOccasion) { toast.error("Pick an occasion"); return; }
-    generateOutfit();
+  const handleNext = () => {
+    if (step === 0 && !selectedOccasion) { toast.error("Pick an occasion"); return; }
+    setStep(1);
   };
 
-  const generateOutfit = async () => {
+  const handleGenerate = (count: number) => {
+    generateOutfit(count);
+  };
+
+  const generateOutfit = async (count: number = 2) => {
     setShowOutfitModal(false);
     setOutfitGenerating(true);
     setGeneratedOutfits([]);
@@ -194,9 +199,10 @@ export default function DressingRoomPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          occasion: selectedOccasion,
+          occasion: selectedOccasion || "casual",
           weather: "mild",
           color_palette: "neutrals",
+          count: count,
           user_profile: userProfile,
           closet_items: closetItems,
         }),
@@ -393,28 +399,42 @@ export default function DressingRoomPage() {
                   <X className="w-5 h-5" />
                 </button>
 
-                <h2 className="font-display text-2xl font-bold text-center mb-6">What's the occasion?</h2>
-
-                <div className="space-y-6">
-                  <div className="grid grid-cols-2 gap-3">
-                    {OCCASIONS.map((o) => (
-                      <button key={o.id} onClick={() => setSelectedOccasion(o.id)}
-                        className={`p-4 rounded-xl border text-left transition-all ${
-                          selectedOccasion === o.id
-                            ? "border-primary bg-primary/10 text-primary"
-                            : "border-white/10 bg-white/5 hover:bg-white/10"
-                        }`}>
-                        <span className="text-2xl">{o.emoji}</span>
-                        <p className="text-sm font-semibold mt-1">{o.label}</p>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <button onClick={handleStepNext}
-                  className="w-full mt-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors">
-                  ✨ Generate Outfits
-                </button>
+                {step === 0 && (
+                  <>
+                    <h2 className="font-display text-2xl font-bold text-center mb-6">What's the occasion?</h2>
+                    <div className="grid grid-cols-2 gap-3">
+                      {OCCASIONS.map((o) => (
+                        <button key={o.id} onClick={() => { setSelectedOccasion(o.id); }}
+                          className={`p-4 rounded-xl border text-left transition-all ${
+                            selectedOccasion === o.id
+                              ? "border-primary bg-primary/10 text-primary"
+                              : "border-white/10 bg-white/5 hover:bg-white/10"
+                          }`}>
+                          <span className="text-2xl">{o.emoji}</span>
+                          <p className="text-sm font-semibold mt-1">{o.label}</p>
+                        </button>
+                      ))}
+                    </div>
+                    <button onClick={handleNext}
+                      className="w-full mt-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors">
+                      Next
+                    </button>
+                  </>
+                )}
+                {step === 1 && (
+                  <>
+                    <h2 className="font-display text-2xl font-bold text-center mb-2">{selectedOccasion.charAt(0).toUpperCase() + selectedOccasion.slice(1)}</h2>
+                    <p className="text-sm text-muted-foreground text-center mb-6">How many outfits?</p>
+                    <div className="grid grid-cols-3 gap-3">
+                      {[1, 2, 3].map((n) => (
+                        <button key={n} onClick={() => handleGenerate(n)}
+                          className="py-6 rounded-xl bg-primary/10 border border-primary/30 text-primary font-bold hover:bg-primary/20 transition-all text-lg">
+                          {n}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
               </motion.div>
             </motion.div>
           )}
