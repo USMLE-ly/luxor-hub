@@ -1922,6 +1922,22 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
     _tweak_seed = int(time.time() * 1000) % 10000
     tweak_image_url = f"https://image.pollinations.ai/prompt/{_safe_tweak}?nologin=true&seed={_tweak_seed}"
 
+    # Parse honest improvements from AI
+    improvements = []
+    raw_imps = result.get("improvements", [])
+    if isinstance(raw_imps, list):
+        for imp in raw_imps:
+            if isinstance(imp, dict):
+                improvements.append({
+                    "issue": imp.get("issue", ""),
+                    "suggestion": imp.get("suggestion", ""),
+                    "priority": imp.get("priority", "medium"),
+                })
+    if not improvements:
+        tweak_txt = result.get("tweak_plan", "")
+        if tweak_txt:
+            improvements.append({"issue": tweak_txt, "suggestion": "", "priority": "medium"})
+
     return {
         "success": True,
         "source": result.get("source", "unknown"),
