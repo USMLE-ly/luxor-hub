@@ -31,6 +31,7 @@ interface OutfitData {
   actual_colors: string[];
   items_detected: string[];
   strengths: string[];
+  improvements?: { issue: string; suggestion: string; priority: string }[];
   audit: string;
   tweak_plan: string;
   generation_prompt: string;
