@@ -13,7 +13,7 @@ import { GlowingEffect } from "@/components/ui/glowing-effect";
 import {
   Upload, Star, Clock, Loader2, Sparkles, Trash2, Shirt,
   Instagram, Twitter, ExternalLink, Grid3X3, List, Search,
-  ArrowUp, X, ShoppingBag, Sun, Cloud, Palette
+  ArrowUp, X, ShoppingBag
 } from "lucide-react";
 
 /* ------------------------------------------------------------------ */
@@ -60,19 +60,6 @@ const OCCASIONS = [
   { id: "sport", label: "Sport", emoji: "🏃" },
 ];
 
-const WEATHERS = [
-  { id: "hot", label: "Hot", emoji: "☀️" },
-  { id: "mild", label: "Mild", emoji: "🌤" },
-  { id: "cold", label: "Cold", emoji: "❄️" },
-];
-
-const PALETTES = [
-  { id: "neutrals", label: "Neutrals", emoji: "🤎" },
-  { id: "brights", label: "Brights", emoji: "🌈" },
-  { id: "pastels", label: "Pastels", emoji: "🌸" },
-  { id: "dark", label: "Dark", emoji: "🖤" },
-];
-
 /* ------------------------------------------------------------------ */
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
@@ -93,11 +80,8 @@ export default function DressingRoomPage() {
   const [generatedOutfits, setGeneratedOutfits] = useState<OutfitOption[]>([]);
   const [selectedOutfit, setSelectedOutfit] = useState<OutfitOption | null>(null);
 
-  // 3-step quiz state
-  const [step, setStep] = useState(0);
+  // Only ask for occasion
   const [selectedOccasion, setSelectedOccasion] = useState("");
-  const [selectedWeather, setSelectedWeather] = useState("");
-  const [selectedPalette, setSelectedPalette] = useState("");
 
   /* ---------- Fetch gallery items ---------- */
   const fetchItems = async () => {
@@ -146,22 +130,13 @@ export default function DressingRoomPage() {
 
   /* ---------- Generate Outfit (new) ---------- */
   const openGenerateModal = () => {
-    setStep(0);
     setSelectedOccasion("");
-    setSelectedWeather("");
-    setSelectedPalette("");
     setShowOutfitModal(true);
   };
 
   const handleStepNext = () => {
-    if (step === 0 && !selectedOccasion) { toast.error("Pick an occasion"); return; }
-    if (step === 1 && !selectedWeather) { toast.error("Pick a weather"); return; }
-    if (step === 2 && !selectedPalette) { toast.error("Pick a color palette"); return; }
-    if (step < 2) {
-      setStep(step + 1);
-    } else {
-      generateOutfit();
-    }
+    if (!selectedOccasion) { toast.error("Pick an occasion"); return; }
+    generateOutfit();
   };
 
   const generateOutfit = async () => {
@@ -220,8 +195,8 @@ export default function DressingRoomPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           occasion: selectedOccasion,
-          weather: selectedWeather,
-          color_palette: selectedPalette,
+          weather: "mild",
+          color_palette: "neutrals",
           user_profile: userProfile,
           closet_items: closetItems,
         }),
@@ -400,7 +375,7 @@ export default function DressingRoomPage() {
           </div>
         )}
 
-        {/* ---- GENERATE OUTFIT MODAL (3-step Quiz) ---- */}
+        {/* ---- GENERATE OUTFIT MODAL ---- */}
         <AnimatePresence>
           {showOutfitModal && (
             <motion.div
@@ -418,73 +393,27 @@ export default function DressingRoomPage() {
                   <X className="w-5 h-5" />
                 </button>
 
-                {/* Step Indicator */}
-                <div className="flex items-center gap-2 mb-8">
-                  {[0, 1, 2].map((s) => (
-                    <div key={s} className={`flex-1 h-1 rounded-full transition-all ${s <= step ? "bg-primary" : "bg-white/10"}`} />
-                  ))}
+                <h2 className="font-display text-2xl font-bold text-center mb-6">What's the occasion?</h2>
+
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 gap-3">
+                    {OCCASIONS.map((o) => (
+                      <button key={o.id} onClick={() => setSelectedOccasion(o.id)}
+                        className={`p-4 rounded-xl border text-left transition-all ${
+                          selectedOccasion === o.id
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-white/10 bg-white/5 hover:bg-white/10"
+                        }`}>
+                        <span className="text-2xl">{o.emoji}</span>
+                        <p className="text-sm font-semibold mt-1">{o.label}</p>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-
-                {step === 0 && (
-                  <div className="space-y-6">
-                    <h2 className="font-display text-2xl font-bold">What's the occasion?</h2>
-                    <div className="grid grid-cols-2 gap-3">
-                      {OCCASIONS.map((o) => (
-                        <button key={o.id} onClick={() => setSelectedOccasion(o.id)}
-                          className={`p-4 rounded-xl border text-left transition-all ${
-                            selectedOccasion === o.id
-                              ? "border-primary bg-primary/10 text-primary"
-                              : "border-white/10 bg-white/5 hover:bg-white/10"
-                          }`}>
-                          <span className="text-2xl">{o.emoji}</span>
-                          <p className="text-sm font-semibold mt-1">{o.label}</p>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {step === 1 && (
-                  <div className="space-y-6">
-                    <h2 className="font-display text-2xl font-bold">What's the weather?</h2>
-                    <div className="grid grid-cols-3 gap-3">
-                      {WEATHERS.map((w) => (
-                        <button key={w.id} onClick={() => setSelectedWeather(w.id)}
-                          className={`p-4 rounded-xl border text-center transition-all ${
-                            selectedWeather === w.id
-                              ? "border-primary bg-primary/10 text-primary"
-                              : "border-white/10 bg-white/5 hover:bg-white/10"
-                          }`}>
-                          <span className="text-2xl">{w.emoji}</span>
-                          <p className="text-sm font-semibold mt-1">{w.label}</p>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {step === 2 && (
-                  <div className="space-y-6">
-                    <h2 className="font-display text-2xl font-bold">Color palette?</h2>
-                    <div className="grid grid-cols-2 gap-3">
-                      {PALETTES.map((p) => (
-                        <button key={p.id} onClick={() => setSelectedPalette(p.id)}
-                          className={`p-4 rounded-xl border text-left transition-all ${
-                            selectedPalette === p.id
-                              ? "border-primary bg-primary/10 text-primary"
-                              : "border-white/10 bg-white/5 hover:bg-white/10"
-                          }`}>
-                          <span className="text-2xl">{p.emoji}</span>
-                          <p className="text-sm font-semibold mt-1">{p.label}</p>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
 
                 <button onClick={handleStepNext}
                   className="w-full mt-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors">
-                  {step < 2 ? "Next" : "✨ Generate Outfits"}
+                  ✨ Generate Outfits
                 </button>
               </motion.div>
             </motion.div>
