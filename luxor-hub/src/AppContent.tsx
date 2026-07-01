@@ -51,6 +51,7 @@ const Blog = React.lazy(() => import("./pages/Blog"));
 const BlogArticle = React.lazy(() => import("./pages/BlogArticle"));
 const DeepDive = React.lazy(() => import("./pages/DeepDive"));
 const DressingRoom = React.lazy(() => import("./pages/DressingRoom"));
+const StyleRecommendations = React.lazy(() => import("./pages/StyleRecommendations"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
 
 const RouteTracker = () => {
