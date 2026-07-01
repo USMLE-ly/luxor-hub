@@ -332,6 +332,21 @@ const Closet = () => {
         price: newItem.price ? parseFloat(newItem.price) : null, photo_url: photoUrl,
       });
       if (error) throw error;
+      // Sync to Replit backend (Qdrant) so Dressing Room can find this item
+      try {
+        const api = import.meta.env.VITE_API_URL || import.meta.env.VITE_PUBLIC_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:5000' : '');
+        await fetch(api + '/api/v1/closet/add-item', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            label: newItem.name || 'Unknown item',
+            type: newItem.category || 'other',
+            color: newItem.color || '',
+            category: newItem.category || 'other',
+            image_b64: previewUrl ? previewUrl.split(',')[1] || '' : '',
+          }),
+        });
+      } catch (_e) { /* Qdrant sync is best-effort */ }
       toast.success("Added. Your closet just got stronger.");
       setUploadOpen(false);
       setNewItem({ name: "", category: "top", color: "", brand: "", season: "all-season", occasion: "", style: "", notes: "", price: "" });
