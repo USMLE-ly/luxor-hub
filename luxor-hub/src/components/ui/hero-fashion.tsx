@@ -25,6 +25,7 @@ function extractHighlightItem(text: string): { start: string; item: string; end:
 }
 
 interface FashionHeroProps {
+  aiSourceLabel?: string;
   styleName?: string;
   styleScore?: number | null;
   strengths?: string[];
@@ -77,6 +78,7 @@ export function FashionHero({
   bottomType = "",
   footwear = "",
   accessories = "",
+  aiSourceLabel,
 }: FashionHeroProps) {
   const isNA = styleScore === null || styleScore === undefined || styleScore === 0;
   const showMindMap = !imageUrl && vibeType;
@@ -169,6 +171,7 @@ export function FashionHero({
                     <div>
                       <p className="text-xs text-muted-foreground uppercase tracking-wider">Style Score</p>
                       <p className="text-sm text-foreground/80">{styleName}</p>
+                      {aiSourceLabel && aiSourceLabel !== "AI Analysis" && <span className="inline-flex items-center gap-1 mt-1 text-[10px] uppercase tracking-widest text-purple-400/70"><span className="w-1.5 h-1.5 rounded-full bg-purple-500/60"/>{aiSourceLabel}</span>}
                     </div>
                   </div>
                 )}

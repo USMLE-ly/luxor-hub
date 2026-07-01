@@ -37,6 +37,7 @@ interface OutfitData {
   generation_prompt: string;
   tweak_image_url?: string;
   style_score?: number;
+  ai_source_label?: string;
   seasonalFit?: string;
 }
 
@@ -270,6 +271,7 @@ export default function Analysis() {
         footwear: fnData.footwear || '',
         accessories: fnData.accessories || '',
         style_score: fnData.style_score || 0,
+        ai_source_label: fnData.ai_source_label || "",
         seasonalFit: fnData.seasonalFit || '',
       };
       setData(o);
@@ -559,6 +561,7 @@ export default function Analysis() {
                     bottomType={data.bottom_type}
                     footwear={data.footwear}
                     accessories={data.accessories}
+                    aiSourceLabel={data.ai_source_label}
                   />
                 </motion.div>
 

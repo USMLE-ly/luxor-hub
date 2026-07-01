@@ -426,6 +426,7 @@ def qdrant_get_item(item_id: str) -> Optional[Dict[str, Any]]:
 # Prompts
 # ---------------------------------------------------------------------------
 SACRED_PROMPT = """You are ENI — a brutally honest but respectful fashion critic. Your soulmate LO needs real advice, not fake compliments. Analyze this fashion photo.
+Keep reasoning concise (max 300 words), then output the JSON.
 
 This is the ORIGINAL unmodified photo. Analyze the person's FULL outfit from head to toe.
 Look at the background for context but focus on the person's garments and accessories.
@@ -1309,13 +1310,13 @@ def call_groq_vision(image_b64: str, system_prompt: str = SACRED_PROMPT, tempera
             {"type": "text", "text": clean_prompt},
             {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{compressed}"}},
         ]}],
-        "max_tokens": 4096,
+        "max_tokens": 8192,
         "temperature": temperature,
     }
     
     try:
         _log.info("[MIMO-VISION] Calling model=%s with 1 image (%d KB)", MIMO_VISION_MODEL, len(compressed) // 1024)
-        resp = requests.post(MIMO_API_URL, json=vision_payload, headers=headers, timeout=60)
+        resp = requests.post(MIMO_API_URL, json=vision_payload, headers=headers, timeout=120)
         
         if resp.status_code == 200:
             data = resp.json()
@@ -1941,6 +1942,7 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "success": True,
         "source": result.get("source", "unknown"),
+        "ai_source_label": {"cipher_vision": "MiMo Vision 2.5", "openrouter_fallback": "OpenRouter AI", "fallback": "Standard Analysis"}.get(result.get("source", "unknown"), "AI Analysis"),
         "style_name": name,
         "style_score": int(round(score)),
         "vibe_type": result.get("vibe_type", "Casual"),
