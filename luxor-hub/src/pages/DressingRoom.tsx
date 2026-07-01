@@ -99,25 +99,6 @@ export default function DressingRoomPage() {
   const [selectedWeather, setSelectedWeather] = useState("");
   const [selectedPalette, setSelectedPalette] = useState("");
 
-  /* ---------- Fetch Replit closet items (Qdrant) for Dressing Room ---------- */
-  const [closetItemCount, setClosetItemCount] = useState(0);
-  const [closetItems, setClosetItems] = useState<any[]>([]);
-
-  useEffect(() => {
-    const fetchCloset = async () => {
-      try {
-        const api = import.meta.env.VITE_API_URL || import.meta.env.VITE_PUBLIC_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:5000' : '');
-        const resp = await fetch(api + '/api/v1/closet/list-items');
-        const data = await resp.json();
-        if (data.success && data.items) {
-          setClosetItems(data.items);
-          setClosetItemCount(data.items.length);
-        }
-      } catch (_e) { /* silent */ }
-    };
-    fetchCloset();
-  }, []);
-
   /* ---------- Fetch gallery items ---------- */
   const fetchItems = async () => {
     if (!user) return;
