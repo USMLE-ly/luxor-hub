@@ -33,7 +33,7 @@ def _extract_first_json(text: str) -> Optional[str]:
 
 def call_mimo_vision(
     image_b64: str,
-    system_prompt: str,
+    system_prompt: Optional[str] = None,
     temperature: float = 0.2,
 ) -> Optional[Dict[str, Any]]:
     """Call MiMo V2.5 Vision — single provider, no fallbacks.
@@ -46,6 +46,11 @@ def call_mimo_vision(
 
     _log.info("[MIMO] Stage 1/6: Compressing image")
     compressed = compress_image_b64(image_b64)
+
+        # Use SACRED_PROMPT as default if not provided
+    if system_prompt is None:
+        from backend.ai.prompts import SACRED_PROMPT
+        system_prompt = SACRED_PROMPT
 
     _log.info("[MIMO] Stage 2/6: Building request (model=%s, %d KB)", MIMO_VISION_MODEL, len(compressed) // 1024)
     headers = {
