@@ -2358,7 +2358,7 @@ def dressing_generate():
                     continue
                 attempted_signatures.add(sig)
                 
-                # Build name from item types
+                # Build rich name from item types + weather + palette context
                 name_parts = []
                 for item in items:
                     norm = normalize_cat(item.get("type", item.get("category", "")))
@@ -2367,11 +2367,111 @@ def dressing_generate():
                     if label not in name_parts:  # avoid "Top & Top"
                         name_parts.append(label)
                 
-                outfit_name = f"{occ_prefix} {' & '.join(name_parts)}" if name_parts else f"{occ_prefix} Look"
+                # Weather descriptor
+                weather_prefixes = {
+                    "hot": "Summer",
+                    "mild": "Mild",
+                    "cold": "Winter",
+                    "rainy": "Rainy Day",
+                    "windy": "Windy",
+                }
+                weather_desc = weather_prefixes.get(weather.lower(), weather.capitalize()) if weather else ""
+                
+                # Palette descriptor
+                palette_descs = {
+                    "neutrals": "Neutral",
+                    "brights": "Vibrant",
+                    "pastels": "Soft",
+                    "dark": "Evening",
+                    "earthy": "Earthy",
+                    "monochrome": "Monochrome",
+                }
+                palette_desc = palette_descs.get(color_palette.lower(), "") if color_palette else ""
+                
+                # Build name: {Weather} {Occasion} {Items} • {Palette}
+                weather_part = f"{weather_desc} " if weather_desc else ""
+                palette_part = f"\u2022 {palette_desc}" if palette_desc else ""
+                items_str = " & ".join(name_parts) if name_parts else "Look"
+                outfit_name = f"{weather_part}{occ_prefix} {items_str} {palette_part}".strip()
+                
+                # Build a meaningful reason using actual item colors and types
+                def format_item_desc(item: Dict) -> str:
+                    c = item.get("color", "")
+                    t = item.get("type", item.get("category", ""))
+                    l = item.get("label", "")
+                    # Prefer color + type, fallback to label
+                    if c and t:
+                        return f"a {c.lower()} {t.lower()}"
+                    if l:
+                        return f"a {l.lower()}"
+                    return t.lower() if t else "an item"
+                
+                item_descs = [format_item_desc(it) for it in items]
+                
+                # Build occasion phrase
+                occasion_phrases = {
+                    "casual": "everyday casual wear",
+                    "business": "the office",
+                    "party": "parties and nights out",
+                    "date-night": "a romantic date night",
+                    "sport": "active days",
+                    "formal": "formal events",
+                    "vacation": "vacation",
+                    "beach": "the beach",
+                    "work": "work",
+                    "romantic": "romantic occasions",
+                    "festival": "festivals",
+                    "travel": "traveling",
+                }
+                occ_phrase = occasion_phrases.get(occasion.lower(), f"{occasion.lower()} occasions") if occasion else "any occasion"
+                
+                # Weather phrase
+                weather_phrases = {
+                    "hot": "warm weather",
+                    "mild": "mild weather",
+                    "cold": "cold weather",
+                    "rainy": "rainy days",
+                    "windy": "windy days",
+                }
+                weather_phrase = weather_phrases.get(weather.lower(), "") if weather else ""
+                
+                # Palette phrase
+                palette_phrases = {
+                    "neutrals": "a neutral palette that keeps it timeless",
+                    "brights": "vibrant colors that make a statement",
+                    "pastels": "soft pastel tones for a delicate look",
+                    "dark": "deep, moody tones for evening drama",
+                    "earthy": "earthy tones for a grounded feel",
+                    "monochrome": "a monochrome palette for sleek sophistication",
+                }
+                palette_phrase = palette_phrases.get(color_palette.lower(), "") if color_palette else ""
+                
+                # Combine reason: e.g., "A black dress paired with silver heels and a gold clutch — perfect for parties in warm weather with a vibrant palette."
+                if len(item_descs) == 1:
+                    reason = f"{item_descs[0].capitalize()} \u2014 great for {occ_phrase}"
+                    if weather_phrase:
+                        reason += f" in {weather_phrase}"
+                    if palette_phrase:
+                        reason += f", featuring {palette_phrase}"
+                    reason += "."
+                elif len(item_descs) == 2:
+                    reason = f"{item_descs[0].capitalize()} paired with {item_descs[1]} \u2014 ideal for {occ_phrase}"
+                    if weather_phrase:
+                        reason += f" in {weather_phrase}"
+                    if palette_phrase:
+                        reason += f", with {palette_phrase}"
+                    reason += "."
+                else:
+                    reason = f"{item_descs[0].capitalize()} paired with {item_descs[1]}, accented with {item_descs[2]} \u2014 perfect for {occ_phrase}"
+                    if weather_phrase:
+                        reason += f" in {weather_phrase}"
+                    if palette_phrase:
+                        reason += f", featuring {palette_phrase}"
+                    reason += "."
                 
                 outfit_options.append({
                     "outfit_name": outfit_name,
-                    "reason": "",
+                    "reason": reason,
                     "items": items,
                 })
 
