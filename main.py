@@ -1310,13 +1310,15 @@ def call_mimo_vision(image_b64: str, system_prompt: str = SACRED_PROMPT, tempera
         
         try:
             parsed = json.loads(json_str)
+            if not parsed or not isinstance(parsed, dict):
+                _log.error("[MIMO] Parsed JSON is not a dict")
+                return None
+            parsed["source"] = "cipher_vision"
             top = parsed.get("top_type") or parsed.get("top", "")
             bottom = parsed.get("bottom_type") or parsed.get("bottom", "")
-            if top or bottom:
-                parsed["source"] = "cipher_vision"
-                _log.info("[MIMO] Stage 6/6: OK top=%s bottom=%s", top, bottom)
-                return parsed
-            _log.warning("[MIMO] JSON parsed but missing top/bottom keys: %s", list(parsed.keys())[:5])
+            _log.info("[MIMO] Stage 6/6: OK keys=%s top=%s bottom=%s", 
+                      list(parsed.keys())[:5], top or "(not an outfit)", bottom or "(not an outfit)")
+            return parsed
         except json.JSONDecodeError:
             _log.error("[MIMO] JSON parse failed — response may be truncated")
         
