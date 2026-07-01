@@ -325,7 +325,7 @@ const Closet = () => {
       toast.success("Added. Your closet just got stronger.");
       setUploadOpen(false);
       setNewItem({ name: "", category: "top", color: "", brand: "", season: "all-season", occasion: "", style: "", notes: "", price: "" });
-      setSelectedFile(null); setPreviewUrl(null); fetchItems();
+      setSelectedFile(null); setPreviewUrl(null); await fetchItems().catch(() => {});
     } catch (err: any) { toast.error(err.message); }
     finally { setUploading(false); }
   };
