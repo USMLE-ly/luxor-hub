@@ -43,7 +43,6 @@ const placeholdersBySection: Record<string, string[]> = {
   "Accessories": [imgAccBag, imgAccJewelry, imgSunglassesCateye],
   "Dresses": [imgDressMidi, imgDressMini],
   "Full Outfits": [],
-  "Other": [],
 };
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
@@ -74,7 +73,6 @@ const categoryMap: Record<string, { label: string; categories: string[] }> = {
   "Accessories": { label: "Accessories", categories: ["accessory"] },
   "Dresses": { label: "Dresses", categories: ["dress"] },
   "Full Outfits": { label: "Full Outfits", categories: ["full_outfit"] },
-  "Other": { label: "Other", categories: ["other"] },
 };
 
 // Map closet categories to mannequin categories
