@@ -212,7 +212,27 @@ export default function DressingRoomPage() {
         }
       }
       
-            const api = import.meta.env.VITE_API_URL || import.meta.env.VITE_PUBLIC_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:5000' : '');
+      // Fetch user's closet items from Supabase (bypass Qdrant dependency)
+      let closetItems: any[] = [];
+      try {
+        const { data: closetData } = await supabase
+          .from("clothing_items")
+          .select("id, name, category, color, brand, photo_url")
+          .eq("user_id", user?.id || '')
+          .order("created_at", { ascending: false });
+        if (closetData) {
+          closetItems = closetData.map((item: any) => ({
+            id: item.id,
+            label: item.name || 'Unknown',
+            type: item.category || 'other',
+            color: item.color || '',
+            category: item.category || 'other',
+            image_url: item.photo_url || '',
+          }));
+        }
+      } catch (_e) { /* Supabase fetch best-effort */ }
+
+      const api = import.meta.env.VITE_API_URL || import.meta.env.VITE_PUBLIC_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:5000' : '');
       const genResp = await fetch(api + "/api/v1/dressing-room/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -221,6 +241,7 @@ export default function DressingRoomPage() {
           weather: selectedWeather,
           color_palette: selectedPalette,
           user_profile: userProfile,
+          closet_items: closetItems,
         }),
       });
       if (!genResp.ok) throw new Error("Generation failed");

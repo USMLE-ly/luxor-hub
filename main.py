@@ -2198,8 +2198,10 @@ def dressing_generate():
 
         _log.info("[DRESSING] Generate: occasion=%s weather=%s palette=%s", occasion, weather, color_palette)
 
-        # Get all closet items from Qdrant
-        closet_items = qdrant_get_all_items()
+        # Get closet items: prefer items from frontend (Supabase), fallback to Qdrant
+        closet_items = data.get("closet_items", None)
+        if not closet_items:
+            closet_items = qdrant_get_all_items()
         if not closet_items:
             return jsonify({"success": False, "error": "Closet is empty! Add items first."})
 
