@@ -69,8 +69,14 @@ export default function DressingRoomPage() {
           }));
           console.log("[DressingRoom] Normalized flat URLs to OutfitImages:", normalized);
         } else {
-          // Already objects with top/mid/bottom
-          normalized = images as OutfitImages[];
+          // Defensive: ensure all image keys exist, prevent null/undefined from reaching FlipGallery
+          normalized = images.map((item: any) => ({
+            top: item.top || '',
+            mid: item.mid || '',
+            bottom: item.bottom || '',
+            type: item.type || 'regular',
+            accessory_note: item.accessory_note || '',
+          }));
         }
         setGeneratedImages(normalized);
         toast.success(`${data.images.length} outfits generated!`);
