@@ -64,20 +64,39 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading 
   if (outfits.length === 0) {
     return (
       <div style={{
-        position: 'relative', width: '100%', height: '400px',
-        perspective: '800px', backgroundColor: '#0a0a0a', overflow: 'hidden'
-      }} className="md:h-[500px]">
-        {/* 3 dark strips — inline styles only */}
-        <div style={{ position: 'absolute', top: 0, height: '33.333%', width: '100%', backgroundColor: '#1A1A1A', borderBottom: '1px solid black', zIndex: 0 }} />
-        <div style={{ position: 'absolute', top: '33.333%', height: '33.333%', width: '100%', backgroundColor: '#0a0a0a', borderBottom: '1px solid black', zIndex: 0 }} />
-        <div style={{ position: 'absolute', bottom: 0, height: '33.333%', width: '100%', backgroundColor: '#0a0a0a', zIndex: 0 }} />
+        position: 'relative',
+        width: '100%',
+        height: '450px',
+        perspective: '800px',
+        backgroundColor: '#0a0a0a',
+        overflow: 'hidden'
+      }}>
+        {/* 3 dark strips — absolute positioned, inline styles only */}
+        <div style={{
+          position: 'absolute', top: 0, width: '100%', height: '33.333%',
+          backgroundColor: '#1A1A1A', borderBottom: '1px solid #000', zIndex: 0
+        }} />
+        <div style={{
+          position: 'absolute', top: '33.333%', width: '100%', height: '33.333%',
+          backgroundColor: '#0a0a0a', borderBottom: '1px solid #000', zIndex: 0
+        }} />
+        <div style={{
+          position: 'absolute', bottom: 0, width: '100%', height: '33.333%',
+          backgroundColor: '#0a0a0a', zIndex: 0
+        }} />
 
         {/* 2 divider lines */}
-        <div style={{ position: 'absolute', top: '33.333%', left: 0, width: '100%', height: '4px', backgroundColor: '#000', zIndex: 10, transform: 'translateY(-50%)' }} />
-        <div style={{ position: 'absolute', top: '66.666%', left: 0, width: '100%', height: '4px', backgroundColor: '#000', zIndex: 10, transform: 'translateY(-50%)' }} />
+        <div style={{
+          position: 'absolute', top: '33.333%', left: 0, width: '100%', height: '4px',
+          backgroundColor: '#000', zIndex: 10, transform: 'translateY(-50%)'
+        }} />
+        <div style={{
+          position: 'absolute', top: '66.666%', left: 0, width: '100%', height: '4px',
+          backgroundColor: '#000', zIndex: 10, transform: 'translateY(-50%)'
+        }} />
 
-        {/* Generate button — bottom-left (FIXED: inside frame, not clipped) */}
-        <div style={{ position: 'absolute', bottom: '1rem', left: '1rem', zIndex: 20 }}>
+        {/* Generate button — bottom-left, INSIDE the frame */}
+        <div style={{ position: 'absolute', bottom: '16px', left: '16px', zIndex: 20 }}>
           <button
             onClick={onGenerate}
             disabled={isLoading}
@@ -87,14 +106,13 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading 
               border: 'none', cursor: isLoading ? 'not-allowed' : 'pointer',
               opacity: isLoading ? 0.5 : 1,
             }}
-            className="hover:bg-purple-700 transition-colors"
           >
             {isLoading ? 'Consulting MiMo...' : 'Generate Outfit'}
           </button>
         </div>
 
-        {/* Grayed arrows — bottom-right */}
-        <div style={{ position: 'absolute', bottom: '1rem', right: '1rem', zIndex: 20, display: 'flex', gap: '8px' }}>
+        {/* Grayed arrows — bottom-right, INSIDE the frame */}
+        <div style={{ position: 'absolute', bottom: '16px', right: '16px', zIndex: 20, display: 'flex', gap: '8px' }}>
           <button disabled style={{ color: 'rgba(255,255,255,0.2)', cursor: 'not-allowed', background: 'none', border: 'none' }}><ChevronLeft size={20} /></button>
           <button disabled style={{ color: 'rgba(255,255,255,0.2)', cursor: 'not-allowed', background: 'none', border: 'none' }}><ChevronRight size={20} /></button>
         </div>
@@ -102,6 +120,7 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading 
     );
   }
 
+  // ============= POPULATED STATE =============
   // ============= POPULATED STATE =============
   const currentOutfit = outfits[currentIndex];
   if (!currentOutfit || typeof currentOutfit === 'string') return null;
@@ -125,9 +144,9 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading 
 
   return (
     <div style={{
-      position: 'relative', width: '100%', height: '400px',
+      position: 'relative', width: '100%', height: '450px',
       perspective: '800px', backgroundColor: '#000', overflow: 'hidden'
-    }} className="md:h-[500px]">
+    }}>
       <div id="flip-gallery" ref={containerRef} style={{ position: 'relative', width: '100%', height: '100%' }}>
         {sections.map((url, idx) => (
           <div
@@ -138,7 +157,6 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading 
               backgroundImage: url ? `url('${url}')` : undefined,
               backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat',
               overflow: 'hidden', transformOrigin: idx === sectionCount - 1 ? 'top' : 'bottom',
-              transition: 'transform 350ms ease-in-out',
             }}
           />
         ))}

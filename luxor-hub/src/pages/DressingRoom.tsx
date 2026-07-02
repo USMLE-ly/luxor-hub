@@ -51,6 +51,7 @@ export default function DressingRoomPage() {
       });
 
       const data = await res.json();
+      console.log("[DressingRoom] API RAW RESPONSE:", data);
       if (!data.success) throw new Error(data.error || "Generation failed");
 
       setProgressValue(80);

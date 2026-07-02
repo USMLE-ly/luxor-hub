@@ -2481,10 +2481,16 @@ def generate_outfits():
                 _log.info("[DRESSING] Sending to MiMo Vision")
                 mimo_result = call_mimo_vision(collage_b64, vision_prompt, temperature=0.2)
                 _log.info("[DRESSING] MiMo Vision: %s", str(mimo_result)[:300])
+                import sys
+                print("[DRESSING-DEBUG] MIMO_SELECTED:", json.dumps(mimo_result, indent=2)[:500], file=sys.stderr)
             except Exception as exc:
                 _log.warning("[DRESSING] MiMo Vision error: %s", exc)
 
         # ---- Build outfits from selection ----
+        import sys
+        if tops: print(f"[DRESSING-DEBUG] TOPS available: {[(t.get('id'), t.get('label',''), t.get('image_url','')[:40]) for t in tops]}", file=sys.stderr)
+        if bottoms: print(f"[DRESSING-DEBUG] BOTTOMS available: {[(b.get('id'), b.get('label',''), b.get('image_url','')[:40]) for b in bottoms]}", file=sys.stderr)
+        if shoes_list: print(f"[DRESSING-DEBUG] SHOES available: {[(s.get('id'), s.get('label',''), s.get('image_url','')[:40]) for s in shoes_list]}", file=sys.stderr)
         outfits = []
         used_ids = set()
         debug_source = "combinatorial"
@@ -2561,6 +2567,7 @@ def generate_outfits():
                     "bottom": "",
                     "accessory_note": combo.get("accessory_note", ""),
                 }
+                import sys; print(f"[DRESSING-DEBUG] FULL_OUTFIT: top={outfit_data['top'][:50]}", file=sys.stderr)
             elif combo.get("type") == "dress":
                 dr = combo.get("dress", {})
                 sh = combo.get("shoes", {})
@@ -2571,6 +2578,7 @@ def generate_outfits():
                     "bottom": sh.get("image_url", ""),  # shoes (1-split bottom 50%)
                     "accessory_note": combo.get("accessory_note", ""),
                 }
+                import sys; print(f"[DRESSING-DEBUG] DRESS: top={outfit_data['top'][:50]} bottom={outfit_data['bottom'][:50]}", file=sys.stderr)
             else:  # regular
                 outfit_data = {
                     "type": "regular",
@@ -2579,6 +2587,7 @@ def generate_outfits():
                     "bottom": combo.get("shoes", {}).get("image_url", ""),
                     "accessory_note": combo.get("accessory_note", ""),
                 }
+                import sys; print(f"[DRESSING-DEBUG] REGULAR: top={outfit_data['top'][:50]} mid={outfit_data['mid'][:50]} bottom={outfit_data['bottom'][:50]}", file=sys.stderr)
 
             outfits.append(outfit_data)
 
@@ -2594,6 +2603,8 @@ def generate_outfits():
                 }
                 outfits.append(outfit)
 
+        import sys; print(f"[DRESSING-DEBUG] FINAL OUTFITS COUNT={len(outfits)} SRC={debug_source}", file=sys.stderr)
+        for _oi, _od in enumerate(outfits): print(f"[DRESSING-DEBUG]  OUT#{_oi}: type={_od.get('type')} top={str(_od.get('top',''))[:40]} mid={str(_od.get('mid',''))[:40]} bottom={str(_od.get('bottom',''))[:40]}", file=sys.stderr)
         _log.info("[DRESSING] %d outfits (%s)", len(outfits), debug_source)
         return jsonify({
             "success": True,
