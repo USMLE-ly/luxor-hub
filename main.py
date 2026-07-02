@@ -1905,12 +1905,10 @@ def generate_outfits():
         count = min(int(data.get("count", 3)), 7)
         _log.info("[DRESSING] Generating %d outfits for %s", count, occasion)
 
-        # Accept items from frontend (Supabase), fallback to Qdrant/local JSON
-        closet_items = data.get("closet_items", None)
+        # Load items from Qdrant (or local JSON fallback)
+        closet_items = qdrant_get_all_items()
         if not closet_items:
-            closet_items = qdrant_get_all_items()
-        if not closet_items:
-            return jsonify({"success": False, "error": "Your closet is empty! Add items first."}), 400
+            return jsonify({"success": False, "images": [], "error": "Your closet is empty! Add items first."}), 200
 
         # Allow items even without image_url — FlipGallery handles empty URLs gracefully (dark block)
         items_with_img = [i for i in closet_items if (i.get("image_url") or i.get("photo_url"))]
@@ -1936,9 +1934,9 @@ def generate_outfits():
             label = (item.get("label","")+" "+item.get("name","")+" "+t).lower()
             for kws,res in [
                 (("jacket","coat","blazer","hoodie","cardigan","vest","bomber","trench","puffer"),"top"),
-                (("shirt","blouse","t-shirt","tee","tank","camisole","crop top","sweater","polo","bodysuit"),"top"),
-                (("pants","jeans","trousers","shorts","skirt","leggings","chinos"),"bottom"),
-                (("shoes","sneakers","boots","sandals","heels","flats","loafers"),"shoes"),
+                (("shirt","blouse","t-shirt","tee","tank","camisole","crop top","sweater","polo","bodysuit","top"),"top"),
+                (("pants","jeans","trousers","shorts","skirt","leggings","chinos","bottom","pant"),"bottom"),
+                (("shoes","sneakers","boots","sandals","heels","flats","loafers","shoe","footwear"),"shoes"),
                 (("dress","gown","jumpsuit","romper","sundress"),"dress"),
                 (("bag","purse","belt","hat","scarf","jewelry","watch","sunglasses","earrings"),"accessory"),
                 (("full outfit","full look","complete outfit","matching set","outfit set","coord set","two-piece","suit set"),"full_outfit"),
@@ -1966,9 +1964,9 @@ def generate_outfits():
         has_acc = len(accessories) > 0
 
         if not has_tops and not has_dresses and not has_full:
-            return jsonify({"success":False,"error":"No tops, dresses, or full outfits in your closet. Upload clothing photos first."}),400
+            return jsonify({"success":False,"images":[],"error":"No tops, dresses, or full outfits in your closet. Upload clothing photos first."}),200
         if has_tops and not has_bottoms:
-            return jsonify({"success":False,"error":"You need bottoms (pants/skirts) in your closet."}),400
+            return jsonify({"success":False,"images":[],"error":"You need bottoms (pants/skirts) in your closet."}),200
 
         # ---- Build text description ----
         def _item_text(items_list):
