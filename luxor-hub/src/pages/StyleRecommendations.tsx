@@ -87,6 +87,10 @@ interface OutfitReview {
 
 const apiBase = import.meta.env.VITE_API_URL || import.meta.env.VITE_PUBLIC_API_URL || "";
 
+function getApiUrl(): string {
+  return apiBase || (window.location.hostname === "localhost" ? "http://localhost:5000" : "");
+}
+
 export default function StyleRecommendationsPage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
@@ -96,90 +100,92 @@ export default function StyleRecommendationsPage() {
   const [recommendations, setRecommendations] = useState<Recommendations | null>(null);
   const [outfitReview, setOutfitReview] = useState<OutfitReview | null>(null);
   const [activeTab, setActiveTab] = useState<"analyze" | "recommendations" | "review">("analyze");
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setError(null);
     const reader = new FileReader();
     reader.onloadend = () => {
       setImagePreview(reader.result as string);
       setAnalysis(null);
       setRecommendations(null);
       setOutfitReview(null);
+      setActiveTab("analyze");
     };
     reader.readAsDataURL(file);
   };
 
-  const handleAnalyze = async () => {
+  // ── Consolidated full analysis: face/body → recommendations → outfit review ──
+  const handleFullAnalysis = async () => {
     if (!imagePreview) return;
     setAnalyzing(true);
-    setProgressValue(10);
-    setProgressStage("Sending image for analysis...");
-    const api = apiBase || (window.location.hostname === "localhost" ? "http://localhost:5000" : "");
+    setError(null);
+    const api = getApiUrl();
+
     try {
-      setProgressValue(40);
-      setProgressStage("Calling MiMo Vision 2.5...");
-      const resp = await fetch(api + "/api/v1/style-analyze", {
+      // Step 1: Style Analyze (face + body)
+      setProgressValue(10);
+      setProgressStage("Analyzing face & body...");
+      const styleResp = await fetch(api + "/api/v1/style-analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ image_b64: imagePreview }),
       });
-      const data = await resp.json();
-      if (data.success && data.analysis) {
-        setAnalysis(data.analysis);
-        setProgressValue(70);
-        setProgressStage("Generating recommendations...");
-        toast.success("Analysis complete!");
-        setActiveTab("recommendations");
-        const recResp = await fetch(api + "/api/v1/style-recommendations", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ analysis: data.analysis }),
-        });
-        const recData = await recResp.json();
-        if (recData.success && recData.recommendations) {
-          setProgressValue(90);
-          setProgressStage("Finalizing results...");
-          setRecommendations(recData.recommendations);
-        }
-      } else {
-        toast.error(data.error || "Analysis failed");
+      const styleData = await styleResp.json();
+      if (!styleData.success || !styleData.analysis) {
+        throw new Error(styleData.error || "Face/body analysis failed");
       }
-    } catch (e: any) {
-      toast.error(e.message || "Failed to analyze");
-    } finally {
-      setProgressValue(100);
-      setProgressStage("Complete!");
-      setAnalyzing(false);
-    }
-  };
+      setAnalysis(styleData.analysis);
 
-  const handleReview = async () => {
-    if (!imagePreview) return;
-    setAnalyzing(true);
-    const api = apiBase || (window.location.hostname === "localhost" ? "http://localhost:5000" : "");
-    try {
-      const resp = await fetch(api + "/api/v1/outfit-review", {
+      // Step 2: Style Recommendations
+      setProgressValue(40);
+      setProgressStage("Generating style recommendations...");
+      const recResp = await fetch(api + "/api/v1/style-recommendations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ analysis: styleData.analysis }),
+      });
+      const recData = await recResp.json();
+      if (recData.success && recData.recommendations) {
+        setRecommendations(recData.recommendations);
+      } else {
+        toast.warning("Recommendations unavailable, continuing with review...");
+      }
+
+      // Step 3: Outfit Review
+      setProgressValue(70);
+      setProgressStage("Reviewing outfit...");
+      const reviewResp = await fetch(api + "/api/v1/outfit-review", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ image_b64: imagePreview, occasion: "casual" }),
       });
-      const data = await resp.json();
-      if (data.success && data.review) {
-        setOutfitReview(data.review);
-        toast.success("Outfit reviewed!");
+      const reviewData = await reviewResp.json();
+      if (reviewData.success && reviewData.review) {
+        setOutfitReview(reviewData.review);
       } else {
-        toast.error(data.error || "Review failed");
+        toast.warning("Outfit review unavailable");
       }
+
+      // Done!
+      setProgressValue(100);
+      setProgressStage("Complete!");
+      setActiveTab("analyze");
+      toast.success("Full analysis complete! ✨");
     } catch (e: any) {
-      toast.error(e.message || "Failed to review");
+      setError(e.message || "Analysis failed");
+      toast.error(e.message || "Analysis failed. Please try again.");
     } finally {
       setAnalyzing(false);
     }
   };
 
   const scoreColor = (s: number) => s >= 80 ? "text-green-500" : s >= 60 ? "text-yellow-500" : "text-red-400";
+
+  const scoreBgColor = (s: number) => s >= 80 ? "bg-green-500/10 border-green-500/30" : s >= 60 ? "bg-yellow-500/10 border-yellow-500/30" : "bg-red-500/10 border-red-500/30";
 
   return (
     <AppLayout>
@@ -197,8 +203,8 @@ export default function StyleRecommendationsPage() {
           {imagePreview ? (
             <div className="relative w-full max-w-md">
               <img src={imagePreview} alt="Upload" className="w-full h-auto max-h-[50vh] object-contain rounded-xl" />
-              <button onClick={() => { setImagePreview(null); setAnalysis(null); setRecommendations(null); setOutfitReview(null); }}
-                className="absolute top-2 right-2 p-2 rounded-full bg-black/60 hover:bg-black/80 text-white text-xs">\u2715</button>
+              <button onClick={() => { setImagePreview(null); setAnalysis(null); setRecommendations(null); setOutfitReview(null); setError(null); }}
+                className="absolute top-2 right-2 p-2 rounded-full bg-black/60 hover:bg-black/80 text-white text-xs">✕</button>
             </div>
           ) : (
             <div onClick={() => fileInputRef.current?.click()} className="w-full max-w-md aspect-[4/3] rounded-xl border-2 border-dashed border-white/20 flex flex-col items-center justify-center gap-4 cursor-pointer hover:border-primary/50 transition-all bg-zinc-900/40">
@@ -208,13 +214,11 @@ export default function StyleRecommendationsPage() {
           )}
           <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
 
+          {/* Single consolidated button */}
           <div className="flex gap-3">
-            <Button onClick={handleAnalyze} disabled={!imagePreview || analyzing} className="gap-2">
-              {analyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <User className="w-4 h-4" />}
-              {analyzing ? "Analyzing..." : "Analyze Body & Face"}
-            </Button>
-            <Button onClick={handleReview} disabled={!imagePreview || analyzing} variant="outline" className="gap-2">
-              <Star className="w-4 h-4" /> Review Outfit
+            <Button onClick={handleFullAnalysis} disabled={!imagePreview || analyzing} className="gap-2">
+              {analyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+              {analyzing ? "Analyzing..." : "✨ Analyze Outfit"}
             </Button>
           </div>
           {analyzing && (
@@ -222,24 +226,35 @@ export default function StyleRecommendationsPage() {
               <ProgressBar value={progressValue} stage={progressStage} variant="purple" animated />
             </div>
           )}
+          {error && (
+            <div className="flex items-center gap-2 text-red-400 text-sm bg-red-500/10 px-4 py-2 rounded-lg border border-red-500/30">
+              <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
         </div>
 
-        {analysis && (
+        {/* Tabs — shown when any data exists */}
+        {(analysis || recommendations || outfitReview) && (
           <div className="flex gap-2 border-b border-white/10 pb-2">
-            {(["analyze", "recommendations", "review"] as const).map((tab) => (
-              <button key={tab} onClick={() => setActiveTab(tab)}
-                className={"px-4 py-2 rounded-lg text-sm font-medium transition-all " + (
-                  activeTab === tab ? "bg-primary/20 text-primary" : "text-white/50 hover:text-white/80"
-                )}>
-                {tab === "analyze" ? "\u2728 Analysis" : tab === "recommendations" ? "\u2728 Recommendations" : "\u2728 Review"}
-              </button>
-            ))}
+            {(["analyze", "recommendations", "review"] as const).map((tab) => {
+              const hasData = tab === "analyze" ? !!analysis : tab === "recommendations" ? !!recommendations : !!outfitReview;
+              return (
+                <button key={tab} onClick={() => hasData && setActiveTab(tab)}
+                  className={"px-4 py-2 rounded-lg text-sm font-medium transition-all " + (
+                    activeTab === tab ? "bg-primary/20 text-primary" : "text-white/50 hover:text-white/80"
+                  ) + (!hasData ? " opacity-40 cursor-not-allowed" : "")}>
+                  {tab === "analyze" ? "✨ Analysis" : tab === "recommendations" ? "✨ Recommendations" : "✨ Review"}
+                </button>
+              );
+            })}
           </div>
         )}
 
         <AnimatePresence mode="wait">
+          {/* ── TAB: Analysis (Face + Body) ── */}
           {activeTab === "analyze" && analysis && (
-            <motion.div key="analysis" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <motion.div key="analysis" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="rounded-xl border border-white/10 bg-zinc-900/40 backdrop-blur-xl p-5">
                 <div className="flex items-center gap-2 mb-4"><span className="text-primary"><ScanFaceIcon className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-white/80">Face Analysis</h3></div>
                 <InfoRow label="Face Shape" value={analysis.face_shape} />
@@ -273,6 +288,212 @@ export default function StyleRecommendationsPage() {
                 <div className="text-3xl font-bold mb-2 text-yellow-500">{Number(analysis.current_style_score) * 10}/100</div>
                 <p className="text-sm text-white/70 italic">"{analysis.overall_style_profile}"</p>
               </div>
+            </motion.div>
+          )}
+
+          {/* ── TAB: Recommendations ── */}
+          {activeTab === "recommendations" && recommendations && (
+            <motion.div key="recommendations" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
+              {/* Color Analysis */}
+              <div className="rounded-xl border border-white/10 bg-zinc-900/40 backdrop-blur-xl p-5">
+                <div className="flex items-center gap-2 mb-4"><span className="text-primary"><Palette className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-white/80">Color Analysis</h3></div>
+                {recommendations.color_analysis && (
+                  <>
+                    <div className="mb-3">
+                      <p className="text-xs text-white/50 mb-1">Best Colors</p>
+                      <div className="flex flex-wrap gap-2">
+                        {recommendations.color_analysis.best_colors?.map((c, i) => (
+                          <span key={i} className="px-3 py-1 rounded-full bg-green-500/15 text-green-400 text-xs border border-green-500/30">{c}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <p className="text-xs text-white/50 mb-1">Colors to Avoid</p>
+                      <div className="flex flex-wrap gap-2">
+                        {recommendations.color_analysis.colors_to_avoid?.map((c, i) => (
+                          <span key={i} className="px-3 py-1 rounded-full bg-red-500/15 text-red-400 text-xs border border-red-500/30">{c}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <p className="text-xs text-white/50 mb-1">Accessory Colors</p>
+                      <p className="text-sm text-white/80">{recommendations.color_analysis.best_accessory_colors?.join(", ") || "—"}</p>
+                    </div>
+                    <div className="mb-3">
+                      <p className="text-xs text-white/50 mb-1">Shoe Colors</p>
+                      <p className="text-sm text-white/80">{recommendations.color_analysis.best_shoe_colors?.join(", ") || "—"}</p>
+                    </div>
+                    <div className="mb-3">
+                      <p className="text-xs text-white/50 mb-1">Best Jewelry Metals</p>
+                      <div className="flex flex-wrap gap-2">
+                        {recommendations.color_analysis.best_jewelry_metals?.map((m, i) => (
+                          <span key={i} className="px-3 py-1 rounded-full bg-amber-500/15 text-amber-400 text-xs border border-amber-500/30">{m}</span>
+                        ))}
+                      </div>
+                    </div>
+                    {recommendations.color_analysis.explanation && (
+                      <p className="text-xs text-white/50 italic mt-2">{recommendations.color_analysis.explanation}</p>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {/* Face Recommendations */}
+              <div className="rounded-xl border border-white/10 bg-zinc-900/40 backdrop-blur-xl p-5">
+                <div className="flex items-center gap-2 mb-4"><span className="text-primary"><ScanFaceIcon className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-white/80">Face Recommendations</h3></div>
+                {recommendations.face_recommendations && (
+                  <>
+                    {recommendations.face_recommendations.best_collar_types?.length > 0 && (
+                      <InfoRow label="Best Collars" value={recommendations.face_recommendations.best_collar_types.join(", ")} />
+                    )}
+                    {recommendations.face_recommendations.best_neckline_styles?.length > 0 && (
+                      <InfoRow label="Best Necklines" value={recommendations.face_recommendations.best_neckline_styles.join(", ")} />
+                    )}
+                    {recommendations.face_recommendations.glasses_recommendation && (
+                      <InfoRow label="Glasses" value={recommendations.face_recommendations.glasses_recommendation} />
+                    )}
+                    {recommendations.face_recommendations.hat_recommendation && (
+                      <InfoRow label="Hats" value={recommendations.face_recommendations.hat_recommendation} />
+                    )}
+                    {recommendations.face_recommendations.hairstyle_advice && (
+                      <InfoRow label="Hairstyle" value={recommendations.face_recommendations.hairstyle_advice} />
+                    )}
+                    {recommendations.face_recommendations.beard_advice && (
+                      <InfoRow label="Beard" value={recommendations.face_recommendations.beard_advice} />
+                    )}
+                    {recommendations.face_recommendations.explanation && (
+                      <p className="text-xs text-white/50 italic mt-2">{recommendations.face_recommendations.explanation}</p>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {/* Body Recommendations */}
+              <div className="rounded-xl border border-white/10 bg-zinc-900/40 backdrop-blur-xl p-5">
+                <div className="flex items-center gap-2 mb-4"><span className="text-primary"><Shirt className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-white/80">Body Recommendations</h3></div>
+                {recommendations.body_recommendations && (
+                  <>
+                    {recommendations.body_recommendations.shirt_fit && <InfoRow label="Shirt Fit" value={recommendations.body_recommendations.shirt_fit} />}
+                    {recommendations.body_recommendations.jacket_fit && <InfoRow label="Jacket Fit" value={recommendations.body_recommendations.jacket_fit} />}
+                    {recommendations.body_recommendations.pants_fit && <InfoRow label="Pants Fit" value={recommendations.body_recommendations.pants_fit} />}
+                    {recommendations.body_recommendations.shorts_length && <InfoRow label="Shorts Length" value={recommendations.body_recommendations.shorts_length} />}
+                    {recommendations.body_recommendations.coat_style && <InfoRow label="Coat Style" value={recommendations.body_recommendations.coat_style} />}
+                    {recommendations.body_recommendations.suit_cut && <InfoRow label="Suit Cut" value={recommendations.body_recommendations.suit_cut} />}
+                    {recommendations.body_recommendations.explanation && (
+                      <p className="text-xs text-white/50 italic mt-2">{recommendations.body_recommendations.explanation}</p>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {/* Honest Tips */}
+              {recommendations.honest_tips?.length > 0 && (
+                <div className="rounded-xl border border-amber-500/20 bg-amber-950/20 backdrop-blur-xl p-5">
+                  <div className="flex items-center gap-2 mb-4"><span className="text-amber-400"><Lightbulb className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-amber-300/80">Honest Tips</h3></div>
+                  <div className="space-y-3">
+                    {recommendations.honest_tips.map((tip, i) => (
+                      <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-black/30 border border-white/5">
+                        <span className="text-amber-400/70 text-sm mt-0.5">•</span>
+                        <div className="flex-1">
+                          <p className="text-sm text-white/80">{tip.tip}</p>
+                          <p className="text-[10px] text-white/40 mt-1">Confidence: {tip.confidence}%</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Confidence Score */}
+              {recommendations.confidence_score > 0 && (
+                <div className="text-center text-xs text-white/40">
+                  Overall recommendation confidence: <span className="text-white/70 font-semibold">{recommendations.confidence_score}%</span>
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {/* ── TAB: Review ── */}
+          {activeTab === "review" && outfitReview && (
+            <motion.div key="review" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
+              {/* Overall Score */}
+              <div className={`rounded-xl border p-6 text-center ${scoreBgColor(outfitReview.overall_score)}`}>
+                <p className="text-xs text-white/50 uppercase tracking-wider mb-1">Overall Score</p>
+                <div className={`text-5xl font-bold ${scoreColor(outfitReview.overall_score)}`}>
+                  {outfitReview.overall_score}/100
+                </div>
+              </div>
+
+              {/* Score Breakdown */}
+              {Object.keys(outfitReview.scores).length > 0 && (
+                <div className="rounded-xl border border-white/10 bg-zinc-900/40 backdrop-blur-xl p-5">
+                  <div className="flex items-center gap-2 mb-4"><span className="text-primary"><Star className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-white/80">Score Breakdown</h3></div>
+                  <div className="space-y-3">
+                    {Object.entries(outfitReview.scores).map(([key, val]) => (
+                      <div key={key}>
+                        <div className="flex justify-between mb-1">
+                          <span className="text-xs text-white/60 capitalize">{key.replace(/_/g, " ")}</span>
+                          <span className={`text-xs font-semibold ${scoreColor(val)}`}>{val}/100</span>
+                        </div>
+                        <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+                          <motion.div
+                            className={`h-full rounded-full ${val >= 80 ? "bg-green-500" : val >= 60 ? "bg-yellow-500" : "bg-red-500"}`}
+                            initial={{ width: 0 }}
+                            animate={{ width: `${val}%` }}
+                            transition={{ duration: 0.8, ease: "easeOut" }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Strengths */}
+              {outfitReview.strengths?.length > 0 && (
+                <div className="rounded-xl border border-green-500/20 bg-green-950/20 backdrop-blur-xl p-5">
+                  <div className="flex items-center gap-2 mb-4"><span className="text-green-400"><Sparkles className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-green-300/80">Strengths</h3></div>
+                  <ul className="space-y-2">
+                    {outfitReview.strengths.map((s, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-white/80">
+                        <span className="text-green-400 mt-0.5">✓</span> {s}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Improvements */}
+              {outfitReview.improvements?.length > 0 && (
+                <div className="rounded-xl border border-amber-500/20 bg-amber-950/20 backdrop-blur-xl p-5">
+                  <div className="flex items-center gap-2 mb-4"><span className="text-amber-400"><AlertTriangle className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-amber-300/80">Improvements</h3></div>
+                  <div className="space-y-3">
+                    {outfitReview.improvements.map((imp, i) => (
+                      <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-black/30 border border-white/5">
+                        <span className={
+                          imp.priority === "high" ? "text-red-400" :
+                          imp.priority === "medium" ? "text-amber-400" : "text-blue-400"
+                        }>
+                          {imp.priority === "high" ? "🔴" : imp.priority === "medium" ? "🟡" : "🔵"}
+                        </span>
+                        <div className="flex-1">
+                          <p className="text-sm text-white/80">{imp.issue}</p>
+                          {imp.suggestion && (
+                            <p className="text-xs text-amber-300/70 mt-0.5">→ {imp.suggestion}</p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Honest Summary */}
+              {outfitReview.honest_summary && (
+                <div className="rounded-xl border border-white/10 bg-zinc-900/40 backdrop-blur-xl p-5">
+                  <p className="text-sm text-white/60 italic text-center">"{outfitReview.honest_summary}"</p>
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
