@@ -75,13 +75,13 @@ export default function FlipGallery({ images, onGenerate, onDismiss, isLoading }
     return (
       <div id="flip-gallery-empty" className='relative w-full h-[400px] md:h-[500px]' style={{ perspective: '800px' }}>
         {/* Split-screen dark placeholders */}
-        <div className='top unite bg-[#111]'></div>
-        <div className='bottom unite bg-[#111]'></div>
-        <div className='overlay-top unite bg-[#111]'></div>
-        <div className='overlay-bottom unite bg-[#111]'></div>
+        <div className='top unite bg-black'></div>
+        <div className='bottom unite bg-black'></div>
+        <div className='overlay-top unite bg-black'></div>
+        <div className='overlay-bottom unite bg-black'></div>
 
         {/* Black divider line */}
-        <div className='absolute top-1/2 left-0 w-full h-[4px] bg-black z-10 -translate-y-1/2'></div>
+        <div className='divider-line absolute top-1/2 left-0 w-full h-[4px] bg-black z-10 -translate-y-1/2'></div>
 
         {/* Generate button where "Joshua Hibbert" was (bottom-left) */}
         <div className='absolute bottom-[-1rem] left-[-0.5rem] z-20'>
@@ -102,7 +102,7 @@ export default function FlipGallery({ images, onGenerate, onDismiss, isLoading }
 
         <style>{`
           #flip-gallery-empty { position: relative; }
-          #flip-gallery-empty > div { position: absolute; width: 100%; height: 50%; overflow: hidden; }
+          #flip-gallery-empty .unite { position: absolute; width: 100%; height: 50%; overflow: hidden; }
           #flip-gallery-empty .top, #flip-gallery-empty .overlay-top { top: 0; transform-origin: bottom; }
           #flip-gallery-empty .bottom, #flip-gallery-empty .overlay-bottom { bottom: 0; transform-origin: top; }
         `}</style>
