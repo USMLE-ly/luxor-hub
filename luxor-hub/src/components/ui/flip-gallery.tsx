@@ -45,10 +45,11 @@ const FRAME_STYLE: React.CSSProperties = {
   padding: '8px',
 };
 
+/* 9:16 aspect ratio: height is computed from width automatically     */
 const INNER_STYLE: React.CSSProperties = {
   position: 'relative',
   width: '100%',
-  height: '450px',
+  aspectRatio: '9 / 16',
   perspective: '800px',
   backgroundColor: '#0a0a0a',
   overflow: 'hidden',
@@ -144,10 +145,10 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading 
     return (
       <div style={FRAME_STYLE}>
         <div style={INNER_STYLE}>
-          {/* 3 dark strips with subtle difference */}
-          <div style={{ ...SECTION_BASE, top: 0, height: '33.333%', backgroundColor: '#181818', borderBottom: '4px solid #000', zIndex: 0 }} />
-          <div style={{ ...SECTION_BASE, top: '33.333%', height: '33.333%', backgroundColor: '#0a0a0a', borderBottom: '4px solid #000', zIndex: 0 }} />
-          <div style={{ ...SECTION_BASE, bottom: 0, height: '33.333%', backgroundColor: '#0a0a0a', zIndex: 0 }} />
+          {/* UNIFORM dark gray strips — all same #1A1A1A color */}
+          <div style={{ ...SECTION_BASE, top: 0, height: '33.333%', backgroundColor: '#1A1A1A', borderBottom: '4px solid #000', zIndex: 0 }} />
+          <div style={{ ...SECTION_BASE, top: '33.333%', height: '33.333%', backgroundColor: '#1A1A1A', borderBottom: '4px solid #000', zIndex: 0 }} />
+          <div style={{ ...SECTION_BASE, bottom: 0, height: '33.333%', backgroundColor: '#1A1A1A', zIndex: 0 }} />
 
           {/* Generate button */}
           <div style={CONTROL_BOTTOM_LEFT}>
@@ -187,7 +188,7 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading 
   return (
     <div style={FRAME_STYLE}>
       <div style={INNER_STYLE}>
-        {/* Render sections with background images */}
+        {/* Render sections with background images from closet */}
         {sections.map((url, idx) => (
           <div
             key={idx}
