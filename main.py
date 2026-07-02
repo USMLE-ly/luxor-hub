@@ -1908,9 +1908,11 @@ def generate_outfits():
         if not closet_items:
             return jsonify({"success": False, "error": "Your closet is empty! Add items first."}), 400
 
-        items_with_img = [i for i in closet_items if i.get("image_url")]
+        # Allow items even without image_url — FlipGallery handles empty URLs gracefully (dark block)
+        items_with_img = [i for i in closet_items if i.get("image_url") is not None]
+        print(f"[DEBUG] Found {len(items_with_img)} items with image_url field")
         if not items_with_img:
-            return jsonify({"success": False, "error": "No items with photos in your closet. Upload clothing photos first."}), 400
+            return jsonify({"success": False, "images": [], "error": "No items found in closet. Add items first."}), 200
 
         # ---- Category detection ----
         def _cat(item):
@@ -1941,6 +1943,7 @@ def generate_outfits():
             return "other"
 
         # ---- Group items ----
+        print(f"[DEBUG] Grouping: items_with_img={len(items_with_img)}")
         tops = [i for i in items_with_img if _cat(i) == "top"]
         bottoms = [i for i in items_with_img if _cat(i) == "bottom"]
         shoes_list = [i for i in items_with_img if _cat(i) == "shoes"]
