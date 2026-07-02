@@ -196,8 +196,8 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading 
               ...SECTION_BASE,
               top: `${(idx / sectionCount) * 100}%`,
               height: `${(1 / sectionCount) * 100}%`,
-              backgroundImage: url ? `url('${url}')` : undefined,
-              backgroundColor: url ? 'transparent' : '#111',
+              backgroundImage: url?.startsWith('http') ? `url('${url}')` : undefined,
+              backgroundColor: url?.startsWith('http') ? 'transparent' : '#111',
             }}
           />
         ))}
