@@ -2314,45 +2314,241 @@ def outfit_review():
         return jsonify({"success": False, "error": f"Review failed: {str(exc)[:100]}"}), 500
 
 @app.route("/api/v1/generate-outfits", methods=["POST", "OPTIONS"], strict_slashes=False)
-def generate_outfits_mock():
-    """Temporary mock endpoint for dressing room outfit generation."""
+def generate_outfits():
     if request.method == "OPTIONS":
         return "", 204
     try:
+        import random
         data = request.get_json(silent=True) or {}
         occasion = data.get("occasion", "casual")
         count = min(int(data.get("count", 3)), 7)
+        _log.info("[DRESSING] Generating %d outfits for %s via MiMo Vision", count, occasion)
 
-        _log.info("[DRESSING] Mock generating %d outfits for %s", count, occasion)
+        closet_items = qdrant_get_all_items()
+        if not closet_items:
+            return jsonify({"success": False, "error": "Your closet is empty! Add items first."}), 400
 
-        # Mock outfit data: each outfit has top/mid/bottom URLs
-        mock_outfits = [
-            {
-                "top": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=600&h=600&q=80",
-                "mid": "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=600&h=600&q=80",
-                "bottom": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=600&h=600&q=80",
-            },
-            {
-                "top": "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=600&h=600&q=80",
-                "mid": "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=600&h=600&q=80",
-                "bottom": "https://images.unsplash.com/photo-1564584217132-2271feaeb3c5?auto=format&fit=crop&w=600&h=600&q=80",
-            },
-            {
-                "top": "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=600&h=600&q=80",
-                "mid": "https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?auto=format&fit=crop&w=600&h=600&q=80",
-                "bottom": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&h=600&q=80",
-            },
-        ]
+        items_with_img = [i for i in closet_items if i.get("image_url")]
+        if not items_with_img:
+            return jsonify({"success": False, "error": "No items with photos in your closet. Upload clothing photos first."}), 400
 
+        def _guess_cat(item):
+            t = (item.get("type") or item.get("category") or "").lower().strip()
+            tops = ("top","shirt","blouse","t-shirt","tshirt","camisole","tank","sweater","hoodie","cardigan","blazer","vest","bodysuit","crop top","tube top","halter","jacket","coat","outerwear")
+            bottoms = ("bottom","pants","jeans","trousers","shorts","skirt","leggings","chinos","cargo","culottes","palazzo")
+            shoes_cat = ("shoes","footwear","sneakers","boots","sandals","heels","flats","loafers","oxfords","mules","wedges","slides")
+            dresses = ("dress","gown","jumpsuit","romper","sundress")
+            if t in tops or any(k in t for k in ("jacket","blazer","cardigan")):
+                return "top"
+            if t in bottoms:
+                return "bottom"
+            if t in shoes_cat:
+                return "shoes"
+            if t in dresses:
+                return "dress"
+            label = (item.get("label","")+" "+item.get("name","")+" "+t).lower()
+            for kw_set,result in [
+                (("jacket","coat","blazer","hoodie","cardigan","vest","bomber","trench","puffer"),"top"),
+                (("shirt","blouse","t-shirt","tee","tank","camisole","crop top","sweater","polo","bodysuit"),"top"),
+                (("pants","jeans","trousers","shorts","skirt","leggings","chinos"),"bottom"),
+                (("shoes","sneakers","boots","sandals","heels","flats","loafers"),"shoes"),
+                (("dress","gown","jumpsuit","romper","sundress"),"dress"),
+            ]:
+                if any(kw in label for kw in kw_set):
+                    return result
+            return "other"
+
+        tops = [i for i in items_with_img if _guess_cat(i) == "top"]
+        bottoms = [i for i in items_with_img if _guess_cat(i) == "bottom"]
+        shoes_list = [i for i in items_with_img if _guess_cat(i) == "shoes"]
+        dresses = [i for i in items_with_img if _guess_cat(i) == "dress"]
+
+        if not tops and not dresses:
+            return jsonify({"success":False,"error":"No tops or dresses in your closet. Upload clothing photos first."}),400
+        if tops and not bottoms:
+            return jsonify({"success":False,"error":"You need bottoms (pants/skirts) in your closet."}),400
+
+        # Build text item list
+        def _build_items_text():
+            lines = []
+            if tops:
+                lines.append("TOPS:" + "".join(f"\n  [{i}] {tops[i].get('label','Item')} ({tops[i].get('color','')})" for i in range(len(tops))))
+            if bottoms:
+                lines.append("\nBOTTOMS:" + "".join(f"\n  [{i}] {bottoms[i].get('label','Item')} ({bottoms[i].get('color','')})" for i in range(len(bottoms))))
+            if shoes_list:
+                lines.append("\nSHOES:" + "".join(f"\n  [{i}] {shoes_list[i].get('label','Item')} ({shoes_list[i].get('color','')})" for i in range(len(shoes_list))))
+            if dresses:
+                lines.append("\nDRESSES:" + "".join(f"\n  [{i}] {dresses[i].get('label','Item')} ({dresses[i].get('color','')})" for i in range(len(dresses))))
+            return "".join(lines)
+
+        items_text = _build_items_text()
+
+        style_desc = {
+            "casual":"relaxed, everyday casual","business":"professional, business-appropriate","party":"stylish, eye-catching party","date-night":"romantic, attractive date night",
+            "sport":"active, sporty","formal":"elegant, formal","vacation":"vacation, resort-style","beach":"beach-ready, light","work":"professional work",
+        }.get(occasion.lower(), "versatile")
+
+        # Try creating a visual collage for MiMo Vision
+        collage_b64 = None
+        try:
+            from PIL import Image, ImageDraw, ImageFont
+            thumb_sz = 160
+            pad = 12
+            cat_h = 25
+            label_h = 22
+            col_w = thumb_sz + pad * 2
+            row_h = thumb_sz + label_h + pad * 2 + cat_h
+
+            cat_groups = [(tops,"TOPS",(70,130,180)),(bottoms,"BOTTOMS",(60,179,113)),(shoes_list,"SHOES",(218,165,32)),(dresses,"DRESSES",(180,70,130))]
+            active = [(g,l,c) for g,l,c in cat_groups if g]
+            n_rows = len(active)
+            max_cols = max(len(g) for g,_,_ in active)
+            cw = max(max_cols * col_w + pad, 400)
+            ch = n_rows * row_h + pad
+
+            canvas = Image.new("RGB", (cw, ch), (25, 25, 35))
+            draw = ImageDraw.Draw(canvas)
+            try:
+                tfont = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 13)
+                lfont = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 10)
+            except:
+                tfont = lfont = ImageFont.load_default()
+
+            for ri,(gi,gl,gc) in enumerate(active):
+                yb = ri * row_h + pad
+                draw.rectangle([(pad,yb),(cw-pad,yb+cat_h)], fill=gc)
+                draw.text((pad+6,yb+4), gl, fill=(255,255,255), font=tfont)
+                for ci,item in enumerate(gi[:max_cols]):
+                    x = ci * col_w + pad
+                    y = yb + cat_h + 4
+                    try:
+                        r = requests.get(item.get("image_url",""), timeout=8)
+                        if r.status_code == 200:
+                            im = Image.open(io.BytesIO(r.content))
+                            im.thumbnail((thumb_sz,thumb_sz), Image.Resampling.LANCZOS)
+                            ix = x + pad + (thumb_sz - im.width)//2
+                            iy = y + (thumb_sz - im.height)//2
+                            canvas.paste(im, (ix,iy))
+                    except:
+                        pass
+                    draw.rectangle([(x+pad-1,y-1),(x+pad+thumb_sz,y+thumb_sz)], outline=(100,100,100), width=1)
+                    lbl = item.get("label","")[:20]
+                    draw.text((x+pad, y+thumb_sz+2), f"[{ci}] {lbl}", fill=(180,180,180), font=lfont)
+
+            buf = io.BytesIO()
+            canvas.save(buf, format="JPEG", quality=88)
+            collage_b64 = base64.b64encode(buf.getvalue()).decode()
+            _log.info("[DRESSING] Collage: %dx%d, %d KB", cw, ch, len(collage_b64)//1024)
+        except Exception as exc:
+            _log.warning("[DRESSING] Collage failed: %s — using text prompt", exc)
+
+        vision_prompt = (
+            'You are a fashion stylist AI. Look at the closet items shown in the image. '
+            'Select the best outfit combination for a ' + style_desc + ' occasion.\n\n'
+            'Available items:\n' + items_text + '\n\n'
+            'Return ONLY this JSON (no other text):\n'
+            '{"selections":[{"top_idx":0,"bottom_idx":0,"shoe_idx":0}]}\n\n'
+            'RULES:\n'
+            '- Pick items that coordinate in color and style.\n'
+            '- A complete outfit needs at minimum: top + bottom + shoes (if available).\n'
+            '- top_idx is the index in TOPS list, bottom_idx in BOTTOMS, shoe_idx in SHOES.\n'
+            '- If shoes not available, set shoe_idx to null.\n'
+            '- Return exactly ' + str(count) + ' selection(s) if enough items exist.'
+        )
+
+        # Try MiMo Vision
+        mimo_result = None
+        if collage_b64:
+            try:
+                _log.info("[DRESSING] Sending collage to MiMo Vision")
+                mimo_result = call_mimo_vision(collage_b64, vision_prompt, temperature=0.3)
+                _log.info("[DRESSING] MiMo Vision responded: %s", str(mimo_result)[:200])
+            except Exception as exc:
+                _log.warning("[DRESSING] MiMo Vision error: %s", exc)
+
+        # Build outfits
+        def _pick_random(tops_list, bottoms_list, shoes_list):
+            combo = {}
+            if tops_list:
+                combo["top"] = random.choice(tops_list)
+            if bottoms_list:
+                combo["bottom"] = random.choice(bottoms_list)
+            if shoes_list:
+                combo["shoes"] = random.choice(shoes_list)
+            return combo
+
+        outfits = []
+        used_ids = set()
+        debug_source = "combinatorial"
+
+        for oi in range(count):
+            combo = None
+            # Try MiMo selection
+            if mimo_result and isinstance(mimo_result, dict):
+                try:
+                    sels = mimo_result.get("selections", [])
+                    if oi < len(sels):
+                        sel = sels[oi]
+                        c = {}
+                        ti = sel.get("top_idx")
+                        if ti is not None and 0 <= ti < len(tops):
+                            c["top"] = tops[ti]
+                        bi = sel.get("bottom_idx")
+                        if bi is not None and 0 <= bi < len(bottoms):
+                            c["bottom"] = bottoms[bi]
+                        si = sel.get("shoe_idx")
+                        if si is not None and 0 <= si < len(shoes_list):
+                            c["shoes"] = shoes_list[si]
+                        if len(c) >= 2:
+                            combo = c
+                            debug_source = "mimo_vision"
+                except (IndexError, TypeError, ValueError):
+                    pass
+
+            if not combo:
+                combo = _pick_random(tops, bottoms, shoes_list)
+                all_ids = {v.get("id") for v in combo.values() if v}
+                if all_ids & used_ids:
+                    combo = _pick_random(tops, bottoms, shoes_list)
+
+            if not combo:
+                continue
+
+            for v in combo.values():
+                if v and v.get("id"):
+                    used_ids.add(v.get("id"))
+
+            outfit = {
+                "top": combo.get("top",{}).get("image_url",""),
+                "mid": combo.get("bottom",{}).get("image_url",""),
+                "bottom": combo.get("shoes",{}).get("image_url",""),
+            }
+            outfits.append(outfit)
+
+        if not outfits:
+            fb = items_with_img[:3]
+            if fb:
+                outfit = {
+                    "top": fb[0].get("image_url",""),
+                    "mid": fb[1].get("image_url","") if len(fb)>1 else "",
+                    "bottom": fb[2].get("image_url","") if len(fb)>2 else "",
+                }
+                outfits.append(outfit)
+
+        _log.info("[DRESSING] %d outfits (%s) for %s", len(outfits), debug_source, occasion)
         return jsonify({
             "success": True,
-            "images": mock_outfits[:count],
+            "images": outfits,
             "occasion": occasion,
-            "count": count,
+            "count": len(outfits),
+            "source": debug_source,
         })
     except Exception as exc:
         _log.error("[DRESSING] Error: %s", exc, exc_info=True)
+        import traceback, sys
+        traceback.print_exc()
         return jsonify({"success": False, "error": str(exc)[:200]}), 500
+
 
 @app.route("/debug/analyze", methods=["POST"], strict_slashes=False)
 def debug_analyze():
