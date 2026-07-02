@@ -1279,6 +1279,7 @@ _image_b64_cache = ""
 
 # Fashion Decision
 # ---------------------------------------------------------------------------
+@app.route("/api/v1/analyze-outfit", methods=["POST", "OPTIONS"], strict_slashes=False)
 def analyze_outfit():
     if request.method == "OPTIONS":
         return "", 204
