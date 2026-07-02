@@ -189,6 +189,12 @@ def call_mimo_text(
                 raw = raw.strip()
                 _log.info("[MIMO-TEXT] Raw response (first 100): %s", raw[:100])
                 # Strip markdown code block wrappers
+                # re already imported at module level
+                # Strip opening and closing code fences
+                raw = re.sub(r'^```\w*\s*\n?', '', raw.strip())
+                raw = re.sub(r'\s*```$', '', raw.strip())
+                raw = raw.strip()
+                # Fallback: handle remaining fences via while loop
                 while raw.startswith("```"):
                     first_nl = raw.find("\n")
                     if first_nl >= 0:
