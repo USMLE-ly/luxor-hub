@@ -73,8 +73,8 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading 
         <div style={{ position: 'absolute', top: '33.333%', left: 0, width: '100%', height: '4px', background: '#000', zIndex: 10, transform: 'translateY(-50%)' }} />
         <div style={{ position: 'absolute', top: '66.666%', left: 0, width: '100%', height: '4px', background: '#000', zIndex: 10, transform: 'translateY(-50%)' }} />
 
-        {/* Generate button — bottom left */}
-        <div style={{ position: 'absolute', bottom: '-1rem', left: '-0.5rem', zIndex: 20 }}>
+        {/* Generate button — bottom left (inside frame) */}
+        <div style={{ position: 'absolute', bottom: '1rem', left: '1rem', zIndex: 20 }}>
           <button
             onClick={onGenerate}
             disabled={isLoading}
@@ -97,7 +97,7 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading 
         </div>
 
         {/* Arrows — bottom right (grayed) */}
-        <div style={{ position: 'absolute', bottom: '-1rem', right: 0, zIndex: 20, display: 'flex', gap: '8px' }}>
+        <div style={{ position: 'absolute', bottom: '1rem', right: '0.5rem', zIndex: 20, display: 'flex', gap: '8px' }}>
           <button disabled style={{ color: 'rgba(255,255,255,0.2)', cursor: 'not-allowed', background: 'none', border: 'none' }}>
             <ChevronLeft size={20} />
           </button>
@@ -111,6 +111,11 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading 
 
   // ============= POPULATED STATE =============
   const outfit = outfits[currentIndex];
+  // Defensive: if outfit is a string (flat URL), it's invalid for the gallery
+  if (!outfit || typeof outfit === 'string') {
+    console.warn("[FlipGallery] Invalid outfit (string instead of object):", outfit);
+    return null; // Will fall through to controls-only view
+  }
   const { images, dividerCount } = getSections(outfit);
 
   // Calculate section heights (percentage)

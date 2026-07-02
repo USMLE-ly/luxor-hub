@@ -57,8 +57,21 @@ export default function DressingRoomPage() {
       setProgressStage("Ready!");
 
       if (data.images?.length > 0) {
-        // Backend already returns OutfitImages[] with top/mid/bottom
-        setGeneratedImages(data.images as OutfitImages[]);
+        // Normalize data: if it's flat URLs, wrap into objects; otherwise use as-is
+        const images = data.images || [];
+        let normalized: OutfitImages[];
+        if (images.length > 0 && typeof images[0] === 'string') {
+          // Flat array of URLs — wrap into { top, mid, bottom } objects for the 3-split gallery
+          normalized = images.map((url: string) => ({
+            top: url, mid: url, bottom: url,
+            type: 'regular' as const, accessory_note: '',
+          }));
+          console.log("[DressingRoom] Normalized flat URLs to OutfitImages:", normalized);
+        } else {
+          // Already objects with top/mid/bottom
+          normalized = images as OutfitImages[];
+        }
+        setGeneratedImages(normalized);
         toast.success(`${data.images.length} outfits generated!`);
       } else {
         toast.error("No outfits returned. Try again.");
