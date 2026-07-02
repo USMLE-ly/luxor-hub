@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { ProgressBar } from "@/components/ui/progress-bar";
+import FlipGallery from "@/components/ui/flip-gallery";
 
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -61,9 +62,8 @@ const OCCASIONS = [
   { id: "sport", label: "Sport", emoji: "🏃" },
 ];
 
-/* ------------------------------------------------------------------ */
-/*  Component                                                          */
-/* ------------------------------------------------------------------ */
+const OUTFIT_COUNT = 3;
+
 export default function DressingRoomPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -73,17 +73,15 @@ export default function DressingRoomPage() {
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [deleting, setDeleting] = useState<string | null>(null);
-  const [uploadHover, setUploadHover] = useState(false);
 
-  // Outfit generation state
-  const [showOutfitModal, setShowOutfitModal] = useState(false);
-  const [outfitGenerating, setOutfitGenerating] = useState(false);
+  // FlipGallery generated images
+  const [generatedImages, setGeneratedImages] = useState<string[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [progressValue, setProgressValue] = useState(0);
   const [progressStage, setProgressStage] = useState("");
-  const [generatedOutfits, setGeneratedOutfits] = useState<OutfitOption[]>([]);
-  const [selectedOutfit, setSelectedOutfit] = useState<OutfitOption | null>(null);
 
-  const [step, setStep] = useState(0);
+  // Occasion modal
+  const [showOccasionModal, setShowOccasionModal] = useState(false);
   const [selectedOccasion, setSelectedOccasion] = useState("");
 
   /* ---------- Fetch gallery items ---------- */
@@ -100,13 +98,6 @@ export default function DressingRoomPage() {
   };
 
   useEffect(() => { fetchItems(); }, [user]);
-
-  // Auto-select first outfit when generated
-  useEffect(() => {
-    if (generatedOutfits.length > 0 && !selectedOutfit) {
-      setSelectedOutfit(generatedOutfits[0]);
-    }
-  }, [generatedOutfits]);
 
   const filtered = items.filter(
     (i) =>
@@ -131,458 +122,296 @@ export default function DressingRoomPage() {
   const scoreColor = (s: number) =>
     s >= 80 ? "text-green-500" : s >= 60 ? "text-yellow-500" : "text-red-400";
 
-  /* ---------- Generate Outfit (new) ---------- */
-  const openGenerateModal = () => {
-    setStep(0);
-    setSelectedOccasion("");
-    setShowOutfitModal(true);
-  };
-
-  const handleNext = () => {
-    if (step === 0 && !selectedOccasion) { toast.error("Pick an occasion"); return; }
-    setStep(1);
-  };
-
-  const handleGenerate = (count: number) => {
-    generateOutfit(count);
-  };
-
-  const generateOutfit = async (count: number = 2) => {
-    setShowOutfitModal(false);
-    setOutfitGenerating(true);
-    setGeneratedOutfits([]);
-    setProgressValue(15);
-    setProgressStage("Fetching your closet...");
-
+  /* ---------- Generate Outfit (context-preserving) ---------- */
+  const generateOutfits = async (occasion: string, count: number) => {
+    if (!user) return;
+    setIsGenerating(true);
+    setProgressValue(10);
+    setProgressStage("Scanning your closet...");
     try {
-      // Fetch user profile from onboarding data
-      let userProfile = {};
-      if (user) {
-        const { data: profile } = await supabase
-          .from("style_profiles")
-          .select("preferences")
-          .eq("user_id", user.id)
-          .single();
-        if (profile?.preferences) {
-          userProfile = {
-            bodyType: profile.preferences.bodyShape || "Average",
-            height: profile.preferences.height || "Average",
-            budget: profile.preferences.budget || "Mid-range",
-            lifestyle: profile.preferences.lifestyle || "Casual",
-            profession: profile.preferences.profession || "Professional",
-            styleGoal: profile.preferences.styleGoal || "Confident",
-            brands: Array.isArray(profile.preferences.brands) ? profile.preferences.brands.join(", ") : (profile.preferences.brands || "Any"),
-            styleMood: profile.preferences.styleMood || "",
-            ageRange: profile.preferences.ageRange || "",
-          };
-        }
-      }
-      
-      // Fetch user's closet items from Supabase (bypass Qdrant dependency)
-      let closetItems: any[] = [];
-      try {
-        const { data: closetData } = await supabase
-          .from("clothing_items")
-          .select("id, name, category, color, brand, season, photo_url")
-          .eq("user_id", user?.id || '')
-          .order("created_at", { ascending: false });
-        if (closetData) {
-          setProgressValue(30);
-          setProgressStage("Analyzing your wardrobe...");
-          closetItems = closetData.map((item: any) => ({
-            id: item.id,
-            label: item.name || 'Unknown',
-            type: item.category || 'other',
-            color: item.color || '',
-            category: item.category || 'other',
-            season: item.season || '',
-            image_url: item.photo_url || '',
-          }));
-        }
-      } catch (_e) { /* Supabase fetch best-effort */ }
+      const apiBase =
+        import.meta.env.VITE_API_URL ||
+        import.meta.env.VITE_PUBLIC_API_URL ||
+        (window.location.hostname === "localhost" ? "http://localhost:5000" : "");
 
-      setProgressValue(50);
-      setProgressStage("Consulting MiMo Vision 2.5...");
-      const api = import.meta.env.VITE_API_URL || import.meta.env.VITE_PUBLIC_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:5000' : '');
-      const genResp = await fetch(api + "/api/v1/dressing-room/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          occasion: selectedOccasion || "casual",
-          weather: "mild",
-          color_palette: "neutrals",
-          count: count,
-          user_profile: userProfile,
-          closet_items: closetItems,
-        }),
+      // Fetch closet items
+      const { data: closetData } = await supabase
+        .from("clothing_items")
+        .select("id, name, category, color, style, season, photo_url")
+        .eq("user_id", user.id);
+
+      const closetItems = (closetData || []).map((c) => ({
+        id: c.id,
+        name: c.name || "Unnamed",
+        category: c.category || "other",
+        color: c.color || "unknown",
+        style: c.style || "casual",
+        season: c.season || "all-season",
+        photo_url: c.photo_url || "",
+      }));
+
+      setProgressValue(30);
+      setProgressStage(`Consulting MiMo for ${occasion} outfits...`);
+
+      // Call edge function
+      const { data: functionData, error } = await supabase.functions.invoke("generate-outfits", {
+        body: {
+          closetItems,
+          occasion,
+          mood: "confident",
+          count: Math.min(count || OUTFIT_COUNT, 7),
+        },
       });
-      if (!genResp.ok) throw new Error("Generation failed");
-      const data: OutfitResponse = await genResp.json();
-      if (data.success && data.outfit_options && data.outfit_options.length > 0) {
-        setProgressValue(85);
-        setProgressStage("Composing outfits...");
-        setGeneratedOutfits(data.outfit_options);
-        toast.success("Outfits generated!");
+
+      if (error) throw new Error(error.message);
+
+      setProgressValue(70);
+      setProgressStage("Assembling your looks...");
+
+      if (functionData?.outfits?.length > 0) {
+        // Map outfit images from analysis gallery
+        const images = functionData.outfits
+          .map((o: any) => {
+            // Try to find matching items in gallery
+            const matched = items.find((g) =>
+              o.name?.toLowerCase().includes(g.overall_style?.toLowerCase())
+            );
+            return matched?.image_url || null;
+          })
+          .filter(Boolean);
+
+        if (images.length > 0) {
+          setGeneratedImages(images);
+        } else {
+          // Fallback: use saved analysis images
+          setGeneratedImages(items.slice(0, OUTFIT_COUNT).map((i) => i.image_url));
+        }
+
+        toast.success(`${functionData.outfits.length} outfits generated!`);
       } else {
-        toast.error(data.error || "Could not generate outfits");
+        // Fallback: show recent analyses
+        const fallbackImages = items.slice(0, OUTFIT_COUNT).map((i) => i.image_url);
+        if (fallbackImages.length > 0) {
+          setGeneratedImages(fallbackImages);
+          toast.success("Showing recent analyses");
+        } else {
+          toast.error("No outfits could be generated. Upload some clothes first!");
+        }
       }
     } catch (e: any) {
       toast.error(e.message || "Failed to generate outfits");
     } finally {
+      setIsGenerating(false);
       setProgressValue(100);
-      setProgressStage("Ready!");
-      setOutfitGenerating(false);
     }
   };
 
-  /* ---------- Upload handler ---------- */
-  function handleUploadClick() {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
-    input.onchange = (e: any) => {
-      const file = e.target?.files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          sessionStorage.setItem("pendingUpload", reader.result as string);
-          window.location.href = "/outfit-analysis";
-        };
-        reader.readAsDataURL(file);
-      }
-    };
-    input.click();
-  }
+  const handleGenerateClick = () => {
+    setSelectedOccasion("");
+    setShowOccasionModal(true);
+  };
 
-  /* ---------- Render ---------- */
+  const handleOccasionSelect = (occasionId: string) => {
+    setSelectedOccasion(occasionId);
+    setShowOccasionModal(false);
+    generateOutfits(occasionId, OUTFIT_COUNT);
+  };
+
+  const handleDismiss = () => {
+    setGeneratedImages([]);
+  };
+
   return (
     <AppLayout>
       <div className="p-4 md:p-8 mx-auto max-w-7xl space-y-8 overflow-x-hidden">
 
         {/* ---- HEADER ---- */}
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="relative">
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
           <div className="absolute -top-4 -left-4 w-32 h-32 bg-primary/10 rounded-full blur-[60px]" />
-          <h1 className="font-display text-4xl font-bold text-foreground relative">
-            Your <span className="gold-text">Dressing Room</span>
-          </h1>
+          <h1 className="font-display text-4xl font-bold text-foreground">Your Dressing Room</h1>
           <p className="text-muted-foreground mt-2 text-lg">
             Browse your analyzed outfits. Generate new combinations from your closet.
           </p>
         </motion.div>
 
-        {/* ---- UPLOAD + SEARCH BAR ---- */}
-        <div className="flex flex-col md:flex-row gap-6 items-stretch md:items-center justify-between">
-          {/* Upload Button */}
-          <div className="relative rounded-[1.5rem] border-[0.75px] border-border p-[3px]">
-            <GlowingEffect spread={60} glow proximity={80} inactiveZone={0.01} borderWidth={3} />
-            <motion.button
-              onHoverStart={() => setUploadHover(true)}
-              onHoverEnd={() => setUploadHover(false)}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleUploadClick}
-              className="relative flex items-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-r from-orange-500/20 via-orange-500/30 to-orange-500/20 border border-orange-500/30 text-orange-500 font-sans font-semibold text-base hover:from-orange-500/30 hover:to-orange-500/40 transition-all shadow-lg shadow-orange-500/10"
-            >
-              <motion.div
-                animate={{ rotate: uploadHover ? 15 : 0, scale: uploadHover ? 1.15 : 1 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                <Upload className="w-6 h-6" />
-              </motion.div>
-              Upload New Outfit
-            </motion.button>
-          </div>
-
-          {/* Generate Button */}
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={openGenerateModal}
-            className="flex items-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-r from-purple-500/20 via-purple-500/30 to-purple-500/20 border border-purple-500/30 text-purple-500 font-sans font-semibold text-base hover:from-purple-500/30 hover:to-purple-500/40 transition-all shadow-lg shadow-purple-500/10"
-          >
-            <Sparkles className="w-6 h-6" />
-            Generate Outfit
-          </motion.button>
-
-          {/* Search + View Toggle */}
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                id="dressing-search" name="search" placeholder="Search looks..."
-                className="pl-10 pr-4 py-2.5 rounded-xl bg-muted/50 border border-border/50 text-sm w-48 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
-              />
-            </div>
-            <div className="flex bg-muted/30 rounded-xl p-1 border border-border/30">
-              <button onClick={() => setViewMode("grid")} className={`p-2 rounded-lg transition-all ${viewMode === "grid" ? "bg-muted/60 shadow-sm" : ""}`}>
-                <Grid3X3 className="w-4 h-4" />
-              </button>
-              <button onClick={() => setViewMode("list")} className={`p-2 rounded-lg transition-all ${viewMode === "list" ? "bg-muted/60 shadow-sm" : ""}`}>
-                <List className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
+        {/* ---- FLIP GALLERY ---- */}
+        <div className="flex justify-center items-start pt-4">
+          <FlipGallery
+            images={generatedImages}
+            onGenerate={handleGenerateClick}
+            onDismiss={handleDismiss}
+            isLoading={isGenerating}
+          />
         </div>
 
-        {/* ---- GALLERY / EMPTY STATE ---- */}
-        {loading ? (
-          <div className="flex items-center justify-center py-32">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          </div>
-        ) : filtered.length === 0 ? (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-32 space-y-6">
-            <div className="w-20 h-20 mx-auto rounded-full bg-muted/40 flex items-center justify-center">
-              <ShoppingBag className="w-10 h-10 text-muted-foreground/60" />
-            </div>
-            <h3 className="font-display text-2xl text-foreground">Your dressing room is empty</h3>
-            <p className="text-muted-foreground max-w-md mx-auto">
-              Upload your first outfit photo to get personalized style analysis and AI recommendations.
-            </p>
-          </motion.div>
-        ) : viewMode === "grid" ? (
-          /* ---- GRID VIEW ---- */
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
-            {filtered.map((item, idx) => (
-              <motion.div
-                key={item.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.03 }}
-                className="group relative rounded-2xl overflow-hidden border border-border/50 bg-muted/10 hover:border-primary/30 transition-all duration-300"
-              >
-                <div className="aspect-[3/4] overflow-hidden">
-                  <img src={item.image_url} alt={item.overall_style} loading="lazy"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                  <p className="text-white text-sm font-semibold truncate">{item.overall_style || "Unstyled"}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className={`text-xs font-bold ${scoreColor(item.style_score)}`}>{item.style_score}</span>
-                    <span className="text-white/60 text-xs">{timeAgo(item.created_at)}</span>
-                  </div>
-                </div>
-                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => handleDelete(item.id)} disabled={deleting === item.id}
-                    className="w-8 h-8 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center hover:bg-red-500/80 transition-colors">
-                    {deleting === item.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4 text-white" />}
-                  </button>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        ) : (
-          /* ---- LIST VIEW ---- */
-          <div className="space-y-3">
-            {filtered.map((item) => (
-              <div key={item.id} className="flex items-center gap-4 p-4 rounded-2xl bg-muted/10 border border-border/30 hover:border-primary/20 transition-all">
-                <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0">
-                  <img src={item.image_url} alt="" className="w-full h-full object-cover" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm truncate">{item.overall_style || "Unstyled"}</p>
-                  <p className="text-xs text-muted-foreground truncate">{item.summary}</p>
-                </div>
-                <span className={`text-xs font-bold ${scoreColor(item.style_score)}`}>{item.style_score}</span>
-                <span className="text-xs text-muted-foreground">{timeAgo(item.created_at)}</span>
-                <button onClick={() => handleDelete(item.id)} disabled={deleting === item.id}
-                  className="p-2 hover:bg-red-500/20 rounded-lg transition-colors">
-                  {deleting === item.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4 text-red-400" />}
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* ---- GENERATE OUTFIT MODAL ---- */}
+        {/* ---- Progress indicator ---- */}
         <AnimatePresence>
-          {showOutfitModal && (
+          {isGenerating && (
             <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-              onClick={() => setShowOutfitModal(false)}
-            >
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
-                className="relative w-full max-w-lg rounded-2xl border border-white/10 bg-zinc-900/80 backdrop-blur-2xl p-8"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <button onClick={() => setShowOutfitModal(false)}
-                  className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-xl transition-colors">
-                  <X className="w-5 h-5" />
-                </button>
-
-                {step === 0 && (
-                  <>
-                    <h2 className="font-display text-2xl font-bold text-center mb-6">What's the occasion?</h2>
-                    <div className="grid grid-cols-2 gap-3">
-                      {OCCASIONS.map((o) => (
-                        <button key={o.id} onClick={() => { setSelectedOccasion(o.id); }}
-                          className={`p-4 rounded-xl border text-left transition-all ${
-                            selectedOccasion === o.id
-                              ? "border-primary bg-primary/10 text-primary"
-                              : "border-white/10 bg-white/5 hover:bg-white/10"
-                          }`}>
-                          <span className="text-2xl">{o.emoji}</span>
-                          <p className="text-sm font-semibold mt-1">{o.label}</p>
-                        </button>
-                      ))}
-                    </div>
-                    <button onClick={handleNext}
-                      className="w-full mt-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors">
-                      Next
-                    </button>
-                  </>
-                )}
-                {step === 1 && (
-                  <>
-                    <h2 className="font-display text-2xl font-bold text-center mb-2">{selectedOccasion.charAt(0).toUpperCase() + selectedOccasion.slice(1)}</h2>
-                    <p className="text-sm text-muted-foreground text-center mb-6">How many outfits?</p>
-                    <div className="grid grid-cols-3 gap-3">
-                      {[1, 2, 3].map((n) => (
-                        <button key={n} onClick={() => handleGenerate(n)}
-                          className="py-6 rounded-xl bg-primary/10 border border-primary/30 text-primary font-bold hover:bg-primary/20 transition-all text-lg">
-                          {n}
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* ---- GENERATED OUTFITS ---- */}
-        {outfitGenerating && (
-          <div className="flex items-center justify-center py-16 px-6">
-            <div className="text-center space-y-4 w-full max-w-sm">
-              <Loader2 className="w-10 h-10 animate-spin text-primary mx-auto" />
-              <p className="text-muted-foreground">AI is styling your outfits...</p>
-              <ProgressBar value={progressValue} stage={progressStage} variant="gold" animated />
-            </div>
-          </div>
-        )}
-
-        <AnimatePresence>
-          {generatedOutfits.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="space-y-6"
+              className="max-w-sm mx-auto"
             >
-              <div className="flex items-center justify-between">
-                <h2 className="font-display text-2xl font-bold flex items-center gap-2">
-                  <Sparkles className="w-6 h-6 text-primary" />
-                  Your AI Styled Outfits
-                </h2>
-                <button onClick={() => setGeneratedOutfits([])}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  Dismiss
-                </button>
-              </div>
-
-              {/* FLAT LAY: Vertical stacks for each outfit option */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {generatedOutfits.map((option, idx) => {
-                  const typeLabels: Record<string, string> = {
-                    "top": "Top", "shirt": "Top", "blouse": "Top", "t-shirt": "Top",
-                    "bottom": "Bottom", "pants": "Bottom", "jeans": "Bottom",
-                    "shoes": "Shoes", "sneakers": "Shoes", "boots": "Shoes",
-                    "dress": "Dress", "jacket": "Layer", "coat": "Layer", "hoodie": "Layer",
-                    "accessory": "Accessory", "bag": "Bag"
-                  };
-                  
-                  return (
-                    <div key={idx}
-                      className="relative bg-zinc-900/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 overflow-hidden"
-                    >
-                      {/* Outfit name badge + source */}
-                      <div className="flex items-center gap-2 mb-4 flex-wrap">
-                        <div className="bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-white">
-                          {option.outfit_name}
-                        </div>
-                        {option.source === "mimo" && (
-                          <span className="text-[10px] font-semibold text-purple-300 bg-purple-500/15 px-2 py-0.5 rounded-full">AI Styled</span>
-                        )}
-                        {option.source === "combinatorial" && (
-                          <span className="text-[10px] font-semibold text-amber-300 bg-amber-500/15 px-2 py-0.5 rounded-full">Generated</span>
-                        )}
-                        {option.source === "full_outfit" && (
-                          <span className="text-[10px] font-semibold text-emerald-300 bg-emerald-500/15 px-2 py-0.5 rounded-full">Complete</span>
-                        )}
-                      </div>
-
-                      {/* Vertical flat lay stack */}
-                      <div className="flex flex-col items-center gap-4">
-                        {option.items.map((item, itemIdx) => {
-                          const typeLabel = typeLabels[item.type?.toLowerCase()] || item.type || `Item ${itemIdx + 1}`;
-                          return (
-                            <div key={item.id || itemIdx} className="w-full max-w-xs flex flex-col items-center gap-1.5">
-                              <div className={`w-full ${item.type === "full_outfit" ? "aspect-[4/3]" : "aspect-[3/4]"} rounded-xl overflow-hidden bg-zinc-900/60 border border-white/10 shadow-lg`}>
-                                <img
-                                  src={item.image_url}
-                                  alt={item.label || item.type}
-                                  className="w-full h-full object-contain"
-                                />
-                              </div>
-                              {item.type === "full_outfit" && (
-                                <span className="text-[10px] uppercase tracking-widest text-purple-400 font-bold bg-purple-500/10 px-2 py-0.5 rounded-full">Complete Look</span>
-                              )}
-                              <div className="flex flex-wrap items-center justify-center gap-1.5">
-                                <span className="text-[10px] uppercase tracking-wider text-white/50 font-semibold">{typeLabel}</span>
-                                <span className="text-xs text-white/80">{item.label}</span>
-                                {item.color && (
-                                  <span className="text-[10px] text-white/40 bg-white/10 px-2 py-0.5 rounded-full">{item.color}</span>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-
-                      {/* Reason */}
-                      {option.reason && (
-                        <p className="text-xs text-muted-foreground mt-4 italic leading-relaxed">
-                          "{option.reason}"
-                        </p>
-                      )}
-
-                      {/* Wear button */}
-                      <button
-                        onClick={() => toast.success(`Wearing ${option.outfit_name}!`)}
-                        className="w-full mt-4 py-2.5 rounded-xl bg-primary/20 border border-primary/30 text-primary hover:bg-primary/30 transition-all text-sm font-semibold flex items-center justify-center gap-2"
-                      >
-                        👕 Wear {option.outfit_name}
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-              {/* Try again button */}
-              <div className="text-center">
-                <button onClick={openGenerateModal}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-white/10 hover:bg-white/5 transition-all text-sm">
-                  <Sparkles className="w-4 h-4" />
-                  Try Different Options
-                </button>
-              </div>
+              <ProgressBar value={progressValue} stage={progressStage} variant="purple" animated />
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* ---- SCROLL TO TOP ---- */}
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="fixed bottom-24 right-6 w-10 h-10 rounded-full bg-primary/20 backdrop-blur-md border border-primary/30 flex items-center justify-center text-primary hover:bg-primary/30 transition-colors z-40 shadow-lg"
-        >
-          <ArrowUp className="w-5 h-5" />
-        </motion.button>
+        {/* ---- Analysis History (collapsed when showing FlipGallery) ---- */}
+        {generatedImages.length === 0 && (
+          <>
+            {/* Search & View Toggle */}
+            {items.length > 0 && (
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="relative w-full sm:max-w-xs">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search saved analyses..."
+                    className="w-full pl-9 pr-4 py-2 rounded-xl bg-muted/50 border border-border/50 text-sm focus:outline-none focus:border-primary/50 transition-colors"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setViewMode("grid")}
+                    className={`p-2 rounded-lg transition-colors ${viewMode === "grid" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                  >
+                    <Grid3X3 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setViewMode("list")}
+                    className={`p-2 rounded-lg transition-colors ${viewMode === "list" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                  >
+                    <List className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
 
-        {/* ---- FOOTER ---- */}
+            {/* Gallery Grid/List */}
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            ) : filtered.length > 0 ? (
+              <div className={viewMode === "grid"
+                ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"
+                : "space-y-3"
+              }>
+                {filtered.map((item) => (
+                  <motion.div
+                    key={item.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className={viewMode === "grid"
+                      ? "relative group rounded-xl overflow-hidden border border-border/50 bg-card hover:shadow-lg transition-all"
+                      : "relative flex items-center gap-4 p-3 rounded-xl border border-border/50 bg-card hover:shadow-lg transition-all"
+                    }
+                  >
+                    {viewMode === "grid" ? (
+                      <>
+                        <div className="aspect-[3/4]">
+                          <img src={item.image_url} alt={item.overall_style} className="w-full h-full object-cover" />
+                        </div>
+                        <div className="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+                          <p className="text-sm font-semibold text-white truncate">{item.overall_style}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className={`text-xs font-bold ${scoreColor(item.style_score)}`}>{item.style_score}/100</span>
+                            <span className="text-[10px] text-white/50">{timeAgo(item.created_at)}</span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleDelete(item.id)}
+                          className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500/80"
+                        >
+                          {deleting === item.id ? <Loader2 className="w-3 h-3 animate-spin text-white" /> : <Trash2 className="w-3 h-3 text-white" />}
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                          <img src={item.image_url} alt={item.overall_style} className="w-full h-full object-cover" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-foreground truncate">{item.overall_style}</p>
+                          <p className="text-xs text-muted-foreground truncate">{item.summary}</p>
+                        </div>
+                        <span className={`text-xs font-bold ${scoreColor(item.style_score)}`}>{item.style_score}/100</span>
+                        <span className="text-[10px] text-muted-foreground">{timeAgo(item.created_at)}</span>
+                        <button
+                          onClick={() => handleDelete(item.id)}
+                          className="p-1.5 rounded-lg hover:bg-red-500/20 text-muted-foreground hover:text-red-400 transition-colors"
+                        >
+                          {deleting === item.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+                        </button>
+                      </>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16">
+                <Shirt className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-40" />
+                <h3 className="font-display text-xl text-foreground mb-2">Your dressing room is empty</h3>
+                <p className="text-muted-foreground text-sm max-w-sm mx-auto mb-6">
+                  Head over to the Analysis page to scan an outfit, or generate a new combination from your closet.
+                </p>
+                <div className="flex items-center justify-center gap-3">
+                  <Button onClick={() => navigate("/outfit-analysis")} variant="default" className="gap-2">
+                    <Upload className="w-4 h-4" /> Analyze an Outfit
+                  </Button>
+                  <Button onClick={handleGenerateClick} variant="outline" className="gap-2">
+                    <Sparkles className="w-4 h-4" /> Generate from Closet
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* ---- Occasion Modal ---- */}
+        <AnimatePresence>
+          {showOccasionModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+              onClick={() => setShowOccasionModal(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-zinc-900/95 border border-white/10 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h3 className="text-lg font-semibold text-white mb-4">Pick an Occasion</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {OCCASIONS.map((occ) => (
+                    <button
+                      key={occ.id}
+                      onClick={() => handleOccasionSelect(occ.id)}
+                      className="flex flex-col items-center gap-2 p-4 rounded-xl border border-white/10 hover:border-purple-500/50 hover:bg-purple-500/10 transition-all"
+                    >
+                      <span className="text-2xl">{occ.emoji}</span>
+                      <span className="text-sm text-white/80">{occ.label}</span>
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setShowOccasionModal(false)}
+                  className="w-full mt-4 py-2 text-sm text-white/50 hover:text-white transition-colors"
+                >
+                  Cancel
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </AppLayout>
   );
