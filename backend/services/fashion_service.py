@@ -247,7 +247,7 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
     for _kw in ["necklace", "earring", "bracelet", "watch", "ring", "belt",
                 "scarf", "jacket", "blazer", "cardigan", "coat", "handbag",
                 "clutch", "sunglasses", "hat", "bag", "shoes", "boots"]:
-        if re.search(r'\b' + _kw + r'\b', tweak_text.lower()):
+        if re.search(r'\b' + _kw + r's?\b', tweak_text.lower()):
             _tweak_accessory = _kw
             break
     _tweak_prompt = generate_tweak_visualization_prompt(_tweak_accessory, tweak_text)
