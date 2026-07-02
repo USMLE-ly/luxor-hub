@@ -135,6 +135,7 @@ export default function StyleRecommendationsPage() {
         body: JSON.stringify({ image_b64: imagePreview }),
       });
       const styleData = await styleResp.json();
+      console.log("[STYLE-ANALYZE RAW RESPONSE]", styleData);
       if (!styleData.success || !styleData.analysis) {
         throw new Error(styleData.error || "Face/body analysis failed");
       }
@@ -149,10 +150,20 @@ export default function StyleRecommendationsPage() {
         body: JSON.stringify({ analysis: styleData.analysis }),
       });
       const recData = await recResp.json();
+      console.log("[RECOMMENDATIONS API RAW RESPONSE]", recData);
       if (recData.success && recData.recommendations) {
+        console.log("[RECOMMENDATIONS] Data received:", Object.keys(recData.recommendations));
         setRecommendations(recData.recommendations);
       } else {
-        toast.warning("Recommendations unavailable, continuing with review...");
+        console.warn("[RECOMMENDATIONS] API returned no data, setting fallback");
+        // Set a fallback so the tab is still clickable with a friendly message
+        setRecommendations({
+          color_analysis: { best_colors: [], colors_to_avoid: [], best_accessory_colors: [], best_shoe_colors: [], best_jewelry_metals: [], explanation: "" },
+          face_recommendations: { best_collar_types: [], best_neckline_styles: [], glasses_recommendation: "", hat_recommendation: "", hairstyle_advice: "", beard_advice: "", explanation: "" },
+          body_recommendations: { shirt_fit: "", jacket_fit: "", pants_fit: "", shorts_length: "", coat_style: "", suit_cut: "", explanation: "" },
+          honest_tips: [],
+          confidence_score: 0,
+        });
       }
 
       // Step 3: Outfit Review
@@ -164,6 +175,7 @@ export default function StyleRecommendationsPage() {
         body: JSON.stringify({ image_b64: imagePreview, occasion: "casual" }),
       });
       const reviewData = await reviewResp.json();
+      console.log("[OUTFIT-REVIEW RAW RESPONSE]", reviewData);
       if (reviewData.success && reviewData.review) {
         setOutfitReview(reviewData.review);
       } else {
@@ -387,6 +399,7 @@ export default function StyleRecommendationsPage() {
               </div>
 
               {/* Honest Tips */}
+              {/* Honest Tips */}
               {recommendations.honest_tips?.length > 0 && (
                 <div className="rounded-xl border border-amber-500/20 bg-amber-950/20 backdrop-blur-xl p-5">
                   <div className="flex items-center gap-2 mb-4"><span className="text-amber-400"><Lightbulb className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-amber-300/80">Honest Tips</h3></div>
@@ -401,6 +414,22 @@ export default function StyleRecommendationsPage() {
                       </div>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {/* No data fallback — when API returned nothing */}
+              {!recommendations.color_analysis?.best_colors?.length && 
+               !recommendations.face_recommendations?.best_collar_types?.length &&
+               !recommendations.body_recommendations?.shirt_fit &&
+               !recommendations.honest_tips?.length && (
+                <div className="rounded-xl border border-white/10 bg-zinc-900/40 backdrop-blur-xl p-8 text-center">
+                  <Lightbulb className="w-10 h-10 text-amber-500/50 mx-auto mb-3" />
+                  <h3 className="text-sm font-semibold text-white/70 mb-1">No AI Recommendations Yet</h3>
+                  <p className="text-xs text-white/40 max-w-md mx-auto">
+                    The AI was unable to generate personalized recommendations for this image. 
+                    This can happen if the image is unclear or the AI service is busy. 
+                    Try uploading a clearer full-body photo and click Analyze again.
+                  </p>
                 </div>
               )}
 
