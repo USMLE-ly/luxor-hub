@@ -70,23 +70,46 @@ export default function FlipGallery({ images, onGenerate, onDismiss, isLoading }
     updateGallery(nextIndex, true);
   };
 
+  // --- EMPTY STATE (Lighthouse split-screen frame) ---
   if (images.length === 0) {
     return (
-      <div className='relative bg-white/10 border border-white/25 p-2 w-full max-w-[300px] mx-auto'>
-        <div className='relative w-full h-[400px] md:h-[500px] flex flex-col items-center justify-center text-center rounded-sm bg-black/40'>
-          <p className='text-white/70 mb-6 text-sm max-w-[200px]'>Your dressing room is empty.</p>
+      <div className='relative w-full h-[400px] md:h-[500px]' style={{ perspective: '800px' }} id='flip-gallery-empty'>
+        {/* Split-screen dark placeholders */}
+        <div className='top unite' style={{ backgroundImage: 'none', backgroundColor: '#111' }}></div>
+        <div className='bottom unite' style={{ backgroundImage: 'none', backgroundColor: '#111' }}></div>
+        <div className='overlay-top unite' style={{ backgroundImage: 'none', backgroundColor: '#111' }}></div>
+        <div className='overlay-bottom unite' style={{ backgroundImage: 'none', backgroundColor: '#111' }}></div>
+
+        {/* Black divider line */}
+        <div className='absolute top-1/2 left-0 w-full h-[4px] bg-black z-10 -translate-y-1/2'></div>
+
+        {/* Generate button where "Joshua Hibbert" was (bottom-left) */}
+        <div className='absolute bottom-[-1rem] left-[-0.5rem] z-20'>
           <button
             onClick={onGenerate}
             disabled={isLoading}
-            className='bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+            className='bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
           >
             {isLoading ? 'Consulting MiMo...' : 'Generate Outfit'}
           </button>
         </div>
+
+        {/* Grayed-out arrows (bottom-right) */}
+        <div className='absolute bottom-[-1rem] right-0 z-20 flex gap-2'>
+          <button disabled className='text-white/20 cursor-not-allowed'><ChevronLeft size={20} /></button>
+          <button disabled className='text-white/20 cursor-not-allowed'><ChevronRight size={20} /></button>
+        </div>
+
+        <style>{`
+          #flip-gallery-empty > div { position: absolute; width: 100%; height: 50%; overflow: hidden; }
+          #flip-gallery-empty .top, #flip-gallery-empty .overlay-top { top: 0; transform-origin: bottom; }
+          #flip-gallery-empty .bottom, #flip-gallery-empty .overlay-bottom { bottom: 0; transform-origin: top; }
+        `}</style>
       </div>
     );
   }
 
+  // --- POPULATED STATE ---
   return (
     <div className='relative bg-white/10 border border-white/25 p-2 w-full max-w-[300px] mx-auto'>
       <div
@@ -102,10 +125,7 @@ export default function FlipGallery({ images, onGenerate, onDismiss, isLoading }
       </div>
 
       <div className='flex justify-between items-center w-full mt-3 px-1'>
-        <button
-          onClick={onDismiss}
-          className='text-sm text-white/60 hover:text-white transition-colors'
-        >
+        <button onClick={onDismiss} className='text-sm text-white/60 hover:text-white transition-colors'>
           Dismiss
         </button>
         {images.length > 1 && (
