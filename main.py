@@ -2243,6 +2243,23 @@ def style_recommendations():
         if not result:
             return jsonify({"success": False, "error": "Failed to generate recommendations."})
 
+        # Handle case where result is a raw string (JSON parsing failed upstream)
+        if isinstance(result, str):
+            _log.warning("[STYLE] MiMo returned raw string, attempting fallback parse")
+            # Try to extract JSON from the raw string
+            import re
+            json_match = re.search(r'\{.*\}', result, re.DOTALL)
+            if json_match:
+                try:
+                    import json as json_module
+                    result = json_module.loads(json_match.group())
+                except (json_module.JSONDecodeError, ValueError):
+                    _log.error("[STYLE] Failed to parse raw string as JSON")
+                    return jsonify({"success": False, "error": "Could not parse AI response."})
+
+        if not isinstance(result, dict):
+            return jsonify({"success": False, "error": "AI returned unexpected data format."})
+
         recommendations = {
             "color_analysis": result.get("color_analysis", {}),
             "face_recommendations": result.get("face_recommendations", {}),
