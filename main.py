@@ -2313,6 +2313,37 @@ def outfit_review():
         _log.error("[STYLE] Error: %s", exc, exc_info=True)
         return jsonify({"success": False, "error": f"Review failed: {str(exc)[:100]}"}), 500
 
+@app.route("/api/v1/generate-outfits", methods=["POST", "OPTIONS"], strict_slashes=False)
+def generate_outfits_mock():
+    """Temporary mock endpoint for dressing room outfit generation."""
+    if request.method == "OPTIONS":
+        return "", 204
+    try:
+        data = request.get_json(silent=True) or {}
+        occasion = data.get("occasion", "casual")
+        count = min(int(data.get("count", 3)), 7)
+
+        _log.info("[DRESSING] Mock generating %d outfits for %s", count, occasion)
+
+        # Mock outfit images
+        mock_images = [
+            "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=600&h=1000&q=80",
+            "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=600&h=1000&q=80",
+            "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=600&h=1000&q=80",
+            "https://images.unsplash.com/photo-1564584217132-2271feaeb3c5?auto=format&fit=crop&w=600&h=1000&q=80",
+            "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&h=1000&q=80",
+        ]
+
+        return jsonify({
+            "success": True,
+            "images": mock_images[:count],
+            "occasion": occasion,
+            "count": count,
+        })
+    except Exception as exc:
+        _log.error("[DRESSING] Error: %s", exc, exc_info=True)
+        return jsonify({"success": False, "error": str(exc)[:200]}), 500
+
 @app.route("/debug/analyze", methods=["POST"], strict_slashes=False)
 def debug_analyze():
     data = request.get_json(silent=True) or {}

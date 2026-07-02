@@ -73,44 +73,37 @@ export default function FlipGallery({ images, onGenerate, onDismiss, isLoading }
   // --- EMPTY STATE (No Outfits Generated) ---
   if (images.length === 0) {
     return (
-      <div id="flip-gallery-empty" className='relative w-full h-[400px] md:h-[500px]' style={{ perspective: '800px' }}>
-        {/* Split-screen dark placeholders */}
-        <div className='top unite bg-[#1A1A1A]'></div>
-        <div className='bottom unite bg-[#0A0A0A]'></div>
-        <div className='overlay-top unite bg-[#1A1A1A]'></div>
-        <div className='overlay-bottom unite bg-[#0A0A0A]'></div>
+      <div className='relative w-full h-[400px] md:h-[500px]' style={{ perspective: '800px', background: '#0a0a0a' }}>
+        {/* TOP HALF (Slightly lighter so you can see the split) */}
+        <div className='absolute w-full h-[50%] top-0 bg-[#181818] border-b border-black'></div>
+        
+        {/* BOTTOM HALF (Dark) */}
+        <div className='absolute w-full h-[50%] bottom-0 bg-[#0a0a0a]'></div>
 
-        {/* Black divider line */}
-        <div className='divider-line absolute top-1/2 left-0 w-full h-[4px] bg-black z-10 -translate-y-1/2'></div>
+        {/* DIVIDER LINE */}
+        <div className='absolute top-1/2 left-0 w-full h-[4px] bg-black z-10 -translate-y-1/2 border-y border-[#222]'></div>
 
-        {/* Generate button where "Joshua Hibbert" was (bottom-left) */}
+        {/* Generate Button (Bottom Left) */}
         <div className='absolute bottom-[-1rem] left-[-0.5rem] z-20'>
-          <button
-            onClick={onGenerate}
-            disabled={isLoading}
-            className='bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
-          >
-            {isLoading ? 'Consulting MiMo...' : 'Generate Outfit'}
-          </button>
+           <button
+             onClick={onGenerate}
+             disabled={isLoading}
+             className='bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+           >
+             {isLoading ? 'Consulting MiMo...' : 'Generate Outfit'}
+           </button>
         </div>
 
-        {/* Grayed-out arrows (bottom-right) */}
+        {/* Arrows (Bottom Right - grayed out) */}
         <div className='absolute bottom-[-1rem] right-0 z-20 flex gap-2'>
-          <button disabled className='text-white/20 cursor-not-allowed'><ChevronLeft size={20} /></button>
-          <button disabled className='text-white/20 cursor-not-allowed'><ChevronRight size={20} /></button>
+           <button disabled className='text-white/20 cursor-not-allowed'><ChevronLeft size={20} /></button>
+           <button disabled className='text-white/20 cursor-not-allowed'><ChevronRight size={20} /></button>
         </div>
-
-        <style>{`
-          #flip-gallery-empty { position: relative; }
-          #flip-gallery-empty .unite { position: absolute; width: 100%; height: 50%; overflow: hidden; }
-          #flip-gallery-empty .top, #flip-gallery-empty .overlay-top { top: 0; transform-origin: bottom; }
-          #flip-gallery-empty .bottom, #flip-gallery-empty .overlay-bottom { bottom: 0; transform-origin: top; }
-        `}</style>
       </div>
     );
   }
 
-  // --- POPULATED STATE ---
+  // --- POPULATED STATE ---  // --- POPULATED STATE ---
   return (
     <div className='relative bg-white/10 border border-white/25 p-2 w-full max-w-[300px] mx-auto'>
       <div

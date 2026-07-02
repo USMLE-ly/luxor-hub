@@ -36,55 +36,31 @@ export default function DressingRoomPage() {
     if (!user) return;
     setIsGenerating(true);
     setProgressValue(10);
-    setProgressStage("Scanning your closet...");
+    setProgressStage("Consulting MiMo...");
     try {
-      setProgressValue(30);
-      setProgressStage(`Consulting MiMo for ${occasion} outfits...`);
+      setProgressValue(40);
+      setProgressStage(`Generating ${count} ${occasion} outfits...`);
 
-      const { data: functionData, error } = await supabase.functions.invoke("generate-outfits", {
-        body: {
-          closetItems: [],
-          occasion,
-          mood: "confident",
-          count: Math.min(count || OUTFIT_COUNT, 7),
-        },
+      const api = import.meta.env.VITE_API_URL || import.meta.env.VITE_PUBLIC_API_URL || 
+        (window.location.hostname === "localhost" ? "http://localhost:5000" : "");
+
+      const res = await fetch(api + "/api/v1/generate-outfits", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ occasion, count }),
       });
 
-      if (error) throw new Error(error.message);
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || "Generation failed");
 
-      setProgressValue(70);
-      setProgressStage("Assembling your looks...");
+      setProgressValue(80);
+      setProgressStage("Ready!");
 
-      if (functionData?.outfits?.length > 0) {
-        // Pull saved analysis images as outfit visuals
-        const { data: recentItems } = await supabase
-          .from("outfit_analyses")
-          .select("image_url")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false })
-          .limit(OUTFIT_COUNT);
-
-        const images = (recentItems || []).map((i) => i.image_url).filter(Boolean);
-        if (images.length > 0) {
-          setGeneratedImages(images);
-        }
-        toast.success(`${functionData.outfits.length} outfits generated!`);
+      if (data.images?.length > 0) {
+        setGeneratedImages(data.images);
+        toast.success(`${data.images.length} outfits generated!`);
       } else {
-        // Fallback: show recent analyses
-        const { data: fallbackItems } = await supabase
-          .from("outfit_analyses")
-          .select("image_url")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false })
-          .limit(OUTFIT_COUNT);
-
-        const fallbackImages = (fallbackItems || []).map((i) => i.image_url).filter(Boolean);
-        if (fallbackImages.length > 0) {
-          setGeneratedImages(fallbackImages);
-          toast.success("Showing recent analyses");
-        } else {
-          toast.error("No outfits could be generated. Upload some clothes first!");
-        }
+        toast.error("No outfits returned. Try again.");
       }
     } catch (e: any) {
       toast.error(e.message || "Failed to generate outfits");
