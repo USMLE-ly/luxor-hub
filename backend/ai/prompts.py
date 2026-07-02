@@ -116,16 +116,16 @@ Analysis data:
 {analysis_json}
 
 Return EXACTLY this JSON structure:
-{
-  "color_analysis": {
+{{
+  "color_analysis": {{
     "best_colors": ["color1", "color2", "color3", "color4", "color5"],
     "colors_to_avoid": ["color1", "color2", "color3"],
     "best_accessory_colors": ["color1", "color2"],
     "best_shoe_colors": ["color1", "color2"],
     "best_jewelry_metals": ["gold", "silver", "rose_gold"],
     "explanation": "Brief explanation of color recommendations based on skin tone and undertone"
-  },
-  "face_recommendations": {
+  }},
+  "face_recommendations": {{
     "best_collar_types": ["type1", "type2"],
     "best_neckline_styles": ["style1", "style2"],
     "glasses_recommendation": "advice about glasses frames",
@@ -133,8 +133,8 @@ Return EXACTLY this JSON structure:
     "hairstyle_advice": "brief hairstyle advice",
     "beard_advice": "advice if applicable or empty string",
     "explanation": "Why these recommendations suit their face shape"
-  },
-  "body_recommendations": {
+  }},
+  "body_recommendations": {{
     "shirt_fit": "advice on shirt fit",
     "jacket_fit": "advice on jacket fit",
     "pants_fit": "advice on pants fit",
@@ -142,14 +142,14 @@ Return EXACTLY this JSON structure:
     "coat_style": "advice on coat style",
     "suit_cut": "advice on suit cut or empty string",
     "explanation": "Why these recommendations suit their body type"
-  },
+  }},
   "honest_tips": [
-    {"tip": "Specific honest but respectful tip 1", "confidence": 85},
-    {"tip": "Specific honest but respectful tip 2", "confidence": 75},
-    {"tip": "Specific honest but respectful tip 3", "confidence": 90}
+    {{"tip": "Specific honest but respectful tip 1", "confidence": 85}},
+    {{"tip": "Specific honest but respectful tip 2", "confidence": 75}},
+    {{"tip": "Specific honest but respectful tip 3", "confidence": 90}}
   ],
   "confidence_score": 85
-}
+}}
 
 RULES:
 - Be HONEST. If something doesn't work, say it.

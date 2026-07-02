@@ -203,11 +203,15 @@ def call_mimo_text(
                         raw = ""
                         break
                 raw = raw.strip()
-                # Try JSON first, fall back to raw text
-                try:
-                    return json.loads(raw)
-                except (json.JSONDecodeError, ValueError):
-                    return raw
+                # Use _extract_first_json to find JSON object (handles prefix/suffix text)
+                json_str = _extract_first_json(raw)
+                if json_str:
+                    try:
+                        return json.loads(json_str)
+                    except (json.JSONDecodeError, ValueError):
+                        pass
+                # Fall back to raw text
+                return raw
             elif resp.status_code == 402:
                 _log.warning("[MIMO-TEXT] Insufficient balance")
                 continue
