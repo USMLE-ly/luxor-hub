@@ -37,17 +37,38 @@ def get_fashion_decision(image_b64: str) -> Dict[str, Any]:
     raise RuntimeError("MiMo Vision 2.5 failed to analyze the image")
 
 
-def generate_tweak_visualization_prompt(accessory: str) -> str:
-    """Build a product photography prompt for Pollinations visualization."""
+def generate_tweak_visualization_prompt(accessory: str, tweak_text: str = "") -> str:
+    """Build a Pollinations prompt to visualize the tweak recommendation.
+    
+    For clothing items (blazer, jacket, coat, etc.), generates a fashion
+    photo prompt with a person wearing the item. For small accessories
+    (earrings, necklace, etc.), uses product photography style.
+    """
     clean_acc = accessory.lower().replace("a ", "").strip()
     if not clean_acc:
         return ""
 
+    # Determine if this is a clothing item (needs a person) or small accessory (product photo)
+    clothing_items = ["jacket", "blazer", "cardigan", "coat", "shirt", "top", "blouse",
+                      "pants", "jeans", "trousers", "skirt", "dress", "shoes", "boots",
+                      "sneakers", "heels", "loafers", "sandals", "scarf", "hat", "bag",
+                      "handbag", "clutch", "sunglasses"]
+    
     color_word = "polished sterling silver"
     if "gold" in clean_acc:
         color_word = "polished 18k gold"
 
-    if "earring" in clean_acc:
+    if clean_acc in clothing_items:
+        # Use the full tweak text as the prompt description
+        description = tweak_text if tweak_text else f"A person wearing a {clean_acc}"
+        return (
+            f"Fashion photograph of {description}, "
+            f"model wearing the suggested item, full body shot, "
+            f"studio lighting, clean white background, fashion editorial style, "
+            f"high-end lookbook aesthetic, sharp focus, natural pose, "
+            f"photorealistic, 4K resolution."
+        )
+    elif "earring" in clean_acc:
         item_desc = f"a single {color_word} teardrop drop earring with a secure post and hook mechanism, resting on its side"
     elif "necklace" in clean_acc or "pendant" in clean_acc:
         item_desc = f"a delicate {color_word} pendant necklace"
@@ -60,6 +81,14 @@ def generate_tweak_visualization_prompt(accessory: str) -> str:
     elif "belt" in clean_acc:
         item_desc = f"a premium {color_word} belt"
     else:
+        # Fallback: use the tweak description if available
+        if tweak_text:
+            return (
+                f"Fashion photograph of {tweak_text}, "
+                f"model wearing the suggested item, studio lighting, "
+                f"clean white background, fashion editorial style, "
+                f"photorealistic, 4K resolution."
+            )
         item_desc = f"a luxurious {color_word} accessory"
 
     return (
@@ -182,7 +211,7 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
         if _kw in tweak_text.lower():
             _tweak_accessory = _kw
             break
-    _tweak_prompt = generate_tweak_visualization_prompt(_tweak_accessory)
+    _tweak_prompt = generate_tweak_visualization_prompt(_tweak_accessory, tweak_text)
     _safe_tweak = urllib.parse.quote(_tweak_prompt)
     _tweak_seed = int(time.time() * 1000) % 10000
     tweak_image_url = f"https://image.pollinations.ai/prompt/{_safe_tweak}?nologin=true&seed={_tweak_seed}"
