@@ -34,6 +34,7 @@ except ImportError:
     SelfieSegmentation: Any = None
     _HAS_MEDIAPIPE = False
 from dotenv import load_dotenv
+import traceback
 
 # Track MiMo model status - skip broken models
 # MiMo client status — no global flags (checked fresh per request)
@@ -1536,427 +1537,6 @@ RULES:
 # ---------------------------------------------------------------------------
 # Dressing Room Generator (Groq Text picks from Qdrant closet)
 # ---------------------------------------------------------------------------
-@app.route("/api/v1/dressing-room/generate", methods=["POST", "OPTIONS"], strict_slashes=False)
-def dressing_generate():
-    if request.method == "OPTIONS":
-        return "", 204
-    try:
-        data = request.get_json(silent=True) or {}
-        occasion = data.get("occasion", "Casual")
-        weather = data.get("weather", "Mild")
-        color_palette = data.get("color_palette", "Neutrals")
-        requested_count = data.get("count", 3)
-        max_outfits = min(int(requested_count), 6)
-
-        _log.info("[DRESSING] Generate: occasion=%s weather=%s palette=%s count=%d", occasion, weather, color_palette, max_outfits)
-
-        # Get closet items: prefer items from frontend (Supabase), fallback to Qdrant
-        closet_items = data.get("closet_items", None)
-        if not closet_items:
-            closet_items = qdrant_get_all_items()
-        if not closet_items:
-            return jsonify({"success": False, "error": "Closet is empty! Add items first."})
-
-        # -----------------------------------------------------------------------
-        # Category normalization
-        # -----------------------------------------------------------------------
-        def normalize_cat(cat: str) -> str:
-            c = cat.lower().strip()
-            if c in ("top", "shirt", "blouse", "t-shirt", "tshirt", "camisole", "tank", "sweater", "jacket", "coat", "hoodie", "cardigan", "blazer", "vest", "bodysuit", "crop top", "tube top", "halter", "outerwear"):
-                return "top"
-            if c in ("bottom", "pants", "jeans", "trousers", "shorts", "skirt", "leggings", "chinos", "cargo", "culottes", "palazzo"):
-                return "bottom"
-            if c in ("shoes", "footwear", "sneakers", "boots", "sandals", "heels", "flats", "loafers", "oxfords", "mules", "wedges", "slides"):
-                return "shoes"
-            if c in ("dress", "gown", "jumpsuit", "romper", "caftan", "maxi dress", "mini dress", "midi dress", "sundress"):
-                return "dress"
-            if c in ("accessory", "accessories", "bag", "purse", "belt", "hat", "scarf", "jewelry", "watch", "sunglasses", "earrings", "necklace", "bracelet", "ring", "wallet", "backpack", "tote", "clutch", "headband", "gloves"):
-                return "accessory"
-            if c in ("full outfit", "full look", "complete outfit", "complete look", "outfit set", "set", "coord", "co-ord", "matching set"):
-                return "full_outfit"
-            return "other"
-
-        def type_label(norm_cat: str, raw_type: str = "") -> str:
-            rt = str(raw_type or "").lower()
-            if norm_cat == "full_outfit":
-                return "Full Outfit"
-            if norm_cat == "top":
-                if rt in ("jacket", "coat", "hoodie", "cardigan", "blazer", "outerwear", "puffer", "parka", "trench", "bomber", "vest", "windbreaker", "raincoat"):
-                    return "Layer"
-                if rt in ("shirt", "blouse", "t-shirt", "tshirt", "tee", "polo", "button-down", "henley", "turtleneck", "bodysuit", "crop top", "tube top", "halter", "camisole", "tank", "sweater", "jersey", "sweatshirt", "pullover"):
-                    return rt.capitalize() if len(rt) > 3 else "Top"
-                return "Top"
-            if norm_cat == "bottom":
-                if rt in ("jeans", "pants", "trousers", "chinos", "leggings", "joggers", "sweatpants", "cargo", "culottes", "palazzo", "capris", "bermuda", "slacks", "shorts", "skirt", "miniskirt"):
-                    return rt.capitalize() if len(rt) > 3 else "Bottom"
-                return "Bottom"
-            if norm_cat == "shoes":
-                if rt in ("sneakers", "boots", "sandals", "heels", "loafers", "oxfords", "flats", "mules", "wedges", "slides", "trainers", "pumps", "stilettos", "espadrilles", "slippers", "platforms"):
-                    return rt.capitalize()
-                return "Shoes"
-            if norm_cat == "dress":
-                if rt in ("gown", "jumpsuit", "romper", "sundress", "maxi dress", "mini dress", "midi dress", "caftan", "slip dress", "bodycon", "shift dress", "wrap dress"):
-                    return rt.capitalize() if len(rt) > 3 else "Dress"
-                return "Dress"
-            if norm_cat == "accessory":
-                if rt in ("bag", "purse", "backpack", "tote", "clutch", "wallet"):
-                    return "Bag"
-                if rt in ("hat", "cap", "beanie", "headband"):
-                    return "Hat"
-                if rt in ("earrings", "necklace", "bracelet", "ring", "watch"):
-                    return rt.capitalize()
-                if rt in ("scarf", "belt", "gloves", "sunglasses", "shawl"):
-                    return rt.capitalize()
-                return "Accessory"
-            return rt.capitalize() if rt else "Item"
-
-        # -----------------------------------------------------------------------
-        # Smart re-detect: when an item is "other", guess from label/name
-        # -----------------------------------------------------------------------
-        def smart_redetect(item: Dict) -> str:
-            norm = normalize_cat(item.get("type", item.get("category", "other")))
-            if norm != "other":
-                return norm
-            label = (item.get("label", "") + " " + item.get("name", "") + " " + item.get("type", "")).lower()
-            if any(kw in label for kw in ("jacket", "coat", "blazer", "hoodie", "cardigan", "vest", "windbreaker", "parka", "bomber", "trench", "puffer", "raincoat", "fleece")):
-                return "top"
-            if any(kw in label for kw in ("shirt", "blouse", "t-shirt", "tee", "tank", "camisole", "crop top", "tube top", "halter", "sweater", "jersey", "polo", "button-down", "bodysuit", "turtleneck", "henley")):
-                return "top"
-            if any(kw in label for kw in ("pants", "jeans", "trousers", "shorts", "skirt", "leggings", "chinos", "cargo", "culottes", "palazzo", "capris", "bermuda", "joggers", "sweatpants", "slacks")):
-                return "bottom"
-            if any(kw in label for kw in ("shoes", "sneakers", "boots", "sandals", "heels", "flats", "loafers", "oxfords", "mules", "wedges", "slides", "trainers", "running", "pumps", "stilettos", "espadrilles", "slippers")):
-                return "shoes"
-            if any(kw in label for kw in ("dress", "gown", "jumpsuit", "romper", "sundress", "maxi dress", "mini dress", "midi dress", "caftan", "slip dress", "bodycon", "shift dress", "wrap dress")):
-                return "dress"
-            if any(kw in label for kw in ("bag", "purse", "belt", "hat", "scarf", "jewelry", "watch", "sunglasses", "earrings", "necklace", "bracelet", "ring", "wallet", "backpack", "tote", "clutch", "headband", "gloves", "beanie", "cap", "tie", "cufflinks", "brooch", "shawl", "umbrella")):
-                return "accessory"
-            if any(kw in label for kw in ("full outfit", "full look", "complete look", "matching set", "outfit set", "coord set", "co-ord", "two-piece", "suit set", "ensemble")):
-                return "full_outfit"
-            return "other"
-
-        # -----------------------------------------------------------------------
-        # Weather suitability check
-        # -----------------------------------------------------------------------
-        def is_weather_suitable(item: Dict, weather: str) -> bool:
-            season = (item.get("season") or "").lower().strip()
-            label = (item.get("label") or "").lower()
-            type_name = (item.get("type") or "").lower()
-            combined = f"{label} {type_name}"
-
-            if season and season not in ("", "none", "any"):
-                if season in ("all-season", "all", "all season", "all_season"):
-                    return True
-                if weather == "hot" and season in ("summer", "spring"):
-                    return True
-                if weather == "cold" and season in ("winter", "fall", "autumn"):
-                    return True
-                if weather == "mild" and season in ("spring", "fall", "autumn", "summer"):
-                    return True
-                return False
-
-            if weather == "cold":
-                hot_only = ["shorts", "tank top", "sandal", "flip flop", "slide", "bikini", "swim", "crop top", "mini skirt", "sleeveless", "muscle tee", "vest top"]
-                if any(kw in combined for kw in hot_only):
-                    return False
-                return True
-            if weather == "hot":
-                cold_only = ["coat", "jacket", "sweater", "hoodie", "parka", "boots", "scarf", "gloves", "beanie", "fleece", "wool", "puffer", "trench", "cardigan", "overcoat", "down", "thermal", "long sleeve"]
-                if any(kw in combined for kw in cold_only):
-                    return False
-                return True
-            return True
-
-        # -----------------------------------------------------------------------
-        # GROUP items with smart detection + weather filter
-        # -----------------------------------------------------------------------
-        grouped: Dict[str, List[Dict]] = {}
-        weather_filtered_out = 0
-        for item in closet_items:
-            cat = normalize_cat(item.get("type", item.get("category", "other")))
-            if cat == "other":
-                cat = smart_redetect(item)
-            if not is_weather_suitable(item, weather):
-                weather_filtered_out += 1
-                continue
-            if cat not in grouped:
-                grouped[cat] = []
-            grouped[cat].append(item)
-
-        _log.info("[DRESSING] Grouped: %s | Filtered out for weather: %d", {k: len(v) for k, v in grouped.items()}, weather_filtered_out)
-
-        total_items = sum(len(v) for v in grouped.values())
-        has_full_outfits = len(grouped.get("full_outfit", [])) > 0
-        has_dresses = len(grouped.get("dress", [])) > 0
-        has_tops = len(grouped.get("top", [])) > 0
-        has_bottoms = len(grouped.get("bottom", [])) > 0
-        has_shoes = len(grouped.get("shoes", [])) > 0
-        has_accessories = len(grouped.get("accessory", [])) > 0
-
-        if total_items == 0:
-            msg = f"Nothing suitable for {weather} weather in your closet."
-            if weather == "cold":
-                msg += " Add warm items like coats, sweaters, pants, or boots."
-            elif weather == "hot":
-                msg += " Add light items like shorts, tank tops, or sandals."
-            return jsonify({"success": False, "error": msg})
-
-        # -----------------------------------------------------------------------
-        # Descriptors for naming
-        # -----------------------------------------------------------------------
-        weather_prefixes = {"hot": "Summer", "mild": "Mild", "cold": "Winter", "rainy": "Rainy Day", "windy": "Windy"}
-        weather_desc = weather_prefixes.get(weather.lower(), weather.capitalize()) if weather else ""
-
-        palette_descs = {"neutrals": "Neutral", "brights": "Vibrant", "pastels": "Soft", "dark": "Evening", "earthy": "Earthy", "monochrome": "Monochrome"}
-        palette_desc = palette_descs.get(color_palette.lower(), "") if color_palette else ""
-        palette_part = f"\u2022 {palette_desc}" if palette_desc else ""
-
-        occasion_prefixes = {"casual": "Casual", "business": "Business", "party": "Party", "date-night": "Date Night", "sport": "Sport", "formal": "Formal", "vacation": "Vacation", "beach": "Beach", "work": "Work", "romantic": "Romantic", "festival": "Festival", "travel": "Travel"}
-        occ_prefix = occasion_prefixes.get(occasion.lower(), occasion.capitalize() if occasion else "Casual")
-        weather_part = f"{weather_desc} " if weather_desc else ""
-
-        def format_item_desc(item: Dict) -> str:
-            c = item.get("color", "")
-            l = item.get("label", "")
-            t = item.get("type", item.get("category", ""))
-            if l:
-                label_text = l.lower()
-                if c:
-                    c_lower = c.lower()
-                    if c_lower in label_text:
-                        return f"your {label_text}"
-                    return f"your {c_lower} {label_text}"
-                return f"your {label_text}"
-            if c and t:
-                return f"your {c.lower()} {t.lower()}"
-            return "an item from your closet"
-
-        def build_name(items_list):
-            name_parts = []
-            for item in items_list:
-                norm = normalize_cat(item.get("type") or item.get("category") or "")
-                raw: str = item.get("type") or ""
-                label = type_label(norm, raw)
-                if label not in name_parts:
-                    name_parts.append(label)
-            if len(name_parts) <= 2:
-                items_str = " & ".join(name_parts) if name_parts else "Look"
-            else:
-                items_str = ", ".join(name_parts[:-1]) + " & " + name_parts[-1]
-            return f"{weather_part}{occ_prefix} {items_str} {palette_part}".strip()
-
-        def build_reason(item_descs, occ, wthr, pal):
-            occ_phrases = {"casual": "everyday casual wear", "business": "the office", "party": "parties and nights out", "date-night": "a romantic date night", "sport": "active days", "formal": "formal events", "vacation": "vacation", "beach": "the beach", "work": "work", "romantic": "romantic occasions", "festival": "festivals", "travel": "traveling"}
-            occ_phrase = occ_phrases.get(occ.lower(), f"{occ.lower()} occasions") if occ else "any occasion"
-            wthr_phrases = {"hot": "warm weather", "mild": "mild weather", "cold": "cold weather", "rainy": "rainy days", "windy": "windy days"}
-            weather_phrase = wthr_phrases.get(wthr.lower(), "") if wthr else ""
-            pal_phrases = {"neutrals": "a neutral palette", "brights": "vibrant colors", "pastels": "soft pastel tones", "dark": "deep, moody tones", "earthy": "earthy tones", "monochrome": "a monochrome palette"}
-            palette_phrase = pal_phrases.get(pal.lower(), "") if pal else ""
-            if len(item_descs) == 1:
-                r = f"{item_descs[0].capitalize()} \u2014 great for {occ_phrase}"
-            elif len(item_descs) == 2:
-                r = f"{item_descs[0].capitalize()} paired with {item_descs[1]} \u2014 ideal for {occ_phrase}"
-            else:
-                r = f"{item_descs[0].capitalize()} paired with {item_descs[1]}, accented with {item_descs[2]} \u2014 perfect for {occ_phrase}"
-            if weather_phrase:
-                r += f" in {weather_phrase}"
-            if palette_phrase:
-                r += f", featuring {palette_phrase}"
-            r += "."
-            return r
-
-        def item_id_set(items):
-            return frozenset(i.get("id", "") for i in items)
-
-        def lookup_items_by_ids(ids):
-            """Look up items by ID from grouped items and closet_items."""
-            id_to_item = {}
-            for item in closet_items:
-                id_to_item[item.get("id", "")] = item
-            found = []
-            for iid in ids:
-                if iid in id_to_item:
-                    found.append(id_to_item[iid])
-            return found
-
-        # =====================================================================
-        # GENERATION — MIMO FIRST, combinatorial fallback
-        # =====================================================================
-        outfit_options = []
-        attempted_signatures = set()
-
-        # ---- Phase A: Full Outfits (pre-made complete looks) ----
-        for full_outfit in grouped.get("full_outfit", []):
-            items = [full_outfit]
-            used_ids = {full_outfit.get("id")}
-            combined_label = (full_outfit.get("label", "") + " " + full_outfit.get("name", "") + " " + full_outfit.get("type", "")).lower()
-            already_has_shoes = any(kw in combined_label for kw in ["with shoes", "with boots", "with sneakers", "includes shoes", "includes boots"])
-            already_has_accessories = any(kw in combined_label for kw in ["with bag", "with jewelry", "with accessories", "with clutch", "with scarf", "with hat", "includes accessories"])
-            if not already_has_shoes and has_shoes:
-                avail = [s for s in grouped.get("shoes", []) if s.get("id") not in used_ids]
-                if avail:
-                    pick = random.choice(avail)
-                    items.append(pick)
-                    used_ids.add(pick.get("id"))
-            if not already_has_accessories and has_accessories:
-                avail = [a for a in grouped.get("accessory", []) if a.get("id") not in used_ids]
-                if avail:
-                    pick = random.choice(avail)
-                    items.append(pick)
-                    used_ids.add(pick.get("id"))
-            name_parts = ["Full Outfit"]
-            if len(items) > 1:
-                extra = [type_label(normalize_cat(i.get("type") or ""), i.get("type") or "") for i in items[1:]]
-                name_parts.extend(extra)
-            items_str = " & ".join(name_parts)
-            outfit_name = f"{weather_part}{occ_prefix} {items_str} {palette_part}".strip()
-            item_descs = [format_item_desc(it) for it in items]
-            reason = build_reason(item_descs, occasion, weather, color_palette)
-            sig = item_id_set(items)
-            if sig not in attempted_signatures:
-                attempted_signatures.add(sig)
-                outfit_options.append({"outfit_name": outfit_name, "reason": reason, "items": items, "source": "full_outfit"})
-
-        # ---- Phase B: MiMo Selects Items (Primary) ----
-        if len(outfit_options) < max_outfits:
-            # Build a clean item list for MiMo
-            item_lines = []
-            for item in closet_items:
-                iid = item.get("id", "")
-                label = item.get("label", "Unknown")
-                color = item.get("color", "")
-                itype = item.get("type", item.get("category", "other"))
-                cat = normalize_cat(itype)
-                if cat == "other":
-                    cat = smart_redetect(item)
-                season_tag = f" [{item.get('season', '')}]" if item.get("season") else ""
-                color_tag = f" ({color})" if color else ""
-                item_lines.append(f"  ID:{iid} - {label}{color_tag} [{cat}]{season_tag}")
-
-            items_text = "Closet items:\n" + "\n".join(item_lines)
-            prompt = CLOSET_PROMPT.format(occasion=occasion, weather=weather, color_palette=color_palette,
-                body_type="Average", height="Average", budget="Mid-range",
-                lifestyle="Casual", profession="Professional", style_goal="Confident", brands="Any")
-
-            messages = [
-                {"role": "user", "content": items_text},
-                {"role": "user", "content": prompt},
-            ]
-
-            for mimo_attempt in range(2):  # up to 2 retries
-                if len(outfit_options) >= max_outfits:
-                    break
-                _log.info("[DRESSING] MiMo attempt %d/2", mimo_attempt + 1)
-                result = call_mimo_text(messages, temperature=0.5, timeout=90, max_tokens=4096, model=MIMO_VISION_MODEL)
-                if not result:
-                    _log.warning("[DRESSING] MiMo returned nothing on attempt %d", mimo_attempt + 1)
-                    continue
-
-                outfit_list = result if isinstance(result, list) else (result.get("outfits") if isinstance(result, dict) else None)
-                if not isinstance(outfit_list, list) or not outfit_list:
-                    _log.warning("[DRESSING] MiMo returned invalid format: %s", str(result)[:200])
-                    continue
-
-                for opt in outfit_list:
-                    if len(outfit_options) >= max_outfits:
-                        break
-                    item_ids = opt.get("item_ids", [])
-                    if not item_ids:
-                        continue
-                    # Validate all IDs exist in the closet
-                    items = lookup_items_by_ids(item_ids)
-                    if len(items) < 2:
-                        continue
-                    # Verify at least one clothing + shoes minimum
-                    cats_in_outfit = set(normalize_cat(i.get("type", i.get("category", ""))) for i in items)
-                    has_clothing = "top" in cats_in_outfit or "bottom" in cats_in_outfit or "dress" in cats_in_outfit or "full_outfit" in cats_in_outfit
-                    if not has_clothing:
-                        continue
-                    sig = item_id_set(items)
-                    if sig in attempted_signatures:
-                        continue
-                    attempted_signatures.add(sig)
-                    # Use MiMo's name if it's reasonable, otherwise generate our own
-                    mimo_name = (opt.get("outfit_name") or "").strip()
-                    if mimo_name and len(mimo_name) > 2 and len(mimo_name) < 40:
-                        outfit_name = f"{weather_part}{occ_prefix} {mimo_name} {palette_part}".strip()
-                    else:
-                        outfit_name = build_name(items)
-                    # Use MiMo's reason if it's reasonable, otherwise generate our own
-                    mimo_reason = (opt.get("reason") or "").strip()
-                    if mimo_reason and len(mimo_reason) > 10:
-                        reason = mimo_reason
-                    else:
-                        item_descs = [format_item_desc(it) for it in items]
-                        reason = build_reason(item_descs, occasion, weather, color_palette)
-                    _log.info("[DRESSING] MiMo generated outfit: %s (%d items)", outfit_name, len(items))
-                    outfit_options.append({"outfit_name": outfit_name, "reason": reason, "items": items, "source": "mimo"})
-
-        # ---- Phase C: Combinatorial Fallback (if MiMo didn't give enough) ----
-        if len(outfit_options) < 2:
-            _log.info("[DRESSING] Using combinatorial fallback")
-            templates = [
-                ["dress", "shoes", "accessory"], ["top", "bottom", "shoes", "accessory"],
-                ["top", "bottom", "shoes"], ["dress", "shoes"], ["dress", "accessory"],
-                ["top", "bottom", "accessory"], ["top", "bottom"], ["top", "shoes"],
-                ["bottom", "shoes"], ["top", "accessory"], ["bottom", "accessory"],
-                ["dress"], ["top"], ["bottom"],
-            ]
-
-            def pick_for_template(template, used_ids):
-                chosen = []
-                local_used = set(used_ids)
-                for slot in template:
-                    candidates = []
-                    for cat_part in slot.split(","):
-                        candidates.extend(grouped.get(cat_part.strip(), []))
-                    avail = [i for i in candidates if i.get("id") not in local_used]
-                    if not avail:
-                        return None
-                    pick = random.choice(avail)
-                    local_used.add(pick.get("id"))
-                    chosen.append(pick)
-                if len(chosen) < 2:
-                    return None
-                return chosen
-
-            for template in templates:
-                if len(outfit_options) >= max_outfits:
-                    break
-                for _ in range(4):
-                    if len(outfit_options) >= max_outfits:
-                        break
-                    items = pick_for_template(template, set())
-                    if items is None:
-                        continue
-                    sig = item_id_set(items)
-                    if sig in attempted_signatures or len(sig) < 2:
-                        continue
-                    attempted_signatures.add(sig)
-                    outfit_name = build_name(items)
-                    item_descs = [format_item_desc(it) for it in items]
-                    reason = build_reason(item_descs, occasion, weather, color_palette)
-                    outfit_options.append({"outfit_name": outfit_name, "reason": reason, "items": items, "source": "combinatorial"})
-
-        # ---- Phase D: Single-item fallback ----
-        if not outfit_options:
-            best_cat = max(grouped.items(), key=lambda kv: len(kv[1])) if grouped else (None, [])
-            if best_cat and best_cat[1]:
-                cat_name, cat_items = best_cat
-                the_item = cat_items[0]
-                the_label = the_item.get("label", cat_name)
-                outfit_name = f"{weather_part}{occ_prefix} {type_label(cat_name or '', the_item.get('type') or '')} {palette_part}".strip()
-                reason = f"Your {the_label.lower()} \u2014 your only option for {occ_prefix.lower()} {weather_desc.lower()} wear."
-                outfit_options.append({"outfit_name": outfit_name, "reason": reason, "items": [the_item], "source": "combinatorial"})
-
-        if not outfit_options:
-            return jsonify({"success": False, "error": f"Could not compose outfits for {weather} {occasion}. Not enough items in your closet that fit the weather and occasion."})
-
-        _log.info("[DRESSING] Success: %d outfit options", len(outfit_options))
-        return jsonify({"success": True, "outfit_options": outfit_options})
-    except Exception as exc:
-        _log.error("[DRESSING] Error: %s", exc, exc_info=True)
-        return jsonify({"success": False, "error": f"Generation failed: {str(exc)[:100]}"}), 500
-
 @app.route("/api/v1/upload-color-pdf", methods=["POST", "OPTIONS"], strict_slashes=False)
 def upload_color_pdf():
     if request.method == "OPTIONS":
@@ -2481,19 +2061,18 @@ def generate_outfits():
                 _log.info("[DRESSING] Sending to MiMo Vision")
                 mimo_result = call_mimo_vision(collage_b64, vision_prompt, temperature=0.2)
                 _log.info("[DRESSING] MiMo Vision: %s", str(mimo_result)[:300])
-                import sys
                 print("[DRESSING-DEBUG] MIMO_SELECTED:", json.dumps(mimo_result, indent=2)[:500], file=sys.stderr)
             except Exception as exc:
                 _log.warning("[DRESSING] MiMo Vision error: %s", exc)
 
         # ---- Build outfits from selection ----
-        import sys
+
         if tops: print(f"[DRESSING-DEBUG] TOPS available: {[(t.get('id'), t.get('label',''), t.get('image_url','')[:40]) for t in tops]}", file=sys.stderr)
         if bottoms: print(f"[DRESSING-DEBUG] BOTTOMS available: {[(b.get('id'), b.get('label',''), b.get('image_url','')[:40]) for b in bottoms]}", file=sys.stderr)
         if shoes_list: print(f"[DRESSING-DEBUG] SHOES available: {[(s.get('id'), s.get('label',''), s.get('image_url','')[:40]) for s in shoes_list]}", file=sys.stderr)
         outfits = []
         used_ids = set()
-        debug_source = "combinatorial"
+        debug_source = "mimo_vision"
 
         for oi in range(count):
             outfit_data = {"type": "regular", "top": "", "mid": "", "bottom": "", "accessory_note": ""}
@@ -2533,23 +2112,16 @@ def generate_outfits():
                 except (IndexError, TypeError, ValueError) as e:
                     _log.warning("[DRESSING] MiMo parse error: %s", e)
 
-            # Fallback combinatorial
+            # No fallback — if MiMo fails, return structured error
             if not combo:
-                if has_full:
-                    combo = {"type": "full_outfit", "full_outfit": random.choice(full_outfits), "accessory_note": ""}
-                    debug_source = "combinatorial"
-                elif has_dresses:
-                    c = {"type": "dress", "dress": random.choice(dresses), "accessory_note": ""}
-                    if has_shoes: c["shoes"] = random.choice(shoes_list)
-                    combo = c
-                    debug_source = "combinatorial"
-                elif has_tops and has_bottoms:
-                    c = {"type": "regular", "accessory_note": ""}
-                    c["top"] = random.choice([t for t in tops if t.get("id") not in used_ids]) or random.choice(tops)
-                    c["bottom"] = random.choice([b for b in bottoms if b.get("id") not in used_ids]) or random.choice(bottoms)
-                    if has_shoes: c["shoes"] = random.choice(shoes_list)
-                    combo = c
-                    debug_source = "combinatorial"
+                _log.error("[DRESSING] MiMo Vision failed to select items — no outfits generated")
+                return jsonify({
+                    "success": False,
+                    "provider": "MiMo Vision 2.5",
+                    "stage": "Item Selection",
+                    "error": "MiMo Vision could not select compatible items for the requested occasion",
+                    "timestamp": __import__('datetime').datetime.now().isoformat(),
+                }), 500
 
             if not combo: continue
 
@@ -2567,7 +2139,7 @@ def generate_outfits():
                     "bottom": "",
                     "accessory_note": combo.get("accessory_note", ""),
                 }
-                import sys; print(f"[DRESSING-DEBUG] FULL_OUTFIT: top={outfit_data['top'][:50]}", file=sys.stderr)
+                print(f"[DRESSING-DEBUG] FULL_OUTFIT: top={outfit_data['top'][:50]}", file=sys.stderr)
             elif combo.get("type") == "dress":
                 dr = combo.get("dress", {})
                 sh = combo.get("shoes", {})
@@ -2578,7 +2150,7 @@ def generate_outfits():
                     "bottom": sh.get("image_url", ""),  # shoes (1-split bottom 50%)
                     "accessory_note": combo.get("accessory_note", ""),
                 }
-                import sys; print(f"[DRESSING-DEBUG] DRESS: top={outfit_data['top'][:50]} bottom={outfit_data['bottom'][:50]}", file=sys.stderr)
+                print(f"[DRESSING-DEBUG] DRESS: top={outfit_data['top'][:50]} bottom={outfit_data['bottom'][:50]}", file=sys.stderr)
             else:  # regular
                 outfit_data = {
                     "type": "regular",
@@ -2587,25 +2159,21 @@ def generate_outfits():
                     "bottom": combo.get("shoes", {}).get("image_url", ""),
                     "accessory_note": combo.get("accessory_note", ""),
                 }
-                import sys; print(f"[DRESSING-DEBUG] REGULAR: top={outfit_data['top'][:50]} mid={outfit_data['mid'][:50]} bottom={outfit_data['bottom'][:50]}", file=sys.stderr)
+                print(f"[DRESSING-DEBUG] REGULAR: top={outfit_data['top'][:50]} mid={outfit_data['mid'][:50]} bottom={outfit_data['bottom'][:50]}", file=sys.stderr)
 
             outfits.append(outfit_data)
 
+        # If no outfits were built from MiMo selections, return structured error
         if not outfits:
-            fb = items_with_img[:3]
-            if fb:
-                outfit = {
-                    "type": "regular",
-                    "top": fb[0].get("image_url","") if len(fb)>0 else "",
-                    "mid": fb[1].get("image_url","") if len(fb)>1 else "",
-                    "bottom": fb[2].get("image_url","") if len(fb)>2 else "",
-                    "accessory_note": "",
-                }
-                outfits.append(outfit)
+            _log.error("[DRESSING] No outfits could be constructed from MiMo Vision selections")
+            return jsonify({
+                "success": False,
+                "provider": "MiMo Vision 2.5",
+                "stage": "Outfit Construction",
+                "error": "No valid outfits could be built from MiMo Vision selections",
+                "timestamp": __import__('datetime').datetime.now().isoformat(),
+            }), 500
 
-        import sys; print(f"[DRESSING-DEBUG] FINAL OUTFITS COUNT={len(outfits)} SRC={debug_source}", file=sys.stderr)
-        for _oi, _od in enumerate(outfits): print(f"[DRESSING-DEBUG]  OUT#{_oi}: type={_od.get('type')} top={str(_od.get('top',''))[:40]} mid={str(_od.get('mid',''))[:40]} bottom={str(_od.get('bottom',''))[:40]}", file=sys.stderr)
-        _log.info("[DRESSING] %d outfits (%s)", len(outfits), debug_source)
         return jsonify({
             "success": True,
             "images": outfits,
@@ -2615,41 +2183,10 @@ def generate_outfits():
         })
     except Exception as exc:
         _log.error("[DRESSING] Error: %s", exc, exc_info=True)
-        import traceback, sys
         traceback.print_exc()
         return jsonify({"success": False, "error": str(exc)[:200]}), 500
 
 
-@app.route("/debug/analyze", methods=["POST"], strict_slashes=False)
-def debug_analyze():
-    data = request.get_json(silent=True) or {}
-    image_b64 = data.get("image_b64")
-    if not image_b64:
-        return jsonify({"error": "Missing image_b64"}), 400
-    compressed = compress_image_b64(image_b64)
-    headers = {"Content-Type": "application/json", "api-key": MIMO_API_KEY, "HTTP-Referer": "https://luxor.ly", "X-Title": "LuxorHub"}
-    features = _extract_image_features(image_b64)
-    models_to_try = [MIMO_VISION_MODEL]
-    for model in models_to_try:
-        payload = {"model": model, "messages": [{"role": "user", "content": [{"type": "text", "text": SACRED_PROMPT + "\n\nExtracted image features: " + features}, {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{compressed}"}}]}], "max_tokens": 4096, "temperature": 0.2}
-        try:
-            resp = requests.post(MIMO_API_URL, json=payload, headers=headers, timeout=120)
-            if resp.status_code == 200:
-                return jsonify({"status": "success", "code": 200, "model": model, "raw": resp.json()})
-            elif resp.status_code == 429:
-                continue
-            return jsonify({"status": "error", "code": resp.status_code, "model": model, "text": resp.text[:500]})
-        except Exception as e:
-            continue
-
-    # Text fallback for debug
-    text_prompt = f"{SACRED_PROMPT}\n\nVision API unavailable. Using extracted features:\n{features}\n\nReturn the JSON as requested."
-    payload = {"model": MIMO_TEXT_MODEL, "messages": [{"role": "user", "content": text_prompt}], "max_tokens": CIPHER_MAX_TOKENS}
-    try:
-        resp = requests.post(MIMO_API_URL, json=payload, headers=headers, timeout=30)
-        return jsonify({"status": "success" if resp.status_code == 200 else "error", "code": resp.status_code, "model": "mimo_text_fallback", "raw": resp.json() if resp.status_code == 200 else {}, "text": resp.text[:500] if resp.status_code != 200 else ""})
-    except Exception as e:
-        return jsonify({"status": "exception", "error": str(e)})
 
 @app.route("/", methods=["GET"], strict_slashes=False)
 @app.route("/api/health", methods=["GET"], strict_slashes=False)
