@@ -2272,7 +2272,11 @@ def style_recommendations():
         return jsonify({"success": True, "recommendations": recommendations})
     except Exception as exc:
         _log.error("[STYLE] Error: %s", exc, exc_info=True)
-        return jsonify({"success": False, "error": f"Recommendations failed: {str(exc)[:100]}"}), 500
+        import traceback, sys
+        print("=== CRITICAL STYLE-RECOMMENDATIONS ERROR ===", file=sys.stderr)
+        traceback.print_exc()
+        print("============================================", file=sys.stderr)
+        return jsonify({"success": False, "error": f"Recommendations failed: {str(exc)[:200]}"}), 500
 
 
 @app.route("/api/v1/outfit-review", methods=["POST", "OPTIONS"], strict_slashes=False)
