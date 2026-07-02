@@ -112,6 +112,17 @@ export default function DressingRoomPage() {
           />
         </div>
 
+        {/* ---- Accessory note ---- */}
+        {generatedImages.length > 0 && generatedImages[0]?.accessory_note && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-sm mx-auto mt-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-center"
+          >
+            <p className="text-sm text-amber-300/90">{generatedImages[0].accessory_note}</p>
+          </motion.div>
+        )}
+
         {/* ---- Progress indicator ---- */}
         <AnimatePresence>
           {isGenerating && (

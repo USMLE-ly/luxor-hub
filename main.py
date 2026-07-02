@@ -2322,7 +2322,7 @@ def generate_outfits():
         data = request.get_json(silent=True) or {}
         occasion = data.get("occasion", "casual")
         count = min(int(data.get("count", 3)), 7)
-        _log.info("[DRESSING] Generating %d outfits for %s via MiMo Vision", count, occasion)
+        _log.info("[DRESSING] Generating %d outfits for %s", count, occasion)
 
         closet_items = qdrant_get_all_items()
         if not closet_items:
@@ -2332,210 +2332,269 @@ def generate_outfits():
         if not items_with_img:
             return jsonify({"success": False, "error": "No items with photos in your closet. Upload clothing photos first."}), 400
 
-        def _guess_cat(item):
+        # ---- Category detection ----
+        def _cat(item):
             t = (item.get("type") or item.get("category") or "").lower().strip()
-            tops = ("top","shirt","blouse","t-shirt","tshirt","camisole","tank","sweater","hoodie","cardigan","blazer","vest","bodysuit","crop top","tube top","halter","jacket","coat","outerwear")
-            bottoms = ("bottom","pants","jeans","trousers","shorts","skirt","leggings","chinos","cargo","culottes","palazzo")
-            shoes_cat = ("shoes","footwear","sneakers","boots","sandals","heels","flats","loafers","oxfords","mules","wedges","slides")
-            dresses = ("dress","gown","jumpsuit","romper","sundress")
-            if t in tops or any(k in t for k in ("jacket","blazer","cardigan")):
-                return "top"
-            if t in bottoms:
-                return "bottom"
-            if t in shoes_cat:
-                return "shoes"
-            if t in dresses:
-                return "dress"
+            tops_kw = ("top","shirt","blouse","t-shirt","tshirt","camisole","tank","sweater","hoodie","cardigan","blazer","vest","bodysuit","crop top","tube top","halter","jacket","coat","outerwear")
+            bottoms_kw = ("bottom","pants","jeans","trousers","shorts","skirt","leggings","chinos","cargo","culottes","palazzo")
+            shoes_kw = ("shoes","footwear","sneakers","boots","sandals","heels","flats","loafers","oxfords","mules","wedges","slides")
+            dress_kw = ("dress","gown","jumpsuit","romper","sundress","maxi dress","mini dress","midi dress")
+            acc_kw = ("accessory","bag","purse","belt","hat","scarf","jewelry","watch","sunglasses","earrings","necklace","bracelet","ring","wallet","backpack","tote","clutch","headband","gloves")
+            full_kw = ("full outfit","full look","complete outfit","matching set","outfit set","coord set","co-ord","two-piece","suit set","ensemble")
+            if t in full_kw or t == "full_outfit": return "full_outfit"
+            if t in tops_kw or any(k in t for k in ("jacket","blazer","cardigan")): return "top"
+            if t in bottoms_kw: return "bottom"
+            if t in shoes_kw: return "shoes"
+            if t in dress_kw: return "dress"
+            if t in acc_kw: return "accessory"
             label = (item.get("label","")+" "+item.get("name","")+" "+t).lower()
-            for kw_set,result in [
+            for kws,res in [
                 (("jacket","coat","blazer","hoodie","cardigan","vest","bomber","trench","puffer"),"top"),
                 (("shirt","blouse","t-shirt","tee","tank","camisole","crop top","sweater","polo","bodysuit"),"top"),
                 (("pants","jeans","trousers","shorts","skirt","leggings","chinos"),"bottom"),
                 (("shoes","sneakers","boots","sandals","heels","flats","loafers"),"shoes"),
                 (("dress","gown","jumpsuit","romper","sundress"),"dress"),
+                (("bag","purse","belt","hat","scarf","jewelry","watch","sunglasses","earrings"),"accessory"),
+                (("full outfit","full look","complete outfit","matching set","outfit set","coord set","two-piece","suit set"),"full_outfit"),
             ]:
-                if any(kw in label for kw in kw_set):
-                    return result
+                if any(kw in label for kw in kws): return res
             return "other"
 
-        tops = [i for i in items_with_img if _guess_cat(i) == "top"]
-        bottoms = [i for i in items_with_img if _guess_cat(i) == "bottom"]
-        shoes_list = [i for i in items_with_img if _guess_cat(i) == "shoes"]
-        dresses = [i for i in items_with_img if _guess_cat(i) == "dress"]
+        # ---- Group items ----
+        tops = [i for i in items_with_img if _cat(i) == "top"]
+        bottoms = [i for i in items_with_img if _cat(i) == "bottom"]
+        shoes_list = [i for i in items_with_img if _cat(i) == "shoes"]
+        dresses = [i for i in items_with_img if _cat(i) == "dress"]
+        accessories = [i for i in items_with_img if _cat(i) == "accessory"]
+        full_outfits = [i for i in items_with_img if _cat(i) == "full_outfit"]
 
-        if not tops and not dresses:
-            return jsonify({"success":False,"error":"No tops or dresses in your closet. Upload clothing photos first."}),400
-        if tops and not bottoms:
+        has_full = len(full_outfits) > 0
+        has_dresses = len(dresses) > 0
+        has_tops = len(tops) > 0
+        has_bottoms = len(bottoms) > 0
+        has_shoes = len(shoes_list) > 0
+        has_acc = len(accessories) > 0
+
+        if not has_tops and not has_dresses and not has_full:
+            return jsonify({"success":False,"error":"No tops, dresses, or full outfits in your closet. Upload clothing photos first."}),400
+        if has_tops and not has_bottoms:
             return jsonify({"success":False,"error":"You need bottoms (pants/skirts) in your closet."}),400
 
-        # Build text item list
-        def _build_items_text():
-            lines = []
-            if tops:
-                lines.append("TOPS:" + "".join(f"\n  [{i}] {tops[i].get('label','Item')} ({tops[i].get('color','')})" for i in range(len(tops))))
-            if bottoms:
-                lines.append("\nBOTTOMS:" + "".join(f"\n  [{i}] {bottoms[i].get('label','Item')} ({bottoms[i].get('color','')})" for i in range(len(bottoms))))
-            if shoes_list:
-                lines.append("\nSHOES:" + "".join(f"\n  [{i}] {shoes_list[i].get('label','Item')} ({shoes_list[i].get('color','')})" for i in range(len(shoes_list))))
-            if dresses:
-                lines.append("\nDRESSES:" + "".join(f"\n  [{i}] {dresses[i].get('label','Item')} ({dresses[i].get('color','')})" for i in range(len(dresses))))
-            return "".join(lines)
+        # ---- Build text description ----
+        def _item_text(items_list):
+            return "".join(f"\n  [{i}] {items_list[i].get('label','Item')} ({items_list[i].get('color','')})" for i in range(len(items_list)))
 
-        items_text = _build_items_text()
+        def _build_text():
+            parts = []
+            if tops: parts.append("TOPS:" + _item_text(tops))
+            if bottoms: parts.append("\nBOTTOMS:" + _item_text(bottoms))
+            if shoes_list: parts.append("\nSHOES:" + _item_text(shoes_list))
+            if dresses: parts.append("\nDRESSES:" + _item_text(dresses))
+            if accessories: parts.append("\nACCESSORIES:" + _item_text(accessories))
+            if full_outfits: parts.append("\nFULL OUTFITS:" + _item_text(full_outfits))
+            return "".join(parts)
+
+        items_text = _build_text()
 
         style_desc = {
-            "casual":"relaxed, everyday casual","business":"professional, business-appropriate","party":"stylish, eye-catching party","date-night":"romantic, attractive date night",
-            "sport":"active, sporty","formal":"elegant, formal","vacation":"vacation, resort-style","beach":"beach-ready, light","work":"professional work",
+            "casual":"relaxed everyday casual","business":"professional business","party":"stylish party","date-night":"romantic date night",
+            "sport":"active sporty","formal":"elegant formal","vacation":"vacation resort","beach":"beach ready","work":"professional work",
         }.get(occasion.lower(), "versatile")
 
-        # Try creating a visual collage for MiMo Vision
+        # ---- Create collage image ----
         collage_b64 = None
         try:
             from PIL import Image, ImageDraw, ImageFont
-            thumb_sz = 160
-            pad = 12
-            cat_h = 25
-            label_h = 22
-            col_w = thumb_sz + pad * 2
-            row_h = thumb_sz + label_h + pad * 2 + cat_h
+            sz = 160; pd = 12; ch = 25; lh = 22
+            cw = sz + pd*2; rh = sz + lh + pd*2 + ch
 
-            cat_groups = [(tops,"TOPS",(70,130,180)),(bottoms,"BOTTOMS",(60,179,113)),(shoes_list,"SHOES",(218,165,32)),(dresses,"DRESSES",(180,70,130))]
-            active = [(g,l,c) for g,l,c in cat_groups if g]
-            n_rows = len(active)
-            max_cols = max(len(g) for g,_,_ in active)
-            cw = max(max_cols * col_w + pad, 400)
-            ch = n_rows * row_h + pad
+            cats = [(tops,"TOPS",(70,130,180)),(bottoms,"BOTTOMS",(60,179,113)),(shoes_list,"SHOES",(218,165,32)),
+                    (dresses,"DRESSES",(180,70,130)),(accessories,"ACCESSORIES",(200,120,200)),(full_outfits,"FULL OUTFITS",(100,200,100))]
+            active = [(g,l,c) for g,l,c in cats if g]
+            nr = len(active); nc = max(len(g) for g,_,_ in active) if active else 1
+            cw2 = max(nc*cw+pd,400); ch2 = nr*rh+pd
 
-            canvas = Image.new("RGB", (cw, ch), (25, 25, 35))
+            canvas = Image.new("RGB", (cw2,ch2), (25,25,35))
             draw = ImageDraw.Draw(canvas)
             try:
-                tfont = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 13)
-                lfont = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 10)
+                tf = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",13)
+                lf = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",10)
             except:
-                tfont = lfont = ImageFont.load_default()
+                tf = lf = ImageFont.load_default()
 
             for ri,(gi,gl,gc) in enumerate(active):
-                yb = ri * row_h + pad
-                draw.rectangle([(pad,yb),(cw-pad,yb+cat_h)], fill=gc)
-                draw.text((pad+6,yb+4), gl, fill=(255,255,255), font=tfont)
-                for ci,item in enumerate(gi[:max_cols]):
-                    x = ci * col_w + pad
-                    y = yb + cat_h + 4
+                yb = ri*rh+pd
+                draw.rectangle([(pd,yb),(cw2-pd,yb+ch)], fill=gc)
+                draw.text((pd+6,yb+4), gl, fill=(255,255,255), font=tf)
+                for ci,item in enumerate(gi[:nc]):
+                    x = ci*cw+pd; y = yb+ch+4
                     try:
                         r = requests.get(item.get("image_url",""), timeout=8)
-                        if r.status_code == 200:
+                        if r.status_code==200:
                             im = Image.open(io.BytesIO(r.content))
-                            im.thumbnail((thumb_sz,thumb_sz), Image.Resampling.LANCZOS)
-                            ix = x + pad + (thumb_sz - im.width)//2
-                            iy = y + (thumb_sz - im.height)//2
+                            im.thumbnail((sz,sz), Image.Resampling.LANCZOS)
+                            ix = x+pd+(sz-im.width)//2; iy = y+(sz-im.height)//2
                             canvas.paste(im, (ix,iy))
-                    except:
-                        pass
-                    draw.rectangle([(x+pad-1,y-1),(x+pad+thumb_sz,y+thumb_sz)], outline=(100,100,100), width=1)
-                    lbl = item.get("label","")[:20]
-                    draw.text((x+pad, y+thumb_sz+2), f"[{ci}] {lbl}", fill=(180,180,180), font=lfont)
+                    except: pass
+                    draw.rectangle([(x+pd-1,y-1),(x+pd+sz,y+sz)], outline=(100,100,100), width=1)
+                    draw.text((x+pd,y+sz+2), f"[{ci}] {item.get('label','')[:18]}", fill=(180,180,180), font=lf)
 
             buf = io.BytesIO()
             canvas.save(buf, format="JPEG", quality=88)
             collage_b64 = base64.b64encode(buf.getvalue()).decode()
-            _log.info("[DRESSING] Collage: %dx%d, %d KB", cw, ch, len(collage_b64)//1024)
+            _log.info("[DRESSING] Collage: %dx%d %dKB", cw2,ch2,len(collage_b64)//1024)
         except Exception as exc:
-            _log.warning("[DRESSING] Collage failed: %s — using text prompt", exc)
+            _log.warning("[DRESSING] Collage failed: %s", exc)
 
+        # ---- MiMo Vision prompt ----
         vision_prompt = (
-            'You are a fashion stylist AI. Look at the closet items shown in the image. '
-            'Select the best outfit combination for a ' + style_desc + ' occasion.\n\n'
+            'You are a fashion stylist AI. Look only at the ACTUAL closet items shown in the image and listed below. '
+            'Do NOT invent or hallucinate any items. Only use items that exist in the lists.\n'
+            'Occasion: ' + style_desc + '.\n\n'
             'Available items:\n' + items_text + '\n\n'
-            'Return ONLY this JSON (no other text):\n'
-            '{"selections":[{"top_idx":0,"bottom_idx":0,"shoe_idx":0}]}\n\n'
-            'RULES:\n'
-            '- Pick items that coordinate in color and style.\n'
-            '- A complete outfit needs at minimum: top + bottom + shoes (if available).\n'
-            '- top_idx is the index in TOPS list, bottom_idx in BOTTOMS, shoe_idx in SHOES.\n'
-            '- If shoes not available, set shoe_idx to null.\n'
-            '- Return exactly ' + str(count) + ' selection(s) if enough items exist.'
+            'Decide the BEST outfit type based on what is available and the occasion:\n'
+            '- "regular": top + bottom + shoes (use top_idx, bottom_idx, shoe_idx)\n'
+            '- "dress": dress + shoes (use dress_idx, shoe_idx)\n'
+            '- "full_outfit": a single complete outfit item (use full_outfit_idx only)\n\n'
+            'Return ONLY this JSON array (no other text, no code fences):\n'
+            '{"selections":[\n'
+            '  {"type":"regular","top_idx":0,"bottom_idx":0,"shoe_idx":0,"dress_idx":null,"full_outfit_idx":null,"accessory_note":""}\n'
+            ']}\n\n'
+            'CRITICAL RULES - VIOLATION WILL BREAK THE APP:\n'
+            '1. ONLY use indices for items that ACTUALLY EXIST in the lists above.\n'
+            '2. If TOPS/BOTTOMS/SHOES exist, prefer "regular" type.\n'
+            '3. If DRESSES exist (and occasion fits), use "dress" type. Set dress_idx to the index, shoe_idx to matching shoes (or null).\n'
+            '4. If FULL OUTFITS exist, use "full_outfit" type. Set full_outfit_idx only.\n'
+            '5. For "full_outfit": ONLY set full_outfit_idx. Set top_idx/bottom_idx/shoe_idx/dress_idx to null.\n'
+            '6. For "dress": ONLY use dress_idx + shoe_idx. Do NOT also pick top/bottom.\n'
+            '7. accessory_note: ONLY write if the outfit NEEDS an accessory to be complete.\n'
+            '   - If the needed accessory EXISTS in your ACCESSORIES list, say: "Add [item] from your closet".\n'
+            '   - If the needed accessory is NOT in the closet, say: "Consider adding [item]".\n'
+            '   - If the outfit already has accessories or doesn\'t need any, leave accessory_note as empty string "".\n'
+            '8. Return exactly ' + str(count) + ' selection(s).\n'
+            '9. NO HALLUCINATION. NO invented items. NO made-up indices.'
         )
 
-        # Try MiMo Vision
         mimo_result = None
         if collage_b64:
             try:
-                _log.info("[DRESSING] Sending collage to MiMo Vision")
-                mimo_result = call_mimo_vision(collage_b64, vision_prompt, temperature=0.3)
-                _log.info("[DRESSING] MiMo Vision responded: %s", str(mimo_result)[:200])
+                _log.info("[DRESSING] Sending to MiMo Vision")
+                mimo_result = call_mimo_vision(collage_b64, vision_prompt, temperature=0.2)
+                _log.info("[DRESSING] MiMo Vision: %s", str(mimo_result)[:300])
             except Exception as exc:
                 _log.warning("[DRESSING] MiMo Vision error: %s", exc)
 
-        # Build outfits
-        def _pick_random(tops_list, bottoms_list, shoes_list):
-            combo = {}
-            if tops_list:
-                combo["top"] = random.choice(tops_list)
-            if bottoms_list:
-                combo["bottom"] = random.choice(bottoms_list)
-            if shoes_list:
-                combo["shoes"] = random.choice(shoes_list)
-            return combo
-
+        # ---- Build outfits from selection ----
         outfits = []
         used_ids = set()
         debug_source = "combinatorial"
 
         for oi in range(count):
+            outfit_data = {"type": "regular", "top": "", "mid": "", "bottom": "", "accessory_note": ""}
             combo = None
-            # Try MiMo selection
+
+            # Try MiMo Vision selection
             if mimo_result and isinstance(mimo_result, dict):
                 try:
                     sels = mimo_result.get("selections", [])
                     if oi < len(sels):
                         sel = sels[oi]
-                        c = {}
-                        ti = sel.get("top_idx")
-                        if ti is not None and 0 <= ti < len(tops):
-                            c["top"] = tops[ti]
-                        bi = sel.get("bottom_idx")
-                        if bi is not None and 0 <= bi < len(bottoms):
-                            c["bottom"] = bottoms[bi]
-                        si = sel.get("shoe_idx")
-                        if si is not None and 0 <= si < len(shoes_list):
-                            c["shoes"] = shoes_list[si]
-                        if len(c) >= 2:
-                            combo = c
-                            debug_source = "mimo_vision"
-                except (IndexError, TypeError, ValueError):
-                    pass
+                        otype = sel.get("type", "regular")
+                        acc_note = sel.get("accessory_note", "")
+                        c = {"type": otype, "accessory_note": acc_note}
 
+                        if otype == "full_outfit":
+                            fidx = sel.get("full_outfit_idx")
+                            if fidx is not None and 0 <= fidx < len(full_outfits):
+                                c["full_outfit"] = full_outfits[fidx]
+                                if len(c) >= 1: combo = c; debug_source = "mimo_vision"
+                        elif otype == "dress":
+                            didx = sel.get("dress_idx")
+                            sidx = sel.get("shoe_idx")
+                            if didx is not None and 0 <= didx < len(dresses):
+                                c["dress"] = dresses[didx]
+                                if sidx is not None and 0 <= sidx < len(shoes_list):
+                                    c["shoes"] = shoes_list[sidx]
+                                if len(c) >= 1: combo = c; debug_source = "mimo_vision"
+                        else:
+                            ti = sel.get("top_idx")
+                            bi = sel.get("bottom_idx")
+                            si = sel.get("shoe_idx")
+                            if ti is not None and 0 <= ti < len(tops): c["top"] = tops[ti]
+                            if bi is not None and 0 <= bi < len(bottoms): c["bottom"] = bottoms[bi]
+                            if si is not None and 0 <= si < len(shoes_list): c["shoes"] = shoes_list[si]
+                            if len(c) >= 2: combo = c; debug_source = "mimo_vision"
+                except (IndexError, TypeError, ValueError) as e:
+                    _log.warning("[DRESSING] MiMo parse error: %s", e)
+
+            # Fallback combinatorial
             if not combo:
-                combo = _pick_random(tops, bottoms, shoes_list)
-                all_ids = {v.get("id") for v in combo.values() if v}
-                if all_ids & used_ids:
-                    combo = _pick_random(tops, bottoms, shoes_list)
+                if has_full:
+                    combo = {"type": "full_outfit", "full_outfit": random.choice(full_outfits), "accessory_note": ""}
+                    debug_source = "combinatorial"
+                elif has_dresses:
+                    c = {"type": "dress", "dress": random.choice(dresses), "accessory_note": ""}
+                    if has_shoes: c["shoes"] = random.choice(shoes_list)
+                    combo = c
+                    debug_source = "combinatorial"
+                elif has_tops and has_bottoms:
+                    c = {"type": "regular", "accessory_note": ""}
+                    c["top"] = random.choice([t for t in tops if t.get("id") not in used_ids]) or random.choice(tops)
+                    c["bottom"] = random.choice([b for b in bottoms if b.get("id") not in used_ids]) or random.choice(bottoms)
+                    if has_shoes: c["shoes"] = random.choice(shoes_list)
+                    combo = c
+                    debug_source = "combinatorial"
 
-            if not combo:
-                continue
+            if not combo: continue
 
+            # Track used IDs
             for v in combo.values():
-                if v and v.get("id"):
-                    used_ids.add(v.get("id"))
+                if isinstance(v, dict) and v.get("id"): used_ids.add(v.get("id"))
 
-            outfit = {
-                "top": combo.get("top",{}).get("image_url",""),
-                "mid": combo.get("bottom",{}).get("image_url",""),
-                "bottom": combo.get("shoes",{}).get("image_url",""),
-            }
-            outfits.append(outfit)
+            # Build outfit based on type
+            if combo.get("type") == "full_outfit":
+                fo = combo.get("full_outfit", {})
+                outfit_data = {
+                    "type": "full_outfit",
+                    "top": fo.get("image_url", ""),   # single full image
+                    "mid": "",
+                    "bottom": "",
+                    "accessory_note": combo.get("accessory_note", ""),
+                }
+            elif combo.get("type") == "dress":
+                dr = combo.get("dress", {})
+                sh = combo.get("shoes", {})
+                outfit_data = {
+                    "type": "dress",
+                    "top": dr.get("image_url", ""),   # dress image (1-split top 50%)
+                    "mid": "",                          # not used for dress
+                    "bottom": sh.get("image_url", ""),  # shoes (1-split bottom 50%)
+                    "accessory_note": combo.get("accessory_note", ""),
+                }
+            else:  # regular
+                outfit_data = {
+                    "type": "regular",
+                    "top": combo.get("top", {}).get("image_url", ""),
+                    "mid": combo.get("bottom", {}).get("image_url", ""),
+                    "bottom": combo.get("shoes", {}).get("image_url", ""),
+                    "accessory_note": combo.get("accessory_note", ""),
+                }
+
+            outfits.append(outfit_data)
 
         if not outfits:
             fb = items_with_img[:3]
             if fb:
                 outfit = {
-                    "top": fb[0].get("image_url",""),
+                    "type": "regular",
+                    "top": fb[0].get("image_url","") if len(fb)>0 else "",
                     "mid": fb[1].get("image_url","") if len(fb)>1 else "",
                     "bottom": fb[2].get("image_url","") if len(fb)>2 else "",
+                    "accessory_note": "",
                 }
                 outfits.append(outfit)
 
-        _log.info("[DRESSING] %d outfits (%s) for %s", len(outfits), debug_source, occasion)
+        _log.info("[DRESSING] %d outfits (%s)", len(outfits), debug_source)
         return jsonify({
             "success": True,
             "images": outfits,

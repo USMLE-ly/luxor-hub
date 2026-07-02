@@ -5,6 +5,8 @@ export interface OutfitImages {
   top: string;
   mid: string;
   bottom: string;
+  type?: 'regular' | 'dress' | 'full_outfit';
+  accessory_note?: string;
 }
 
 interface FlipGalleryProps {
@@ -134,16 +136,49 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading 
   // --- POPULATED STATE (Outfits Generated) ---
   return (
     <div className='relative w-full h-[400px] md:h-[500px]' style={{ perspective: '800px', background: '#000' }}>
-      {/* 3-Split Active Frame */}
       <div id='flip-gallery' ref={containerRef} className='relative w-full h-full'>
-        <div className='unite top bg-cover bg-no-repeat bg-center'></div>
-        <div className='unite mid bg-cover bg-no-repeat bg-center'></div>
-        <div className='unite bottom bg-cover bg-no-repeat bg-center'></div>
+        {(() => {
+          const outfit = outfits[currentIndex];
+          const otype = outfit?.type || 'regular';
 
-        {/* Overlays for animation */}
-        <div className='overlay-top unite bg-cover bg-no-repeat bg-center'></div>
-        <div className='overlay-mid unite bg-cover bg-no-repeat bg-center'></div>
-        <div className='overlay-bottom unite bg-cover bg-no-repeat bg-center'></div>
+          if (otype === 'full_outfit') {
+            // Full outfit: 1 image, 100% height
+            return (
+              <div className='unite full bg-cover bg-no-repeat bg-center'
+                style={{ backgroundImage: `url('${outfit.top}')`, height: '100%', top: 0, left: 0, width: '100%', position: 'absolute' }}></div>
+            );
+          } else if (otype === 'dress') {
+            // Dress: 1-split + shoes = 2 images (dress 50%, shoes 50%)
+            return (
+              <>
+                <div className='dress-top bg-cover bg-no-repeat bg-center'
+                  style={{ backgroundImage: `url('${outfit.top}')`, top: 0, left: 0, width: '100%', height: '50%', position: 'absolute' }}></div>
+                {outfit.bottom && (
+                  <div className='dress-bottom bg-cover bg-no-repeat bg-center'
+                    style={{ backgroundImage: `url('${outfit.bottom}')`, bottom: 0, left: 0, width: '100%', height: '50%', position: 'absolute' }}></div>
+                )}
+                <style>{`
+                  #flip-gallery::after { content: ''; position: absolute; background: black; width: 100%; height: 4px; top: 50%; left: 0; transform: translateY(-50%); z-index: 1; }
+                  #flip-gallery::before { display: none; }
+                `}</style>
+              </>
+            );
+          } else {
+            // Regular: 2-split = 3 sections (top 33%, bottom 33%, shoes 33%)
+            return (
+              <>
+                <div className='unite top bg-cover bg-no-repeat bg-center'
+                  style={{ backgroundImage: `url('${outfit.top}')` }}></div>
+                <div className='unite mid bg-cover bg-no-repeat bg-center'
+                  style={{ backgroundImage: `url('${outfit.mid}')` }}></div>
+                {outfit.bottom && (
+                  <div className='unite bottom bg-cover bg-no-repeat bg-center'
+                    style={{ backgroundImage: `url('${outfit.bottom}')` }}></div>
+                )}
+              </>
+            );
+          }
+        })()}
       </div>
 
       {/* Controls: Dismiss and Arrows */}
@@ -151,7 +186,6 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading 
         <button onClick={onDismiss} className='text-sm text-white/60 hover:text-white transition-colors'>
           Dismiss
         </button>
-
         {outfits.length > 1 && (
           <div className='flex gap-3'>
             <button onClick={handlePrev} className='text-white/60 hover:text-white transition-colors'>
@@ -165,35 +199,18 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading 
       </div>
 
       <style>{`
+        #flip-gallery { position: relative; }
         #flip-gallery::after {
-          content: '';
-          position: absolute;
-          background-color: black;
-          width: 100%;
-          height: 4px;
-          top: 33.333%;
-          left: 0;
-          transform: translateY(-50%);
-          z-index: 1;
+          content: ''; position: absolute; background-color: black; width: 100%; height: 4px;
+          top: 33.333%; left: 0; transform: translateY(-50%); z-index: 1;
         }
         #flip-gallery::before {
-          content: '';
-          position: absolute;
-          background-color: black;
-          width: 100%;
-          height: 4px;
-          top: 66.666%;
-          left: 0;
-          transform: translateY(-50%);
-          z-index: 1;
+          content: ''; position: absolute; background-color: black; width: 100%; height: 4px;
+          top: 66.666%; left: 0; transform: translateY(-50%); z-index: 1;
         }
         #flip-gallery > .unite {
-          position: absolute;
-          width: 100%;
-          height: 33.333%;
-          overflow: hidden;
-          background-size: cover;
-          background-position: center;
+          position: absolute; width: 100%; height: 33.333%; overflow: hidden;
+          background-size: cover; background-position: center;
         }
         .top, .overlay-top { top: 0; transform-origin: bottom; }
         .mid, .overlay-mid { top: 33.333%; transform-origin: bottom; }
