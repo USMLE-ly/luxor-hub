@@ -16,23 +16,7 @@ interface FlipGalleryProps {
   isLoading: boolean;
 }
 
-/**
- * Returns section config based on outfit type:
- *   regular -> 3 sections (top, mid, bottom) each 33.333% height, 2 divider lines
- *   dress   -> 2 sections (top=dress, bottom=shoes) each 50% height, 1 divider line
- *   full_outfit -> 1 section (top=full) 100% height, 0 divider lines
- */
-function getSections(outfit: OutfitImages | undefined): { images: string[]; dividerCount: number } {
-  const type = outfit?.type || 'regular';
-  if (type === 'full_outfit') {
-    return { images: [outfit?.top || ''], dividerCount: 0 };
-  }
-  if (type === 'dress') {
-    return { images: [outfit?.top || '', outfit?.bottom || ''], dividerCount: 1 };
-  }
-  // regular
-  return { images: [outfit?.top || '', outfit?.mid || '', outfit?.bottom || ''], dividerCount: 2 };
-}
+const FLIP_SPEED = 750;
 
 export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading }: FlipGalleryProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -43,52 +27,65 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading 
     setCurrentIndex(0);
   }, [outfits]);
 
-  // Debug: log current outfit
+  // Apply background images via inline styles (bypass Tailwind JIT)
   useEffect(() => {
-    if (outfits.length > 0 && currentIndex < outfits.length) {
-      console.log("[FlipGallery] Rendering outfit:", outfits[currentIndex]);
+    if (!containerRef.current || outfits.length === 0) return;
+    const currentOutfit = outfits[currentIndex];
+    if (!currentOutfit || typeof currentOutfit === 'string') {
+      console.warn("[FlipGallery] Invalid outfit:", currentOutfit);
+      return;
     }
+    const topEl = containerRef.current.querySelector('.unite.top') as HTMLElement;
+    const midEl = containerRef.current.querySelector('.unite.mid') as HTMLElement;
+    const botEl = containerRef.current.querySelector('.unite.bottom') as HTMLElement;
+    if (topEl && currentOutfit.top) topEl.style.backgroundImage = `url('${currentOutfit.top}')`;
+    if (midEl && currentOutfit.mid) midEl.style.backgroundImage = `url('${currentOutfit.mid}')`;
+    if (botEl && currentOutfit.bottom) botEl.style.backgroundImage = `url('${currentOutfit.bottom}')`;
   }, [currentIndex, outfits]);
+
+  // Flip animation
+  const flipTo = (nextIndex: number) => {
+    const gallery = containerRef.current;
+    if (!gallery || outfits.length === 0) return;
+    const units = gallery.querySelectorAll('.unite');
+    units.forEach((el) => {
+      (el as HTMLElement).style.transform = 'rotateX(-90deg)';
+      (el as HTMLElement).style.transition = 'transform 350ms ease-in-out';
+    });
+    setTimeout(() => {
+      setCurrentIndex(nextIndex);
+    }, FLIP_SPEED / 2);
+  };
+
+  const handleNext = () => flipTo((currentIndex + 1) % outfits.length);
+  const handlePrev = () => flipTo((currentIndex - 1 + outfits.length) % outfits.length);
 
   // ============= EMPTY STATE =============
   if (outfits.length === 0) {
     return (
-      <div
-        style={{
-          position: 'relative',
-          width: '100%',
-          height: '400px',
-          perspective: '800px',
-          background: '#0a0a0a',
-          overflow: 'hidden',
-        }}
-        className="md:h-[500px]"
-      >
-        {/* 3 background strips — pure inline styles, no Tailwind arbitrary values */}
-        <div style={{ position: 'absolute', width: '100%', height: '33.333%', top: 0, background: '#1A1A1A', borderBottom: '1px solid #000', zIndex: 0 }} />
-        <div style={{ position: 'absolute', width: '100%', height: '33.333%', top: '33.333%', background: '#0a0a0a', borderBottom: '1px solid #000', zIndex: 0 }} />
-        <div style={{ position: 'absolute', width: '100%', height: '33.333%', bottom: 0, background: '#0a0a0a', zIndex: 0 }} />
+      <div style={{
+        position: 'relative', width: '100%', height: '400px',
+        perspective: '800px', backgroundColor: '#0a0a0a', overflow: 'hidden'
+      }} className="md:h-[500px]">
+        {/* 3 dark strips — inline styles only */}
+        <div style={{ position: 'absolute', top: 0, height: '33.333%', width: '100%', backgroundColor: '#1A1A1A', borderBottom: '1px solid black', zIndex: 0 }} />
+        <div style={{ position: 'absolute', top: '33.333%', height: '33.333%', width: '100%', backgroundColor: '#0a0a0a', borderBottom: '1px solid black', zIndex: 0 }} />
+        <div style={{ position: 'absolute', bottom: 0, height: '33.333%', width: '100%', backgroundColor: '#0a0a0a', zIndex: 0 }} />
 
         {/* 2 divider lines */}
-        <div style={{ position: 'absolute', top: '33.333%', left: 0, width: '100%', height: '4px', background: '#000', zIndex: 10, transform: 'translateY(-50%)' }} />
-        <div style={{ position: 'absolute', top: '66.666%', left: 0, width: '100%', height: '4px', background: '#000', zIndex: 10, transform: 'translateY(-50%)' }} />
+        <div style={{ position: 'absolute', top: '33.333%', left: 0, width: '100%', height: '4px', backgroundColor: '#000', zIndex: 10, transform: 'translateY(-50%)' }} />
+        <div style={{ position: 'absolute', top: '66.666%', left: 0, width: '100%', height: '4px', backgroundColor: '#000', zIndex: 10, transform: 'translateY(-50%)' }} />
 
-        {/* Generate button — bottom left (inside frame) */}
+        {/* Generate button — bottom-left (FIXED: inside frame, not clipped) */}
         <div style={{ position: 'absolute', bottom: '1rem', left: '1rem', zIndex: 20 }}>
           <button
             onClick={onGenerate}
             disabled={isLoading}
             style={{
-              background: isLoading ? undefined : '#9333ea',
-              backgroundColor: isLoading ? undefined : '#9333ea',
-              color: 'white',
-              padding: '8px 16px',
-              borderRadius: '6px',
-              fontWeight: 500,
-              fontSize: '14px',
+              backgroundColor: '#9333ea', color: 'white', padding: '8px 16px',
+              borderRadius: '6px', fontWeight: 500, fontSize: '14px',
+              border: 'none', cursor: isLoading ? 'not-allowed' : 'pointer',
               opacity: isLoading ? 0.5 : 1,
-              cursor: isLoading ? 'not-allowed' : 'pointer',
-              border: 'none',
             }}
             className="hover:bg-purple-700 transition-colors"
           >
@@ -96,111 +93,78 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading 
           </button>
         </div>
 
-        {/* Arrows — bottom right (grayed) */}
-        <div style={{ position: 'absolute', bottom: '1rem', right: '0.5rem', zIndex: 20, display: 'flex', gap: '8px' }}>
-          <button disabled style={{ color: 'rgba(255,255,255,0.2)', cursor: 'not-allowed', background: 'none', border: 'none' }}>
-            <ChevronLeft size={20} />
-          </button>
-          <button disabled style={{ color: 'rgba(255,255,255,0.2)', cursor: 'not-allowed', background: 'none', border: 'none' }}>
-            <ChevronRight size={20} />
-          </button>
+        {/* Grayed arrows — bottom-right */}
+        <div style={{ position: 'absolute', bottom: '1rem', right: '1rem', zIndex: 20, display: 'flex', gap: '8px' }}>
+          <button disabled style={{ color: 'rgba(255,255,255,0.2)', cursor: 'not-allowed', background: 'none', border: 'none' }}><ChevronLeft size={20} /></button>
+          <button disabled style={{ color: 'rgba(255,255,255,0.2)', cursor: 'not-allowed', background: 'none', border: 'none' }}><ChevronRight size={20} /></button>
         </div>
       </div>
     );
   }
 
   // ============= POPULATED STATE =============
-  const outfit = outfits[currentIndex];
-  // Defensive: if outfit is a string (flat URL), it's invalid for the gallery
-  if (!outfit || typeof outfit === 'string') {
-    console.warn("[FlipGallery] Invalid outfit (string instead of object):", outfit);
-    return null; // Will fall through to controls-only view
-  }
-  const { images, dividerCount } = getSections(outfit);
+  const currentOutfit = outfits[currentIndex];
+  if (!currentOutfit || typeof currentOutfit === 'string') return null;
 
-  // Calculate section heights (percentage)
-  const sectionCount = images.length;
-  const sectionHeight = sectionCount > 0 ? 100 / sectionCount : 100;
-  const heights = images.map(() => sectionHeight);
+  const type = currentOutfit.type || 'regular';
+  // Build sections array based on type
+  // regular -> [top, mid, bottom] = 3 sections, 2 dividers
+  // dress   -> [top, bottom]       = 2 sections, 1 divider (top=dress, bottom=shoes)
+  // full_outfit -> [top]            = 1 section, 0 dividers
+  let sections: string[];
+  if (type === 'full_outfit') {
+    sections = [currentOutfit.top];
+  } else if (type === 'dress') {
+    sections = [currentOutfit.top, currentOutfit.bottom]; // dress + shoes
+  } else {
+    sections = [currentOutfit.top, currentOutfit.mid, currentOutfit.bottom];
+  }
+
+  const sectionCount = sections.length;
+  const pct = 100 / sectionCount;
 
   return (
-    <div
-      style={{
-        position: 'relative',
-        width: '100%',
-        height: '400px',
-        perspective: '800px',
-        background: '#000',
-        overflow: 'hidden',
-      }}
-      className="md:h-[500px]"
-    >
-      {/* Reference div for background image management */}
-      <div ref={containerRef} style={{ position: 'relative', width: '100%', height: '100%' }}>
-        {/* Image sections */}
-        {images.map((url, idx) => (
+    <div style={{
+      position: 'relative', width: '100%', height: '400px',
+      perspective: '800px', backgroundColor: '#000', overflow: 'hidden'
+    }} className="md:h-[500px]">
+      <div id="flip-gallery" ref={containerRef} style={{ position: 'relative', width: '100%', height: '100%' }}>
+        {sections.map((url, idx) => (
           <div
             key={idx}
+            className={`unite ${type === 'regular' ? (idx === 0 ? 'top' : idx === 1 ? 'mid' : 'bottom') : ''}`}
             style={{
-              position: 'absolute',
-              width: '100%',
-              height: `${heights[idx]}%`,
-              top: `${heights.slice(0, idx).reduce((a, b) => a + b, 0)}%`,
+              position: 'absolute', top: `${idx * pct}%`, height: `${pct}%`, width: '100%',
               backgroundImage: url ? `url('${url}')` : undefined,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-              overflow: 'hidden',
+              backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat',
+              overflow: 'hidden', transformOrigin: idx === sectionCount - 1 ? 'top' : 'bottom',
+              transition: 'transform 350ms ease-in-out',
             }}
           />
         ))}
 
-        {/* Divider lines between sections */}
-        {Array.from({ length: dividerCount }).map((_, idx) => {
-          const dividerPos = ((idx + 1) * 100) / sectionCount;
-          return (
-            <div
-              key={`divider-${idx}`}
-              style={{
-                position: 'absolute',
-                top: `${dividerPos}%`,
-                left: 0,
-                width: '100%',
-                height: '4px',
-                background: '#000',
-                zIndex: 10,
-                transform: 'translateY(-50%)',
-              }}
-            />
-          );
-        })}
+        {/* Dynamic dividers */}
+        {Array.from({ length: sectionCount - 1 }).map((_, i) => (
+          <div
+            key={`d-${i}`}
+            style={{
+              position: 'absolute', top: `${pct * (i + 1)}%`, left: 0, width: '100%', height: '4px',
+              backgroundColor: '#000', transform: 'translateY(-50%)', zIndex: 10,
+            }}
+          />
+        ))}
       </div>
 
       {/* Controls */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '12px', padding: '0 4px' }}>
-        <button
-          onClick={onDismiss}
-          style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', fontSize: '14px', cursor: 'pointer' }}
-          className="hover:text-white transition-colors"
-        >
-          Dismiss
-        </button>
+        <button onClick={onDismiss} style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', background: 'none', border: 'none', cursor: 'pointer' }}
+          className="hover:text-white transition-colors">Dismiss</button>
         {outfits.length > 1 && (
           <div style={{ display: 'flex', gap: '12px' }}>
-            <button onClick={() => {
-              const next = (currentIndex - 1 + outfits.length) % outfits.length;
-              setCurrentIndex(next);
-            }} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer' }}
-              className="hover:text-white transition-colors">
-              <ChevronLeft size={20} />
-            </button>
-            <button onClick={() => {
-              const next = (currentIndex + 1) % outfits.length;
-              setCurrentIndex(next);
-            }} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer' }}
-              className="hover:text-white transition-colors">
-              <ChevronRight size={20} />
-            </button>
+            <button onClick={handlePrev} style={{ color: 'rgba(255,255,255,0.6)', background: 'none', border: 'none', cursor: 'pointer' }}
+              className="hover:text-white transition-colors"><ChevronLeft size={20} /></button>
+            <button onClick={handleNext} style={{ color: 'rgba(255,255,255,0.6)', background: 'none', border: 'none', cursor: 'pointer' }}
+              className="hover:text-white transition-colors"><ChevronRight size={20} /></button>
           </div>
         )}
       </div>
