@@ -22,3 +22,4 @@ knowledge_base/*/embeddings.meta.json
 *.bak
 .env.luxor
 node_modules/
+luxor-hub/dist/

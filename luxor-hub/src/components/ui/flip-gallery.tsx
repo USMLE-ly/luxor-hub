@@ -1,8 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
+export interface OutfitImages {
+  top: string;
+  mid: string;
+  bottom: string;
+}
+
 interface FlipGalleryProps {
-  images: string[];
+  outfits: OutfitImages[];
   onGenerate: () => void;
   onDismiss: () => void;
   isLoading: boolean;
@@ -11,7 +17,13 @@ interface FlipGalleryProps {
 const FLIP_SPEED = 750;
 const flipTiming = { duration: FLIP_SPEED, iterations: 1 };
 
+// Flip down animations for top, mid, bottom
 const flipAnimationTop = [
+  { transform: 'rotateX(0)' },
+  { transform: 'rotateX(-90deg)' },
+  { transform: 'rotateX(-90deg)' }
+];
+const flipAnimationMid = [
   { transform: 'rotateX(0)' },
   { transform: 'rotateX(-90deg)' },
   { transform: 'rotateX(-90deg)' }
@@ -21,7 +33,14 @@ const flipAnimationBottom = [
   { transform: 'rotateX(90deg)' },
   { transform: 'rotateX(0)' }
 ];
+
+// Flip up animations (Reverse)
 const flipAnimationTopReverse = [
+  { transform: 'rotateX(-90deg)' },
+  { transform: 'rotateX(-90deg)' },
+  { transform: 'rotateX(0)' }
+];
+const flipAnimationMidReverse = [
   { transform: 'rotateX(-90deg)' },
   { transform: 'rotateX(-90deg)' },
   { transform: 'rotateX(0)' }
@@ -32,95 +51,108 @@ const flipAnimationBottomReverse = [
   { transform: 'rotateX(90deg)' }
 ];
 
-export default function FlipGallery({ images, onGenerate, onDismiss, isLoading }: FlipGalleryProps) {
+export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading }: FlipGalleryProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     setCurrentIndex(0);
-  }, [images]);
+  }, [outfits]);
 
   useEffect(() => {
-    if (!containerRef.current || images.length === 0) return;
-    const uniteElements = containerRef.current.querySelectorAll('.unite');
-    uniteElements.forEach((el) => {
-      (el as HTMLElement).style.backgroundImage = `url('${images[currentIndex]}')`;
-    });
-  }, [currentIndex, images]);
+    if (!containerRef.current || outfits.length === 0) return;
+    const currentOutfit = outfits[currentIndex];
+
+    const topEl = containerRef.current.querySelector('.unite.top') as HTMLElement;
+    if (topEl) topEl.style.backgroundImage = `url('${currentOutfit.top}')`;
+    const midEl = containerRef.current.querySelector('.unite.mid') as HTMLElement;
+    if (midEl) midEl.style.backgroundImage = `url('${currentOutfit.mid}')`;
+    const botEl = containerRef.current.querySelector('.unite.bottom') as HTMLElement;
+    if (botEl) botEl.style.backgroundImage = `url('${currentOutfit.bottom}')`;
+  }, [currentIndex, outfits]);
 
   const updateGallery = (nextIndex: number, isReverse: boolean = false) => {
     const gallery = containerRef.current;
-    if (!gallery || images.length === 0) return;
+    if (!gallery || outfits.length === 0) return;
+
     const topAnim = isReverse ? flipAnimationTopReverse : flipAnimationTop;
-    const bottomAnim = isReverse ? flipAnimationBottomReverse : flipAnimationBottom;
+    const midAnim = isReverse ? flipAnimationMidReverse : flipAnimationMid;
+    const botAnim = isReverse ? flipAnimationBottomReverse : flipAnimationBottom;
+
     gallery.querySelector('.overlay-top')?.animate(topAnim, flipTiming);
-    gallery.querySelector('.overlay-bottom')?.animate(bottomAnim, flipTiming);
+    gallery.querySelector('.overlay-mid')?.animate(midAnim, flipTiming);
+    gallery.querySelector('.overlay-bottom')?.animate(botAnim, flipTiming);
+
     setTimeout(() => {
       setCurrentIndex(nextIndex);
     }, FLIP_SPEED / 2);
   };
 
   const handleNext = () => {
-    const nextIndex = (currentIndex + 1) % images.length;
+    const nextIndex = (currentIndex + 1) % outfits.length;
     updateGallery(nextIndex);
   };
 
   const handlePrev = () => {
-    const nextIndex = (currentIndex - 1 + images.length) % images.length;
+    const nextIndex = (currentIndex - 1 + outfits.length) % outfits.length;
     updateGallery(nextIndex, true);
   };
 
   // --- EMPTY STATE (No Outfits Generated) ---
-  if (images.length === 0) {
+  if (outfits.length === 0) {
     return (
       <div className='relative w-full h-[400px] md:h-[500px]' style={{ perspective: '800px', background: '#0a0a0a' }}>
-        {/* Split Background (Visible placeholders) */}
-        <div className='absolute w-full h-[50%] top-0 bg-[#181818] border-b border-black z-0'></div>
-        <div className='absolute w-full h-[50%] bottom-0 bg-[#0a0a0a] z-0'></div>
-        
-        {/* The black divider line */}
-        <div className='absolute top-1/2 left-0 w-full h-[4px] bg-black z-10 -translate-y-1/2'></div>
+        {/* 3 Split Background placeholders */}
+        <div className='absolute w-full h-[33.333%] top-0 bg-[#181818] border-b border-black z-0'></div>
+        <div className='absolute w-full h-[33.333%] top-[33.333%] bg-[#111] border-b border-black z-0'></div>
+        <div className='absolute w-full h-[33.333%] bottom-0 bg-[#0a0a0a] z-0'></div>
+
+        {/* 2 black divider lines */}
+        <div className='absolute top-[33.333%] left-0 w-full h-[4px] bg-black z-10 -translate-y-1/2'></div>
+        <div className='absolute top-[66.666%] left-0 w-full h-[4px] bg-black z-10 -translate-y-1/2'></div>
 
         {/* Generate Button (Bottom Left) */}
         <div className='absolute bottom-[-1rem] left-[-0.5rem] z-20'>
-           <button
-             onClick={onGenerate}
-             disabled={isLoading}
-             className='bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
-           >
-             {isLoading ? 'Consulting MiMo...' : 'Generate Outfit'}
-           </button>
+          <button
+            onClick={onGenerate}
+            disabled={isLoading}
+            className='bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+          >
+            {isLoading ? 'Consulting MiMo...' : 'Generate Outfit'}
+          </button>
         </div>
 
         {/* Arrows (Bottom Right - grayed out) */}
         <div className='absolute bottom-[-1rem] right-0 z-20 flex gap-2'>
-           <button disabled className='text-white/20 cursor-not-allowed'><ChevronLeft size={20} /></button>
-           <button disabled className='text-white/20 cursor-not-allowed'><ChevronRight size={20} /></button>
+          <button disabled className='text-white/20 cursor-not-allowed'><ChevronLeft size={20} /></button>
+          <button disabled className='text-white/20 cursor-not-allowed'><ChevronRight size={20} /></button>
         </div>
       </div>
     );
   }
 
-  // --- POPULATED STATE ---
+  // --- POPULATED STATE (Outfits Generated) ---
   return (
-    <div className='relative bg-white/10 border border-white/25 p-2 w-full max-w-[300px] mx-auto'>
-      <div
-        id='flip-gallery'
-        ref={containerRef}
-        className='relative w-full h-[400px] md:h-[500px] text-center'
-        style={{ perspective: '800px' }}
-      >
-        <div className='top unite bg-cover bg-no-repeat'></div>
-        <div className='bottom unite bg-cover bg-no-repeat'></div>
-        <div className='overlay-top unite bg-cover bg-no-repeat'></div>
-        <div className='overlay-bottom unite bg-cover bg-no-repeat'></div>
+    <div className='relative w-full h-[400px] md:h-[500px]' style={{ perspective: '800px', background: '#000' }}>
+      {/* 3-Split Active Frame */}
+      <div id='flip-gallery' ref={containerRef} className='relative w-full h-full'>
+        <div className='unite top bg-cover bg-no-repeat bg-center'></div>
+        <div className='unite mid bg-cover bg-no-repeat bg-center'></div>
+        <div className='unite bottom bg-cover bg-no-repeat bg-center'></div>
+
+        {/* Overlays for animation */}
+        <div className='overlay-top unite bg-cover bg-no-repeat bg-center'></div>
+        <div className='overlay-mid unite bg-cover bg-no-repeat bg-center'></div>
+        <div className='overlay-bottom unite bg-cover bg-no-repeat bg-center'></div>
       </div>
 
+      {/* Controls: Dismiss and Arrows */}
       <div className='flex justify-between items-center w-full mt-3 px-1'>
         <button onClick={onDismiss} className='text-sm text-white/60 hover:text-white transition-colors'>
           Dismiss
         </button>
-        {images.length > 1 && (
+
+        {outfits.length > 1 && (
           <div className='flex gap-3'>
             <button onClick={handlePrev} className='text-white/60 hover:text-white transition-colors'>
               <ChevronLeft size={20} />
@@ -139,20 +171,32 @@ export default function FlipGallery({ images, onGenerate, onDismiss, isLoading }
           background-color: black;
           width: 100%;
           height: 4px;
-          top: 50%;
+          top: 33.333%;
           left: 0;
           transform: translateY(-50%);
           z-index: 1;
         }
-        #flip-gallery > * {
+        #flip-gallery::before {
+          content: '';
+          position: absolute;
+          background-color: black;
+          width: 100%;
+          height: 4px;
+          top: 66.666%;
+          left: 0;
+          transform: translateY(-50%);
+          z-index: 1;
+        }
+        #flip-gallery > .unite {
           position: absolute;
           width: 100%;
-          height: 50%;
+          height: 33.333%;
           overflow: hidden;
           background-size: cover;
           background-position: center;
         }
         .top, .overlay-top { top: 0; transform-origin: bottom; }
+        .mid, .overlay-mid { top: 33.333%; transform-origin: bottom; }
         .bottom, .overlay-bottom { bottom: 0; transform-origin: top; }
       `}</style>
     </div>

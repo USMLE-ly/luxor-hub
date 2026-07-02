@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/app/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import FlipGallery from "@/components/ui/flip-gallery";
+import FlipGallery, { type OutfitImages } from "@/components/ui/flip-gallery";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { ProgressBar } from "@/components/ui/progress-bar";
@@ -23,7 +23,7 @@ const OUTFIT_COUNT = 3;
 export default function DressingRoomPage() {
   const { user } = useAuth();
 
-  const [generatedImages, setGeneratedImages] = useState<string[]>([]);
+  const [generatedImages, setGeneratedImages] = useState<OutfitImages[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [progressValue, setProgressValue] = useState(0);
   const [progressStage, setProgressStage] = useState("");
@@ -57,7 +57,8 @@ export default function DressingRoomPage() {
       setProgressStage("Ready!");
 
       if (data.images?.length > 0) {
-        setGeneratedImages(data.images);
+        // Backend already returns OutfitImages[] with top/mid/bottom
+        setGeneratedImages(data.images as OutfitImages[]);
         toast.success(`${data.images.length} outfits generated!`);
       } else {
         toast.error("No outfits returned. Try again.");
@@ -86,7 +87,7 @@ export default function DressingRoomPage() {
   };
 
   const handleDismiss = () => {
-    setGeneratedImages([]);
+    setGeneratedImages([] as OutfitImages[]);
   };
 
   return (
@@ -104,7 +105,7 @@ export default function DressingRoomPage() {
         {/* ---- FLIP GALLERY (No duplicate empty state below) ---- */}
         <div className="flex justify-center items-start pt-4">
           <FlipGallery
-            images={generatedImages}
+            outfits={generatedImages}
             onGenerate={handleGenerateClick}
             onDismiss={handleDismiss}
             isLoading={isGenerating}

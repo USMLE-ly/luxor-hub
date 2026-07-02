@@ -2325,18 +2325,28 @@ def generate_outfits_mock():
 
         _log.info("[DRESSING] Mock generating %d outfits for %s", count, occasion)
 
-        # Mock outfit images
-        mock_images = [
-            "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=600&h=1000&q=80",
-            "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=600&h=1000&q=80",
-            "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=600&h=1000&q=80",
-            "https://images.unsplash.com/photo-1564584217132-2271feaeb3c5?auto=format&fit=crop&w=600&h=1000&q=80",
-            "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&h=1000&q=80",
+        # Mock outfit data: each outfit has top/mid/bottom URLs
+        mock_outfits = [
+            {
+                "top": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=600&h=600&q=80",
+                "mid": "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=600&h=600&q=80",
+                "bottom": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=600&h=600&q=80",
+            },
+            {
+                "top": "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=600&h=600&q=80",
+                "mid": "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=600&h=600&q=80",
+                "bottom": "https://images.unsplash.com/photo-1564584217132-2271feaeb3c5?auto=format&fit=crop&w=600&h=600&q=80",
+            },
+            {
+                "top": "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=600&h=600&q=80",
+                "mid": "https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?auto=format&fit=crop&w=600&h=600&q=80",
+                "bottom": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&h=600&q=80",
+            },
         ]
 
         return jsonify({
             "success": True,
-            "images": mock_images[:count],
+            "images": mock_outfits[:count],
             "occasion": occasion,
             "count": count,
         })
