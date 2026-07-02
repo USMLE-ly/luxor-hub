@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export interface OutfitImages {
@@ -16,173 +16,210 @@ interface FlipGalleryProps {
   isLoading: boolean;
 }
 
-const FLIP_SPEED = 750;
+/* ------------------------------------------------------------------ */
+/*  Helper – resolves sections array + count from an OutfitImages obj  */
+/* ------------------------------------------------------------------ */
+function getSections(o: OutfitImages): { sections: string[]; count: number } {
+  if (o.type === 'full_outfit') {
+    return { sections: [o.top], count: 1 };
+  }
+  if (o.type === 'dress') {
+    // dress image on top half, shoes on bottom half
+    return { sections: [o.top, o.bottom], count: 2 };
+  }
+  // regular: top | bottom (mid) | shoes (bottom)
+  return { sections: [o.top, o.mid, o.bottom], count: 3 };
+}
 
+/* ------------------------------------------------------------------ */
+/*  Inline style objects (avoids Tailwind JIT issues entirely)         */
+/* ------------------------------------------------------------------ */
+
+const FRAME_STYLE: React.CSSProperties = {
+  position: 'relative',
+  width: '100%',
+  maxWidth: '340px',
+  margin: '0 auto',
+  backgroundColor: '#1A1A1A',
+  border: '1px solid #2A2A2A',
+  padding: '8px',
+};
+
+const INNER_STYLE: React.CSSProperties = {
+  position: 'relative',
+  width: '100%',
+  height: '450px',
+  perspective: '800px',
+  backgroundColor: '#0a0a0a',
+  overflow: 'hidden',
+};
+
+const SECTION_BASE: React.CSSProperties = {
+  position: 'absolute',
+  left: 0,
+  width: '100%',
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+  backgroundRepeat: 'no-repeat',
+  overflow: 'hidden',
+};
+
+const DIVIDER_STYLE: React.CSSProperties = {
+  position: 'absolute',
+  left: 0,
+  width: '100%',
+  height: '4px',
+  backgroundColor: '#000',
+  transform: 'translateY(-50%)',
+  zIndex: 10,
+};
+
+const CONTROL_BOTTOM_LEFT: React.CSSProperties = {
+  position: 'absolute',
+  bottom: '16px',
+  left: '16px',
+  zIndex: 20,
+};
+
+const CONTROL_BOTTOM_RIGHT: React.CSSProperties = {
+  position: 'absolute',
+  bottom: '16px',
+  right: '16px',
+  zIndex: 20,
+  display: 'flex',
+  gap: '12px',
+  alignItems: 'center',
+};
+
+const PURPLE_BTN: React.CSSProperties = {
+  backgroundColor: '#9333ea',
+  color: 'white',
+  padding: '8px 16px',
+  borderRadius: '6px',
+  fontWeight: 500,
+  fontSize: '14px',
+  border: 'none',
+  cursor: 'pointer',
+};
+
+const DISABLED_ARROW: React.CSSProperties = {
+  color: 'rgba(255,255,255,0.2)',
+  cursor: 'not-allowed',
+  background: 'none',
+  border: 'none',
+  padding: 0,
+};
+
+const ACTIVE_ARROW: React.CSSProperties = {
+  color: 'rgba(255,255,255,0.7)',
+  cursor: 'pointer',
+  background: 'none',
+  border: 'none',
+  padding: 0,
+};
+
+const DISMISS_BTN: React.CSSProperties = {
+  fontSize: '14px',
+  color: 'rgba(255,255,255,0.7)',
+  background: 'none',
+  border: 'none',
+  cursor: 'pointer',
+  padding: 0,
+};
+
+/* ------------------------------------------------------------------ */
+/*  Component                                                         */
+/* ------------------------------------------------------------------ */
 export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading }: FlipGalleryProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Reset index when outfits change
-  useEffect(() => {
-    setCurrentIndex(0);
-  }, [outfits]);
+  // Reset to first when list changes
+  useEffect(() => { setCurrentIndex(0); }, [outfits]);
 
-  // Apply background images via inline styles (bypass Tailwind JIT)
-  useEffect(() => {
-    if (!containerRef.current || outfits.length === 0) return;
-    const currentOutfit = outfits[currentIndex];
-    if (!currentOutfit || typeof currentOutfit === 'string') {
-      console.warn("[FlipGallery] Invalid outfit:", currentOutfit);
-      return;
-    }
-    const topEl = containerRef.current.querySelector('.unite.top') as HTMLElement;
-    const midEl = containerRef.current.querySelector('.unite.mid') as HTMLElement;
-    const botEl = containerRef.current.querySelector('.unite.bottom') as HTMLElement;
-    if (topEl && currentOutfit.top) topEl.style.backgroundImage = `url('${currentOutfit.top}')`;
-    if (midEl && currentOutfit.mid) midEl.style.backgroundImage = `url('${currentOutfit.mid}')`;
-    if (botEl && currentOutfit.bottom) botEl.style.backgroundImage = `url('${currentOutfit.bottom}')`;
-  }, [currentIndex, outfits]);
+  const handleNext = () => setCurrentIndex((currentIndex + 1) % outfits.length);
+  const handlePrev = () => setCurrentIndex((currentIndex - 1 + outfits.length) % outfits.length);
 
-  // Flip animation
-  const flipTo = (nextIndex: number) => {
-    const gallery = containerRef.current;
-    if (!gallery || outfits.length === 0) return;
-    const units = gallery.querySelectorAll('.unite');
-    units.forEach((el) => {
-      (el as HTMLElement).style.transform = 'rotateX(-90deg)';
-      (el as HTMLElement).style.transition = 'transform 350ms ease-in-out';
-    });
-    setTimeout(() => {
-      setCurrentIndex(nextIndex);
-    }, FLIP_SPEED / 2);
-  };
-
-  const handleNext = () => flipTo((currentIndex + 1) % outfits.length);
-  const handlePrev = () => flipTo((currentIndex - 1 + outfits.length) % outfits.length);
-
-  // ============= EMPTY STATE =============
+  /* ======================= EMPTY STATE ======================= */
   if (outfits.length === 0) {
     return (
-      <div style={{
-        position: 'relative',
-        width: '100%',
-        height: '450px',
-        perspective: '800px',
-        backgroundColor: '#0a0a0a',
-        overflow: 'hidden'
-      }}>
-        {/* 3 dark strips — absolute positioned, inline styles only */}
-        <div style={{
-          position: 'absolute', top: 0, width: '100%', height: '33.333%',
-          backgroundColor: '#1A1A1A', borderBottom: '1px solid #000', zIndex: 0
-        }} />
-        <div style={{
-          position: 'absolute', top: '33.333%', width: '100%', height: '33.333%',
-          backgroundColor: '#0a0a0a', borderBottom: '1px solid #000', zIndex: 0
-        }} />
-        <div style={{
-          position: 'absolute', bottom: 0, width: '100%', height: '33.333%',
-          backgroundColor: '#0a0a0a', zIndex: 0
-        }} />
+      <div style={FRAME_STYLE}>
+        <div style={INNER_STYLE}>
+          {/* 3 dark strips with subtle difference */}
+          <div style={{ ...SECTION_BASE, top: 0, height: '33.333%', backgroundColor: '#181818', borderBottom: '4px solid #000', zIndex: 0 }} />
+          <div style={{ ...SECTION_BASE, top: '33.333%', height: '33.333%', backgroundColor: '#0a0a0a', borderBottom: '4px solid #000', zIndex: 0 }} />
+          <div style={{ ...SECTION_BASE, bottom: 0, height: '33.333%', backgroundColor: '#0a0a0a', zIndex: 0 }} />
 
-        {/* 2 divider lines */}
-        <div style={{
-          position: 'absolute', top: '33.333%', left: 0, width: '100%', height: '4px',
-          backgroundColor: '#000', zIndex: 10, transform: 'translateY(-50%)'
-        }} />
-        <div style={{
-          position: 'absolute', top: '66.666%', left: 0, width: '100%', height: '4px',
-          backgroundColor: '#000', zIndex: 10, transform: 'translateY(-50%)'
-        }} />
+          {/* Generate button */}
+          <div style={CONTROL_BOTTOM_LEFT}>
+            <button
+              onClick={onGenerate}
+              disabled={isLoading}
+              style={{
+                ...PURPLE_BTN,
+                opacity: isLoading ? 0.5 : 1,
+                cursor: isLoading ? 'not-allowed' : 'pointer',
+              }}
+            >
+              {isLoading ? 'Consulting MiMo...' : 'Generate Outfit'}
+            </button>
+          </div>
 
-        {/* Generate button — bottom-left, INSIDE the frame */}
-        <div style={{ position: 'absolute', bottom: '16px', left: '16px', zIndex: 20 }}>
-          <button
-            onClick={onGenerate}
-            disabled={isLoading}
-            style={{
-              backgroundColor: '#9333ea', color: 'white', padding: '8px 16px',
-              borderRadius: '6px', fontWeight: 500, fontSize: '14px',
-              border: 'none', cursor: isLoading ? 'not-allowed' : 'pointer',
-              opacity: isLoading ? 0.5 : 1,
-            }}
-          >
-            {isLoading ? 'Consulting MiMo...' : 'Generate Outfit'}
-          </button>
-        </div>
-
-        {/* Grayed arrows — bottom-right, INSIDE the frame */}
-        <div style={{ position: 'absolute', bottom: '16px', right: '16px', zIndex: 20, display: 'flex', gap: '8px' }}>
-          <button disabled style={{ color: 'rgba(255,255,255,0.2)', cursor: 'not-allowed', background: 'none', border: 'none' }}><ChevronLeft size={20} /></button>
-          <button disabled style={{ color: 'rgba(255,255,255,0.2)', cursor: 'not-allowed', background: 'none', border: 'none' }}><ChevronRight size={20} /></button>
+          {/* Grayed arrows */}
+          <div style={CONTROL_BOTTOM_RIGHT}>
+            <button disabled style={DISABLED_ARROW}><ChevronLeft size={20} /></button>
+            <button disabled style={DISABLED_ARROW}><ChevronRight size={20} /></button>
+          </div>
         </div>
       </div>
     );
   }
 
-  // ============= POPULATED STATE =============
-  // ============= POPULATED STATE =============
-  const currentOutfit = outfits[currentIndex];
-  if (!currentOutfit || typeof currentOutfit === 'string') return null;
-
-  const type = currentOutfit.type || 'regular';
-  // Build sections array based on type
-  // regular -> [top, mid, bottom] = 3 sections, 2 dividers
-  // dress   -> [top, bottom]       = 2 sections, 1 divider (top=dress, bottom=shoes)
-  // full_outfit -> [top]            = 1 section, 0 dividers
-  let sections: string[];
-  if (type === 'full_outfit') {
-    sections = [currentOutfit.top];
-  } else if (type === 'dress') {
-    sections = [currentOutfit.top, currentOutfit.bottom]; // dress + shoes
-  } else {
-    sections = [currentOutfit.top, currentOutfit.mid, currentOutfit.bottom];
+  /* ===================== POPULATED STATE ===================== */
+  const outfit = outfits[currentIndex];
+  // Defensive: if data is somehow a flat string, skip rendering
+  if (!outfit || typeof outfit === 'string') {
+    console.warn('[FlipGallery] Invalid outfit data at index', currentIndex, outfit);
+    return null;
   }
 
-  const sectionCount = sections.length;
-  const pct = 100 / sectionCount;
+  const { sections, count: sectionCount } = getSections(outfit);
 
   return (
-    <div style={{
-      position: 'relative', width: '100%', height: '450px',
-      perspective: '800px', backgroundColor: '#000', overflow: 'hidden'
-    }}>
-      <div id="flip-gallery" ref={containerRef} style={{ position: 'relative', width: '100%', height: '100%' }}>
+    <div style={FRAME_STYLE}>
+      <div style={INNER_STYLE}>
+        {/* Render sections with background images */}
         {sections.map((url, idx) => (
           <div
             key={idx}
-            className={`unite ${type === 'regular' ? (idx === 0 ? 'top' : idx === 1 ? 'mid' : 'bottom') : ''}`}
             style={{
-              position: 'absolute', top: `${idx * pct}%`, height: `${pct}%`, width: '100%',
+              ...SECTION_BASE,
+              top: `${(idx / sectionCount) * 100}%`,
+              height: `${(1 / sectionCount) * 100}%`,
               backgroundImage: url ? `url('${url}')` : undefined,
-              backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat',
-              overflow: 'hidden', transformOrigin: idx === sectionCount - 1 ? 'top' : 'bottom',
+              backgroundColor: url ? 'transparent' : '#111',
             }}
           />
         ))}
 
-        {/* Dynamic dividers */}
+        {/* Black dividers between sections */}
         {Array.from({ length: sectionCount - 1 }).map((_, i) => (
           <div
             key={`d-${i}`}
             style={{
-              position: 'absolute', top: `${pct * (i + 1)}%`, left: 0, width: '100%', height: '4px',
-              backgroundColor: '#000', transform: 'translateY(-50%)', zIndex: 10,
+              ...DIVIDER_STYLE,
+              top: `${((i + 1) / sectionCount) * 100}%`,
             }}
           />
         ))}
-      </div>
 
-      {/* Controls */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '12px', padding: '0 4px' }}>
-        <button onClick={onDismiss} style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', background: 'none', border: 'none', cursor: 'pointer' }}
-          className="hover:text-white transition-colors">Dismiss</button>
+        {/* Controls */}
+        <div style={CONTROL_BOTTOM_LEFT}>
+          <button onClick={onDismiss} style={DISMISS_BTN}>Dismiss</button>
+        </div>
         {outfits.length > 1 && (
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <button onClick={handlePrev} style={{ color: 'rgba(255,255,255,0.6)', background: 'none', border: 'none', cursor: 'pointer' }}
-              className="hover:text-white transition-colors"><ChevronLeft size={20} /></button>
-            <button onClick={handleNext} style={{ color: 'rgba(255,255,255,0.6)', background: 'none', border: 'none', cursor: 'pointer' }}
-              className="hover:text-white transition-colors"><ChevronRight size={20} /></button>
+          <div style={CONTROL_BOTTOM_RIGHT}>
+            <button onClick={handlePrev} style={ACTIVE_ARROW}><ChevronLeft size={20} /></button>
+            <button onClick={handleNext} style={ACTIVE_ARROW}><ChevronRight size={20} /></button>
           </div>
         )}
       </div>
