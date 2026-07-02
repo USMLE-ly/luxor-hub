@@ -88,5 +88,14 @@
     "label": "Red Cocktail Dress",
     "created_at": "2026-06-01T10:09:00Z",
     "image_url": "https://placehold.co/600x800/ddd"
+  },
+  {
+    "id": "full-001",
+    "type": "Full Outfit",
+    "color": "Black",
+    "category": "Formal",
+    "label": "Black Tuxedo Set",
+    "created_at": "2026-06-01T10:10:00Z",
+    "image_url": "https://placehold.co/600x1000/222"
   }
 ]
