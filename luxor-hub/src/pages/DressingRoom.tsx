@@ -28,6 +28,8 @@ export default function DressingRoomPage() {
   const [progressValue, setProgressValue] = useState(0);
   const [progressStage, setProgressStage] = useState("");
   const [showOccasionModal, setShowOccasionModal] = useState(false);
+  const [showCountModal, setShowCountModal] = useState(false);
+  const [selectedOccasion, setSelectedOccasion] = useState("");
 
   /* ---------- Generate Outfit ---------- */
   const generateOutfits = async (occasion: string, count: number) => {
@@ -97,8 +99,14 @@ export default function DressingRoomPage() {
   };
 
   const handleOccasionSelect = (occasionId: string) => {
+    setSelectedOccasion(occasionId);
     setShowOccasionModal(false);
-    generateOutfits(occasionId, OUTFIT_COUNT);
+    setShowCountModal(true);
+  };
+
+  const handleCountSelect = (count: number) => {
+    setShowCountModal(false);
+    generateOutfits(selectedOccasion, count);
   };
 
   const handleDismiss = () => {
@@ -173,6 +181,48 @@ export default function DressingRoomPage() {
                 </div>
                 <button
                   onClick={() => setShowOccasionModal(false)}
+                  className="w-full mt-4 py-2 text-sm text-white/50 hover:text-white transition-colors"
+                >
+                  Cancel
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ---- Count Modal ---- */}
+        <AnimatePresence>
+          {showCountModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+              onClick={() => setShowCountModal(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-zinc-900/95 border border-white/10 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h3 className="text-lg font-semibold text-white mb-4">How many outfits?</h3>
+                <p className="text-sm text-white/50 mb-4">Choose how many combinations to generate.</p>
+                <div className="grid grid-cols-3 gap-3">
+                  {[1, 2, 3].map((num) => (
+                    <button
+                      key={num}
+                      onClick={() => handleCountSelect(num)}
+                      className="flex flex-col items-center gap-2 p-4 rounded-xl border border-white/10 hover:border-purple-500/50 hover:bg-purple-500/10 transition-all"
+                    >
+                      <span className="text-2xl font-bold text-white">{num}</span>
+                      <span className="text-xs text-white/60">Outfit{num > 1 ? 's' : ''}</span>
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setShowCountModal(false)}
                   className="w-full mt-4 py-2 text-sm text-white/50 hover:text-white transition-colors"
                 >
                   Cancel

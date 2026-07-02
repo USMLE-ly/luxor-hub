@@ -75,10 +75,10 @@ export default function FlipGallery({ images, onGenerate, onDismiss, isLoading }
     return (
       <div id="flip-gallery-empty" className='relative w-full h-[400px] md:h-[500px]' style={{ perspective: '800px' }}>
         {/* Split-screen dark placeholders */}
-        <div className='top unite bg-black'></div>
-        <div className='bottom unite bg-black'></div>
-        <div className='overlay-top unite bg-black'></div>
-        <div className='overlay-bottom unite bg-black'></div>
+        <div className='top unite bg-[#1A1A1A]'></div>
+        <div className='bottom unite bg-[#0A0A0A]'></div>
+        <div className='overlay-top unite bg-[#1A1A1A]'></div>
+        <div className='overlay-bottom unite bg-[#0A0A0A]'></div>
 
         {/* Black divider line */}
         <div className='divider-line absolute top-1/2 left-0 w-full h-[4px] bg-black z-10 -translate-y-1/2'></div>
