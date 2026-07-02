@@ -70,15 +70,15 @@ export default function FlipGallery({ images, onGenerate, onDismiss, isLoading }
     updateGallery(nextIndex, true);
   };
 
-  // --- EMPTY STATE (Lighthouse split-screen frame) ---
+  // --- EMPTY STATE (No Outfits Generated) ---
   if (images.length === 0) {
     return (
-      <div className='relative w-full h-[400px] md:h-[500px]' style={{ perspective: '800px' }} id='flip-gallery-empty'>
+      <div id="flip-gallery-empty" className='relative w-full h-[400px] md:h-[500px]' style={{ perspective: '800px' }}>
         {/* Split-screen dark placeholders */}
-        <div className='top unite' style={{ backgroundImage: 'none', backgroundColor: '#111' }}></div>
-        <div className='bottom unite' style={{ backgroundImage: 'none', backgroundColor: '#111' }}></div>
-        <div className='overlay-top unite' style={{ backgroundImage: 'none', backgroundColor: '#111' }}></div>
-        <div className='overlay-bottom unite' style={{ backgroundImage: 'none', backgroundColor: '#111' }}></div>
+        <div className='top unite bg-[#111]'></div>
+        <div className='bottom unite bg-[#111]'></div>
+        <div className='overlay-top unite bg-[#111]'></div>
+        <div className='overlay-bottom unite bg-[#111]'></div>
 
         {/* Black divider line */}
         <div className='absolute top-1/2 left-0 w-full h-[4px] bg-black z-10 -translate-y-1/2'></div>
@@ -101,6 +101,7 @@ export default function FlipGallery({ images, onGenerate, onDismiss, isLoading }
         </div>
 
         <style>{`
+          #flip-gallery-empty { position: relative; }
           #flip-gallery-empty > div { position: absolute; width: 100%; height: 50%; overflow: hidden; }
           #flip-gallery-empty .top, #flip-gallery-empty .overlay-top { top: 0; transform-origin: bottom; }
           #flip-gallery-empty .bottom, #flip-gallery-empty .overlay-bottom { bottom: 0; transform-origin: top; }
