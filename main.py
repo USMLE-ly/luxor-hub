@@ -1913,7 +1913,7 @@ def generate_outfits():
             return jsonify({"success": False, "error": "Your closet is empty! Add items first."}), 400
 
         # Allow items even without image_url — FlipGallery handles empty URLs gracefully (dark block)
-        items_with_img = [i for i in closet_items if i.get("image_url") is not None]
+        items_with_img = [i for i in closet_items if (i.get("image_url") or i.get("photo_url"))]
         print(f"[DEBUG] Found {len(items_with_img)} items with image_url field")
         if not items_with_img:
             return jsonify({"success": False, "images": [], "error": "No items found in closet. Add items first."}), 200
@@ -1945,6 +1945,9 @@ def generate_outfits():
             ]:
                 if any(kw in label for kw in kws): return res
             return "other"
+        def _img_url(item, default=""):
+            """Get image URL from item, checking both image_url and photo_url (Supabase)."""
+            return item.get("image_url") or item.get("photo_url") or default
 
         # ---- Group items ----
         print(f"[DEBUG] Grouping: items_with_img={len(items_with_img)}")
@@ -2016,7 +2019,7 @@ def generate_outfits():
                 for ci,item in enumerate(gi[:nc]):
                     x = ci*cw+pd; y = yb+ch+4
                     try:
-                        r = requests.get(item.get("image_url",""), timeout=8)
+                        r = requests.get(_img_url(item), timeout=8)
                         if r.status_code==200:
                             im = Image.open(io.BytesIO(r.content))
                             im.thumbnail((sz,sz), Image.Resampling.LANCZOS)
@@ -2074,9 +2077,9 @@ def generate_outfits():
 
         # ---- Build outfits from selection ----
 
-        if tops: print(f"[DRESSING-DEBUG] TOPS available: {[(t.get('id'), t.get('label',''), t.get('image_url','')[:40]) for t in tops]}", file=sys.stderr)
-        if bottoms: print(f"[DRESSING-DEBUG] BOTTOMS available: {[(b.get('id'), b.get('label',''), b.get('image_url','')[:40]) for b in bottoms]}", file=sys.stderr)
-        if shoes_list: print(f"[DRESSING-DEBUG] SHOES available: {[(s.get('id'), s.get('label',''), s.get('image_url','')[:40]) for s in shoes_list]}", file=sys.stderr)
+        if tops: print(f"[DRESSING-DEBUG] TOPS available: {[(t.get('id'), t.get('label',''), _img_url(t)[:40]) for t in tops]}", file=sys.stderr)
+        if bottoms: print(f"[DRESSING-DEBUG] BOTTOMS available: {[(b.get('id'), b.get('label',''), _img_url(b)[:40]) for b in bottoms]}", file=sys.stderr)
+        if shoes_list: print(f"[DRESSING-DEBUG] SHOES available: {[(s.get('id'), s.get('label',''), _img_url(s)[:40]) for s in shoes_list]}", file=sys.stderr)
         outfits = []
         used_ids = set()
         debug_source = "mimo_vision"
@@ -2141,7 +2144,7 @@ def generate_outfits():
                 fo = combo.get("full_outfit", {})
                 outfit_data = {
                     "type": "full_outfit",
-                    "top": fo.get("image_url", ""),   # single full image
+                    "top": _img_url(fo),   # single full image
                     "mid": "",
                     "bottom": "",
                     "accessory_note": combo.get("accessory_note", ""),
@@ -2152,18 +2155,18 @@ def generate_outfits():
                 sh = combo.get("shoes", {})
                 outfit_data = {
                     "type": "dress",
-                    "top": dr.get("image_url", ""),   # dress image (1-split top 50%)
+                    "top": _img_url(dr),   # dress image (1-split top 50%)
                     "mid": "",                          # not used for dress
-                    "bottom": sh.get("image_url", ""),  # shoes (1-split bottom 50%)
+                    "bottom": _img_url(sh),  # shoes (1-split bottom 50%)
                     "accessory_note": combo.get("accessory_note", ""),
                 }
                 print(f"[DRESSING-DEBUG] DRESS: top={outfit_data['top'][:50]} bottom={outfit_data['bottom'][:50]}", file=sys.stderr)
             else:  # regular
                 outfit_data = {
                     "type": "regular",
-                    "top": combo.get("top", {}).get("image_url", ""),
-                    "mid": combo.get("bottom", {}).get("image_url", ""),
-                    "bottom": combo.get("shoes", {}).get("image_url", ""),
+                    "top": _img_url(combo.get("top", {})),
+                    "mid": _img_url(combo.get("bottom", {})),
+                    "bottom": _img_url(combo.get("shoes", {})),
                     "accessory_note": combo.get("accessory_note", ""),
                 }
                 print(f"[DRESSING-DEBUG] REGULAR: top={outfit_data['top'][:50]} mid={outfit_data['mid'][:50]} bottom={outfit_data['bottom'][:50]}", file=sys.stderr)
