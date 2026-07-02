@@ -1902,7 +1902,7 @@ def generate_outfits():
         import random
         data = request.get_json(silent=True) or {}
         occasion = data.get("occasion", "casual")
-        count = min(int(data.get("count", 3)), 7)
+        count = max(1, min(int(data.get("count", 3)), 7))
         _log.info("[DRESSING] Generating %d outfits for %s", count, occasion)
 
         # Load items from Qdrant (or local JSON fallback)
