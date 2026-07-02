@@ -6,6 +6,7 @@ import random
 import time
 import urllib.parse
 from typing import Any, Dict, List, Optional
+import re
 
 from backend.ai.mimo_client import call_mimo_vision
 from backend.ai.prompts import SACRED_PROMPT
@@ -69,13 +70,53 @@ def generate_tweak_visualization_prompt(accessory: str, tweak_text: str = "") ->
             f"photorealistic, 4K resolution."
         )
     elif "earring" in clean_acc:
-        item_desc = f"a single {color_word} teardrop drop earring with a secure post and hook mechanism, resting on its side"
+        return (
+            f"Extreme close-up macro photography of {color_word} drop earrings "
+            f"worn on a person's ear. Extremely detailed visible skin texture with "
+            f"natural pores and fine hair, warm golden-hour soft studio lighting, "
+            f"dramatic but elegant shadows. Shallow depth of field, soft warm-toned "
+            f"blur background (bokeh), editorial fashion jewelry photography, "
+            f"shot on 100mm macro lens, 8K photorealistic, cinematic lighting, "
+            f"hyper-detailed, commercial jewelry ad aesthetic. "
+            f"--no low resolution --no blurry --no plastic --no flat lighting "
+            f"--no white background --no marble background"
+        )
     elif "necklace" in clean_acc or "pendant" in clean_acc:
-        item_desc = f"a delicate {color_word} pendant necklace"
+        return (
+            f"Extreme close-up macro photography of a {color_word} pendant necklace "
+            f"worn on a person's neck and collarbone. Extremely detailed visible skin "
+            f"texture with natural pores, warm golden-hour soft studio lighting, "
+            f"the pendant resting delicately on the skin. Shallow depth of field, "
+            f"soft warm-toned blur background (bokeh), editorial fashion jewelry "
+            f"photography, shot on 100mm macro lens, 8K photorealistic, cinematic "
+            f"lighting, hyper-detailed, commercial jewelry ad aesthetic. "
+            f"--no low resolution --no blurry --no plastic --no flat lighting "
+            f"--no white background --no marble background"
+        )
     elif "ring" in clean_acc:
-        item_desc = f"an elegant {color_word} ring"
+        return (
+            f"Extreme close-up macro photography of an elegant {color_word} ring "
+            f"worn on a person's finger. Extremely detailed visible skin texture with "
+            f"natural pores and fine hair, warm golden-hour soft studio lighting, "
+            f"the ring catching the light beautifully. Shallow depth of field, "
+            f"soft warm-toned blur background (bokeh), editorial fashion jewelry "
+            f"photography, shot on 100mm macro lens, 8K photorealistic, cinematic "
+            f"lighting, hyper-detailed, commercial jewelry ad aesthetic. "
+            f"--no low resolution --no blurry --no plastic --no flat lighting "
+            f"--no white background --no marble background"
+        )
     elif "bracelet" in clean_acc:
-        item_desc = f"a sleek {color_word} bracelet"
+        return (
+            f"Extreme close-up macro photography of a sleek {color_word} bracelet "
+            f"worn on a person's wrist. Extremely detailed visible skin texture with "
+            f"natural pores and fine hair, warm golden-hour soft studio lighting, "
+            f"the bracelet resting elegantly on the skin. Shallow depth of field, "
+            f"soft warm-toned blur background (bokeh), editorial fashion jewelry "
+            f"photography, shot on 100mm macro lens, 8K photorealistic, cinematic "
+            f"lighting, hyper-detailed, commercial jewelry ad aesthetic. "
+            f"--no low resolution --no blurry --no plastic --no flat lighting "
+            f"--no white background --no marble background"
+        )
     elif "watch" in clean_acc:
         item_desc = f"a refined {color_word} wristwatch"
     elif "belt" in clean_acc:
@@ -96,14 +137,11 @@ def generate_tweak_visualization_prompt(accessory: str, tweak_text: str = "") ->
         f"resting diagonally on a deep black marble surface with sharp white veining. "
         f"The {color_word} surface reflects the crisp studio lighting perfectly, "
         f"showing highly realistic metallic reflections and high gloss. "
-        f"A tiny drop of water sits near the base of the object to imply premium luxury. "
         f"Shot with a 50mm lens at f/2.8, ultra-sharp focus on the object, "
         f"creamy bokeh background, cinematic depth of field. "
         f"Photorealistic, 8K resolution, glossy magazine ad aesthetic, "
         f"isolated single object, matte soft shadows, subtle lens flare. "
-        f"No humans, no hands, no skin, no neck, no bodies. "
-        f"--no text --no watermarks --no logos --no distorted features "
-        f"--no humans --no skin --no hands --no fingers --no neck --no chains"
+        f"--no text --no watermarks --no logos --no distorted features"
     )
 
 
@@ -205,10 +243,11 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
     # Generate tweak image URL
     tweak_text = _humanize_tweak(result.get("tweak_plan", ""), detected_items or items_detected)
     _tweak_accessory = tweak_text
+    import re
     for _kw in ["necklace", "earring", "bracelet", "watch", "ring", "belt",
                 "scarf", "jacket", "blazer", "cardigan", "coat", "handbag",
                 "clutch", "sunglasses", "hat", "bag", "shoes", "boots"]:
-        if _kw in tweak_text.lower():
+        if re.search(r'\b' + _kw + r'\b', tweak_text.lower()):
             _tweak_accessory = _kw
             break
     _tweak_prompt = generate_tweak_visualization_prompt(_tweak_accessory, tweak_text)
