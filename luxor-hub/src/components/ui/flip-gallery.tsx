@@ -74,14 +74,12 @@ export default function FlipGallery({ images, onGenerate, onDismiss, isLoading }
   if (images.length === 0) {
     return (
       <div className='relative w-full h-[400px] md:h-[500px]' style={{ perspective: '800px', background: '#0a0a0a' }}>
-        {/* TOP HALF (Slightly lighter so you can see the split) */}
-        <div className='absolute w-full h-[50%] top-0 bg-[#181818] border-b border-black'></div>
+        {/* Split Background (Visible placeholders) */}
+        <div className='absolute w-full h-[50%] top-0 bg-[#181818] border-b border-black z-0'></div>
+        <div className='absolute w-full h-[50%] bottom-0 bg-[#0a0a0a] z-0'></div>
         
-        {/* BOTTOM HALF (Dark) */}
-        <div className='absolute w-full h-[50%] bottom-0 bg-[#0a0a0a]'></div>
-
-        {/* DIVIDER LINE */}
-        <div className='absolute top-1/2 left-0 w-full h-[4px] bg-black z-10 -translate-y-1/2 border-y border-[#222]'></div>
+        {/* The black divider line */}
+        <div className='absolute top-1/2 left-0 w-full h-[4px] bg-black z-10 -translate-y-1/2'></div>
 
         {/* Generate Button (Bottom Left) */}
         <div className='absolute bottom-[-1rem] left-[-0.5rem] z-20'>
@@ -103,7 +101,7 @@ export default function FlipGallery({ images, onGenerate, onDismiss, isLoading }
     );
   }
 
-  // --- POPULATED STATE ---  // --- POPULATED STATE ---
+  // --- POPULATED STATE ---
   return (
     <div className='relative bg-white/10 border border-white/25 p-2 w-full max-w-[300px] mx-auto'>
       <div
