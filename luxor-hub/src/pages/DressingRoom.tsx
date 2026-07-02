@@ -36,8 +36,20 @@ export default function DressingRoomPage() {
     if (!user) return;
     setIsGenerating(true);
     setProgressValue(10);
-    setProgressStage("Consulting MiMo...");
+    setProgressStage("Loading closet from Supabase...");
     try {
+      // Fetch user's real closet items from Supabase
+      const { data: closetItems, error: closetError } = await supabase
+        .from("clothing_items")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (closetError) throw new Error("Failed to load closet: " + closetError.message);
+      if (!closetItems || closetItems.length === 0) {
+        throw new Error("Your closet is empty! Add items first.");
+      }
+
       setProgressValue(40);
       setProgressStage(`Generating ${count} ${occasion} outfits...`);
 
@@ -47,7 +59,11 @@ export default function DressingRoomPage() {
       const res = await fetch(api + "/api/v1/generate-outfits", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ occasion, count }),
+        body: JSON.stringify({ 
+          occasion, 
+          count, 
+          closet_items: closetItems,  // Send real items to backend
+        }),
       });
 
       const data = await res.json();

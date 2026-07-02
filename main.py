@@ -10,6 +10,7 @@ import logging
 import os
 import random
 import re
+import sys
 import time
 import urllib.parse
 import uuid
@@ -1904,7 +1905,10 @@ def generate_outfits():
         count = min(int(data.get("count", 3)), 7)
         _log.info("[DRESSING] Generating %d outfits for %s", count, occasion)
 
-        closet_items = qdrant_get_all_items()
+        # Accept items from frontend (Supabase), fallback to Qdrant/local JSON
+        closet_items = data.get("closet_items", None)
+        if not closet_items:
+            closet_items = qdrant_get_all_items()
         if not closet_items:
             return jsonify({"success": False, "error": "Your closet is empty! Add items first."}), 400
 
