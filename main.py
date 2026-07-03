@@ -401,9 +401,9 @@ def _init_qdrant():
     _log.info("[QDRANT] Running JSON migration...")
     _migrate_json_to_qdrant()
 
-    # Reverse sync: if JSON is missing but Qdrant has data, write JSON
+    # Reverse sync: if JSON is missing or empty, restore from Qdrant
     try:
-        if not os.path.exists(_LOCAL_CLOSET_FILE):
+        if not os.path.exists(_LOCAL_CLOSET_FILE) or os.path.getsize(_LOCAL_CLOSET_FILE) < 10:
             qdrant_all = qdrant_get_all_items()
             if qdrant_all:
                 with open(_LOCAL_CLOSET_FILE, "w") as f:
@@ -415,10 +415,15 @@ def _init_qdrant():
     _log.info("[QDRANT] Qdrant ready — client initialized, collections OK")
 
 
-# Eager initialization at module load time
-_init_qdrant()
-# Register health routes after Qdrant is initialized (lambda needs qdrant_get_all_items)
-init_health_routes(app, get_closet_count=lambda: len(qdrant_get_all_items()))
+# Eager initialization at module load time — gracefully degrades to JSON-only if Qdrant is unavailable
+try:
+    _init_qdrant()
+except Exception as _qdrant_init_err:
+    _log.critical("[QDRANT] Failed to initialize Qdrant: %s — running in JSON-only mode", _qdrant_init_err)
+    _qdrant_closet = None
+
+# Register health routes after Qdrant init attempt
+init_health_routes(app, get_closet_count=lambda: (len(qdrant_get_all_items()) if _qdrant_closet is not None else 0))
 
 
 
