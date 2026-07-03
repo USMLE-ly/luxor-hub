@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 from typing import Any, Optional, Dict, List, cast
 
 import requests
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, make_response
 from flask_cors import CORS
 from PIL import Image
 from collections import Counter
@@ -2007,7 +2007,7 @@ def generate_outfits():
             raw = item.get("image_url") or item.get("photo_url") or default
             if raw and not raw.startswith("http"):
                 # Relative path — prepend backend host to avoid CORB from 404 HTML pages
-                return request.host_url.rstrip("/") + "/media/" + raw.lstrip("/")
+                return request.host_url.rstrip("/") + "/images/" + raw.lstrip("/")
             return raw
 
         # ---- Group items ----
@@ -2292,6 +2292,7 @@ def generate_outfits():
                 "error": "MiMo Vision could not build any valid outfits for this occasion",
             }), 200
 
+        print(f"[DEBUG] Requested: {count}, Returned: {len(outfits)}")
         return jsonify({
             "success": True,
             "images": outfits,
@@ -2323,33 +2324,23 @@ def serve_uploaded_image(filename):
     pixel = base64.b64decode("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7")
     resp = make_response(pixel)
     resp.headers["Content-Type"] = "image/gif"
-    resp.headers["Access-Control-Allow-Origin", "*"]
+    resp.headers["Access-Control-Allow-Origin"] = "*"
     return resp
 
 @app.route("/media/<path:filename>")
 def serve_media_file(filename):
     """Serve uploaded/closet images with CORS headers.
-    Uses custom /media/ path (not Flask's built-in /static/ handler).
-    Returns transparent pixel on 404 to prevent CORB (Cross-Origin Read Blocking)."""
+    Returns transparent pixel on 404 to prevent CORB."""
     import base64
     from flask import make_response
-    # Check if file exists in current directory
     import os as os_mod
-    filepath = os_mod.path.join("." + os_mod.sep, filename)
-    # Normalize to prevent path traversal
-    real_path = os_mod.path.realpath(filepath)
-    if not real_path.startswith(os_mod.path.realpath("." + os_mod.sep)):
-        # Path traversal detected — return transparent pixel
-        pixel = base64.b64decode("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7")
-        resp = make_response(pixel)
-        resp.headers["Content-Type"] = "image/gif"
-        resp.headers["Access-Control-Allow-Origin"] = "*"
-        return resp
-    if os_mod.path.isfile(real_path):
-        response = send_from_directory("." + os_mod.sep, filename)
+    images_dir = os_mod.path.join(os_mod.path.dirname(os_mod.path.abspath(__file__)), "public", "images")
+    real_path = os_mod.path.realpath(os_mod.path.join(images_dir, filename))
+    if real_path.startswith(os_mod.path.realpath(images_dir)) and os_mod.path.isfile(real_path):
+        response = send_from_directory(images_dir, filename)
         response.headers.add("Access-Control-Allow-Origin", "*")
         return response
-    # File not found — return transparent pixel to prevent CORB
+    # Return transparent pixel on 404 to prevent CORB
     pixel = base64.b64decode("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7")
     resp = make_response(pixel)
     resp.headers["Content-Type"] = "image/gif"
