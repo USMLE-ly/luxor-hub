@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import { PLAN_LIMITS } from "@/lib/planRestrictions";
 import { motion, AnimatePresence } from "framer-motion";
@@ -109,6 +109,13 @@ const Closet = () => {
   const itemLimit = PLAN_LIMITS[tier].closetItems;
   const [flatLayView, setFlatLayView] = useState(false);
   const [items, setItems] = useState<ClothingItem[]>([]);
+  // Get backend API base URL
+  const apiBase = useMemo(() => {
+    return import.meta.env.VITE_API_URL || import.meta.env.VITE_PUBLIC_API_URL || 
+      (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+        ? "http://localhost:5000" : "");
+  }, []);
+
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
@@ -149,13 +156,41 @@ const Closet = () => {
 
   const fetchItems = useCallback(async () => {
     if (!user) return;
-    const [itemsRes, styleRes] = await Promise.all([
-      supabase.from("clothing_items").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-      supabase.from("style_profiles").select("preferences").eq("user_id", user.id).single(),
-    ]);
-    if (itemsRes.error) toast.error("Failed to load closet items");
-    else setItems(itemsRes.data || []);
-    const prefs = (styleRes.data?.preferences as any) || {};
+    setLoading(true);
+    try {
+      const resp = await fetch(apiBase + '/api/v1/closet/list-items');
+      const data = await resp.json();
+      if (data.success && Array.isArray(data.items)) {
+        // Map backend fields to ClothingItem format
+        const mapped = data.items.map((item: any) => ({
+          id: item.id || '',
+          name: item.label || item.name || null,
+          category: item.category || item.type || 'other',
+          color: item.color || null,
+          brand: item.brand || null,
+          season: item.season || null,
+          occasion: item.occasion || null,
+          style: item.style || null,
+          photo_url: item.photo_url || item.image_url || null,
+          notes: item.notes || null,
+          price: item.price || null,
+        }));
+        setItems(mapped);
+      }
+    } catch (err) {
+      console.warn('[CLOSET] Backend fetch failed, falling back to Supabase');
+      // Fallback to Supabase
+      const itemsRes = await supabase.from("clothing_items").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+      if (!itemsRes.error) setItems(itemsRes.data || []);
+    }
+    // Still load style profile from Supabase
+    try {
+      const styleRes = await supabase.from("style_profiles").select("preferences").eq("user_id", user.id).single();
+      const prefs = (styleRes.data?.preferences as any) || {};
+      if (prefs.gender === "female") setGender("female");
+    } catch {}
+    setLoading(false);
+  }, [user, apiBase]);
     if (prefs.gender === "female") setGender("female");
     setLoading(false);
   }, [user]);
@@ -309,6 +344,7 @@ const Closet = () => {
     finally { setAnalyzing(false); }
   };
 
+
   const handleUpload = async () => {
     if (!user) return;
     if (items.length >= itemLimit) {
@@ -317,37 +353,38 @@ const Closet = () => {
     }
     setUploading(true);
     try {
-      let photoUrl: string | null = null;
+      let image_b64 = "";
       if (selectedFile) {
-        const fileExt = selectedFile.name.split(".").pop();
-        const filePath = `${user.id}/${crypto.randomUUID()}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage.from("clothing-photos").upload(filePath, selectedFile);
-        if (uploadError) throw uploadError;
-        const { data: urlData } = supabase.storage.from("clothing-photos").getPublicUrl(filePath);
-        photoUrl = urlData.publicUrl;
-      }
-      const { error } = await supabase.from("clothing_items").insert({
-        user_id: user.id, name: newItem.name || null, category: newItem.category,
-        color: newItem.color || null, brand: newItem.brand || null, season: newItem.season || null,
-        occasion: newItem.occasion || null, style: newItem.style || null, notes: newItem.notes || null,
-        price: newItem.price ? parseFloat(newItem.price) : null, photo_url: photoUrl,
-      });
-      if (error) throw error;
-      // Sync to Replit backend (Qdrant) so Dressing Room can find this item
-      try {
-        const api = import.meta.env.VITE_API_URL || import.meta.env.VITE_PUBLIC_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:5000' : '');
-        const syncResp = await fetch(api + '/api/v1/closet/add-item', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            label: newItem.name || 'Unknown item',
-            type: newItem.category || 'other',
-            color: newItem.color || '',
-            category: newItem.category || 'other',
-          }),
+        const reader = new FileReader();
+        image_b64 = await new Promise((resolve, reject) => {
+          reader.onload = () => {
+            const result = reader.result as string;
+            resolve(result.split(",")[1] || result);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(selectedFile as Blob);
         });
-        if (!syncResp.ok) console.warn('[QDRANT] Sync returned', syncResp.status);
-      } catch (_e) { console.warn('[QDRANT] Sync failed', _e); }
+      }
+      const resp = await fetch(apiBase + "/api/v1/closet/add-item", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newItem.name || selectedFile?.name?.replace(/\.[^/.]+$/, "") || "Unknown item",
+          type: newItem.category || "other",
+          color: newItem.color || "",
+          category: newItem.category || "other",
+          brand: newItem.brand || "",
+          season: newItem.season || "all-season",
+          occasion: newItem.occasion || "",
+          style: newItem.style || "",
+          notes: newItem.notes || "",
+          price: newItem.price ? parseFloat(newItem.price) : null,
+          image_b64: image_b64,
+          user_id: user.id,
+        }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || "Upload failed");
       toast.success("Added. Your closet just got stronger.");
       setUploadOpen(false);
       setNewItem({ name: "", category: "top", color: "", brand: "", season: "all-season", occasion: "", style: "", notes: "", price: "" });
@@ -357,11 +394,26 @@ const Closet = () => {
   };
 
   const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("clothing_items").delete().eq("id", id);
-    if (error) toast.error("Failed to delete item");
-    else { setItems((prev) => prev.filter((item) => item.id !== id)); toast.success("Item removed"); }
+    try {
+      const resp = await fetch(apiBase + "/api/v1/closet/delete-item", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      if (resp.ok) {
+        setItems((prev) => prev.filter((item) => item.id !== id));
+        toast.success("Item removed");
+      } else {
+        const errData = await resp.json();
+        toast.error(errData.error || "Failed to delete");
+      }
+    } catch (err) {
+      console.warn("[CLOSET] Backend delete failed, fallback to Supabase");
+      const { error } = await supabase.from("clothing_items").delete().eq("id", id);
+      if (error) toast.error("Failed to delete item");
+      else { setItems((prev) => prev.filter((item) => item.id !== id)); toast.success("Item removed"); }
+    }
   };
-
   const handleWornToday = async (itemId: string) => {
     if (!user) return;
     const { error } = await supabase.from("wear_logs").insert({ user_id: user.id, clothing_item_id: itemId });

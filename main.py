@@ -315,31 +315,17 @@ def qdrant_get_all_items() -> List[Dict[str, Any]]:
                 return qdrant_items
         except Exception as exc:
             _log.warning("[QDRANT] Scroll error: %s", exc)
-    # Fallback: load from local JSON file
+    # Fallback: load from local JSON file (user-added items, no demo defaults)
     try:
-        with open(_LOCAL_CLOSET_FILE, 'r') as f:
+        with open(_LOCAL_CLOSET_FILE, "r") as f:
             local_items = json.load(f)
-        _log.info("[CLOSET] Loaded %d items from local file", len(local_items))
-        return local_items
+            if local_items:
+                _log.info("[CLOSET] Loaded %d items from local file", len(local_items))
+                return local_items
     except (FileNotFoundError, json.JSONDecodeError):
-        return []
-
+        pass
+    return []
 def qdrant_upsert_item(item: Dict[str, Any]) -> bool:
-    client = _get_qdrant_closet()
-    if client and qdrant_models is not None:
-        try:
-            point_id = item.get("id", str(uuid.uuid4())[:8])
-            client.upsert(
-                collection_name=_CLOSET_COLLECTION,
-                points=[qdrant_models.PointStruct(
-                    id=point_id,
-                    vector=[0.0, 0.0, 0.0, 0.0],
-                    payload=item,
-                )]
-            )
-            return True
-        except Exception as exc:
-            _log.warning("[QDRANT] Upsert error: %s", exc)
     # Fallback: store in local JSON file
     try:
         items = []
@@ -1360,30 +1346,60 @@ def closet_add():
     if request.method == "OPTIONS":
         return "", 204
     data = request.get_json(silent=True) or {}
-    item_type = data.get("type", "other")
-    label = data.get("label", "")
+    item_type = data.get("type", data.get("category", "other"))
+    label = data.get("label", data.get("name", ""))
     color = data.get("color", "")
-    category = data.get("category", "")
+    category = data.get("category", data.get("type", "other"))
+    brand = data.get("brand", "")
+    season = data.get("season", "all-season")
+    occasion = data.get("occasion", "")
+    style = data.get("style", "")
+    notes = data.get("notes", "")
+    price = data.get("price", None)
     image_b64 = data.get("image_b64", "")
+    user_id = data.get("user_id", "")
 
     if not label and not image_b64:
         return jsonify({"error": "Need label or image"}), 400
 
-    # Upload image to Vercel Blob
-    image_url = None
+    # Upload image: prefer Vercel Blob, fallback to local disk
+    image_url = ""
     if image_b64:
         image_url = upload_image_to_blob(image_b64)
+        if not image_url:
+            # Fallback: save to public/images/ for local /media/ serving
+            try:
+                raw = base64.b64decode(image_b64)
+                fname = f"{uuid.uuid4().hex[:16]}.jpg"
+                local_path = os.path.join(BASE_DIR, "public", "images", fname)
+                os.makedirs(os.path.dirname(local_path), exist_ok=True)
+                with open(local_path, "wb") as f:
+                    f.write(raw)
+                image_url = f"/images/{fname}"
+                _log.info("[CLOSET] Saved image locally: %s", local_path)
+            except Exception as exc:
+                _log.warning("[CLOSET] Local image save failed: %s", exc)
 
     # Build item
     item_id = str(uuid.uuid4())[:8]
+    now = datetime.now(timezone.utc).isoformat()
     item = {
         "id": item_id,
         "type": item_type,
         "label": label,
+        "name": label,
         "color": color,
         "category": category,
+        "brand": brand,
+        "season": season,
+        "occasion": occasion,
+        "style": style,
+        "notes": notes,
+        "price": price,
+        "user_id": user_id,
         "image_url": image_url or "",
-        "created_at": datetime.now(timezone.utc).isoformat(),
+        "photo_url": image_url or "",
+        "created_at": now,
     }
 
     # Store in Qdrant
