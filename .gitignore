@@ -24,3 +24,5 @@ knowledge_base/*/embeddings.meta.json
 node_modules/
 luxor-hub/dist/
 qdrant_db/
+closet_items.json
+public/images/

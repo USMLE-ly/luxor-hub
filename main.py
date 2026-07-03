@@ -1579,26 +1579,31 @@ def closet_add():
         return jsonify(_qdrant_error("upsert", str(e), traceback.format_exc())), 500
 @app.route("/api/v1/closet/list-items", methods=["GET", "OPTIONS"], strict_slashes=False)
 def closet_list():
-    """List all closet items — dead simple, never hangs."""
+    """List all closet items — Qdrant first (persistent), JSON fallback."""
     if request.method == "OPTIONS":
         return "", 204
+    # Primary: fetch from Qdrant Cloud (persists across restarts)
+    try:
+        items = qdrant_get_all_items()
+        _log.info("[CLOSET] list-items returning %d items from Qdrant", len(items))
+        return jsonify({"success": True, "items": items})
+    except Exception as qe:
+        _log.warning("[CLOSET] Qdrant read failed: %s — falling back to JSON", qe)
+    # Fallback: read from local JSON file
     try:
         print(f"[LIST-DEBUG] Reading from: {os.path.abspath(_LOCAL_CLOSET_FILE)}", flush=True)
         with open(_LOCAL_CLOSET_FILE, "r") as f:
             items = json.load(f)
             if isinstance(items, list):
-                _log.info("[CLOSET] list-items returning %d items", len(items))
+                _log.info("[CLOSET] list-items returning %d items from JSON fallback", len(items))
                 return jsonify({"success": True, "items": items})
-            return jsonify({"success": True, "items": []})
     except FileNotFoundError:
         _log.info("[CLOSET] No JSON file yet — returning empty")
-        return jsonify({"success": True, "items": []})
     except json.JSONDecodeError as e:
         _log.error("[CLOSET] Corrupt JSON: %s — returning empty", e)
-        return jsonify({"success": True, "items": []})
     except Exception as e:
-        _log.error("[CLOSET] Unexpected error: %s — returning empty", e)
-        return jsonify({"success": True, "items": []})
+        _log.error("[CLOSET] JSON fallback error: %s — returning empty", e)
+    return jsonify({"success": True, "items": []})
 @app.route("/api/v1/closet/delete-item", methods=["POST", "OPTIONS"], strict_slashes=False)
 def closet_delete():
     try:
@@ -2109,23 +2114,20 @@ def generate_outfits():
 
         # Load items from Qdrant (or local JSON fallback)
 
-        # Primary: load from canonical JSON file
+        # Primary: load from Qdrant Cloud (persists across restarts)
         closet_items = []
         try:
-            with open(_LOCAL_CLOSET_FILE, "r") as f:
-                closet_items = json.load(f)
-                if not isinstance(closet_items, list):
-                    closet_items = []
-        except (FileNotFoundError, json.JSONDecodeError):
-            pass
-        # Fallback: try Qdrant if JSON was empty
+            closet_items = qdrant_get_all_items()
+        except Exception as qe:
+            _log.warning("[DRESSING] Qdrant read failed: %s — falling back to JSON", qe)
+        # Fallback: read from local JSON file
         if not closet_items:
             try:
-                qdrant_items = qdrant_get_all_items()
-                if qdrant_items:
-                    _log.info("[DRESSING] Falling back to Qdrant — %d items", len(qdrant_items))
-                    closet_items = qdrant_items
-            except Exception:
+                with open(_LOCAL_CLOSET_FILE, "r") as f:
+                    closet_items = json.load(f)
+                    if not isinstance(closet_items, list):
+                        closet_items = []
+            except (FileNotFoundError, json.JSONDecodeError):
                 pass
         if not closet_items:
             return jsonify({"success": False, "images": [], "error": "Your closet is empty! Add items first."}), 200
