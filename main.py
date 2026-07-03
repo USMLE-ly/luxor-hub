@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 from typing import Any, Optional, Dict, List, cast
 
 import requests
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from PIL import Image
 from collections import Counter
@@ -1948,8 +1948,7 @@ def generate_outfits():
             raw = item.get("image_url") or item.get("photo_url") or default
             if raw and not raw.startswith("http"):
                 # Relative path — prepend backend host to avoid CORB from 404 HTML pages
-                base = request.host_url.rstrip("/")
-                return base.rstrip("/") + "/" + raw.lstrip("/")
+                return request.host_url.rstrip("/") + "/static/" + raw.lstrip("/")
             return raw
 
         # ---- Group items ----
@@ -2190,6 +2189,15 @@ def generate_outfits():
         traceback.print_exc()
         return jsonify({"success": False, "error": str(exc)[:200]}), 500
 
+
+# Serve static files with proper CORS headers to prevent CORB errors
+@app.route("/static/<path:filename>")
+def serve_static_file(filename):
+    """Serve uploaded/closet images with CORS headers so the frontend
+    (on luxor.ly or other origins) can load them without CORB blocking."""
+    response = send_from_directory("." + os.sep, filename)
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    return response
 
 
 @app.route("/", methods=["GET"], strict_slashes=False)
