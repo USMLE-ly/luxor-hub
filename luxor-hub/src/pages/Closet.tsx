@@ -191,8 +191,6 @@ const Closet = () => {
     } catch {}
     setLoading(false);
   }, [user, apiBase]);
-    if (prefs.gender === "female") setGender("female");
-    setLoading(false);
   // Auto-remove backgrounds when flat-lay view is active
   useEffect(() => {
     if (!flatLayView) return;
