@@ -48,7 +48,7 @@ export default function DressingRoomPage() {
       const res = await fetch(api + "/api/v1/generate-outfits", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ occasion, count }),
+        body: JSON.stringify({ occasion, count, user_id: user.id }),
       });
 
       const data = await res.json();

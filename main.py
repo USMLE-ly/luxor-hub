@@ -354,6 +354,16 @@ def _ensure_closet_collection(client: Any):
             _log.info("[QDRANT] Payload index on 'id' ready")
         except Exception:
             pass  # Index already exists — acceptable
+        # Ensure payload index on user_id for per-user filtering
+        try:
+            client.create_payload_index(
+                collection_name=_CLOSET_COLLECTION,
+                field_name="user_id",
+                field_schema=qdrant_models.PayloadSchemaType.KEYWORD,
+            )
+            _log.info("[QDRANT] Payload index on 'user_id' ready")
+        except Exception:
+            pass  # Index already exists — acceptable
         _log.info("[QDRANT] Collection '%s' verified OK", _CLOSET_COLLECTION)
     except Exception as exc:
         _log.error("[QDRANT] Collection verification failed: %s", exc)
@@ -409,8 +419,9 @@ def _init_qdrant():
 _init_qdrant()
 
 
-def qdrant_get_all_items(timeout: float = 8.0) -> List[Dict[str, Any]]:
+def qdrant_get_all_items(timeout: float = 8.0, user_id: str = "") -> List[Dict[str, Any]]:
     """Get all closet items from Qdrant with a timeout.
+    If user_id is provided, only return items belonging to that user.
     Raises on failure — no silent fallback. Caller handles fallback.
     """
     from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
@@ -420,10 +431,18 @@ def qdrant_get_all_items(timeout: float = 8.0) -> List[Dict[str, Any]]:
         raise RuntimeError("Qdrant closet client is not initialized")
 
     def _do_scroll():
+        scroll_filter = None
+        if user_id and qdrant_models is not None:
+            scroll_filter = qdrant_models.Filter(
+                must=[qdrant_models.FieldCondition(
+                    key="user_id", match=qdrant_models.MatchValue(value=user_id)
+                )]
+            )
         result = client.scroll(
             collection_name=_CLOSET_COLLECTION,
             limit=1000,
             with_payload=True,
+            scroll_filter=scroll_filter,
         )
         points = result[0] if isinstance(result, tuple) else result
         return [dict(p.payload) for p in points if p.payload]
@@ -432,7 +451,7 @@ def qdrant_get_all_items(timeout: float = 8.0) -> List[Dict[str, Any]]:
         future = executor.submit(_do_scroll)
         try:
             items = future.result(timeout=timeout)
-            _log.info("[QDRANT] Scrolled %d items from collection", len(items))
+            _log.info("[QDRANT] Scrolled %d items from collection (user_id=%s)", len(items), user_id or "all")
             return items
         except FuturesTimeout:
             _log.error("[QDRANT] Scroll timed out after %ss", timeout)
@@ -1590,12 +1609,15 @@ def closet_add():
         return jsonify(_qdrant_error("upsert", str(e), traceback.format_exc())), 500
 @app.route("/api/v1/closet/list-items", methods=["GET", "OPTIONS"], strict_slashes=False)
 def closet_list():
-    """List all closet items — Qdrant first (persistent), JSON fallback."""
+    """List all closet items — Qdrant first (persistent), JSON fallback.
+    Supports ?user_id=xxx for per-user filtering.
+    """
     if request.method == "OPTIONS":
         return "", 204
     # Primary: fetch from Qdrant Cloud (persists across restarts)
+    uid = request.args.get("user_id", "")
     try:
-        items = qdrant_get_all_items()
+        items = qdrant_get_all_items(user_id=uid)
         _log.info("[CLOSET] list-items returning %d items from Qdrant", len(items))
         return jsonify({"success": True, "items": items})
     except Exception as qe:
@@ -1606,7 +1628,10 @@ def closet_list():
         with open(_LOCAL_CLOSET_FILE, "r") as f:
             items = json.load(f)
             if isinstance(items, list):
-                _log.info("[CLOSET] list-items returning %d items from JSON fallback", len(items))
+                # Filter by user_id if provided
+                if uid:
+                    items = [i for i in items if i.get("user_id") == uid]
+                _log.info("[CLOSET] list-items returning %d items from JSON fallback (user_id=%s)", len(items), uid or "all")
                 return jsonify({"success": True, "items": items})
     except FileNotFoundError:
         _log.info("[CLOSET] No JSON file yet — returning empty")
@@ -2124,11 +2149,13 @@ def generate_outfits():
         _log.info("[DRESSING] Generating %d outfits for %s", count, occasion)
 
         # Load items from Qdrant (or local JSON fallback)
+        gen_uid = data.get("user_id", "")
+        _log.info("[DRESSING] user_id=%s", gen_uid or "all")
 
         # Primary: load from Qdrant Cloud (persists across restarts)
         closet_items = []
         try:
-            closet_items = qdrant_get_all_items()
+            closet_items = qdrant_get_all_items(user_id=gen_uid)
         except Exception as qe:
             _log.warning("[DRESSING] Qdrant read failed: %s — falling back to JSON", qe)
         # Fallback: read from local JSON file
@@ -2138,6 +2165,9 @@ def generate_outfits():
                     closet_items = json.load(f)
                     if not isinstance(closet_items, list):
                         closet_items = []
+                # Filter by user_id if provided
+                if gen_uid:
+                    closet_items = [i for i in closet_items if i.get("user_id") == gen_uid]
             except (FileNotFoundError, json.JSONDecodeError):
                 pass
         if not closet_items:

@@ -161,7 +161,7 @@ const Closet = () => {
         setTimeout(() => reject(new Error("Request timed out")), 5000)
       );
       const resp = await Promise.race([
-        fetch(apiBase + '/api/v1/closet/list-items'),
+        fetch(apiBase + '/api/v1/closet/list-items?user_id=' + encodeURIComponent(user.id)),
         timeoutPromise,
       ]);
       if (!resp.ok) return [];
