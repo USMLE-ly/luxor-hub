@@ -1597,6 +1597,10 @@ def closet_add():
             _log.error("[CLOSET] Failed to persist item %s", item_id)
             return jsonify({"error": "Storage unavailable"}), 503
         
+        # Debug: confirm base64 was persisted
+        if image_b64:
+            print(f"[ADD-DEBUG] Saved Base64 for '{label}', b64 length: {len(image_b64)}", flush=True)
+        
         # Verify the write by reading back
         try:
             with open(_LOCAL_CLOSET_FILE, 'r') as f:
@@ -2524,86 +2528,101 @@ def generate_outfits():
         return jsonify({"success": False, "error": str(exc)[:200]}), 500
 
 
+# Transparent GIF pixel for CORB-safe 404 fallback
+_TRANSPARENT_PIXEL_B64 = "R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+
 # Serve static files with proper CORS headers to prevent CORB errors
 @app.route("/static/<path:filename>")
 
 @app.route("/images/<path:filename>")
 def serve_uploaded_image(filename):
-    """Serve user-uploaded closet images from public/images/."""
-    import os as os_mod
+    """Serve user-uploaded closet images — disk first, then base64 fallback from JSON."""
     # Strip any nested /images/ prefix to handle double-prefix gracefully
-    safe_filename = filename
-    if safe_filename.startswith("images/"):
-        safe_filename = safe_filename[len("images/"):]
-    images_dir = os_mod.path.join(os_mod.path.dirname(os_mod.path.abspath(__file__)), "public", "images")
-    real_path = os_mod.path.realpath(os_mod.path.join(images_dir, safe_filename))
-    print(f"[IMG-DEBUG] Request: filename={filename} safe={safe_filename} path={real_path}", flush=True)
-    if real_path.startswith(os_mod.path.realpath(images_dir)) and os_mod.path.isfile(real_path):
-        print(f"[IMG-DEBUG] Serving: {safe_filename} from {images_dir}")
-        response = send_from_directory(images_dir, safe_filename)
-        response.headers.add("Access-Control-Allow-Origin", "*")
-        return response
-    # Fallback: look up image_data_b64 in closet_items.json
+    safe = filename
+    if safe.startswith("images/"):
+        safe = safe[len("images/"):]
+    images_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "public", "images")
+    real_path = os.path.realpath(os.path.join(images_dir, safe))
+    print(f"[IMG-DEBUG] Request: filename={filename} safe={safe} path={real_path}", flush=True)
+
+    # 1. Check disk first (ephemeral — may be empty after restart)
+    if real_path.startswith(os.path.realpath(images_dir)) and os.path.isfile(real_path):
+        print(f"[IMG-DEBUG] Serving from disk: {safe}")
+        resp = send_from_directory(images_dir, safe)
+        resp.headers.add("Access-Control-Allow-Origin", "*")
+        return resp
+
+    # 2. Fallback: find matching item in JSON by EXACT filename, serve base64
     try:
-        with open(_LOCAL_CLOSET_FILE, "r") as _fb:
-            _all = json.load(_fb)
-        for _it in _all if isinstance(_all, list) else []:
-            _url = _it.get("image_url") or _it.get("photo_url") or ""
-            if filename in _url and _it.get("image_data_b64"):
-                _b64 = _it["image_data_b64"]
-                print(f"[IMG-DEBUG] Serving from base64: {filename}")
-                _raw = base64.b64decode(_b64)
-                resp = make_response(_raw)
-                resp.headers["Content-Type"] = "image/jpeg"
-                resp.headers["Access-Control-Allow-Origin"] = "*"
-                return resp
-    except Exception as _fb_err:
-        pass
-    # Return transparent pixel on 404 to prevent CORB
-    print(f"[IMG-DEBUG] File not found: {filename} (no fallback in JSON)")
-    pixel = base64.b64decode("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7")
-    resp = make_response(pixel)
+        with open(_LOCAL_CLOSET_FILE, "r") as fb:
+            items = json.load(fb)
+        for it in items if isinstance(items, list) else []:
+            stored_url = (it.get("image_url") or it.get("photo_url") or "").strip()
+            # Extract the exact filename from the stored URL
+            stored_filename = stored_url.rstrip("/").split("/")[-1]
+            b64_data = it.get("image_data_b64") or ""
+            if stored_filename == safe and b64_data and len(b64_data) > 100:
+                try:
+                    img_bytes = base64.b64decode(b64_data)
+                    print(f"[IMG-DEBUG] Serving from base64: {safe} ({len(img_bytes)} bytes)")
+                    resp = make_response(img_bytes)
+                    resp.headers["Content-Type"] = "image/jpeg"
+                    resp.headers["Access-Control-Allow-Origin"] = "*"
+                    return resp
+                except Exception as dec_err:
+                    print(f"[IMG-ERR] Base64 decode failed for {safe}: {dec_err}", flush=True)
+    except Exception as fb_err:
+        print(f"[IMG-DEBUG] JSON fallback error: {fb_err}", flush=True)
+
+    # 3. Ultimate fallback — transparent pixel prevents CORB
+    print(f"[IMG-DEBUG] File not found: {safe} — returning transparent pixel", flush=True)
+    resp = make_response(base64.b64decode(_TRANSPARENT_PIXEL_B64))
     resp.headers["Content-Type"] = "image/gif"
     resp.headers["Access-Control-Allow-Origin"] = "*"
     return resp
 
 @app.route("/media/<path:filename>")
 def serve_media_file(filename):
-    """Serve uploaded/closet images with CORS headers.
-    Returns transparent pixel on 404 to prevent CORB."""
-    import base64
-    from flask import make_response
-    import os as os_mod
+    """Serve uploaded/closet images with CORS headers — disk first, then base64 fallback."""
     # Strip nested prefixes to handle double-prefix gracefully
-    safe_filename = filename
-    if safe_filename.startswith("images/") or safe_filename.startswith("media/"):
-        safe_filename = safe_filename.split("/", 1)[1] if "/" in safe_filename else safe_filename
-    images_dir = os_mod.path.join(os_mod.path.dirname(os_mod.path.abspath(__file__)), "public", "images")
-    real_path = os_mod.path.realpath(os_mod.path.join(images_dir, safe_filename))
-    if real_path.startswith(os_mod.path.realpath(images_dir)) and os_mod.path.isfile(real_path):
-        print(f"[IMG-DEBUG] /media/ Serving: {safe_filename} from {images_dir}")
-        response = send_from_directory(images_dir, safe_filename)
-        response.headers.add("Access-Control-Allow-Origin", "*")
-        return response
-    # Fallback: look up image_data_b64 in closet_items.json
+    safe = filename
+    if safe.startswith("images/") or safe.startswith("media/"):
+        safe = safe.split("/", 1)[1] if "/" in safe else safe
+    images_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "public", "images")
+    real_path = os.path.realpath(os.path.join(images_dir, safe))
+    print(f"[IMG-DEBUG] /media/ Request: filename={filename} safe={safe}", flush=True)
+
+    # 1. Check disk first
+    if real_path.startswith(os.path.realpath(images_dir)) and os.path.isfile(real_path):
+        print(f"[IMG-DEBUG] /media/ Serving from disk: {safe}")
+        resp = send_from_directory(images_dir, safe)
+        resp.headers.add("Access-Control-Allow-Origin", "*")
+        return resp
+
+    # 2. Fallback: find matching item in JSON by EXACT filename, serve base64
     try:
-        with open(_LOCAL_CLOSET_FILE, "r") as _fb:
-            _all = json.load(_fb)
-        for _it in _all if isinstance(_all, list) else []:
-            _url = _it.get("image_url") or _it.get("photo_url") or ""
-            if safe_filename in _url and _it.get("image_data_b64"):
-                _b64 = _it["image_data_b64"]
-                print(f"[IMG-DEBUG] /media/ Serving from base64: {safe_filename}")
-                _raw = base64.b64decode(_b64)
-                resp = make_response(_raw)
-                resp.headers["Content-Type"] = "image/jpeg"
-                resp.headers["Access-Control-Allow-Origin"] = "*"
-                return resp
-    except Exception as _fb_err:
-        pass
-    print(f"[IMG-DEBUG] /media/ File not found: {safe_filename} (no fallback in JSON)")
-    pixel = base64.b64decode("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7")
-    resp = make_response(pixel)
+        with open(_LOCAL_CLOSET_FILE, "r") as fb:
+            items = json.load(fb)
+        for it in items if isinstance(items, list) else []:
+            stored_url = (it.get("image_url") or it.get("photo_url") or "").strip()
+            stored_filename = stored_url.rstrip("/").split("/")[-1]
+            b64_data = it.get("image_data_b64") or ""
+            if stored_filename == safe and b64_data and len(b64_data) > 100:
+                try:
+                    img_bytes = base64.b64decode(b64_data)
+                    print(f"[IMG-DEBUG] /media/ Serving from base64: {safe} ({len(img_bytes)} bytes)")
+                    resp = make_response(img_bytes)
+                    resp.headers["Content-Type"] = "image/jpeg"
+                    resp.headers["Access-Control-Allow-Origin"] = "*"
+                    return resp
+                except Exception as dec_err:
+                    print(f"[IMG-ERR] /media/ Base64 decode failed for {safe}: {dec_err}", flush=True)
+    except Exception as fb_err:
+        print(f"[IMG-DEBUG] /media/ JSON fallback error: {fb_err}", flush=True)
+
+    # 3. Ultimate fallback — transparent pixel prevents CORB
+    print(f"[IMG-DEBUG] /media/ File not found: {safe} — returning transparent pixel", flush=True)
+    resp = make_response(base64.b64decode(_TRANSPARENT_PIXEL_B64))
     resp.headers["Content-Type"] = "image/gif"
     resp.headers["Access-Control-Allow-Origin"] = "*"
     return resp

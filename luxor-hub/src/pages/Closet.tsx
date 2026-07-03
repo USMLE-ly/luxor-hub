@@ -863,6 +863,11 @@ const Closet = () => {
                                   alt={item.name || ""}
                                   className="w-full h-full object-contain transition-opacity duration-500"
                                   style={{ mixBlendMode: "multiply" }}
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = "none";
+                                    const parent = e.currentTarget.parentElement;
+                                    if (parent) parent.style.backgroundColor = "#1A1A1A";
+                                  }}
                                 />
                               ) : (
                                 <Shirt className="w-12 h-12 text-muted-foreground/30" />
