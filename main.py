@@ -1949,7 +1949,7 @@ def generate_outfits():
             if raw and not raw.startswith("http"):
                 # Relative path — prepend backend host to avoid CORB from 404 HTML pages
                 base = request.host_url.rstrip("/")
-                return f"{base}/{raw.lstrip("/")}"
+                return base.rstrip("/") + "/" + raw.lstrip("/")
             return raw
 
         # ---- Group items ----
