@@ -114,7 +114,6 @@ from backend.routes.analyze import init_routes as init_analyze_routes
 from backend.routes.health import init_routes as init_health_routes
 
 init_analyze_routes(app)
-init_health_routes(app, get_closet_count=lambda: len(qdrant_get_all_items()))
 
 # Color Dictionary
 # ---------------------------------------------------------------------------
@@ -268,6 +267,7 @@ set_color_names(_COLOR_NAMES)
 _LOCAL_CLOSET_FILE = os.path.join(BASE_DIR, "closet_items.json")
 _qdrant_closet: Any = None
 _CLOSET_COLLECTION = "luxor_closet"
+_json_lock = threading.Lock()
 def _qdrant_error(stage: str, error: str, details: str = "") -> Dict[str, Any]:
     """Return a structured error dict for Qdrant failures."""
     return {
@@ -417,6 +417,9 @@ def _init_qdrant():
 
 # Eager initialization at module load time
 _init_qdrant()
+# Register health routes after Qdrant is initialized (lambda needs qdrant_get_all_items)
+init_health_routes(app, get_closet_count=lambda: len(qdrant_get_all_items()))
+
 
 
 def qdrant_get_all_items(timeout: float = 8.0, user_id: str = "") -> List[Dict[str, Any]]:
@@ -491,16 +494,17 @@ def qdrant_upsert_item(item: Dict[str, Any]) -> bool:
 
     # 2. Always write to local JSON file as secondary persistence
     try:
-        items = []
-        try:
-            with open(_LOCAL_CLOSET_FILE, 'r') as f:
-                items = json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
-            pass
-        items = [i for i in items if i.get("id") != item_id]
-        items.append(item)
-        with open(_LOCAL_CLOSET_FILE, 'w') as f:
-            json.dump(items, f, indent=2)
+        with _json_lock:
+            items = []
+            try:
+                with open(_LOCAL_CLOSET_FILE, 'r') as f:
+                    items = json.load(f)
+            except (FileNotFoundError, json.JSONDecodeError):
+                pass
+            items = [i for i in items if i.get("id") != item_id]
+            items.append(item)
+            with open(_LOCAL_CLOSET_FILE, 'w') as f:
+                json.dump(items, f, indent=2)
         _log.info("[CLOSET] Saved item to local file: %s (%s)", item.get("label", "unknown"), item_id)
         json_ok = True
     except Exception as exc:
@@ -543,11 +547,12 @@ def qdrant_delete_item(item_id: str) -> bool:
 
     # 2. Always delete from local file
     try:
-        with open(_LOCAL_CLOSET_FILE, 'r') as f:
-            items = json.load(f)
-        items = [i for i in items if i.get("id") != item_id]
-        with open(_LOCAL_CLOSET_FILE, 'w') as f:
-            json.dump(items, f, indent=2)
+        with _json_lock:
+            with open(_LOCAL_CLOSET_FILE, 'r') as f:
+                items = json.load(f)
+            items = [i for i in items if i.get("id") != item_id]
+            with open(_LOCAL_CLOSET_FILE, 'w') as f:
+                json.dump(items, f, indent=2)
         _log.info("[CLOSET] Deleted item %s from local file", item_id)
         json_ok = True
     except (FileNotFoundError, json.JSONDecodeError):

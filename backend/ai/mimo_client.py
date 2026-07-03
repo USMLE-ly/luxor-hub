@@ -3,6 +3,7 @@
 import json
 import logging
 import re
+import time
 from typing import Any, Optional, Dict, List
 
 import requests
@@ -214,12 +215,15 @@ def call_mimo_text(
                 return raw
             elif resp.status_code == 402:
                 _log.warning("[MIMO-TEXT] Insufficient balance")
+                time.sleep(0.5)
                 continue
             else:
                 _log.warning("[MIMO-TEXT] HTTP %s for %s", resp.status_code, model_name)
+                time.sleep(0.5)
                 continue
         except requests.exceptions.Timeout:
             _log.warning("[MIMO-TEXT] Timeout for %s", model_name)
+            time.sleep(0.5)
             continue
         except Exception as exc:
             _log.error("[MIMO-TEXT] %s", exc)
