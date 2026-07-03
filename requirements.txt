@@ -5,3 +5,4 @@ python-dotenv
 Pillow
 qdrant-client>=1.12
 gunicorn
+numpy
