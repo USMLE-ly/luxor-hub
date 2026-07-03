@@ -2055,7 +2055,8 @@ def generate_outfits():
             '   - If the needed accessory is NOT in the closet, say: "Consider adding [item]".\n'
             '   - If the outfit already has accessories or doesn\'t need any, leave accessory_note as empty string "".\n'
             '8. Return exactly ' + str(count) + ' selection(s).\n'
-            '9. NO HALLUCINATION. NO invented items. NO made-up indices.'
+            '9. NO HALLUCINATION. NO invented items. NO made-up indices.\n'
+            '10. VARY your shoe_idx and item indices across the selections — do not pick the same shoe for every outfit.\n'
         )
 
         mimo_result = None
@@ -2095,15 +2096,22 @@ def generate_outfits():
                             fidx = sel.get("full_outfit_idx")
                             if fidx is not None and 0 <= fidx < len(full_outfits):
                                 c["full_outfit"] = full_outfits[fidx]
-                                if len(c) >= 1: combo = c; debug_source = "mimo_vision"
+                            # Require at least one actual item key
+                            item_keys = [k for k in c if k in ("full_outfit", "dress", "shoes", "top", "bottom")]
+                            if item_keys:
+                                combo = c
+                                debug_source = "mimo_vision"
                         elif otype == "dress":
                             didx = sel.get("dress_idx")
                             sidx = sel.get("shoe_idx")
                             if didx is not None and 0 <= didx < len(dresses):
                                 c["dress"] = dresses[didx]
-                                if sidx is not None and 0 <= sidx < len(shoes_list):
-                                    c["shoes"] = shoes_list[sidx]
-                                if len(c) >= 1: combo = c; debug_source = "mimo_vision"
+                            if sidx is not None and 0 <= sidx < len(shoes_list):
+                                c["shoes"] = shoes_list[sidx]
+                            item_keys = [k for k in c if k in ("full_outfit", "dress", "shoes", "top", "bottom")]
+                            if item_keys:
+                                combo = c
+                                debug_source = "mimo_vision"
                         else:
                             ti = sel.get("top_idx")
                             bi = sel.get("bottom_idx")
@@ -2111,41 +2119,70 @@ def generate_outfits():
                             if ti is not None and 0 <= ti < len(tops): c["top"] = tops[ti]
                             if bi is not None and 0 <= bi < len(bottoms): c["bottom"] = bottoms[bi]
                             if si is not None and 0 <= si < len(shoes_list): c["shoes"] = shoes_list[si]
-                            if len(c) >= 2: combo = c; debug_source = "mimo_vision"
+                            item_keys = [k for k in c if k in ("full_outfit", "dress", "shoes", "top", "bottom")]
+                            if len(item_keys) >= 2:
+                                combo = c
+                                debug_source = "mimo_vision"
                 except (IndexError, TypeError, ValueError) as e:
                     _log.warning("[DRESSING] MiMo parse error: %s", e)
 
-            # No fallback — if MiMo fails, skip this iteration gracefully
+            # ── Fallback: random selection if MiMo failed or skipped ──
             if not combo:
-                _log.warning("[DRESSING] MiMo Vision selection %d failed — skipping", oi)
+                _log.info("[DRESSING] Fallback random outfit %d", oi)
+                fallback_c = {"type": "regular", "accessory_note": ""}
+                # Pick a top (prefer unused)
+                if tops:
+                    unused_tops = [t for t in tops if t.get("id") not in used_ids]
+                    fallback_c["top"] = unused_tops[0] if unused_tops else random.choice(tops)
+                # Pick a bottom (prefer unused)
+                if bottoms:
+                    unused_bottoms = [b for b in bottoms if b.get("id") not in used_ids]
+                    fallback_c["bottom"] = unused_bottoms[0] if unused_bottoms else random.choice(bottoms)
+                # Pick shoes (rotate through to avoid all same)
+                if shoes_list:
+                    shoe_idx = oi % len(shoes_list)
+                    fallback_c["shoes"] = shoes_list[shoe_idx]
+                # Mark as random fallback
+                item_keys = [k for k in fallback_c if k in ("full_outfit", "dress", "shoes", "top", "bottom")]
+                if len(item_keys) >= 2:
+                    combo = fallback_c
+                    debug_source = "random_fallback"
+                    _log.info("[DRESSING] Random fallback built outfit %d: top=%s bottom=%s shoe_idx=%d",
+                              oi, fallback_c.get("top", {}).get("label","none"),
+                              fallback_c.get("bottom", {}).get("label","none"),
+                              shoe_idx)
+
+            if not combo:
+                _log.warning("[DRESSING] Could not build outfit %d — not enough items", oi)
                 continue
 
             # Track used IDs
             for v in combo.values():
-                if isinstance(v, dict) and v.get("id"): used_ids.add(v.get("id"))
+                if isinstance(v, dict) and v.get("id"):
+                    used_ids.add(v.get("id"))
 
             # Build outfit based on type
             if combo.get("type") == "full_outfit":
                 fo = combo.get("full_outfit", {})
                 outfit_data = {
                     "type": "full_outfit",
-                    "top": _img_url(fo),   # single full image
+                    "top": _img_url(fo),
                     "mid": "",
                     "bottom": "",
                     "accessory_note": combo.get("accessory_note", ""),
                 }
-                print(f"[DRESSING-DEBUG] FULL_OUTFIT: top={outfit_data['top'][:50]}", file=sys.stderr)
+                _log.info("[DRESSING] FULL_OUTFIT: %s", outfit_data['top'][:50])
             elif combo.get("type") == "dress":
                 dr = combo.get("dress", {})
                 sh = combo.get("shoes", {})
                 outfit_data = {
                     "type": "dress",
-                    "top": _img_url(dr),   # dress image (1-split top 50%)
-                    "mid": "",                          # not used for dress
-                    "bottom": _img_url(sh),  # shoes (1-split bottom 50%)
+                    "top": _img_url(dr),
+                    "mid": "",
+                    "bottom": _img_url(sh),
                     "accessory_note": combo.get("accessory_note", ""),
                 }
-                print(f"[DRESSING-DEBUG] DRESS: top={outfit_data['top'][:50]} bottom={outfit_data['bottom'][:50]}", file=sys.stderr)
+                _log.info("[DRESSING] DRESS: top=%s bottom=%s", outfit_data['top'][:50], outfit_data['bottom'][:50])
             else:  # regular
                 outfit_data = {
                     "type": "regular",
@@ -2154,7 +2191,8 @@ def generate_outfits():
                     "bottom": _img_url(combo.get("shoes", {})),
                     "accessory_note": combo.get("accessory_note", ""),
                 }
-                print(f"[DRESSING-DEBUG] REGULAR: top={outfit_data['top'][:50]} mid={outfit_data['mid'][:50]} bottom={outfit_data['bottom'][:50]}", file=sys.stderr)
+                _log.info("[DRESSING] REGULAR: top=%s mid=%s bottom=%s",
+                          outfit_data['top'][:40], outfit_data['mid'][:40], outfit_data['bottom'][:40])
 
             outfits.append(outfit_data)
 
