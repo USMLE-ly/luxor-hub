@@ -1948,7 +1948,7 @@ def generate_outfits():
             raw = item.get("image_url") or item.get("photo_url") or default
             if raw and not raw.startswith("http"):
                 # Relative path — prepend backend host to avoid CORB from 404 HTML pages
-                return request.host_url.rstrip("/") + "/static/" + raw.lstrip("/")
+                return request.host_url.rstrip("/") + "/media/" + raw.lstrip("/")
             return raw
 
         # ---- Group items ----
@@ -2192,12 +2192,54 @@ def generate_outfits():
 
 # Serve static files with proper CORS headers to prevent CORB errors
 @app.route("/static/<path:filename>")
-def serve_static_file(filename):
-    """Serve uploaded/closet images with CORS headers so the frontend
-    (on luxor.ly or other origins) can load them without CORB blocking."""
-    response = send_from_directory("." + os.sep, filename)
-    response.headers.add("Access-Control-Allow-Origin", "*")
-    return response
+@app.route("/media/<path:filename>")
+def serve_media_file(filename):
+    """Serve uploaded/closet images with CORS headers.
+    Uses custom /media/ path (not Flask's built-in /static/ handler).
+    Returns transparent pixel on 404 to prevent CORB (Cross-Origin Read Blocking)."""
+    import base64
+    from flask import make_response
+    # Check if file exists in current directory
+    import os as os_mod
+    filepath = os_mod.path.join("." + os_mod.sep, filename)
+    # Normalize to prevent path traversal
+    real_path = os_mod.path.realpath(filepath)
+    if not real_path.startswith(os_mod.path.realpath("." + os_mod.sep)):
+        # Path traversal detected — return transparent pixel
+        pixel = base64.b64decode("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7")
+        resp = make_response(pixel)
+        resp.headers["Content-Type"] = "image/gif"
+        resp.headers["Access-Control-Allow-Origin"] = "*"
+        return resp
+    if os_mod.path.isfile(real_path):
+        response = send_from_directory("." + os_mod.sep, filename)
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        return response
+    # File not found — return transparent pixel to prevent CORB
+    pixel = base64.b64decode("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7")
+    resp = make_response(pixel)
+    resp.headers["Content-Type"] = "image/gif"
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    return resp
+
+# Global CORS-safe error handlers — return JSON instead of HTML to prevent CORB
+@app.errorhandler(404)
+def not_found(e):
+    """Return JSON 404 with CORS headers instead of HTML (which would trigger CORB)."""
+    from flask import make_response, jsonify
+    resp = make_response(jsonify({"error": "Not found", "status": 404}))
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    resp.headers["Content-Type"] = "application/json"
+    return resp, 404
+
+@app.errorhandler(500)
+def server_error(e):
+    """Return JSON 500 with CORS headers instead of HTML."""
+    from flask import make_response, jsonify
+    resp = make_response(jsonify({"error": "Internal server error", "status": 500}))
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    resp.headers["Content-Type"] = "application/json"
+    return resp, 500
 
 
 @app.route("/", methods=["GET"], strict_slashes=False)
