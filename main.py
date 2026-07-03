@@ -1367,7 +1367,6 @@ def closet_add():
     if image_b64:
         image_url = upload_image_to_blob(image_b64)
         if not image_url:
-            # Fallback: save to public/images/ for local /media/ serving
             try:
                 raw = base64.b64decode(image_b64)
                 fname = f"{uuid.uuid4().hex[:16]}.jpg"
@@ -1402,18 +1401,41 @@ def closet_add():
         "created_at": now,
     }
 
-    # Store in Qdrant
-    ok = qdrant_upsert_item(item)
-    if not ok:
+    # ---- Persist to closet_items.json (read → append → write) ----
+    json_path = _LOCAL_CLOSET_FILE
+    items = []
+    try:
+        if os.path.exists(json_path):
+            with open(json_path, "r") as f:
+                try:
+                    items = json.load(f)
+                    if not isinstance(items, list):
+                        items = []
+                except json.JSONDecodeError:
+                    items = []
+    except Exception as exc:
+        _log.warning("[CLOSET] Error reading %s: %s", json_path, exc)
+        items = []
+
+    # Remove existing item with same id (safe upsert)
+    items = [i for i in items if i.get("id") != item_id]
+    items.append(item)
+
+    try:
+        with open(json_path, "w") as f:
+            json.dump(items, f, indent=2)
+        _log.info("[CLOSET] Saved %d items to %s", len(items), json_path)
+        print(f"[CLOSET-DEBUG] Saved {len(items)} items to closet_items.json")
+    except Exception as exc:
+        _log.error("[CLOSET] Failed to write %s: %s", json_path, exc)
         return jsonify({"error": "Storage unavailable"}), 503
 
-    return jsonify({"success": True, "item": item})
-
-@app.route("/api/v1/closet/list-items", methods=["GET", "OPTIONS"], strict_slashes=False)
+    return jsonify({"success": True, "item": item})@app.route("/api/v1/closet/list-items", methods=["GET", "OPTIONS"], strict_slashes=False)
 def closet_list():
     if request.method == "OPTIONS":
         return "", 204
     items = qdrant_get_all_items()
+    _log.info("[CLOSET] list-items returning %d items", len(items))
     return jsonify({"success": True, "items": items})
 
 @app.route("/api/v1/closet/delete-item", methods=["POST", "OPTIONS"], strict_slashes=False)
