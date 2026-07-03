@@ -71,3 +71,21 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+---
+
+## 🚀 Deployment
+
+This project uses a **two-tier deployment**:
+
+### Replit (Backend — Flask API)
+1. Push this repo to Replit
+2. Go to **Tools → Secrets** and add:
+   - `MIMO_API_KEY` (your MiMo Vision key)
+   - `QDRANT_URL` and `QDRANT_API_KEY` (optional, for closet features)
+3. Replit will run `bash start.sh` → gunicorn binds to `$PORT` automatically
+
+### Vercel (Frontend — React SPA)
+1. Connect your repo to Vercel
+2. In `vercel.json`, replace `YOUR_REPLIT_URL` with your actual Replit app URL
+3. Deploy — Vercel builds the frontend and proxies `/api/*` to your Replit backend

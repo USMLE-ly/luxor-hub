@@ -12,7 +12,7 @@
   ],
   "routes": [
     { "handle": "filesystem" },
-    { "source": "/api/(.*)", "destination": "https://nice-useful-plot--al-bosify.replit.app/api/$1" },
+    { "source": "/api/(.*)", "destination": "https://YOUR_REPLIT_URL.replit.app/api/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
