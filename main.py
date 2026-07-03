@@ -1952,13 +1952,13 @@ def generate_outfits():
             return raw
 
         # ---- Group items ----
-        print(f"[DEBUG] Grouping: items_with_img={len(items_with_img)}")
         tops = [i for i in items_with_img if _cat(i) == "top"]
         bottoms = [i for i in items_with_img if _cat(i) == "bottom"]
         shoes_list = [i for i in items_with_img if _cat(i) == "shoes"]
         dresses = [i for i in items_with_img if _cat(i) == "dress"]
         accessories = [i for i in items_with_img if _cat(i) == "accessory"]
         full_outfits = [i for i in items_with_img if _cat(i) == "full_outfit"]
+        print(f"[CLOSET-DEBUG] Items: {len(items_with_img)} with images | Tops: {len(tops)} Bottoms: {len(bottoms)} Shoes: {len(shoes_list)} Dresses: {len(dresses)} Full: {len(full_outfits)} Accessories: {len(accessories)}")
 
         has_full = len(full_outfits) > 0
         has_dresses = len(dresses) > 0
@@ -1968,9 +1968,11 @@ def generate_outfits():
         has_acc = len(accessories) > 0
 
         if not has_tops and not has_dresses and not has_full:
-            return jsonify({"success":False,"images":[],"error":"No tops, dresses, or full outfits in your closet. Upload clothing photos first."}),200
+            return jsonify({"success":False,"images":[],"error":"No tops, dresses, or full outfits in your closet."}),200
         if has_tops and not has_bottoms:
             return jsonify({"success":False,"images":[],"error":"You need bottoms (pants/skirts) in your closet."}),200
+        if has_tops and has_bottoms and not has_shoes:
+            return jsonify({"success":False,"images":[],"error":"You need shoes in your closet to complete outfits."}),200
 
         # ---- Build text description ----
         def _item_text(items_list):
