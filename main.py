@@ -84,6 +84,8 @@ def handle_preflight():
         return resp, 204
 
 # ---------------------------------------------------------------------------
+
+
 # Environment
 # ---------------------------------------------------------------------------
 # Configuration imported from backend.config (single source of truth)
@@ -106,6 +108,12 @@ from backend.services.fashion_service import (
     generate_tweak_visualization_prompt, set_color_names,
 )
 
+# Route initializers from backend/routes/ modular modules
+from backend.routes.analyze import init_routes as init_analyze_routes
+from backend.routes.health import init_routes as init_health_routes
+
+init_analyze_routes(app)
+init_health_routes(app, get_closet_count=lambda: len(qdrant_get_all_items()))
 
 # Color Dictionary
 # ---------------------------------------------------------------------------
@@ -1277,30 +1285,6 @@ _STRENGTH_DETAILS = {
 }
 
 
-_image_b64_cache = ""
-
-# Fashion Decision
-# ---------------------------------------------------------------------------
-@app.route("/api/v1/analyze-outfit", methods=["POST", "OPTIONS"], strict_slashes=False)
-def analyze_outfit():
-    if request.method == "OPTIONS":
-        return "", 204
-    data = request.get_json(silent=True) or {}
-    image_b64 = data.get("image_b64")
-    if not image_b64:
-        return jsonify({"error": "Missing image_b64"}), 400
-    global _image_b64_cache
-    _image_b64_cache = image_b64
-    try:
-        result = get_fashion_decision(image_b64)
-        return jsonify(map_analysis(result))
-    except Exception as exc:
-        _log.error("[ANALYZE] ERROR: %s", exc)
-        return jsonify({"success": False, "error": f"MiMo Vision 2.5 failed: {str(exc)[:200]}"}), 500
-
-# ---------------------------------------------------------------------------
-# Stylist Explore
-# ---------------------------------------------------------------------------
 @app.route("/api/v1/stylist-explore", methods=["POST", "OPTIONS"], strict_slashes=False)
 def stylist_explore():
     if request.method == "OPTIONS":
@@ -2248,44 +2232,6 @@ def server_error(e):
     resp.headers["Content-Type"] = "application/json"
     return resp, 500
 
-
-@app.route("/", methods=["GET"], strict_slashes=False)
-@app.route("/api/health", methods=["GET"], strict_slashes=False)
-@app.route("/health", methods=["GET"], strict_slashes=False)
-def health():
-    closet_count = len(qdrant_get_all_items())
-    return jsonify({
-        "status": "ok",
-        "service": "luxor-fashion-omega-v5",
-        "mimo_configured": bool(MIMO_API_KEY),
-        "mimo_key_prefix": MIMO_API_KEY[:8] if MIMO_API_KEY else "",
-        "blob_configured": bool(BLOB_READ_WRITE_TOKEN),
-        "qdrant_configured": bool(QDRANT_URL and QDRANT_API_KEY),
-        "closet_items": closet_count,
-    })
-
-# ---------------------------------------------------------------------------
-# Entrypoint
-# ---------------------------------------------------------------------------
-
-
-@app.route("/api/health/mimo", methods=["GET"], strict_slashes=False)
-def mimo_health():
-    return jsonify({
-        "api_key_loaded": bool(MIMO_API_KEY),
-        "endpoint": MIMO_API_URL,
-        "model": MIMO_VISION_MODEL,
-        "authentication": "configured" if MIMO_API_KEY else "missing",
-    })
-
-
-@app.route("/api/health/config", methods=["GET"], strict_slashes=False)
-def config_health():
-    return jsonify({
-        "api_key": bool(MIMO_API_KEY),
-        "qdrant": bool(QDRANT_URL and QDRANT_API_KEY),
-        "blob": bool(BLOB_READ_WRITE_TOKEN),
-    })
 
 
 if __name__ == "__main__":
