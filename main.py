@@ -1343,94 +1343,102 @@ def stylist_generate():
 # ---------------------------------------------------------------------------
 @app.route("/api/v1/closet/add-item", methods=["POST", "OPTIONS"], strict_slashes=False)
 def closet_add():
-    if request.method == "OPTIONS":
-        return "", 204
-    data = request.get_json(silent=True) or {}
-    item_type = data.get("type", data.get("category", "other"))
-    label = data.get("label", data.get("name", ""))
-    color = data.get("color", "")
-    category = data.get("category", data.get("type", "other"))
-    brand = data.get("brand", "")
-    season = data.get("season", "all-season")
-    occasion = data.get("occasion", "")
-    style = data.get("style", "")
-    notes = data.get("notes", "")
-    price = data.get("price", None)
-    image_b64 = data.get("image_b64", "")
-    user_id = data.get("user_id", "")
-
-    if not label and not image_b64:
-        return jsonify({"error": "Need label or image"}), 400
-
-    # Upload image: prefer Vercel Blob, fallback to local disk
-    image_url = ""
-    if image_b64:
-        image_url = upload_image_to_blob(image_b64)
-        if not image_url:
-            try:
-                raw = base64.b64decode(image_b64)
-                fname = f"{uuid.uuid4().hex[:16]}.jpg"
-                local_path = os.path.join(BASE_DIR, "public", "images", fname)
-                os.makedirs(os.path.dirname(local_path), exist_ok=True)
-                with open(local_path, "wb") as f:
-                    f.write(raw)
-                image_url = f"/images/{fname}"
-                _log.info("[CLOSET] Saved image locally: %s", local_path)
-            except Exception as exc:
-                _log.warning("[CLOSET] Local image save failed: %s", exc)
-
-    # Build item
-    item_id = str(uuid.uuid4())[:8]
-    now = datetime.now(timezone.utc).isoformat()
-    item = {
-        "id": item_id,
-        "type": item_type,
-        "label": label,
-        "name": label,
-        "color": color,
-        "category": category,
-        "brand": brand,
-        "season": season,
-        "occasion": occasion,
-        "style": style,
-        "notes": notes,
-        "price": price,
-        "user_id": user_id,
-        "image_url": image_url or "",
-        "photo_url": image_url or "",
-        "created_at": now,
-    }
-
-    # ---- Persist to closet_items.json (read → append → write) ----
-    json_path = _LOCAL_CLOSET_FILE
-    items = []
     try:
-        if os.path.exists(json_path):
-            with open(json_path, "r") as f:
+        if request.method == "OPTIONS":
+            return "", 204
+        data = request.get_json(silent=True) or {}
+        item_type = data.get("type", data.get("category", "other"))
+        label = data.get("label", data.get("name", ""))
+        color = data.get("color", "")
+        category = data.get("category", data.get("type", "other"))
+        brand = data.get("brand", "")
+        season = data.get("season", "all-season")
+        occasion = data.get("occasion", "")
+        style = data.get("style", "")
+        notes = data.get("notes", "")
+        price = data.get("price", None)
+        image_b64 = data.get("image_b64", "")
+        user_id = data.get("user_id", "")
+
+        if not label and not image_b64:
+            return jsonify({"error": "Need label or image"}), 400
+
+        # Upload image: prefer Vercel Blob, fallback to local disk
+        image_url = ""
+        if image_b64:
+            image_url = upload_image_to_blob(image_b64)
+            if not image_url:
                 try:
-                    items = json.load(f)
-                    if not isinstance(items, list):
-                        items = []
-                except json.JSONDecodeError:
-                    items = []
-    except Exception as exc:
-        _log.warning("[CLOSET] Error reading %s: %s", json_path, exc)
+                    raw = base64.b64decode(image_b64)
+                    fname = f"{uuid.uuid4().hex[:16]}.jpg"
+                    local_path = os.path.join(BASE_DIR, "public", "images", fname)
+                    os.makedirs(os.path.dirname(local_path), exist_ok=True)
+                    with open(local_path, "wb") as f:
+                        f.write(raw)
+                    image_url = f"/images/{fname}"
+                    _log.info("[CLOSET] Saved image locally: %s", local_path)
+                except Exception as exc:
+                    _log.warning("[CLOSET] Local image save failed: %s", exc)
+
+        # Build item
+        item_id = str(uuid.uuid4())[:8]
+        now = datetime.now(timezone.utc).isoformat()
+        item = {
+            "id": item_id,
+            "type": item_type,
+            "label": label,
+            "name": label,
+            "color": color,
+            "category": category,
+            "brand": brand,
+            "season": season,
+            "occasion": occasion,
+            "style": style,
+            "notes": notes,
+            "price": price,
+            "user_id": user_id,
+            "image_url": image_url or "",
+            "photo_url": image_url or "",
+            "created_at": now,
+        }
+
+        # ---- Persist to closet_items.json (read -> append -> write) ----
+        json_path = _LOCAL_CLOSET_FILE
         items = []
+        try:
+            if os.path.exists(json_path):
+                with open(json_path, "r") as f:
+                    try:
+                        items = json.load(f)
+                        if not isinstance(items, list):
+                            items = []
+                    except json.JSONDecodeError:
+                        items = []
+        except Exception as exc:
+            _log.warning("[CLOSET] Error reading %s: %s", json_path, exc)
+            items = []
 
-    # Remove existing item with same id (safe upsert)
-    items = [i for i in items if i.get("id") != item_id]
-    items.append(item)
+        # Remove existing item with same id (safe upsert)
+        items = [i for i in items if i.get("id") != item_id]
+        items.append(item)
 
-    try:
-        with open(json_path, "w") as f:
-            json.dump(items, f, indent=2)
-        _log.info("[CLOSET] Saved %d items to %s", len(items), json_path)
-        print(f"[CLOSET-DEBUG] Saved {len(items)} items to closet_items.json")
-    except Exception as exc:
-        _log.error("[CLOSET] Failed to write %s: %s", json_path, exc)
-        return jsonify({"error": "Storage unavailable"}), 503
+        try:
+            with open(json_path, "w") as f:
+                json.dump(items, f, indent=2)
+            _log.info("[CLOSET] Saved %d items to %s", len(items), json_path)
+            print(f"[CLOSET-DEBUG] Saved {len(items)} items to closet_items.json")
+        except Exception as exc:
+            _log.error("[CLOSET] Failed to write %s: %s", json_path, exc)
+            return jsonify({"error": "Storage unavailable"}), 503
 
-    return jsonify({"success": True, "item": item})@app.route("/api/v1/closet/list-items", methods=["GET", "OPTIONS"], strict_slashes=False)
+        return jsonify({"success": True, "item": item})
+    except Exception as e:
+        import traceback
+        print("=== CRITICAL ERROR IN /api/v1/closet/add-item ===", flush=True)
+        traceback.print_exc()
+        print("================================================", flush=True)
+        return jsonify({"success": False, "message": str(e)}), 500
+@app.route("/api/v1/closet/list-items", methods=["GET", "OPTIONS"], strict_slashes=False)
 def closet_list():
     if request.method == "OPTIONS":
         return "", 204
