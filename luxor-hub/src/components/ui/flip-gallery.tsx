@@ -304,7 +304,7 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading 
             )}
           </div>
           );
-        })
+        })}
 
         {/* Black dividers between sections */}
         {Array.from({ length: sectionCount - 1 }).map((_, i) => (
