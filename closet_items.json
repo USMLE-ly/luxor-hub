@@ -4,98 +4,71 @@
     "type": "Top",
     "color": "White",
     "category": "Casual",
-    "label": "White Cotton T-Shirt",
+    "label": "D\u00e9bardeur camisole",
     "created_at": "2026-06-01T10:00:00Z",
-    "image_url": "/images/white-tshirt.jpg"
+    "image_url": "/images/debardeur-camisole.jpg"
   },
   {
     "id": "top-002",
     "type": "Top",
-    "color": "Black",
-    "category": "Formal",
-    "label": "Black Silk Blouse",
+    "color": "Green",
+    "category": "Casual",
+    "label": "Green top",
     "created_at": "2026-06-01T10:01:00Z",
-    "image_url": "/images/black-blouse.jpg"
-  },
-  {
-    "id": "top-003",
-    "type": "Top",
-    "color": "Pink",
-    "category": "Party",
-    "label": "Pink Silk Camisole",
-    "created_at": "2026-06-01T10:02:00Z",
-    "image_url": "/images/pink-camisole.jpg"
+    "image_url": "/images/green-top.jpg"
   },
   {
     "id": "bottom-001",
     "type": "Bottom",
-    "color": "Blue",
-    "category": "Casual",
-    "label": "Blue Wide-Leg Jeans",
-    "created_at": "2026-06-01T10:03:00Z",
-    "image_url": "/images/blue-jeans.jpg"
+    "color": "Navy",
+    "category": "Work",
+    "label": "Navy pant",
+    "created_at": "2026-06-01T10:02:00Z",
+    "image_url": "/images/navy-pant.jpg"
   },
   {
     "id": "bottom-002",
     "type": "Bottom",
-    "color": "Black",
-    "category": "Formal",
-    "label": "Black Tailored Trousers",
-    "created_at": "2026-06-01T10:04:00Z",
-    "image_url": "/images/black-trousers.jpg"
+    "color": "Green",
+    "category": "Casual",
+    "label": "Green pants",
+    "created_at": "2026-06-01T10:03:00Z",
+    "image_url": "/images/green-pants.jpg"
   },
   {
     "id": "bottom-003",
     "type": "Bottom",
-    "color": "Navy",
-    "category": "Work",
-    "label": "Navy Pencil Skirt",
-    "created_at": "2026-06-01T10:05:00Z",
-    "image_url": "/images/navy-skirt.jpg"
+    "color": "Multi",
+    "category": "Party",
+    "label": "Flower pants",
+    "created_at": "2026-06-01T10:04:00Z",
+    "image_url": "/images/flower-pants.jpg"
   },
   {
     "id": "shoe-001",
     "type": "Shoe",
-    "color": "White",
-    "category": "Casual",
-    "label": "White Sneakers",
-    "created_at": "2026-06-01T10:06:00Z",
-    "image_url": "/images/white-sneakers.jpg"
+    "color": "Black",
+    "category": "Formal",
+    "label": "Minimalistes mais",
+    "created_at": "2026-06-01T10:05:00Z",
+    "image_url": "/images/minimalistes-mais.jpg"
   },
   {
     "id": "shoe-002",
     "type": "Shoe",
-    "color": "Black",
-    "category": "Formal",
-    "label": "Black Leather Loafers",
-    "created_at": "2026-06-01T10:07:00Z",
-    "image_url": "/images/black-loafers.jpg"
-  },
-  {
-    "id": "jacket-001",
-    "type": "Jacket",
-    "color": "Black",
-    "category": "Formal",
-    "label": "Black Blazer",
-    "created_at": "2026-06-01T10:08:00Z",
-    "image_url": "/images/black-blazer.jpg"
-  },
-  {
-    "id": "dress-001",
-    "type": "Dress",
-    "color": "Red",
-    "category": "Party",
-    "label": "Red Cocktail Dress",
-    "created_at": "2026-06-01T10:09:00Z",
-    "image_url": "/images/red-dress.jpg"
+    "color": "Beige",
+    "category": "Casual",
+    "label": "Chaussures femme",
+    "created_at": "2026-06-01T10:06:00Z",
+    "image_url": "/images/chaussures-femme.jpg"
   },
   {
     "id": "full-001",
     "type": "Full Outfit",
-    "color": "Black",
-    "category": "Formal",
-    "label": "Black Tuxedo Set",
-    "created_at": "2026-06-01T10:10:00Z",
-    "image_url": "/images/tuxedo-set.jpg"
+    "color": "Pink",
+    "category": "Party",
+    "label": "Pink Floral Lehenga Set",
+    "created_at": "2026-06-01T10:07:00Z",
+    "image_url": "/images/pink-lehenga.jpg"
   }
 ]
