@@ -105,6 +105,7 @@ const PRESET_COLORS: Record<string, string> = {
   pink: '#ffbfd1',
   titanium: '#837a72',
   'natural-titanium': '#a69a8a',
+  'golden-sands': '#E8C87A',
   green: '#2b622e',
   red: '#c81f2f'
 };

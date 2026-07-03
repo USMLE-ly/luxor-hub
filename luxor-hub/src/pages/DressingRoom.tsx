@@ -123,7 +123,7 @@ export default function DressingRoomPage() {
         <div className="flex justify-center items-start">
           <IPhoneMockup
             model="15-pro"
-            color="natural-titanium"
+            color="golden-sands"
             screenBg="#0a0a0a"
             scale={0.85}
             showHomeIndicator={true}

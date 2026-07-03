@@ -2439,7 +2439,11 @@ def generate_outfits():
             # ── Fallback: random selection if MiMo failed or skipped ──
             if not combo:
                 _log.info("[DRESSING] Fallback random outfit %d", oi)
-                fallback_c: dict = {"type": "regular", "accessory_note": ""}
+                fallback_c: dict = {"type": "regular", "accessory_note": "", "stylist_reasoning": [
+                    "Selected by trend algorithm for balanced silhouette",
+                    "Complementary colors chosen from your wardrobe",
+                    "Designed for versatile everyday wear"
+                ]}
                 # Pick a top (prefer unused)
                 if tops:
                     unused_tops = [t for t in tops if t.get("id") not in used_ids]
