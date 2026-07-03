@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "id": "8c93e122",
+    "type": "shoes",
+    "label": "White Blue Puma",
+    "name": "White Blue Puma",
+    "color": "White/Blue",
+    "category": "shoes",
+    "brand": "",
+    "season": "all-season",
+    "occasion": "",
+    "style": "",
+    "notes": "",
+    "price": null,
+    "user_id": "",
+    "image_url": "/images/3d5185b7f30b47b3.jpg",
+    "photo_url": "/images/3d5185b7f30b47b3.jpg",
+    "created_at": "2026-07-03T16:03:59.759389+00:00"
+  }
+]

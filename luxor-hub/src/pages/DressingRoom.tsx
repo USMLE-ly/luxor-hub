@@ -65,7 +65,7 @@ export default function DressingRoomPage() {
           // Flat array of URLs — wrap into { top, mid, bottom } objects for the 3-split gallery
           normalized = images.map((url: string) => ({
             top: url, mid: url, bottom: url,
-            type: 'regular' as const, accessory_note: '',
+            type: 'regular' as const, accessory_note: '', stylist_reasoning: [],
           }));
           console.log("[DressingRoom] Normalized flat URLs to OutfitImages:", normalized);
         } else {
@@ -76,6 +76,7 @@ export default function DressingRoomPage() {
             bottom: item.bottom || '',
             type: item.type || 'regular',
             accessory_note: item.accessory_note || '',
+            stylist_reasoning: item.stylist_reasoning || [],
           }));
         }
         setGeneratedImages(normalized);
@@ -140,6 +141,25 @@ export default function DressingRoomPage() {
             className="max-w-sm mx-auto mt-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-center"
           >
             <p className="text-sm text-amber-300/90">{generatedImages[0].accessory_note}</p>
+          </motion.div>
+        )}
+
+        {/* ---- Stylist Notes ---- */}
+        {generatedImages.length > 0 && generatedImages[0]?.stylist_reasoning && generatedImages[0].stylist_reasoning.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-sm mx-auto mt-4 p-4 rounded-lg bg-[#1F1F1F] border border-white/10"
+          >
+            <h4 className="text-sm font-semibold text-purple-400 mb-2">Stylist Notes</h4>
+            <ul className="space-y-1.5">
+              {generatedImages[0].stylist_reasoning.map((note: string, i: number) => (
+                <li key={i} className="text-sm text-gray-300 flex items-start gap-2">
+                  <span className="text-purple-400 mt-0.5">•</span>
+                  <span>{note}</span>
+                </li>
+              ))}
+            </ul>
           </motion.div>
         )}
 

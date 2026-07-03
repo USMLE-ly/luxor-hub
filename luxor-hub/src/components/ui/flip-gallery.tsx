@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export interface OutfitImages {
@@ -7,6 +7,7 @@ export interface OutfitImages {
   bottom: string;
   type?: 'regular' | 'dress' | 'full_outfit';
   accessory_note?: string;
+  stylist_reasoning?: string[];
 }
 
 interface FlipGalleryProps {
@@ -59,10 +60,18 @@ const SECTION_BASE: React.CSSProperties = {
   position: 'absolute',
   left: 0,
   width: '100%',
-  backgroundSize: 'cover',
-  backgroundPosition: 'center',
-  backgroundRepeat: 'no-repeat',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
   overflow: 'hidden',
+};
+
+const IMG_STYLE: React.CSSProperties = {
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover',
+  objectPosition: 'center',
+  display: 'block',
 };
 
 const DIVIDER_STYLE: React.CSSProperties = {
@@ -128,17 +137,74 @@ const DISMISS_BTN: React.CSSProperties = {
   padding: 0,
 };
 
+const FLIP_SPEED = 400; // ms per section flip
+const DOMINO_DELAY = 150; // ms stagger between sections
+
 /* ------------------------------------------------------------------ */
 /*  Component                                                         */
 /* ------------------------------------------------------------------ */
 export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading }: FlipGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [flipState, setFlipState] = useState<'idle' | 'out' | 'in'>('idle');
+  const [animDirection, setAnimDirection] = useState<'next' | 'prev'>('next');
+  const flipTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Reset to first when list changes
-  useEffect(() => { setCurrentIndex(0); }, [outfits]);
+  useEffect(() => { setCurrentIndex(0); setFlipState('idle'); }, [outfits]);
 
-  const handleNext = () => setCurrentIndex((currentIndex + 1) % outfits.length);
-  const handlePrev = () => setCurrentIndex((currentIndex - 1 + outfits.length) % outfits.length);
+  // Clean up timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (flipTimeoutRef.current) clearTimeout(flipTimeoutRef.current);
+    };
+  }, []);
+
+  // ── Domino flip state machine ──
+  useEffect(() => {
+    if (flipState === 'idle') return;
+
+    const sectionCount = outfits[currentIndex]
+      ? getSections(outfits[currentIndex]).count
+      : 3;
+
+    if (flipState === 'out') {
+      // Wait for all sections to flip out (last section delay + transition)
+      const delay = (sectionCount - 1) * DOMINO_DELAY + FLIP_SPEED + 50;
+      flipTimeoutRef.current = setTimeout(() => {
+        setCurrentIndex(prev =>
+          animDirection === 'next'
+            ? (prev + 1) % outfits.length
+            : (prev - 1 + outfits.length) % outfits.length
+        );
+        // Use double rAF to let the new content render before flip-in
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            setFlipState('in');
+          });
+        });
+      }, delay);
+    } else if (flipState === 'in') {
+      // Wait for flip-in to complete
+      const delay = (sectionCount - 1) * DOMINO_DELAY + FLIP_SPEED + 50;
+      flipTimeoutRef.current = setTimeout(() => {
+        setFlipState('idle');
+      }, delay);
+    }
+
+    return () => {
+      if (flipTimeoutRef.current) clearTimeout(flipTimeoutRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flipState]);
+
+  const triggerFlip = (direction: 'next' | 'prev') => {
+    if (flipState !== 'idle') return;
+    setAnimDirection(direction);
+    setFlipState('out');
+  };
+
+  const handleNext = () => triggerFlip('next');
+  const handlePrev = () => triggerFlip('prev');
 
   /* ======================= EMPTY STATE ======================= */
   if (outfits.length === 0) {
@@ -185,21 +251,44 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading 
 
   const { sections, count: sectionCount } = getSections(outfit);
 
+  /* ── Compute per-section style with domino flip transform ── */
+  const getSectionStyle = (idx: number): React.CSSProperties => {
+    const isAnimating = flipState !== 'idle';
+    let transform = 'rotateX(0deg)';
+    if (flipState === 'out') {
+      transform = 'rotateX(-90deg)';
+    }
+    // 'in' phase: back to rotateX(0) — handled by base transform
+    return {
+      position: 'absolute',
+      left: 0,
+      width: '100%',
+      top: `${(idx / sectionCount) * 100}%`,
+      height: `${(1 / sectionCount) * 100}%`,
+      transform,
+      transition: isAnimating ? `transform ${FLIP_SPEED}ms ease-in-out` : 'none',
+      transitionDelay: isAnimating ? `${idx * DOMINO_DELAY}ms` : '0ms',
+      overflow: 'hidden',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#1A1A1A',
+      zIndex: 1,
+    };
+  };
+
   return (
     <div style={FRAME_STYLE}>
       <div style={INNER_STYLE}>
-        {/* Render sections with background images from closet */}
+        {/* Render sections with <img> tags for editorial object-fit */}
         {sections.map((url, idx) => (
-          <div
-            key={idx}
-            style={{
-              ...SECTION_BASE,
-              top: `${(idx / sectionCount) * 100}%`,
-              height: `${(1 / sectionCount) * 100}%`,
-              backgroundImage: url?.startsWith('http') ? `url('${url}')` : undefined,
-              backgroundColor: url?.startsWith("http") ? "transparent" : "#1A1A1A",
-            }}
-          />
+          <div key={idx} style={getSectionStyle(idx)}>
+            {url?.startsWith('http') ? (
+              <img src={url} alt={`Outfit ${currentIndex + 1} section ${idx + 1}`} style={IMG_STYLE} />
+            ) : (
+              <div style={{ width: '100%', height: '100%', backgroundColor: '#1A1A1A' }} />
+            )}
+          </div>
         ))}
 
         {/* Black dividers between sections */}
@@ -219,8 +308,8 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading 
         </div>
         {outfits.length > 1 && (
           <div style={CONTROL_BOTTOM_RIGHT}>
-            <button onClick={handlePrev} style={ACTIVE_ARROW}><ChevronLeft size={20} /></button>
-            <button onClick={handleNext} style={ACTIVE_ARROW}><ChevronRight size={20} /></button>
+            <button onClick={handlePrev} style={ACTIVE_ARROW} disabled={flipState !== 'idle'}><ChevronLeft size={20} /></button>
+            <button onClick={handleNext} style={ACTIVE_ARROW} disabled={flipState !== 'idle'}><ChevronRight size={20} /></button>
           </div>
         )}
       </div>

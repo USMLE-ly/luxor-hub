@@ -2044,9 +2044,13 @@ def generate_outfits():
         except Exception as exc:
             _log.warning("[DRESSING] Collage failed: %s", exc)
 
-        # ---- MiMo Vision prompt ----
+                # ---- MiMo Vision prompt ----
         vision_prompt = (
-            'You are a fashion stylist AI. Look only at the ACTUAL closet items shown in the image and listed below. '
+            'Act as a master stylist with three decades of elite fashion experience. '
+            'You are choosing an outfit for a client. Analyze the provided closet items. '
+            'Select the best top, bottom, and shoes. Consider color theory, seasonal relevance, '
+            'body flow, and mixing textures.\n\n'
+            'Look only at the ACTUAL closet items shown in the image and listed below. '
             'Do NOT invent or hallucinate any items. Only use items that exist in the lists.\n'
             'Occasion: ' + style_desc + '.\n\n'
             'Available items:\n' + items_text + '\n\n'
@@ -2056,7 +2060,7 @@ def generate_outfits():
             '- "full_outfit": a single complete outfit item (use full_outfit_idx only)\n\n'
             'Return ONLY this JSON array (no other text, no code fences):\n'
             '{"selections":[\n'
-            '  {"type":"regular","top_idx":0,"bottom_idx":0,"shoe_idx":0,"dress_idx":null,"full_outfit_idx":null,"accessory_note":""}\n'
+            '  {"type":"regular","top_idx":0,"bottom_idx":0,"shoe_idx":0,"dress_idx":null,"full_outfit_idx":null,"accessory_note":"","stylist_reasoning":["The textured navy dress creates a long vertical line, elongating the torso."]}\n'
             ']}\n\n'
             'CRITICAL RULES - VIOLATION WILL BREAK THE APP:\n'
             '1. ONLY use indices for items that ACTUALLY EXIST in the lists above.\n'
@@ -2065,13 +2069,17 @@ def generate_outfits():
             '4. If FULL OUTFITS exist, use "full_outfit" type. Set full_outfit_idx only.\n'
             '5. For "full_outfit": ONLY set full_outfit_idx. Set top_idx/bottom_idx/shoe_idx/dress_idx to null.\n'
             '6. For "dress": ONLY use dress_idx + shoe_idx. Do NOT also pick top/bottom.\n'
-            '7. accessory_note: ONLY write if the outfit NEEDS an accessory to be complete.\n'
+            '7. STRICT RULE: For EVERY selection, you MUST include a "stylist_reasoning" array containing 3 to 5 specific fashion notes explaining your choices.\n'
+            '   Examples: "The cream silk top adds softness against structured trousers",'
+            ' "These brown loafers ground the outfit with earthy warmth",'
+            ' "The high-waisted cut creates a flattering hourglass proportion".\n'
+            '8. accessory_note: ONLY write if the outfit NEEDS an accessory to be complete.\n'
             '   - If the needed accessory EXISTS in your ACCESSORIES list, say: "Add [item] from your closet".\n'
             '   - If the needed accessory is NOT in the closet, say: "Consider adding [item]".\n'
             '   - If the outfit already has accessories or doesn\'t need any, leave accessory_note as empty string "".\n'
-            '8. Return exactly ' + str(count) + ' selection(s).\n'
-            '9. NO HALLUCINATION. NO invented items. NO made-up indices.\n'
-            '10. VARY your shoe_idx and item indices across the selections — do not pick the same shoe for every outfit.\n'
+            '9. Return exactly ' + str(count) + ' selection(s).\n'
+            '10. NO HALLUCINATION. NO invented items. NO made-up indices.\n'
+            '11. VARY your shoe_idx and item indices across the selections — do not pick the same shoe for every outfit.\n'
         )
 
         mimo_result = None
@@ -2094,7 +2102,7 @@ def generate_outfits():
         debug_source = "mimo_vision"
 
         for oi in range(count):
-            outfit_data = {"type": "regular", "top": "", "mid": "", "bottom": "", "accessory_note": ""}
+            outfit_data = {"type": "regular", "top": "", "mid": "", "bottom": "", "accessory_note": "", "stylist_reasoning": []}
             combo = None
 
             # Try MiMo Vision selection
@@ -2105,7 +2113,8 @@ def generate_outfits():
                         sel = sels[oi]
                         otype = sel.get("type", "regular")
                         acc_note = sel.get("accessory_note", "")
-                        c = {"type": otype, "accessory_note": acc_note}
+                        s_reason = sel.get("stylist_reasoning", [])
+                        c = {"type": otype, "accessory_note": acc_note, "stylist_reasoning": s_reason}
 
                         if otype == "full_outfit":
                             fidx = sel.get("full_outfit_idx")
@@ -2185,6 +2194,7 @@ def generate_outfits():
                     "mid": "",
                     "bottom": "",
                     "accessory_note": combo.get("accessory_note", ""),
+                    "stylist_reasoning": combo.get("stylist_reasoning", []),
                 }
                 _log.info("[DRESSING] FULL_OUTFIT: %s", outfit_data['top'][:50])
             elif combo.get("type") == "dress":
@@ -2196,6 +2206,7 @@ def generate_outfits():
                     "mid": "",
                     "bottom": _img_url(sh),
                     "accessory_note": combo.get("accessory_note", ""),
+                    "stylist_reasoning": combo.get("stylist_reasoning", []),
                 }
                 _log.info("[DRESSING] DRESS: top=%s bottom=%s", outfit_data['top'][:50], outfit_data['bottom'][:50])
             else:  # regular
@@ -2205,6 +2216,7 @@ def generate_outfits():
                     "mid": _img_url(combo.get("bottom", {})),
                     "bottom": _img_url(combo.get("shoes", {})),
                     "accessory_note": combo.get("accessory_note", ""),
+                    "stylist_reasoning": combo.get("stylist_reasoning", []),
                 }
                 _log.info("[DRESSING] REGULAR: top=%s mid=%s bottom=%s",
                           outfit_data['top'][:40], outfit_data['mid'][:40], outfit_data['bottom'][:40])
