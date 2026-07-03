@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { AppLayout } from "@/components/app/AppLayout";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import FlipGallery, { type OutfitImages } from "@/components/ui/flip-gallery";
+import IPhoneMockup from "@/components/ui/iphone-mockup";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { ProgressBar } from "@/components/ui/progress-bar";
@@ -17,8 +17,6 @@ const OCCASIONS = [
   { id: "date-night", label: "Date Night", emoji: "🌹" },
   { id: "sport", label: "Sport", emoji: "🏃" },
 ];
-
-const OUTFIT_COUNT = 3;
 
 export default function DressingRoomPage() {
   const { user } = useAuth();
@@ -59,18 +57,15 @@ export default function DressingRoomPage() {
       setProgressStage("Ready!");
 
       if (data.images?.length > 0) {
-        // Normalize data: if it's flat URLs, wrap into objects; otherwise use as-is
         const images = data.images || [];
         let normalized: OutfitImages[];
         if (images.length > 0 && typeof images[0] === 'string') {
-          // Flat array of URLs — wrap into { top, mid, bottom } objects for the 3-split gallery
           normalized = images.map((url: string) => ({
             top: url, mid: url, bottom: url,
             type: 'regular' as const, accessory_note: '', stylist_reasoning: [],
           }));
           console.log("[DressingRoom] Normalized flat URLs to OutfitImages:", normalized);
         } else {
-          // Defensive: ensure all image keys exist, prevent null/undefined from reaching FlipGallery
           normalized = images.map((item: any) => ({
             top: item.top || '',
             mid: item.mid || '',
@@ -124,44 +119,52 @@ export default function DressingRoomPage() {
           </p>
         </motion.div>
 
-        {/* ---- FLIP GALLERY (No duplicate empty state below) ---- */}
-        <div className="flex justify-center items-start pt-4">
-          <FlipGallery
-            outfits={generatedImages}
-            onGenerate={handleGenerateClick}
-            onDismiss={handleDismiss}
-            isLoading={isGenerating}
-            onOutfitChange={setActiveOutfit}
-          />
+        {/* ---- IPHONE MOCKUP + FLIPGALLERY ---- */}
+        <div className="flex justify-center items-start">
+          <IPhoneMockup
+            model="15-pro"
+            color="natural-titanium"
+            screenBg="#0a0a0a"
+            scale={0.85}
+            showHomeIndicator={true}
+            safeArea={true}
+          >
+            <FlipGallery
+              outfits={generatedImages}
+              onGenerate={handleGenerateClick}
+              onDismiss={handleDismiss}
+              isLoading={isGenerating}
+              onOutfitChange={setActiveOutfit}
+            />
+          </IPhoneMockup>
         </div>
 
-        {/* ---- Accessory note ---- */}
-        {activeOutfit && activeOutfit.accessory_note && (
+        {/* ---- STYLIST NOTES & ACCESSORY NOTE ---- */}
+        {activeOutfit && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="max-w-sm mx-auto mt-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-center"
+            className="max-w-sm mx-auto space-y-4"
           >
-            <p className="text-sm text-amber-300/90">{activeOutfit.accessory_note}</p>
-          </motion.div>
-        )}
+            {activeOutfit.accessory_note && (
+              <div className="bg-[#2a1f1a] border border-[#4a2f1a] text-amber-200/90 p-3 rounded-lg text-center text-sm">
+                {activeOutfit.accessory_note}
+              </div>
+            )}
 
-        {/* ---- Stylist Notes ---- */}
-        {activeOutfit && activeOutfit.stylist_reasoning && activeOutfit.stylist_reasoning.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-sm mx-auto mt-4 p-4 rounded-lg bg-[#1F1F1F] border border-white/10"
-          >
-            <h4 className="text-sm font-semibold text-purple-400 mb-2">Stylist Notes</h4>
-            <ul className="space-y-1.5">
-              {activeOutfit.stylist_reasoning.map((note: string, i: number) => (
-                <li key={i} className="text-sm text-gray-300 flex items-start gap-2">
-                  <span className="text-purple-400 mt-0.5">•</span>
-                  <span>{note}</span>
-                </li>
-              ))}
-            </ul>
+            {activeOutfit.stylist_reasoning && activeOutfit.stylist_reasoning.length > 0 && (
+              <div className="p-4 rounded-lg bg-[#1F1F1F] border border-white/10">
+                <h4 className="text-sm font-semibold text-purple-400 mb-2">Stylist Notes</h4>
+                <ul className="space-y-1.5">
+                  {activeOutfit.stylist_reasoning.map((note: string, i: number) => (
+                    <li key={i} className="text-sm text-gray-300 flex items-start gap-2">
+                      <span className="text-purple-400 mt-0.5">•</span>
+                      <span>{note}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </motion.div>
         )}
 
