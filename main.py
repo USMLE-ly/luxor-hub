@@ -1943,12 +1943,11 @@ def generate_outfits():
         accessories = [i for i in items_with_img if _cat(i) == "accessory"]
         full_outfits = [i for i in items_with_img if _cat(i) == "full_outfit"]
         print(f"[CLOSET-DEBUG] Items: {len(items_with_img)} with images | Tops: {len(tops)} Bottoms: {len(bottoms)} Shoes: {len(shoes_list)} Dresses: {len(dresses)} Full: {len(full_outfits)} Accessories: {len(accessories)}")
-        print(f"[DEPLOYMENT-CHECK] Tops found: {len(tops)} items - {[t.get("label","") for t in tops[:3]]}")
-        print(f"[DEPLOYMENT-CHECK] Bottoms found: {len(bottoms)} items - {[b.get("label","") for b in bottoms[:3]]}")
-        print(f"[DEPLOYMENT-CHECK] Shoes found: {len(shoes_list)} items - {[s.get("label","") for s in shoes_list[:3]]}")
-        print(f"[DEPLOYMENT-CHECK] Full outfits found: {len(full_outfits)} items - {[f.get("label","") for f in full_outfits[:3]]}")
-        print(f"[DEPLOYMENT-CHECK] Dresses found: {len(dresses)} items - {[d.get("label","") for d in dresses[:3]]}")
-
+        print(f'[DEPLOYMENT-CHECK] Tops found: {len(tops)} items - {[t.get("label","") for t in tops[:3]]}')
+        print(f'[DEPLOYMENT-CHECK] Bottoms found: {len(bottoms)} items - {[b.get("label","") for b in bottoms[:3]]}')
+        print(f'[DEPLOYMENT-CHECK] Shoes found: {len(shoes_list)} items - {[s.get("label","") for s in shoes_list[:3]]}')
+        print(f'[DEPLOYMENT-CHECK] Full outfits found: {len(full_outfits)} items - {[f.get("label","") for f in full_outfits[:3]]}')
+        print(f'[DEPLOYMENT-CHECK] Dresses found: {len(dresses)} items - {[d.get("label","") for d in dresses[:3]]}')
         has_full = len(full_outfits) > 0
         has_dresses = len(dresses) > 0
         has_tops = len(tops) > 0
@@ -2129,7 +2128,7 @@ def generate_outfits():
             # ── Fallback: random selection if MiMo failed or skipped ──
             if not combo:
                 _log.info("[DRESSING] Fallback random outfit %d", oi)
-                fallback_c = {"type": "regular", "accessory_note": ""}
+                fallback_c: dict = {"type": "regular", "accessory_note": ""}
                 # Pick a top (prefer unused)
                 if tops:
                     unused_tops = [t for t in tops if t.get("id") not in used_ids]
