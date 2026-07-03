@@ -6,7 +6,7 @@
     "category": "Casual",
     "label": "White Cotton T-Shirt",
     "created_at": "2026-06-01T10:00:00Z",
-    "image_url": "https://placehold.co/600x800/555"
+    "image_url": "https://picsum.photos/seed/white-tshirt/600/800"
   },
   {
     "id": "top-002",
@@ -15,7 +15,7 @@
     "category": "Formal",
     "label": "Black Silk Blouse",
     "created_at": "2026-06-01T10:01:00Z",
-    "image_url": "https://placehold.co/600x800/444"
+    "image_url": "https://picsum.photos/seed/black-blouse/600/800"
   },
   {
     "id": "top-003",
@@ -24,7 +24,7 @@
     "category": "Party",
     "label": "Pink Silk Camisole",
     "created_at": "2026-06-01T10:02:00Z",
-    "image_url": "https://placehold.co/600x800/666"
+    "image_url": "https://picsum.photos/seed/pink-camisole/600/800"
   },
   {
     "id": "bottom-001",
@@ -33,7 +33,7 @@
     "category": "Casual",
     "label": "Blue Wide-Leg Jeans",
     "created_at": "2026-06-01T10:03:00Z",
-    "image_url": "https://placehold.co/600x800/777"
+    "image_url": "https://picsum.photos/seed/blue-jeans/600/800"
   },
   {
     "id": "bottom-002",
@@ -42,7 +42,7 @@
     "category": "Formal",
     "label": "Black Tailored Trousers",
     "created_at": "2026-06-01T10:04:00Z",
-    "image_url": "https://placehold.co/600x800/888"
+    "image_url": "https://picsum.photos/seed/black-trousers/600/800"
   },
   {
     "id": "bottom-003",
@@ -51,7 +51,7 @@
     "category": "Work",
     "label": "Navy Pencil Skirt",
     "created_at": "2026-06-01T10:05:00Z",
-    "image_url": "https://placehold.co/600x800/999"
+    "image_url": "https://picsum.photos/seed/navy-skirt/600/800"
   },
   {
     "id": "shoe-001",
@@ -60,7 +60,7 @@
     "category": "Casual",
     "label": "White Sneakers",
     "created_at": "2026-06-01T10:06:00Z",
-    "image_url": "https://placehold.co/600x800/aaa"
+    "image_url": "https://picsum.photos/seed/white-sneakers/600/800"
   },
   {
     "id": "shoe-002",
@@ -69,7 +69,7 @@
     "category": "Formal",
     "label": "Black Leather Loafers",
     "created_at": "2026-06-01T10:07:00Z",
-    "image_url": "https://placehold.co/600x800/bbb"
+    "image_url": "https://picsum.photos/seed/black-loafers/600/800"
   },
   {
     "id": "jacket-001",
@@ -78,7 +78,7 @@
     "category": "Formal",
     "label": "Black Blazer",
     "created_at": "2026-06-01T10:08:00Z",
-    "image_url": "https://placehold.co/600x800/ccc"
+    "image_url": "https://picsum.photos/seed/black-blazer/600/800"
   },
   {
     "id": "dress-001",
@@ -87,7 +87,7 @@
     "category": "Party",
     "label": "Red Cocktail Dress",
     "created_at": "2026-06-01T10:09:00Z",
-    "image_url": "https://placehold.co/600x800/ddd"
+    "image_url": "https://picsum.photos/seed/red-dress/600/800"
   },
   {
     "id": "full-001",
@@ -96,6 +96,6 @@
     "category": "Formal",
     "label": "Black Tuxedo Set",
     "created_at": "2026-06-01T10:10:00Z",
-    "image_url": "https://placehold.co/600x1000/222"
+    "image_url": "https://picsum.photos/seed/tuxedo/600/1000"
   }
 ]
