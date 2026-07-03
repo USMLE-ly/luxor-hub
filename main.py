@@ -2236,6 +2236,25 @@ def generate_outfits():
 
 # Serve static files with proper CORS headers to prevent CORB errors
 @app.route("/static/<path:filename>")
+
+@app.route("/images/<path:filename>")
+def serve_uploaded_image(filename):
+    """Serve user-uploaded closet images from public/images/."""
+    import os as os_mod
+    images_dir = os_mod.path.join(os_mod.path.dirname(os_mod.path.abspath(__file__)), "public", "images")
+    real_path = os_mod.path.realpath(os_mod.path.join(images_dir, filename))
+    if real_path.startswith(os_mod.path.realpath(images_dir)) and os_mod.path.isfile(real_path):
+        response = send_from_directory(images_dir, filename)
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        return response
+    # Return transparent pixel on 404 to prevent CORB
+    import base64
+    pixel = base64.b64decode("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7")
+    resp = make_response(pixel)
+    resp.headers["Content-Type"] = "image/gif"
+    resp.headers["Access-Control-Allow-Origin", "*"]
+    return resp
+
 @app.route("/media/<path:filename>")
 def serve_media_file(filename):
     """Serve uploaded/closet images with CORS headers.

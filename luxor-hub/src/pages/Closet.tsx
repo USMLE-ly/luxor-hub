@@ -171,7 +171,7 @@ const Closet = () => {
           season: item.season || null,
           occasion: item.occasion || null,
           style: item.style || null,
-          photo_url: item.photo_url || item.image_url || null,
+          photo_url: (item.photo_url || item.image_url) ? ((item.photo_url || item.image_url).startsWith("http") ? (item.photo_url || item.image_url) : apiBase + (item.photo_url || item.image_url)) : null,
           notes: item.notes || null,
           price: item.price || null,
         }));
@@ -1388,7 +1388,7 @@ function ItemCard({
         </div>
       </div>
       <div className="p-2">
-        <p className="font-sans text-xs font-medium text-foreground truncate">{item.name || "Unnamed"}</p>
+        <p className="font-sans text-xs font-medium text-foreground break-words">{item.name || "Unnamed"}</p>
         <p className="text-[10px] text-muted-foreground font-sans capitalize">{item.category}</p>
       </div>
     </motion.div>
