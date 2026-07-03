@@ -70,5 +70,14 @@
     "label": "Pink Floral Lehenga Set",
     "created_at": "2026-06-01T10:07:00Z",
     "image_url": "/images/pink-lehenga.jpg"
+  },
+  {
+    "id": "jacket-004",
+    "type": "Jacket",
+    "color": "Black",
+    "category": "Party",
+    "label": "Black Leather Jacket",
+    "created_at": "2026-07-03T12:00:00Z",
+    "image_url": "/images/black-leather-jacket.jpg"
   }
 ]
