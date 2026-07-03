@@ -68,7 +68,7 @@ logging.basicConfig(
 _log = logging.getLogger("luxor.omega")
 
 app = Flask(__name__)
-CORS(app, origins=["*"])
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # CRITICAL: Handle OPTIONS preflight BEFORE any routing/redirects
 # Replit proxy adds trailing slashes, Flask redirects with 308 on mismatched routes
@@ -1944,8 +1944,13 @@ def generate_outfits():
                 if any(kw in label for kw in kws): return res
             return "other"
         def _img_url(item, default=""):
-            """Get image URL from item, checking both image_url and photo_url (Supabase)."""
-            return item.get("image_url") or item.get("photo_url") or default
+            """Get image URL from item, ensuring it is an absolute URL to prevent CORB."""
+            raw = item.get("image_url") or item.get("photo_url") or default
+            if raw and not raw.startswith("http"):
+                # Relative path — prepend backend host to avoid CORB from 404 HTML pages
+                base = request.host_url.rstrip("/")
+                return f"{base}/{raw.lstrip("/")}"
+            return raw
 
         # ---- Group items ----
         print(f"[DEBUG] Grouping: items_with_img={len(items_with_img)}")
