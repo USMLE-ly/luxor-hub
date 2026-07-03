@@ -2005,7 +2005,10 @@ def generate_outfits():
             raw = item.get("image_url") or item.get("photo_url") or default
             if raw and not raw.startswith("http"):
                 # Relative path — prepend backend host to avoid CORB from 404 HTML pages
-                return request.host_url.rstrip("/") + "/images/" + raw.lstrip("/")
+                final_url = request.host_url.rstrip("/") + "/images/" + raw.lstrip("/")
+                print(f"[IMG-DEBUG] Generated URL: {final_url} (from raw={raw})")
+                return final_url
+            print(f"[IMG-DEBUG] Raw URL (no transform): {raw}")
             return raw
 
         # ---- Group items ----
@@ -2314,10 +2317,12 @@ def serve_uploaded_image(filename):
     images_dir = os_mod.path.join(os_mod.path.dirname(os_mod.path.abspath(__file__)), "public", "images")
     real_path = os_mod.path.realpath(os_mod.path.join(images_dir, filename))
     if real_path.startswith(os_mod.path.realpath(images_dir)) and os_mod.path.isfile(real_path):
+        print(f"[IMG-DEBUG] Serving: {filename} from {images_dir}")
         response = send_from_directory(images_dir, filename)
         response.headers.add("Access-Control-Allow-Origin", "*")
         return response
     # Return transparent pixel on 404 to prevent CORB
+    print(f"[IMG-DEBUG] File not found: {filename} (looked in {images_dir})")
     import base64
     pixel = base64.b64decode("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7")
     resp = make_response(pixel)
@@ -2335,10 +2340,11 @@ def serve_media_file(filename):
     images_dir = os_mod.path.join(os_mod.path.dirname(os_mod.path.abspath(__file__)), "public", "images")
     real_path = os_mod.path.realpath(os_mod.path.join(images_dir, filename))
     if real_path.startswith(os_mod.path.realpath(images_dir)) and os_mod.path.isfile(real_path):
+        print(f"[IMG-DEBUG] /media/ Serving: {filename} from {images_dir}")
         response = send_from_directory(images_dir, filename)
         response.headers.add("Access-Control-Allow-Origin", "*")
         return response
-    # Return transparent pixel on 404 to prevent CORB
+    print(f"[IMG-DEBUG] /media/ File not found: {filename} (looked in {images_dir})")
     pixel = base64.b64decode("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7")
     resp = make_response(pixel)
     resp.headers["Content-Type"] = "image/gif"
