@@ -1446,10 +1446,39 @@ def closet_delete():
     item_id = data.get("id", "")
     if not item_id:
         return jsonify({"error": "Missing id"}), 400
-    ok = qdrant_delete_item(item_id)
-    return jsonify({"success": ok})
 
+    # Also try Qdrant if available
+    qdrant_ok = qdrant_delete_item(item_id)
 
+    # Always delete from local JSON file directly (no cache)
+    json_path = _LOCAL_CLOSET_FILE
+    items = []
+    try:
+        if os.path.exists(json_path):
+            with open(json_path, "r") as f:
+                try:
+                    items = json.load(f)
+                    if not isinstance(items, list):
+                        items = []
+                except json.JSONDecodeError:
+                    items = []
+    except Exception as exc:
+        _log.warning("[CLOSET] Error reading %s: %s", json_path, exc)
+
+    before = len(items)
+    items = [i for i in items if i.get("id") != item_id]
+    removed = before - len(items)
+
+    try:
+        with open(json_path, "w") as f:
+            json.dump(items, f, indent=2)
+        _log.info("[CLOSET] Deleted item %s from local file (removed %d item(s), %d remain)", item_id, removed, len(items))
+        print(f"[CLOSET-DEBUG] Deleted item {item_id}: removed={removed} remaining={len(items)}")
+    except Exception as exc:
+        _log.error("[CLOSET] Failed to write %s: %s", json_path, exc)
+        return jsonify({"error": "Delete failed"}), 500
+
+    return jsonify({"success": True, "removed": removed, "remaining": len(items)})
 # ---------------------------------------------------------------------------
 # Closet AI Analyze Item (MiMo Vision)
 # ---------------------------------------------------------------------------
