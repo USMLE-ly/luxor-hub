@@ -391,6 +391,17 @@ def _init_qdrant():
     _log.info("[QDRANT] Running JSON migration...")
     _migrate_json_to_qdrant()
 
+    # Reverse sync: if JSON is missing but Qdrant has data, write JSON
+    try:
+        if not os.path.exists(_LOCAL_CLOSET_FILE):
+            qdrant_all = qdrant_get_all_items()
+            if qdrant_all:
+                with open(_LOCAL_CLOSET_FILE, "w") as f:
+                    json.dump(qdrant_all, f, indent=2)
+                _log.info("[QDRANT] Restored closet_items.json from Qdrant (%d items)", len(qdrant_all))
+    except Exception as rs:
+        _log.warning("[QDRANT] Reverse sync skipped: %s", rs)
+    
     _log.info("[QDRANT] Qdrant ready — client initialized, collections OK")
 
 
