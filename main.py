@@ -266,29 +266,40 @@ set_color_names(_COLOR_NAMES)
 # Qdrant Closet Client
 # ---------------------------------------------------------------------------
 _LOCAL_CLOSET_FILE = os.path.join(BASE_DIR, "closet_items.json")
-_qdrant_closet = None
+_qdrant_closet: Any = None
 _CLOSET_COLLECTION = "luxor_closet"
-
-def _get_qdrant_closet() -> Any:
-    """Return the cached Qdrant client (initialized eagerly at module load)."""
-    if _qdrant_closet is None:
-        _log.warning("[QDRANT] _get_qdrant_closet() called but Qdrant not initialized!")
-    return _qdrant_closet
-
+def _qdrant_error(stage: str, error: str, details: str = "") -> Dict[str, Any]:
+    """Return a structured error dict for Qdrant failures."""
+    return {
+        "success": False,
+        "service": "qdrant",
+        "stage": stage,
+        "error": error,
+        "details": details,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
 
 
 def _migrate_json_to_qdrant():
-    """Migrate items from closet_items.json that aren't yet in Qdrant."""
+    """Migrate items from closet_items.json that aren't yet in Qdrant.
+    Called exactly once during startup, after Qdrant connection is verified.
+    """
     try:
         from uuid import uuid5, NAMESPACE_DNS
         import json as _json
         client = _qdrant_closet
         if not client:
+            _log.error("[QDRANT] Migration skipped — Qdrant client is None")
             return
-        result = client.scroll(collection_name=_CLOSET_COLLECTION, limit=5000, with_payload=True)
+        # Verify collection exists
+        _ensure_closet_collection(client)
+        result = client.scroll(
+            collection_name=_CLOSET_COLLECTION, limit=5000, with_payload=True
+        )
         points = result[0] if isinstance(result, tuple) else result
         qdrant_ids = {p.payload.get("id") for p in points if p.payload and p.payload.get("id")}
         if not os.path.exists(_LOCAL_CLOSET_FILE):
+            _log.info("[QDRANT] No local JSON file to migrate")
             return
         with open(_LOCAL_CLOSET_FILE, "r") as f:
             json_items = _json.load(f)
@@ -307,22 +318,30 @@ def _migrate_json_to_qdrant():
                         payload=item,
                     )]
                 )
-            _log.info("[QDRANT] Migration complete")
+            _log.info("[QDRANT] Migration complete — %d items migrated", len(to_migrate))
+        else:
+            _log.info("[QDRANT] No items to migrate — Qdrant is already in sync")
     except Exception as exc:
-        _log.warning("[QDRANT] Migration error: %s", exc)
+        _log.error("[QDRANT] Migration failed: %s", exc)
+        raise  # Fail fast during startup
 
 
 def _ensure_closet_collection(client: Any):
+    """Ensure the Qdrant collection exists with proper schema.
+    Raises on failure — called during startup, no silent passes."""
     if qdrant_models is None:
-        _log.warning("[QDRANT] qdrant_models not available, skipping collection creation")
-        return
+        raise RuntimeError("Qdrant models not available (import failed)")
+    _log.info("[QDRANT] Verifying collection '%s'...", _CLOSET_COLLECTION)
     try:
         collections = client.get_collections()
         names = [c.name for c in collections.collections]
         if _CLOSET_COLLECTION not in names:
+            _log.info("[QDRANT] Creating collection '%s'...", _CLOSET_COLLECTION)
             client.create_collection(
                 collection_name=_CLOSET_COLLECTION,
-                vectors_config=qdrant_models.VectorParams(size=4, distance=qdrant_models.Distance.COSINE),
+                vectors_config=qdrant_models.VectorParams(
+                    size=4, distance=qdrant_models.Distance.COSINE
+                ),
             )
             _log.info("[QDRANT] Created collection '%s'", _CLOSET_COLLECTION)
         # Ensure payload index on id for fast lookups and deletes
@@ -332,76 +351,98 @@ def _ensure_closet_collection(client: Any):
                 field_name="id",
                 field_schema=qdrant_models.PayloadSchemaType.KEYWORD,
             )
+            _log.info("[QDRANT] Payload index on 'id' ready")
         except Exception:
-            pass  # Index already exists
+            pass  # Index already exists — acceptable
+        _log.info("[QDRANT] Collection '%s' verified OK", _CLOSET_COLLECTION)
     except Exception as exc:
-        _log.warning("[QDRANT] Ensure collection: %s", exc)
+        _log.error("[QDRANT] Collection verification failed: %s", exc)
+        raise
+
 
 def _init_qdrant():
-    """Initialize Qdrant client at startup (called once at module load)."""
+    """Initialize Qdrant client at startup — called ONCE at module load.
+    Fail fast if Qdrant is unavailable. No lazy init, no silent None.
+    """
     global _qdrant_closet
-    _log.info("[QDRANT] Initializing...")
+    _log.info("[QDRANT] Starting initialization...")
+
+    if QdrantClient is None:
+        raise RuntimeError("QdrantClient not available (import failed)")
+
+    if not QDRANT_URL or not QDRANT_API_KEY:
+        raise RuntimeError(
+            "QDRANT_URL and QDRANT_API_KEY must be set in environment"
+        )
+
+    _log.info("[QDRANT] Connecting to Qdrant Cloud at %s...", QDRANT_URL.split("//")[1].split(".")[0] + ".qdrant.io")
+    _qdrant_closet = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY, timeout=10)
+
+    # Verify connection explicitly
+    _log.info("[QDRANT] Verifying connection...")
     try:
-        if QdrantClient is None:
-            _log.warning("[QDRANT] QdrantClient not available (import failed)")
-            return
+        _qdrant_closet.get_collections()
+    except Exception as e:
+        raise RuntimeError(f"Qdrant connection verification failed: {e}")
 
-        if QDRANT_URL and QDRANT_API_KEY:
-            _qdrant_closet = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY, timeout=30)
-            _log.info("[QDRANT] Connected to Qdrant Cloud")
-        else:
-            qdrant_path = os.path.join(BASE_DIR, "qdrant_db")
-            os.makedirs(qdrant_path, exist_ok=True)
-            _qdrant_closet = QdrantClient(path=qdrant_path)
-            _log.info("[QDRANT] Using local embedded Qdrant at %s", qdrant_path)
+    _log.info("[QDRANT] Connection OK. Ensuring collection...")
+    _ensure_closet_collection(_qdrant_closet)
 
-        if _qdrant_closet is not None:
-            _ensure_closet_collection(_qdrant_closet)
-            _migrate_json_to_qdrant()
-    except Exception as exc:
-        _log.error("[QDRANT] Initialization failed: %s", exc)
-        _qdrant_closet = None
+    _log.info("[QDRANT] Running JSON migration...")
+    _migrate_json_to_qdrant()
+
+    _log.info("[QDRANT] Qdrant ready — client initialized, collections OK")
 
 
 # Eager initialization at module load time
 _init_qdrant()
 
 
-def qdrant_get_all_items() -> List[Dict[str, Any]]:
-    client = _get_qdrant_closet()
-    if client:
+def qdrant_get_all_items(timeout: float = 8.0) -> List[Dict[str, Any]]:
+    """Get all closet items from Qdrant with a timeout.
+    Raises on failure — no silent fallback. Caller handles fallback.
+    """
+    from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
+
+    client = _qdrant_closet
+    if client is None:
+        raise RuntimeError("Qdrant closet client is not initialized")
+
+    def _do_scroll():
+        result = client.scroll(
+            collection_name=_CLOSET_COLLECTION,
+            limit=1000,
+            with_payload=True,
+        )
+        points = result[0] if isinstance(result, tuple) else result
+        return [dict(p.payload) for p in points if p.payload]
+
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        future = executor.submit(_do_scroll)
         try:
-            result = client.scroll(
-                collection_name=_CLOSET_COLLECTION,
-                limit=1000,
-                with_payload=True,
-            )
-            points = result[0] if isinstance(result, tuple) else result
-            qdrant_items = [dict(p.payload) for p in points if p.payload]
-            if qdrant_items:
-                return qdrant_items
+            items = future.result(timeout=timeout)
+            _log.info("[QDRANT] Scrolled %d items from collection", len(items))
+            return items
+        except FuturesTimeout:
+            _log.error("[QDRANT] Scroll timed out after %ss", timeout)
+            raise TimeoutError(f"Qdrant scroll timed out after {timeout}s")
         except Exception as exc:
-            _log.warning("[QDRANT] Scroll error: %s", exc)
-    # Fallback: load from local JSON file (user-added items, no demo defaults)
-    try:
-        with open(_LOCAL_CLOSET_FILE, "r") as f:
-            local_items = json.load(f)
-            if local_items:
-                _log.info("[CLOSET] Loaded %d items from local file", len(local_items))
-                return local_items
-    except (FileNotFoundError, json.JSONDecodeError):
-        pass
-    return []
+            _log.error("[QDRANT] Scroll error: %s", exc)
+            raise
 def qdrant_upsert_item(item: Dict[str, Any]) -> bool:
-    # Ensure item has an id
+    """Upsert an item to BOTH Qdrant Cloud and local JSON.
+    Qdrant errors are logged as errors (not warnings) but do not block
+    the local JSON save, ensuring the item is always persisted.
+    Returns True if at least one storage layer succeeded.
+    """
     item_id = item.get("id", str(uuid.uuid4())[:8])
     item["id"] = item_id
+    qdrant_ok = False
+    json_ok = False
 
-    # 1. Write to Qdrant Cloud (if configured)
-    client = _get_qdrant_closet()
-    import sys; sys.stderr.write(f"[Q-UPSERT-DEBUG] client={client is not None}, qdrant_models={qdrant_models is not None}\n"); sys.stderr.flush()
-
-    if client and qdrant_models is not None:
+    # 1. Upsert to Qdrant Cloud
+    client = _qdrant_closet
+    if client is not None and qdrant_models is not None:
         try:
             from uuid import uuid5, NAMESPACE_DNS
             point_id = str(uuid5(NAMESPACE_DNS, item_id))
@@ -414,10 +455,11 @@ def qdrant_upsert_item(item: Dict[str, Any]) -> bool:
                 )]
             )
             _log.info("[QDRANT] Upserted item %s to Qdrant Cloud", item_id)
+            qdrant_ok = True
         except Exception as exc:
-            _log.warning("[QDRANT] Cloud upsert error: %s", exc)
+            _log.error("[QDRANT] Cloud upsert FAILED for item %s: %s", item_id, exc)
 
-    # 2. Always write to local JSON file as fallback
+    # 2. Always write to local JSON file as secondary persistence
     try:
         items = []
         try:
@@ -430,16 +472,31 @@ def qdrant_upsert_item(item: Dict[str, Any]) -> bool:
         with open(_LOCAL_CLOSET_FILE, 'w') as f:
             json.dump(items, f, indent=2)
         _log.info("[CLOSET] Saved item to local file: %s (%s)", item.get("label", "unknown"), item_id)
-        print(f"[CLOSET-DEBUG] Saved {len(items)} items to closet_items.json")
-        return True
+        json_ok = True
     except Exception as exc:
-        _log.warning("[CLOSET] Local save error: %s", exc)
+        _log.error("[CLOSET] Local save FAILED for item %s: %s", item_id, exc)
+
+    if not qdrant_ok and json_ok:
+        _log.warning("[QDRANT] Item %s saved to local file only (Qdrant unavailable)", item_id)
+    elif qdrant_ok and not json_ok:
+        _log.warning("[QDRANT] Item %s saved to Qdrant only (local file unavailable)", item_id)
+    elif not qdrant_ok and not json_ok:
+        _log.error("[QDRANT] Item %s FAILED to persist to ANY storage layer", item_id)
         return False
 
+    return True
+
+
 def qdrant_delete_item(item_id: str) -> bool:
-    # 1. Delete from Qdrant Cloud (if configured)
-    client = _get_qdrant_closet()
-    if client and qdrant_models is not None:
+    """Delete an item from both Qdrant Cloud and local JSON.
+    Returns True if deletion succeeded in at least one layer.
+    """
+    qdrant_ok = False
+    json_ok = False
+
+    # 1. Delete from Qdrant Cloud
+    client = _qdrant_closet
+    if client is not None and qdrant_models is not None:
         try:
             client.delete(
                 collection_name=_CLOSET_COLLECTION,
@@ -450,8 +507,9 @@ def qdrant_delete_item(item_id: str) -> bool:
                 ),
             )
             _log.info("[QDRANT] Deleted item %s from Qdrant Cloud", item_id)
+            qdrant_ok = True
         except Exception as exc:
-            _log.warning("[QDRANT] Delete error: %s", exc)
+            _log.error("[QDRANT] Cloud delete FAILED for item %s: %s", item_id, exc)
 
     # 2. Always delete from local file
     try:
@@ -461,44 +519,46 @@ def qdrant_delete_item(item_id: str) -> bool:
         with open(_LOCAL_CLOSET_FILE, 'w') as f:
             json.dump(items, f, indent=2)
         _log.info("[CLOSET] Deleted item %s from local file", item_id)
-        return True
+        json_ok = True
     except (FileNotFoundError, json.JSONDecodeError):
-        return False
+        _log.info("[CLOSET] No local file to delete from (fresh state)")
+        json_ok = True  # Not an error — nothing to delete
     except Exception as exc:
-        _log.warning("[CLOSET] Local delete error: %s", exc)
-        return False
+        _log.error("[CLOSET] Local delete FAILED for item %s: %s", item_id, exc)
+
+    if not qdrant_ok and json_ok:
+        _log.warning("[QDRANT] Item %s deleted from local file only (Qdrant unavailable)", item_id)
+    elif qdrant_ok and not json_ok:
+        _log.warning("[QDRANT] Item %s deleted from Qdrant only (local file unavailable)", item_id)
+
+    return qdrant_ok or json_ok
+
 
 def qdrant_get_item(item_id: str) -> Optional[Dict[str, Any]]:
-    client = _get_qdrant_closet()
-    if client and qdrant_models is not None:
-        try:
-            result = client.scroll(
-                collection_name=_CLOSET_COLLECTION,
-                limit=1,
-                with_payload=True,
-                scroll_filter=qdrant_models.Filter(
-                    must=[qdrant_models.FieldCondition(
-                        key="id", match=qdrant_models.MatchValue(value=item_id)
-                    )]
-                ),
-            )
-            points = result[0] if isinstance(result, tuple) else result
-            if points and points[0].payload:
-                return dict(points[0].payload)
-        except Exception as exc:
-            _log.warning("[QDRANT] Get error: %s", exc)
-    # Fallback: look up in local file
+    """Get a single item by ID. No silent fallback."""
+    client = _qdrant_closet
+    if client is None:
+        raise RuntimeError("Qdrant closet client is not initialized")
+    if qdrant_models is None:
+        raise RuntimeError("Qdrant models not available")
     try:
-        with open(_LOCAL_CLOSET_FILE, 'r') as f:
-            items = json.load(f)
-        for item in items:
-            if item.get("id") == item_id:
-                return item
+        result = client.scroll(
+            collection_name=_CLOSET_COLLECTION,
+            limit=1,
+            with_payload=True,
+            scroll_filter=qdrant_models.Filter(
+                must=[qdrant_models.FieldCondition(
+                    key="id", match=qdrant_models.MatchValue(value=item_id)
+                )]
+            ),
+        )
+        points = result[0] if isinstance(result, tuple) else result
+        if points and points[0].payload:
+            return dict(points[0].payload)
         return None
-    except (FileNotFoundError, json.JSONDecodeError):
-        return None
-
-# ---------------------------------------------------------------------------
+    except Exception as exc:
+        _log.error("[QDRANT] Get error for item %s: %s", item_id, exc)
+        raise
 # Prompts
 # ---------------------------------------------------------------------------
 CLOSET_PROMPT = """You are a professional fashion stylist. Given a user's closet items, select outfits that work well together.
@@ -1490,14 +1550,25 @@ def closet_add():
             "user_id": user_id,
             "image_url": image_url or "",
             "photo_url": image_url or "",
+            "image_data_b64": image_b64 or "",  # Persist image data across restarts
             "created_at": now,
         }
 
         # ---- Persist to Qdrant Cloud + JSON (dual-write) ----
+        print(f"[ADD-DEBUG] Received: {label} ({item_id})", flush=True)
+        print(f"[ADD-DEBUG] Writing to JSON at path: {os.path.abspath(_LOCAL_CLOSET_FILE)}", flush=True)
         ok = qdrant_upsert_item(item)
         if not ok:
             _log.error("[CLOSET] Failed to persist item %s", item_id)
             return jsonify({"error": "Storage unavailable"}), 503
+        
+        # Verify the write by reading back
+        try:
+            with open(_LOCAL_CLOSET_FILE, 'r') as f:
+                verify_items = json.load(f)
+            print(f"[ADD-DEBUG] Save successful. Total items in JSON: {len(verify_items)}", flush=True)
+        except Exception as ve:
+            print(f"[ADD-DEBUG] Verification read failed: {ve}", flush=True)
         
         return jsonify({"success": True, "item": item})
     except Exception as e:
@@ -1505,38 +1576,60 @@ def closet_add():
         print("=== CRITICAL ERROR IN /api/v1/closet/add-item ===", flush=True)
         traceback.print_exc()
         print("================================================", flush=True)
-        return jsonify({"success": False, "message": str(e)}), 500
+        return jsonify(_qdrant_error("upsert", str(e), traceback.format_exc())), 500
 @app.route("/api/v1/closet/list-items", methods=["GET", "OPTIONS"], strict_slashes=False)
 def closet_list():
+    """List all closet items — dead simple, never hangs."""
     if request.method == "OPTIONS":
         return "", 204
-    items = qdrant_get_all_items()
-    _log.info("[CLOSET] list-items returning %d items", len(items))
-    return jsonify({"success": True, "items": items})
-
+    try:
+        print(f"[LIST-DEBUG] Reading from: {os.path.abspath(_LOCAL_CLOSET_FILE)}", flush=True)
+        with open(_LOCAL_CLOSET_FILE, "r") as f:
+            items = json.load(f)
+            if isinstance(items, list):
+                _log.info("[CLOSET] list-items returning %d items", len(items))
+                return jsonify({"success": True, "items": items})
+            return jsonify({"success": True, "items": []})
+    except FileNotFoundError:
+        _log.info("[CLOSET] No JSON file yet — returning empty")
+        return jsonify({"success": True, "items": []})
+    except json.JSONDecodeError as e:
+        _log.error("[CLOSET] Corrupt JSON: %s — returning empty", e)
+        return jsonify({"success": True, "items": []})
+    except Exception as e:
+        _log.error("[CLOSET] Unexpected error: %s — returning empty", e)
+        return jsonify({"success": True, "items": []})
 @app.route("/api/v1/closet/delete-item", methods=["POST", "OPTIONS"], strict_slashes=False)
 def closet_delete():
-    if request.method == "OPTIONS":
-        return "", 204
-    data = request.get_json(silent=True) or {}
-    item_id = data.get("id", "")
-    if not item_id:
-        return jsonify({"error": "Missing id"}), 400
-
-    # Delete from Qdrant Cloud AND local JSON file (dual-delete)
-    qdrant_delete_item(item_id)
-    # Read current state from file to report accurate counts
-    json_path = _LOCAL_CLOSET_FILE
-    remaining = 0
     try:
-        if os.path.exists(json_path):
-            with open(json_path, "r") as f:
-                items = json.load(f)
-                if isinstance(items, list):
-                    remaining = len(items)
-    except Exception:
-        pass
-    return jsonify({"success": True, "removed": 1, "remaining": remaining})
+        if request.method == "OPTIONS":
+            return "", 204
+        data = request.get_json(silent=True) or {}
+        item_id = data.get("id", "")
+        if not item_id:
+            return jsonify({"error": "Missing id"}), 400
+
+        # Delete from Qdrant Cloud AND local JSON file (dual-delete)
+        ok = qdrant_delete_item(item_id)
+        if not ok:
+            _log.error("[CLOSET] Failed to delete item %s from all storage layers", item_id)
+            return jsonify(_qdrant_error("delete", "Storage unavailable", f"Item {item_id} could not be deleted from any layer")), 503
+
+        # Read current state from file to report accurate counts
+        json_path = _LOCAL_CLOSET_FILE
+        remaining = 0
+        try:
+            if os.path.exists(json_path):
+                with open(json_path, "r") as f:
+                    items = json.load(f)
+                    if isinstance(items, list):
+                        remaining = len(items)
+        except Exception:
+            pass
+        return jsonify({"success": True, "removed": 1, "remaining": remaining})
+    except Exception as e:
+        _log.error("[CLOSET] delete-item error: %s", e)
+        return jsonify(_qdrant_error("delete", str(e), "Exception in delete endpoint")), 500
 # ---------------------------------------------------------------------------
 # Closet AI Analyze Item (MiMo Vision)
 # ---------------------------------------------------------------------------
@@ -2015,7 +2108,25 @@ def generate_outfits():
         _log.info("[DRESSING] Generating %d outfits for %s", count, occasion)
 
         # Load items from Qdrant (or local JSON fallback)
-        closet_items = qdrant_get_all_items()
+
+        # Primary: load from canonical JSON file
+        closet_items = []
+        try:
+            with open(_LOCAL_CLOSET_FILE, "r") as f:
+                closet_items = json.load(f)
+                if not isinstance(closet_items, list):
+                    closet_items = []
+        except (FileNotFoundError, json.JSONDecodeError):
+            pass
+        # Fallback: try Qdrant if JSON was empty
+        if not closet_items:
+            try:
+                qdrant_items = qdrant_get_all_items()
+                if qdrant_items:
+                    _log.info("[DRESSING] Falling back to Qdrant — %d items", len(qdrant_items))
+                    closet_items = qdrant_items
+            except Exception:
+                pass
         if not closet_items:
             return jsonify({"success": False, "images": [], "error": "Your closet is empty! Add items first."}), 200
 
@@ -2056,10 +2167,16 @@ def generate_outfits():
             """Get image URL from item, ensuring it is an absolute URL to prevent CORB."""
             raw = item.get("image_url") or item.get("photo_url") or default
             if raw and not raw.startswith("http"):
-                # Relative path — prepend backend host to avoid CORB from 404 HTML pages
-                final_url = request.host_url.rstrip("/") + "/images/" + raw.lstrip("/")
-                print(f"[IMG-DEBUG] Generated URL: {final_url} (from raw={raw})")
+                # Strip any leading /images/ or /media/ prefix to prevent double-prefix
+                clean = raw.lstrip("/")
+                for prefix in ("images/", "media/", "media/images/"):
+                    if clean.startswith(prefix):
+                        clean = clean[len(prefix):]
+                final_url = request.host_url.rstrip("/") + "/images/" + clean
+                print(f"[URL-DEBUG] Final generated image URL: {final_url}")
+                print(f"[IMG-DEBUG] Generated URL: {final_url} (from raw={raw} clean={clean})")
                 return final_url
+            print(f"[URL-DEBUG] Final generated image URL: {raw}")
             print(f"[IMG-DEBUG] Raw URL (no transform): {raw}")
             return raw
 
@@ -2366,16 +2483,36 @@ def generate_outfits():
 def serve_uploaded_image(filename):
     """Serve user-uploaded closet images from public/images/."""
     import os as os_mod
+    # Strip any nested /images/ prefix to handle double-prefix gracefully
+    safe_filename = filename
+    if safe_filename.startswith("images/"):
+        safe_filename = safe_filename[len("images/"):]
     images_dir = os_mod.path.join(os_mod.path.dirname(os_mod.path.abspath(__file__)), "public", "images")
-    real_path = os_mod.path.realpath(os_mod.path.join(images_dir, filename))
+    real_path = os_mod.path.realpath(os_mod.path.join(images_dir, safe_filename))
+    print(f"[IMG-DEBUG] Request: filename={filename} safe={safe_filename} path={real_path}", flush=True)
     if real_path.startswith(os_mod.path.realpath(images_dir)) and os_mod.path.isfile(real_path):
-        print(f"[IMG-DEBUG] Serving: {filename} from {images_dir}")
-        response = send_from_directory(images_dir, filename)
+        print(f"[IMG-DEBUG] Serving: {safe_filename} from {images_dir}")
+        response = send_from_directory(images_dir, safe_filename)
         response.headers.add("Access-Control-Allow-Origin", "*")
         return response
+    # Fallback: look up image_data_b64 in closet_items.json
+    try:
+        with open(_LOCAL_CLOSET_FILE, "r") as _fb:
+            _all = json.load(_fb)
+        for _it in _all if isinstance(_all, list) else []:
+            _url = _it.get("image_url") or _it.get("photo_url") or ""
+            if filename in _url and _it.get("image_data_b64"):
+                _b64 = _it["image_data_b64"]
+                print(f"[IMG-DEBUG] Serving from base64: {filename}")
+                _raw = base64.b64decode(_b64)
+                resp = make_response(_raw)
+                resp.headers["Content-Type"] = "image/jpeg"
+                resp.headers["Access-Control-Allow-Origin"] = "*"
+                return resp
+    except Exception as _fb_err:
+        pass
     # Return transparent pixel on 404 to prevent CORB
-    print(f"[IMG-DEBUG] File not found: {filename} (looked in {images_dir})")
-    import base64
+    print(f"[IMG-DEBUG] File not found: {filename} (no fallback in JSON)")
     pixel = base64.b64decode("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7")
     resp = make_response(pixel)
     resp.headers["Content-Type"] = "image/gif"
@@ -2389,14 +2526,34 @@ def serve_media_file(filename):
     import base64
     from flask import make_response
     import os as os_mod
+    # Strip nested prefixes to handle double-prefix gracefully
+    safe_filename = filename
+    if safe_filename.startswith("images/") or safe_filename.startswith("media/"):
+        safe_filename = safe_filename.split("/", 1)[1] if "/" in safe_filename else safe_filename
     images_dir = os_mod.path.join(os_mod.path.dirname(os_mod.path.abspath(__file__)), "public", "images")
-    real_path = os_mod.path.realpath(os_mod.path.join(images_dir, filename))
+    real_path = os_mod.path.realpath(os_mod.path.join(images_dir, safe_filename))
     if real_path.startswith(os_mod.path.realpath(images_dir)) and os_mod.path.isfile(real_path):
-        print(f"[IMG-DEBUG] /media/ Serving: {filename} from {images_dir}")
-        response = send_from_directory(images_dir, filename)
+        print(f"[IMG-DEBUG] /media/ Serving: {safe_filename} from {images_dir}")
+        response = send_from_directory(images_dir, safe_filename)
         response.headers.add("Access-Control-Allow-Origin", "*")
         return response
-    print(f"[IMG-DEBUG] /media/ File not found: {filename} (looked in {images_dir})")
+    # Fallback: look up image_data_b64 in closet_items.json
+    try:
+        with open(_LOCAL_CLOSET_FILE, "r") as _fb:
+            _all = json.load(_fb)
+        for _it in _all if isinstance(_all, list) else []:
+            _url = _it.get("image_url") or _it.get("photo_url") or ""
+            if safe_filename in _url and _it.get("image_data_b64"):
+                _b64 = _it["image_data_b64"]
+                print(f"[IMG-DEBUG] /media/ Serving from base64: {safe_filename}")
+                _raw = base64.b64decode(_b64)
+                resp = make_response(_raw)
+                resp.headers["Content-Type"] = "image/jpeg"
+                resp.headers["Access-Control-Allow-Origin"] = "*"
+                return resp
+    except Exception as _fb_err:
+        pass
+    print(f"[IMG-DEBUG] /media/ File not found: {safe_filename} (no fallback in JSON)")
     pixel = base64.b64decode("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7")
     resp = make_response(pixel)
     resp.headers["Content-Type"] = "image/gif"

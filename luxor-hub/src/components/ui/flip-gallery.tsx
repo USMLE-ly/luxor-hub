@@ -281,15 +281,30 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading 
     <div style={FRAME_STYLE}>
       <div style={INNER_STYLE}>
         {/* Render sections with <img> tags for editorial object-fit */}
-        {sections.map((url, idx) => (
+        {sections.map((url, idx) => {
+          console.log(`[FLIP-GALLERY] Attempting to load background image: ${url}`);
+          return (
           <div key={idx} style={getSectionStyle(idx)}>
             {url?.startsWith('http') ? (
-              <img src={url} alt={`Outfit ${currentIndex + 1} section ${idx + 1}`} style={IMG_STYLE} />
+              <img
+                src={url}
+                alt={`Outfit ${currentIndex + 1} section ${idx + 1}`}
+                style={IMG_STYLE}
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  console.warn(`[FLIP-GALLERY] Image load FAILED for: ${url}`);
+                  if (target.src !== 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7') {
+                    target.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+                  }
+                }}
+                onLoad={() => console.log(`[FLIP-GALLERY] Image loaded OK: ${url}`)}
+              />
             ) : (
               <div style={{ width: '100%', height: '100%', backgroundColor: '#1A1A1A' }} />
             )}
           </div>
-        ))}
+          );
+        })
 
         {/* Black dividers between sections */}
         {Array.from({ length: sectionCount - 1 }).map((_, i) => (

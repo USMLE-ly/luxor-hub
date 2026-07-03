@@ -154,15 +154,20 @@ const Closet = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const receiptInputRef = useRef<HTMLInputElement>(null);
 
-  const fetchItems = useCallback(async () => {
-    if (!user) return;
-    setLoading(true);
+  const fetchItems = useCallback(async (): Promise<ClothingItem[]> => {
+    if (!user) return [];
     try {
-      const resp = await fetch(apiBase + '/api/v1/closet/list-items');
+      const timeoutPromise = new Promise<Response>((_, reject) =>
+        setTimeout(() => reject(new Error("Request timed out")), 5000)
+      );
+      const resp = await Promise.race([
+        fetch(apiBase + '/api/v1/closet/list-items'),
+        timeoutPromise,
+      ]);
+      if (!resp.ok) return [];
       const data = await resp.json();
       if (data.success && Array.isArray(data.items)) {
-        // Map backend fields to ClothingItem format
-        const mapped = data.items.map((item: any) => ({
+        return data.items.map((item: any) => ({
           id: item.id || '',
           name: item.label || item.name || null,
           category: item.category || item.type || 'other',
@@ -175,22 +180,39 @@ const Closet = () => {
           notes: item.notes || null,
           price: item.price || null,
         }));
-        setItems(mapped);
       }
+      return [];
     } catch (err) {
-      console.warn('[CLOSET] Backend fetch failed, falling back to Supabase');
-      // Fallback to Supabase
-      const itemsRes = await supabase.from("clothing_items").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
-      if (!itemsRes.error) setItems(itemsRes.data || []);
+      console.warn('[CLOSET] Fetch failed or timed out:', err);
+      return [];
     }
-    // Still load style profile from Supabase
-    try {
-      const styleRes = await supabase.from("style_profiles").select("preferences").eq("user_id", user.id).single();
-      const prefs = (styleRes.data?.preferences as any) || {};
-      if (prefs.gender === "female") setGender("female");
-    } catch {}
-    setLoading(false);
   }, [user, apiBase]);
+  // Fetch closet items — re-runs when user auth resolves, with 3s brute-force timeout
+  useEffect(() => {
+    let mounted = true;
+    const forceTimeout = setTimeout(() => {
+      if (mounted) setLoading(false);
+    }, 3000);
+    const load = async () => {
+      setLoading(true);
+      try {
+        const mapped = await fetchItems();
+        if (mounted) {
+          setItems(mapped);
+          clearTimeout(forceTimeout);
+          setLoading(false);
+        }
+      } catch (e) {
+        if (mounted) {
+          clearTimeout(forceTimeout);
+          setLoading(false);
+        }
+      }
+    };
+    load();
+    return () => { mounted = false; clearTimeout(forceTimeout); };
+  }, [fetchItems]);  // Re-fetch when fetchItems changes (e.g. user auth resolves)
+
   // Auto-remove backgrounds when flat-lay view is active
   useEffect(() => {
     if (!flatLayView) return;
@@ -382,7 +404,7 @@ const Closet = () => {
       toast.success("Added. Your closet just got stronger.");
       setUploadOpen(false);
       setNewItem({ name: "", category: "top", color: "", brand: "", season: "all-season", occasion: "", style: "", notes: "", price: "" });
-      setSelectedFile(null); setPreviewUrl(null); await fetchItems().catch(() => {});
+      setSelectedFile(null); setPreviewUrl(null); const refreshed = await fetchItems(); setItems(refreshed);
     } catch (err: any) { toast.error(err.message); }
     finally { setUploading(false); }
   };
@@ -444,7 +466,7 @@ const Closet = () => {
           });
         }
         toast.success(`Added ${data.items.length} items from receipt! 🧾`);
-        fetchItems();
+        const receiptItems = await fetchItems(); setItems(receiptItems);
       } else {
         toast.info("No clothing items found on this receipt");
       }
