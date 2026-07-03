@@ -1455,10 +1455,8 @@ def closet_delete():
     if not item_id:
         return jsonify({"error": "Missing id"}), 400
 
-    # Also try Qdrant if available
-    qdrant_ok = qdrant_delete_item(item_id)
-
     # Always delete from local JSON file directly (no cache)
+    # Note: Qdrant deletion is handled separately via qdrant_delete_item if needed
     json_path = _LOCAL_CLOSET_FILE
     items = []
     try:
