@@ -2125,18 +2125,10 @@ def generate_outfits():
                 except (IndexError, TypeError, ValueError) as e:
                     _log.warning("[DRESSING] MiMo parse error: %s", e)
 
-            # No fallback — if MiMo fails, return structured error
+            # No fallback — if MiMo fails, skip this iteration gracefully
             if not combo:
-                _log.error("[DRESSING] MiMo Vision failed to select items — no outfits generated")
-                return jsonify({
-                    "success": False,
-                    "provider": "MiMo Vision 2.5",
-                    "stage": "Item Selection",
-                    "error": "MiMo Vision could not select compatible items for the requested occasion",
-                    "timestamp": __import__('datetime').datetime.now().isoformat(),
-                }), 500
-
-            if not combo: continue
+                _log.warning("[DRESSING] MiMo Vision selection %d failed — skipping", oi)
+                continue
 
             # Track used IDs
             for v in combo.values():
@@ -2177,15 +2169,14 @@ def generate_outfits():
             outfits.append(outfit_data)
 
         # If no outfits were built from MiMo selections, return structured error
+        # If no outfits were built from MiMo selections, return graceful 200
         if not outfits:
-            _log.error("[DRESSING] No outfits could be constructed from MiMo Vision selections")
+            _log.warning("[DRESSING] No outfits could be constructed from MiMo Vision selections")
             return jsonify({
                 "success": False,
-                "provider": "MiMo Vision 2.5",
-                "stage": "Outfit Construction",
-                "error": "No valid outfits could be built from MiMo Vision selections",
-                "timestamp": __import__('datetime').datetime.now().isoformat(),
-            }), 500
+                "images": [],
+                "error": "MiMo Vision could not build any valid outfits for this occasion",
+            }), 200
 
         return jsonify({
             "success": True,
