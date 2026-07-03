@@ -17,6 +17,7 @@ import uuid
 from concurrent.futures import TimeoutError as CFTimeoutError
 from datetime import datetime, timezone
 from typing import Any, Optional, Dict, List, cast
+import threading
 
 import requests
 from flask import Flask, request, jsonify, send_from_directory, make_response
@@ -264,25 +265,52 @@ set_color_names(_COLOR_NAMES)
 # ---------------------------------------------------------------------------
 # Qdrant Closet Client
 # ---------------------------------------------------------------------------
+_LOCAL_CLOSET_FILE = os.path.join(BASE_DIR, "closet_items.json")
 _qdrant_closet = None
 _CLOSET_COLLECTION = "luxor_closet"
-_LOCAL_CLOSET_FILE = os.path.join(BASE_DIR, "closet_items.json")
 
 def _get_qdrant_closet() -> Any:
-    global _qdrant_closet
-    if _qdrant_closet is None and QDRANT_URL and QDRANT_API_KEY:
-        try:
-            if QdrantClient is None:
-                _log.warning("[QDRANT] QdrantClient not available (import failed)")
-                return None
-            _qdrant_closet = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY, timeout=10)
-            if _qdrant_closet is not None:  # <--- CRITICAL FIX: Prevents crash if connection failed
-                _ensure_closet_collection(_qdrant_closet)
-                _log.info("[QDRANT] Closet client ready")
-        except Exception as exc:
-            _log.warning("[QDRANT] Init failed: %s", exc)
-            _qdrant_closet = None
+    """Return the cached Qdrant client (initialized eagerly at module load)."""
+    if _qdrant_closet is None:
+        _log.warning("[QDRANT] _get_qdrant_closet() called but Qdrant not initialized!")
     return _qdrant_closet
+
+
+
+def _migrate_json_to_qdrant():
+    """Migrate items from closet_items.json that aren't yet in Qdrant."""
+    try:
+        from uuid import uuid5, NAMESPACE_DNS
+        import json as _json
+        client = _qdrant_closet
+        if not client:
+            return
+        result = client.scroll(collection_name=_CLOSET_COLLECTION, limit=5000, with_payload=True)
+        points = result[0] if isinstance(result, tuple) else result
+        qdrant_ids = {p.payload.get("id") for p in points if p.payload and p.payload.get("id")}
+        if not os.path.exists(_LOCAL_CLOSET_FILE):
+            return
+        with open(_LOCAL_CLOSET_FILE, "r") as f:
+            json_items = _json.load(f)
+        if not isinstance(json_items, list):
+            return
+        to_migrate = [i for i in json_items if i.get("id") and i["id"] not in qdrant_ids]
+        if to_migrate:
+            _log.info("[QDRANT] Migrating %d items from JSON to Qdrant", len(to_migrate))
+            for item in to_migrate:
+                point_id = str(uuid5(NAMESPACE_DNS, item["id"]))
+                client.upsert(
+                    collection_name=_CLOSET_COLLECTION,
+                    points=[qdrant_models.PointStruct(
+                        id=point_id,
+                        vector=[0.0, 0.0, 0.0, 0.0],
+                        payload=item,
+                    )]
+                )
+            _log.info("[QDRANT] Migration complete")
+    except Exception as exc:
+        _log.warning("[QDRANT] Migration error: %s", exc)
+
 
 def _ensure_closet_collection(client: Any):
     if qdrant_models is None:
@@ -297,8 +325,47 @@ def _ensure_closet_collection(client: Any):
                 vectors_config=qdrant_models.VectorParams(size=4, distance=qdrant_models.Distance.COSINE),
             )
             _log.info("[QDRANT] Created collection '%s'", _CLOSET_COLLECTION)
+        # Ensure payload index on id for fast lookups and deletes
+        try:
+            client.create_payload_index(
+                collection_name=_CLOSET_COLLECTION,
+                field_name="id",
+                field_schema=qdrant_models.PayloadSchemaType.KEYWORD,
+            )
+        except Exception:
+            pass  # Index already exists
     except Exception as exc:
         _log.warning("[QDRANT] Ensure collection: %s", exc)
+
+def _init_qdrant():
+    """Initialize Qdrant client at startup (called once at module load)."""
+    global _qdrant_closet
+    _log.info("[QDRANT] Initializing...")
+    try:
+        if QdrantClient is None:
+            _log.warning("[QDRANT] QdrantClient not available (import failed)")
+            return
+
+        if QDRANT_URL and QDRANT_API_KEY:
+            _qdrant_closet = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY, timeout=30)
+            _log.info("[QDRANT] Connected to Qdrant Cloud")
+        else:
+            qdrant_path = os.path.join(BASE_DIR, "qdrant_db")
+            os.makedirs(qdrant_path, exist_ok=True)
+            _qdrant_closet = QdrantClient(path=qdrant_path)
+            _log.info("[QDRANT] Using local embedded Qdrant at %s", qdrant_path)
+
+        if _qdrant_closet is not None:
+            _ensure_closet_collection(_qdrant_closet)
+            _migrate_json_to_qdrant()
+    except Exception as exc:
+        _log.error("[QDRANT] Initialization failed: %s", exc)
+        _qdrant_closet = None
+
+
+# Eager initialization at module load time
+_init_qdrant()
+
 
 def qdrant_get_all_items() -> List[Dict[str, Any]]:
     client = _get_qdrant_closet()
@@ -326,7 +393,31 @@ def qdrant_get_all_items() -> List[Dict[str, Any]]:
         pass
     return []
 def qdrant_upsert_item(item: Dict[str, Any]) -> bool:
-    # Fallback: store in local JSON file
+    # Ensure item has an id
+    item_id = item.get("id", str(uuid.uuid4())[:8])
+    item["id"] = item_id
+
+    # 1. Write to Qdrant Cloud (if configured)
+    client = _get_qdrant_closet()
+    import sys; sys.stderr.write(f"[Q-UPSERT-DEBUG] client={client is not None}, qdrant_models={qdrant_models is not None}\n"); sys.stderr.flush()
+
+    if client and qdrant_models is not None:
+        try:
+            from uuid import uuid5, NAMESPACE_DNS
+            point_id = str(uuid5(NAMESPACE_DNS, item_id))
+            client.upsert(
+                collection_name=_CLOSET_COLLECTION,
+                points=[qdrant_models.PointStruct(
+                    id=point_id,
+                    vector=[0.0, 0.0, 0.0, 0.0],
+                    payload=item,
+                )]
+            )
+            _log.info("[QDRANT] Upserted item %s to Qdrant Cloud", item_id)
+        except Exception as exc:
+            _log.warning("[QDRANT] Cloud upsert error: %s", exc)
+
+    # 2. Always write to local JSON file as fallback
     try:
         items = []
         try:
@@ -334,20 +425,19 @@ def qdrant_upsert_item(item: Dict[str, Any]) -> bool:
                 items = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
             pass
-        # Remove existing item with same id if present
-        item_id = item.get("id", str(uuid.uuid4())[:8])
-        item["id"] = item_id
         items = [i for i in items if i.get("id") != item_id]
         items.append(item)
         with open(_LOCAL_CLOSET_FILE, 'w') as f:
             json.dump(items, f, indent=2)
         _log.info("[CLOSET] Saved item to local file: %s (%s)", item.get("label", "unknown"), item_id)
+        print(f"[CLOSET-DEBUG] Saved {len(items)} items to closet_items.json")
         return True
     except Exception as exc:
         _log.warning("[CLOSET] Local save error: %s", exc)
         return False
 
 def qdrant_delete_item(item_id: str) -> bool:
+    # 1. Delete from Qdrant Cloud (if configured)
     client = _get_qdrant_closet()
     if client and qdrant_models is not None:
         try:
@@ -359,10 +449,11 @@ def qdrant_delete_item(item_id: str) -> bool:
                     )]
                 ),
             )
-            return True
+            _log.info("[QDRANT] Deleted item %s from Qdrant Cloud", item_id)
         except Exception as exc:
             _log.warning("[QDRANT] Delete error: %s", exc)
-    # Fallback: delete from local file
+
+    # 2. Always delete from local file
     try:
         with open(_LOCAL_CLOSET_FILE, 'r') as f:
             items = json.load(f)
@@ -1402,35 +1493,12 @@ def closet_add():
             "created_at": now,
         }
 
-        # ---- Persist to closet_items.json (read -> append -> write) ----
-        json_path = _LOCAL_CLOSET_FILE
-        items = []
-        try:
-            if os.path.exists(json_path):
-                with open(json_path, "r") as f:
-                    try:
-                        items = json.load(f)
-                        if not isinstance(items, list):
-                            items = []
-                    except json.JSONDecodeError:
-                        items = []
-        except Exception as exc:
-            _log.warning("[CLOSET] Error reading %s: %s", json_path, exc)
-            items = []
-
-        # Remove existing item with same id (safe upsert)
-        items = [i for i in items if i.get("id") != item_id]
-        items.append(item)
-
-        try:
-            with open(json_path, "w") as f:
-                json.dump(items, f, indent=2)
-            _log.info("[CLOSET] Saved %d items to %s", len(items), json_path)
-            print(f"[CLOSET-DEBUG] Saved {len(items)} items to closet_items.json")
-        except Exception as exc:
-            _log.error("[CLOSET] Failed to write %s: %s", json_path, exc)
+        # ---- Persist to Qdrant Cloud + JSON (dual-write) ----
+        ok = qdrant_upsert_item(item)
+        if not ok:
+            _log.error("[CLOSET] Failed to persist item %s", item_id)
             return jsonify({"error": "Storage unavailable"}), 503
-
+        
         return jsonify({"success": True, "item": item})
     except Exception as e:
         import traceback
@@ -1455,36 +1523,20 @@ def closet_delete():
     if not item_id:
         return jsonify({"error": "Missing id"}), 400
 
-    # Always delete from local JSON file directly (no cache)
-    # Note: Qdrant deletion is handled separately via qdrant_delete_item if needed
+    # Delete from Qdrant Cloud AND local JSON file (dual-delete)
+    qdrant_delete_item(item_id)
+    # Read current state from file to report accurate counts
     json_path = _LOCAL_CLOSET_FILE
-    items = []
+    remaining = 0
     try:
         if os.path.exists(json_path):
             with open(json_path, "r") as f:
-                try:
-                    items = json.load(f)
-                    if not isinstance(items, list):
-                        items = []
-                except json.JSONDecodeError:
-                    items = []
-    except Exception as exc:
-        _log.warning("[CLOSET] Error reading %s: %s", json_path, exc)
-
-    before = len(items)
-    items = [i for i in items if i.get("id") != item_id]
-    removed = before - len(items)
-
-    try:
-        with open(json_path, "w") as f:
-            json.dump(items, f, indent=2)
-        _log.info("[CLOSET] Deleted item %s from local file (removed %d item(s), %d remain)", item_id, removed, len(items))
-        print(f"[CLOSET-DEBUG] Deleted item {item_id}: removed={removed} remaining={len(items)}")
-    except Exception as exc:
-        _log.error("[CLOSET] Failed to write %s: %s", json_path, exc)
-        return jsonify({"error": "Delete failed"}), 500
-
-    return jsonify({"success": True, "removed": removed, "remaining": len(items)})
+                items = json.load(f)
+                if isinstance(items, list):
+                    remaining = len(items)
+    except Exception:
+        pass
+    return jsonify({"success": True, "removed": 1, "remaining": remaining})
 # ---------------------------------------------------------------------------
 # Closet AI Analyze Item (MiMo Vision)
 # ---------------------------------------------------------------------------

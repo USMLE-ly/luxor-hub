@@ -23,3 +23,4 @@ knowledge_base/*/embeddings.meta.json
 .env.luxor
 node_modules/
 luxor-hub/dist/
+qdrant_db/
