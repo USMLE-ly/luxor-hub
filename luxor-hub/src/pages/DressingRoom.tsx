@@ -25,6 +25,7 @@ export default function DressingRoomPage() {
 
   const [generatedImages, setGeneratedImages] = useState<OutfitImages[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [activeOutfit, setActiveOutfit] = useState<OutfitImages | null>(null);
   const [progressValue, setProgressValue] = useState(0);
   const [progressStage, setProgressStage] = useState("");
   const [showOccasionModal, setShowOccasionModal] = useState(false);
@@ -130,22 +131,23 @@ export default function DressingRoomPage() {
             onGenerate={handleGenerateClick}
             onDismiss={handleDismiss}
             isLoading={isGenerating}
+            onOutfitChange={setActiveOutfit}
           />
         </div>
 
         {/* ---- Accessory note ---- */}
-        {generatedImages.length > 0 && generatedImages[0]?.accessory_note && (
+        {activeOutfit && activeOutfit.accessory_note && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             className="max-w-sm mx-auto mt-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-center"
           >
-            <p className="text-sm text-amber-300/90">{generatedImages[0].accessory_note}</p>
+            <p className="text-sm text-amber-300/90">{activeOutfit.accessory_note}</p>
           </motion.div>
         )}
 
         {/* ---- Stylist Notes ---- */}
-        {generatedImages.length > 0 && generatedImages[0]?.stylist_reasoning && generatedImages[0].stylist_reasoning.length > 0 && (
+        {activeOutfit && activeOutfit.stylist_reasoning && activeOutfit.stylist_reasoning.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -153,7 +155,7 @@ export default function DressingRoomPage() {
           >
             <h4 className="text-sm font-semibold text-purple-400 mb-2">Stylist Notes</h4>
             <ul className="space-y-1.5">
-              {generatedImages[0].stylist_reasoning.map((note: string, i: number) => (
+              {activeOutfit.stylist_reasoning.map((note: string, i: number) => (
                 <li key={i} className="text-sm text-gray-300 flex items-start gap-2">
                   <span className="text-purple-400 mt-0.5">•</span>
                   <span>{note}</span>

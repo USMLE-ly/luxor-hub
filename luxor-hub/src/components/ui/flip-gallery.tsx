@@ -15,6 +15,7 @@ interface FlipGalleryProps {
   onGenerate: () => void;
   onDismiss: () => void;
   isLoading: boolean;
+  onOutfitChange?: (outfit: OutfitImages) => void;
 }
 
 /* ------------------------------------------------------------------ */
@@ -143,7 +144,7 @@ const DOMINO_DELAY = 150; // ms stagger between sections
 /* ------------------------------------------------------------------ */
 /*  Component                                                         */
 /* ------------------------------------------------------------------ */
-export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading }: FlipGalleryProps) {
+export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading, onOutfitChange }: FlipGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flipState, setFlipState] = useState<'idle' | 'out' | 'in'>('idle');
   const [animDirection, setAnimDirection] = useState<'next' | 'prev'>('next');
@@ -151,6 +152,13 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading 
 
   // Reset to first when list changes
   useEffect(() => { setCurrentIndex(0); setFlipState('idle'); }, [outfits]);
+
+  // Notify parent when current outfit changes
+  useEffect(() => {
+    if (outfits.length > 0 && onOutfitChange) {
+      onOutfitChange(outfits[currentIndex]);
+    }
+  }, [currentIndex, outfits, onOutfitChange]);
 
   // Clean up timeouts on unmount
   useEffect(() => {
