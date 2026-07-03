@@ -6,7 +6,7 @@
     "category": "Casual",
     "label": "White Cotton T-Shirt",
     "created_at": "2026-06-01T10:00:00Z",
-    "image_url": "https://placehold.co/600x800/FFFFFF/000?text=White+Cotton+T-Shirt"
+    "image_url": "/images/white-tshirt.jpg"
   },
   {
     "id": "top-002",
@@ -15,7 +15,7 @@
     "category": "Formal",
     "label": "Black Silk Blouse",
     "created_at": "2026-06-01T10:01:00Z",
-    "image_url": "https://placehold.co/600x800/222222/FFF?text=Black+Silk+Blouse"
+    "image_url": "/images/black-blouse.jpg"
   },
   {
     "id": "top-003",
@@ -24,7 +24,7 @@
     "category": "Party",
     "label": "Pink Silk Camisole",
     "created_at": "2026-06-01T10:02:00Z",
-    "image_url": "https://placehold.co/600x800/FFB6C1/000?text=Pink+Silk+Camisole"
+    "image_url": "/images/pink-camisole.jpg"
   },
   {
     "id": "bottom-001",
@@ -33,7 +33,7 @@
     "category": "Casual",
     "label": "Blue Wide-Leg Jeans",
     "created_at": "2026-06-01T10:03:00Z",
-    "image_url": "https://placehold.co/600x800/4169E1/FFF?text=Blue+Wide-Leg+Jeans"
+    "image_url": "/images/blue-jeans.jpg"
   },
   {
     "id": "bottom-002",
@@ -42,7 +42,7 @@
     "category": "Formal",
     "label": "Black Tailored Trousers",
     "created_at": "2026-06-01T10:04:00Z",
-    "image_url": "https://placehold.co/600x800/222222/FFF?text=Black+Tailored+Trousers"
+    "image_url": "/images/black-trousers.jpg"
   },
   {
     "id": "bottom-003",
@@ -51,7 +51,7 @@
     "category": "Work",
     "label": "Navy Pencil Skirt",
     "created_at": "2026-06-01T10:05:00Z",
-    "image_url": "https://placehold.co/600x800/000080/FFF?text=Navy+Pencil+Skirt"
+    "image_url": "/images/navy-skirt.jpg"
   },
   {
     "id": "shoe-001",
@@ -60,7 +60,7 @@
     "category": "Casual",
     "label": "White Sneakers",
     "created_at": "2026-06-01T10:06:00Z",
-    "image_url": "https://placehold.co/600x800/FFFFFF/000?text=White+Sneakers"
+    "image_url": "/images/white-sneakers.jpg"
   },
   {
     "id": "shoe-002",
@@ -69,7 +69,7 @@
     "category": "Formal",
     "label": "Black Leather Loafers",
     "created_at": "2026-06-01T10:07:00Z",
-    "image_url": "https://placehold.co/600x800/222222/FFF?text=Black+Leather+Loafers"
+    "image_url": "/images/black-loafers.jpg"
   },
   {
     "id": "jacket-001",
@@ -78,7 +78,7 @@
     "category": "Formal",
     "label": "Black Blazer",
     "created_at": "2026-06-01T10:08:00Z",
-    "image_url": "https://placehold.co/600x800/222222/FFF?text=Black+Blazer"
+    "image_url": "/images/black-blazer.jpg"
   },
   {
     "id": "dress-001",
@@ -87,7 +87,7 @@
     "category": "Party",
     "label": "Red Cocktail Dress",
     "created_at": "2026-06-01T10:09:00Z",
-    "image_url": "https://placehold.co/600x800/DC143C/FFF?text=Red+Cocktail+Dress"
+    "image_url": "/images/red-dress.jpg"
   },
   {
     "id": "full-001",
@@ -96,6 +96,6 @@
     "category": "Formal",
     "label": "Black Tuxedo Set",
     "created_at": "2026-06-01T10:10:00Z",
-    "image_url": "https://placehold.co/600x800/222222/FFF?text=Black+Tuxedo+Set"
+    "image_url": "/images/tuxedo-set.jpg"
   }
 ]
