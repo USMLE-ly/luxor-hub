@@ -132,8 +132,68 @@ export default function DressingRoomPage() {
             safeArea={true}
           >
             {isGenerating ? (
-              <div className="flex items-center justify-center w-full h-full" style={{ minHeight: '300px' }}>
-                <CircularProgress progress={progressValue} label={progressStage} />
+              <div style={{
+                position: 'absolute',
+                inset: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: 'rgba(0,0,0,0.7)',
+                zIndex: 50,
+              }}>
+                {/* Spinning halo ring — golden sand gradient */}
+                <div style={{
+                  position: 'relative',
+                  width: '96px',
+                  height: '96px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                  {/* Outer spinning ring — golden sand gradient */}
+                  <div style={{
+                    position: 'absolute',
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: '50%',
+                    border: '4px solid rgba(255,255,255,0.08)',
+                    borderTopColor: '#fbbf24',
+                    borderRightColor: '#f59e0b',
+                  }}
+                    className="animate-spin"
+                  />
+                  {/* Inner pulse glow */}
+                  <div style={{
+                    position: 'absolute',
+                    width: '64px',
+                    height: '64px',
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(251, 191, 36, 0.15)',
+                  }}
+                    className="animate-pulse"
+                  />
+                  {/* Percentage text */}
+                  <span style={{
+                    fontSize: '16px',
+                    fontWeight: 600,
+                    color: 'rgba(251, 191, 36, 0.9)',
+                    zIndex: 1,
+                  }}>
+                    {progressValue}%
+                  </span>
+                </div>
+                <p style={{
+                  marginTop: '24px',
+                  fontSize: '13px',
+                  color: 'rgba(255,255,255,0.7)',
+                  fontWeight: 500,
+                  letterSpacing: '0.05em',
+                  textAlign: 'center',
+                  padding: '0 16px',
+                }}>
+                  {progressStage}
+                </p>
               </div>
             ) : (
               <FlipGallery

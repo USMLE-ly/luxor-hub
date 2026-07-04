@@ -189,8 +189,8 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading,
         perspective: '800px',
         overflow: 'hidden',
       }}>
-        <div style={{ ...SECTION_BASE, top: 0, height: '33.333%', backgroundColor: '#1A1A1A', borderBottom: '4px solid #000', zIndex: 0 }} />
-        <div style={{ ...SECTION_BASE, top: '33.333%', height: '33.333%', backgroundColor: '#1A1A1A', borderBottom: '4px solid #000', zIndex: 0 }} />
+        <div style={{ ...SECTION_BASE, top: 0, height: '33.333%', backgroundColor: '#0a0a0a', borderBottom: '4px solid #000', zIndex: 0 }} />
+        <div style={{ ...SECTION_BASE, top: '33.333%', height: '33.333%', backgroundColor: '#0a0a0a', borderBottom: '4px solid #000', zIndex: 0 }} />
         <div style={{ ...SECTION_BASE, bottom: 0, height: '33.333%', backgroundColor: '#1A1A1A', zIndex: 0 }} />
 
         <div style={{ position: 'absolute', bottom: '8px', left: 0, right: 0, zIndex: 20 }}>
@@ -228,7 +228,7 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#1A1A1A',
+      backgroundColor: '#0a0a0a',
       zIndex: 1,
     };
   };
@@ -261,7 +261,7 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading,
               onLoad={() => console.log(`[FLIP-GALLERY] Image loaded OK: ${url}`)}
             />
           ) : (
-            <div style={{ width: '100%', height: '100%', backgroundColor: '#1A1A1A' }} />
+            <div style={{ width: '100%', height: '100%', backgroundColor: '#0a0a0a' }} />
           )}
         </div>
         );
@@ -277,14 +277,90 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading,
         />
       ))}
 
-      <div style={{ position: 'absolute', bottom: '8px', left: 0, right: 0, zIndex: 20 }}>
-        <MarketingBadges
-          onDismiss={onDismiss}
-          onPrev={handlePrev}
-          onNext={handleNext}
-          hasMultiple={outfits.length > 1}
-          hasOutfits={true}
-        />
+      {/* Custom Bottom Controls — Dismiss right, arrows left, no overlap */}
+      <div style={{
+        position: 'absolute',
+        bottom: '16px',
+        left: '8px',
+        right: '8px',
+        zIndex: 20,
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        pointerEvents: 'none',
+      }}>
+        {/* Arrows — left edge */}
+        <div style={{ display: 'flex', gap: '12px', pointerEvents: 'auto' }}>
+          {outfits.length > 1 && (
+            <>
+              <button
+                onClick={handlePrev}
+                style={{
+                  backgroundColor: '#60a5fa',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '40px',
+                  height: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                  transition: 'transform 0.2s ease',
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <button
+                onClick={handleNext}
+                style={{
+                  backgroundColor: '#60a5fa',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '40px',
+                  height: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                  transition: 'transform 0.2s ease',
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+              >
+                <ChevronRight size={20} />
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* Dismiss — right edge */}
+        <div style={{ pointerEvents: 'auto' }}>
+          <button
+            onClick={onDismiss}
+            style={{
+              backgroundColor: '#fbbf24',
+              color: '#1e293b',
+              border: 'none',
+              borderRadius: '9999px',
+              padding: '10px 24px',
+              fontWeight: 600,
+              fontSize: '14px',
+              cursor: 'pointer',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+              transition: 'transform 0.2s ease',
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          >
+            Dismiss
+          </button>
+        </div>
       </div>
     </div>
   );
