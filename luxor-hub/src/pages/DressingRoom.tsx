@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import FlipGallery, { type OutfitImages } from "@/components/ui/flip-gallery";
@@ -26,6 +26,7 @@ export default function DressingRoomPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeOutfit, setActiveOutfit] = useState<OutfitImages | null>(null);
   const [progressValue, setProgressValue] = useState(0);
+  const [displayProgress, setDisplayProgress] = useState(0);
   const [progressStage, setProgressStage] = useState("");
   const [showOccasionModal, setShowOccasionModal] = useState(false);
   const [showCountModal, setShowCountModal] = useState(false);
@@ -109,6 +110,24 @@ export default function DressingRoomPage() {
     setActiveOutfit(null);
   };
 
+  // ── Smooth progress animation during generation ──
+  useEffect(() => {
+    if (!isGenerating) {
+      setDisplayProgress(progressValue);
+      return;
+    }
+    const timer = setInterval(() => {
+      setDisplayProgress(prev => {
+        // Smoothly chase the target progressValue
+        const target = progressValue;
+        if (prev >= target) return target;
+        const step = Math.max(1, Math.floor((target - prev) / 8) + 1);
+        return Math.min(prev + step, target);
+      });
+    }, 100);
+    return () => clearInterval(timer);
+  }, [isGenerating, progressValue]);
+
   return (
     <AppLayout>
       <div className="p-4 md:p-8 mx-auto max-w-7xl space-y-8 overflow-x-hidden">
@@ -157,9 +176,9 @@ export default function DressingRoomPage() {
                     width: '100%',
                     height: '100%',
                     borderRadius: '50%',
-                    border: '4px solid rgba(255,255,255,0.08)',
-                    borderTopColor: '#fbbf24',
-                    borderRightColor: '#f59e0b',
+                    border: '4px solid rgba(255,255,255,0.06)',
+                    borderTopColor: '#e5c785',
+                    borderRightColor: '#d4b06a',
                   }}
                     className="animate-spin"
                   />
@@ -169,18 +188,18 @@ export default function DressingRoomPage() {
                     width: '64px',
                     height: '64px',
                     borderRadius: '50%',
-                    backgroundColor: 'rgba(251, 191, 36, 0.15)',
+                    backgroundColor: 'rgba(229, 199, 133, 0.15)',
                   }}
                     className="animate-pulse"
                   />
-                  {/* Percentage text */}
+                  {/* Percentage text - smoothly animated */}
                   <span style={{
                     fontSize: '16px',
                     fontWeight: 600,
-                    color: 'rgba(251, 191, 36, 0.9)',
+                    color: 'rgba(229, 199, 133, 0.9)',
                     zIndex: 1,
                   }}>
-                    {progressValue}%
+                    {displayProgress}%
                   </span>
                 </div>
                 <p style={{
@@ -225,49 +244,46 @@ export default function DressingRoomPage() {
                 <div className="p-6 rounded-lg bg-[#1F1F1F] border border-white/10">
                   <h4 className="text-sm font-semibold text-purple-400 mb-4 text-center">Stylist Notes</h4>
                   {/* Important phrases as MarketingBadges-style pills */}
-                  <div className="flex flex-wrap gap-2 justify-center mb-4">
-                    {activeOutfit.stylist_reasoning.flatMap((note: string) => {
-                      // Extract meaningful key phrases from the note
-                      const phrases = note
-                        .split(/[,;.]|\sand\s|\swith\s|\bfor\b|\bthat\b|\bwhich\b/)
-                        .map(p => p.trim())
-                        .filter(p => p.length > 10 && p.split(' ').length >= 2);
-                      return phrases.slice(0, 6); // limit per note
-                    }).slice(0, 9).map((phrase: string, pi: number) => {
-                      const pillColors = [
-                        'from-amber-300 to-yellow-400',
-                        'from-pink-300 to-pink-400',
-                        'from-blue-400 to-blue-500',
-                        'from-orange-400 to-orange-500',
-                        'from-purple-400 to-purple-500',
-                        'from-green-400 to-green-500',
-                      ];
-                      const rotations = [-2, 1, -1, 2, -3, 0];
-                      const colorClass = pillColors[pi % pillColors.length];
-                      const rotation = rotations[pi % rotations.length];
-                      return (
-                        <span
-                          key={pi}
-                          className={`inline-block cursor-default select-none rounded-full px-4 py-1.5 text-xs font-semibold bg-gradient-to-b shadow-lg transition-all duration-300 ease-out hover:scale-105 hover:shadow-xl`}
-                          style={{
-                            background: `linear-gradient(135deg, ${colorClass})`,
-                            color: '#1e293b',
-                            transform: `rotate(${rotation}deg)`,
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.2), inset 0 1px 2px rgba(255,255,255,0.3)',
-                          }}
-                        >
-                          {phrase}
-                        </span>
-                      );
-                    })}
-                  </div>
-                  {/* Full notes as Highlight text */}
-                  <div className="flex flex-col gap-3">
+                                    {/* Inline phrase highlighting - only key fashion terms pop */}
+                  <div className="flex flex-col gap-4">
                     {activeOutfit.stylist_reasoning.map((note: string, i: number) => {
-                      const colors: Array<'red' | 'purple' | 'green'> = ['purple', 'green', 'red', 'purple', 'green'];
+                      const noteColors: Array<'purple' | 'green' | 'red'> = ['purple', 'green', 'red'];
+                      const highlightColor = noteColors[i % noteColors.length];
+                      
+                      // Split note around key fashion terms, highlighting only those terms
+                      const fashionTerms = [
+                        'black','navy','cream','brown','white','gray','beige','olive',
+                        'burgundy','camel','charcoal','taupe','ivory','khaki','rust','mauve',
+                        'slate','ebony','mocha','terracotta','indigo','cobalt','emerald',
+                        'silk','cotton','wool','linen','cashmere','denim','velvet','leather',
+                        'suede','chiffon','tweed','lace','satin','jersey','flannel','corduroy',
+                        'mesh','knit','woven','textured','ribbed',
+                        'blazer','trousers','loafers','structured','oversized','tailored',
+                        'A-line','wrap','pleated','crop','high-waisted','wide-leg','slim-fit',
+                        'pumps','mules','sandals','heels','flats','sneakers','boots',
+                        'blouse','cardigan','sweater','hoodie','jacket','coat','parka',
+                        'skirt','dress','jumpsuit','romper','shorts','jeans','chinos',
+                        'silhouette','texture','earthy','neutral','monochrome','layered',
+                        'minimalist','polished','effortless','sophisticated','refined',
+                        'versatile','timeless','classic','modern','edgy','chic',
+                        'elegant','luxurious','cozy','relaxed','sharp','crisp',
+                        'flattering','elongating','grounding','softening','balancing',
+                      ];
+                      
+                      // Escape and build regex
+                      const escaped = fashionTerms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+                      const pattern = new RegExp('(' + escaped.join('|') + ')', 'gi');
+                      const parts = note.split(pattern);
+                      
                       return (
                         <p key={i} className="text-sm text-gray-300 leading-relaxed">
-                          <Highlight color={colors[i % colors.length]}>{note}</Highlight>
+                          {parts.map((part, pi) => {
+                            const isKeyword = fashionTerms.some(t => t.toLowerCase() === part.toLowerCase());
+                            if (isKeyword) {
+                              return <Highlight key={pi} color={highlightColor}>{part}</Highlight>;
+                            }
+                            return part ? <span key={pi}>{part}</span> : null;
+                          })}
                         </p>
                       );
                     })}

@@ -344,7 +344,7 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading,
           <button
             onClick={onDismiss}
             style={{
-              backgroundColor: '#fbbf24',
+              background: 'linear-gradient(135deg, #e5c785, #d4b06a)',
               color: '#1e293b',
               border: 'none',
               borderRadius: '9999px',
