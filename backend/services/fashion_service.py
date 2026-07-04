@@ -4,6 +4,7 @@ import json
 import logging
 import random
 import time
+import hashlib
 import urllib.parse
 from typing import Any, Dict, List, Optional
 
@@ -70,36 +71,36 @@ def generate_tweak_visualization_prompt(original_items_string: str, tweak_item_s
         outfit_desc = 'A complete outfit'
     
     return (
-        f"SUBJECT: HYPERREALISTIC FULL-BODY FASHION EDITORIAL PHOTOGRAPH OF A MODEL WEARING {outfit_desc.upper()}. "
+        f"SUBJECT: HYPERREALISTIC FULL-BODY FASHION EDITORIAL PHOTOGRAPH OF A MODEL WEARING {outfit_desc}. "
         f"MATTE NATURAL SKIN WITH VISIBLE PORES, REALISTIC MICRO-TEXTURE, SUBTLE IMPERFECTIONS, "
         f"AUTHENTIC UNDERTONES, AND NATURAL TONAL VARIATION. NO RETOUCHING OR AIRBRUSHING. "
         f"THE MODEL HAS A REFINED, POISED EXPRESSION WITH RELAXED YET SOPHISTICATED POSTURE, "
         f"CONVEYING EFFORTLESS ELEGANCE AND QUIET CONFIDENCE. "
-        f"NATURAL HAIR TEXTURE WITH SUBTLE MOVEMENT AND LIFELIKE DETAIL.\n\n"
+        f"NATURAL HAIR TEXTURE WITH SUBTLE MOVEMENT AND LIFELIKE DETAIL. "
         f"MEDIUM: HYPERREALISTIC PHOTOGRAPH, 8K ULTRA-PHOTOREALISM, CRISP OPTICAL CLARITY, "
         f"HIGH-FIDELITY FABRIC RENDERING, CINEMATIC EDITORIAL FINISH. "
         f"DSLR FULL-FRAME CAMERA QUALITY WITH PROFESSIONAL-GRADE OUTPUT RESEMBLING "
-        f"LUXURY FASHION MAGAZINE EDITORIALS (VOGUE, HARPER\'S BAZAAR).\n\n"
+        f"LUXURY FASHION MAGAZINE EDITORIALS (VOGUE, HARPER\'S BAZAAR). "
         f"ENVIRONMENT: MINIMALIST HIGH-END FASHION STUDIO SETTING WITH A SOFT, SEAMLESS WHITE "
         f"OR NEUTRAL GREY GRADIENT BACKDROP. CLEAN, UNCLUTTERED, DISTRACTION-FREE SPACE "
-        f"DESIGNED TO EMPHASIZE THE GARMENT DETAILS, SILHOUETTE, AND TEXTURE NARRATIVE.\n\n"
+        f"DESIGNED TO EMPHASIZE THE GARMENT DETAILS, SILHOUETTE, AND TEXTURE NARRATIVE. "
         f"LIGHTING: SOFT DIFFUSED STUDIO LIGHTING WITH PROFESSIONAL BALANCE. NATURAL, "
         f"EVEN ILLUMINATION PROVIDING GENTLE HIGHLIGHTS AND MICRO-SHADOWS THAT DEFINE "
         f"FABRIC TEXTURE AND FACIAL CONTOURS. NO HARSH CONTRAST, NO ARTIFICIAL GLOW. "
         f"GENTLE RIM LIGHTING DEFINING THE SILHOUETTE AGAINST THE BACKGROUND. "
-        f"TRUE-TO-LIFE LIGHT SCATTERING ACROSS SKIN AND FABRIC WITH SMOOTH SHADOW-TO-LIGHT TRANSITIONS.\n\n"
+        f"TRUE-TO-LIFE LIGHT SCATTERING ACROSS SKIN AND FABRIC WITH SMOOTH SHADOW-TO-LIGHT TRANSITIONS. "
         f"COLOR: TRUE-TO-LIFE COLOR CALIBRATION WITH PREMIUM EDITORIAL GRADING. HARMONIOUS PALETTE "
         f"FEATURING NATURAL SKIN TONES AND PRECISE TEXTILE COLORS. ACCURATE RENDERING OF EVERY "
-        f"GARMENT WITHOUT OVERSATURATION. SMOOTH TONAL GRADIENTS WITH AUTHENTIC COLOR VARIATION.\n\n"
+        f"GARMENT WITHOUT OVERSATURATION. SMOOTH TONAL GRADIENTS WITH AUTHENTIC COLOR VARIATION. "
         f"MOOD: MODERN, REFINED, MINIMALIST LUXURY. CONFIDENT, ELEGANT, AND EFFORTLESSLY "
         f"SOPHISTICATED. PREMIUM HIGH-FASHION EDITORIAL ATMOSPHERE. CALM, COMPOSED, "
-        f"AND TIMELESS WITH QUIET SOPHISTICATION.\n\n"
+        f"AND TIMELESS WITH QUIET SOPHISTICATION. "
         f"COMPOSITION: SHOT WITH AN 85MM FASHION LENS ON A FULL-FRAME SENSOR. "
         f"FULL-BODY FRAMING, STRAIGHT-ON ANGLE, CENTERED COMPOSITION. "
         f"SHALLOW DEPTH OF FIELD KEEPING THE MODEL AND OUTFIT IN SHARP FOCUS "
         f"WHILE THE BACKGROUND FALLS SOFTLY OUT OF FOCUS. "
         f"PRECISE AUTOFOCUS ON THE FACE AND GARMENT DETAILS. "
-        f"MAGAZINE-READY EDITORIAL QUALITY WITH BALANCED NEGATIVE SPACE.\n\n"
+        f"MAGAZINE-READY EDITORIAL QUALITY WITH BALANCED NEGATIVE SPACE. "
         f"--no marble --no stone background --no table --no flat lay --no product photography "
         f"--no isolated product --no product isolation --no stainless steel --no metal object "
         f"--no jewelry box --no tarnished metal --no dark shadows --no empty room "
@@ -207,11 +208,13 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
 
     # Generate tweak image URL
     tweak_text = _humanize_tweak(result.get("tweak_plan", ""), detected_items or items_detected)
-    _outfit_items = ", ".join(items_detected) if items_detected else ""
+    _outfit_items = ", ".join(detected_items) if detected_items else (tweak_text if tweak_text else "a fashion outfit")
     _tweak_prompt = generate_tweak_visualization_prompt(_outfit_items, tweak_text)
     _safe_tweak = urllib.parse.quote(_tweak_prompt)
-    _tweak_seed = int(time.time() * 1000) % 10000
-    tweak_image_url = f"https://image.pollinations.ai/prompt/{_safe_tweak}?nologin=true&seed={_tweak_seed}"
+    # Deterministic seed based on outfit + tweak text for consistency
+    _seed_input = (_outfit_items + tweak_text).encode('utf-8')
+    _tweak_seed = int(hashlib.md5(_seed_input).hexdigest()[:8], 16) % 999999
+    tweak_image_url = f"https://image.pollinations.ai/prompt/{_safe_tweak}?nologin=true&seed={_tweak_seed}&width=1024&height=1536&model=flux"
 
     # Parse honest improvements
     improvements = []
