@@ -200,18 +200,25 @@ export default function DressingRoomPage() {
                 onClick={(e) => e.stopPropagation()}
               >
                 <h3 className="text-lg font-semibold text-white mb-4">Pick an Occasion</h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {OCCASIONS.map((occ) => (
-                    <button
-                      key={occ.id}
-                      onClick={() => handleOccasionSelect(occ.id)}
-                      className="flex flex-col items-center gap-2 p-4 rounded-xl border border-white/10 hover:border-purple-500/50 hover:bg-purple-500/10 transition-all"
-                    >
-                      <span className="text-2xl">{occ.emoji}</span>
-                      <span className="text-sm text-white/80">{occ.label}</span>
-                    </button>
-                  ))}
-                </div>
+                <Perspective maxRotateX={8} maxRotateY={16} smoothing={0.08}>
+                  <div className="grid grid-cols-2 gap-3">
+                    {OCCASIONS.map((occ, idx) => {
+                      const occColors: Array<'red' | 'purple' | 'green'> = ['red', 'purple', 'green', 'purple', 'green'];
+                      return (
+                        <button
+                          key={occ.id}
+                          onClick={() => handleOccasionSelect(occ.id)}
+                          className="flex flex-col items-center gap-2 p-4 rounded-xl border border-white/10 hover:border-purple-500/50 hover:bg-purple-500/10 transition-all"
+                        >
+                          <span className="text-2xl">{occ.emoji}</span>
+                          <span className="text-sm">
+                            <Highlight color={occColors[idx % occColors.length]}>{occ.label}</Highlight>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </Perspective>
                 <button
                   onClick={() => setShowOccasionModal(false)}
                   className="w-full mt-4 py-2 text-sm text-white/50 hover:text-white transition-colors"
@@ -242,18 +249,25 @@ export default function DressingRoomPage() {
               >
                 <h3 className="text-lg font-semibold text-white mb-4">How many outfits?</h3>
                 <p className="text-sm text-white/50 mb-4">Choose how many combinations to generate.</p>
-                <div className="grid grid-cols-3 gap-3">
-                  {[1, 2, 3].map((num) => (
-                    <button
-                      key={num}
-                      onClick={() => handleCountSelect(num)}
-                      className="flex flex-col items-center gap-2 p-4 rounded-xl border border-white/10 hover:border-purple-500/50 hover:bg-purple-500/10 transition-all"
-                    >
-                      <span className="text-2xl font-bold text-white">{num}</span>
-                      <span className="text-xs text-white/60">Outfit{num > 1 ? 's' : ''}</span>
-                    </button>
-                  ))}
-                </div>
+                <Perspective maxRotateX={8} maxRotateY={16} smoothing={0.08}>
+                  <div className="grid grid-cols-3 gap-3">
+                    {[1, 2, 3].map((num, idx) => {
+                      const countColors: Array<'red' | 'purple' | 'green'> = ['red', 'purple', 'green'];
+                      return (
+                        <button
+                          key={num}
+                          onClick={() => handleCountSelect(num)}
+                          className="flex flex-col items-center gap-2 p-4 rounded-xl border border-white/10 hover:border-purple-500/50 hover:bg-purple-500/10 transition-all"
+                        >
+                          <span className="text-2xl font-bold">
+                            <Highlight color={countColors[idx]}>{num}</Highlight>
+                          </span>
+                          <span className="text-xs text-white/60">Outfit{num > 1 ? 's' : ''}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </Perspective>
                 <button
                   onClick={() => setShowCountModal(false)}
                   className="w-full mt-4 py-2 text-sm text-white/50 hover:text-white transition-colors"

@@ -568,8 +568,12 @@ const Closet = () => {
         notes: `Mannequin outfit with ${mannequinClothing.length} items`,
         outfit_items: mannequinClothing as any,
       });
-    if (error) toast.error("Failed to save to calendar");
-    else { toast.success("Outfit saved to calendar!"); setShowCalendar(false); }
+      if (error) toast.error("Failed to save to calendar");
+      else { toast.success("Outfit saved to calendar!"); setShowCalendar(false); }
+    } catch (e) {
+      console.warn('[CLOSET] saveToCalendar error:', e);
+      toast.error('Failed to save to calendar');
+    }
   };
 
   const handleTraceUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

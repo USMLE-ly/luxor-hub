@@ -51,7 +51,7 @@ export function MarketingBadges({
         ] : []),
       ]
     : [
-        { id: "generate", label: isLoading ? "Consulting MiMo..." : "Generate Outfit", color: "from-purple-500 to-purple-600", size: "md", rotation: 1, zIndex: 10, offsetX: 0, offsetY: 0 },
+        { id: "generate", label: isLoading ? "Consulting MiMo..." : "Generate Outfit", color: "from-amber-300 to-yellow-400", size: "md", rotation: 1, zIndex: 10, offsetX: 0, offsetY: 0 },
       ]
 
   const handleClick = (id: string) => {
