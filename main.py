@@ -2730,80 +2730,30 @@ def server_error(e):
 
 
 def _humanize_stylist_note(note: str) -> str:
-    """Post-process MiMo Vision notes to sound like a real personal stylist, not a robot.
-    Replaces stiff, academic or AI-sounding phrases with warm, natural fashion-consultant language."""
-    replacements = [
-        # Verbs
-        (r'\bprovides\b', 'gives'),
-        (r'\bintroduces\b', 'adds'),
-        (r'\butilizes\b', 'uses'),
-        (r'\bensures\b', 'creates'),
-        (r'\bresulting in\b', 'giving'),
-        (r'\boffers\b', 'brings'),
-        (r'\benhances\b', 'elevates'),
-        (r'\bexudes\b', 'gives off'),
-        (r'\bestablishes\b', 'creates'),
-        (r'\bincorporates\b', 'mixes in'),
-        (r'\bcomplements\b', 'works with'),
-        (r'\bexecutes\b', 'delivers'),
-        (r'\bmaintains\b', 'keeps'),
-        (r'\bachieves\b', 'strikes'),
-        (r'\bdemonstrates\b', 'shows off'),
-        (r'\bemphasizes\b', 'highlights'),
-        (r'\bproduces\b', 'lends'),
-        (r'\bselected\b', 'chose'),
-        (r'\bchooses\b', 'picks'),
-        # Nouns
-        (r'\bensemble\b', 'outfit'),
-        (r'\bsilhouette\b', 'shape'),
-        (r'\bfabrication\b', 'fabric'),
-        (r'\baesthetic\b', 'look'),
-        (r'\bgarment\b', 'piece'),
-        (r'\bcombination\b', 'pairing'),
-        (r'\butilization\b', 'use'),
-        (r'\bimplementation\b', 'way'),
-        (r'\bintegration\b', 'mix'),
-        # Adjectives
-        (r'\bcontemporary\b', 'modern'),
-        (r'\bversatile\b', 'easygoing'),
-        (r'\bsophisticated\b', 'polished'),
-        (r'\bcohesive\b', 'together'),
-        (r'\bharmonious\b', 'natural'),
-        (r'\bexceptional\b', 'smart'),
-        (r'\boptimal\b', 'best'),
-        (r'\beffortless\b', 'easy'),
-        # Phrases
-        (r'\bperfect for\b', 'ideal for'),
-        (r'\bin order to\b', 'to'),
-        (r'\bas well as\b', 'plus'),
-        (r'\bdue to the fact that\b', 'because'),
-        (r'\bon a daily basis\b', 'everyday'),
-        # Hallucination / boilerplate removers
-        (r'\bselected by trend algorithm\b', ''),
-        (r'\bselected to match your personal aesthetic\b', ''),
-        (r'\bcomplementary colors chosen from your wardrobe\b', ''),
-        (r'\bseasonal relevance considered\b', ''),
-        (r'\bpersonal aesthetic\b', 'style'),
-        (r'\bwardrobe versatility\b', 'wearability'),
-        (r'\bfashion-forward\b', 'stylish'),
-        (r'\btimeless appeal\b', 'lasting style'),
-        (r'\binvestment piece\b', 'staple'),
-        # Extra polish
-        (r'\byour overall\b', 'your'),
-        (r'\bthe overall\b', 'the'),
-    ]
-    import re as _re
-    result = note
-    for pattern, replacement in replacements:
-        result = _re.sub(pattern, replacement, result, flags=_re.IGNORECASE)
-    # Clean up double spaces
-    result = _re.sub(r'  +', ' ', result)
-    # Clean up leading/trailing commas or spaces from removed phrases
-    result = result.strip().strip(',').strip()
-    # Capitalize first letter
-    if result:
-        result = result[0].upper() + result[1:]
-    # Ensure it ends with a period
-    if result and not result.endswith('.'):
-        result += '.'
-    return result
+    """Post-process text through the Humanizer to remove AI writing patterns.
+    Replaces stiff, academic or AI-sounding phrases with warm, natural language."""
+    try:
+        from backend.utils.humanizer import humanize_text
+        return humanize_text(note)
+    except ImportError:
+        # Fallback if humanizer module not available
+        import re
+        replacements = [
+            (r'\bprovides\b', 'gives'),
+            (r'\bintroduces\b', 'adds'),
+            (r'\bperfect for\b', 'ideal for'),
+            (r'\bensemble\b', 'outfit'),
+            (r'\bsilhouette\b', 'shape'),
+            (r'\baesthetic\b', 'look'),
+            (r'\bselected by trend algorithm\b', ''),
+        ]
+        result = note
+        for pattern, replacement in replacements:
+            result = re.sub(pattern, replacement, result, flags=re.IGNORECASE)
+        result = re.sub(r'  +', ' ', result)
+        result = result.strip().strip(',').strip()
+        if result:
+            result = result[0].upper() + result[1:]
+        if result and not result.endswith('.'):
+            result += '.'
+        return result

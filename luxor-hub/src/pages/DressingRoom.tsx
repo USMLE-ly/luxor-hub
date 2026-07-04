@@ -6,6 +6,7 @@ import IPhoneMockup from "@/components/ui/iphone-mockup";
 import { Perspective, Highlight } from "@/components/ui/perspective-highlight";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { humanizeTextArray } from "@/lib/humanizer";
 
 /* ------------------------------------------------------------------ */
 /*  Constants                                                          */
@@ -72,7 +73,7 @@ export default function DressingRoomPage() {
             bottom: item.bottom || '',
             type: item.type || 'regular',
             accessory_note: item.accessory_note || '',
-            stylist_reasoning: item.stylist_reasoning || [],
+            stylist_reasoning: humanizeTextArray(item.stylist_reasoning || []),
           }));
         }
         setGeneratedImages(normalized);

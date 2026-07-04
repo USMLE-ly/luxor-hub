@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { ImageSwiper } from "@/components/ui/image-swiper";
 
 import { FashionHero } from "@/components/ui/hero-fashion";
+import { humanizeText, humanizeTextArray } from "@/lib/humanizer";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -273,10 +274,14 @@ export default function Analysis() {
         style_name: fnData.style_name || '',
         actual_colors: fnData.actual_colors || [],
         items_detected: fnData.items_detected || [],
-        strengths: fnData.strengths || [],
-        improvements: fnData.improvements || [],
-        audit: fnData.audit || '',
-        tweak_plan: fnData.tweak_plan || '',
+        strengths: humanizeTextArray(fnData.strengths || []),
+        improvements: (fnData.improvements || []).map((imp: any) => ({
+          ...imp,
+          issue: humanizeText(imp.issue || ''),
+          suggestion: humanizeText(imp.suggestion || ''),
+        })),
+        audit: humanizeText(fnData.audit || ''),
+        tweak_plan: humanizeText(fnData.tweak_plan || ''),
         generation_prompt: fnData.generation_prompt || '',
         vibe_type: fnData.vibe_type || '',
         top_type: fnData.top_type || '',

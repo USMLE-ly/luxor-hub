@@ -379,7 +379,7 @@ export default function StyleRecommendationsPage() {
                       <InfoRow label="Beard" value={recommendations.face_recommendations.beard_advice} />
                     )}
                     {recommendations.face_recommendations.explanation && (
-                      <p className="text-xs text-white/50 italic mt-2">{recommendations.face_recommendations.explanation}</p>
+                      <p className="text-xs text-white/50 italic mt-2">{humanizeText(recommendations.face_recommendations.explanation)}</p>
                     )}
                   </>
                 )}
@@ -397,7 +397,7 @@ export default function StyleRecommendationsPage() {
                     {recommendations.body_recommendations.coat_style && <InfoRow label="Coat Style" value={recommendations.body_recommendations.coat_style} />}
                     {recommendations.body_recommendations.suit_cut && <InfoRow label="Suit Cut" value={recommendations.body_recommendations.suit_cut} />}
                     {recommendations.body_recommendations.explanation && (
-                      <p className="text-xs text-white/50 italic mt-2">{recommendations.body_recommendations.explanation}</p>
+                      <p className="text-xs text-white/50 italic mt-2">{humanizeText(recommendations.body_recommendations.explanation)}</p>
                     )}
                   </>
                 )}
@@ -413,7 +413,7 @@ export default function StyleRecommendationsPage() {
                       <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-black/30 border border-white/5">
                         <span className="text-amber-400/70 text-sm mt-0.5">•</span>
                         <div className="flex-1">
-                          <p className="text-sm text-white/80">{tip.tip}</p>
+                          <p className="text-sm text-white/80">{humanizeText(tip.tip)}</p>
                           <p className="text-[10px] text-white/40 mt-1">Confidence: {tip.confidence}%</p>
                         </div>
                       </div>

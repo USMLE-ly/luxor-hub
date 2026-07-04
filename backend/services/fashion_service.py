@@ -119,7 +119,12 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
         result.get(k, "") for k in ["top_type", "bottom_type", "footwear", "accessories"]
         if result.get(k, "") and result.get(k, "") != "None"
     ]
-    strengths = _humanize_strengths(detected_items or items_detected)
+    raw_strengths = _humanize_strengths(detected_items or items_detected)
+    try:
+        from backend.utils.humanizer import humanize_text_array
+        strengths = humanize_text_array(raw_strengths)
+    except ImportError:
+        strengths = raw_strengths
 
     # Normalize score and name
     score = result.get("style_score")

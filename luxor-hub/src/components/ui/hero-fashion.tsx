@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import { AnimatedGradient } from "@/components/ui/animated-gradient-with-svg";
 import { MarkerHighlight } from "@/components/ui/marker-highlight";
 import { ShimmerBgText } from "@/components/ui/shimmer-bg-text";
+import { humanizeText, humanizeTextArray } from "@/lib/humanizer";
 
 /** Clothing & accessory keywords to detect in tweak text for yellow highlighting */
 const TWEAK_KEYWORDS = [
@@ -357,7 +358,7 @@ export function FashionHero({
                     {strengths.length > 0 ? strengths.map((s, idx) => (
                       <div key={idx} className="flex items-start gap-2.5 text-sm text-white/90 leading-relaxed">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] mt-1.5 flex-shrink-0" />
-                        <ShimmerBgText><span className="tracking-wide">{s}</span></ShimmerBgText>
+                        <ShimmerBgText><span className="tracking-wide">{humanizeText(s)}</span></ShimmerBgText>
                       </div>
                     )) : (
                       <p className="text-xs text-white/40">No strengths detected</p>
@@ -378,7 +379,7 @@ export function FashionHero({
                       const text = tweakPlan || "Consider adding a structured blazer for a more polished look.";
                       return (
                         <p className="text-sm italic text-white/90 leading-relaxed tracking-wide">
-                          {renderHighlightedTweak(text)}
+                          {renderHighlightedTweak(humanizeText(text))}
                         </p>
                       );
                     })()}
