@@ -60,14 +60,14 @@ def generate_tweak_visualization_prompt(accessory: str, tweak_text: str = "") ->
         color_word = "polished 18k gold"
 
     if clean_acc in clothing_items:
-        # Use the full tweak text as the prompt description
+        # Use the full tweak text as the prompt description for exact item visualization
         description = tweak_text if tweak_text else f"A person wearing a {clean_acc}"
         return (
-            f"Fashion photograph of {description}, "
-            f"model wearing the suggested item, full body shot, "
-            f"studio lighting, clean white background, fashion editorial style, "
-            f"high-end lookbook aesthetic, sharp focus, natural pose, "
-            f"photorealistic, 4K resolution."
+            f"Fashion full-body photograph of a model exactly wearing: {description}. "
+            f"The model is shown wearing the EXACT recommended complete outfit described above. "
+            f"Full body shot from head to toe, professional studio lighting, "
+            f"clean white background, fashion editorial style, "
+            f"sharp focus, natural pose, photorealistic, 4K resolution."
         )
     elif "earring" in clean_acc:
         return (

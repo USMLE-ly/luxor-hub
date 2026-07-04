@@ -4,24 +4,89 @@ import { AnimatedGradient } from "@/components/ui/animated-gradient-with-svg";
 import { MarkerHighlight } from "@/components/ui/marker-highlight";
 import { ShimmerBgText } from "@/components/ui/shimmer-bg-text";
 
-/** Extract the item/accessory word from a tweak_plan string for marker highlighting */
-function extractHighlightItem(text: string): { start: string; item: string; end: string } {
-  if (!text) return { start: "Consider adding a ", item: "structured blazer", end: " for a more polished look." };
-  
-  // Match "Add a X to...", "Try adding a X...", "Try a X...", "Swap the X for..."
-  const addMatch = text.match(/(?:Add|adding)\s+(?:a\s+)?(?:simple\s+)?(?:delicate\s+)?(?:thin\s+)?(?:layered\s+)?([a-zA-Z\s-]+?)\s+(?:to|for|and|if|or)/i);
-  const tryMatch = text.match(/Try\s+(?:a\s+)?(?:adding\s+)?(?:a\s+)?(?:simple\s+)?(?:delicate\s+)?(?:thin\s+)?([a-zA-Z\s-]+?)\s+(?:to|for|and|if|or)/i);
-  const swapMatch = text.match(/Swap\s+(?:the\s+)?([a-zA-Z\s]+?)\s+(?:for|with)/i);
-  const match = addMatch || tryMatch || swapMatch;
-  
-  if (match) {
-    const item = match[1].trim();
-    const idx = text.toLowerCase().indexOf(item.toLowerCase());
-    const start = text.substring(0, idx);
-    const end = text.substring(idx + item.length);
-    return { start, item, end };
+/** Clothing & accessory keywords to detect in tweak text for yellow highlighting */
+const TWEAK_KEYWORDS = [
+  'blazer','jacket','cardigan','coat','vest','hoodie','sweater','shirt','blouse','top',
+  'trousers','pants','jeans','shorts','skirt','dress','jumpsuit','romper',
+  'loafers','sneakers','boots','heels','pumps','sandals','flats','mules','oxfords',
+  'necklace','earring','bracelet','ring','watch','belt','scarf','bag','handbag',
+  'clutch','tote','backpack','hat','sunglasses','gloves',
+  'crop top','tank top','t-shirt','blazer','suit','vest',
+  'wide-leg','slim-fit','high-waisted','tailored','oversized','structured',
+  'leather','suede','denim','silk','cotton','linen','cashmere','wool','lace','satin',
+  'gold','silver','rose gold','tortoiseshell','pearl',
+  'polka dot','striped','floral','plaid','checkered',
+  'navy','cream','beige','khaki','olive','burgundy','camel','charcoal','taupe',
+  'black','white','gray','brown','tan','blush','mauve','terracotta','indigo',
+];
+
+/** Render tweak text with ALL matching clothing terms highlighted in yellow */
+function renderHighlightedTweak(text: string) {
+  if (!text) {
+    const fallback = "Consider adding a structured blazer for a more polished look.";
+    return <span>{fallback}</span>;
   }
-  return { start: text, item: "", end: "" };
+  
+  // Build a regex from all keywords, longest first to match multi-word phrases
+  const sorted = [...TWEAK_KEYWORDS].sort((a, b) => b.length - a.length);
+  const escaped = sorted.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const pattern = new RegExp('(' + escaped.join('|') + ')', 'gi');
+  
+  const parts = text.split(pattern);
+  const result: React.ReactNode[] = [];
+  
+  parts.forEach((part, i) => {
+    if (!part) return;
+    const isKeyword = sorted.some(k => k.toLowerCase() === part.toLowerCase());
+    if (isKeyword) {
+      result.push(
+        <MarkerHighlight
+          key={i}
+          highlight={part}
+          markerColor="#facc15"
+          baseColor="#ffffff"
+          highlightedTextColor="#171717"
+          speed={1.2}
+          fontSize={18}
+          fontWeight={500}
+          className="inline-block align-middle"
+        />
+      );
+    } else {
+      result.push(<span key={i}>{part}</span>);
+    }
+  });
+  
+  // If no keywords were found, highlight the first actionable phrase (after "Add", "Try", "Swap")
+  if (result.length <= 1) {
+    const match = text.match(/(?:Add|adding|Try|Swap|Pair|Wear|Opt|Go|Choose)\s+(?:a\s+|an\s+|the\s+)?([a-zA-Z\s-]+?)(?:\s+(?:to|for|and|if|or|with|instead|when)|$)/i);
+    if (match) {
+      const phrase = match[1].trim();
+      const idx = text.toLowerCase().indexOf(phrase.toLowerCase());
+      if (idx >= 0) {
+        const before = text.substring(0, idx);
+        const after = text.substring(idx + phrase.length);
+        return (
+          <span>
+            {before}
+            <MarkerHighlight
+              highlight={phrase}
+              markerColor="#facc15"
+              baseColor="#ffffff"
+              highlightedTextColor="#171717"
+              speed={1.2}
+              fontSize={18}
+              fontWeight={500}
+              className="inline-block align-middle"
+            />
+            {after}
+          </span>
+        );
+      }
+    }
+  }
+  
+  return <span>{result}</span>;
 }
 
 interface FashionHeroProps {
@@ -312,34 +377,17 @@ export function FashionHero({
                     <div className="flex-1 w-full">
                       {(() => {
                         const text = tweakPlan || "Consider adding a structured blazer for a more polished look.";
-                        const { start, item, end } = extractHighlightItem(text);
-                        if (item) {
-                          return (
-                            <p className="text-sm italic text-white/90 leading-relaxed tracking-wide">
-                              {start}
-                              <MarkerHighlight
-                                highlight={item}
-                                markerColor="#facc15"
-                                baseColor="#ffffff"
-                                highlightedTextColor="#171717"
-                                speed={1.2}
-                                fontSize={18}
-                                fontWeight={500}
-                                className="inline-block align-middle"
-                              />
-                              {end}
-                            </p>
-                          );
-                        }
                         return (
-                          <p className="text-sm italic text-white/90 leading-relaxed tracking-wide">{text}</p>
+                          <p className="text-sm italic text-white/90 leading-relaxed tracking-wide">
+                            {renderHighlightedTweak(text)}
+                          </p>
                         );
                       })()}
                     </div>
 
                     {/* Right / Bottom: Tweak visualization image */}
                     {(tweakImageUrl) && (
-                      <div className="relative w-full md:w-[45%] lg:w-[40%] h-auto max-h-[180px] overflow-hidden rounded-lg border border-white/20 bg-black/20 flex-shrink-0">
+                      <div className="relative w-full md:w-[45%] lg:w-[40%] aspect-[4/5] overflow-hidden rounded-lg border border-white/20 flex-shrink-0">
                         <img
                           src={tweakImageUrl}
                           alt="Tweak Visualization"

@@ -4,7 +4,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import FlipGallery, { type OutfitImages } from "@/components/ui/flip-gallery";
 import IPhoneMockup from "@/components/ui/iphone-mockup";
 import { Perspective, Highlight } from "@/components/ui/perspective-highlight";
-import { CircularProgress } from "@/components/ui/circular-progress";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
