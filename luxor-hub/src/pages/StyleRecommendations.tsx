@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Sparkles, Upload, Camera, Palette, ScanFaceIcon, User, Star, Lightbulb, AlertTriangle } from "lucide-react";
-import { Perspective, Highlight } from "@/components/ui/perspective-highlight";
 import { humanizeText } from "@/lib/humanizer";
 import { CircularProgress } from "@/components/ui/circular-progress";
 import InfoCardsTable, { type RowData, type CellData } from "@/components/ui/info-cards-table";

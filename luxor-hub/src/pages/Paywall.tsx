@@ -231,7 +231,7 @@ const Paywall = () => {
                     t.isFree ? (
                       <button
                         onClick={() => {
-                          localStorage.setItem("luxor_paid", "free");
+                          try { localStorage.setItem("luxor_paid", "free"); } catch {}
                           grantAccess("free");
                           navigate("/dashboard");
                         }}

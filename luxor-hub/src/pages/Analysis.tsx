@@ -2,7 +2,7 @@ import React from "react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { AppLayout } from "@/components/app/AppLayout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
