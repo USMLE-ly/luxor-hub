@@ -405,7 +405,7 @@ export default function StyleRecommendationsPage() {
 
               {/* Honest Tips */}
               {/* Honest Tips */}
-              {recommendations.honest_tips?.length > 0 && (
+              {Array.isArray(recommendations.honest_tips) && recommendations.honest_tips.length > 0 && (
                 <div className="rounded-xl border border-amber-500/20 bg-amber-950/20 backdrop-blur-xl p-5">
                   <div className="flex items-center gap-2 mb-4"><span className="text-amber-400"><Lightbulb className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-amber-300/80">Honest Tips</h3></div>
                   <div className="space-y-3">

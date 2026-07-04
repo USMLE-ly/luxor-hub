@@ -429,7 +429,7 @@ export default function Analysis() {
         overall_style: data.style_name,
         style_score: data.style_score || 0,
         summary: data.audit,
-        detected_items: data.items_detected.map((n) => ({ name: n, category: "Item", color: "N/A", style: "N/A" })),
+        detected_items: Array.isArray(data.items_detected) ? data.items_detected.map((n) => ({ name: n, category: "Item", color: "N/A", style: "N/A" })) : [],
         color_palette: { colors: data.actual_colors, harmony: "Balanced", rating: "Good" },
         strengths: data.strengths,
         improvements: [{ suggestion: data.tweak_plan, reason: "AI suggestion", priority: "medium" }],

@@ -1501,7 +1501,7 @@ def stylist_explore():
 
     if gen_prompt and not next_q:
         safe = urllib.parse.quote(gen_prompt)
-        image_url = f"https://image.pollinations.ai/prompt/{safe}?width=1024&height=1536&nologin=true&seed={seed}&model=flux"
+        image_url = f"https://image.pollinations.ai/prompt/{safe}?width=1024&height=1536&nologin=true&seed={seed}&model=sana"
         return jsonify({"next_question": "", "options": [], "generated_prompt": gen_prompt, "outfit_name": outfit_name, "image_url": image_url})
 
     return jsonify({"next_question": next_q, "options": options, "generated_prompt": "", "outfit_name": ""})
@@ -1521,7 +1521,7 @@ def stylist_generate():
     prompt = f"SUBJECT: HYPERREALISTIC FULL-BODY FASHION EDITORIAL PHOTOGRAPH OF A WOMAN STANDING CONFIDENTLY, WEARING A {vibe} STYLE OUTFIT, DESIGNED FOR {weather} WEATHER, USING A {color} COLOR PALETTE. TWO VISIBLE LEGS, TWO ARMS, NATURAL HUMAN PROPORTIONS. NO DEFORMITIES, NO EXTRA LIMBS. COMPLETE OUTFIT FROM HEAD TO TOE WITH SHOES VISIBLE AT THE BOTTOM OF THE FRAME. MEDIUM: 8K ULTRA-PHOTOREALISTIC FASHION PHOTOGRAPH, DSLR FULL-FRAME CLARITY. ENVIRONMENT: MINIMALIST HIGH-END FASHION STUDIO WITH SOFT GRADIENT BACKDROP. LIGHTING: SOFT DIFFUSED STUDIO LIGHTING WITH PROFESSIONAL BALANCE. COLOR: TRUE-TO-LIFE COLOR CALIBRATION. MOOD: {vibe}, CONFIDENT, MODERN LUXURY. COMPOSITION: SHOT WITH AN 85MM FASHION LENS ON A FULL-FRAME SENSOR. FULL-BODY FRAMING FROM HEAD TO TOE, CENTERED COMPOSITION. SHOES CLEARLY VISIBLE AT THE BOTTOM OF THE FRAME."
     safe = urllib.parse.quote(prompt)
     seed = int(time.time() * 1000)
-    image_url = f"https://image.pollinations.ai/prompt/{safe}?width=1024&height=1536&nologin=true&seed={seed}&model=flux"
+    image_url = f"https://image.pollinations.ai/prompt/{safe}?width=1024&height=1536&nologin=true&seed={seed}&model=sana"
 
     return jsonify({
         "success": True,
