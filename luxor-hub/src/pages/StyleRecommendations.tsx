@@ -7,6 +7,7 @@ import { Loader2, Sparkles, Upload, Camera, Shirt, Palette, ScanFaceIcon, User, 
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { Perspective, Highlight } from "@/components/ui/perspective-highlight";
 import { humanizeText } from "@/lib/humanizer";
+import InfoCardsTable, { type TableRowItem } from "@/components/ui/info-cards-table";
 
 interface StyleAnalysis {
   face_shape: string;
@@ -312,119 +313,10 @@ export default function StyleRecommendationsPage() {
           {/* ── TAB: Recommendations ── */}
           {activeTab === "recommendations" && recommendations && (
             <motion.div key="recommendations" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
-              {/* Color Analysis */}
-              <div className="rounded-xl border border-white/10 bg-zinc-900/40 backdrop-blur-xl p-5">
-                <div className="flex items-center gap-2 mb-4"><span className="text-primary"><Palette className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-white/80">Color Analysis</h3></div>
-                {recommendations.color_analysis && (
-                  <>
-                    <div className="mb-3">
-                      <p className="text-xs text-white/50 mb-1">Best Colors</p>
-                      <div className="flex flex-wrap gap-2">
-                        {recommendations.color_analysis.best_colors?.map((c, i) => (
-                          <span key={i} className="px-3 py-1 rounded-full bg-green-500/15 text-green-400 text-xs border border-green-500/30">{c}</span>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="mb-3">
-                      <p className="text-xs text-white/50 mb-1">Colors to Avoid</p>
-                      <div className="flex flex-wrap gap-2">
-                        {recommendations.color_analysis.colors_to_avoid?.map((c, i) => (
-                          <span key={i} className="px-3 py-1 rounded-full bg-red-500/15 text-red-400 text-xs border border-red-500/30">{c}</span>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="mb-3">
-                      <p className="text-xs text-white/50 mb-1">Accessory Colors</p>
-                      <p className="text-sm text-white/80">{recommendations.color_analysis.best_accessory_colors?.join(", ") || "—"}</p>
-                    </div>
-                    <div className="mb-3">
-                      <p className="text-xs text-white/50 mb-1">Shoe Colors</p>
-                      <p className="text-sm text-white/80">{recommendations.color_analysis.best_shoe_colors?.join(", ") || "—"}</p>
-                    </div>
-                    <div className="mb-3">
-                      <p className="text-xs text-white/50 mb-1">Best Jewelry Metals</p>
-                      <div className="flex flex-wrap gap-2">
-                        {recommendations.color_analysis.best_jewelry_metals?.map((m, i) => (
-                          <span key={i} className="px-3 py-1 rounded-full bg-amber-500/15 text-amber-400 text-xs border border-amber-500/30">{m}</span>
-                        ))}
-                      </div>
-                    </div>
-                    {recommendations.color_analysis.explanation && (
-                      <p className="text-xs text-white/50 italic mt-2">{humanizeText(recommendations.color_analysis.explanation)}</p>
-                    )}
-                  </>
-                )}
-              </div>
-
-              {/* Face Recommendations */}
-              <div className="rounded-xl border border-white/10 bg-zinc-900/40 backdrop-blur-xl p-5">
-                <div className="flex items-center gap-2 mb-4"><span className="text-primary"><ScanFaceIcon className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-white/80">Face Recommendations</h3></div>
-                {recommendations.face_recommendations && (
-                  <>
-                    {recommendations.face_recommendations.best_collar_types?.length > 0 && (
-                      <InfoRow label="Best Collars" value={recommendations.face_recommendations.best_collar_types.join(", ")} />
-                    )}
-                    {recommendations.face_recommendations.best_neckline_styles?.length > 0 && (
-                      <InfoRow label="Best Necklines" value={recommendations.face_recommendations.best_neckline_styles.join(", ")} />
-                    )}
-                    {recommendations.face_recommendations.glasses_recommendation && (
-                      <InfoRow label="Glasses" value={humanizeText(recommendations.face_recommendations.glasses_recommendation)} />
-                    )}
-                    {recommendations.face_recommendations.hat_recommendation && (
-                      <InfoRow label="Hats" value={humanizeText(recommendations.face_recommendations.hat_recommendation)} />
-                    )}
-                    {recommendations.face_recommendations.hairstyle_advice && (
-                      <InfoRow label="Hairstyle" value={humanizeText(recommendations.face_recommendations.hairstyle_advice)} />
-                    )}
-                    {recommendations.face_recommendations.beard_advice && (
-                      <InfoRow label="Beard" value={humanizeText(recommendations.face_recommendations.beard_advice)} />
-                    )}
-                    {recommendations.face_recommendations.explanation && (
-                      <p className="text-xs text-white/50 italic mt-2">{humanizeText(recommendations.face_recommendations.explanation)}</p>
-                    )}
-                  </>
-                )}
-              </div>
-
-              {/* Body Recommendations */}
-              <div className="rounded-xl border border-white/10 bg-zinc-900/40 backdrop-blur-xl p-5">
-                <div className="flex items-center gap-2 mb-4"><span className="text-primary"><Shirt className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-white/80">Body Recommendations</h3></div>
-                {recommendations.body_recommendations && (
-                  <>
-                    {recommendations.body_recommendations.shirt_fit && <InfoRow label="Shirt Fit" value={humanizeText(recommendations.body_recommendations.shirt_fit)} />}
-                    {recommendations.body_recommendations.jacket_fit && <InfoRow label="Jacket Fit" value={humanizeText(recommendations.body_recommendations.jacket_fit)} />}
-                    {recommendations.body_recommendations.pants_fit && <InfoRow label="Pants Fit" value={humanizeText(recommendations.body_recommendations.pants_fit)} />}
-                    {recommendations.body_recommendations.shorts_length && <InfoRow label="Shorts Length" value={humanizeText(recommendations.body_recommendations.shorts_length)} />}
-                    {recommendations.body_recommendations.coat_style && <InfoRow label="Coat Style" value={humanizeText(recommendations.body_recommendations.coat_style)} />}
-                    {recommendations.body_recommendations.suit_cut && <InfoRow label="Suit Cut" value={humanizeText(recommendations.body_recommendations.suit_cut)} />}
-                    {recommendations.body_recommendations.explanation && (
-                      <p className="text-xs text-white/50 italic mt-2">{humanizeText(recommendations.body_recommendations.explanation)}</p>
-                    )}
-                  </>
-                )}
-              </div>
-
-              {/* Honest Tips */}
-              {/* Honest Tips */}
-              {Array.isArray(recommendations.honest_tips) && recommendations.honest_tips.length > 0 && (
-                <div className="rounded-xl border border-amber-500/20 bg-amber-950/20 backdrop-blur-xl p-5">
-                  <div className="flex items-center gap-2 mb-4"><span className="text-amber-400"><Lightbulb className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-amber-300/80">Honest Tips</h3></div>
-                  <div className="space-y-3">
-                    {recommendations.honest_tips.map((tip, i) => (
-                      <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-black/30 border border-white/5">
-                        <span className="text-amber-400/70 text-sm mt-0.5">•</span>
-                        <div className="flex-1">
-                          <p className="text-sm text-white/80">{humanizeText(tip.tip)}</p>
-                          <p className="text-[10px] text-white/40 mt-1">Confidence: {tip.confidence}%</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
+              {/* Unified Recommendations Table */}
+              <InfoCardsTable items={buildTableData(recommendations)} />
               {/* No data fallback — when API returned nothing */}
-              {!recommendations.color_analysis?.best_colors?.length && 
+              {recommendations && !recommendations.color_analysis?.best_colors?.length && 
                !recommendations.face_recommendations?.best_collar_types?.length &&
                !recommendations.body_recommendations?.shirt_fit &&
                !recommendations.honest_tips?.length && (
@@ -440,7 +332,7 @@ export default function StyleRecommendationsPage() {
               )}
 
               {/* Confidence Score */}
-              {recommendations.confidence_score > 0 && (
+              {recommendations && recommendations.confidence_score > 0 && (
                 <div className="text-center text-xs text-white/40">
                   Overall recommendation confidence: <span className="text-white/70 font-semibold">{recommendations.confidence_score}%</span>
                 </div>
