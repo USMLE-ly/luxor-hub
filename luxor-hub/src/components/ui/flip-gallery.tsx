@@ -48,10 +48,10 @@ const SECTION_BASE: React.CSSProperties = {
 
 const DIVIDER_STYLE: React.CSSProperties = {
   position: 'absolute',
-  left: 0,
-  width: '100%',
-  height: '4px',
-  backgroundColor: '#000',
+  left: '10%',
+  width: '80%',
+  height: '1px',
+  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent)',
   transform: 'translateY(-50%)',
   zIndex: 10,
 };
@@ -248,9 +248,9 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading,
         perspective: '800px',
         overflow: 'hidden',
       }}>
-        <div style={{ ...SECTION_BASE, top: 0, height: '33.333%', backgroundColor: '#0a0a0a', borderBottom: '4px solid #000', zIndex: 0 }} />
-        <div style={{ ...SECTION_BASE, top: '33.333%', height: '33.333%', backgroundColor: '#0a0a0a', borderBottom: '4px solid #000', zIndex: 0 }} />
-        <div style={{ ...SECTION_BASE, bottom: 0, height: '33.333%', backgroundColor: '#0a0a0a', zIndex: 0 }} />
+        <div style={{ ...SECTION_BASE, top: 0, height: '33.333%', backgroundColor: '#111111', borderBottom: '1px solid rgba(255,255,255,0.06)', zIndex: 0 }} />
+        <div style={{ ...SECTION_BASE, top: '33.333%', height: '33.333%', backgroundColor: '#111111', borderBottom: '1px solid rgba(255,255,255,0.06)', zIndex: 0 }} />
+        <div style={{ ...SECTION_BASE, bottom: 0, height: '33.333%', backgroundColor: '#111111', zIndex: 0 }} />
 
         <div style={{ position: 'absolute', bottom: '8px', left: 0, right: 0, zIndex: 20 }}>
           <MarketingBadges onGenerate={onGenerate} isLoading={isLoading} />
@@ -333,7 +333,7 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading,
               }}
             />
           ) : (
-            <div style={{ width: '100%', height: '100%', backgroundColor: '#0a0a0a' }} />
+            <div style={{ width: '100%', height: '100%', backgroundColor: '#111111' }} />
           )}
         </div>
         );
