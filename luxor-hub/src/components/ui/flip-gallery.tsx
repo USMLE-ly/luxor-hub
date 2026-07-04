@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { MarketingBadges } from '@/components/ui/marketing-badges';
 
@@ -128,6 +128,65 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading,
   const [flipState, setFlipState] = useState<'idle' | 'out' | 'in'>('idle');
   const [animDirection, setAnimDirection] = useState<'next' | 'prev'>('next');
   const flipTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [sectionBgColors, setSectionBgColors] = useState<Record<string, string>>({});
+
+  // ── Extract dominant edge color from an image for background expansion ──
+  const extractEdgeColor = useCallback((img: HTMLImageElement): string => {
+    try {
+      if (!canvasRef.current) {
+        canvasRef.current = document.createElement('canvas');
+      }
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return '#0a0a0a';
+      
+      const w = Math.min(img.naturalWidth, 200);
+      const h = Math.min(img.naturalHeight, 200);
+      canvas.width = w;
+      canvas.height = h;
+      ctx.drawImage(img, 0, 0, w, h);
+      
+      // Sample edge pixels: corners + midpoints of each edge
+      const positions = [
+        [0, 0], [w/2, 0], [w-1, 0],           // top edge
+        [0, h/2], [w-1, h/2],                  // sides
+        [0, h-1], [w/2, h-1], [w-1, h-1],      // bottom edge
+      ];
+      
+      let totalR = 0, totalG = 0, totalB = 0, count = 0;
+      for (const [x, y] of positions) {
+        const p = ctx.getImageData(x, y, 1, 1).data;
+        // Exclude very dark pixels (likely the clothing itself at edges)
+        if (p[0] > 30 || p[1] > 30 || p[2] > 30) {
+          totalR += p[0]; totalG += p[1]; totalB += p[2]; count++;
+        }
+      }
+      
+      if (count === 0) return '#0a0a0a';
+      
+      const avgR = totalR / count;
+      const avgG = totalG / count;
+      const avgB = totalB / count;
+      
+      // Determine if the background is white, light, dark, or colored
+      const brightness = (avgR + avgG + avgB) / 3;
+      const isGray = Math.abs(avgR - avgG) < 15 && Math.abs(avgG - avgB) < 15;
+      
+      if (brightness > 220 && isGray) return '#ffffff';
+      if (brightness > 180 && isGray) {
+        const hex = Math.round(brightness);
+        return `rgb(${hex}, ${hex}, ${hex})`;
+      }
+      if (brightness < 40 && isGray) return '#0a0a0a';
+      if (brightness < 80 && isGray) return '#1a1a1a';
+      
+      // For colored backgrounds, return the average color
+      return `rgb(${Math.round(avgR)}, ${Math.round(avgG)}, ${Math.round(avgB)})`;
+    } catch {
+      return '#0a0a0a';
+    }
+  }, []);
 
   useEffect(() => { setCurrentIndex(0); setFlipState('idle'); }, [outfits]);
 
@@ -215,6 +274,10 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading,
     if (flipState === 'out') {
       transform = 'rotateX(-90deg)';
     }
+    const outfitsKey = outfits[currentIndex]?.top + '-' + outfits[currentIndex]?.mid + '-' + outfits[currentIndex]?.bottom;
+    const sectionKey = outfitsKey + '-' + idx;
+    const bgColor = sectionBgColors[sectionKey] || '#0a0a0a';
+    
     return {
       position: 'absolute',
       left: 0,
@@ -228,7 +291,8 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#0a0a0a',
+      backgroundColor: bgColor,
+      borderRadius: '12px',
       zIndex: 1,
     };
   };
@@ -251,6 +315,7 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading,
               src={url}
               alt={`Outfit ${currentIndex + 1} section ${idx + 1}`}
               style={IMG_STYLE}
+              crossOrigin="anonymous"
               onError={(e) => {
                 const target = e.currentTarget;
                 console.warn(`[FLIP-GALLERY] Image load FAILED for: ${url}`);
@@ -258,7 +323,14 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading,
                   target.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
                 }
               }}
-              onLoad={() => console.log(`[FLIP-GALLERY] Image loaded OK: ${url}`)}
+              onLoad={(e) => {
+                console.log(`[FLIP-GALLERY] Image loaded OK: ${url}`);
+                const img = e.currentTarget;
+                const outfitsKey = outfits[currentIndex]?.top + '-' + outfits[currentIndex]?.mid + '-' + outfits[currentIndex]?.bottom;
+                const sectionKey = outfitsKey + '-' + idx;
+                const bgColor = extractEdgeColor(img);
+                setSectionBgColors(prev => ({ ...prev, [sectionKey]: bgColor }));
+              }}
             />
           ) : (
             <div style={{ width: '100%', height: '100%', backgroundColor: '#0a0a0a' }} />

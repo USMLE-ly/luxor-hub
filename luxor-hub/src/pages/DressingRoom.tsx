@@ -36,10 +36,9 @@ export default function DressingRoomPage() {
   const generateOutfits = async (occasion: string, count: number) => {
     if (!user) return;
     setIsGenerating(true);
-    setProgressValue(10);
+    setDisplayProgress(0);
     setProgressStage("Consulting MiMo...");
     try {
-      setProgressValue(40);
       setProgressStage(`Generating ${count} ${occasion} outfits...`);
 
       const api = import.meta.env.VITE_API_URL || import.meta.env.VITE_PUBLIC_API_URL || 
@@ -55,7 +54,7 @@ export default function DressingRoomPage() {
       console.log("[DressingRoom] API RAW RESPONSE:", data);
       if (!data.success) throw new Error(data.error || "Generation failed");
 
-      setProgressValue(80);
+      setDisplayProgress(95);
       setProgressStage("Ready!");
 
       if (data.images?.length > 0) {
@@ -78,6 +77,7 @@ export default function DressingRoomPage() {
           }));
         }
         setGeneratedImages(normalized);
+        setDisplayProgress(100);
         toast.success(`${data.images.length} outfits generated!`);
       } else {
         toast.error("No outfits returned. Try again.");
@@ -87,6 +87,7 @@ export default function DressingRoomPage() {
     } finally {
       setIsGenerating(false);
       setProgressValue(100);
+      setDisplayProgress(100);
     }
   };
 
@@ -110,23 +111,25 @@ export default function DressingRoomPage() {
     setActiveOutfit(null);
   };
 
-  // ── Smooth progress animation during generation ──
+  // ── Smooth auto-increment progress: 0 → 95% during generation, jumps to 100% on success ──
   useEffect(() => {
     if (!isGenerating) {
       setDisplayProgress(progressValue);
       return;
     }
+    // Reset to 0 when generation starts
+    setDisplayProgress(0);
     const timer = setInterval(() => {
       setDisplayProgress(prev => {
-        // Smoothly chase the target progressValue
-        const target = progressValue;
-        if (prev >= target) return target;
-        const step = Math.max(1, Math.floor((target - prev) / 8) + 1);
-        return Math.min(prev + step, target);
+        // Slow down as we approach 95% — never reach it via timer alone
+        if (prev >= 95) return 95;
+        // Speed: fast at start, slow near cap
+        const increment = prev < 30 ? 3 : prev < 60 ? 2 : prev < 80 ? 1.5 : 1;
+        return Math.min(prev + increment, 95);
       });
-    }, 100);
+    }, 200);
     return () => clearInterval(timer);
-  }, [isGenerating, progressValue]);
+  }, [isGenerating]);
 
   return (
     <AppLayout>

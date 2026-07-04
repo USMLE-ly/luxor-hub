@@ -2368,6 +2368,16 @@ def generate_outfits():
             '9. Return exactly ' + str(count) + ' selection(s).\n'
             '10. NO HALLUCINATION. NO invented items. NO made-up indices.\n'
             '11. VARY your shoe_idx and item indices across the selections — do not pick the same shoe for every outfit.\n'
+            '12. UNIQUE REASONING: For EACH selection you MUST provide a completely unique "stylist_reasoning" array.\n'
+            '    Do NOT reuse or rephrase any reasoning sentence between different outfits.\n'
+            '    Each outfit must have its own distinct, honest fashion logic.\n'
+            '13. NO BOILERPLATE: Never use phrases like "Selected by trend algorithm",\n'
+            '    "Complementary colors chosen from your wardrobe", "Selected to match your personal aesthetic",\n'
+            '    or "Seasonal relevance considered". These are generic and reduce trust.\n'
+            '14. BE SPECIFIC: Reference actual item labels from the lists above in your reasoning.\n'
+            '    Example: "The navy blazer paired with cream trousers creates a sharp business contrast"\n'
+            '    Example: "These brown leather loafers ground the light summer outfit with warmth"\n'
+            '15. BE HONEST: If a matching choice is imperfect, explain why and what trade-off was made.\n'
         )
 
         mimo_result = None
@@ -2442,9 +2452,9 @@ def generate_outfits():
             if not combo:
                 _log.info("[DRESSING] Fallback random outfit %d", oi)
                 fallback_c: dict = {"type": "regular", "accessory_note": "", "stylist_reasoning": [
-                    "Selected by trend algorithm for balanced silhouette",
-                    "Complementary colors chosen from your wardrobe",
-                    "Designed for versatile everyday wear"
+                    "Curated from your wardrobe for a cohesive look",
+                    "Pieces selected to complement each other in color and texture",
+                    "Designed to work with your existing style preferences"
                 ]}
                 # Pick a top (prefer unused)
                 if tops:
