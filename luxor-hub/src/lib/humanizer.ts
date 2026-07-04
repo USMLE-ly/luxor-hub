@@ -9,7 +9,8 @@
 
 const AI_VOCABULARY: [RegExp, string][] = [
   // Significance inflation
-  [/\b(pivotal|stands as|serves as a testament|a testament to|marks a|sets the stage)\b/gi, 'is a'],
+  [/\b(pivotal|serves as a testament|a testament to|marks a|sets the stage)\b/gi, 'important'],
+  [/\b(stands as|serves as)\b/gi, 'is'],,
   [/\b(underscores|highlights the importance|reflects broader|evolving landscape)\b/gi, 'shows'],
   [/\b(indelible mark|deeply rooted|focal point|key turning point)\b/gi, 'important'],
   [/\b(symbolizing|signifying|embodying|exemplifying)\b/gi, 'showing'],
@@ -22,11 +23,11 @@ const AI_VOCABULARY: [RegExp, string][] = [
   // AI vocabulary
   [/\b(additionally|furthermore|moreover)\b/gi, 'also'],
   [/\b(delve|delving)\b/gi, 'explore'],
-  [/\b(interplay|intricacies|intricate)\b/gi, 'details'],
-  [/\b(showcase|showcasing)\b/gi, 'show'],
+    [/\b(showcase|showcasing)\b/gi, 'show'],
   [/\b(testament|underscore|underscores)\b/gi, ''],
   [/\b(fostering|cultivating)\b/gi, 'building'],
   [/\b(enduring|timeless appeal|lasting style)\b/gi, 'lasting'],
+  [/\b(ensures)\b/gi, 'makes sure'],
   [/\b(garner|garnered)\b/gi, 'gained'],
   [/\b(landscape|tapestry) (in abstract sense)\b/gi, ''],
 

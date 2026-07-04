@@ -11,7 +11,8 @@ from typing import List
 # AI vocabulary replacement patterns: (regex, replacement)
 _AI_PATTERNS: List[tuple] = [
     # Significance inflation
-    (r'\b(pivotal|stands as|serves as a testament|a testament to|marks a|sets the stage)\b', 'is a'),
+    (r'\b(pivotal|serves as a testament|a testament to|marks a|sets the stage)\b', 'important'),
+    (r'\b(stands as|serves as)\b', 'is'),
     (r'\b(underscores|highlights the importance|reflects broader|evolving landscape)\b', 'shows'),
     (r'\b(indelible mark|deeply rooted|focal point|key turning point)\b', 'important'),
     (r'\b(symbolizing|signifying|embodying|exemplifying)\b', 'showing'),
@@ -24,13 +25,15 @@ _AI_PATTERNS: List[tuple] = [
     # AI vocabulary
     (r'\b(additionally|furthermore|moreover)\b', 'also'),
     (r'\b(delve|delving)\b', 'explore'),
-    (r'\b(interplay|intricacies|intricate)\b', 'details'),
-    (r'\b(showcase|showcasing)\b', 'show'),
+    
+    (r'\b(showcase|showcases)\b', 'shows'),
+    (r'\b(showcasing)\b', 'showing'),
     (r'\b(testament|underscore|underscores)\b', ''),
     (r'\b(fostering|cultivating)\b', 'building'),
     (r'\b(enduring|timeless appeal|lasting style)\b', 'lasting'),
+    (r'\b(ensures)\b', 'makes sure'),
     (r'\b(garner|garnered)\b', 'gained'),
-    (r'\b(cohesive|harmonious)\b', 'together'),
+    (r'\b(contemporary|cohesive|harmonious)\b', 'modern'),
     (r'\b(exceptional|optimal)\b', 'smart'),
 
     # Copula avoidance
