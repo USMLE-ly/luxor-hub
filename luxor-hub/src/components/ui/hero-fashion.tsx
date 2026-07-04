@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import { AnimatedGradient } from "@/components/ui/animated-gradient-with-svg";
 import { MarkerHighlight } from "@/components/ui/marker-highlight";
 import { ShimmerBgText } from "@/components/ui/shimmer-bg-text";
-import { humanizeText, humanizeTextArray } from "@/lib/humanizer";
+import { humanizeText } from "@/lib/humanizer";
 
 /** Clothing & accessory keywords to detect in tweak text for yellow highlighting */
 const TWEAK_KEYWORDS = [

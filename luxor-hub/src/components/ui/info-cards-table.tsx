@@ -1,6 +1,6 @@
 "use client"
 
-import { Palette, ScanFaceIcon, Shirt, Lightbulb, Sparkles, Check, X } from "lucide-react"
+import { Palette, ScanFaceIcon, Shirt, Lightbulb } from "lucide-react"
 import {
   Table,
   TableBody,

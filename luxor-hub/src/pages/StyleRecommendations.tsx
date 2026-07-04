@@ -121,6 +121,69 @@ export default function StyleRecommendationsPage() {
     reader.readAsDataURL(file);
   };
 
+  /* ---------- Build table data from recommendations ---------- */
+  const buildTableData = (recs: Recommendations): TableRowItem[] => {
+    const rows: TableRowItem[] = [];
+    if (!recs) return rows;
+
+    if (recs.color_analysis) {
+      const ca = recs.color_analysis;
+      const subFeatures: { label: string; value: string | string[] }[] = [];
+      if (ca.best_colors?.length) subFeatures.push({ label: "Best Colors", value: ca.best_colors });
+      if (ca.colors_to_avoid?.length) subFeatures.push({ label: "Avoid", value: ca.colors_to_avoid });
+      if (ca.best_accessory_colors?.length) subFeatures.push({ label: "Accessories", value: ca.best_accessory_colors });
+      if (ca.best_shoe_colors?.length) subFeatures.push({ label: "Shoes", value: ca.best_shoe_colors });
+      if (ca.best_jewelry_metals?.length) subFeatures.push({ label: "Jewelry", value: ca.best_jewelry_metals });
+      if (ca.explanation) subFeatures.push({ label: "Why", value: humanizeText(ca.explanation) });
+      if (subFeatures.length) {
+        rows.push({ category: "Color Analysis", icon: <Palette className="w-4 h-4" />, subFeatures });
+      }
+    }
+
+    if (recs.face_recommendations) {
+      const fr = recs.face_recommendations;
+      const subFeatures: { label: string; value: string | string[] }[] = [];
+      if (fr.best_collar_types?.length) subFeatures.push({ label: "Collars", value: fr.best_collar_types });
+      if (fr.best_neckline_styles?.length) subFeatures.push({ label: "Necklines", value: fr.best_neckline_styles });
+      if (fr.glasses_recommendation) subFeatures.push({ label: "Glasses", value: humanizeText(fr.glasses_recommendation) });
+      if (fr.hat_recommendation) subFeatures.push({ label: "Hats", value: humanizeText(fr.hat_recommendation) });
+      if (fr.hairstyle_advice) subFeatures.push({ label: "Hairstyle", value: humanizeText(fr.hairstyle_advice) });
+      if (fr.beard_advice) subFeatures.push({ label: "Beard", value: humanizeText(fr.beard_advice) });
+      if (fr.explanation) subFeatures.push({ label: "Why", value: humanizeText(fr.explanation) });
+      if (subFeatures.length) {
+        rows.push({ category: "Face Recommendations", icon: <ScanFaceIcon className="w-4 h-4" />, subFeatures });
+      }
+    }
+
+    if (recs.body_recommendations) {
+      const br = recs.body_recommendations;
+      const subFeatures: { label: string; value: string | string[] }[] = [];
+      if (br.shirt_fit) subFeatures.push({ label: "Shirt", value: humanizeText(br.shirt_fit) });
+      if (br.jacket_fit) subFeatures.push({ label: "Jacket", value: humanizeText(br.jacket_fit) });
+      if (br.pants_fit) subFeatures.push({ label: "Pants", value: humanizeText(br.pants_fit) });
+      if (br.shorts_length) subFeatures.push({ label: "Shorts", value: humanizeText(br.shorts_length) });
+      if (br.coat_style) subFeatures.push({ label: "Coat", value: humanizeText(br.coat_style) });
+      if (br.suit_cut) subFeatures.push({ label: "Suit", value: humanizeText(br.suit_cut) });
+      if (br.explanation) subFeatures.push({ label: "Why", value: humanizeText(br.explanation) });
+      if (subFeatures.length) {
+        rows.push({ category: "Body Recommendations", icon: <Shirt className="w-4 h-4" />, subFeatures });
+      }
+    }
+
+    if (Array.isArray(recs.honest_tips) && recs.honest_tips.length > 0) {
+      rows.push({
+        category: "Honest Tips",
+        icon: <Lightbulb className="w-4 h-4" />,
+        subFeatures: recs.honest_tips.map((tip, i) => ({
+          label: `Tip ${i + 1}`,
+          value: `${humanizeText(tip.tip)} (${tip.confidence}% confidence)`,
+        })),
+      });
+    }
+
+    return rows;
+  };
+
   // ── Consolidated full analysis: face/body → recommendations → outfit review ──
   const handleFullAnalysis = async () => {
     if (!imagePreview) return;
@@ -138,6 +201,8 @@ export default function StyleRecommendationsPage() {
         body: JSON.stringify({ image_b64: imagePreview }),
       });
       const styleData = await styleResp.json();
+      // Strip 'for' key
+      if (styleData && typeof styleData === 'object') delete (styleData as any).for;
       console.log("[STYLE-ANALYZE RAW RESPONSE]", styleData);
       if (!styleData.success || !styleData.analysis) {
         throw new Error(styleData.error || "Face/body analysis failed");
@@ -153,6 +218,8 @@ export default function StyleRecommendationsPage() {
         body: JSON.stringify({ analysis: styleData.analysis }),
       });
       const recData = await recResp.json();
+      // Strip 'for' key
+      if (recData && typeof recData === 'object') delete (recData as any).for;
       console.log("[RECOMMENDATIONS API RAW RESPONSE]", recData);
       if (recData.success && recData.recommendations) {
         console.log("[RECOMMENDATIONS] Data received:", Object.keys(recData.recommendations));
@@ -178,6 +245,8 @@ export default function StyleRecommendationsPage() {
         body: JSON.stringify({ image_b64: imagePreview, occasion: "casual" }),
       });
       const reviewData = await reviewResp.json();
+      // Strip 'for' key
+      if (reviewData && typeof reviewData === 'object') delete (reviewData as any).for;
       console.log("[OUTFIT-REVIEW RAW RESPONSE]", reviewData);
       if (reviewData.success && reviewData.review) {
         setOutfitReview(reviewData.review);

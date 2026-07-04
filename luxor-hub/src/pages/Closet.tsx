@@ -250,7 +250,7 @@ const Closet = () => {
   // Persist on change
   useEffect(() => {
     if (!STORAGE_KEY) return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(mannequinClothing));
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(mannequinClothing)); } catch {}
   }, [mannequinClothing, STORAGE_KEY]);
 
   // Fetch saved mannequin outfits

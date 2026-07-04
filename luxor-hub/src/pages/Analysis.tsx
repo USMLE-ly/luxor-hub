@@ -139,9 +139,10 @@ export default function Analysis() {
 
   // Check for pending upload from Dressing Room
   useEffect(() => {
-    const pending = sessionStorage.getItem("pendingUpload");
+    let pending = null;
+    try { pending = sessionStorage.getItem("pendingUpload"); } catch {}
     if (pending) {
-      sessionStorage.removeItem("pendingUpload");
+      try { sessionStorage.removeItem("pendingUpload"); } catch {}
       const byteString = atob(pending.split(",")[1]);
       const ab = new ArrayBuffer(byteString.length);
       const ia = new Uint8Array(ab);

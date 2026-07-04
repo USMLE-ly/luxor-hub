@@ -52,6 +52,8 @@ export default function DressingRoomPage() {
 
       const data = await res.json();
       console.log("[DressingRoom] API RAW RESPONSE:", data);
+      // Strip 'for' key from API response if present (causes ".for is not iterable" crash)
+      if (data && typeof data === 'object') { delete (data as any).for; }
       if (!data.success) throw new Error(data.error || "Generation failed");
 
       setDisplayProgress(95);
