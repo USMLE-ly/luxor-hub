@@ -275,6 +275,9 @@ export default function Analysis() {
         return;
       }
 
+      // Strip 'for' key from API response if present (causes ".for is not iterable" crash)
+      if (fnData && typeof fnData === 'object') delete (fnData as any).for;
+
       setProgressValue(70);
       setProgressStage("Parsing results...");
       

@@ -155,6 +155,8 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
         if tweak_txt:
             improvements.append({"issue": tweak_txt, "suggestion": "", "priority": "medium"})
 
+    # ── Strip any 'for' key from MiMo response (reserved word causes JS ".for is not iterable") ──
+    result.pop("for", None)
     # ── Force all array fields to be lists (MiMo sometimes returns None or strings) ──
     _force_list = lambda v: v if isinstance(v, list) else []
     return {
