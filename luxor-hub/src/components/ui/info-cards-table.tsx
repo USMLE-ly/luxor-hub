@@ -1,6 +1,6 @@
 "use client"
 
-import { Palette, ScanFaceIcon, Shirt, Lightbulb } from "lucide-react"
+import { Palette, ScanFaceIcon, Shirt, Lightbulb, Check, X } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -11,100 +11,161 @@ import {
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 
-export interface TableRowItem {
-  category: string
-  icon: React.ReactNode
-  subFeatures: { label: string; value: string | string[] }[]
-}
+/* ------------------------------------------------------------------ */
+/*  Types                                                              */
+/* ------------------------------------------------------------------ */
+export type CellData = { header: string; value: string | string[] | null }
+export type RowData = { category: string; columns: CellData[] }
 
 interface InfoCardsTableProps {
-  items: TableRowItem[]
+  rows: RowData[]
 }
 
-export default function InfoCardsTable({ items = [] }: InfoCardsTableProps) {
-  if (!items.length) return null
+/* ------------------------------------------------------------------ */
+/*  Color Utility — maps color names to vivid hex                      */
+/* ------------------------------------------------------------------ */
+const getColorHex = (str: string): string => {
+  const colorMap: Record<string, string> = {
+    coral: "#FF7F50", gold: "#FFD700", navy: "#000080", peach: "#FFDAB9",
+    ivory: "#FFFFF0", "warm pink": "#FFB6C1", beige: "#F5F5DC", black: "#000000",
+    tan: "#D2B48C", camel: "#C19A6B", "cool grey": "#8F9E9E", "warm brown": "#8B6B4D",
+    "rose gold": "#B76E79", silver: "#C0C0C0", "soft white": "#F8F8F8",
+    "olive green": "#556B2F", cream: "#FFFDD0", teal: "#008080", terracotta: "#E2725B",
+    white: "#FFFFFF", gray: "#808080", grey: "#808080", brown: "#8B4513",
+    blue: "#4169E1", red: "#DC143C", pink: "#FF69B4", purple: "#9370DB",
+    green: "#2E8B57", yellow: "#FFD700", orange: "#FF8C00", burgundy: "#800020",
+    maroon: "#800000", blush: "#FFE4E1", khaki: "#C3B091", olive: "#556B2F",
+    indigo: "#4B0082", charcoal: "#36454F", taupe: "#483C32", mauve: "#E0B0FF",
+    emerald: "#50C878", cobalt: "#0047AB", slate: "#708090", ebony: "#555D50",
+    mocha: "#4A3728", rust: "#B7410E", lavender: "#E6E6FA", mint: "#98FF98",
+    champagne: "#F7E7CE", nude: "#E3BC9A", pastel: "#FFD1DC", neon: "#39FF14",
+  }
+  const key = str.toLowerCase().trim()
+  return colorMap[key] || ""
+}
 
-  // Compute all unique sub-feature labels across all rows
-  const allSubLabels = Array.from(
-    new Set(items.flatMap((row) => row.subFeatures.map((sf) => sf.label)))
-  )
+/* ------------------------------------------------------------------ */
+/*  Icon helper                                                        */
+/* ------------------------------------------------------------------ */
+const categoryIcon = (cat: string): React.ReactNode => {
+  const lower = cat.toLowerCase()
+  if (lower.includes("color")) return <Palette className="w-4 h-4" />
+  if (lower.includes("face")) return <ScanFaceIcon className="w-4 h-4" />
+  if (lower.includes("body")) return <Shirt className="w-4 h-4" />
+  return <Lightbulb className="w-4 h-4" />
+}
+
+/* ------------------------------------------------------------------ */
+/*  Component                                                          */
+/* ------------------------------------------------------------------ */
+export default function InfoCardsTable({ rows = [] }: InfoCardsTableProps) {
+  if (!rows.length) return null
+
+  // Collect all unique column headers across all rows
+  const allHeaders = Array.from(new Set(rows.flatMap((r) => r.columns.map((c) => c.header))))
+
+  /** Check whether a cell has meaningful data */
+  const hasData = (cell: CellData | undefined): boolean => {
+    if (!cell) return false
+    const { value } = cell
+    if (value === null || value === undefined) return false
+    if (typeof value === "string") return value.trim().length > 0 && value.trim() !== "-"
+    if (Array.isArray(value)) return value.length > 0
+    return false
+  }
 
   return (
-    <div className="w-full overflow-hidden rounded-xl border border-white/10 bg-zinc-900/60 backdrop-blur-xl">
-      <Table className="w-full">
-        <TableHeader>
-          <TableRow className="border-b border-white/10 hover:bg-transparent">
-            <TableHead className="w-44 text-white/60 font-semibold text-xs uppercase tracking-wider py-4 pl-5">
-              Category
-            </TableHead>
-            {allSubLabels.map((label) => (
-              <TableHead
-                key={label}
-                className="text-white/60 font-semibold text-xs uppercase tracking-wider text-center py-4 px-3 min-w-[100px]"
-              >
-                {label}
+    <div className="w-full overflow-x-auto rounded-xl border border-white/10 bg-zinc-900/60 backdrop-blur-xl">
+      <div className="min-w-[900px]">
+        <Table className="w-full">
+          {/* ── Header Row ── */}
+          <TableHeader>
+            <TableRow className="border-b border-white/10 hover:bg-transparent">
+              <TableHead className="w-44 text-white/60 font-semibold text-xs uppercase tracking-wider py-4 pl-5">
+                Category
               </TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {items.map((row, rowIdx) => {
-            const isEven = rowIdx % 2 === 0
-            return (
-              <TableRow
-                key={row.category}
-                className={cn(
-                  "border-b border-white/5 transition-colors hover:bg-white/5",
-                  isEven && "bg-white/[0.02]"
-                )}
-              >
-                {/* Category cell with icon */}
-                <TableCell className="font-semibold text-white/80 py-4 pl-5 border-r border-white/5">
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-primary/80 shrink-0">{row.icon}</span>
-                    <span className="text-sm">{row.category}</span>
-                  </div>
-                </TableCell>
+              {allHeaders.map((h) => (
+                <TableHead
+                  key={h}
+                  className="text-white/60 font-semibold text-xs uppercase tracking-wider text-center py-4 px-4 min-w-[110px]"
+                >
+                  {h}
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
 
-                {/* Sub-feature cells */}
-                {allSubLabels.map((label) => {
-                  const subFeature = row.subFeatures.find((sf) => sf.label === label)
-                  const value = subFeature?.value
+          {/* ── Body Rows ── */}
+          <TableBody>
+            {rows.map((row, rowIdx) => {
+              const isEven = rowIdx % 2 === 0
+              return (
+                <TableRow
+                  key={row.category}
+                  className={cn(
+                    "border-b border-white/5 transition-colors hover:bg-white/5",
+                    isEven && "bg-white/[0.02]"
+                  )}
+                >
+                  {/* Category cell */}
+                  <TableCell className="font-semibold text-white/80 py-4 pl-5 border-r border-white/5 align-top">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-primary/80 shrink-0">{categoryIcon(row.category)}</span>
+                      <span className="text-sm whitespace-nowrap">{row.category}</span>
+                    </div>
+                  </TableCell>
 
-                  // Determine if it's an array or string
-                  const displayVal = Array.isArray(value) ? value : value ? [value] : []
-                  const isEmpty = !displayVal.length
+                  {/* Data cells */}
+                  {allHeaders.map((header) => {
+                    const cell = row.columns.find((c) => c.header === header)
+                    const populated = hasData(cell)
+                    const raw = cell?.value
+                    const items = Array.isArray(raw) ? raw : (typeof raw === "string" && raw ? [raw] : [])
 
-                  return (
-                    <TableCell
-                      key={label}
-                      className={cn(
-                        "text-center py-4 px-3 border-r border-white/5 last:border-r-0",
-                        isEmpty && "text-white/20"
-                      )}
-                    >
-                      {isEmpty ? (
-                        <span className="flex items-center justify-center gap-1 text-xs">—</span>
-                      ) : (
-                        <div className="flex flex-wrap justify-center gap-1.5">
-                          {displayVal.map((v, vi) => (
-                            <span
-                              key={vi}
-                              className="inline-block px-2.5 py-1 rounded-full text-[11px] leading-tight font-medium bg-white/5 border border-white/10 text-white/80"
-                            >
-                              {v}
-                            </span>
-                          ))}
+                    return (
+                      <TableCell
+                        key={header}
+                        className={cn(
+                          "py-4 px-4 border-r border-white/5 last:border-r-0 align-top"
+                        )}
+                      >
+                        <div className="flex items-start gap-2 min-h-[28px]">
+                          {/* Green Check / Red X */}
+                          <span className="shrink-0 mt-0.5">
+                            {populated ? (
+                              <Check className="w-4 h-4 text-emerald-500" />
+                            ) : (
+                              <X className="w-4 h-4 text-red-500" />
+                            )}
+                          </span>
+
+                          {/* Values — plain text, colorized, horizontal flow */}
+                          {populated && items.length > 0 && (
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm leading-snug">
+                              {items.map((item, vi) => {
+                                const hex = getColorHex(item)
+                                return (
+                                  <span
+                                    key={vi}
+                                    style={hex ? { color: hex, fontWeight: 500 } : { color: "#e2e8f0", fontWeight: 400 }}
+                                    className="whitespace-nowrap"
+                                  >
+                                    {item}
+                                  </span>
+                                )
+                              })}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </TableCell>
-                  )
-                })}
-              </TableRow>
-            )
-          })}
-        </TableBody>
-      </Table>
+                      </TableCell>
+                    )
+                  })}
+                </TableRow>
+              )
+            })}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   )
 }
