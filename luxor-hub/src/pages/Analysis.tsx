@@ -274,6 +274,7 @@ export default function Analysis() {
         actual_colors: fnData.actual_colors || [],
         items_detected: fnData.items_detected || [],
         strengths: fnData.strengths || [],
+        improvements: fnData.improvements || [],
         audit: fnData.audit || '',
         tweak_plan: fnData.tweak_plan || '',
         generation_prompt: fnData.generation_prompt || '',
@@ -425,15 +426,20 @@ export default function Analysis() {
     setImagePreview(s.image_url);
     setImageFile(null);
     setData({
-      vibe_type: (s.detected_items as any)?.vibe_type || '',
       style_name: s.overall_style || '',
+      style_score: s.style_score || 0,
       actual_colors: (s.color_palette as any)?.colors || [],
       items_detected: ((s.detected_items || []) as any[]).map((i: any) => i.name || ''),
       strengths: (s.strengths as string[]) || [],
+      improvements: (s.detected_items as any)?.improvements || [],
       audit: s.summary || '',
-      tweak_plan: '',
-      generation_prompt: '',
-      style_score: s.style_score || 0,
+      tweak_plan: s.summary || '',
+      generation_prompt: s.summary || '',
+      vibe_type: (s.detected_items as any)?.vibe_type || '',
+      top_type: (s.detected_items as any)?.top_type || '',
+      bottom_type: (s.detected_items as any)?.bottom_type || '',
+      footwear: (s.detected_items as any)?.footwear || '',
+      accessories: (s.detected_items as any)?.accessories || '',
     });
     setSavedId(s.id);
   };
