@@ -281,7 +281,7 @@ export default function Analysis() {
       const o: OutfitData = {
         style_name: fnData.style_name || '',
         actual_colors: Array.isArray(fnData.actual_colors) ? fnData.actual_colors : [],
-        items_detected: Array.isArray(fnData.items_detected) ? fnData.items_detected : [],
+        items_detected: Array.isArray(fnData.items_detected) ? fnData.items_detected : (Array.isArray(fnData.items) ? fnData.items : []),
         strengths: humanizeTextArray(fnData.strengths),
         improvements: Array.isArray(fnData.improvements) ? fnData.improvements.map((imp: any) => ({
           ...imp,
@@ -301,7 +301,7 @@ export default function Analysis() {
         seasonalFit: fnData.seasonalFit || '',
       };
       // Validate required array fields before setting data — prevents ".for is not iterable" crash
-      const requiredArrayKeys = ['items', 'items_detected', 'strengths', 'improvements'] as const;
+      const requiredArrayKeys = ['items', 'strengths', 'improvements'] as const;
       for (const key of requiredArrayKeys) {
         if ((o as any)[key] !== undefined && !Array.isArray((o as any)[key])) {
           throw new Error(`Invalid data format: expected "${key}" to be an array.`);
