@@ -10,7 +10,7 @@
 const AI_VOCABULARY: [RegExp, string][] = [
   // Significance inflation
   [/\b(pivotal|serves as a testament|a testament to|marks a|sets the stage)\b/gi, 'important'],
-  [/\b(stands as|serves as)\b/gi, 'is'],,
+  [/\b(stands as|serves as)\b/gi, 'is'],
   [/\b(underscores|highlights the importance|reflects broader|evolving landscape)\b/gi, 'shows'],
   [/\b(indelible mark|deeply rooted|focal point|key turning point)\b/gi, 'important'],
   [/\b(symbolizing|signifying|embodying|exemplifying)\b/gi, 'showing'],

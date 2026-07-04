@@ -73,7 +73,7 @@ export default function DressingRoomPage() {
             bottom: item.bottom || '',
             type: item.type || 'regular',
             accessory_note: item.accessory_note || '',
-            stylist_reasoning: humanizeTextArray(item.stylist_reasoning || []),
+            stylist_reasoning: (() => { try { return humanizeTextArray(item.stylist_reasoning || []); } catch (e) { console.warn('[DR] humanizeTextArray error:', e); return item.stylist_reasoning || []; } })(),
           }));
         }
         setGeneratedImages(normalized);
@@ -245,12 +245,12 @@ export default function DressingRoomPage() {
             {activeOutfit.stylist_reasoning && activeOutfit.stylist_reasoning.length > 0 && (
               <Perspective>
                 <div className="p-6 rounded-lg bg-[#1F1F1F] border border-white/10">
-                  <h4 className="text-sm font-semibold text-purple-400 mb-4 text-center">Stylist Notes</h4>
+                  <h4 className="text-sm font-semibold mb-4 text-center"><span className="bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-300 bg-clip-text text-transparent">Stylist Notes</span></h4>
                   {/* Important phrases as MarketingBadges-style pills */}
                                     {/* Inline phrase highlighting - only key fashion terms pop */}
                   <div className="flex flex-col gap-4">
                     {activeOutfit.stylist_reasoning.map((note: string, i: number) => {
-                      const noteColors: Array<'purple' | 'green' | 'red'> = ['purple', 'green', 'red'];
+                      const noteColors: Array<'purple' | 'green' | 'red'> = ['red', 'green', 'purple'];
                       const highlightColor = noteColors[i % noteColors.length];
                       
                       // Split note around key fashion terms, highlighting only those terms
@@ -320,12 +320,12 @@ export default function DressingRoomPage() {
                 <Perspective maxRotateX={8} maxRotateY={16} smoothing={0.08}>
                   <div className="grid grid-cols-2 gap-3">
                     {OCCASIONS.map((occ, idx) => {
-                      const occColors: Array<'red' | 'purple' | 'green'> = ['red', 'purple', 'green', 'purple', 'green'];
+                      const occColors: Array<'red' | 'purple' | 'green'> = ['red', 'green', 'purple', 'blue', 'amber'];
                       return (
                         <button
                           key={occ.id}
                           onClick={() => handleOccasionSelect(occ.id)}
-                          className="flex flex-col items-center gap-2 p-4 rounded-xl border border-white/10 hover:border-purple-500/50 hover:bg-purple-500/10 transition-all"
+                          className="flex flex-col items-center gap-2 p-4 rounded-xl border border-white/10 hover:border-amber-400/50 hover:bg-amber-400/10 transition-all"
                         >
                           <span className="text-2xl">{occ.emoji}</span>
                           <span className="text-sm">
@@ -369,12 +369,12 @@ export default function DressingRoomPage() {
                 <Perspective maxRotateX={8} maxRotateY={16} smoothing={0.08}>
                   <div className="grid grid-cols-3 gap-3">
                     {[1, 2, 3].map((num, idx) => {
-                      const countColors: Array<'red' | 'purple' | 'green'> = ['red', 'purple', 'green'];
+                      const countColors: Array<'red' | 'purple' | 'green'> = ['amber', 'green', 'purple'];
                       return (
                         <button
                           key={num}
                           onClick={() => handleCountSelect(num)}
-                          className="flex flex-col items-center gap-2 p-4 rounded-xl border border-white/10 hover:border-purple-500/50 hover:bg-purple-500/10 transition-all"
+                          className="flex flex-col items-center gap-2 p-4 rounded-xl border border-white/10 hover:border-amber-400/50 hover:bg-amber-400/10 transition-all"
                         >
                           <span className="text-2xl font-bold">
                             <Highlight color={countColors[idx]}>{num}</Highlight>

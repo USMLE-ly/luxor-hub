@@ -287,14 +287,18 @@ export default function Analysis() {
         actual_colors: Array.isArray(fnData.actual_colors) ? fnData.actual_colors : [],
         items: Array.isArray(fnData.items) ? fnData.items : (Array.isArray(fnData.items_detected) ? fnData.items_detected : []),
         items_detected: Array.isArray(fnData.items_detected) ? fnData.items_detected : (Array.isArray(fnData.items) ? fnData.items : []),
-        strengths: humanizeTextArray(fnData.strengths),
-        improvements: Array.isArray(fnData.improvements) ? fnData.improvements.map((imp: any) => ({
-          ...imp,
-          issue: humanizeText(imp.issue || ''),
-          suggestion: humanizeText(imp.suggestion || ''),
-        })) : [],
-        audit: humanizeText(fnData.audit || ''),
-        tweak_plan: humanizeText(fnData.tweak_plan || ''),
+        strengths: (() => { try { return humanizeTextArray(fnData.strengths); } catch { return Array.isArray(fnData.strengths) ? fnData.strengths : []; } })(),
+        improvements: (() => {
+          try {
+            return Array.isArray(fnData.improvements) ? fnData.improvements.map((imp: any) => ({
+              ...imp,
+              issue: (() => { try { return humanizeText(imp.issue || ''); } catch { return imp.issue || ''; } })(),
+              suggestion: (() => { try { return humanizeText(imp.suggestion || ''); } catch { return imp.suggestion || ''; } })(),
+            })) : [];
+          } catch { return []; }
+        })(),
+        audit: (() => { try { return humanizeText(fnData.audit || ''); } catch { return fnData.audit || ''; } })(),
+        tweak_plan: (() => { try { return humanizeText(fnData.tweak_plan || ''); } catch { return fnData.tweak_plan || ''; }})(),
         generation_prompt: fnData.generation_prompt || '',
         vibe_type: fnData.vibe_type || '',
         top_type: fnData.top_type || '',
@@ -328,7 +332,11 @@ export default function Analysis() {
       setAnalysisFailed(true);
       setData(null);
       const errMsg = e.message || '';
+      const errStack = e.stack || '(no stack)';
+      // Log FULL error details to console for debugging
       console.error('[ANALYZE-ERROR]', errMsg);
+      console.error('[ANALYZE-ERROR][STACK]', errStack);
+      console.error('[ANALYZE-ERROR][NAME]', e.name || '(no name)');
       // Show a user-friendly message instead of raw JS error
       if (errMsg.includes('.for is not iterable') || errMsg.includes('is not iterable') || errMsg.includes('not iterable')) {
         toast.error('The analysis returned unexpected data. Please try again with a clearer photo.');
@@ -469,10 +477,11 @@ export default function Analysis() {
     setData({
       style_name: s.overall_style || '',
       style_score: s.style_score || 0,
+      items: Array.isArray((s as any).items) ? (s as any).items : Array.isArray(s.detected_items) ? (s.detected_items as any[]).map((i: any) => i.name || '') : [],
       actual_colors: (s.color_palette as any)?.colors || [],
       items_detected: Array.isArray(s.detected_items) ? (s.detected_items as any[]).map((i: any) => i.name || '') : [],
-      strengths: (s.strengths as string[]) || [],
-      improvements: (s.detected_items as any)?.improvements || [],
+      strengths: Array.isArray(s.strengths) ? s.strengths : [],
+      improvements: Array.isArray((s.detected_items as any)?.improvements) ? (s.detected_items as any).improvements : [],
       audit: s.summary || '',
       tweak_plan: s.summary || '',
       generation_prompt: s.summary || '',

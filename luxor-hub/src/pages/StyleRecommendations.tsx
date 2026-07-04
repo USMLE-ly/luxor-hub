@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Sparkles, Upload, Camera, Shirt, Palette, ScanFaceIcon, User, Star, Lightbulb, AlertTriangle } from "lucide-react";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { Perspective, Highlight } from "@/components/ui/perspective-highlight";
+import { humanizeText } from "@/lib/humanizer";
 
 interface StyleAnalysis {
   face_shape: string;
@@ -349,7 +350,7 @@ export default function StyleRecommendationsPage() {
                       </div>
                     </div>
                     {recommendations.color_analysis.explanation && (
-                      <p className="text-xs text-white/50 italic mt-2">{recommendations.color_analysis.explanation}</p>
+                      <p className="text-xs text-white/50 italic mt-2">{humanizeText(recommendations.color_analysis.explanation)}</p>
                     )}
                   </>
                 )}
@@ -367,16 +368,16 @@ export default function StyleRecommendationsPage() {
                       <InfoRow label="Best Necklines" value={recommendations.face_recommendations.best_neckline_styles.join(", ")} />
                     )}
                     {recommendations.face_recommendations.glasses_recommendation && (
-                      <InfoRow label="Glasses" value={recommendations.face_recommendations.glasses_recommendation} />
+                      <InfoRow label="Glasses" value={humanizeText(recommendations.face_recommendations.glasses_recommendation)} />
                     )}
                     {recommendations.face_recommendations.hat_recommendation && (
-                      <InfoRow label="Hats" value={recommendations.face_recommendations.hat_recommendation} />
+                      <InfoRow label="Hats" value={humanizeText(recommendations.face_recommendations.hat_recommendation)} />
                     )}
                     {recommendations.face_recommendations.hairstyle_advice && (
-                      <InfoRow label="Hairstyle" value={recommendations.face_recommendations.hairstyle_advice} />
+                      <InfoRow label="Hairstyle" value={humanizeText(recommendations.face_recommendations.hairstyle_advice)} />
                     )}
                     {recommendations.face_recommendations.beard_advice && (
-                      <InfoRow label="Beard" value={recommendations.face_recommendations.beard_advice} />
+                      <InfoRow label="Beard" value={humanizeText(recommendations.face_recommendations.beard_advice)} />
                     )}
                     {recommendations.face_recommendations.explanation && (
                       <p className="text-xs text-white/50 italic mt-2">{humanizeText(recommendations.face_recommendations.explanation)}</p>
@@ -390,12 +391,12 @@ export default function StyleRecommendationsPage() {
                 <div className="flex items-center gap-2 mb-4"><span className="text-primary"><Shirt className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-white/80">Body Recommendations</h3></div>
                 {recommendations.body_recommendations && (
                   <>
-                    {recommendations.body_recommendations.shirt_fit && <InfoRow label="Shirt Fit" value={recommendations.body_recommendations.shirt_fit} />}
-                    {recommendations.body_recommendations.jacket_fit && <InfoRow label="Jacket Fit" value={recommendations.body_recommendations.jacket_fit} />}
-                    {recommendations.body_recommendations.pants_fit && <InfoRow label="Pants Fit" value={recommendations.body_recommendations.pants_fit} />}
-                    {recommendations.body_recommendations.shorts_length && <InfoRow label="Shorts Length" value={recommendations.body_recommendations.shorts_length} />}
-                    {recommendations.body_recommendations.coat_style && <InfoRow label="Coat Style" value={recommendations.body_recommendations.coat_style} />}
-                    {recommendations.body_recommendations.suit_cut && <InfoRow label="Suit Cut" value={recommendations.body_recommendations.suit_cut} />}
+                    {recommendations.body_recommendations.shirt_fit && <InfoRow label="Shirt Fit" value={humanizeText(recommendations.body_recommendations.shirt_fit)} />}
+                    {recommendations.body_recommendations.jacket_fit && <InfoRow label="Jacket Fit" value={humanizeText(recommendations.body_recommendations.jacket_fit)} />}
+                    {recommendations.body_recommendations.pants_fit && <InfoRow label="Pants Fit" value={humanizeText(recommendations.body_recommendations.pants_fit)} />}
+                    {recommendations.body_recommendations.shorts_length && <InfoRow label="Shorts Length" value={humanizeText(recommendations.body_recommendations.shorts_length)} />}
+                    {recommendations.body_recommendations.coat_style && <InfoRow label="Coat Style" value={humanizeText(recommendations.body_recommendations.coat_style)} />}
+                    {recommendations.body_recommendations.suit_cut && <InfoRow label="Suit Cut" value={humanizeText(recommendations.body_recommendations.suit_cut)} />}
                     {recommendations.body_recommendations.explanation && (
                       <p className="text-xs text-white/50 italic mt-2">{humanizeText(recommendations.body_recommendations.explanation)}</p>
                     )}

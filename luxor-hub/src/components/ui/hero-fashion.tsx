@@ -393,7 +393,7 @@ export function FashionHero({
                 <div className="relative w-full overflow-hidden rounded-xl border border-amber-500/20 bg-gradient-to-r from-amber-950/30 via-red-950/20 to-amber-950/30">
                   <div className="relative z-10 p-4 backdrop-blur-sm">
                     <h3 className="text-xs uppercase tracking-[0.15em] text-amber-400/80 mb-3 font-semibold flex items-center gap-1.5">
-                      <span>\u26A0</span> HONEST FEEDBACK
+                      HONEST FEEDBACK
                     </h3>
                     <div className="space-y-3">
                       {Array.isArray(improvements) && improvements.map((imp, idx) => (
