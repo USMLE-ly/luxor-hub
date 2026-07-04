@@ -294,7 +294,7 @@ export default function Analysis() {
       const tweakPrompt = fnData.tweak_plan || fnData.generation_prompt || '';
       if (tweakPrompt) {
         const safe = encodeURIComponent(tweakPrompt + ", high fashion editorial, photorealistic");
-        const pollinationsUrl = `https://image.pollinations.ai/prompt/${safe}?width=1024&height=1024&nologin=true&seed=`;
+        const pollinationsUrl = `https://image.pollinations.ai/prompt/${safe}?width=1024&height=1536&nologin=true&seed=`;
         setGeneratedImageUrl(pollinationsUrl + Date.now());
       }
       setSavedId(null);
