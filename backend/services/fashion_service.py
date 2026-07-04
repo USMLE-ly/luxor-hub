@@ -138,7 +138,6 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
 
         # Tweak text only (no image generation)
     tweak_text = _humanize_tweak(result.get("tweak_plan", ""), detected_items or items_detected)
-    tweak_image_url = ""
 
     # Parse honest improvements
     improvements = []
@@ -174,6 +173,5 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
         "improvements": improvements,
         "audit": _humanize_audit(detected_items or items_detected, name),
         "tweak_plan": tweak_text,
-        "tweak_image_url": "",
         "generation_prompt": result.get("generation_prompt", name + " outfit with " + ", ".join(actual_colors) + " tones."),
     }
