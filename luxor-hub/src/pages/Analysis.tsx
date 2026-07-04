@@ -301,7 +301,7 @@ export default function Analysis() {
         seasonalFit: fnData.seasonalFit || '',
       };
       // Validate required array fields before setting data — prevents ".for is not iterable" crash
-      const requiredArrayKeys = ['items_detected', 'strengths', 'improvements'] as const;
+      const requiredArrayKeys = ['items', 'items_detected', 'strengths', 'improvements'] as const;
       for (const key of requiredArrayKeys) {
         if ((o as any)[key] !== undefined && !Array.isArray((o as any)[key])) {
           throw new Error(`Invalid data format: expected "${key}" to be an array.`);
@@ -460,7 +460,7 @@ export default function Analysis() {
       style_name: s.overall_style || '',
       style_score: s.style_score || 0,
       actual_colors: (s.color_palette as any)?.colors || [],
-      items_detected: ((s.detected_items || []) as any[]).map((i: any) => i.name || ''),
+      items_detected: Array.isArray(s.detected_items) ? (s.detected_items as any[]).map((i: any) => i.name || '') : [],
       strengths: (s.strengths as string[]) || [],
       improvements: (s.detected_items as any)?.improvements || [],
       audit: s.summary || '',
