@@ -155,6 +155,8 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
         if tweak_txt:
             improvements.append({"issue": tweak_txt, "suggestion": "", "priority": "medium"})
 
+    # ── Force all array fields to be lists (MiMo sometimes returns None or strings) ──
+    _force_list = lambda v: v if isinstance(v, list) else []
     return {
         "success": True,
         "source": result.get("source", "unknown"),
@@ -167,10 +169,10 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
         "bottom_type": result.get("bottom_type", ""),
         "footwear": result.get("footwear", ""),
         "accessories": result.get("accessories", ""),
-        "actual_colors": actual_colors,
-        "items_detected": items_detected,
-        "strengths": strengths,
-        "improvements": improvements,
+        "actual_colors": _force_list(actual_colors),
+        "items_detected": _force_list(items_detected),
+        "strengths": _force_list(strengths),
+        "improvements": _force_list(improvements),
         "audit": _humanize_audit(detected_items or items_detected, name),
         "tweak_plan": tweak_text,
         "generation_prompt": result.get("generation_prompt", name + " outfit with " + ", ".join(actual_colors) + " tones."),

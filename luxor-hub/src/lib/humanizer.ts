@@ -74,8 +74,10 @@ const AI_VOCABULARY: [RegExp, string][] = [
  * Humanize a single string by removing AI writing patterns.
  * Preserves meaning while making text sound more natural.
  */
-export function humanizeText(text: string): string {
-  if (!text) return text;
+export function humanizeText(text: any): string {
+  // Ultra-defensive: handle non-string values to prevent ".for is not iterable" crashes
+  if (text === null || text === undefined) return '';
+  if (typeof text !== 'string') return String(text);
 
   let result = text;
 
@@ -115,7 +117,13 @@ export function humanizeText(text: string): string {
  */
 export function humanizeTextArray(texts: any): string[] {
   if (!Array.isArray(texts)) return [];
-  return texts.map(t => humanizeText(t));
+  return texts.map(t => {
+    try {
+      return humanizeText(t);
+    } catch {
+      return String(t ?? '');
+    }
+  });
 }
 
 /**

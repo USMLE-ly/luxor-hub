@@ -508,6 +508,39 @@ export default function Analysis() {
   }, [loading, progressValue]);
 
 
+  // ── Early return guard: prevent ".for is not iterable" crash ──
+  // If data is null/falsy AND analysis failed, show a clean fallback
+  // instead of letting React try to read properties on null.
+  if (!data && analysisFailed) {
+    return (
+      <AppLayout>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center max-w-md mx-auto">
+          <div className="w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center mb-6">
+            <AlertTriangle className="w-8 h-8 text-amber-400" />
+          </div>
+          <h2 className="font-display text-xl text-foreground mb-2">Analysis unavailable</h2>
+          <p className="text-muted-foreground text-sm mb-8 max-w-sm">
+            We couldn't analyze this outfit. The AI returned unexpected data. Please try again with a clearer photo.
+          </p>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-amber-300 to-yellow-400 text-slate-900 font-semibold text-sm hover:scale-105 transition-transform"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={() => { setImagePreview(null); setImageFile(null); setAnalysisFailed(false); }}
+              className="px-6 py-2.5 rounded-lg border border-white/10 text-white/70 text-sm hover:bg-white/5 transition-colors"
+            >
+              Upload New Photo
+            </button>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
+
   return (
     <AppLayout>
       <div className="p-4 md:p-8 mx-auto max-w-7xl space-y-8 overflow-x-hidden">

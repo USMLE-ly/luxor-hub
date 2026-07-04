@@ -31,7 +31,16 @@ def init_routes(app):
             return jsonify(map_analysis(result))
         except Exception as exc:
             _log.error("[ANALYZE] ERROR: %s", exc)
-            return jsonify({"success": False, "error": f"MiMo Vision 2.5 failed: {str(exc)[:200]}"}), 500
+            return jsonify({
+                "success": False,
+                "error": f"MiMo Vision 2.5 failed: {str(exc)[:200]}",
+                "items_detected": [],
+                "strengths": [],
+                "improvements": [],
+                "actual_colors": [],
+                "tweak_plan": "",
+                "generation_prompt": "",
+            }), 500
 
     @app.route("/debug/analyze", methods=["POST"], strict_slashes=False)
     def debug_analyze():
