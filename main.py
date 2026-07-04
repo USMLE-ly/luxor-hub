@@ -106,7 +106,7 @@ from backend.ai.mimo_client import call_mimo_vision, call_mimo_text, _extract_fi
 from backend.services.fashion_service import (
     get_fashion_decision, map_analysis,
     _humanize_strengths, _humanize_audit, _humanize_tweak,
-    generate_tweak_visualization_prompt, set_color_names,
+    set_color_names,
 )
 
 # Route initializers from backend/routes/ modular modules

@@ -4,8 +4,6 @@ import json
 import logging
 import random
 import time
-import hashlib
-import urllib.parse
 from typing import Any, Dict, List, Optional
 
 from backend.ai.mimo_client import call_mimo_vision
@@ -36,86 +34,6 @@ def get_fashion_decision(image_b64: str) -> Dict[str, Any]:
 
     _log.error("[PIPELINE] MiMo Vision 2.5 failed - no fallback")
     raise RuntimeError("MiMo Vision 2.5 failed to analyze the image")
-
-
-def generate_tweak_visualization_prompt(original_items_string: str, tweak_item_string: str) -> str:
-    """Generate a hyperrealistic fashion editorial prompt for AI image generation.
-
-    Based on the FASHION AI SCHOOL 30-example methodology: strict 7-section
-    editorial structure (SUBJECT, MEDIUM, ENVIRONMENT, LIGHTING, COLOR, MOOD, COMPOSITION),
-    each on its own line with section name followed by colon.
-    Always produces a full-body shot of a living human model wearing the complete
-    original + tweak outfit. Includes natural anatomical description to prevent
-    'third leg' or 'missing garment' hallucinations. The model must be a REAL PERSON
-    (not a mannequin, not a product shot) with visible skin texture, pores, and
-    natural imperfections. Two legs clearly visible, correct human proportions.
-    No isolated garments, no marble backgrounds, no tabletop shots.
-
-    Args:
-        original_items_string: The original outfit items, comma-separated
-            (e.g., 'Black Lace Sleeve Blouse, Olive Green Trousers')
-        tweak_item_string: The full tweak recommendation text
-            (e.g., 'Pair with cream wide-leg trousers and woven sandals')
-
-    Returns:
-        A strict 7-section editorial fashion prompt following the FASHION AI SCHOOL
-        format. Safe for Pollinations 'model=flux' API.
-    """
-    original = original_items_string.strip().rstrip(',') if original_items_string else ''
-    tweak = tweak_item_string.strip().rstrip('.') if tweak_item_string else ''
-
-    # Build the complete outfit description
-    if original and tweak:
-        tweak_clean = tweak[0].upper() + tweak[1:] if tweak else ''
-        outfit_desc = f"{original}, AND {tweak_clean}"
-    elif original:
-        outfit_desc = original
-    elif tweak:
-        outfit_desc = tweak[0].upper() + tweak[1:] if tweak else ''
-    else:
-        outfit_desc = 'A complete fashion outfit'
-
-    # Choose a model preset to vary results (rotate based on hash of outfit_desc)
-    _seed = sum(ord(c) for c in outfit_desc)
-    _model_presets = [
-        # Preset A: Fair skin, straight hair
-        "A HIGH-FASHION MODEL WITH FAIR SKIN, VISIBLE PORES, REALISTIC MICRO-TEXTURE, AND SUBTLE FLECKED UNDERTONES. LONG STRAIGHT BLONDE HAIR WITH NATURAL MOVEMENT, MICRO-STRANDS, AND FINE FLYAWAYS AROUND THE TEMPLES. MINIMAL MAKEUP, NATURAL BROWS, UNRETOUCHED SKIN.",
-        # Preset B: Warm brown skin, textured hair
-        "A HIGH-FASHION MODEL WITH WARM BROWN SKIN, VISIBLE PORES, REALISTIC EPIDERMAL GRAIN, AND AUTHENTIC UNDERTONES. NATURAL TEXTURED AFRO HAIR WITH VOLUME AND MOVEMENT. MINIMAL MAKEUP, NATURAL BROWS, NO AIRBRUSHING, REAL SKIN TEXTURE.",
-        # Preset C: Olive skin, dark hair
-        "A HIGH-FASHION MODEL WITH OLIVE SKIN TONES, SUN-KISSED COMPLEXION, VISIBLE PORES, AND REALISTIC MICRO-TEXTURE. SLEEK DARK HAIR WITH SUBTLE MOVEMENT AND LIFELIKE DETAIL. NATURAL MAKEUP, GENUINE SKIN TEXTURE PRESERVED.",
-    ]
-    model_preset = _model_presets[_seed % len(_model_presets)]
-
-    return (
-        "SUBJECT: A HIGH-FASHION MODEL STANDING CONFIDENTLY WITH POISED, ELEGANT POSTURE, WEARING A COMPLETE OUTFIT CONSISTING OF: "
-        f"{outfit_desc}. "
-        f"{model_preset} "
-        "TWO VISIBLE LEGS, TWO ARMS, CORRECT HUMAN PROPORTIONS. THE SPECIFIED FOOTWEAR CLEARLY VISIBLE AT THE BOTTOM OF THE FRAME. "
-        "THE MODEL HAS A REFINED, POISED EXPRESSION WITH RELAXED YET SOPHISTICATED POSTURE, CONVEYING EFFORTLESS ELEGANCE AND QUIET CONFIDENCE. "
-        "COMPLETE OUTFIT FROM HEAD TO TOE: ALL GARMENTS, ACCESSORIES, AND SHOES SPECIFIED ABOVE MUST BE VISIBLE AND WORN BY THE MODEL. "
-        "NO DEFORMITIES, NO EXTRA LIMBS, NO EXTRA FINGERS, NO ABNORMALITIES. "
-        "MEDIUM: 8K ULTRA-PHOTOREALISTIC FASHION PHOTOGRAPH. DSLR FULL-FRAME SENSOR, 85MM FASHION LENS, CRISP OPTICAL CLARITY. "
-        "HIGH-FIDELITY FABRIC RENDERING, CINEMATIC EDITORIAL FINISH, PREMIUM MAGAZINE QUALITY. "
-        "ENVIRONMENT: MINIMALIST HIGH-END FASHION STUDIO WITH A SOFT, SEAMLESS WHITE OR NEUTRAL GREY GRADIENT BACKDROP. "
-        "CLEAN, UNCLUTTERED, DISTRACTION-FREE SPACE DESIGNED TO EMPHASIZE THE GARMENT DETAILS AND SILHOUETTE. NO MARBLE, NO TABLES, NO ISOLATED PRODUCTS. "
-        "LIGHTING: SOFT DIFFUSED STUDIO LIGHTING WITH PROFESSIONAL BALANCE. "
-        "EVEN ILLUMINATION PROVIDING GENTLE HIGHLIGHTS AND MICRO-SHADOWS THAT DEFINE FABRIC TEXTURE AND FACIAL CONTOURS. "
-        "GENTLE RIM LIGHTING DEFINING THE SILHOUETTE AGAINST THE BACKGROUND. "
-        "TRUE-TO-LIFE LIGHT SCATTERING ACROSS SKIN AND FABRIC WITH SMOOTH SHADOW-TO-LIGHT TRANSITIONS. NO HARSH CONTRAST, NO ARTIFICIAL GLOW. "
-        "COLOR: TRUE-TO-LIFE COLOR CALIBRATION WITH PREMIUM EDITORIAL GRADING. "
-        "HARMONIOUS PALETTE FEATURING NATURAL SKIN TONES AND PRECISE TEXTILE COLORS. "
-        "ACCURATE RENDERING OF EVERY GARMENT WITHOUT OVERSATURATION. "
-        "SMOOTH TONAL GRADIENTS WITH AUTHENTIC COLOR VARIATION. "
-        "MOOD: MODERN, REFINED, MINIMALIST LUXURY. CONFIDENT, ELEGANT, AND EFFORTLESSLY SOPHISTICATED. "
-        "CALM, COMPOSED, AND TIMELESS WITH QUIET SOPHISTICATION. HIGH-FASHION EDITORIAL ATMOSPHERE. "
-        "COMPOSITION: SHOT WITH AN 85MM FASHION LENS ON A FULL-FRAME SENSOR. "
-        "FULL-BODY FRAMING FROM HEAD TO TOE, STRAIGHT-ON ANGLE, CENTERED COMPOSITION. "
-        "SHOES CLEARLY VISIBLE AT THE BOTTOM OF THE FRAME, WITH NO CROPPING OF THE FEET. "
-        "SHALLOW DEPTH OF FIELD KEEPING THE MODEL AND OUTFIT IN SHARP FOCUS "
-        "WHILE THE BACKGROUND FALLS SOFTLY OUT OF FOCUS. "
-        "MAGAZINE-READY EDITORIAL QUALITY WITH BALANCED COMPOSITION AND NEGATIVE SPACE."
-    )
 
 
 def _humanize_strengths(items: List[str]) -> List[str]:
@@ -213,15 +131,9 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
         score = 99
     name = result.get("style_name", "") or "Modern Classic"
 
-    # Generate tweak image URL
+        # Tweak text only (no image generation)
     tweak_text = _humanize_tweak(result.get("tweak_plan", ""), detected_items or items_detected)
-    _outfit_items = ", ".join(detected_items) if detected_items else (tweak_text if tweak_text else "a fashion outfit")
-    _tweak_prompt = generate_tweak_visualization_prompt(_outfit_items, tweak_text)
-    _safe_tweak = urllib.parse.quote(_tweak_prompt)
-    # Deterministic seed based on outfit + tweak text for consistency
-    _seed_input = (_outfit_items + tweak_text).encode('utf-8')
-    _tweak_seed = int(hashlib.md5(_seed_input).hexdigest()[:8], 16) % 999999
-    tweak_image_url = f"https://image.pollinations.ai/prompt/{_safe_tweak}?nologin=true&seed={_tweak_seed}&width=1024&height=1536&model=flux"
+    tweak_image_url = ""
 
     # Parse honest improvements
     improvements = []
@@ -257,6 +169,6 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
         "improvements": improvements,
         "audit": _humanize_audit(detected_items or items_detected, name),
         "tweak_plan": tweak_text,
-        "tweak_image_url": tweak_image_url,
+        "tweak_image_url": "",
         "generation_prompt": result.get("generation_prompt", name + " outfit with " + ", ".join(actual_colors) + " tones."),
     }

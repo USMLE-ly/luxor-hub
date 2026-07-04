@@ -115,6 +115,7 @@ export default function Analysis() {
   const [savedId, setSavedId] = useState<string | null>(null);
   const [analysisFailed, setAnalysisFailed] = useState(false);
   const [progressValue, setProgressValue] = useState(0);
+  const [displayProgress, setDisplayProgress] = useState(0);
   const [progressStage, setProgressStage] = useState("");
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -275,7 +276,6 @@ export default function Analysis() {
         strengths: fnData.strengths || [],
         audit: fnData.audit || '',
         tweak_plan: fnData.tweak_plan || '',
-        tweak_image_url: fnData.tweak_image_url || '',
         generation_prompt: fnData.generation_prompt || '',
         vibe_type: fnData.vibe_type || '',
         top_type: fnData.top_type || '',
@@ -288,23 +288,9 @@ export default function Analysis() {
       };
       setData(o);
       setProgressValue(90);
-      setProgressStage("Generating visualization...");
+      setProgressStage("Finalizing...");
       
-      // Generate tweak visualization — backend already provides tweak_image_url with proper 7-section prompt.
-      // This frontend fallback is only used if backend image URL is empty.
-      const fnTweakImageUrl = fnData.tweak_image_url || '';
-      if (!fnTweakImageUrl) {
-        const tweakPrompt = fnData.tweak_plan || fnData.generation_prompt || '';
-        if (tweakPrompt) {
-          // Build a minimal editorial prompt since we don't have a full 7-section prompt
-          const itemDescs = (fnData.items_detected || []).join(', ');
-          const fullDesc = itemDescs ? `${itemDescs}. ${tweakPrompt}` : tweakPrompt;
-          const prompt = `SUBJECT: HYPERREALISTIC FULL-BODY FASHION EDITORIAL PHOTOGRAPH OF A MODEL WEARING ${fullDesc}. TWO VISIBLE LEGS, TWO ARMS, NATURAL HUMAN PROPORTIONS. NO DEFORMITIES, NO EXTRA LIMBS. MEDIUM: 8K ULTRA-PHOTOREALISTIC FASHION PHOTOGRAPH, DSLR FULL-FRAME CLARITY. ENVIRONMENT: MINIMALIST HIGH-END FASHION STUDIO WITH SOFT GRADIENT BACKDROP. LIGHTING: SOFT DIFFUSED STUDIO LIGHTING WITH PROFESSIONAL BALANCE. COLOR: TRUE-TO-LIFE COLOR CALIBRATION. MOOD: MODERN, REFINED, MINIMALIST LUXURY. COMPOSITION: FULL-BODY FRAMING FROM HEAD TO TOE WITH AN 85MM FASHION LENS ON A FULL-FRAME SENSOR. SHOES CLEARLY VISIBLE AT THE BOTTOM OF THE FRAME.`;
-          const safe = encodeURIComponent(prompt);
-          const pollinationsUrl = `https://image.pollinations.ai/prompt/${safe}?width=1024&height=1536&nologin=true&seed=${Date.now()}&model=flux`;
-          setGeneratedImageUrl(pollinationsUrl);
-        }
-      }
+      // No tweak image generation (disabled due to quality issues)
       setSavedId(null);
       toast.success('Outfit analyzed! ✨');
     } catch (e: any) {
@@ -446,7 +432,6 @@ export default function Analysis() {
       strengths: (s.strengths as string[]) || [],
       audit: s.summary || '',
       tweak_plan: '',
-      tweak_image_url: '',
       generation_prompt: '',
       style_score: s.style_score || 0,
     });
@@ -466,6 +451,25 @@ export default function Analysis() {
   };
 
   /* ---------- Pre-computed lists ---------- */
+
+
+  // ── Smooth auto-increment progress: 0 → 95% during loading, jumps to 100% on success ──
+  useEffect(() => {
+    if (!loading) {
+      setDisplayProgress(progressValue);
+      return;
+    }
+    setDisplayProgress(0);
+    const timer = setInterval(() => {
+      setDisplayProgress(prev => {
+        if (prev >= 95) return 95;
+        const increment = prev < 30 ? 3 : prev < 60 ? 2 : prev < 80 ? 1.5 : 1;
+        return Math.min(prev + increment, 95);
+      });
+    }, 200);
+    return () => clearInterval(timer);
+  }, [loading, progressValue]);
+
 
   return (
     <AppLayout>
@@ -534,7 +538,7 @@ export default function Analysis() {
                           <div style={{ position: 'absolute', width: '100%', height: '100%', borderRadius: '50%', border: '4px solid rgba(255,255,255,0.06)', borderTopColor: '#e5c785', borderRightColor: '#d4b06a' }} className="animate-spin" />
                           <div style={{ position: 'absolute', width: '64px', height: '64px', borderRadius: '50%', backgroundColor: 'rgba(229, 199, 133, 0.12)' }} className="animate-pulse" />
                           <span style={{ fontSize: '16px', fontWeight: 600, color: 'rgba(229, 199, 133, 0.85)', zIndex: 1 }}>
-                            {progressValue}%
+                            {displayProgress}%
                           </span>
                         </div>
                         <p className="text-sm text-white/70 font-medium tracking-wide">{progressStage}</p>
@@ -583,7 +587,6 @@ export default function Analysis() {
                     tweakPlan={data.tweak_plan}
                     imageUrl={imagePreview}
                     generatedImageUrl={generatedImageUrl}
-                    tweakImageUrl={data?.tweak_image_url}
                     vibeType={data.vibe_type}
                     topType={data.top_type}
                     bottomType={data.bottom_type}

@@ -135,7 +135,7 @@ export function FashionHero({
   actualColors = [],
   audit = "",
   tweakPlan = "",
-  tweakImageUrl,
+
   imageUrl,
   generatedImageUrl,
   vibeType,
@@ -372,30 +372,16 @@ export function FashionHero({
                 <div className="relative z-10 p-4 backdrop-blur-sm h-auto w-full">
                   <h3 className="text-xs uppercase tracking-[0.15em] text-white/60 mb-1.5 font-semibold">TWEAK</h3>
                   
-                  <div className="flex flex-col md:flex-row gap-4 items-center">
-                    {/* Left / Top: Text advice with marker highlight */}
-                    <div className="flex-1 w-full">
-                      {(() => {
-                        const text = tweakPlan || "Consider adding a structured blazer for a more polished look.";
-                        return (
-                          <p className="text-sm italic text-white/90 leading-relaxed tracking-wide">
-                            {renderHighlightedTweak(text)}
-                          </p>
-                        );
-                      })()}
-                    </div>
-
-                    {/* Right / Bottom: Tweak visualization image */}
-                    {(tweakImageUrl) && (
-                      <div className="relative w-full md:w-[45%] lg:w-[40%] aspect-[4/5] overflow-hidden rounded-lg border border-white/20 flex-shrink-0">
-                        <img
-                          src={tweakImageUrl}
-                          alt="Tweak Visualization"
-                          className="w-full h-full object-cover object-center rounded-lg"
-                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                        />
-                      </div>
-                    )}
+                  {/* Text advice with marker highlight — image removed */}
+                  <div className="flex-1 w-full">
+                    {(() => {
+                      const text = tweakPlan || "Consider adding a structured blazer for a more polished look.";
+                      return (
+                        <p className="text-sm italic text-white/90 leading-relaxed tracking-wide">
+                          {renderHighlightedTweak(text)}
+                        </p>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>
