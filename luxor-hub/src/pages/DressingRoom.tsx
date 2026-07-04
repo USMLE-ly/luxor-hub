@@ -220,10 +220,48 @@ export default function DressingRoomPage() {
               </div>
             )}
 
-            {activeOutfit.stylist_reasoning && activeOutfit.stylist_reasoning.length > 0 && (
+{activeOutfit.stylist_reasoning && activeOutfit.stylist_reasoning.length > 0 && (
               <Perspective>
                 <div className="p-6 rounded-lg bg-[#1F1F1F] border border-white/10">
                   <h4 className="text-sm font-semibold text-purple-400 mb-4 text-center">Stylist Notes</h4>
+                  {/* Important phrases as MarketingBadges-style pills */}
+                  <div className="flex flex-wrap gap-2 justify-center mb-4">
+                    {activeOutfit.stylist_reasoning.flatMap((note: string) => {
+                      // Extract meaningful key phrases from the note
+                      const phrases = note
+                        .split(/[,;.]|\sand\s|\swith\s|\bfor\b|\bthat\b|\bwhich\b/)
+                        .map(p => p.trim())
+                        .filter(p => p.length > 10 && p.split(' ').length >= 2);
+                      return phrases.slice(0, 6); // limit per note
+                    }).slice(0, 9).map((phrase: string, pi: number) => {
+                      const pillColors = [
+                        'from-amber-300 to-yellow-400',
+                        'from-pink-300 to-pink-400',
+                        'from-blue-400 to-blue-500',
+                        'from-orange-400 to-orange-500',
+                        'from-purple-400 to-purple-500',
+                        'from-green-400 to-green-500',
+                      ];
+                      const rotations = [-2, 1, -1, 2, -3, 0];
+                      const colorClass = pillColors[pi % pillColors.length];
+                      const rotation = rotations[pi % rotations.length];
+                      return (
+                        <span
+                          key={pi}
+                          className={`inline-block cursor-default select-none rounded-full px-4 py-1.5 text-xs font-semibold bg-gradient-to-b shadow-lg transition-all duration-300 ease-out hover:scale-105 hover:shadow-xl`}
+                          style={{
+                            background: `linear-gradient(135deg, ${colorClass})`,
+                            color: '#1e293b',
+                            transform: `rotate(${rotation}deg)`,
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.2), inset 0 1px 2px rgba(255,255,255,0.3)',
+                          }}
+                        >
+                          {phrase}
+                        </span>
+                      );
+                    })}
+                  </div>
+                  {/* Full notes as Highlight text */}
                   <div className="flex flex-col gap-3">
                     {activeOutfit.stylist_reasoning.map((note: string, i: number) => {
                       const colors: Array<'red' | 'purple' | 'green'> = ['purple', 'green', 'red', 'purple', 'green'];
