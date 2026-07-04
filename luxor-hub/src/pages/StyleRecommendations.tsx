@@ -330,26 +330,7 @@ export default function StyleRecommendationsPage() {
           )}
         </div>
 
-        {/* Tabs — shown when any data exists - with Perspective+Highlight 3D */}
-        {(analysis || recommendations || outfitReview) && (
-          <Perspective maxRotateX={6} maxRotateY={12} smoothing={0.1}>
-            <div className="flex gap-2 border-b border-white/10 pb-2">
-              {(["analyze", "recommendations", "review"] as const).map((tab) => {
-                const hasData = tab === "analyze" ? !!analysis : tab === "recommendations" ? !!recommendations : !!outfitReview;
-                const tabColors: Record<string, 'red' | 'purple' | 'green'> = { analyze: 'purple', recommendations: 'green', review: 'red' };
-                const tabLabels: Record<string, string> = { analyze: '✨ Analysis', recommendations: '✨ Recommendations', review: '✨ Review' };
-                return (
-                  <button key={tab} onClick={() => hasData && setActiveTab(tab)}
-                    className={"px-4 py-2 rounded-lg text-sm font-medium transition-all " + (
-                      activeTab === tab ? "bg-primary/20" : "text-white/50 hover:text-white/80"
-                    ) + (!hasData ? " opacity-40 cursor-not-allowed" : "")}>
-                    <Highlight color={tabColors[tab]}>{tabLabels[tab]}</Highlight>
-                  </button>
-                );
-              })}
-            </div>
-          </Perspective>
-        )}
+
 
         <AnimatePresence mode="wait">
           {/* ── TAB: Analysis (Face + Body) ── */}

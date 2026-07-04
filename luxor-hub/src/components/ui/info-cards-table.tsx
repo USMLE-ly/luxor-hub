@@ -168,7 +168,10 @@ export default function InfoCardsTable({ rows = [] }: InfoCardsTableProps) {
                     return (
                       <TableCell
                         key={header}
-                        className={cn("py-4 px-4 border-r border-white/5 last:border-r-0 align-top")}
+                        className={cn(
+                          "py-4 px-4 border-r border-white/5 last:border-r-0 align-top",
+                          header.toLowerCase() === "why" && "min-w-[300px]"
+                        )}
                       >
                         <div className="flex items-start justify-center gap-2 min-h-[28px]">
                           {rendered ?? (
