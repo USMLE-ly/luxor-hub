@@ -191,7 +191,7 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading,
       }}>
         <div style={{ ...SECTION_BASE, top: 0, height: '33.333%', backgroundColor: '#0a0a0a', borderBottom: '4px solid #000', zIndex: 0 }} />
         <div style={{ ...SECTION_BASE, top: '33.333%', height: '33.333%', backgroundColor: '#0a0a0a', borderBottom: '4px solid #000', zIndex: 0 }} />
-        <div style={{ ...SECTION_BASE, bottom: 0, height: '33.333%', backgroundColor: '#1A1A1A', zIndex: 0 }} />
+        <div style={{ ...SECTION_BASE, bottom: 0, height: '33.333%', backgroundColor: '#0a0a0a', zIndex: 0 }} />
 
         <div style={{ position: 'absolute', bottom: '8px', left: 0, right: 0, zIndex: 20 }}>
           <MarketingBadges onGenerate={onGenerate} isLoading={isLoading} />

@@ -220,7 +220,7 @@ export default function DressingRoomPage() {
               </div>
             )}
 
-{activeOutfit.stylist_reasoning && activeOutfit.stylist_reasoning.length > 0 && (
+            {activeOutfit.stylist_reasoning && activeOutfit.stylist_reasoning.length > 0 && (
               <Perspective>
                 <div className="p-6 rounded-lg bg-[#1F1F1F] border border-white/10">
                   <h4 className="text-sm font-semibold text-purple-400 mb-4 text-center">Stylist Notes</h4>
