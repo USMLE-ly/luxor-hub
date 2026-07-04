@@ -244,9 +244,17 @@ export default function Analysis() {
             signal: controller.signal,
           });
           clearTimeout(abortTimer);
-          if (!response.ok) throw new Error('Server returned ' + response.status);
+          if (!response.ok) {
+            let errMsg = 'Server returned ' + response.status;
+            try { const errBody = await response.json(); if (errBody?.error) errMsg = errBody.error; } catch {}
+            throw new Error(errMsg);
+          }
           fnData = await response.json();
-          if (!fnData || !fnData.success) throw new Error('Analysis failed');
+          if (!fnData || !fnData.success) {
+            const errDetail = fnData?.error ? 'Backend: ' + fnData.error : 'Analysis failed - empty response';
+            console.error('[ANALYZE-ERROR] Backend response:', JSON.stringify(fnData));
+            throw new Error(errDetail);
+          }
           break;  // any successful source is fine
         } catch (fetchErr) {
           clearTimeout(abortTimer);
@@ -272,14 +280,14 @@ export default function Analysis() {
       // Map the Fable 5 response to our UI shape - NO fallback dummies
       const o: OutfitData = {
         style_name: fnData.style_name || '',
-        actual_colors: fnData.actual_colors || [],
-        items_detected: fnData.items_detected || [],
-        strengths: humanizeTextArray(fnData.strengths || []),
-        improvements: (fnData.improvements || []).map((imp: any) => ({
+        actual_colors: Array.isArray(fnData.actual_colors) ? fnData.actual_colors : [],
+        items_detected: Array.isArray(fnData.items_detected) ? fnData.items_detected : [],
+        strengths: humanizeTextArray(fnData.strengths),
+        improvements: Array.isArray(fnData.improvements) ? fnData.improvements.map((imp: any) => ({
           ...imp,
           issue: humanizeText(imp.issue || ''),
           suggestion: humanizeText(imp.suggestion || ''),
-        })),
+        })) : [],
         audit: humanizeText(fnData.audit || ''),
         tweak_plan: humanizeText(fnData.tweak_plan || ''),
         generation_prompt: fnData.generation_prompt || '',
@@ -302,9 +310,20 @@ export default function Analysis() {
     } catch (e: any) {
       setAnalysisFailed(true);
       setData(null);
-      toast.error(e.message || 'Analysis failed');
+      const errMsg = e.message || '';
+      console.error('[ANALYZE-ERROR]', errMsg);
+      // Show a user-friendly message instead of raw JS error
+      if (errMsg.includes('.for is not iterable') || errMsg.includes('is not iterable') || errMsg.includes('not iterable')) {
+        toast.error('The analysis returned unexpected data. Please try again with a clearer photo.');
+      } else if (errMsg.includes('timed out') || errMsg.includes('Timeout') || errMsg.includes('AbortError')) {
+        toast.error('The AI took too long to respond. Please try again.');
+      } else if (errMsg.includes('400') || errMsg.includes('401') || errMsg.includes('402')) {
+        toast.error('Server authentication issue. Please refresh and try again.');
+      } else {
+        toast.error(errMsg || 'Analysis failed. Please ensure the image is clear and try again.');
+      }
       // If the error is about Cipher Vision, show a retry CTA instead of dead end
-      if (e.message && e.message.includes('Cipher Vision') && file) {
+      if (errMsg.includes('Cipher Vision') && file) {
         const retryFile = file;
         setTimeout(() => {
           toast(
@@ -619,7 +638,7 @@ export default function Analysis() {
                         <h3 className="text-xs uppercase tracking-[0.15em] text-white/60 mb-1 font-semibold">Outfit Versatility</h3>
                         <p className="text-[11px] text-white/40 mb-4">How well this outfit adapts to different occasions.</p>
                         <div className="space-y-4">
-                          {versatilityScores.map((v, i) => (
+                          {Array.isArray(versatilityScores) && versatilityScores.map((v, i) => (
                             <div key={v.label}>
                               <div className="flex justify-between mb-1.5">
                                 <span className="text-xs font-medium text-white/80">{v.label}</span>
@@ -701,7 +720,7 @@ export default function Analysis() {
                   <Layers className="w-5 h-5 text-primary" /> Previous Analyses
                 </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {history.slice(0, 6).map((h) => (
+                  {Array.isArray(history) && history.slice(0, 6).map((h) => (
                     <motion.button
                       key={h.id}
                       whileHover={{ scale: 1.03, y: -2 }}

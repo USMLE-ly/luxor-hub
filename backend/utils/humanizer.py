@@ -113,8 +113,11 @@ def humanize_text(text: str) -> str:
     return result.strip()
 
 
-def humanize_text_array(texts: List[str]) -> List[str]:
-    """Humanize an array of strings (strengths, improvements, reasons, etc.)"""
+def humanize_text_array(texts) -> List[str]:
+    """Humanize an array of strings (strengths, improvements, reasons, etc.)
+    Returns empty list if input is not a list."""
+    if not isinstance(texts, list):
+        return []
     return [humanize_text(t) for t in texts]
 
 

@@ -113,7 +113,8 @@ export function humanizeText(text: string): string {
 /**
  * Humanize an array of strings (strengths, improvements, reasons, etc.)
  */
-export function humanizeTextArray(texts: string[]): string[] {
+export function humanizeTextArray(texts: any): string[] {
+  if (!Array.isArray(texts)) return [];
   return texts.map(t => humanizeText(t));
 }
 
