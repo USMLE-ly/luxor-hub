@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Sparkles, Upload, Camera, Palette, ScanFaceIcon, User, Star, Lightbulb, AlertTriangle } from "lucide-react";
-import { ProgressBar } from "@/components/ui/progress-bar";
 import { Perspective, Highlight } from "@/components/ui/perspective-highlight";
 import { humanizeText } from "@/lib/humanizer";
+import { CircularProgress } from "@/components/ui/circular-progress";
 import InfoCardsTable, { type RowData, type CellData } from "@/components/ui/info-cards-table";
 import GlassTabs, { type GlassTab } from "@/components/ui/glass-tabs";
 
@@ -109,6 +109,21 @@ export default function StyleRecommendationsPage() {
     { id: "recommendations", label: "Recommendations", icon: <Lightbulb className="w-4 h-4" /> },
     { id: "review", label: "Review", icon: <Star className="w-4 h-4" /> },
   ];
+
+  // ── Smooth auto-increment progress: 0 → 95% during loading, jumps to 100% on success ──
+  useEffect(() => {
+    if (!analyzing) {
+      return;
+    }
+    const timer = setInterval(() => {
+      setProgressValue(prev => {
+        if (prev >= 95) return 95;
+        const increment = prev < 30 ? 3 : prev < 60 ? 2 : prev < 80 ? 1.5 : 1;
+        return Math.min(prev + increment, 95);
+      });
+    }, 200);
+    return () => clearInterval(timer);
+  }, [analyzing]);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -303,8 +318,8 @@ export default function StyleRecommendationsPage() {
             </Button>
           </div>
           {analyzing && (
-            <div className="w-full max-w-sm mx-auto mt-4">
-              <ProgressBar value={progressValue} stage={progressStage} variant="purple" animated />
+            <div className="w-full flex justify-center mt-6">
+              <CircularProgress progress={progressValue} label={progressStage} size={120} strokeWidth={8} />
             </div>
           )}
           {error && (
