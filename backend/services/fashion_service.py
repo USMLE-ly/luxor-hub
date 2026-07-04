@@ -6,7 +6,6 @@ import random
 import time
 import urllib.parse
 from typing import Any, Dict, List, Optional
-import re
 
 from backend.ai.mimo_client import call_mimo_vision
 from backend.ai.prompts import SACRED_PROMPT
@@ -38,112 +37,66 @@ def get_fashion_decision(image_b64: str) -> Dict[str, Any]:
     raise RuntimeError("MiMo Vision 2.5 failed to analyze the image")
 
 
-def generate_tweak_visualization_prompt(accessory: str, tweak_text: str = "") -> str:
-    """Build a Pollinations prompt to visualize the tweak recommendation.
+def generate_tweak_visualization_prompt(original_items_string: str, tweak_item_string: str) -> str:
+    """Generate a hyperrealistic fashion editorial prompt for AI image generation.
     
-    For clothing items (blazer, jacket, coat, etc.), generates a fashion
-    photo prompt with a person wearing the item. For small accessories
-    (earrings, necklace, etc.), uses product photography style.
+    Always produces a prompt showing a real person wearing the complete 
+    original + tweak outfit. No isolated products, no marble backgrounds.
+    Uses strict editorial fashion structure.
+    
+    Args:
+        original_items_string: The original outfit items, comma-separated 
+            (e.g., 'Black Lace Sleeve Blouse, Olive Green Trousers')
+        tweak_item_string: The full tweak recommendation text 
+            (e.g., 'Pair with cream wide-leg trousers and woven sandals')
+    
+    Returns:
+        A detailed editorial fashion prompt string for Pollinations or similar AI image API.
+        Includes embedded --no negative terms for Pollinations compatibility.
     """
-    clean_acc = accessory.lower().replace("a ", "").strip()
-    if not clean_acc:
-        return ""
-
-    # Determine if this is a clothing item (needs a person) or small accessory (product photo)
-    clothing_items = ["jacket", "blazer", "cardigan", "coat", "shirt", "top", "blouse",
-                      "pants", "jeans", "trousers", "skirt", "dress", "shoes", "boots",
-                      "sneakers", "heels", "loafers", "sandals", "scarf", "hat", "bag",
-                      "handbag", "clutch", "sunglasses"]
+    original = original_items_string.strip().rstrip(',') if original_items_string else ''
+    tweak = tweak_item_string.strip().rstrip('.') if tweak_item_string else ''
     
-    color_word = "polished sterling silver"
-    if "gold" in clean_acc:
-        color_word = "polished 18k gold"
-
-    if clean_acc in clothing_items:
-        # Use the full tweak text as the prompt description for exact item visualization
-        description = tweak_text if tweak_text else f"A person wearing a {clean_acc}"
-        return (
-            f"Fashion full-body photograph of a model exactly wearing: {description}. "
-            f"The model is shown wearing the EXACT recommended complete outfit described above. "
-            f"Full body shot from head to toe, professional studio lighting, "
-            f"clean white background, fashion editorial style, "
-            f"sharp focus, natural pose, photorealistic, 4K resolution."
-        )
-    elif "earring" in clean_acc:
-        return (
-            f"Extreme close-up macro photography of {color_word} drop earrings "
-            f"worn on a person's ear. Extremely detailed visible skin texture with "
-            f"natural pores and fine hair, warm golden-hour soft studio lighting, "
-            f"dramatic but elegant shadows. Shallow depth of field, soft warm-toned "
-            f"blur background (bokeh), editorial fashion jewelry photography, "
-            f"shot on 100mm macro lens, 8K photorealistic, cinematic lighting, "
-            f"hyper-detailed, commercial jewelry ad aesthetic. "
-            f"--no low resolution --no blurry --no plastic --no flat lighting "
-            f"--no white background --no marble background"
-        )
-    elif "necklace" in clean_acc or "pendant" in clean_acc:
-        return (
-            f"Extreme close-up macro photography of a {color_word} pendant necklace "
-            f"worn on a person's neck and collarbone. Extremely detailed visible skin "
-            f"texture with natural pores, warm golden-hour soft studio lighting, "
-            f"the pendant resting delicately on the skin. Shallow depth of field, "
-            f"soft warm-toned blur background (bokeh), editorial fashion jewelry "
-            f"photography, shot on 100mm macro lens, 8K photorealistic, cinematic "
-            f"lighting, hyper-detailed, commercial jewelry ad aesthetic. "
-            f"--no low resolution --no blurry --no plastic --no flat lighting "
-            f"--no white background --no marble background"
-        )
-    elif "ring" in clean_acc:
-        return (
-            f"Extreme close-up macro photography of an elegant {color_word} ring "
-            f"worn on a person's finger. Extremely detailed visible skin texture with "
-            f"natural pores and fine hair, warm golden-hour soft studio lighting, "
-            f"the ring catching the light beautifully. Shallow depth of field, "
-            f"soft warm-toned blur background (bokeh), editorial fashion jewelry "
-            f"photography, shot on 100mm macro lens, 8K photorealistic, cinematic "
-            f"lighting, hyper-detailed, commercial jewelry ad aesthetic. "
-            f"--no low resolution --no blurry --no plastic --no flat lighting "
-            f"--no white background --no marble background"
-        )
-    elif "bracelet" in clean_acc:
-        return (
-            f"Extreme close-up macro photography of a sleek {color_word} bracelet "
-            f"worn on a person's wrist. Extremely detailed visible skin texture with "
-            f"natural pores and fine hair, warm golden-hour soft studio lighting, "
-            f"the bracelet resting elegantly on the skin. Shallow depth of field, "
-            f"soft warm-toned blur background (bokeh), editorial fashion jewelry "
-            f"photography, shot on 100mm macro lens, 8K photorealistic, cinematic "
-            f"lighting, hyper-detailed, commercial jewelry ad aesthetic. "
-            f"--no low resolution --no blurry --no plastic --no flat lighting "
-            f"--no white background --no marble background"
-        )
-    elif "watch" in clean_acc:
-        item_desc = f"a refined {color_word} wristwatch"
-    elif "belt" in clean_acc:
-        item_desc = f"a premium {color_word} belt"
+    # Build the complete outfit description for the prompt
+    if original and tweak:
+        # Capitalize first letter of tweak for clean sentence flow
+        tweak_clean = tweak[0].upper() + tweak[1:] if tweak else ''
+        outfit_desc = f"{original}. {tweak_clean}"
+    elif original:
+        outfit_desc = original
+    elif tweak:
+        outfit_desc = tweak[0].upper() + tweak[1:] if tweak else ''
     else:
-        # Fallback: use the tweak description if available
-        if tweak_text:
-            return (
-                f"Fashion photograph of {tweak_text}, "
-                f"model wearing the suggested item, studio lighting, "
-                f"clean white background, fashion editorial style, "
-                f"photorealistic, 4K resolution."
-            )
-        item_desc = f"a luxurious {color_word} accessory"
-
+        outfit_desc = 'A complete outfit'
+    
     return (
-        f"Ultra-high-end commercial product photograph of {item_desc}, "
-        f"resting diagonally on a deep black marble surface with sharp white veining. "
-        f"The {color_word} surface reflects the crisp studio lighting perfectly, "
-        f"showing highly realistic metallic reflections and high gloss. "
-        f"Shot with a 50mm lens at f/2.8, ultra-sharp focus on the object, "
-        f"creamy bokeh background, cinematic depth of field. "
-        f"Photorealistic, 8K resolution, glossy magazine ad aesthetic, "
-        f"isolated single object, matte soft shadows, subtle lens flare. "
-        f"--no text --no watermarks --no logos --no distorted features"
+        f"SUBJECT: A fashion model standing confidently in a full-body shot, wearing {outfit_desc}. "
+        f"The model has natural skin texture, visible pores, and a refined, poised expression. "
+        f"The posture is relaxed yet sophisticated, conveying effortless elegance.\n\n"
+        f"MEDIUM: 8k ultra-photorealistic fashion photograph, DSLR full-frame camera, "
+        f"85mm focal length, crisp optical clarity, high-fidelity fabric rendering, "
+        f"premium editorial finish.\n\n"
+        f"ENVIRONMENT: Minimalist high-end fashion studio setting. A soft, seamless white "
+        f"or neutral grey gradient backdrop. Clean, uncluttered, and distraction-free space "
+        f"designed to emphasize the garment details and silhouette.\n\n"
+        f"LIGHTING: Soft diffused studio lighting. Natural, balanced illumination providing "
+        f"gentle highlights and micro-shadows. No harsh contrast, no artificial glow. "
+        f"True-to-life light scattering across skin and fabric.\n\n"
+        f"COLOR: True-to-life color calibration. Harmonious palette featuring natural skin tones "
+        f"and precise textile colors. Accurate rendering of every garment without oversaturation.\n\n"
+        f"MOOD: Modern, refined, minimalist luxury. Confident, elegant, and effortlessly "
+        f"sophisticated. Premium high-fashion editorial atmosphere.\n\n"
+        f"COMPOSITION: Full-body framing, straight-on angle, centered composition. "
+        f"Shallow depth of field keeping the model and outfit in sharp focus while the "
+        f"background falls softly out of focus. Magazine-ready editorial quality.\n\n"
+        f"--no marble --no stone background --no table --no flat lay --no product photography "
+        f"--no isolated product --no product isolation --no stainless steel --no metal object "
+        f"--no jewelry box --no tarnished metal --no dark shadows --no empty room "
+        f"--no human --no model --no missing limbs --no distorted hands "
+        f"--no mannequin --no plastic --no top-down view --no abstract "
+        f"--no low resolution --no blurry --no text --no watermark --no logo "
+        f"--no cartoon --no illustration --no painting --no 3d render"
     )
-
 
 def _humanize_strengths(items: List[str]) -> List[str]:
     """Generate specific strength statements about detected items."""
@@ -242,15 +195,8 @@ def map_analysis(result: Dict[str, Any]) -> Dict[str, Any]:
 
     # Generate tweak image URL
     tweak_text = _humanize_tweak(result.get("tweak_plan", ""), detected_items or items_detected)
-    _tweak_accessory = tweak_text
-    import re
-    for _kw in ["necklace", "earring", "bracelet", "watch", "ring", "belt",
-                "scarf", "jacket", "blazer", "cardigan", "coat", "handbag",
-                "clutch", "sunglasses", "hat", "bag", "shoes", "boots"]:
-        if re.search(r'\b' + _kw + r's?\b', tweak_text.lower()):
-            _tweak_accessory = _kw
-            break
-    _tweak_prompt = generate_tweak_visualization_prompt(_tweak_accessory, tweak_text)
+    _outfit_items = ", ".join(items_detected) if items_detected else ""
+    _tweak_prompt = generate_tweak_visualization_prompt(_outfit_items, tweak_text)
     _safe_tweak = urllib.parse.quote(_tweak_prompt)
     _tweak_seed = int(time.time() * 1000) % 10000
     tweak_image_url = f"https://image.pollinations.ai/prompt/{_safe_tweak}?nologin=true&seed={_tweak_seed}"
