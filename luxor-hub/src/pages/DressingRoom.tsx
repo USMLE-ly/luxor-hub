@@ -106,6 +106,7 @@ export default function DressingRoomPage() {
 
   const handleDismiss = () => {
     setGeneratedImages([] as OutfitImages[]);
+    setActiveOutfit(null);
   };
 
   return (

@@ -272,19 +272,24 @@ const Closet = () => {
   const saveOutfit = async () => {
     if (!user || !outfitName.trim() || mannequinClothing.length === 0) return;
     setSavingOutfit(true);
-    const { error } = await supabase.from("outfits").insert({
-      user_id: user.id,
-      name: outfitName.trim(),
-      description: `${mannequinClothing.length} items`,
-      mannequin_items: mannequinClothing as any,
-      ai_generated: false,
-    });
-    if (error) toast.error("Failed to save outfit");
-    else {
-      toast.success(`Outfit "${outfitName}" saved!`);
-      setOutfitName("");
-      setShowSaveDialog(false);
-      fetchSavedOutfits();
+    try {
+      const { error } = await supabase.from("outfits").insert({
+        user_id: user.id,
+        name: outfitName.trim(),
+        description: `${mannequinClothing.length} items`,
+        mannequin_items: mannequinClothing as any,
+        ai_generated: false,
+      });
+      if (error) toast.error("Failed to save outfit");
+      else {
+        toast.success(`Outfit "${outfitName}" saved!`);
+        setOutfitName("");
+        setShowSaveDialog(false);
+        fetchSavedOutfits();
+      }
+    } catch (e) {
+      console.warn('[CLOSET] saveOutfit error:', e);
+      toast.error('Failed to save outfit');
     }
     setSavingOutfit(false);
   };
@@ -296,19 +301,29 @@ const Closet = () => {
   };
 
   const deleteSavedOutfit = async (id: string) => {
-    const { error } = await supabase.from("outfits").delete().eq("id", id);
-    if (error) toast.error("Failed to delete outfit");
-    else {
-      setSavedOutfits(prev => prev.filter(o => o.id !== id));
-      toast.success("Outfit deleted");
+    try {
+      const { error } = await supabase.from("outfits").delete().eq("id", id);
+      if (error) toast.error("Failed to delete outfit");
+      else {
+        setSavedOutfits(prev => prev.filter(o => o.id !== id));
+        toast.success("Outfit deleted");
+      }
+    } catch (e) {
+      console.warn('[CLOSET] deleteSavedOutfit error:', e);
+      toast.error('Failed to delete outfit');
     }
   };
 
   const toggleFavorite = async (outfit: any) => {
-    const newVal = !outfit.is_favorite;
-    const { error } = await supabase.from("outfits").update({ is_favorite: newVal }).eq("id", outfit.id);
-    if (error) toast.error("Failed to update");
-    else setSavedOutfits(prev => prev.map(o => o.id === outfit.id ? { ...o, is_favorite: newVal } : o));
+    try {
+      const newVal = !outfit.is_favorite;
+      const { error } = await supabase.from("outfits").update({ is_favorite: newVal }).eq("id", outfit.id);
+      if (error) toast.error("Failed to update");
+      else setSavedOutfits(prev => prev.map(o => o.id === outfit.id ? { ...o, is_favorite: newVal } : o));
+    } catch (e) {
+      console.warn('[CLOSET] toggleFavorite error:', e);
+      toast.error('Failed to update');
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -432,12 +447,21 @@ const Closet = () => {
   };
   const handleWornToday = async (itemId: string) => {
     if (!user) return;
-    const { error } = await supabase.from("wear_logs").insert({ user_id: user.id, clothing_item_id: itemId });
-    if (error) toast.error("Failed to log wear");
-    else {
-      // Award style points
-      await (supabase.from("style_points" as any).insert({ user_id: user.id, points: 5, reason: "Logged wear" }) as any);
-      toast.success("Logged. +5 style points.");
+    try {
+      const { error } = await supabase.from("wear_logs").insert({ user_id: user.id, clothing_item_id: itemId });
+      if (error) toast.error("Failed to log wear");
+      else {
+        // Award style points
+        try {
+          await (supabase.from("style_points" as any).insert({ user_id: user.id, points: 5, reason: "Logged wear" }) as any);
+        } catch (spErr) {
+          console.warn('[CLOSET] Style points error:', spErr);
+        }
+        toast.success("Logged. +5 style points.");
+      }
+    } catch (e) {
+      console.warn('[CLOSET] handleWornToday error:', e);
+      toast.error('Failed to log wear');
     }
   };
 
@@ -535,14 +559,15 @@ const Closet = () => {
 
   const saveToCalendar = async (date: string) => {
     if (!user) return;
-    const { error } = await supabase.from("calendar_events").insert({
-      user_id: user.id,
-      title: `Outfit: ${mannequinClothing.map((c) => c.name).join(", ")}`,
-      event_date: date,
-      occasion: "Planned Outfit",
-      notes: `Mannequin outfit with ${mannequinClothing.length} items`,
-      outfit_items: mannequinClothing as any,
-    });
+    try {
+      const { error } = await supabase.from("calendar_events").insert({
+        user_id: user.id,
+        title: `Outfit: ${mannequinClothing.map((c) => c.name).join(", ")}`,
+        event_date: date,
+        occasion: "Planned Outfit",
+        notes: `Mannequin outfit with ${mannequinClothing.length} items`,
+        outfit_items: mannequinClothing as any,
+      });
     if (error) toast.error("Failed to save to calendar");
     else { toast.success("Outfit saved to calendar!"); setShowCalendar(false); }
   };
@@ -864,9 +889,28 @@ const Closet = () => {
                                   className="w-full h-full object-contain transition-opacity duration-500"
                                   style={{ mixBlendMode: "multiply" }}
                                   onError={(e) => {
-                                    e.currentTarget.style.display = "none";
-                                    const parent = e.currentTarget.parentElement;
-                                    if (parent) parent.style.backgroundColor = "#1A1A1A";
+                                    const target = e.currentTarget;
+                                    // Prevent infinite loop
+                                    if (target.dataset.fallbackAttempted) {
+                                      target.style.display = "none";
+                                      const parent = target.parentElement;
+                                      if (parent) parent.style.backgroundColor = "#1A1A1A";
+                                      return;
+                                    }
+                                    // Mark fallback as attempted
+                                    target.dataset.fallbackAttempted = "true";
+                                    // Try the local backend /images/ route as fallback
+                                    const currentSrc = target.src;
+                                    const filename = currentSrc.split('/').pop();
+                                    if (filename && !currentSrc.includes('/images/') && (apiBase || '')) {
+                                      const fallbackUrl = apiBase + '/images/' + filename;
+                                      console.warn('[CLOSET] Image failed, trying fallback:', fallbackUrl);
+                                      target.src = fallbackUrl;
+                                    } else {
+                                      target.style.display = "none";
+                                      const parent = target.parentElement;
+                                      if (parent) parent.style.backgroundColor = "#1A1A1A";
+                                    }
                                   }}
                                 />
                               ) : (

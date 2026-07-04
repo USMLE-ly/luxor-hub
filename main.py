@@ -1537,6 +1537,8 @@ def closet_add():
     try:
         if request.method == "OPTIONS":
             return "", 204
+        import socket as _socket_timeout
+        _socket_timeout.setdefaulttimeout(25)
         data = request.get_json(silent=True) or {}
         item_type = data.get("type", data.get("category", "other"))
         label = data.get("label", data.get("name", ""))
@@ -2583,7 +2585,37 @@ def serve_uploaded_image(filename):
     except Exception as fb_err:
         print(f"[IMG-DEBUG] JSON fallback error: {fb_err}", flush=True)
 
-    # 3. Ultimate fallback — transparent pixel prevents CORB
+    # 3. Fallback: search Qdrant Cloud for the item
+    try:
+        client = _qdrant_closet
+        if client is not None:
+            result = client.scroll(
+                collection_name=_CLOSET_COLLECTION,
+                limit=5000,
+                with_payload=True
+            )
+            points = result[0] if isinstance(result, tuple) else result
+            for pt in points:
+                if not pt.payload:
+                    continue
+                payload = pt.payload
+                stored_url = (payload.get("image_url") or payload.get("photo_url") or "").strip()
+                stored_filename = stored_url.rstrip("/").split("/")[-1]
+                b64_data = payload.get("image_data_b64") or ""
+                if stored_filename == safe and b64_data and len(b64_data) > 100:
+                    try:
+                        img_bytes = base64.b64decode(b64_data)
+                        print(f"[IMG-DEBUG] Serving from Qdrant base64: {safe} ({len(img_bytes)} bytes)")
+                        resp = make_response(img_bytes)
+                        resp.headers["Content-Type"] = "image/jpeg"
+                        resp.headers["Access-Control-Allow-Origin"] = "*"
+                        return resp
+                    except Exception as dec_err:
+                        print(f"[IMG-ERR] Qdrant Base64 decode failed for {safe}: {dec_err}", flush=True)
+    except Exception as qd_err:
+        print(f"[IMG-DEBUG] Qdrant fallback error: {qd_err}", flush=True)
+
+    # 4. Ultimate fallback — transparent pixel prevents CORB
     print(f"[IMG-DEBUG] File not found: {safe} — returning transparent pixel", flush=True)
     resp = make_response(base64.b64decode(_TRANSPARENT_PIXEL_B64))
     resp.headers["Content-Type"] = "image/gif"
@@ -2629,7 +2661,37 @@ def serve_media_file(filename):
     except Exception as fb_err:
         print(f"[IMG-DEBUG] /media/ JSON fallback error: {fb_err}", flush=True)
 
-    # 3. Ultimate fallback — transparent pixel prevents CORB
+    # 3. Fallback: search Qdrant Cloud for the item
+    try:
+        client = _qdrant_closet
+        if client is not None:
+            result = client.scroll(
+                collection_name=_CLOSET_COLLECTION,
+                limit=5000,
+                with_payload=True
+            )
+            points = result[0] if isinstance(result, tuple) else result
+            for pt in points:
+                if not pt.payload:
+                    continue
+                payload = pt.payload
+                stored_url = (payload.get("image_url") or payload.get("photo_url") or "").strip()
+                stored_filename = stored_url.rstrip("/").split("/")[-1]
+                b64_data = payload.get("image_data_b64") or ""
+                if stored_filename == safe and b64_data and len(b64_data) > 100:
+                    try:
+                        img_bytes = base64.b64decode(b64_data)
+                        print(f"[IMG-DEBUG] /media/ Serving from Qdrant base64: {safe} ({len(img_bytes)} bytes)")
+                        resp = make_response(img_bytes)
+                        resp.headers["Content-Type"] = "image/jpeg"
+                        resp.headers["Access-Control-Allow-Origin"] = "*"
+                        return resp
+                    except Exception as dec_err:
+                        print(f"[IMG-ERR] /media/ Qdrant Base64 decode failed for {safe}: {dec_err}", flush=True)
+    except Exception as qd_err:
+        print(f"[IMG-DEBUG] /media/ Qdrant fallback error: {qd_err}", flush=True)
+
+    # 4. Ultimate fallback — transparent pixel prevents CORB
     print(f"[IMG-DEBUG] /media/ File not found: {safe} — returning transparent pixel", flush=True)
     resp = make_response(base64.b64decode(_TRANSPARENT_PIXEL_B64))
     resp.headers["Content-Type"] = "image/gif"
