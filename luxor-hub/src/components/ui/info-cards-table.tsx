@@ -1,6 +1,6 @@
 "use client"
 
-import { Palette, ScanFaceIcon, Shirt, Lightbulb, Check, X } from "lucide-react"
+import { Palette, ScanFaceIcon, Shirt, Lightbulb, Check, X, Circle } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -22,7 +22,7 @@ interface InfoCardsTableProps {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Color Utility — maps color names to vivid hex                      */
+/*  Color Utility — maps fashion color names to vivid hex              */
 /* ------------------------------------------------------------------ */
 const getColorHex = (str: string): string => {
   const colorMap: Record<string, string> = {
@@ -56,15 +56,57 @@ const categoryIcon = (cat: string): React.ReactNode => {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Bullet‑point splitter for long text                                 */
+/* ------------------------------------------------------------------ */
+const MAX_BULLETS = 4
+
+/** Split a descriptive text into 3–4 concise bullet phrases. */
+const splitIntoBullets = (text: string): string[] => {
+  // Try splitting by sentence boundaries
+  let parts = text
+    .split(/(?<=[.!?])\s+/)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0)
+
+  // If only 1 long sentence, try splitting by commas / semicolons
+  if (parts.length <= 1 && text.length > 60) {
+    parts = text
+      .split(/[,;]/)
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0)
+  }
+
+  // If still just one chunk, try key phrase boundaries
+  if (parts.length <= 1 && text.length > 40) {
+    parts = text
+      .split(/\s+(?:that|which|where|with|for|to|and)\s+/i)
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0)
+  }
+
+  // Cap at MAX_BULLETS
+  if (parts.length > MAX_BULLETS) {
+    parts = parts.slice(0, MAX_BULLETS)
+    parts[MAX_BULLETS - 1] = parts[MAX_BULLETS - 1] + "…"
+  }
+
+  return parts
+}
+
+/** Check whether a header is a long‑text type that benefits from bullets */
+const shouldShowBullets = (header: string): boolean => {
+  const lower = header.toLowerCase()
+  return lower === "why" || lower === "explanation" || lower === "description" || lower === "note"
+}
+
+/* ------------------------------------------------------------------ */
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
 export default function InfoCardsTable({ rows = [] }: InfoCardsTableProps) {
   if (!rows.length) return null
 
-  // Collect all unique column headers across all rows
   const allHeaders = Array.from(new Set(rows.flatMap((r) => r.columns.map((c) => c.header))))
 
-  /** Check whether a cell has meaningful data */
   const hasData = (cell: CellData | undefined): boolean => {
     if (!cell) return false
     const { value } = cell
@@ -78,7 +120,6 @@ export default function InfoCardsTable({ rows = [] }: InfoCardsTableProps) {
     <div className="w-full overflow-x-auto rounded-xl border border-white/10 bg-zinc-900/60 backdrop-blur-xl">
       <div className="min-w-[900px]">
         <Table className="w-full">
-          {/* ── Header Row ── */}
           <TableHeader>
             <TableRow className="border-b border-white/10 hover:bg-transparent">
               <TableHead className="w-44 text-white/60 font-semibold text-xs uppercase tracking-wider py-4 pl-5">
@@ -95,7 +136,6 @@ export default function InfoCardsTable({ rows = [] }: InfoCardsTableProps) {
             </TableRow>
           </TableHeader>
 
-          {/* ── Body Rows ── */}
           <TableBody>
             {rows.map((row, rowIdx) => {
               const isEven = rowIdx % 2 === 0
@@ -107,7 +147,7 @@ export default function InfoCardsTable({ rows = [] }: InfoCardsTableProps) {
                     isEven && "bg-white/[0.02]"
                   )}
                 >
-                  {/* Category cell */}
+                  {/* Category */}
                   <TableCell className="font-semibold text-white/80 py-4 pl-5 border-r border-white/5 align-top">
                     <div className="flex items-center gap-2.5">
                       <span className="text-primary/80 shrink-0">{categoryIcon(row.category)}</span>
@@ -115,22 +155,22 @@ export default function InfoCardsTable({ rows = [] }: InfoCardsTableProps) {
                     </div>
                   </TableCell>
 
-                  {/* Data cells */}
+                  {/* Cells */}
                   {allHeaders.map((header) => {
                     const cell = row.columns.find((c) => c.header === header)
                     const populated = hasData(cell)
                     const raw = cell?.value
                     const items = Array.isArray(raw) ? raw : (typeof raw === "string" && raw ? [raw] : [])
+                    const useBullets = shouldShowBullets(header) && populated && items.length === 1 && items[0].length > 50
+                    const bulletPoints = useBullets ? splitIntoBullets(items[0]) : []
 
                     return (
                       <TableCell
                         key={header}
-                        className={cn(
-                          "py-4 px-4 border-r border-white/5 last:border-r-0 align-top"
-                        )}
+                        className={cn("py-4 px-4 border-r border-white/5 last:border-r-0 align-top")}
                       >
                         <div className="flex items-start gap-2 min-h-[28px]">
-                          {/* Green Check / Red X */}
+                          {/* Indicator icon */}
                           <span className="shrink-0 mt-0.5">
                             {populated ? (
                               <Check className="w-4 h-4 text-emerald-500" />
@@ -139,8 +179,8 @@ export default function InfoCardsTable({ rows = [] }: InfoCardsTableProps) {
                             )}
                           </span>
 
-                          {/* Values — plain text, colorized, horizontal flow */}
-                          {populated && items.length > 0 && (
+                          {/* Values */}
+                          {populated && items.length > 0 && !useBullets && (
                             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm leading-snug">
                               {items.map((item, vi) => {
                                 const hex = getColorHex(item)
@@ -154,6 +194,18 @@ export default function InfoCardsTable({ rows = [] }: InfoCardsTableProps) {
                                   </span>
                                 )
                               })}
+                            </div>
+                          )}
+
+                          {/* Bullet points for long text */}
+                          {populated && useBullets && (
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm leading-snug">
+                              {bulletPoints.map((bp, bi) => (
+                                <span key={bi} className="inline-flex items-center gap-1.5 text-white/80">
+                                  <Circle className="w-1.5 h-1.5 fill-white/40 text-white/40 shrink-0" />
+                                  {bp}
+                                </span>
+                              ))}
                             </div>
                           )}
                         </div>

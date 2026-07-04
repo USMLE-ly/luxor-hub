@@ -8,6 +8,7 @@ import { ProgressBar } from "@/components/ui/progress-bar";
 import { Perspective, Highlight } from "@/components/ui/perspective-highlight";
 import { humanizeText } from "@/lib/humanizer";
 import InfoCardsTable, { type RowData, type CellData } from "@/components/ui/info-cards-table";
+import GlassTabs, { type GlassTab } from "@/components/ui/glass-tabs";
 
 interface StyleAnalysis {
   face_shape: string;
@@ -103,6 +104,11 @@ export default function StyleRecommendationsPage() {
   const [recommendations, setRecommendations] = useState<Recommendations | null>(null);
   const [outfitReview, setOutfitReview] = useState<OutfitReview | null>(null);
   const [activeTab, setActiveTab] = useState<"analyze" | "recommendations" | "review">("analyze");
+  const glassTabs: GlassTab[] = [
+    { id: "analyze", label: "Analysis", icon: <ScanFaceIcon className="w-4 h-4" /> },
+    { id: "recommendations", label: "Recommendations", icon: <Lightbulb className="w-4 h-4" /> },
+    { id: "review", label: "Review", icon: <Star className="w-4 h-4" /> },
+  ];
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
