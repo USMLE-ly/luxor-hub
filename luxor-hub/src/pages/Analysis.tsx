@@ -300,6 +300,13 @@ export default function Analysis() {
         ai_source_label: fnData.ai_source_label || "",
         seasonalFit: fnData.seasonalFit || '',
       };
+      // Validate required array fields before setting data — prevents ".for is not iterable" crash
+      const requiredArrayKeys = ['items_detected', 'strengths', 'improvements'] as const;
+      for (const key of requiredArrayKeys) {
+        if ((o as any)[key] !== undefined && !Array.isArray((o as any)[key])) {
+          throw new Error(`Invalid data format: expected "${key}" to be an array.`);
+        }
+      }
       setData(o);
       setProgressValue(90);
       setProgressStage("Finalizing...");
@@ -609,10 +616,10 @@ export default function Analysis() {
                   <FashionHero
                     styleName={data.style_name}
                     styleScore={data.style_score || null}
-                    strengths={data.strengths}
+                    strengths={data.strengths || []}
                     improvements={data.improvements || []}
-                    itemsDetected={data.items_detected}
-                    actualColors={data.actual_colors}
+                    itemsDetected={data.items_detected || []}
+                    actualColors={data.actual_colors || []}
                     audit={data.audit}
                     tweakPlan={data.tweak_plan}
                     imageUrl={imagePreview}

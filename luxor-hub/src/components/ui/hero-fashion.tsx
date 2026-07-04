@@ -334,7 +334,7 @@ export function FashionHero({
                           </div>
                         )}
                       </>
-                    ) : itemsDetected.length > 0 ? (
+                    ) : Array.isArray(itemsDetected) && itemsDetected.length > 0 ? (
                       Array.isArray(itemsDetected) && itemsDetected.filter(item => item && item !== "None").map((item, i) => (
                         <div key={i} className="flex items-center gap-3 text-sm md:text-base font-medium text-white bg-transparent">
                           <span className="w-2 h-2 rounded-full bg-white/80 shadow-[0_0_8px_rgba(255,255,255,0.5)] flex-shrink-0" />
@@ -389,7 +389,7 @@ export function FashionHero({
               </div>
 
               {/* SECTION 4.5: HONEST IMPROVEMENTS (Red/Amber) */}
-              {improvements.length > 0 && (
+              {Array.isArray(improvements) && improvements.length > 0 && (
                 <div className="relative w-full overflow-hidden rounded-xl border border-amber-500/20 bg-gradient-to-r from-amber-950/30 via-red-950/20 to-amber-950/30">
                   <div className="relative z-10 p-4 backdrop-blur-sm">
                     <h3 className="text-xs uppercase tracking-[0.15em] text-amber-400/80 mb-3 font-semibold flex items-center gap-1.5">
