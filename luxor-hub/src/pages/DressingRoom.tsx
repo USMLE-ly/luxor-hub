@@ -3,9 +3,10 @@ import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import FlipGallery, { type OutfitImages } from "@/components/ui/flip-gallery";
 import IPhoneMockup from "@/components/ui/iphone-mockup";
+import { Perspective, Highlight } from "@/components/ui/perspective-highlight";
+import { CircularProgress } from "@/components/ui/circular-progress";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { ProgressBar } from "@/components/ui/progress-bar";
 
 /* ------------------------------------------------------------------ */
 /*  Constants                                                          */
@@ -129,13 +130,19 @@ export default function DressingRoomPage() {
             showHomeIndicator={true}
             safeArea={true}
           >
-            <FlipGallery
-              outfits={generatedImages}
-              onGenerate={handleGenerateClick}
-              onDismiss={handleDismiss}
-              isLoading={isGenerating}
-              onOutfitChange={setActiveOutfit}
-            />
+            {isGenerating ? (
+              <div className="flex items-center justify-center w-full h-full" style={{ minHeight: '300px' }}>
+                <CircularProgress progress={progressValue} label={progressStage} />
+              </div>
+            ) : (
+              <FlipGallery
+                outfits={generatedImages}
+                onGenerate={handleGenerateClick}
+                onDismiss={handleDismiss}
+                isLoading={isGenerating}
+                onOutfitChange={setActiveOutfit}
+              />
+            )}
           </IPhoneMockup>
         </div>
 
@@ -153,34 +160,26 @@ export default function DressingRoomPage() {
             )}
 
             {activeOutfit.stylist_reasoning && activeOutfit.stylist_reasoning.length > 0 && (
-              <div className="p-4 rounded-lg bg-[#1F1F1F] border border-white/10">
-                <h4 className="text-sm font-semibold text-purple-400 mb-2">Stylist Notes</h4>
-                <ul className="space-y-1.5">
-                  {activeOutfit.stylist_reasoning.map((note: string, i: number) => (
-                    <li key={i} className="text-sm text-gray-300 flex items-start gap-2">
-                      <span className="text-purple-400 mt-0.5">•</span>
-                      <span>{note}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <Perspective>
+                <div className="p-6 rounded-lg bg-[#1F1F1F] border border-white/10">
+                  <h4 className="text-sm font-semibold text-purple-400 mb-4 text-center">Stylist Notes</h4>
+                  <div className="flex flex-col gap-3">
+                    {activeOutfit.stylist_reasoning.map((note: string, i: number) => {
+                      const colors: Array<'red' | 'purple' | 'green'> = ['purple', 'green', 'red', 'purple', 'green'];
+                      return (
+                        <p key={i} className="text-sm text-gray-300 leading-relaxed">
+                          <Highlight color={colors[i % colors.length]}>{note}</Highlight>
+                        </p>
+                      );
+                    })}
+                  </div>
+                </div>
+              </Perspective>
             )}
           </motion.div>
         )}
 
-        {/* ---- Progress indicator ---- */}
-        <AnimatePresence>
-          {isGenerating && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="max-w-sm mx-auto"
-            >
-              <ProgressBar value={progressValue} stage={progressStage} variant="purple" animated />
-            </motion.div>
-          )}
-        </AnimatePresence>
+
 
         {/* ---- Occasion Modal ---- */}
         <AnimatePresence>

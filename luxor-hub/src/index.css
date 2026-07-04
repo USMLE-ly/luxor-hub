@@ -600,3 +600,27 @@
     right: 1.25rem;
   }
 }
+
+/* ── Perspective + Highlight for Stylist Notes ── */
+:root {
+  --perspective-red-bg: #e89c9c;
+  --perspective-red-ring: 220, 130, 130;
+  --perspective-purple-bg: #b8a0db;
+  --perspective-purple-ring: 160, 120, 220;
+  --perspective-green-bg: #9fd68d;
+  --perspective-green-ring: 120, 200, 100;
+}
+
+.dark {
+  --perspective-red-bg: #d48989;
+  --perspective-red-ring: 200, 120, 120;
+  --perspective-purple-bg: #a78fcd;
+  --perspective-purple-ring: 145, 110, 200;
+  --perspective-green-bg: #8dc77b;
+  --perspective-green-ring: 115, 185, 95;
+}
+
+@keyframes perspective-blur-in {
+  from { opacity: 0; filter: blur(10px); transform: translateY(6px); }
+  to { opacity: 1; filter: blur(0); transform: translateY(0); }
+}

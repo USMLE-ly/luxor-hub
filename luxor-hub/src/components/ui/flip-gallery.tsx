@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { MarketingBadges } from '@/components/ui/marketing-badges';
 
 export interface OutfitImages {
   top: string;
@@ -111,7 +112,7 @@ const DISMISS_BTN: React.CSSProperties = {
 const IMG_STYLE: React.CSSProperties = {
   width: '100%',
   height: '100%',
-  objectFit: 'cover',
+  objectFit: 'contain',
   objectPosition: 'center',
   display: 'block',
 };
@@ -192,23 +193,8 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading,
         <div style={{ ...SECTION_BASE, top: '33.333%', height: '33.333%', backgroundColor: '#1A1A1A', borderBottom: '4px solid #000', zIndex: 0 }} />
         <div style={{ ...SECTION_BASE, bottom: 0, height: '33.333%', backgroundColor: '#1A1A1A', zIndex: 0 }} />
 
-        <div style={CONTROL_BOTTOM_LEFT}>
-          <button
-            onClick={onGenerate}
-            disabled={isLoading}
-            style={{
-              ...PURPLE_BTN,
-              opacity: isLoading ? 0.5 : 1,
-              cursor: isLoading ? 'not-allowed' : 'pointer',
-            }}
-          >
-            {isLoading ? 'Consulting MiMo...' : 'Generate Outfit'}
-          </button>
-        </div>
-
-        <div style={CONTROL_BOTTOM_RIGHT}>
-          <button disabled style={DISABLED_ARROW}><ChevronLeft size={20} /></button>
-          <button disabled style={DISABLED_ARROW}><ChevronRight size={20} /></button>
+        <div style={{ position: 'absolute', bottom: '8px', left: 0, right: 0, zIndex: 20 }}>
+          <MarketingBadges onGenerate={onGenerate} isLoading={isLoading} />
         </div>
       </div>
     );
@@ -291,15 +277,15 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading,
         />
       ))}
 
-      <div style={CONTROL_BOTTOM_LEFT}>
-        <button onClick={onDismiss} style={DISMISS_BTN}>Dismiss</button>
+      <div style={{ position: 'absolute', bottom: '8px', left: 0, right: 0, zIndex: 20 }}>
+        <MarketingBadges
+          onDismiss={onDismiss}
+          onPrev={handlePrev}
+          onNext={handleNext}
+          hasMultiple={outfits.length > 1}
+          hasOutfits={true}
+        />
       </div>
-      {outfits.length > 1 && (
-        <div style={CONTROL_BOTTOM_RIGHT}>
-          <button onClick={handlePrev} style={ACTIVE_ARROW} disabled={flipState !== 'idle'}><ChevronLeft size={20} /></button>
-          <button onClick={handleNext} style={ACTIVE_ARROW} disabled={flipState !== 'idle'}><ChevronRight size={20} /></button>
-        </div>
-      )}
     </div>
   );
 }

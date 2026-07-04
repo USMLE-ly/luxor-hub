@@ -2484,7 +2484,7 @@ def generate_outfits():
                     "mid": "",
                     "bottom": "",
                     "accessory_note": combo.get("accessory_note", ""),
-                    "stylist_reasoning": combo.get("stylist_reasoning", []),
+                    "stylist_reasoning": [_humanize_stylist_note(n) for n in (combo.get("stylist_reasoning") or [])],
                 }
                 _log.info("[DRESSING] FULL_OUTFIT: %s", outfit_data['top'][:50])
             elif combo.get("type") == "dress":
@@ -2496,7 +2496,7 @@ def generate_outfits():
                     "mid": "",
                     "bottom": _img_url(sh),
                     "accessory_note": combo.get("accessory_note", ""),
-                    "stylist_reasoning": combo.get("stylist_reasoning", []),
+                    "stylist_reasoning": [_humanize_stylist_note(n) for n in (combo.get("stylist_reasoning") or [])],
                 }
                 _log.info("[DRESSING] DRESS: top=%s bottom=%s", outfit_data['top'][:50], outfit_data['bottom'][:50])
             else:  # regular
@@ -2506,7 +2506,7 @@ def generate_outfits():
                     "mid": _img_url(combo.get("bottom", {})),
                     "bottom": _img_url(combo.get("shoes", {})),
                     "accessory_note": combo.get("accessory_note", ""),
-                    "stylist_reasoning": combo.get("stylist_reasoning", []),
+                    "stylist_reasoning": [_humanize_stylist_note(n) for n in (combo.get("stylist_reasoning") or [])],
                 }
                 _log.info("[DRESSING] REGULAR: top=%s mid=%s bottom=%s",
                           outfit_data['top'][:40], outfit_data['mid'][:40], outfit_data['bottom'][:40])
@@ -2655,6 +2655,36 @@ def server_error(e):
     resp.headers["Content-Type"] = "application/json"
     return resp, 500
 
+
+
+def _humanize_stylist_note(note: str) -> str:
+    """Post-process MiMo Vision notes to sound like a real stylist, not a robot."""
+    replacements = [
+        (r'provides', 'gives'),
+        (r'introduces', 'adds'),
+        (r'utilizes', 'uses'),
+        (r'perfect for', 'ideal for'),
+        (r'ensures', 'creates'),
+        (r'resulting in', 'giving'),
+        (r'offers', 'brings'),
+        (r'contemporary', 'modern'),
+        (r'ensemble', 'outfit'),
+        (r'silhouette', 'shape'),
+        (r'fabrication', 'fabric'),
+        (r'aesthetic', 'look'),
+        (r'enhances', 'elevates'),
+        (r'exudes', 'gives off'),
+        (r'garment', 'piece'),
+    ]
+    import re as _re
+    result = note
+    for pattern, replacement in replacements:
+        result = _re.sub(pattern, replacement, result, flags=_re.IGNORECASE)
+    # Capitalize first letter, ensure it ends with a period
+    result = result.strip()
+    if result and not result.endswith('.'):
+        result += '.'
+    return result
 
 
 if __name__ == "__main__":
