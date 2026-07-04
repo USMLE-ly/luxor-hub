@@ -22,8 +22,8 @@ Return ONLY valid JSON with these exact keys (no other text, no code fences):
     {"issue": "Another specific critique", "suggestion": "Fix", "priority": "medium"}
   ],
   "audit": "max 15 word brutally honest summary",
-  "tweak_plan": "1 specific styling change they should make",
-  "generation_prompt": "A fashion-forward person wearing [exact colors and garments seen]"
+  "tweak_plan": "1 specific styling change they should make. Be very specific: mention the exact clothing item type, color, and how to wear it (e.g., \'Pair with cream wide-leg trousers and woven sandals for effortless summer style\'). Include colors whenever possible.",
+  "generation_prompt": "A fashion-forward person wearing [exact colors and garments seen]. Full body fashion editorial photograph with clean studio background. Professional soft lighting, true-to-life colors, 85mm fashion lens, magazine editorial quality. Natural skin texture, visible pores, no retouching."
 }
 
 RULES FOR HONESTY:
@@ -52,7 +52,7 @@ Return ONLY JSON:
 {
   "next_question": "" if complete else "your question",
   "options": ["option1", "option2"] or [],
-  "generated_prompt": "15-word Pollinations prompt (only when complete)",
+  "generated_prompt": "Detailed Pollinations image prompt (only when complete). Must include: clothing colors and types, full-body framing, two legs visible, natural human proportions, soft studio lighting, 85mm fashion lens, magazine editorial quality. Example: \'A woman wearing a navy blue blazer and cream trousers, full body shot, two legs visible, soft studio lighting, 85mm fashion lens, editorial quality, no deformities, no extra limbs.\'",
   "outfit_name": "2-3 word name (only when complete)"
 }"""
 

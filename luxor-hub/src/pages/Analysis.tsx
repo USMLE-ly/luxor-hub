@@ -290,12 +290,20 @@ export default function Analysis() {
       setProgressValue(90);
       setProgressStage("Generating visualization...");
       
-      // Generate tweak visualization from the tweak_plan instead of AI fashion image
-      const tweakPrompt = fnData.tweak_plan || fnData.generation_prompt || '';
-      if (tweakPrompt) {
-        const safe = encodeURIComponent(tweakPrompt + ", high fashion editorial, photorealistic");
-        const pollinationsUrl = `https://image.pollinations.ai/prompt/${safe}?width=1024&height=1536&nologin=true&seed=`;
-        setGeneratedImageUrl(pollinationsUrl + Date.now());
+      // Generate tweak visualization — backend already provides tweak_image_url with proper 7-section prompt.
+      // This frontend fallback is only used if backend image URL is empty.
+      const fnTweakImageUrl = fnData.tweak_image_url || '';
+      if (!fnTweakImageUrl) {
+        const tweakPrompt = fnData.tweak_plan || fnData.generation_prompt || '';
+        if (tweakPrompt) {
+          // Build a minimal editorial prompt since we don't have a full 7-section prompt
+          const itemDescs = (fnData.items_detected || []).join(', ');
+          const fullDesc = itemDescs ? `${itemDescs}. ${tweakPrompt}` : tweakPrompt;
+          const prompt = `SUBJECT: HYPERREALISTIC FULL-BODY FASHION EDITORIAL PHOTOGRAPH OF A MODEL WEARING ${fullDesc}. TWO VISIBLE LEGS, TWO ARMS, NATURAL HUMAN PROPORTIONS. NO DEFORMITIES, NO EXTRA LIMBS. MEDIUM: 8K ULTRA-PHOTOREALISTIC FASHION PHOTOGRAPH, DSLR FULL-FRAME CLARITY. ENVIRONMENT: MINIMALIST HIGH-END FASHION STUDIO WITH SOFT GRADIENT BACKDROP. LIGHTING: SOFT DIFFUSED STUDIO LIGHTING WITH PROFESSIONAL BALANCE. COLOR: TRUE-TO-LIFE COLOR CALIBRATION. MOOD: MODERN, REFINED, MINIMALIST LUXURY. COMPOSITION: FULL-BODY FRAMING FROM HEAD TO TOE WITH AN 85MM FASHION LENS ON A FULL-FRAME SENSOR. SHOES CLEARLY VISIBLE AT THE BOTTOM OF THE FRAME.`;
+          const safe = encodeURIComponent(prompt);
+          const pollinationsUrl = `https://image.pollinations.ai/prompt/${safe}?width=1024&height=1536&nologin=true&seed=${Date.now()}&model=flux`;
+          setGeneratedImageUrl(pollinationsUrl);
+        }
       }
       setSavedId(null);
       toast.success('Outfit analyzed! ✨');

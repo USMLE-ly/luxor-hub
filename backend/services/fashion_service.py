@@ -63,7 +63,8 @@ def generate_tweak_visualization_prompt(original_items_string: str, tweak_item_s
     # Build the complete outfit description
     if original and tweak:
         tweak_clean = tweak[0].upper() + tweak[1:] if tweak else ''
-        outfit_desc = f"{original}. {tweak_clean}"
+        # Explicitly state the complete outfit: original items + tweak items together
+        outfit_desc = f"{original}, AND {tweak_clean}"
     elif original:
         outfit_desc = original
     elif tweak:
@@ -84,7 +85,7 @@ def generate_tweak_visualization_prompt(original_items_string: str, tweak_item_s
     model_preset = _model_presets[_seed % len(_model_presets)]
 
     return (
-        "SUBJECT: HYPERREALISTIC FULL-BODY FASHION EDITORIAL PHOTOGRAPH OF A MODEL STANDING CONFIDENTLY, WEARING "
+        "SUBJECT: HYPERREALISTIC FULL-BODY FASHION EDITORIAL PHOTOGRAPH OF A MODEL STANDING CONFIDENTLY, WEARING A COMPLETE OUTFIT CONSISTING OF: "
         f"{outfit_desc}. "
         f"{model_preset} "
         "TWO VISIBLE LEGS, TWO ARMS, NATURAL HUMAN PROPORTIONS. SINGLE PAIR OF LEGS WITH THE SPECIFIED FOOTWEAR CLEARLY VISIBLE AT THE BOTTOM OF THE FRAME. "
