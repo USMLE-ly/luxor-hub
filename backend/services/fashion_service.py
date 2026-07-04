@@ -40,9 +40,10 @@ def get_fashion_decision(image_b64: str) -> Dict[str, Any]:
 def generate_tweak_visualization_prompt(original_items_string: str, tweak_item_string: str) -> str:
     """Generate a hyperrealistic fashion editorial prompt for AI image generation.
     
-    Always produces a prompt showing a real person wearing the complete 
+    Based on the FASHION AI SCHOOL 30-example methodology — strict 7-section
+    editorial structure (SUBJECT, MEDIUM, ENVIRONMENT, LIGHTING, COLOR, MOOD, COMPOSITION).
+    Always produces a full-body shot of a real person wearing the complete
     original + tweak outfit. No isolated products, no marble backgrounds.
-    Uses strict editorial fashion structure.
     
     Args:
         original_items_string: The original outfit items, comma-separated 
@@ -59,7 +60,6 @@ def generate_tweak_visualization_prompt(original_items_string: str, tweak_item_s
     
     # Build the complete outfit description for the prompt
     if original and tweak:
-        # Capitalize first letter of tweak for clean sentence flow
         tweak_clean = tweak[0].upper() + tweak[1:] if tweak else ''
         outfit_desc = f"{original}. {tweak_clean}"
     elif original:
@@ -70,32 +70,44 @@ def generate_tweak_visualization_prompt(original_items_string: str, tweak_item_s
         outfit_desc = 'A complete outfit'
     
     return (
-        f"SUBJECT: A fashion model standing confidently in a full-body shot, wearing {outfit_desc}. "
-        f"The model has natural skin texture, visible pores, and a refined, poised expression. "
-        f"The posture is relaxed yet sophisticated, conveying effortless elegance.\n\n"
-        f"MEDIUM: 8k ultra-photorealistic fashion photograph, DSLR full-frame camera, "
-        f"85mm focal length, crisp optical clarity, high-fidelity fabric rendering, "
-        f"premium editorial finish.\n\n"
-        f"ENVIRONMENT: Minimalist high-end fashion studio setting. A soft, seamless white "
-        f"or neutral grey gradient backdrop. Clean, uncluttered, and distraction-free space "
-        f"designed to emphasize the garment details and silhouette.\n\n"
-        f"LIGHTING: Soft diffused studio lighting. Natural, balanced illumination providing "
-        f"gentle highlights and micro-shadows. No harsh contrast, no artificial glow. "
-        f"True-to-life light scattering across skin and fabric.\n\n"
-        f"COLOR: True-to-life color calibration. Harmonious palette featuring natural skin tones "
-        f"and precise textile colors. Accurate rendering of every garment without oversaturation.\n\n"
-        f"MOOD: Modern, refined, minimalist luxury. Confident, elegant, and effortlessly "
-        f"sophisticated. Premium high-fashion editorial atmosphere.\n\n"
-        f"COMPOSITION: Full-body framing, straight-on angle, centered composition. "
-        f"Shallow depth of field keeping the model and outfit in sharp focus while the "
-        f"background falls softly out of focus. Magazine-ready editorial quality.\n\n"
+        f"SUBJECT: HYPERREALISTIC FULL-BODY FASHION EDITORIAL PHOTOGRAPH OF A MODEL WEARING {outfit_desc.upper()}. "
+        f"MATTE NATURAL SKIN WITH VISIBLE PORES, REALISTIC MICRO-TEXTURE, SUBTLE IMPERFECTIONS, "
+        f"AUTHENTIC UNDERTONES, AND NATURAL TONAL VARIATION. NO RETOUCHING OR AIRBRUSHING. "
+        f"THE MODEL HAS A REFINED, POISED EXPRESSION WITH RELAXED YET SOPHISTICATED POSTURE, "
+        f"CONVEYING EFFORTLESS ELEGANCE AND QUIET CONFIDENCE. "
+        f"NATURAL HAIR TEXTURE WITH SUBTLE MOVEMENT AND LIFELIKE DETAIL.\n\n"
+        f"MEDIUM: HYPERREALISTIC PHOTOGRAPH, 8K ULTRA-PHOTOREALISM, CRISP OPTICAL CLARITY, "
+        f"HIGH-FIDELITY FABRIC RENDERING, CINEMATIC EDITORIAL FINISH. "
+        f"DSLR FULL-FRAME CAMERA QUALITY WITH PROFESSIONAL-GRADE OUTPUT RESEMBLING "
+        f"LUXURY FASHION MAGAZINE EDITORIALS (VOGUE, HARPER\'S BAZAAR).\n\n"
+        f"ENVIRONMENT: MINIMALIST HIGH-END FASHION STUDIO SETTING WITH A SOFT, SEAMLESS WHITE "
+        f"OR NEUTRAL GREY GRADIENT BACKDROP. CLEAN, UNCLUTTERED, DISTRACTION-FREE SPACE "
+        f"DESIGNED TO EMPHASIZE THE GARMENT DETAILS, SILHOUETTE, AND TEXTURE NARRATIVE.\n\n"
+        f"LIGHTING: SOFT DIFFUSED STUDIO LIGHTING WITH PROFESSIONAL BALANCE. NATURAL, "
+        f"EVEN ILLUMINATION PROVIDING GENTLE HIGHLIGHTS AND MICRO-SHADOWS THAT DEFINE "
+        f"FABRIC TEXTURE AND FACIAL CONTOURS. NO HARSH CONTRAST, NO ARTIFICIAL GLOW. "
+        f"GENTLE RIM LIGHTING DEFINING THE SILHOUETTE AGAINST THE BACKGROUND. "
+        f"TRUE-TO-LIFE LIGHT SCATTERING ACROSS SKIN AND FABRIC WITH SMOOTH SHADOW-TO-LIGHT TRANSITIONS.\n\n"
+        f"COLOR: TRUE-TO-LIFE COLOR CALIBRATION WITH PREMIUM EDITORIAL GRADING. HARMONIOUS PALETTE "
+        f"FEATURING NATURAL SKIN TONES AND PRECISE TEXTILE COLORS. ACCURATE RENDERING OF EVERY "
+        f"GARMENT WITHOUT OVERSATURATION. SMOOTH TONAL GRADIENTS WITH AUTHENTIC COLOR VARIATION.\n\n"
+        f"MOOD: MODERN, REFINED, MINIMALIST LUXURY. CONFIDENT, ELEGANT, AND EFFORTLESSLY "
+        f"SOPHISTICATED. PREMIUM HIGH-FASHION EDITORIAL ATMOSPHERE. CALM, COMPOSED, "
+        f"AND TIMELESS WITH QUIET SOPHISTICATION.\n\n"
+        f"COMPOSITION: SHOT WITH AN 85MM FASHION LENS ON A FULL-FRAME SENSOR. "
+        f"FULL-BODY FRAMING, STRAIGHT-ON ANGLE, CENTERED COMPOSITION. "
+        f"SHALLOW DEPTH OF FIELD KEEPING THE MODEL AND OUTFIT IN SHARP FOCUS "
+        f"WHILE THE BACKGROUND FALLS SOFTLY OUT OF FOCUS. "
+        f"PRECISE AUTOFOCUS ON THE FACE AND GARMENT DETAILS. "
+        f"MAGAZINE-READY EDITORIAL QUALITY WITH BALANCED NEGATIVE SPACE.\n\n"
         f"--no marble --no stone background --no table --no flat lay --no product photography "
         f"--no isolated product --no product isolation --no stainless steel --no metal object "
         f"--no jewelry box --no tarnished metal --no dark shadows --no empty room "
-        f"--no human --no model --no missing limbs --no distorted hands "
         f"--no mannequin --no plastic --no top-down view --no abstract "
         f"--no low resolution --no blurry --no text --no watermark --no logo "
-        f"--no cartoon --no illustration --no painting --no 3d render"
+        f"--no cartoon --no illustration --no painting --no 3d render "
+        f"--no missing limbs --no distorted hands --no extra fingers "
+        f"--no airbrushed skin --no smooth skin --no plastic skin --no poreless skin"
     )
 
 def _humanize_strengths(items: List[str]) -> List[str]:
