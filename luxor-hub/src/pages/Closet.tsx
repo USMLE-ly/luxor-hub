@@ -453,29 +453,80 @@ const Closet = () => {
   const handleClearAll = async () => {
     if (!user) return;
     try {
-      // 1. Delete all items from Supabase
-      const { error: itemsErr } = await supabase.from("clothing_items").delete().eq("user_id", user.id);
-      if (itemsErr) throw new Error("Failed to delete clothing items: " + itemsErr.message);
+      console.log("[CLOSET] Starting clear all for user:", user.id);
+      toast.loading("Clearing closet...");
 
-      // 2. Delete all outfits from Supabase
-      const { error: outfitsErr } = await supabase.from("outfits").delete().eq("user_id", user.id);
-      if (outfitsErr) console.warn("[CLOSET] Outfits delete warning:", outfitsErr.message);
-
-      // 3. Delete all from Qdrant via backend
+      // 0. Get the user's Supabase access_token for backend-proxied deletion
+      let accessToken = "";
       try {
-        await fetch(apiBase + '/api/v1/closet/clear-all', {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ user_id: user.id }),
-        });
-      } catch (qe) {
-        console.warn("[CLOSET] Qdrant clear warning:", qe);
+        const { data: { session } } = await supabase.auth.getSession();
+        accessToken = session?.access_token || "";
+        console.log("[CLOSET] Got access_token:", accessToken ? "yes" : "no");
+      } catch (tokErr) {
+        console.warn("[CLOSET] Failed to get session token:", tokErr);
       }
 
+      // 1. Delete from Supabase directly (RLS will allow if user owns the items)
+      const directErrors: string[] = [];
+
+      // Delete in dependency order: children first, then parents
+      // wear_logs depends on clothing_items
+      const { error: wearErr } = await supabase.from("wear_logs").delete().eq("user_id", user.id);
+      if (wearErr) directErrors.push("wear_logs: " + wearErr.message);
+      else console.log("[CLOSET] Deleted wear_logs");
+
+      // outfits (CASCADE handles outfit_items)
+      const { error: outfitsErr } = await supabase.from("outfits").delete().eq("user_id", user.id);
+      if (outfitsErr) console.warn("[CLOSET] Outfits delete:", outfitsErr.message);
+      else console.log("[CLOSET] Deleted outfits");
+
+      // clothing_items (CASCADE handles outfit_items + wear_logs if cascade is set)
+      const { error: itemsErr } = await supabase.from("clothing_items").delete().eq("user_id", user.id);
+      if (itemsErr) directErrors.push("clothing_items: " + itemsErr.message);
+      else console.log("[CLOSET] Deleted clothing_items");
+
+      // calendar_events
+      const { error: calErr } = await supabase.from("calendar_events").delete().eq("user_id", user.id);
+      if (calErr) console.warn("[CLOSET] Calendar delete:", calErr.message);
+
+      // challenge_entries
+      const { error: challengeErr } = await supabase.from("challenge_entries").delete().eq("user_id", user.id);
+      if (challengeErr) console.warn("[CLOSET] Challenge entries delete:", challengeErr.message);
+
+      console.log("[CLOSET] Direct Supabase deletes done. Errors:", directErrors);
+
+      // 2. Delete from Qdrant + Supabase via backend (proxy with access_token)
+      try {
+        const backendResp = await fetch(apiBase + '/api/v1/closet/clear-all', {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            user_id: user.id, 
+            access_token: accessToken,
+          }),
+        });
+        const backendResult = await backendResp.json();
+        console.log("[CLOSET] Backend clear-all result:", backendResult);
+        if (backendResult.supabase_errors) {
+          console.warn("[CLOSET] Backend Supabase errors:", backendResult.supabase_errors);
+        }
+      } catch (qe) {
+        console.warn("[CLOSET] Backend clear warning:", qe);
+      }
+
+      // 3. Update local state
       setItems([]);
-      toast.success("All closet items cleared!");
+
+      toast.dismiss();
+      toast.success("All closet items cleared! Refreshing...");
+
+      // 4. Force a full page reload after a brief delay to let server catch up
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
     } catch (err: any) {
       console.error("[CLOSET] Clear all error:", err);
+      toast.dismiss();
       toast.error(err.message || "Failed to clear items");
     }
   };
