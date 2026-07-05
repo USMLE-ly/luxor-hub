@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
 import { MarketingBadges } from '@/components/ui/marketing-badges';
 
 export interface OutfitImages {
@@ -15,6 +15,7 @@ interface FlipGalleryProps {
   outfits: OutfitImages[];
   onGenerate: () => void;
   onDismiss: () => void;
+  onAddToCalendar?: (outfit: OutfitImages) => void;
   isLoading: boolean;
   onOutfitChange?: (outfit: OutfitImages) => void;
 }
@@ -123,7 +124,7 @@ const DOMINO_DELAY = 150;
 /* ------------------------------------------------------------------ */
 /*  Component                                                         */
 /* ------------------------------------------------------------------ */
-export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading, onOutfitChange }: FlipGalleryProps) {
+export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCalendar, isLoading, onOutfitChange }: FlipGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flipState, setFlipState] = useState<'idle' | 'out' | 'in'>('idle');
   const [animDirection, setAnimDirection] = useState<'next' | 'prev'>('next');
@@ -411,8 +412,32 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, isLoading,
           )}
         </div>
 
-        {/* Dismiss — right edge */}
-        <div style={{ pointerEvents: 'auto' }}>
+        {/* Dismiss + Calendar — right edge */}
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', pointerEvents: 'auto' }}>
+          {onAddToCalendar && (
+            <button
+              onClick={() => onAddToCalendar(outfits[currentIndex])}
+              style={{
+                background: 'linear-gradient(135deg, #9ca3af, #6b7280)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '50%',
+                width: '40px',
+                height: '40px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                transition: 'transform 0.2s ease',
+              }}
+              title="Add to Calendar"
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              <CalendarDays size={18} />
+            </button>
+          )}
           <button
             onClick={onDismiss}
             style={{

@@ -27,6 +27,7 @@ interface CalendarEvent {
   notes: string | null;
   outfit_items: any;
   mannequin_image_url: string | null;
+  outfit_type?: string;
 }
 
 interface ClosetItem {
@@ -707,7 +708,7 @@ const OutfitCalendarInner = () => {
         const url = closetMap.get(item.toLowerCase());
         if (url) photos.push(url);
       } else {
-        const url = item?.photo_url || item?.photoUrl || item?.image_url || item?.imageUrl;
+        const url = item?.photo_url || item?.photoUrl || item?.image_url || item?.imageUrl || item?.url;
         if (url) photos.push(url);
       }
     });
@@ -1069,11 +1070,42 @@ const OutfitCalendarInner = () => {
                               const url = closetMap.get(item.toLowerCase());
                               if (url) allPhotos.push(url);
                             } else {
-                              const url = item?.photo_url || item?.photoUrl || item?.image_url || item?.imageUrl;
+                              const url = item?.photo_url || item?.photoUrl || item?.image_url || item?.imageUrl || item?.url;
                               if (url) allPhotos.push(url);
                             }
                           });
                         });
+
+                        // Split-screen for DressingRoom outfits in day cell
+                        if (allPhotos.length === 0 && dayEvents.some(ev => ev.outfit_type)) {
+                          const firstOutfitEv = dayEvents.find(ev => ev.outfit_type);
+                          if (firstOutfitEv) {
+                            const evItems = Array.isArray(firstOutfitEv.outfit_items) ? firstOutfitEv.outfit_items : [];
+                            const orderedItems = ['top', 'mid', 'bottom']
+                              .map(t => evItems.find((i: any) => i.type === t))
+                              .filter(Boolean);
+                            if (orderedItems.length > 0) {
+                              const sectionCount = orderedItems.length;
+                              return (
+                                <div className="flex-1 flex flex-col w-full rounded-lg bg-[#0a0a0a] overflow-hidden" style={{ minHeight: "60px" }}>
+                                  {orderedItems.map((item: any, idx: number) => (
+                                    <div
+                                      key={idx}
+                                      className="flex-1 border-b border-[#1a1a1a] last:border-b-0"
+                                      style={{
+                                        backgroundImage: `url(${item.url})`,
+                                        backgroundSize: 'contain',
+                                        backgroundPosition: 'center',
+                                        backgroundRepeat: 'no-repeat',
+                                        backgroundColor: '#0a0a0a',
+                                      }}
+                                    />
+                                  ))}
+                                </div>
+                              );
+                            }
+                          }
+                        }
 
                         if (hasMannequin) {
                           return (
@@ -1204,11 +1236,39 @@ const OutfitCalendarInner = () => {
                             const url = closetMap.get(item.toLowerCase());
                             if (url) resolvedPhotos.push(url);
                           } else {
-                            const url = item?.photo_url || item?.photoUrl || item?.image_url || item?.imageUrl;
+                            const url = item?.photo_url || item?.photoUrl || item?.image_url || item?.imageUrl || item?.url;
                             if (url) resolvedPhotos.push(url);
                           }
                         });
                         const photos = resolvedPhotos.slice(0, 5);
+
+                        // Split-screen layout for DressingRoom outfits
+                        if (ev.outfit_type && ev.outfit_type !== 'full_outfit' && items.length > 0 && items.some((i: any) => i.url)) {
+                          const hasMid = items.some((i: any) => i.type === 'mid');
+                          const sectionCount = ev.outfit_type === 'dress' ? 2 : hasMid ? 3 : 2;
+                          const orderedItems = ['top', 'mid', 'bottom']
+                            .map(t => items.find((i: any) => i.type === t))
+                            .filter(Boolean);
+                          return (
+                            <div className="p-3 pb-0">
+                              <div className="rounded-lg overflow-hidden bg-[#0a0a0a] flex flex-col" style={{ minHeight: "100px", maxHeight: "200px" }}>
+                                {orderedItems.map((item: any, idx: number) => (
+                                  <div
+                                    key={idx}
+                                    className="flex-1 border-b border-[#1a1a1a] last:border-b-0"
+                                    style={{
+                                      backgroundImage: `url(${item.url})`,
+                                      backgroundSize: 'contain',
+                                      backgroundPosition: 'center',
+                                      backgroundRepeat: 'no-repeat',
+                                      backgroundColor: '#0a0a0a',
+                                    }}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        }
 
                         if (ev.mannequin_image_url) {
                           return (
@@ -1848,7 +1908,38 @@ const OutfitCalendarInner = () => {
                   </div>
                 </div>
 
-                {flatLayEvent.mannequin_image_url ? (
+                {flatLayEvent.outfit_type && flatLayEvent.outfit_type !== 'full_outfit' && 
+                  (() => {
+                    const items = Array.isArray(flatLayEvent.outfit_items) ? flatLayEvent.outfit_items : [];
+                    const orderedItems = ['top', 'mid', 'bottom']
+                      .map(t => items.find((i: any) => i.type === t))
+                      .filter(Boolean);
+                    if (orderedItems.length > 0) {
+                      return (
+                        <div className="rounded-xl overflow-hidden bg-[#0a0a0a]" style={{ minHeight: "300px" }}>
+                          <div className="flex flex-col h-80">
+                            {orderedItems.map((item: any, idx: number) => (
+                              <div
+                                key={idx}
+                                className="flex-1 border-b border-[#1a1a1a] last:border-b-0"
+                                style={{
+                                  backgroundImage: `url(${item.url})`,
+                                  backgroundSize: 'contain',
+                                  backgroundPosition: 'center',
+                                  backgroundRepeat: 'no-repeat',
+                                  backgroundColor: '#0a0a0a',
+                                }}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()
+                }
+
+                {!flatLayEvent.outfit_type && flatLayEvent.mannequin_image_url ? (
                   <div className="rounded-xl overflow-hidden" style={{ background: "hsl(40 30% 96%)", border: "1px solid hsl(var(--border) / 0.4)" }}>
                     <img
                       src={flatLayEvent.mannequin_image_url}
@@ -1857,10 +1948,12 @@ const OutfitCalendarInner = () => {
                       style={{ mixBlendMode: "multiply" }}
                     />
                   </div>
-                ) : (
+                ) : null}
+
+                {!flatLayEvent.outfit_type && !flatLayEvent.mannequin_image_url && (
                   <div className="grid grid-cols-2 gap-3">
                     {(Array.isArray(flatLayEvent.outfit_items) ? flatLayEvent.outfit_items : []).map((item: any, idx: number) => {
-                      const photoUrl = item?.photo_url || item?.photoUrl || item?.image_url || item?.imageUrl;
+                      const photoUrl = item?.photo_url || item?.photoUrl || item?.image_url || item?.imageUrl || item?.url;
                       const itemName = item?.name || item?.category || `Item ${idx + 1}`;
                       return (
                         <motion.div
