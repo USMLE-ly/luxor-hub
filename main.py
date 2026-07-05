@@ -1849,9 +1849,10 @@ def closet_clear_all():
         data = request.get_json(silent=True) or {}
         uid = data.get("user_id", "")
         access_token = data.get("access_token", "")
-        service_role_key = data.get("service_role_key", "")
+        # Check env var FIRST, then request body (so Replit Secrets work without curl changes)
+        service_role_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "") or data.get("service_role_key", "")
         print(f"[CLEAR-DEBUG] Starting clear for user_id: {uid}", flush=True)
-        print(f"[CLEAR-DEBUG] Has access_token: {bool(access_token)}, Has service_role_key: {bool(service_role_key)}", flush=True)
+        print(f"[CLEAR-DEBUG] Has access_token: {bool(access_token)}, Has env service_role_key: {bool(os.environ.get('SUPABASE_SERVICE_ROLE_KEY',''))}", flush=True)
         _log.info("[CLOSET] clear-all for user_id=%s", uid or "all")
 
         supabase_errors = []
@@ -1926,8 +1927,10 @@ def closet_clear_all():
 
         # ---- STEP 2: Clear Qdrant items for this user ----
         deleted_from_qdrant = 0
+        qdrant_method = "none"
         client = _qdrant_closet
         if client is not None and qdrant_models is not None:
+            # Method A: Try filter-based deletion (fastest)
             try:
                 if uid:
                     delete_filter = qdrant_models.Filter(
@@ -1936,19 +1939,66 @@ def closet_clear_all():
                         )]
                     )
                 else:
-                    delete_filter = qdrant_models.Filter(
-                        must=[qdrant_models.FieldCondition(
-                            key="id", match=qdrant_models.MatchValue(value="*")
-                        )]
+                    # Delete all points by scrolling and collecting IDs
+                    scroll_result = client.scroll(
+                        collection_name=_CLOSET_COLLECTION,
+                        limit=5000,
+                        with_payload=False,
                     )
-                client.delete(
-                    collection_name=_CLOSET_COLLECTION,
-                    points_selector=delete_filter,
-                )
-                _log.info("[CLOSET] Deleted all Qdrant items for user_id=%s", uid or "all")
-                deleted_from_qdrant = -1
+                    points = scroll_result[0] if isinstance(scroll_result, tuple) else scroll_result
+                    all_ids = [p.id for p in points]
+                    if all_ids:
+                        client.delete(
+                            collection_name=_CLOSET_COLLECTION,
+                            points_selector=qdrant_models.Filter(
+                                must=[qdrant_models.FieldCondition(
+                                    key="id", match=qdrant_models.MatchValue(value=all_ids[0])
+                                )]
+                            ),
+                        )
+                    delete_filter = None  # Skip filter-based for "all" case
+                
+                if delete_filter:
+                    client.delete(
+                        collection_name=_CLOSET_COLLECTION,
+                        points_selector=delete_filter,
+                    )
+                    _log.info("[CLOSET] Deleted all Qdrant items for user_id=%s (filter)", uid or "all")
+                    deleted_from_qdrant = -1
+                    qdrant_method = "filter"
             except Exception as qe:
-                _log.warning("[CLOSET] Qdrant clear error: %s", qe)
+                _log.warning("[CLOSET] Qdrant filter delete failed: %s — trying scroll fallback", qe)
+                
+            # Method B: If filter failed, scroll and delete by IDs
+            if deleted_from_qdrant == 0:
+                try:
+                    scroll_result = client.scroll(
+                        collection_name=_CLOSET_COLLECTION,
+                        limit=5000,
+                        with_payload=True,
+                    )
+                    points = scroll_result[0] if isinstance(scroll_result, tuple) else scroll_result
+                    to_delete = []
+                    for p in points:
+                        if p.payload:
+                            puid = p.payload.get("user_id") or ""
+                            if not uid or puid == uid:
+                                to_delete.append(p.id)
+                    
+                    if to_delete:
+                        # Delete in batches of 100
+                        BATCH = 100
+                        for i in range(0, len(to_delete), BATCH):
+                            batch = to_delete[i:i+BATCH]
+                            client.delete(
+                                collection_name=_CLOSET_COLLECTION,
+                                points_selector=qdrant_models.PointIdsList(points=batch),
+                            )
+                        _log.info("[CLOSET] Deleted %d Qdrant items for user_id=%s (scroll+IDs)", len(to_delete), uid or "all")
+                        deleted_from_qdrant = len(to_delete)
+                        qdrant_method = "scroll_ids"
+                except Exception as qe2:
+                    _log.warning("[CLOSET] Qdrant scroll delete also failed: %s", qe2)
 
         # ---- STEP 3: Clear JSON file ----
         with open(_LOCAL_CLOSET_FILE, "w") as f:

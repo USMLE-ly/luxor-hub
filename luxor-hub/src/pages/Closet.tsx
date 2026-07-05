@@ -496,6 +496,7 @@ const Closet = () => {
       console.log("[CLOSET] Direct Supabase deletes done. Errors:", directErrors);
 
       // 2. Delete from Qdrant + Supabase via backend (proxy with access_token)
+      let backendOk = false;
       try {
         const backendResp = await fetch(apiBase + '/api/v1/closet/clear-all', {
           method: "POST",
@@ -507,8 +508,16 @@ const Closet = () => {
         });
         const backendResult = await backendResp.json();
         console.log("[CLOSET] Backend clear-all result:", backendResult);
-        if (backendResult.supabase_errors) {
-          console.warn("[CLOSET] Backend Supabase errors:", backendResult.supabase_errors);
+        if (backendResult.error) {
+          console.warn("[CLOSET] Backend returned error:", backendResult.error);
+        } else if (backendResult.success) {
+          backendOk = true;
+          if (backendResult.supabase_errors && backendResult.supabase_errors.length > 0) {
+            console.warn("[CLOSET] Backend Supabase delete had errors:", backendResult.supabase_errors);
+          }
+          console.log("[CLOSET] Backend clear-all succeeded");
+        } else {
+          console.warn("[CLOSET] Backend clear-all returned unexpected result:", backendResult);
         }
       } catch (qe) {
         console.warn("[CLOSET] Backend clear warning:", qe);
@@ -518,7 +527,11 @@ const Closet = () => {
       setItems([]);
 
       toast.dismiss();
-      toast.success("All closet items cleared! Refreshing...");
+      if (!backendOk) {
+        toast.success("Items cleared from this view. They will reappear on refresh if the server couldn't clear them. Use the 'Force Clear' option if needed.");
+      } else {
+        toast.success("All closet items cleared!");
+      }
 
       // 4. Items have been cleared from Supabase + Qdrant + JSON
       // No page reload needed — state already updated above
