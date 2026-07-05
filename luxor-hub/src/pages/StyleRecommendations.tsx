@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Sparkles, Upload, Camera, Palette, ScanFaceIcon, User, Star, Lightbulb, AlertTriangle } from "lucide-react";
 import { humanizeText } from "@/lib/humanizer";
 import InfoCardsTable, { type RowData, type CellData } from "@/components/ui/info-cards-table";
+import FashionReviewCard from "@/components/ui/fashion-review-card";
 import GlassTabs, { type GlassTab } from "@/components/ui/glass-tabs";
 
 interface StyleAnalysis {
@@ -280,9 +281,6 @@ export default function StyleRecommendationsPage() {
     }
   };
 
-  const scoreColor = (s: number) => s >= 80 ? "text-green-500" : s >= 60 ? "text-yellow-500" : "text-red-400";
-
-  const scoreBgColor = (s: number) => s >= 80 ? "bg-green-500/10 border-green-500/30" : s >= 60 ? "bg-yellow-500/10 border-yellow-500/30" : "bg-red-500/10 border-red-500/30";
 
   return (
     <AppLayout>
@@ -440,85 +438,20 @@ export default function StyleRecommendationsPage() {
 
           {/* ── TAB: Review ── */}
           {activeTab === "review" && outfitReview && (
-            <motion.div key="review" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
-              {/* Overall Score */}
-              <div className={`rounded-xl border p-6 text-center ${scoreBgColor(outfitReview.overall_score)}`}>
-                <p className="text-xs text-white/50 uppercase tracking-wider mb-1">Overall Score</p>
-                <div className={`text-5xl font-bold ${scoreColor(outfitReview.overall_score)}`}>
-                  {outfitReview.overall_score}/100
-                </div>
-              </div>
-
-              {/* Score Breakdown */}
-              {Object.keys(outfitReview.scores).length > 0 && (
-                <div className="rounded-xl border border-white/10 bg-zinc-900/40 backdrop-blur-xl p-5">
-                  <div className="flex items-center gap-2 mb-4"><span className="text-primary"><Star className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-white/80">Score Breakdown</h3></div>
-                  <div className="space-y-3">
-                    {Object.entries(outfitReview.scores).map(([key, val]) => (
-                      <div key={key}>
-                        <div className="flex justify-between mb-1">
-                          <span className="text-xs text-white/60 capitalize">{key.replace(/_/g, " ")}</span>
-                          <span className={`text-xs font-semibold ${scoreColor(val)}`}>{val}/100</span>
-                        </div>
-                        <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
-                          <motion.div
-                            className={`h-full rounded-full ${val >= 80 ? "bg-green-500" : val >= 60 ? "bg-yellow-500" : "bg-red-500"}`}
-                            initial={{ width: 0 }}
-                            animate={{ width: `${val}%` }}
-                            transition={{ duration: 0.8, ease: "easeOut" }}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Strengths */}
-              {outfitReview.strengths?.length > 0 && (
-                <div className="rounded-xl border border-green-500/20 bg-green-950/20 backdrop-blur-xl p-5">
-                  <div className="flex items-center gap-2 mb-4"><span className="text-green-400"><Sparkles className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-green-300/80">Strengths</h3></div>
-                  <ul className="space-y-2">
-                    {outfitReview.strengths.map((s, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-white/80">
-                        <span className="text-green-400 mt-0.5">✓</span> {s}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Improvements */}
-              {outfitReview.improvements?.length > 0 && (
-                <div className="rounded-xl border border-amber-500/20 bg-amber-950/20 backdrop-blur-xl p-5">
-                  <div className="flex items-center gap-2 mb-4"><span className="text-amber-400"><AlertTriangle className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-amber-300/80">Improvements</h3></div>
-                  <div className="space-y-3">
-                    {outfitReview.improvements.map((imp, i) => (
-                      <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-black/30 border border-white/5">
-                        <span className={
-                          imp.priority === "high" ? "text-red-400" :
-                          imp.priority === "medium" ? "text-amber-400" : "text-blue-400"
-                        }>
-                          {imp.priority === "high" ? "🔴" : imp.priority === "medium" ? "🟡" : "🔵"}
-                        </span>
-                        <div className="flex-1">
-                          <p className="text-sm text-white/80">{imp.issue}</p>
-                          {imp.suggestion && (
-                            <p className="text-xs text-amber-300/70 mt-0.5">→ {imp.suggestion}</p>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Honest Summary */}
-              {outfitReview.honest_summary && (
-                <div className="rounded-xl border border-white/10 bg-zinc-900/40 backdrop-blur-xl p-5">
-                  <p className="text-sm text-white/60 italic text-center">"{outfitReview.honest_summary}"</p>
-                </div>
-              )}
+            <motion.div
+              key="review"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="w-full"
+            >
+              <FashionReviewCard
+                overallScore={outfitReview.overall_score}
+                scoreBreakdown={outfitReview.scores}
+                strengths={outfitReview.strengths}
+                improvements={outfitReview.improvements}
+                honestSummary={outfitReview.honest_summary}
+              />
             </motion.div>
           )}
         </AnimatePresence>
