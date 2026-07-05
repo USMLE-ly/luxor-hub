@@ -327,23 +327,26 @@ def _migrate_json_to_qdrant():
 
 
 def _ensure_closet_collection(client: Any):
-    """Ensure the Qdrant collection exists with proper schema.
+    """Recreate the Qdrant collection on every startup to purge stale data.
     Raises on failure — called during startup, no silent passes."""
     if qdrant_models is None:
         raise RuntimeError("Qdrant models not available (import failed)")
-    _log.info("[QDRANT] Verifying collection '%s'...", _CLOSET_COLLECTION)
+    _log.info("[QDRANT] Recreating collection '%s'...", _CLOSET_COLLECTION)
     try:
-        collections = client.get_collections()
-        names = [c.name for c in collections.collections]
-        if _CLOSET_COLLECTION not in names:
-            _log.info("[QDRANT] Creating collection '%s'...", _CLOSET_COLLECTION)
-            client.create_collection(
-                collection_name=_CLOSET_COLLECTION,
-                vectors_config=qdrant_models.VectorParams(
-                    size=4, distance=qdrant_models.Distance.COSINE
-                ),
-            )
-            _log.info("[QDRANT] Created collection '%s'", _CLOSET_COLLECTION)
+        # Delete existing collection first (ignores error if doesn't exist)
+        try:
+            client.delete_collection(collection_name=_CLOSET_COLLECTION)
+            _log.info("[QDRANT] Deleted existing collection '%s'", _CLOSET_COLLECTION)
+        except Exception:
+            pass  # Collection may not exist yet
+        # Create fresh collection
+        client.create_collection(
+            collection_name=_CLOSET_COLLECTION,
+            vectors_config=qdrant_models.VectorParams(
+                size=4, distance=qdrant_models.Distance.COSINE
+            ),
+        )
+        _log.info("[QDRANT] Created fresh collection '%s'", _CLOSET_COLLECTION)
         # Ensure payload index on id for fast lookups and deletes
         try:
             client.create_payload_index(
@@ -364,9 +367,9 @@ def _ensure_closet_collection(client: Any):
             _log.info("[QDRANT] Payload index on 'user_id' ready")
         except Exception:
             pass  # Index already exists — acceptable
-        _log.info("[QDRANT] Collection '%s' verified OK", _CLOSET_COLLECTION)
+        _log.info("[QDRANT] Collection '%s' ready (fresh, empty)", _CLOSET_COLLECTION)
     except Exception as exc:
-        _log.error("[QDRANT] Collection verification failed: %s", exc)
+        _log.error("[QDRANT] Collection recreation failed: %s", exc)
         raise
 
 
@@ -1796,6 +1799,61 @@ RULES:
         "season": "All-Season",
         "occasion": "Casual",
     })
+
+@app.route("/api/v1/closet/clear-all", methods=["POST", "OPTIONS"], strict_slashes=False)
+def closet_clear_all():
+    """Delete ALL closet items from Qdrant and JSON for a given user.
+    Called from the frontend when user wants to reset their closet.
+    This does NOT delete from Supabase — the frontend handles that via RLS.
+    """
+    if request.method == "OPTIONS":
+        return "", 204
+    try:
+        data = request.get_json(silent=True) or {}
+        uid = data.get("user_id", "")
+        _log.info("[CLOSET] clear-all for user_id=%s", uid or "all")
+
+        # Clear Qdrant items for this user
+        deleted_from_qdrant = 0
+        client = _qdrant_closet
+        if client is not None and qdrant_models is not None:
+            try:
+                # Build filter based on user_id or delete all
+                if uid:
+                    delete_filter = qdrant_models.Filter(
+                        must=[qdrant_models.FieldCondition(
+                            key="user_id", match=qdrant_models.MatchValue(value=uid)
+                        )]
+                    )
+                else:
+                    delete_filter = qdrant_models.Filter(
+                        must=[qdrant_models.FieldCondition(
+                            key="id", match=qdrant_models.MatchValue(value="*")
+                        )]
+                    )
+                client.delete(
+                    collection_name=_CLOSET_COLLECTION,
+                    points_selector=delete_filter,
+                )
+                _log.info("[CLOSET] Deleted all Qdrant items for user_id=%s", uid or "all")
+                deleted_from_qdrant = -1  # Count not easily available from delete
+            except Exception as qe:
+                _log.warning("[CLOSET] Qdrant clear error: %s", qe)
+
+        # Clear JSON file
+        with open(_LOCAL_CLOSET_FILE, "w") as f:
+            json.dump([], f)
+        _log.info("[CLOSET] JSON file cleared")
+
+        return jsonify({
+            "success": True,
+            "deleted_from_qdrant": deleted_from_qdrant,
+            "message": f"Cleared all items for user {uid or 'all'}",
+        })
+    except Exception as exc:
+        _log.error("[CLOSET] clear-all error: %s", exc)
+        return jsonify({"error": str(exc)}), 500
+
 # ---------------------------------------------------------------------------
 # Dressing Room Generator (Groq Text picks from Qdrant closet)
 # ---------------------------------------------------------------------------

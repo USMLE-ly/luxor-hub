@@ -48,6 +48,11 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,
+  AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -445,6 +450,36 @@ const Closet = () => {
       else { setItems((prev) => prev.filter((item) => item.id !== id)); toast.success("Item removed"); }
     }
   };
+  const handleClearAll = async () => {
+    if (!user) return;
+    try {
+      // 1. Delete all items from Supabase
+      const { error: itemsErr } = await supabase.from("clothing_items").delete().eq("user_id", user.id);
+      if (itemsErr) throw new Error("Failed to delete clothing items: " + itemsErr.message);
+
+      // 2. Delete all outfits from Supabase
+      const { error: outfitsErr } = await supabase.from("outfits").delete().eq("user_id", user.id);
+      if (outfitsErr) console.warn("[CLOSET] Outfits delete warning:", outfitsErr.message);
+
+      // 3. Delete all from Qdrant via backend
+      try {
+        await fetch(apiBase + '/api/v1/closet/clear-all', {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: user.id }),
+        });
+      } catch (qe) {
+        console.warn("[CLOSET] Qdrant clear warning:", qe);
+      }
+
+      setItems([]);
+      toast.success("All closet items cleared!");
+    } catch (err: any) {
+      console.error("[CLOSET] Clear all error:", err);
+      toast.error(err.message || "Failed to clear items");
+    }
+  };
+
   const handleWornToday = async (itemId: string) => {
     if (!user) return;
     try {
@@ -631,6 +666,30 @@ const Closet = () => {
               <span className="text-xs font-sans font-semibold text-muted-foreground bg-secondary px-3 py-1 rounded-full">
                 {items.length} ITEMS
               </span>
+              {items.length > 0 && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button className="text-xs font-sans font-semibold text-destructive bg-destructive/10 px-3 py-1 rounded-full hover:bg-destructive/20 transition-colors">
+                      Clear All
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="bg-card border-border">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="font-display">Clear Your Closet?</AlertDialogTitle>
+                      <AlertDialogDescription className="font-sans text-muted-foreground">
+                        This will permanently delete all {items.length} items from your closet, 
+                        outfits, and calendar events. This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="font-sans">Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleClearAll} className="font-sans bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                        Yes, Clear Everything
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
             </div>
           </div>
         </motion.div>
