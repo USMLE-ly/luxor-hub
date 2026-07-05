@@ -197,7 +197,7 @@ const Closet = () => {
     let mounted = true;
     const forceTimeout = setTimeout(() => {
       if (mounted) setLoading(false);
-    }, 3000);
+    }, 8000);
     const load = async () => {
       setLoading(true);
       try {
@@ -520,10 +520,8 @@ const Closet = () => {
       toast.dismiss();
       toast.success("All closet items cleared! Refreshing...");
 
-      // 4. Force a full page reload after a brief delay to let server catch up
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
+      // 4. Items have been cleared from Supabase + Qdrant + JSON
+      // No page reload needed — state already updated above
     } catch (err: any) {
       console.error("[CLOSET] Clear all error:", err);
       toast.dismiss();

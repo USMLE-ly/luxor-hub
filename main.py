@@ -291,8 +291,7 @@ def _migrate_json_to_qdrant():
         if not client:
             _log.error("[QDRANT] Migration skipped — Qdrant client is None")
             return
-        # Verify collection exists
-        _ensure_closet_collection(client)
+        # Collection was already (re)created by _init_qdrant, no need to recreate here
         result = client.scroll(
             collection_name=_CLOSET_COLLECTION, limit=5000, with_payload=True
         )
