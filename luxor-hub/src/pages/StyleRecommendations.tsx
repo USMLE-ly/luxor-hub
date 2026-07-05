@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Sparkles, Upload, Camera, Palette, ScanFaceIcon, User, Star, Lightbulb, AlertTriangle } from "lucide-react";
 import { humanizeText } from "@/lib/humanizer";
-import { CircularProgress } from "@/components/ui/circular-progress";
 import InfoCardsTable, { type RowData, type CellData } from "@/components/ui/info-cards-table";
 import GlassTabs, { type GlassTab } from "@/components/ui/glass-tabs";
 
@@ -98,31 +97,34 @@ export default function StyleRecommendationsPage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [progressValue, setProgressValue] = useState(0);
+  const [displayProgress, setDisplayProgress] = useState(0);
   const [progressStage, setProgressStage] = useState("");
   const [analysis, setAnalysis] = useState<StyleAnalysis | null>(null);
   const [recommendations, setRecommendations] = useState<Recommendations | null>(null);
   const [outfitReview, setOutfitReview] = useState<OutfitReview | null>(null);
   const [activeTab, setActiveTab] = useState<"analyze" | "recommendations" | "review">("analyze");
   const glassTabs: GlassTab[] = [
-    { id: "analyze", label: "Analysis", icon: <ScanFaceIcon className="w-4 h-4" /> },
-    { id: "recommendations", label: "Recommendations", icon: <Lightbulb className="w-4 h-4" /> },
-    { id: "review", label: "Review", icon: <Star className="w-4 h-4" /> },
+    { id: "analyze", label: "Analysis" },
+    { id: "recommendations", label: "Recommendations" },
+    { id: "review", label: "Review" },
   ];
 
   // ── Smooth auto-increment progress: 0 → 95% during loading, jumps to 100% on success ──
   useEffect(() => {
     if (!analyzing) {
+      setDisplayProgress(progressValue);
       return;
     }
+    setDisplayProgress(0);
     const timer = setInterval(() => {
-      setProgressValue(prev => {
+      setDisplayProgress(prev => {
         if (prev >= 95) return 95;
-        const increment = prev < 30 ? 3 : prev < 60 ? 2 : prev < 80 ? 1.5 : 1;
-        return Math.min(prev + increment, 95);
+        const inc = prev < 30 ? 3 : prev < 60 ? 2 : prev < 80 ? 1.5 : 1;
+        return Math.min(prev + inc, 95);
       });
     }, 200);
     return () => clearInterval(timer);
-  }, [analyzing]);
+  }, [analyzing, progressValue]);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -294,7 +296,7 @@ export default function StyleRecommendationsPage() {
           </p>
         </motion.div>
 
-        <div className="flex flex-col items-center gap-6 p-8 rounded-2xl border border-white/10 bg-zinc-900/30 backdrop-blur-sm">
+        <div className="relative flex flex-col items-center gap-6 p-8 rounded-2xl border border-white/10 bg-zinc-900/30 backdrop-blur-sm">
           {imagePreview ? (
             <div className="relative w-full max-w-md">
               <img src={imagePreview} alt="Upload" className="w-full h-auto max-h-[50vh] object-contain rounded-xl" />
@@ -316,10 +318,39 @@ export default function StyleRecommendationsPage() {
               {analyzing ? "Analyzing..." : "✨ Analyze Outfit"}
             </Button>
           </div>
-          {analyzing && (
-            <div className="w-full flex justify-center mt-6">
-              <CircularProgress progress={progressValue} label={progressStage} size={120} strokeWidth={8} />
-            </div>
+          {analyzing && imagePreview && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-transparent flex flex-col items-center justify-center gap-6 z-20 rounded-xl"
+            >
+              <div style={{ position: 'relative', width: '96px', height: '96px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ position: 'absolute', width: '100%', height: '100%', borderRadius: '50%', border: '4px solid rgba(255,255,255,0.06)', borderTopColor: '#e5c785', borderRightColor: '#d4b06a' }} className="animate-spin" />
+                <div style={{ position: 'absolute', width: '64px', height: '64px', borderRadius: '50%', backgroundColor: 'rgba(229, 199, 133, 0.12)' }} className="animate-pulse" />
+                <span style={{ fontSize: '16px', fontWeight: 600, color: 'rgba(229, 199, 133, 0.85)', zIndex: 1 }}>
+                  {displayProgress}%
+                </span>
+              </div>
+              <p className="text-sm text-white/70 font-medium tracking-wide">{progressStage}</p>
+            </motion.div>
+          )}
+          {analyzing && !imagePreview && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex flex-col items-center justify-center gap-6 mt-6"
+            >
+              <div style={{ position: 'relative', width: '96px', height: '96px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ position: 'absolute', width: '100%', height: '100%', borderRadius: '50%', border: '4px solid rgba(255,255,255,0.06)', borderTopColor: '#e5c785', borderRightColor: '#d4b06a' }} className="animate-spin" />
+                <div style={{ position: 'absolute', width: '64px', height: '64px', borderRadius: '50%', backgroundColor: 'rgba(229, 199, 133, 0.12)' }} className="animate-pulse" />
+                <span style={{ fontSize: '16px', fontWeight: 600, color: 'rgba(229, 199, 133, 0.85)', zIndex: 1 }}>
+                  {displayProgress}%
+                </span>
+              </div>
+              <p className="text-sm text-white/70 font-medium tracking-wide">{progressStage}</p>
+            </motion.div>
           )}
           {error && (
             <div className="flex items-center gap-2 text-red-400 text-sm bg-red-500/10 px-4 py-2 rounded-lg border border-red-500/30">
@@ -329,7 +360,13 @@ export default function StyleRecommendationsPage() {
           )}
         </div>
 
-
+        {/* ── Glass Tabs ── */}
+        <GlassTabs
+          tabs={glassTabs}
+          activeTab={activeTab}
+          onTabChange={(id) => setActiveTab(id as "analyze" | "recommendations" | "review")}
+          className="mt-6"
+        />
 
         <AnimatePresence mode="wait">
           {/* ── TAB: Analysis (Face + Body) ── */}

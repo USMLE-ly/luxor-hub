@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 export interface GlassTab {
   id: string;
   label: string;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   imageBg?: string;
   tintClass?: string;
 }
@@ -50,7 +50,7 @@ export default function GlassTabs({ tabs, activeTab, onTabChange, className }: G
               <div className={cn('absolute inset-0', tint)} />
             </div>
             <span className="relative z-10 flex items-center justify-center gap-2 text-sm font-medium">
-              {tab.icon} {tab.label}
+              {tab.icon && <>{tab.icon} </>}{tab.label}
             </span>
           </button>
         );
