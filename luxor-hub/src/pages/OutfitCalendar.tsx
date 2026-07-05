@@ -1607,6 +1607,13 @@ const OutfitCalendarInner = () => {
                 </Select>
               )}
               {/* Manual Clothing Picker */}
+              {!newEvent.outfitId && closetItems.length === 0 && (
+                <div className="text-center py-4 px-2 rounded-xl border border-dashed border-white/10">
+                  <Shirt className="w-6 h-6 text-white/20 mx-auto mb-2" />
+                  <p className="text-xs text-white/40">Your closet is empty.</p>
+                  <p className="text-[10px] text-white/30 mt-0.5">Add items to the Closet page first.</p>
+                </div>
+              )}
               {!newEvent.outfitId && closetItems.length > 0 && (
                 <div className="space-y-2">
                   <p className="text-xs font-sans font-medium text-muted-foreground">Or pick items from your closet:</p>
