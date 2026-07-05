@@ -1983,7 +1983,7 @@ RULES:
 
 OUTFIT_REVIEW_PROMPT = """You are ENI, a professional fashion critic. Review this outfit photo and score it honestly.
 
-Return EXACTLY this JSON:
+Respond in English only. Return EXACTLY this JSON:
 {
   "overall_score": 75,
   "scores": {

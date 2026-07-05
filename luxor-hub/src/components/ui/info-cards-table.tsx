@@ -85,32 +85,29 @@ const renderCellValue = (header: string, value: string | string[] | null) => {
   // Normalise input
   const items = Array.isArray(value) ? value : [value]
 
-  // ── "Why" column → sentence bullets with green check ──
-  if (header.toLowerCase() === "why") {
-    const text = items.join(" ")
-    const sentences = text.match(/[^.!?]+[.!?]+/g) || (text.length > 0 ? [text + "."] : [])
+  // ── Check if ALL items are recognised colour names → render as circles ──
+  const allColors = items.every((item) => getColorHex(item) !== "")
+  if (allColors) {
     return (
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm leading-snug">
-        {sentences.map((s, idx) => (
-          <span key={idx} className="inline-flex items-center gap-1">
-            <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-            <span className="text-white/80">{s.trim()}</span>
-          </span>
+        {items.map((item, vi) => (
+          <ColorCircle key={vi} name={item} />
         ))}
       </div>
     )
   }
 
-  // ── All other cells → detect colour names (render as circles) or plain text ──
+  // ── All other cells → split text into sentence bullets with green check ──
+  const text = items.join(" ")
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || (text.length > 0 ? [text + "."] : [])
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm leading-snug">
-      {items.map((item, vi) => {
-        const hex = getColorHex(item)
-        // If it's a recognised colour → colour circle
-        if (hex) return <ColorCircle key={vi} name={item} />
-        // Otherwise → plain white text
-        return <span key={vi} className="text-white/80 whitespace-nowrap">{item}</span>
-      })}
+      {sentences.map((s, idx) => (
+        <span key={idx} className="inline-flex items-center gap-1">
+          <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+          <span className="text-white/80">{s.trim()}</span>
+        </span>
+      ))}
     </div>
   )
 }

@@ -309,12 +309,26 @@ export default function StyleRecommendationsPage() {
           )}
           <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
 
-          {/* Single consolidated button */}
+          {/* Single consolidated button — glass-morphism white */}
           <div className="flex gap-3">
-            <Button onClick={handleFullAnalysis} disabled={!imagePreview || analyzing} className="gap-2">
-              {analyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-              {analyzing ? "Analyzing..." : "✨ Analyze Outfit"}
-            </Button>
+            <button
+              onClick={handleFullAnalysis}
+              disabled={!imagePreview || analyzing}
+              className="relative overflow-hidden rounded-xl px-6 py-3 text-slate-800 font-medium shadow-lg transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed enabled:hover:scale-105 bg-white/90 backdrop-blur-sm enabled:hover:bg-white"
+            >
+              {analyzing ? (
+                <span className="relative z-10 flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Analyzing...
+                </span>
+              ) : (
+                <span className="relative z-10 flex items-center gap-2">
+                  <Camera className="w-4 h-4" />
+                  Analyze Outfit
+                </span>
+              )}
+              <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/5" />
+            </button>
           </div>
           {analyzing && imagePreview && (
             <motion.div
@@ -427,10 +441,31 @@ export default function StyleRecommendationsPage() {
                 </div>
               )}
 
-              {/* Confidence Score */}
+              {/* Confidence Score — circular badge */}
               {recommendations && recommendations.confidence_score > 0 && (
-                <div className="text-center text-xs text-white/40">
-                  Overall recommendation confidence: <span className="text-white/70 font-semibold">{recommendations.confidence_score}%</span>
+                <div className="flex justify-center items-center gap-4 mt-4 p-4 rounded-xl border border-white/10 bg-zinc-900/40 backdrop-blur-sm">
+                  <div className="relative w-16 h-16 flex items-center justify-center flex-shrink-0">
+                    <svg className="absolute w-full h-full -rotate-90" viewBox="0 0 72 72">
+                      <circle cx="36" cy="36" r="30" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="5" />
+                      <motion.circle
+                        cx="36" cy="36" r="30"
+                        fill="none"
+                        stroke="#e5c785"
+                        strokeWidth="5"
+                        strokeLinecap="round"
+                        strokeDasharray={188.5}
+                        initial={{ strokeDashoffset: 188.5 }}
+                        animate={{ strokeDashoffset: 188.5 - (recommendations.confidence_score / 100) * 188.5 }}
+                        transition={{ duration: 1.5, ease: "easeOut" }}
+                        style={{ filter: "drop-shadow(0 0 4px rgba(229,199,133,0.4))" }}
+                      />
+                    </svg>
+                    <span className="text-base font-bold text-amber-200/90">{recommendations.confidence_score}%</span>
+                  </div>
+                  <div className="text-left">
+                    <p className="text-xs text-white/40 uppercase tracking-wider">Recommendation</p>
+                    <p className="text-sm font-medium text-white/80">Confidence Score</p>
+                  </div>
                 </div>
               )}
             </motion.div>
