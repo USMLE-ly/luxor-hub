@@ -605,6 +605,7 @@ CLOSET_PROMPT = """You are a professional fashion stylist. Given a user's closet
 
 Criteria: {occasion} occasion, {weather} weather, {color_palette} color palette.
 
+Respond exclusively in English. Do not use Chinese characters or any other language.
 RULES:
 1. Only use item IDs that exist in the list I provide — do NOT invent IDs
 2. Pick items that coordinate in color and style for the given occasion/weather
@@ -1721,6 +1722,7 @@ Return ONLY valid JSON with these exact keys (no other text, no code fences):
   "occasion": "Casual or Business or Party or Date Night or Sport or Any"
 }
 
+Respond exclusively in English. Do not use Chinese characters or any other language.
 RULES:
 - Be precise about garment type and color.
 - If the image is ambiguous, make your best guess.
@@ -1974,6 +1976,7 @@ Return EXACTLY this JSON structure:
   "confidence_score": 85
 }}
 
+Respond exclusively in English. Do not use Chinese characters or any other language.
 RULES:
 - Be HONEST. If something doesn't work, say it.
 - Never give fake compliments. Say "This color makes you look washed out" not "This is fine."
