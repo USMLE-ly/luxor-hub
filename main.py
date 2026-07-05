@@ -1934,175 +1934,186 @@ def closet_clear_all():
         return jsonify({"error": str(exc)}), 500
 
 
-@app.route("/api/v1/closet/force-clear", methods=["POST", "OPTIONS", "GET"], strict_slashes=False)
+@app.route("/api/v1/closet/force-clear", methods=["POST", "OPTIONS"], strict_slashes=False)
 def closet_force_clear():
     """NUCLEAR OPTION: Force-delete ALL items from Supabase + Qdrant + JSON.
     
-    This endpoint bypasses RLS if a valid service_role_key is provided.
-    Use ONLY when the normal Clear All button fails.
+    This endpoint bypasses RLS when SUPABASE_SERVICE_ROLE_KEY is set in the
+    server environment (Replit Secrets). Use ONLY when the normal Clear All
+    button fails.
     
-    Usage:
-      curl -X POST https://your-backend.com/api/v1/closet/force-clear \
+    Usage from terminal:
+      curl -X POST https://your-backend.replit.app/api/v1/closet/force-clear \
         -H "Content-Type: application/json" \
-        -d '{"user_id":"YOUR_USER_ID","service_role_key":"YOUR_SERVICE_ROLE_KEY"}'
+        -d '{"user_id":"UUID_FROM_BROWSER"}'
     
-    Get your service_role_key from: Supabase Dashboard > Project Settings > API > service_role key
+    Get your user_id from browser: DevTools -> Application -> Local Storage -> userId
     """
     if request.method == "OPTIONS":
         return "", 204
     
-    print(f"[FORCE-CLEAR] ====== NUCLEAR CLEAR INITIATED ======", flush=True)
+    print(f"[FORCE-CLEAR] ====== NUCLEAR CLEAR INITIATED =====", flush=True)
     
     try:
-        data = {}
-        if request.method == "POST":
-            data = request.get_json(silent=True) or {}
-        else:
-            data = request.args.to_dict()
-        
-        uid = data.get("user_id", "")
-        service_role_key = data.get("service_role_key", "")
-        print(f"[FORCE-CLEAR] user_id: {uid}", flush=True)
-        print(f"[FORCE-CLEAR] Has service_role_key: {bool(service_role_key)}", flush=True)
+        data = request.get_json(silent=True) or {}
+        uid = data.get("user_id", "").strip()
         
         if not uid:
-            return jsonify({"error": "Missing user_id"}), 400
+            return jsonify({"error": "Missing user_id. Provide it in the JSON body: {\"user_id\":\"your-uuid\"}"}), 400
+        
+        print(f"[FORCE-CLEAR] Target user_id: {uid}", flush=True)
+        
+        # Read service_role_key from environment variable first, fallback to request body
+        service_role_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "") or data.get("service_role_key", "")
+        print(f"[FORCE-CLEAR] Service role key source: {'env' if os.environ.get('SUPABASE_SERVICE_ROLE_KEY','') else 'request' if data.get('service_role_key','') else 'NONE'}", flush=True)
         
         results = {"qdrant": False, "json": False, "supabase": {}, "errors": []}
         
-        # STEP 1: Supabase deletion (with or without service_role_key)
-        if uid:
-            headers = {
-                "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVha2t3dmRqb3FzY2Vld2hzZmpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NjE2ODEsImV4cCI6MjA4NzIzNzY4MX0.2bqKl0gFyNESBduLwg6GNYbFIMwF5XjDw_9xlWd1Nfo",
-                "Content-Type": "application/json",
-                "Prefer": "return=minimal",
-            }
-            
-            if service_role_key:
-                # Service role key bypasses RLS — can delete any rows
-                headers["Authorization"] = f"Bearer {service_role_key}"
-                headers["apiKey"] = service_role_key
-                print(f"[FORCE-CLEAR] Using service_role_key (bypasses RLS)", flush=True)
-            else:
-                # Without service role key, try with anon key (will only work if RLS allows)
-                headers["Authorization"] = f"Bearer {headers['apikey']}"
-                print(f"[FORCE-CLEAR] No service_role_key — trying with anon key only", flush=True)
-            
-            supabase_rest_url = "https://uakkwvdjoqsceewhsfjb.supabase.co/rest/v1"
-            
-            tables_to_clear = [
-                "wear_logs",
-                "challenge_entries",
-                "user_badges",
-                "calendar_events",
-            ]
-            
-            # Delete simple tables first
-            for table in tables_to_clear:
-                try:
-                    url = f"{supabase_rest_url}/{table}?user_id=eq.{uid}"
-                    resp = requests.delete(url, headers=headers, timeout=15)
-                    print(f"[FORCE-CLEAR] {table}: {resp.status_code}", flush=True)
-                    results["supabase"][table] = resp.status_code
-                except Exception as e:
-                    results["supabase"][table] = str(e)[:100]
-                    results["errors"].append(f"{table}: {e}")
-            
-            # Delete outfit_items by fetching outfit_ids first
-            try:
-                outfit_resp = requests.get(
-                    f"{supabase_rest_url}/outfits?user_id=eq.{uid}&select=id",
-                    headers=headers,
-                    timeout=15,
-                )
-                print(f"[FORCE-CLEAR] Fetch outfits: {outfit_resp.status_code}", flush=True)
-                if outfit_resp.ok:
-                    outfit_ids = [o["id"] for o in outfit_resp.json()]
-                    if outfit_ids:
-                        for batch_start in range(0, len(outfit_ids), 50):
-                            batch = outfit_ids[batch_start:batch_start+50]
-                            conditions = " or ".join([f"outfit_id.eq.{oid}" for oid in batch])
-                            resp = requests.delete(
-                                f"{supabase_rest_url}/outfit_items?{conditions}",
-                                headers=headers, timeout=15,
-                            )
-                            print(f"[FORCE-CLEAR] outfit_items batch: {resp.status_code}", flush=True)
-            except Exception as e:
-                results["errors"].append(f"outfit_items: {e}")
-            
-            # Delete outfits
-            try:
-                resp = requests.delete(f"{supabase_rest_url}/outfits?user_id=eq.{uid}", headers=headers, timeout=15)
-                print(f"[FORCE-CLEAR] outfits: {resp.status_code}", flush=True)
-                results["supabase"]["outfits"] = resp.status_code
-            except Exception as e:
-                results["supabase"]["outfits"] = str(e)[:100]
-            
-            # Delete clothing_items
-            try:
-                resp = requests.delete(f"{supabase_rest_url}/clothing_items?user_id=eq.{uid}", headers=headers, timeout=15)
-                print(f"[FORCE-CLEAR] clothing_items: {resp.status_code}", flush=True)
-                results["supabase"]["clothing_items"] = resp.status_code
-            except Exception as e:
-                results["supabase"]["clothing_items"] = str(e)[:100]
+        # ---- STEP 1: Supabase deletion via REST API ----
+        SUPABASE_URL = "https://uakkwvdjoqsceewhsfjb.supabase.co"
+        SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVha2t3dmRqb3FzY2Vld2hzZmpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NjE2ODEsImV4cCI6MjA4NzIzNzY4MX0.2bqKl0gFyNESBduLwg6GNYbFIMwF5XjDw_9xlWd1Nfo"
+        supabase_rest_url = f"{SUPABASE_URL}/rest/v1"
         
-        # STEP 2: Clear Qdrant
+        headers = {
+            "apikey": SUPABASE_ANON_KEY,
+            "Content-Type": "application/json",
+            "Prefer": "return=minimal",
+        }
+        
+        if service_role_key:
+            # Service role key bypasses all RLS
+            headers["Authorization"] = f"Bearer {service_role_key}"
+            print(f"[FORCE-CLEAR] Using service_role_key — bypassing RLS", flush=True)
+        else:
+            # Without service role key, use anon key (will only work if RLS allows auth.uid() = user_id)
+            headers["Authorization"] = f"Bearer {SUPABASE_ANON_KEY}"
+            print(f"[FORCE-CLEAR] No service_role_key — using anon key (RLS will filter by auth.uid())", flush=True)
+        
+        # Delete tables in dependency order (children before parents)
+        tables_ordered = [
+            "wear_logs",
+            "challenge_entries",
+            "user_badges",
+            "calendar_events",
+        ]
+        
+        for table in tables_ordered:
+            try:
+                url = f"{supabase_rest_url}/{table}?user_id=eq.{uid}"
+                resp = requests.delete(url, headers=headers, timeout=15)
+                print(f"[FORCE-CLEAR] DELETE {table}: HTTP {resp.status_code}", flush=True)
+                results["supabase"][table] = resp.status_code
+                if not resp.ok and resp.status_code >= 400:
+                    # Try body for error details
+                    try:
+                        err_body = resp.json()
+                        print(f"[FORCE-CLEAR]   Error: {err_body}", flush=True)
+                    except:
+                        print(f"[FORCE-CLEAR]   Body: {resp.text[:200]}", flush=True)
+            except Exception as e:
+                results["supabase"][table] = f"EXCEPTION: {e}"
+                results["errors"].append(f"{table}: {e}")
+                print(f"[FORCE-CLEAR]   Exception: {e}", flush=True)
+        
+        # Delete outfit_items by fetching outfit_ids first
+        try:
+            outfit_resp = requests.get(
+                f"{supabase_rest_url}/outfits?user_id=eq.{uid}&select=id",
+                headers=headers, timeout=15,
+            )
+            print(f"[FORCE-CLEAR] GET outfits (for outfit_items): HTTP {outfit_resp.status_code}", flush=True)
+            if outfit_resp.ok:
+                outfit_ids = [o["id"] for o in outfit_resp.json()]
+                print(f"[FORCE-CLEAR]   Found {len(outfit_ids)} outfits", flush=True)
+                if outfit_ids:
+                    for batch_start in range(0, len(outfit_ids), 50):
+                        batch = outfit_ids[batch_start:batch_start+50]
+                        or_conds = " or ".join([f"outfit_id.eq.{oid}" for oid in batch])
+                        resp = requests.delete(
+                            f"{supabase_rest_url}/outfit_items?{or_conds}",
+                            headers=headers, timeout=15,
+                        )
+                        print(f"[FORCE-CLEAR] DELETE outfit_items batch: HTTP {resp.status_code}", flush=True)
+                        results["supabase"]["outfit_items_batch"] = resp.status_code
+        except Exception as e:
+            results["errors"].append(f"outfit_items: {e}")
+            print(f"[FORCE-CLEAR]   outfit_items exception: {e}", flush=True)
+        
+        # Delete outfits
+        try:
+            resp = requests.delete(f"{supabase_rest_url}/outfits?user_id=eq.{uid}", headers=headers, timeout=15)
+            print(f"[FORCE-CLEAR] DELETE outfits: HTTP {resp.status_code}", flush=True)
+            results["supabase"]["outfits"] = resp.status_code
+        except Exception as e:
+            results["supabase"]["outfits"] = f"EXCEPTION: {e}"
+            results["errors"].append(f"outfits: {e}")
+        
+        # Delete clothing_items last (has FK references)
+        try:
+            resp = requests.delete(f"{supabase_rest_url}/clothing_items?user_id=eq.{uid}", headers=headers, timeout=15)
+            print(f"[FORCE-CLEAR] DELETE clothing_items: HTTP {resp.status_code}", flush=True)
+            results["supabase"]["clothing_items"] = resp.status_code
+        except Exception as e:
+            results["supabase"]["clothing_items"] = f"EXCEPTION: {e}"
+            results["errors"].append(f"clothing_items: {e}")
+        
+        # ---- STEP 2: Clear Qdrant ----
         try:
             if _qdrant_closet is not None and qdrant_models is not None:
-                try:
-                    # Scroll through all and delete
-                    scroll_result = _qdrant_closet.scroll(
-                        collection_name=_CLOSET_COLLECTION,
-                        limit=5000,
-                        with_payload=True,
-                    )
-                    points = scroll_result[0] if isinstance(scroll_result, tuple) else scroll_result
-                    point_ids = [p.id for p in points]
-                    if point_ids:
-                        _qdrant_closet.delete(
-                            collection_name=_CLOSET_COLLECTION,
-                            points_selector=qdrant_models.PointIdsList(points=point_ids),
-                        )
-                    results["qdrant"] = True
-                    print(f"[FORCE-CLEAR] Qdrant cleared: {len(point_ids)} points", flush=True)
-                except Exception as qe:
-                    # Fallback: use filter
-                    _qdrant_closet.delete(
-                        collection_name=_CLOSET_COLLECTION,
-                        points_selector=qdrant_models.Filter(
-                            must=[qdrant_models.FieldCondition(
-                                key="user_id", match=qdrant_models.MatchValue(value=uid)
-                            )]
-                        ) if uid else qdrant_models.Filter(
-                            must=[qdrant_models.FieldCondition(
-                                key="id", match=qdrant_models.MatchValue(value="*")
-                            )]
-                        ),
-                    )
-                    results["qdrant"] = True
-                    print(f"[FORCE-CLEAR] Qdrant cleared (fallback)", flush=True)
+                # Use the same pattern as qdrant_delete_item (Filter-based deletion)
+                _qdrant_closet.delete(
+                    collection_name=_CLOSET_COLLECTION,
+                    points_selector=qdrant_models.Filter(
+                        must=[qdrant_models.FieldCondition(
+                            key="user_id", match=qdrant_models.MatchValue(value=uid)
+                        )]
+                    ) if uid else qdrant_models.Filter(
+                        must=[qdrant_models.FieldCondition(
+                            key="id", match=qdrant_models.MatchValue(value="*")
+                        )]
+                    ),
+                )
+                results["qdrant"] = True
+                print(f"[FORCE-CLEAR] Qdrant cleared for user_id={uid}", flush=True)
         except Exception as qe:
             results["errors"].append(f"qdrant: {qe}")
             print(f"[FORCE-CLEAR] Qdrant error: {qe}", flush=True)
         
-        # STEP 3: Clear JSON
+        # ---- STEP 3: Clear JSON file ----
         try:
             with open(_LOCAL_CLOSET_FILE, "w") as f:
                 json.dump([], f)
             results["json"] = True
+            print(f"[FORCE-CLEAR] JSON file cleared", flush=True)
         except Exception as je:
             results["errors"].append(f"json: {je}")
         
-        print(f"[FORCE-CLEAR] ====== RESULTS: {json.dumps(results)} ======", flush=True)
+        # ---- Determine overall success ----
+        supabase_ok = all(
+            isinstance(v, int) and 200 <= v < 300
+            for v in results["supabase"].values()
+        )
+        
+        print(f"[FORCE-CLEAR] ====== RESULTS =====", flush=True)
+        print(f"[FORCE-CLEAR] Supabase: {results['supabase']}", flush=True)
+        print(f"[FORCE-CLEAR] Qdrant: {results['qdrant']}", flush=True)
+        print(f"[FORCE-CLEAR] JSON: {results['json']}", flush=True)
+        print(f"[FORCE-CLEAR] Errors: {results['errors']}", flush=True)
         
         return jsonify({
-            "success": True,
+            "success": supabase_ok or results["qdrant"] or results["json"],
             "message": f"Force-clear completed for user {uid}",
             "results": results,
-            "note": "If Supabase deletions returned 401/403, you need a valid service_role_key from your Supabase dashboard."
+            "supabase_service_role_configured": bool(service_role_key),
+            "tips": [
+                "If Supabase deletions returned 401/403: Set SUPABASE_SERVICE_ROLE_KEY in Replit Secrets",
+                "Get the key from: Supabase Dashboard → Project Settings → API → service_role key",
+                "Then restart the server and try again.",
+                "Or simply use the red 'Clear All' button on luxor.ly/closet instead of curl.",
+            ],
         })
     except Exception as exc:
-        print(f"[FORCE-CLEAR] Fatal error: {exc}", flush=True)
+        print(f"[FORCE-CLEAR] FATAL: {exc}", flush=True)
         import traceback
         traceback.print_exc()
         return jsonify({"error": str(exc)}), 500
