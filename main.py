@@ -18,6 +18,7 @@ from concurrent.futures import TimeoutError as CFTimeoutError
 from datetime import datetime, timezone
 from typing import Any, Optional, Dict, List, cast
 import threading
+import fcntl
 
 import requests
 from flask import Flask, request, jsonify, send_from_directory, make_response
@@ -268,6 +269,45 @@ _LOCAL_CLOSET_FILE = os.path.join(BASE_DIR, "closet_items.json")
 _qdrant_closet: Any = None
 _CLOSET_COLLECTION = "luxor_closet"
 _json_lock = threading.Lock()
+# File-level lock for cross-process JSON writes (gunicorn workers)
+# Uses fcntl.flock which works across forked processes on POSIX systems
+_JSON_LOCK_FILE = os.path.join(BASE_DIR, ".closet_json.lock")
+def _acquire_json_lock():
+    """Acquire a cross-process file lock for JSON writes.
+    Returns the lock file descriptor (must be closed to release)."""
+    fd = os.open(_JSON_LOCK_FILE, os.O_CREAT | os.O_RDWR, 0o644)
+    fcntl.flock(fd, fcntl.LOCK_EX)
+    return fd
+
+def _release_json_lock(fd):
+    """Release the cross-process file lock."""
+    fcntl.flock(fd, fcntl.LOCK_UN)
+    os.close(fd)
+
+def _read_json_file():
+    """Thread-safe and process-safe read of closet_items.json."""
+    fd = _acquire_json_lock()
+    try:
+        with open(_LOCAL_CLOSET_FILE, 'r') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+    finally:
+        _release_json_lock(fd)
+
+def _write_json_file(items):
+    """Thread-safe and process-safe write of closet_items.json using atomic temp+rename."""
+    fd = _acquire_json_lock()
+    try:
+        # Write to temp file first, then atomically rename
+        tmp_path = _LOCAL_CLOSET_FILE + ".tmp"
+        with open(tmp_path, 'w') as f:
+            json.dump(items, f, indent=2)
+            f.flush()
+            os.fsync(f.fileno())
+        os.rename(tmp_path, _LOCAL_CLOSET_FILE)
+    finally:
+        _release_json_lock(fd)
 def _qdrant_error(stage: str, error: str, details: str = "") -> Dict[str, Any]:
     """Return a structured error dict for Qdrant failures."""
     return {
@@ -484,14 +524,23 @@ def qdrant_get_all_items(timeout: float = 8.0, user_id: str = "") -> List[Dict[s
                     key="user_id", match=qdrant_models.MatchValue(value=user_id)
                 )]
             )
-        result = client.scroll(
-            collection_name=_CLOSET_COLLECTION,
-            limit=1000,
-            with_payload=True,
-            scroll_filter=scroll_filter,
-        )
-        points = result[0] if isinstance(result, tuple) else result
-        return [dict(p.payload) for p in points if p.payload]
+        # Paginated scroll to handle all items (max 10000)
+        all_points = []
+        offset = None
+        while True:
+            result = client.scroll(
+                collection_name=_CLOSET_COLLECTION,
+                limit=1000,
+                with_payload=True,
+                scroll_filter=scroll_filter,
+                offset=offset,
+            )
+            points = result[0] if isinstance(result, tuple) else result
+            offset = result[1] if isinstance(result, tuple) and len(result) > 1 else None
+            all_points.extend(points)
+            if offset is None:
+                break
+        return [dict(p.payload) for p in all_points if p.payload]
 
     with ThreadPoolExecutor(max_workers=1) as executor:
         future = executor.submit(_do_scroll)
@@ -535,19 +584,12 @@ def qdrant_upsert_item(item: Dict[str, Any]) -> bool:
         except Exception as exc:
             _log.error("[QDRANT] Cloud upsert FAILED for item %s: %s", item_id, exc)
 
-    # 2. Always write to local JSON file as secondary persistence
+    # 2. Always write to local JSON file as secondary persistence (process-safe)
     try:
-        with _json_lock:
-            items = []
-            try:
-                with open(_LOCAL_CLOSET_FILE, 'r') as f:
-                    items = json.load(f)
-            except (FileNotFoundError, json.JSONDecodeError):
-                pass
-            items = [i for i in items if i.get("id") != item_id]
-            items.append(item)
-            with open(_LOCAL_CLOSET_FILE, 'w') as f:
-                json.dump(items, f, indent=2)
+        items = _read_json_file()
+        items = [i for i in items if i.get("id") != item_id]
+        items.append(item)
+        _write_json_file(items)
         _log.info("[CLOSET] Saved item to local file: %s (%s)", item.get("label", "unknown"), item_id)
         json_ok = True
     except Exception as exc:
@@ -590,12 +632,9 @@ def qdrant_delete_item(item_id: str) -> bool:
 
     # 2. Always delete from local file
     try:
-        with _json_lock:
-            with open(_LOCAL_CLOSET_FILE, 'r') as f:
-                items = json.load(f)
-            items = [i for i in items if i.get("id") != item_id]
-            with open(_LOCAL_CLOSET_FILE, 'w') as f:
-                json.dump(items, f, indent=2)
+        items = _read_json_file()
+        items = [i for i in items if i.get("id") != item_id]
+        _write_json_file(items)
         _log.info("[CLOSET] Deleted item %s from local file", item_id)
         json_ok = True
     except (FileNotFoundError, json.JSONDecodeError):
@@ -1671,18 +1710,21 @@ def closet_list():
         return "", 204
     # Primary: fetch from Qdrant Cloud (persists across restarts)
     uid = request.args.get("user_id", "")
+    # Retry Qdrant up to 2 times before falling back to JSON
+    for attempt in range(2):
+        try:
+            items = qdrant_get_all_items(user_id=uid, timeout=10.0)
+            _log.info("[CLOSET] list-items returning %d items from Qdrant (attempt %d)", len(items), attempt + 1)
+            return jsonify({"success": True, "items": items})
+        except Exception as qe:
+            if attempt == 0:
+                _log.warning("[CLOSET] Qdrant read attempt %d failed: %s — retrying...", attempt + 1, qe)
+            else:
+                _log.warning("[CLOSET] Qdrant read attempt %d failed: %s — falling back to JSON", attempt + 1, qe)
+    # Fallback: read from local JSON file (process-safe)
     try:
-        items = qdrant_get_all_items(user_id=uid)
-        _log.info("[CLOSET] list-items returning %d items from Qdrant", len(items))
-        return jsonify({"success": True, "items": items})
-    except Exception as qe:
-        _log.warning("[CLOSET] Qdrant read failed: %s — falling back to JSON", qe)
-    # Fallback: read from local JSON file
-    try:
-        print(f"[LIST-DEBUG] Reading from: {os.path.abspath(_LOCAL_CLOSET_FILE)}", flush=True)
-        with open(_LOCAL_CLOSET_FILE, "r") as f:
-            items = json.load(f)
-            if isinstance(items, list):
+        items = _read_json_file()
+        if isinstance(items, list):
                 # Filter by user_id if provided
                 if uid:
                     items = [i for i in items if i.get("user_id") == uid]
@@ -2000,9 +2042,8 @@ def closet_clear_all():
                 except Exception as qe2:
                     _log.warning("[CLOSET] Qdrant scroll delete also failed: %s", qe2)
 
-        # ---- STEP 3: Clear JSON file ----
-        with open(_LOCAL_CLOSET_FILE, "w") as f:
-            json.dump([], f)
+        # ---- STEP 3: Clear JSON file (process-safe) ----
+        _write_json_file([])
         _log.info("[CLOSET] JSON file cleared")
 
         result = {
@@ -2166,8 +2207,7 @@ def closet_force_clear():
         
         # ---- STEP 3: Clear JSON file ----
         try:
-            with open(_LOCAL_CLOSET_FILE, "w") as f:
-                json.dump([], f)
+            _write_json_file([])
             results["json"] = True
             print(f"[FORCE-CLEAR] JSON file cleared", flush=True)
         except Exception as je:
