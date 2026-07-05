@@ -94,11 +94,7 @@ const scheduleNotification = (title: string, body: string, delayMs: number) => {
 };
 
 const OutfitCalendar = () => {
-  return (
-    <TierGate requiredTier="pro" featureName="Outfit Calendar & Planning">
-      <OutfitCalendarInner />
-    </TierGate>
-  );
+  return <OutfitCalendarInner />;
 };
 
 const OutfitCalendarInner = () => {

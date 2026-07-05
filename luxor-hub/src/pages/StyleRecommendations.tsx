@@ -296,8 +296,11 @@ export default function StyleRecommendationsPage() {
 
         <div className="relative flex flex-col items-center gap-6 p-8 rounded-2xl border border-white/10 bg-zinc-900/30 backdrop-blur-sm">
           {imagePreview ? (
-            <div className="relative w-full max-w-md">
+            <div className="relative w-full max-w-md overflow-hidden rounded-xl">
               <img src={imagePreview} alt="Upload" className="w-full h-auto max-h-[50vh] object-contain rounded-xl" />
+              {analyzing && (
+                <div className="absolute inset-0 bg-black/30 backdrop-blur-md z-10" />
+              )}
               <button onClick={() => { setImagePreview(null); setAnalysis(null); setRecommendations(null); setOutfitReview(null); setError(null); }}
                 className="absolute top-2 right-2 p-2 rounded-full bg-black/60 hover:bg-black/80 text-white text-xs">✕</button>
             </div>
