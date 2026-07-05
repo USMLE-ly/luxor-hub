@@ -76,6 +76,8 @@ const ColorCircle = ({ name }: { name: string }) => {
 }
 
 /** Render a value that may be colour names → circles, a string, or null */
+const COLOR_COLUMNS = new Set(["Best Colors", "Avoid", "Accessories", "Shoes", "Jewelry"])
+
 const renderCellValue = (header: string, value: string | string[] | null) => {
   // ── Empty / null → Red X ──
   if (value === null || value === undefined) return null
@@ -85,14 +87,22 @@ const renderCellValue = (header: string, value: string | string[] | null) => {
   // Normalise input
   const items = Array.isArray(value) ? value : [value]
 
-  // ── Check if ALL items are recognised colour names → render as circles ──
-  const allColors = items.every((item) => getColorHex(item) !== "")
-  if (allColors) {
+  // ── Color columns (Best Colors, Avoid, Accessories, Shoes, Jewelry) → color circles, no checkmarks ──
+  if (COLOR_COLUMNS.has(header)) {
     return (
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm leading-snug">
-        {items.map((item, vi) => (
-          <ColorCircle key={vi} name={item} />
-        ))}
+        {items.map((item, vi) => {
+          const hex = getColorHex(item)
+          if (hex) {
+            return (
+              <div key={vi} className="flex items-center gap-1.5">
+                <div className="w-4 h-4 rounded-full shrink-0 border border-white/20" style={{ backgroundColor: hex }} />
+                <span className="text-white text-sm capitalize">{item}</span>
+              </div>
+            )
+          }
+          return <span key={vi} className="text-white/80 text-sm capitalize">{item}</span>
+        })}
       </div>
     )
   }
@@ -121,7 +131,7 @@ export default function InfoCardsTable({ rows = [] }: InfoCardsTableProps) {
   const allHeaders = Array.from(new Set(rows.flatMap((r) => r.columns.map((c) => c.header))))
 
   return (
-    <div className="w-full overflow-x-auto rounded-xl border border-white/10 bg-zinc-900/60 backdrop-blur-xl">
+    <div className="w-full overflow-x-auto rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md shadow-lg shadow-black/20">
       <div className="min-w-[900px]">
         <Table className="w-full">
           <TableHeader>
