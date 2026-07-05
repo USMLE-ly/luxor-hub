@@ -276,21 +276,31 @@ def _acquire_json_lock():
     """Acquire a cross-process file lock for JSON writes.
     Returns the lock file descriptor (must be closed to release)."""
     fd = os.open(_JSON_LOCK_FILE, os.O_CREAT | os.O_RDWR, 0o644)
+    print(f"[LOCK-DEBUG] Acquiring exclusive lock (fd={fd})", flush=True)
     fcntl.flock(fd, fcntl.LOCK_EX)
+    print(f"[LOCK-DEBUG] Acquired exclusive lock (fd={fd})", flush=True)
     return fd
 
 def _release_json_lock(fd):
     """Release the cross-process file lock."""
+    print(f"[LOCK-DEBUG] Releasing lock (fd={fd})", flush=True)
     fcntl.flock(fd, fcntl.LOCK_UN)
     os.close(fd)
+    print(f"[LOCK-DEBUG] Released lock (fd={fd})", flush=True)
 
 def _read_json_file():
     """Thread-safe and process-safe read of closet_items.json."""
     fd = _acquire_json_lock()
     try:
         with open(_LOCAL_CLOSET_FILE, 'r') as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
+            items = json.load(f)
+            print(f"[JSON-DEBUG] _read_json_file: loaded {len(items)} items from {_LOCAL_CLOSET_FILE}", flush=True)
+            return items
+    except FileNotFoundError:
+        print(f"[JSON-DEBUG] _read_json_file: file not found (fresh state)", flush=True)
+        return []
+    except json.JSONDecodeError:
+        print(f"[JSON-DEBUG] _read_json_file: CORRUPT JSON — returning empty", flush=True)
         return []
     finally:
         _release_json_lock(fd)
@@ -306,6 +316,10 @@ def _write_json_file(items):
             f.flush()
             os.fsync(f.fileno())
         os.rename(tmp_path, _LOCAL_CLOSET_FILE)
+        print(f"[JSON-DEBUG] _write_json_file: wrote {len(items)} items (temp+rename)", flush=True)
+    except Exception as e:
+        print(f"[JSON-DEBUG] _write_json_file: FAILED — {e}", flush=True)
+        raise
     finally:
         _release_json_lock(fd)
 def _qdrant_error(stage: str, error: str, details: str = "") -> Dict[str, Any]:
@@ -512,8 +526,10 @@ def qdrant_get_all_items(timeout: float = 8.0, user_id: str = "") -> List[Dict[s
     """
     from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
 
+    print(f"[QDRANT-DEBUG] qdrant_get_all_items called for user_id={user_id or 'all'}", flush=True)
     client = _qdrant_closet
     if client is None:
+        print(f"[QDRANT-DEBUG] Qdrant client is None — raising", flush=True)
         raise RuntimeError("Qdrant closet client is not initialized")
 
     def _do_scroll():
@@ -524,9 +540,11 @@ def qdrant_get_all_items(timeout: float = 8.0, user_id: str = "") -> List[Dict[s
                     key="user_id", match=qdrant_models.MatchValue(value=user_id)
                 )]
             )
+            print(f"[QDRANT-DEBUG] Using scroll filter for user_id={user_id}", flush=True)
         # Paginated scroll to handle all items (max 10000)
         all_points = []
         offset = None
+        pages = 0
         while True:
             result = client.scroll(
                 collection_name=_CLOSET_COLLECTION,
@@ -538,9 +556,12 @@ def qdrant_get_all_items(timeout: float = 8.0, user_id: str = "") -> List[Dict[s
             points = result[0] if isinstance(result, tuple) else result
             offset = result[1] if isinstance(result, tuple) and len(result) > 1 else None
             all_points.extend(points)
+            pages += 1
             if offset is None:
                 break
-        return [dict(p.payload) for p in all_points if p.payload]
+        payload_results = [dict(p.payload) for p in all_points if p.payload]
+        print(f"[QDRANT-DEBUG] Scrolled {pages} page(s), {len(payload_results)} total items (user_id={user_id or 'all'})", flush=True)
+        return payload_results
 
     with ThreadPoolExecutor(max_workers=1) as executor:
         future = executor.submit(_do_scroll)
@@ -550,9 +571,11 @@ def qdrant_get_all_items(timeout: float = 8.0, user_id: str = "") -> List[Dict[s
             return items
         except FuturesTimeout:
             _log.error("[QDRANT] Scroll timed out after %ss", timeout)
+            print(f"[QDRANT-DEBUG] Scroll TIMED OUT after {timeout}s", flush=True)
             raise TimeoutError(f"Qdrant scroll timed out after {timeout}s")
         except Exception as exc:
             _log.error("[QDRANT] Scroll error: %s", exc)
+            print(f"[QDRANT-DEBUG] Scroll error: {exc}", flush=True)
             raise
 def qdrant_upsert_item(item: Dict[str, Any]) -> bool:
     """Upsert an item to BOTH Qdrant Cloud and local JSON.
@@ -564,6 +587,9 @@ def qdrant_upsert_item(item: Dict[str, Any]) -> bool:
     item["id"] = item_id
     qdrant_ok = False
     json_ok = False
+    label = item.get("label", "unknown")
+
+    print(f"[UPSERT-DEBUG] Starting upsert for '{label}' (id={item_id})", flush=True)
 
     # 1. Upsert to Qdrant Cloud
     client = _qdrant_closet
@@ -571,6 +597,7 @@ def qdrant_upsert_item(item: Dict[str, Any]) -> bool:
         try:
             from uuid import uuid5, NAMESPACE_DNS
             point_id = str(uuid5(NAMESPACE_DNS, item_id))
+            print(f"[UPSERT-DEBUG] Qdrant point_id={point_id}", flush=True)
             client.upsert(
                 collection_name=_CLOSET_COLLECTION,
                 points=[qdrant_models.PointStruct(
@@ -580,20 +607,27 @@ def qdrant_upsert_item(item: Dict[str, Any]) -> bool:
                 )]
             )
             _log.info("[QDRANT] Upserted item %s to Qdrant Cloud", item_id)
+            print(f"[UPSERT-DEBUG] Qdrant upsert succeeded for '{label}'", flush=True)
             qdrant_ok = True
         except Exception as exc:
             _log.error("[QDRANT] Cloud upsert FAILED for item %s: %s", item_id, exc)
+            print(f"[UPSERT-DEBUG] Qdrant upsert FAILED for '{label}': {exc}", flush=True)
 
     # 2. Always write to local JSON file as secondary persistence (process-safe)
     try:
         items = _read_json_file()
+        print(f"[UPSERT-DEBUG] Read {len(items)} items from JSON before append", flush=True)
+        existing_ids = [i.get("id") for i in items]
+        was_dup = item_id in existing_ids
         items = [i for i in items if i.get("id") != item_id]
         items.append(item)
         _write_json_file(items)
-        _log.info("[CLOSET] Saved item to local file: %s (%s)", item.get("label", "unknown"), item_id)
+        print(f"[UPSERT-DEBUG] Wrote {len(items)} items to JSON after append (was_dup={was_dup})", flush=True)
+        _log.info("[CLOSET] Saved item to local file: %s (%s)", label, item_id)
         json_ok = True
     except Exception as exc:
         _log.error("[CLOSET] Local save FAILED for item %s: %s", item_id, exc)
+        print(f"[UPSERT-DEBUG] JSON save FAILED: {exc}", flush=True)
 
     if not qdrant_ok and json_ok:
         _log.warning("[QDRANT] Item %s saved to local file only (Qdrant unavailable)", item_id)
@@ -1675,8 +1709,11 @@ def closet_add():
         }
 
         # ---- Persist to Qdrant Cloud + JSON (dual-write) ----
-        print(f"[ADD-DEBUG] Received: {label} ({item_id})", flush=True)
-        print(f"[ADD-DEBUG] Writing to JSON at path: {os.path.abspath(_LOCAL_CLOSET_FILE)}", flush=True)
+        print(f"[ADD-DEBUG] ===== ADD ITEM START =====", flush=True)
+        print(f"[ADD-DEBUG] Label: '{label}', Category: {category}, Color: {color}, User: {user_id[:12]}...", flush=True)
+        print(f"[ADD-DEBUG] Item ID: {item_id}, Image URL: {image_url[:60] if image_url else 'NONE'}", flush=True)
+        print(f"[ADD-DEBUG] Image B64 length: {len(image_b64)}", flush=True)
+        print(f"[ADD-DEBUG] JSON path: {os.path.abspath(_LOCAL_CLOSET_FILE)}", flush=True)
         ok = qdrant_upsert_item(item)
         if not ok:
             _log.error("[CLOSET] Failed to persist item %s", item_id)
@@ -1686,11 +1723,11 @@ def closet_add():
         if image_b64:
             print(f"[ADD-DEBUG] Saved Base64 for '{label}', b64 length: {len(image_b64)}", flush=True)
         
-        # Verify the write by reading back
+        # Verify the write by reading back (process-safe)
         try:
-            with open(_LOCAL_CLOSET_FILE, 'r') as f:
-                verify_items = json.load(f)
+            verify_items = _read_json_file()
             print(f"[ADD-DEBUG] Save successful. Total items in JSON: {len(verify_items)}", flush=True)
+            print(f"[ADD-DEBUG] Items in JSON: {[v.get('id','')+':'+v.get('label','unnamed')[:20] for v in verify_items]}", flush=True)
         except Exception as ve:
             print(f"[ADD-DEBUG] Verification read failed: {ve}", flush=True)
         
@@ -1710,13 +1747,18 @@ def closet_list():
         return "", 204
     # Primary: fetch from Qdrant Cloud (persists across restarts)
     uid = request.args.get("user_id", "")
+    print(f"[LIST-DEBUG] ===== LIST ITEMS CALLED for user_id={uid} =====", flush=True)
     # Retry Qdrant up to 2 times before falling back to JSON
     for attempt in range(2):
         try:
             items = qdrant_get_all_items(user_id=uid, timeout=10.0)
+            print(f"[LIST-DEBUG] Qdrant attempt {attempt+1}: {len(items)} items returned", flush=True)
+            if items:
+                print(f"[LIST-DEBUG] Qdrant items: {[i.get('id','')+':'+i.get('label','unnamed')[:20] for i in items]}", flush=True)
             _log.info("[CLOSET] list-items returning %d items from Qdrant (attempt %d)", len(items), attempt + 1)
             return jsonify({"success": True, "items": items})
         except Exception as qe:
+            print(f"[LIST-DEBUG] Qdrant attempt {attempt+1} FAILED: {qe}", flush=True)
             if attempt == 0:
                 _log.warning("[CLOSET] Qdrant read attempt %d failed: %s — retrying...", attempt + 1, qe)
             else:
@@ -1724,6 +1766,7 @@ def closet_list():
     # Fallback: read from local JSON file (process-safe)
     try:
         items = _read_json_file()
+        print(f"[LIST-DEBUG] JSON fallback: {len(items)} items", flush=True)
         if isinstance(items, list):
                 # Filter by user_id if provided
                 if uid:
@@ -1736,6 +1779,7 @@ def closet_list():
         _log.error("[CLOSET] Corrupt JSON: %s — returning empty", e)
     except Exception as e:
         _log.error("[CLOSET] JSON fallback error: %s — returning empty", e)
+    print(f"[LIST-DEBUG] Returning EMPTY list", flush=True)
     return jsonify({"success": True, "items": []})
 @app.route("/api/v1/closet/delete-item", methods=["POST", "OPTIONS"], strict_slashes=False)
 def closet_delete():

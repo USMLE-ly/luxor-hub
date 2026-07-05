@@ -160,19 +160,22 @@ const Closet = () => {
   const receiptInputRef = useRef<HTMLInputElement>(null);
 
   const fetchItems = useCallback(async (): Promise<ClothingItem[]> => {
-    if (!user) return [];
+    if (!user) { console.log("[FETCH-DEBUG] No user — returning []"); return []; }
     try {
+      console.log("[FETCH-DEBUG] Fetching items from backend for user:", user.id.slice(0,12));
       const timeoutPromise = new Promise<Response>((_, reject) =>
-        setTimeout(() => reject(new Error("Request timed out")), 5000)
+        setTimeout(() => reject(new Error("Request timed out")), 10000)
       );
       const resp = await Promise.race([
         fetch(apiBase + '/api/v1/closet/list-items?user_id=' + encodeURIComponent(user.id)),
         timeoutPromise,
       ]);
-      if (!resp.ok) return [];
+      console.log("[FETCH-DEBUG] Response status:", resp.status);
+      if (!resp.ok) { console.log("[FETCH-DEBUG] Response not OK — returning []"); return []; }
       const data = await resp.json();
+      console.log("[FETCH-DEBUG] Backend returned success:", data.success, "items count:", data.items?.length);
       if (data.success && Array.isArray(data.items)) {
-        return data.items.map((item: any) => ({
+        const mapped = data.items.map((item: any) => ({
           id: item.id || '',
           name: item.label || item.name || null,
           category: item.category || item.type || 'other',
@@ -185,10 +188,13 @@ const Closet = () => {
           notes: item.notes || null,
           price: item.price || null,
         }));
+        console.log("[FETCH-DEBUG] Mapped", mapped.length, "items:", mapped.map(i => i.id.slice(0,8)+":"+(i.name||"unnamed")?.slice(0,15)));
+        return mapped;
       }
+      console.log("[FETCH-DEBUG] Backend returned empty/failed — returning []");
       return [];
     } catch (err) {
-      console.warn('[CLOSET] Fetch failed or timed out:', err);
+      console.warn('[FETCH-DEBUG] Fetch failed or timed out:', err);
       return [];
     }
   }, [user, apiBase]);
@@ -196,18 +202,22 @@ const Closet = () => {
   useEffect(() => {
     let mounted = true;
     const forceTimeout = setTimeout(() => {
-      if (mounted) setLoading(false);
+      if (mounted) { console.log("[EFFECT-DEBUG] Force timeout fired — setting loading=false"); setLoading(false); }
     }, 8000);
     const load = async () => {
       setLoading(true);
+      console.log("[EFFECT-DEBUG] Load effect running (fetchItems)");
       try {
         const mapped = await fetchItems();
+        console.log("[EFFECT-DEBUG] Load effect got", mapped.length, "items");
         if (mounted) {
+          console.log("[EFFECT-DEBUG] Setting items state to", mapped.length, "items");
           setItems(mapped);
           clearTimeout(forceTimeout);
           setLoading(false);
         }
       } catch (e) {
+        console.warn("[EFFECT-DEBUG] Load effect error:", e);
         if (mounted) {
           clearTimeout(forceTimeout);
           setLoading(false);
@@ -215,7 +225,7 @@ const Closet = () => {
       }
     };
     load();
-    return () => { mounted = false; clearTimeout(forceTimeout); };
+    return () => { console.log("[EFFECT-DEBUG] Cleanup — mounted=false"); mounted = false; clearTimeout(forceTimeout); };
   }, [fetchItems]);  // Re-fetch when fetchItems changes (e.g. user auth resolves)
 
   // Auto-remove backgrounds when flat-lay view is active
@@ -388,6 +398,8 @@ const Closet = () => {
       return;
     }
     setUploading(true);
+    const itemName = newItem.name || selectedFile?.name?.replace(/\.[^/.]+$/, "") || "Unknown item";
+    console.log("[CLOSET-UPLOAD] Starting upload:", itemName);
     try {
       let image_b64 = "";
       if (selectedFile) {
@@ -401,11 +413,12 @@ const Closet = () => {
           reader.readAsDataURL(selectedFile as Blob);
         });
       }
+      console.log("[CLOSET-UPLOAD] Sending to backend:", itemName, "b64 length:", image_b64.length);
       const resp = await fetch(apiBase + "/api/v1/closet/add-item", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: newItem.name || selectedFile?.name?.replace(/\.[^/.]+$/, "") || "Unknown item",
+          name: itemName,
           type: newItem.category || "other",
           color: newItem.color || "",
           category: newItem.category || "other",
@@ -421,11 +434,17 @@ const Closet = () => {
       });
       const data = await resp.json();
       if (!resp.ok) throw new Error(data.error || "Upload failed");
+      console.log("[CLOSET-UPLOAD] Backend response:", data);
       toast.success("Added. Your closet just got stronger.");
       setUploadOpen(false);
       setNewItem({ name: "", category: "top", color: "", brand: "", season: "all-season", occasion: "", style: "", notes: "", price: "" });
-      setSelectedFile(null); setPreviewUrl(null); const refreshed = await fetchItems(); setItems(refreshed);
-    } catch (err: any) { toast.error(err.message); }
+      setSelectedFile(null); setPreviewUrl(null);
+      console.log("[CLOSET-UPLOAD] Re-fetching items...");
+      const refreshed = await fetchItems();
+      console.log("[CLOSET-UPLOAD] fetchItems returned", refreshed.length, "items");
+      console.log("[CLOSET-UPLOAD] Items:", refreshed.map(i => i.id+":"+(i.name||"unnamed")?.slice(0,20)));
+      setItems(refreshed);
+    } catch (err: any) { console.error("[CLOSET-UPLOAD] Error:", err); toast.error(err.message); }
     finally { setUploading(false); }
   };
 
