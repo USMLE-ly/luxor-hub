@@ -136,12 +136,12 @@ const renderCellValue = (header: string, value: string | string[] | null) => {
   const text = items.join(" ")
   const sentences = text.match(/[^.!?]+[.!?]+/g) || (text.length > 0 ? [text + "."] : [])
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm leading-snug">
+    <div className="flex flex-wrap gap-x-3 gap-y-1 items-start text-sm">
       {sentences.map((s, idx) => (
-        <span key={idx} className="inline-flex items-center gap-1">
-          <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-          <span className="text-white/80">{s.trim()}</span>
-        </span>
+        <div key={idx} className="flex items-start gap-1.5">
+          <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+          <span className="text-white/90">{s.trim()}</span>
+        </div>
       ))}
     </div>
   )
@@ -156,7 +156,7 @@ export default function InfoCardsTable({ rows = [] }: InfoCardsTableProps) {
   const allHeaders = Array.from(new Set(rows.flatMap((r) => r.columns.map((c) => c.header))))
 
   return (
-    <div className="w-full overflow-x-auto rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md shadow-lg shadow-black/20">
+    <div className="relative w-full overflow-x-auto rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-black/20">
       <div className="min-w-[900px]">
         <Table className="w-full">
           <TableHeader>
