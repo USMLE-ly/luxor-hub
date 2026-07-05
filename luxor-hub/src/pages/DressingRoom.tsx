@@ -6,6 +6,8 @@ import IPhoneMockup from "@/components/ui/iphone-mockup";
 import { Perspective, Highlight } from "@/components/ui/perspective-highlight";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { CalendarDays, Check } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { humanizeTextArray } from "@/lib/humanizer";
 
 /* ------------------------------------------------------------------ */
@@ -29,6 +31,10 @@ export default function DressingRoomPage() {
   const [displayProgress, setDisplayProgress] = useState(0);
   const [progressStage, setProgressStage] = useState("");
   const [showOccasionModal, setShowOccasionModal] = useState(false);
+  const [showCalendarModal, setShowCalendarModal] = useState(false);
+  const [calendarDate, setCalendarDate] = useState("");
+  const [calendarEventTitle, setCalendarEventTitle] = useState("");
+  const [postingToCalendar, setPostingToCalendar] = useState(false);
   const [showCountModal, setShowCountModal] = useState(false);
   const [selectedOccasion, setSelectedOccasion] = useState("");
 
@@ -130,8 +136,74 @@ export default function DressingRoomPage() {
         return Math.min(prev + increment, 95);
       });
     }, 200);
-    return () => clearInterval(timer);
+    
+  const handlePostToCalendar = async () => {
+    if (!user || !activeOutfit || !calendarDate) return;
+    setPostingToCalendar(true);
+    try {
+      const outfitItems = [
+        { url: activeOutfit.top, type: "top" },
+        { url: activeOutfit.mid, type: "mid" },
+        { url: activeOutfit.bottom, type: "bottom" },
+      ].filter(item => item.url);
+      
+      const { error } = await supabase.from("calendar_events").insert({
+        user_id: user.id,
+        title: calendarEventTitle || "Dressing Room Outfit",
+        event_date: calendarDate,
+        occasion: "casual",
+        outfit_items: outfitItems,
+        mannequin_image_url: activeOutfit.top || null,
+        notes: activeOutfit.accessory_note || null,
+      });
+      
+      if (error) throw error;
+      toast.success("Outfit added to calendar!");
+      setShowCalendarModal(false);
+      setCalendarDate("");
+      setCalendarEventTitle("");
+    } catch (e: any) {
+      toast.error(e.message || "Failed to add to calendar");
+    } finally {
+      setPostingToCalendar(false);
+    }
+  };
+
+  return () => clearInterval(timer);
   }, [isGenerating]);
+
+  
+  const handlePostToCalendar = async () => {
+    if (!user || !activeOutfit || !calendarDate) return;
+    setPostingToCalendar(true);
+    try {
+      const outfitItems = [
+        { url: activeOutfit.top, type: "top" },
+        { url: activeOutfit.mid, type: "mid" },
+        { url: activeOutfit.bottom, type: "bottom" },
+      ].filter(item => item.url);
+      
+      const { error } = await supabase.from("calendar_events").insert({
+        user_id: user.id,
+        title: calendarEventTitle || "Dressing Room Outfit",
+        event_date: calendarDate,
+        occasion: "casual",
+        outfit_items: outfitItems,
+        mannequin_image_url: activeOutfit.top || null,
+        notes: activeOutfit.accessory_note || null,
+      });
+      
+      if (error) throw error;
+      toast.success("Outfit added to calendar!");
+      setShowCalendarModal(false);
+      setCalendarDate("");
+      setCalendarEventTitle("");
+    } catch (e: any) {
+      toast.error(e.message || "Failed to add to calendar");
+    } finally {
+      setPostingToCalendar(false);
+    }
+  };
 
   return (
     <AppLayout>
@@ -280,7 +352,40 @@ export default function DressingRoomPage() {
                       const pattern = new RegExp('(' + escaped.join('|') + ')', 'gi');
                       const parts = note.split(pattern);
                       
-                      return (
+                      
+  const handlePostToCalendar = async () => {
+    if (!user || !activeOutfit || !calendarDate) return;
+    setPostingToCalendar(true);
+    try {
+      const outfitItems = [
+        { url: activeOutfit.top, type: "top" },
+        { url: activeOutfit.mid, type: "mid" },
+        { url: activeOutfit.bottom, type: "bottom" },
+      ].filter(item => item.url);
+      
+      const { error } = await supabase.from("calendar_events").insert({
+        user_id: user.id,
+        title: calendarEventTitle || "Dressing Room Outfit",
+        event_date: calendarDate,
+        occasion: "casual",
+        outfit_items: outfitItems,
+        mannequin_image_url: activeOutfit.top || null,
+        notes: activeOutfit.accessory_note || null,
+      });
+      
+      if (error) throw error;
+      toast.success("Outfit added to calendar!");
+      setShowCalendarModal(false);
+      setCalendarDate("");
+      setCalendarEventTitle("");
+    } catch (e: any) {
+      toast.error(e.message || "Failed to add to calendar");
+    } finally {
+      setPostingToCalendar(false);
+    }
+  };
+
+  return (
                         <p key={i} className="text-sm text-gray-300 leading-relaxed">
                           {parts.map((part, pi) => {
                             const isKeyword = fashionTerms.some(t => t.toLowerCase() === part.toLowerCase());
@@ -295,6 +400,21 @@ export default function DressingRoomPage() {
                   </div>
                 </div>
               </Perspective>
+            )}
+            
+            {/* Post to Calendar Button */}
+            {activeOutfit && (
+              <button
+                onClick={() => {
+                  setCalendarDate(new Date().toISOString().split("T")[0]);
+                  setCalendarEventTitle("");
+                  setShowCalendarModal(true);
+                }}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-black/20 text-white/80 hover:text-white hover:border-white/20 transition-all text-sm font-medium"
+              >
+                <CalendarDays className="w-4 h-4" />
+                Add to Calendar
+              </button>
             )}
           </motion.div>
         )}
@@ -323,7 +443,40 @@ export default function DressingRoomPage() {
                   <div className="grid grid-cols-2 gap-3">
                     {OCCASIONS.map((occ, idx) => {
                       const occColors: Array<'red' | 'purple' | 'green'> = ['red', 'green', 'purple', 'blue', 'amber'];
-                      return (
+                      
+  const handlePostToCalendar = async () => {
+    if (!user || !activeOutfit || !calendarDate) return;
+    setPostingToCalendar(true);
+    try {
+      const outfitItems = [
+        { url: activeOutfit.top, type: "top" },
+        { url: activeOutfit.mid, type: "mid" },
+        { url: activeOutfit.bottom, type: "bottom" },
+      ].filter(item => item.url);
+      
+      const { error } = await supabase.from("calendar_events").insert({
+        user_id: user.id,
+        title: calendarEventTitle || "Dressing Room Outfit",
+        event_date: calendarDate,
+        occasion: "casual",
+        outfit_items: outfitItems,
+        mannequin_image_url: activeOutfit.top || null,
+        notes: activeOutfit.accessory_note || null,
+      });
+      
+      if (error) throw error;
+      toast.success("Outfit added to calendar!");
+      setShowCalendarModal(false);
+      setCalendarDate("");
+      setCalendarEventTitle("");
+    } catch (e: any) {
+      toast.error(e.message || "Failed to add to calendar");
+    } finally {
+      setPostingToCalendar(false);
+    }
+  };
+
+  return (
                         <button
                           key={occ.id}
                           onClick={() => handleOccasionSelect(occ.id)}
@@ -349,7 +502,75 @@ export default function DressingRoomPage() {
           )}
         </AnimatePresence>
 
+        {/* ---- Calendar Date Picker Modal ---- */}
+        <AnimatePresence>
+          {showCalendarModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+              onClick={() => setShowCalendarModal(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-zinc-900/95 border border-white/10 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <CalendarDays className="w-5 h-5 text-amber-400" />
+                  Add to Calendar
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm text-white/60 block mb-1.5">Event Title</label>
+                    <input
+                      type="text"
+                      value={calendarEventTitle}
+                      onChange={(e) => setCalendarEventTitle(e.target.value)}
+                      placeholder="e.g., Casual Friday Outfit"
+                      className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-amber-400/50 placeholder:text-white/30"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-white/60 block mb-1.5">Date</label>
+                    <input
+                      type="date"
+                      value={calendarDate}
+                      onChange={(e) => setCalendarDate(e.target.value)}
+                      className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-amber-400/50"
+                    />
+                  </div>
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      onClick={() => setShowCalendarModal(false)}
+                      className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-white/60 hover:text-white hover:bg-white/5 transition-all text-sm"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handlePostToCalendar}
+                      disabled={!calendarDate || postingToCalendar}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-900 font-semibold text-sm hover:scale-[1.02] transition-transform disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      {postingToCalendar ? (
+                        <span className="inline-block w-4 h-4 border-2 border-slate-900/30 border-t-slate-900 rounded-full animate-spin" />
+                      ) : (
+                        <Check className="w-4 h-4" />
+                      )}
+                      {postingToCalendar ? "Adding..." : "Add to Calendar"}
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* ---- Count Modal ---- */}
+        
         <AnimatePresence>
           {showCountModal && (
             <motion.div
@@ -372,7 +593,40 @@ export default function DressingRoomPage() {
                   <div className="grid grid-cols-3 gap-3">
                     {[1, 2, 3].map((num, idx) => {
                       const countColors: Array<'red' | 'purple' | 'green'> = ['amber', 'green', 'purple'];
-                      return (
+                      
+  const handlePostToCalendar = async () => {
+    if (!user || !activeOutfit || !calendarDate) return;
+    setPostingToCalendar(true);
+    try {
+      const outfitItems = [
+        { url: activeOutfit.top, type: "top" },
+        { url: activeOutfit.mid, type: "mid" },
+        { url: activeOutfit.bottom, type: "bottom" },
+      ].filter(item => item.url);
+      
+      const { error } = await supabase.from("calendar_events").insert({
+        user_id: user.id,
+        title: calendarEventTitle || "Dressing Room Outfit",
+        event_date: calendarDate,
+        occasion: "casual",
+        outfit_items: outfitItems,
+        mannequin_image_url: activeOutfit.top || null,
+        notes: activeOutfit.accessory_note || null,
+      });
+      
+      if (error) throw error;
+      toast.success("Outfit added to calendar!");
+      setShowCalendarModal(false);
+      setCalendarDate("");
+      setCalendarEventTitle("");
+    } catch (e: any) {
+      toast.error(e.message || "Failed to add to calendar");
+    } finally {
+      setPostingToCalendar(false);
+    }
+  };
+
+  return (
                         <button
                           key={num}
                           onClick={() => handleCountSelect(num)}

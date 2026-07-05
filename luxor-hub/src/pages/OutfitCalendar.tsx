@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/app/AppLayout";
@@ -958,7 +958,7 @@ const OutfitCalendarInner = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="mb-5 rounded-2xl p-4 relative overflow-hidden"
+            className="mb-5 rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-black/20 p-4 relative overflow-hidden"
             style={{
               background: "linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--secondary)) 100%)",
               border: "1px solid hsl(var(--border))",
@@ -1012,7 +1012,7 @@ const OutfitCalendarInner = () => {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="rounded-2xl overflow-hidden mb-5"
+          className="rounded-2xl overflow-hidden mb-5 border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-black/20"
           style={{
             border: "1px solid hsl(var(--border))",
             background: "hsl(var(--card))",
@@ -1136,7 +1136,7 @@ const OutfitCalendarInner = () => {
               animate={{ opacity: 1, height: "auto", scale: 1 }}
               exit={{ opacity: 0, height: 0, scale: 0.97 }}
               transition={{ type: "spring", stiffness: 300, damping: 30, mass: 0.8 }}
-              className="rounded-2xl mb-5 relative overflow-hidden"
+              className="rounded-2xl mb-5 border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-black/20 relative overflow-hidden"
               style={{
                 background: "hsl(var(--card))",
                 border: "1px solid hsl(var(--border))",

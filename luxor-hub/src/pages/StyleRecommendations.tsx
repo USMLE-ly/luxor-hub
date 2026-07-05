@@ -1,9 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { AppLayout } from "@/components/app/AppLayout";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, Sparkles, Upload, Camera, Palette, ScanFaceIcon, User, Star, Lightbulb, AlertTriangle } from "lucide-react";
+import { Loader2, Upload, Camera, Palette, ScanFaceIcon, User, Star, Lightbulb, AlertTriangle } from "lucide-react";
 import { humanizeText } from "@/lib/humanizer";
 import InfoCardsTable, { type RowData, type CellData } from "@/components/ui/info-cards-table";
 import FashionReviewCard from "@/components/ui/fashion-review-card";
