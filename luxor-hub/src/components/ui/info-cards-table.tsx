@@ -39,8 +39,36 @@ const getColorHex = (str: string): string => {
     emerald: "#50C878", cobalt: "#0047AB", slate: "#708090", ebony: "#555D50",
     mocha: "#4A3728", rust: "#B7410E", lavender: "#E6E6FA", mint: "#98FF98",
     champagne: "#F7E7CE", nude: "#E3BC9A", pastel: "#FFD1DC", neon: "#39FF14",
+    /* Extended palette for AI-generated colour names */
+    "soft pink": "#FFB6C1", "dusty blue": "#7CB9E8", "muted lavender": "#C9A0DC",
+    "bright orange": "#FFA500", "acid yellow": "#DFFF00", "neon green": "#39FF14",
+    rose_gold: "#B76E79", "soft brown": "#A67B5B", "deep burgundy": "#8B0033",
+    "midnight blue": "#191970", "forest green": "#228B22", crimson: "#DC143C",
+    magenta: "#FF00FF", cyan: "#00FFFF", aqua: "#00FFFF", violet: "#8A2BE2",
+    plum: "#DDA0DD", "coral pink": "#F88379", "baby blue": "#89CFF0",
+    "dusty rose": "#C08080", "pale pink": "#FADADD", "hot pink": "#FF69B4",
+    "salmon pink": "#FF91A4", "burnt orange": "#CC5500", "mustard yellow": "#FFDB58",
+    "lemon yellow": "#FFF44F", "lime green": "#32CD32", "sage green": "#BCB88A",
+    "mint green": "#98FF98", "sky blue": "#87CEEB", "steel blue": "#4682B4",
+    "royal blue": "#4169E1", "navy blue": "#000080", "wine red": "#722F37",
+    "brick red": "#CB4154", "copper brown": "#B87333", "chocolate brown": "#7B3F00",
+    "dark brown": "#654321", "light brown": "#A0522D", "sand brown": "#C2B280",
+    "golden yellow": "#FFDF00", "pale yellow": "#FFFACD", "cream white": "#FFFDD0",
+    "off white": "#FAF9F6", "ivory white": "#FFFFF0", "charcoal grey": "#36454F",
+    "dark grey": "#A9A9A9", "light grey": "#D3D3D3", "pale grey": "#E8E8E8",
+    "warm grey": "#808080", "cool grey": "#8F9E9E", "true red": "#FF0000",
+    "cherry red": "#DE3163", "ruby red": "#9B111E", "raspberry": "#E30B5C",
+    "fuchsia pink": "#FF00FF", "lilac purple": "#C8A2C8", "orchid purple": "#DA70D6",
+    "deep purple": "#800080", "aubergine": "#614051", "mauve pink": "#E0B0FF",
+    "pale blue": "#AFEEEE", "powder blue": "#B0E0E6", "ice blue": "#99FFFF",
+    "silver grey": "#C0C0C0", "pewter grey": "#8BA8B0", "gunmetal grey": "#2C3539",
+    "bronze brown": "#CD7F32", "copper red": "#B87333", "rust orange": "#B7410E",
+    cinnamon: "#D2691E", "honey brown": "#D4A017", caramel: "#AF6E4D",
+    "champagne gold": "#F7E7CE", "antique gold": "#CFB53B", "pale gold": "#E6BE8A",
+    "pearl white": "#F5F5F5", "bone white": "#F9F6EE", "linen white": "#FAF0E6",
   }
-  return colorMap[str.toLowerCase().trim()] || ""
+  const key = str.toLowerCase().trim().replace(/_/g, " ")
+  return colorMap[key] || colorMap[key.replace(/\s+/g, " ")] || "#808080"
 }
 
 /* ------------------------------------------------------------------ */
@@ -93,15 +121,12 @@ const renderCellValue = (header: string, value: string | string[] | null) => {
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm leading-snug">
         {items.map((item, vi) => {
           const hex = getColorHex(item)
-          if (hex) {
-            return (
-              <div key={vi} className="flex items-center gap-1.5">
-                <div className="w-4 h-4 rounded-full shrink-0 border border-white/20" style={{ backgroundColor: hex }} />
-                <span className="text-white text-sm capitalize">{item}</span>
-              </div>
-            )
-          }
-          return <span key={vi} className="text-white/80 text-sm capitalize">{item}</span>
+          return (
+            <div key={vi} className="flex items-center gap-1.5">
+              <div className="w-4 h-4 rounded-full shrink-0 border border-white/20" style={{ backgroundColor: hex || "#808080" }} />
+              <span className="text-white text-sm capitalize">{item}</span>
+            </div>
+          )
         })}
       </div>
     )
@@ -177,7 +202,8 @@ export default function InfoCardsTable({ rows = [] }: InfoCardsTableProps) {
                         key={header}
                         className={cn(
                           "py-4 px-4 border-r border-white/5 last:border-r-0 align-top",
-                          header.toLowerCase() === "why" && "min-w-[300px]"
+                          header.toLowerCase() === "why" && "min-w-[300px]",
+                          !COLOR_COLUMNS.has(header) && header.toLowerCase() !== "why" && "min-w-[200px]"
                         )}
                       >
                         <div className="flex items-start justify-center gap-2 min-h-[28px]">
