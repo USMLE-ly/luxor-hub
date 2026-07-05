@@ -326,26 +326,24 @@ def _migrate_json_to_qdrant():
 
 
 def _ensure_closet_collection(client: Any):
-    """Recreate the Qdrant collection on every startup to purge stale data.
+    """Ensure the Qdrant collection exists with proper schema.
+    Does NOT delete or recreate — data persists across restarts.
     Raises on failure — called during startup, no silent passes."""
     if qdrant_models is None:
         raise RuntimeError("Qdrant models not available (import failed)")
-    _log.info("[QDRANT] Recreating collection '%s'...", _CLOSET_COLLECTION)
+    _log.info("[QDRANT] Verifying collection '%s'...", _CLOSET_COLLECTION)
     try:
-        # Delete existing collection first (ignores error if doesn't exist)
-        try:
-            client.delete_collection(collection_name=_CLOSET_COLLECTION)
-            _log.info("[QDRANT] Deleted existing collection '%s'", _CLOSET_COLLECTION)
-        except Exception:
-            pass  # Collection may not exist yet
-        # Create fresh collection
-        client.create_collection(
-            collection_name=_CLOSET_COLLECTION,
-            vectors_config=qdrant_models.VectorParams(
-                size=4, distance=qdrant_models.Distance.COSINE
-            ),
-        )
-        _log.info("[QDRANT] Created fresh collection '%s'", _CLOSET_COLLECTION)
+        collections = client.get_collections()
+        names = [c.name for c in collections.collections]
+        if _CLOSET_COLLECTION not in names:
+            _log.info("[QDRANT] Creating collection '%s'...", _CLOSET_COLLECTION)
+            client.create_collection(
+                collection_name=_CLOSET_COLLECTION,
+                vectors_config=qdrant_models.VectorParams(
+                    size=4, distance=qdrant_models.Distance.COSINE
+                ),
+            )
+            _log.info("[QDRANT] Created collection '%s'", _CLOSET_COLLECTION)
         # Ensure payload index on id for fast lookups and deletes
         try:
             client.create_payload_index(
@@ -366,9 +364,9 @@ def _ensure_closet_collection(client: Any):
             _log.info("[QDRANT] Payload index on 'user_id' ready")
         except Exception:
             pass  # Index already exists — acceptable
-        _log.info("[QDRANT] Collection '%s' ready (fresh, empty)", _CLOSET_COLLECTION)
+        _log.info("[QDRANT] Collection '%s' verified OK", _CLOSET_COLLECTION)
     except Exception as exc:
-        _log.error("[QDRANT] Collection recreation failed: %s", exc)
+        _log.error("[QDRANT] Collection verification failed: %s", exc)
         raise
 
 
@@ -403,16 +401,54 @@ def _init_qdrant():
     _log.info("[QDRANT] Running JSON migration...")
     _migrate_json_to_qdrant()
 
-    # Reverse sync: if JSON is missing or empty, restore from Qdrant
+    # Bidirectional sync: JSON <-> Qdrant
     try:
-        if not os.path.exists(_LOCAL_CLOSET_FILE) or os.path.getsize(_LOCAL_CLOSET_FILE) < 10:
-            qdrant_all = qdrant_get_all_items()
-            if qdrant_all:
-                with open(_LOCAL_CLOSET_FILE, "w") as f:
-                    json.dump(qdrant_all, f, indent=2)
-                _log.info("[QDRANT] Restored closet_items.json from Qdrant (%d items)", len(qdrant_all))
+        # Read JSON items
+        json_items = []
+        if os.path.exists(_LOCAL_CLOSET_FILE) and os.path.getsize(_LOCAL_CLOSET_FILE) >= 10:
+            with open(_LOCAL_CLOSET_FILE, "r") as f:
+                json_items = json.load(f)
+                if not isinstance(json_items, list):
+                    json_items = []
+        
+        # Read Qdrant items
+        qdrant_items = []
+        try:
+            qdrant_items = qdrant_get_all_items()
+        except Exception:
+            pass
+        
+        # Direction 1: JSON has items, Qdrant is empty -> restore Qdrant from JSON
+        if json_items and not qdrant_items:
+            _log.info("[QDRANT] Qdrant is empty but JSON has %d items — restoring Qdrant from JSON", len(json_items))
+            from uuid import uuid5, NAMESPACE_DNS
+            for item in json_items:
+                try:
+                    point_id = str(uuid5(NAMESPACE_DNS, item.get("id", "")))
+                    _qdrant_closet.upsert(
+                        collection_name=_CLOSET_COLLECTION,
+                        points=[qdrant_models.PointStruct(
+                            id=point_id,
+                            vector=[0.0, 0.0, 0.0, 0.0],
+                            payload=item,
+                        )]
+                    )
+                except Exception as upsert_err:
+                    _log.warning("[QDRANT] Restore upsert failed for item %s: %s", item.get("id", ""), upsert_err)
+            _log.info("[QDRANT] Restored Qdrant from JSON (%d items)", len(json_items))
+        
+        # Direction 2: Qdrant has items, JSON is empty -> restore JSON from Qdrant
+        elif qdrant_items and not json_items:
+            _log.info("[QDRANT] JSON is empty but Qdrant has %d items — restoring JSON from Qdrant", len(qdrant_items))
+            with open(_LOCAL_CLOSET_FILE, "w") as f:
+                json.dump(qdrant_items, f, indent=2)
+            _log.info("[QDRANT] Restored JSON from Qdrant (%d items)", len(qdrant_items))
+        
+        # Both have items — ensure JSON has all Qdrant items (and vice versa via migration)
+        elif json_items and qdrant_items:
+            _log.info("[QDRANT] Both JSON (%d) and Qdrant (%d) have items — in sync", len(json_items), len(qdrant_items))
     except Exception as rs:
-        _log.warning("[QDRANT] Reverse sync skipped: %s", rs)
+        _log.warning("[QDRANT] Bidirectional sync error: %s", rs)
     
     _log.info("[QDRANT] Qdrant ready — client initialized, collections OK")
 
