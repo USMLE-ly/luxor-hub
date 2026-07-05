@@ -56,7 +56,7 @@ const getColorHex = (str: string): string => {
     "golden yellow": "#FFDF00", "pale yellow": "#FFFACD", "cream white": "#FFFDD0",
     "off white": "#FAF9F6", "ivory white": "#FFFFF0", "charcoal grey": "#36454F",
     "dark grey": "#A9A9A9", "light grey": "#D3D3D3", "pale grey": "#E8E8E8",
-    "warm grey": "#808080", "cool grey": "#8F9E9E", "true red": "#FF0000",
+    "warm grey": "#808080", "true red": "#FF0000",
     "cherry red": "#DE3163", "ruby red": "#9B111E", "raspberry": "#E30B5C",
     "fuchsia pink": "#FF00FF", "lilac purple": "#C8A2C8", "orchid purple": "#DA70D6",
     "deep purple": "#800080", "aubergine": "#614051", "mauve pink": "#E0B0FF",
