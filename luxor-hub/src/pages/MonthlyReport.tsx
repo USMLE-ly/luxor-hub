@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from "react";
-import TierGate from "@/components/app/TierGate";
 import { motion } from "framer-motion";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
@@ -56,11 +55,7 @@ const seasonIcon = (s: string) => {
 };
 
 const MonthlyReport = () => {
-  return (
-    <TierGate requiredTier="elite" featureName="Monthly Style Report">
-      <MonthlyReportInner />
-    </TierGate>
-  );
+  return <MonthlyReportInner />;
 };
 
 const MonthlyReportInner = () => {

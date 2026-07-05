@@ -116,7 +116,7 @@ const AppContent = () => {
             <Route path="/community-gallery" element={<PaywallGate><CommunityGallery /></PaywallGate>} />
             <Route path="/install" element={<Install />} />
             <Route path="/council" element={<PaywallGate><Council /></PaywallGate>} />
-            <Route path="/monthly-report" element={<PaywallGate><MonthlyReport /></PaywallGate>} />
+            <Route path="/monthly-report" element={<MonthlyReport />} />
             <Route path="/wardrobe-value" element={<PaywallGate><WardrobeValue /></PaywallGate>} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogArticle />} />
