@@ -272,7 +272,7 @@ const MonthlyReportInner = () => {
             {/* Cost-Per-Wear Analytics */}
             {cpwAnalytics && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }}
-                className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-black/20 p-4 overflow-hidden"><div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent pointer-events-none" />
+                className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-black/20 p-4 overflow-hidden">
                 <div className="flex items-center gap-2 mb-3">
                   <DollarSign className="w-4 h-4 text-emerald-500" />
                   <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.15em]">Cost-Per-Wear Analytics</p>
@@ -362,6 +362,67 @@ const MonthlyReportInner = () => {
               </motion.div>
             )}
 
+            {/* Seasonal Wardrobe Analysis */}
+            {(() => { if (closetItems.length === 0) { return <div className="text-center py-8"><Shirt className="w-8 h-8 text-white/20 mx-auto mb-2" /><p className="text-xs text-white/40">Your wardrobe is empty. Add items to your closet to see seasonal rotation recommendations.</p></div>; } if (seasonalAnalysis.rotateIn.length > 0 || seasonalAnalysis.rotateOut.length > 0) { return (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24 }}
+                className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-black/20 p-4 overflow-hidden">
+                <div className="flex items-center gap-2 mb-1">
+                  {seasonIcon(seasonalAnalysis.next)}
+                  <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.15em]">Seasonal Rotation</p>
+                </div>
+                <p className="text-[10px] font-sans text-muted-foreground mb-3">
+                  Preparing for <span className="capitalize font-medium text-foreground">{seasonalAnalysis.next}</span> — {seasonalAnalysis.allSeason} all-season items ready
+                </p>
+
+                {seasonalAnalysis.rotateIn.length > 0 && (
+                  <div className="mb-3">
+                    <p className="text-[10px] font-sans font-semibold text-emerald-500 mb-2 flex items-center gap-1">
+                      <ArrowUpRight className="w-3 h-3" /> Rotate In for {seasonalAnalysis.next}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {seasonalAnalysis.rotateIn.map((item, i) => (
+                        <div key={i} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                          {item.photo_url ? (
+                            <div className="w-6 h-6 rounded bg-white/90 dark:bg-white/80 overflow-hidden flex-shrink-0">
+                              <img src={item.photo_url} alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "multiply" }} />
+                            </div>
+                          ) : (
+                            <Shirt className="w-3.5 h-3.5 text-emerald-500/60" />
+                          )}
+                          <span className="text-[10px] font-sans text-foreground capitalize">{item.name || item.category}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {seasonalAnalysis.rotateOut.length > 0 && (
+                  <div>
+                    <p className="text-[10px] font-sans font-semibold text-orange-400 mb-2 flex items-center gap-1">
+                      <ArrowDownRight className="w-3 h-3" /> Store Away ({seasonalAnalysis.current})
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {seasonalAnalysis.rotateOut.map((item, i) => (
+                        <div key={i} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-orange-500/10 border border-orange-500/20">
+                          {item.photo_url ? (
+                            <div className="w-6 h-6 rounded bg-white/90 dark:bg-white/80 overflow-hidden flex-shrink-0">
+                              <img src={item.photo_url} alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "multiply" }} />
+                            </div>
+                          ) : (
+                            <Shirt className="w-3.5 h-3.5 text-orange-400/60" />
+                          )}
+                          <span className="text-[10px] font-sans text-foreground capitalize">{item.name || item.category}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            );
+
+            } return null;
+
+            })()}
 
             {/* Most Worn Items */}
             {stats.mostWorn.length > 0 && (
@@ -451,14 +512,16 @@ const MonthlyReportInner = () => {
             )}
 
             {/* Empty state */}
-            {events.length === 0 && !cpwAnalytics && seasonalAnalysis.rotateIn.length === 0 && seasonalAnalysis.rotateOut.length === 0 && (
-              <div className="text-center py-12">
-                <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mx-auto mb-3">
-                  <BarChart3 className="w-7 h-7 text-muted-foreground/40" />
-                </div>
-                <p className="text-muted-foreground font-sans text-sm">No outfits planned this month</p>
-                <p className="text-muted-foreground/60 font-sans text-xs mt-0.5">Head to Outfit Schedule to start planning!</p>
-              </div>
+            {!loading && events.length === 0 && !cpwAnalytics && seasonalAnalysis.rotateIn.length === 0 && seasonalAnalysis.rotateOut.length === 0 && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-black/20 p-8 text-center mt-4 overflow-hidden">
+                <CalendarDays className="w-10 h-10 text-amber-500/50 mx-auto mb-3" />
+                <h3 className="text-sm font-semibold text-white/70 mb-1">No Data Yet</h3>
+                <p className="text-xs text-white/40 max-w-md mx-auto">
+                  Start planning outfits in your calendar and adding items to your closet.
+                  Your monthly style report will appear here once you have data.
+                </p>
+              </motion.div>
             )}
           </div>
         )}
@@ -468,74 +531,3 @@ const MonthlyReportInner = () => {
 };
 
 export default MonthlyReport;
-            {/* Seasonal Wardrobe Analysis */}
-            {(() => {
-              if (closetItems.length === 0) {
-                return (
-                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                    className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-black/20 p-6 text-center">
-                    <Shirt className="w-8 h-8 text-white/20 mx-auto mb-2" />
-                    <p className="text-xs text-white/40">Your wardrobe is empty. Add items to your closet to see seasonal rotation recommendations.</p>
-                  </motion.div>
-                );
-              }
-              if (seasonalAnalysis.rotateIn.length > 0 || seasonalAnalysis.rotateOut.length > 0) {
-                return (
-                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24 }}
-                    className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-black/20 p-4 overflow-hidden">
-                    <div className="flex items-center gap-2 mb-1">
-                      {seasonIcon(seasonalAnalysis.next)}
-                      <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.15em]">Seasonal Rotation</p>
-                    </div>
-                    <p className="text-[10px] font-sans text-muted-foreground mb-3">
-                      Preparing for <span className="capitalize font-medium text-foreground">{seasonalAnalysis.next}</span> — {seasonalAnalysis.allSeason} all-season items ready
-                    </p>
-
-                    {seasonalAnalysis.rotateIn.length > 0 && (
-                      <div className="mb-3">
-                        <p className="text-[10px] font-sans font-semibold text-emerald-500 mb-2 flex items-center gap-1">
-                          <ArrowUpRight className="w-3 h-3" /> Rotate In for {seasonalAnalysis.next}
-                        </p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {seasonalAnalysis.rotateIn.map((item, i) => (
-                            <div key={i} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-                              {item.photo_url ? (
-                                <div className="w-6 h-6 rounded bg-white/90 dark:bg-white/80 overflow-hidden flex-shrink-0">
-                                  <img src={item.photo_url} alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "multiply" }} />
-                                </div>
-                              ) : (
-                                <Shirt className="w-3.5 h-3.5 text-emerald-500/60" />
-                              )}
-                              <span className="text-[10px] font-sans text-foreground capitalize">{item.name || item.category}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {seasonalAnalysis.rotateOut.length > 0 && (
-                      <div>
-                        <p className="text-[10px] font-sans font-semibold text-orange-400 mb-2 flex items-center gap-1">
-                          <ArrowDownRight className="w-3 h-3" /> Store Away ({seasonalAnalysis.current})
-                        </p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {seasonalAnalysis.rotateOut.map((item, i) => (
-                            <div key={i} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-orange-500/10 border border-orange-500/20">
-                              {item.photo_url ? (
-                                <div className="w-6 h-6 rounded bg-white/90 dark:bg-white/80 overflow-hidden flex-shrink-0">
-                                  <img src={item.photo_url} alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "multiply" }} />
-                                </div>
-                              ) : (
-                                <Shirt className="w-3.5 h-3.5 text-orange-400/60" />
-                              )}
-                              <span className="text-[10px] font-sans text-foreground capitalize">{item.name || item.category}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </motion.div>
-                );
-              }
-              return null;
-            })()}
