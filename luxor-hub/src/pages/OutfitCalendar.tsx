@@ -5,6 +5,7 @@ import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { notifyEvent } from "@/lib/notificationService";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { OutfitComposition } from "@/components/ui/OutfitComposition";
 import {

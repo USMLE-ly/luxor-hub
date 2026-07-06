@@ -1,4 +1,5 @@
 import { ReactNode, useEffect } from "react";
+import { scheduleEngagementNudges, clearEngagementNudges } from "@/lib/notificationService";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
@@ -16,6 +17,14 @@ export function AppLayout({ children }: { children: ReactNode }) {
       navigate("/auth");
     }
   }, [user, isReady, navigate]);
+
+  // Schedule re-engagement notifications
+  useEffect(() => {
+    if (isReady && user) {
+      scheduleEngagementNudges();
+    }
+    return () => clearEngagementNudges();
+  }, [isReady, user]);
 
   // Show spinner while auth is still hydrating
   if (!isReady || loading) {

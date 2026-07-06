@@ -1838,7 +1838,20 @@ def closet_list():
                 _log.warning("[CLOSET] Qdrant read attempt %d failed: %s — retrying...", attempt + 1, qe)
             else:
                 _log.warning("[CLOSET] Qdrant read attempt %d failed: %s — returning empty", attempt + 1, qe)
-    print(f"[LIST-DEBUG] Qdrant unavailable — returning empty list", flush=True)
+    # Fallback to local JSON file when Qdrant is unavailable
+    try:
+        json_items = _read_json_file()
+        if uid:
+            json_items = [i for i in json_items if i.get("user_id", "").strip() == uid.strip()]
+        if json_items:
+            _log.info("[CLOSET] Qdrant unavailable — returning %d items from JSON fallback", len(json_items))
+            print(f"[LIST-DEBUG] JSON fallback: returning {len(json_items)} items from file", flush=True)
+            return jsonify({"success": True, "items": json_items, "source": "json_fallback"})
+    except Exception as je:
+        _log.error("[CLOSET] JSON fallback ALSO failed: %s", je)
+        print(f"[LIST-DEBUG] JSON fallback failed: {je}", flush=True)
+
+    print(f"[LIST-DEBUG] All sources exhausted — returning empty", flush=True)
     return jsonify({"success": True, "items": []})
 @app.route("/api/v1/closet/delete-item", methods=["POST", "OPTIONS"], strict_slashes=False)
 def closet_delete():

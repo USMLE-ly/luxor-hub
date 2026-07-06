@@ -7,6 +7,7 @@ import { Perspective, Highlight } from "@/components/ui/perspective-highlight";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { CalendarDays, Check } from "lucide-react";
+import { notifyEvent } from "@/lib/notificationService";
 import { LiquidGlassCard } from "@/components/ui/liquid-notification";
 import { supabase } from "@/integrations/supabase/client";
 import { humanizeTextArray } from "@/lib/humanizer";
@@ -89,6 +90,7 @@ export default function DressingRoomPage() {
         setGeneratedImages(normalized);
         setDisplayProgress(100);
         toast.success(`${data.images.length} outfits generated!`);
+        notifyEvent("outfit-generated");
       } else {
         toast.error("No outfits returned. Try again.");
       }
