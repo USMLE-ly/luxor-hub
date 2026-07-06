@@ -215,6 +215,38 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
     };
   }, []);
 
+  // ── Extract edge colors from outfit images (background expansion) ──
+  const extractColorsRef = useRef<AbortController | null>(null);
+  useEffect(() => {
+    if (!outfits[currentIndex]) return;
+    extractColorsRef.current?.abort();
+    const ctrl = new AbortController();
+    extractColorsRef.current = ctrl;
+
+    const outfit = outfits[currentIndex];
+    const { sections } = getSections(outfit);
+    const outfitsKey = outfit.top + '-' + outfit.mid + '-' + outfit.bottom;
+
+    sections.forEach((url, idx) => {
+      if (!url?.startsWith('http')) return;
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        if (ctrl.signal.aborted) return;
+        const sectionKey = outfitsKey + '-' + idx;
+        const bgColor = extractEdgeColor(img);
+        setSectionBgColors(prev => ({ ...prev, [sectionKey]: bgColor }));
+      };
+      img.onerror = () => {}; // ignore
+      img.src = url;
+    });
+
+    return () => ctrl.abort();
+  }, [currentIndex, outfits]);
+
+  // ── Wait for preloaded images before flipping back in ──
+  const pendingPreloadRef = useRef<Promise<void> | null>(null);
+
   // ── Domino flip state machine ──
   useEffect(() => {
     if (flipState === 'idle') return;
@@ -225,11 +257,20 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
 
     if (flipState === 'out') {
       const delay = (sectionCount - 1) * DOMINO_DELAY + FLIP_SPEED + 50;
-      flipTimeoutRef.current = setTimeout(() => {
+      flipTimeoutRef.current = setTimeout(async () => {
+        // Swap to the next outfit while sections are hidden (rotated out)
         setCurrentIndex(prev => {
           if (animDirection === 'next') return (prev + 1) % outfits.length;
           return (prev - 1 + outfits.length) % outfits.length;
         });
+
+        // Wait for preloaded images to be ready (should be instant if cache hit)
+        if (pendingPreloadRef.current) {
+          try { await pendingPreloadRef.current; } catch {}
+        }
+
+        // Small RAF to ensure DOM paints new backgroundImage before flip-in
+        await new Promise(resolve => requestAnimationFrame(resolve));
         setFlipState('in');
       }, delay);
     }
@@ -241,36 +282,38 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
     }
   }, [flipState, animDirection, outfits, currentIndex]);
 
+
+
   const triggerFlip = (direction: 'next' | 'prev') => {
     if (flipState !== 'idle') return;
     setAnimDirection(direction);
     setFlipState('out');
   };
 
-  const handleNext = async () => {
+  const handleNext = () => {
     if (flipState !== 'idle' || outfits.length === 0) return;
     const nextIndex = (currentIndex + 1) % outfits.length;
     const nextOutfit = outfits[nextIndex];
     if (nextOutfit) {
-      await Promise.all([
+      pendingPreloadRef.current = Promise.all([
         preloadImage(nextOutfit.top),
         preloadImage(nextOutfit.mid),
         preloadImage(nextOutfit.bottom),
-      ]);
+      ]).then(() => {});
     }
     triggerFlip('next');
   };
 
-  const handlePrev = async () => {
+  const handlePrev = () => {
     if (flipState !== 'idle' || outfits.length === 0) return;
     const nextIndex = (currentIndex - 1 + outfits.length) % outfits.length;
     const nextOutfit = outfits[nextIndex];
     if (nextOutfit) {
-      await Promise.all([
+      pendingPreloadRef.current = Promise.all([
         preloadImage(nextOutfit.top),
         preloadImage(nextOutfit.mid),
         preloadImage(nextOutfit.bottom),
-      ]);
+      ]).then(() => {});
     }
     triggerFlip('prev');
   };
@@ -315,6 +358,7 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
     const outfitsKey = outfits[currentIndex]?.top + '-' + outfits[currentIndex]?.mid + '-' + outfits[currentIndex]?.bottom;
     const sectionKey = outfitsKey + '-' + idx;
     const bgColor = sectionBgColors[sectionKey] || '#0a0a0a';
+    const url = sections[idx];
     
     return {
       position: 'absolute',
@@ -330,6 +374,10 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: bgColor,
+      backgroundImage: url?.startsWith('http') ? `url('${url}')` : 'none',
+      backgroundSize: 'contain',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
       borderRadius: '12px',
       zIndex: 1,
     };
@@ -345,35 +393,8 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
       overflow: 'hidden',
     }}>
       {sections.map((url, idx) => {
-        console.log(`[FLIP-GALLERY] Attempting to load background image: ${url}`);
         return (
-        <div key={idx} style={getSectionStyle(idx)}>
-          {url?.startsWith('http') ? (
-            <img
-              src={url}
-              alt={`Outfit ${currentIndex + 1} section ${idx + 1}`}
-              style={IMG_STYLE}
-              crossOrigin="anonymous"
-              onError={(e) => {
-                const target = e.currentTarget;
-                console.warn(`[FLIP-GALLERY] Image load FAILED for: ${url}`);
-                if (target.src !== 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7') {
-                  target.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-                }
-              }}
-              onLoad={(e) => {
-                console.log(`[FLIP-GALLERY] Image loaded OK: ${url}`);
-                const img = e.currentTarget;
-                const outfitsKey = outfits[currentIndex]?.top + '-' + outfits[currentIndex]?.mid + '-' + outfits[currentIndex]?.bottom;
-                const sectionKey = outfitsKey + '-' + idx;
-                const bgColor = extractEdgeColor(img);
-                setSectionBgColors(prev => ({ ...prev, [sectionKey]: bgColor }));
-              }}
-            />
-          ) : (
-            <div style={{ width: '100%', height: '100%', backgroundColor: '#111111' }} />
-          )}
-        </div>
+        <div key={idx} style={getSectionStyle(idx)} />
         );
       })}
 
