@@ -1,5 +1,6 @@
 import { ReactNode, useEffect } from "react";
 import { scheduleEngagementNudges, clearEngagementNudges } from "@/lib/notificationService";
+import { ClassicLoader } from "@/components/ui/loader";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
@@ -30,7 +31,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   if (!isReady || loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="border-primary flex h-10 w-10 animate-spin items-center justify-center rounded-full border-4 border-t-transparent"></div>
+        <ClassicLoader />
       </div>
     );
   }
