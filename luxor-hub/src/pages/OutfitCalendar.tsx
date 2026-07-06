@@ -1077,15 +1077,22 @@ const OutfitCalendarInner = () => {
                         });
 
                         // Split-screen for DressingRoom outfits in day cell
-                        if (allPhotos.length === 0 && dayEvents.some(ev => ev.outfit_type)) {
-                          const firstOutfitEv = dayEvents.find(ev => ev.outfit_type);
+                        // Detect DressingRoom outfits by checking for items with `url` key
+                        const hasDressingRoomItems = dayEvents.some(ev => {
+                          const evItems = Array.isArray(ev.outfit_items) ? ev.outfit_items : [];
+                          return evItems.some((i: any) => i.url);
+                        });
+                        if (allPhotos.length === 0 && hasDressingRoomItems) {
+                          const firstOutfitEv = dayEvents.find(ev => {
+                            const evItems = Array.isArray(ev.outfit_items) ? ev.outfit_items : [];
+                            return evItems.some((i: any) => i.url);
+                          });
                           if (firstOutfitEv) {
                             const evItems = Array.isArray(firstOutfitEv.outfit_items) ? firstOutfitEv.outfit_items : [];
                             const orderedItems = ['top', 'mid', 'bottom']
                               .map(t => evItems.find((i: any) => i.type === t))
                               .filter(Boolean);
                             if (orderedItems.length > 0) {
-                              const sectionCount = orderedItems.length;
                               return (
                                 <div className="flex-1 flex flex-col w-full rounded-lg bg-[#0a0a0a] overflow-hidden" style={{ minHeight: "60px" }}>
                                   {orderedItems.map((item: any, idx: number) => (
@@ -1243,9 +1250,8 @@ const OutfitCalendarInner = () => {
                         const photos = resolvedPhotos.slice(0, 5);
 
                         // Split-screen layout for DressingRoom outfits
-                        if (ev.outfit_type && ev.outfit_type !== 'full_outfit' && items.length > 0 && items.some((i: any) => i.url)) {
+                        if (items.length > 0 && items.some((i: any) => i.url)) {
                           const hasMid = items.some((i: any) => i.type === 'mid');
-                          const sectionCount = ev.outfit_type === 'dress' ? 2 : hasMid ? 3 : 2;
                           const orderedItems = ['top', 'mid', 'bottom']
                             .map(t => items.find((i: any) => i.type === t))
                             .filter(Boolean);
@@ -1908,83 +1914,87 @@ const OutfitCalendarInner = () => {
                   </div>
                 </div>
 
-                {flatLayEvent.outfit_type && flatLayEvent.outfit_type !== 'full_outfit' && 
-                  (() => {
-                    const items = Array.isArray(flatLayEvent.outfit_items) ? flatLayEvent.outfit_items : [];
-                    const orderedItems = ['top', 'mid', 'bottom']
-                      .map(t => items.find((i: any) => i.type === t))
-                      .filter(Boolean);
-                    if (orderedItems.length > 0) {
-                      return (
-                        <div className="rounded-xl overflow-hidden bg-[#0a0a0a]" style={{ minHeight: "300px" }}>
-                          <div className="flex flex-col h-80">
-                            {orderedItems.map((item: any, idx: number) => (
-                              <div
-                                key={idx}
-                                className="flex-1 border-b border-[#1a1a1a] last:border-b-0"
-                                style={{
-                                  backgroundImage: `url(${item.url})`,
-                                  backgroundSize: 'contain',
-                                  backgroundPosition: 'center',
-                                  backgroundRepeat: 'no-repeat',
-                                  backgroundColor: '#0a0a0a',
-                                }}
-                              />
-                            ))}
+                {(() => {
+                    const flItems = Array.isArray(flatLayEvent?.outfit_items) ? flatLayEvent.outfit_items : [];
+                    const hasUrlItems = flItems.some((i: any) => i.url);
+                    // DressingRoom outfits: vertical split-screen
+                    if (hasUrlItems) {
+                      const orderedItems = ['top', 'mid', 'bottom']
+                        .map(t => flItems.find((i: any) => i.type === t))
+                        .filter(Boolean);
+                      if (orderedItems.length > 0) {
+                        return (
+                          <div className="rounded-xl overflow-hidden bg-[#0a0a0a]" style={{ minHeight: "300px" }}>
+                            <div className="flex flex-col h-80">
+                              {orderedItems.map((item: any, idx: number) => (
+                                <div
+                                  key={idx}
+                                  className="flex-1 border-b border-[#1a1a1a] last:border-b-0"
+                                  style={{
+                                    backgroundImage: `url(${item.url})`,
+                                    backgroundSize: 'contain',
+                                    backgroundPosition: 'center',
+                                    backgroundRepeat: 'no-repeat',
+                                    backgroundColor: '#0a0a0a',
+                                  }}
+                                />
+                              ))}
+                            </div>
                           </div>
+                        );
+                      }
+                    }
+                    // Mannequin image (legacy outfits)
+                    if (flatLayEvent.mannequin_image_url) {
+                      return (
+                        <div className="rounded-xl overflow-hidden" style={{ background: "hsl(40 30% 96%)", border: "1px solid hsl(var(--border) / 0.4)" }}>
+                          <img
+                            src={flatLayEvent.mannequin_image_url}
+                            alt="Outfit"
+                            className="w-full h-64 object-contain p-4"
+                            style={{ mixBlendMode: "multiply" }}
+                          />
                         </div>
                       );
                     }
-                    return null;
+                    // Fallback: grid of closet items
+                    return (
+                      <div className="grid grid-cols-2 gap-3">
+                        {flItems.map((item: any, idx: number) => {
+                          const photoUrl = item?.photo_url || item?.photoUrl || item?.image_url || item?.imageUrl || item?.url;
+                          const itemName = item?.name || item?.category || `Item ${idx + 1}`;
+                          return (
+                            <motion.div
+                              key={idx}
+                              initial={{ opacity: 0, scale: 0.9 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ delay: idx * 0.06 }}
+                              className="rounded-xl overflow-hidden"
+                              style={{
+                                background: "hsl(40 30% 96%)",
+                                border: "1px solid hsl(var(--border) / 0.4)",
+                                boxShadow: "0 3px 12px -3px hsl(var(--foreground) / 0.08)",
+                              }}
+                            >
+                              {photoUrl ? (
+                                <div className="p-3">
+                                  <img src={photoUrl} alt={itemName} className="w-full aspect-square object-contain" style={{ mixBlendMode: "multiply" }} />
+                                </div>
+                              ) : (
+                                <div className="w-full aspect-square flex items-center justify-center" style={{ background: "hsl(var(--muted) / 0.2)" }}>
+                                  <Shirt className="w-8 h-8 text-muted-foreground/30" />
+                                </div>
+                              )}
+                              <div className="px-3 pb-2.5">
+                                <p className="text-xs font-medium text-foreground truncate">{itemName}</p>
+                              </div>
+                            </motion.div>
+                          );
+                        })}
+                      </div>
+                    );
                   })()
                 }
-
-                {!flatLayEvent.outfit_type && flatLayEvent.mannequin_image_url ? (
-                  <div className="rounded-xl overflow-hidden" style={{ background: "hsl(40 30% 96%)", border: "1px solid hsl(var(--border) / 0.4)" }}>
-                    <img
-                      src={flatLayEvent.mannequin_image_url}
-                      alt="Outfit"
-                      className="w-full h-64 object-contain p-4"
-                      style={{ mixBlendMode: "multiply" }}
-                    />
-                  </div>
-                ) : null}
-
-                {!flatLayEvent.outfit_type && !flatLayEvent.mannequin_image_url && (
-                  <div className="grid grid-cols-2 gap-3">
-                    {(Array.isArray(flatLayEvent.outfit_items) ? flatLayEvent.outfit_items : []).map((item: any, idx: number) => {
-                      const photoUrl = item?.photo_url || item?.photoUrl || item?.image_url || item?.imageUrl || item?.url;
-                      const itemName = item?.name || item?.category || `Item ${idx + 1}`;
-                      return (
-                        <motion.div
-                          key={idx}
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: idx * 0.06 }}
-                          className="rounded-xl overflow-hidden"
-                          style={{
-                            background: "hsl(40 30% 96%)",
-                            border: "1px solid hsl(var(--border) / 0.4)",
-                            boxShadow: "0 3px 12px -3px hsl(var(--foreground) / 0.08)",
-                          }}
-                        >
-                          {photoUrl ? (
-                            <div className="p-3">
-                              <img src={photoUrl} alt={itemName} className="w-full aspect-square object-contain" style={{ mixBlendMode: "multiply" }} />
-                            </div>
-                          ) : (
-                            <div className="w-full aspect-square flex items-center justify-center" style={{ background: "hsl(var(--muted) / 0.2)" }}>
-                              <Shirt className="w-8 h-8 text-muted-foreground/30" />
-                            </div>
-                          )}
-                          <div className="px-3 pb-2.5">
-                            <p className="text-xs font-medium text-foreground truncate">{itemName}</p>
-                          </div>
-                        </motion.div>
-                      );
-                    })}
-                  </div>
-                )}
 
                 {flatLayEvent.notes && (
                   <p className="text-xs text-muted-foreground italic text-center">"{flatLayEvent.notes}"</p>
