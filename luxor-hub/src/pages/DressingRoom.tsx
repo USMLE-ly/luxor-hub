@@ -198,16 +198,16 @@ export default function DressingRoomPage() {
         </motion.div>
 
         {/* ---- IPHONE MOCKUP + NOTIFICATIONS ---- */}
-        <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto gap-2 overflow-visible">
+        <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto gap-1 overflow-visible">
           {/* Top Notification — Outfit Title (above iPhone) */}
           <AnimatePresence>
             {showNotifications && activeOutfit && activeOutfit.stylist_reasoning && activeOutfit.stylist_reasoning.length > 0 && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.7, y: 60 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.7, y: 30 }}
+                initial={{ opacity: 0, scale: 0.7 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.7 }}
                 transition={{ type: "spring", stiffness: 100, damping: 25 }}
-                className="w-full flex justify-center"
+                className="w-full flex justify-center origin-center"
               >
                 <LiquidGlassCard
                   width="320px"
@@ -324,15 +324,15 @@ export default function DressingRoomPage() {
           {/* Three Bottom Notifications — Stylist Reasoning (below iPhone) */}
           <AnimatePresence>
             {showNotifications && activeOutfit && activeOutfit.stylist_reasoning && activeOutfit.stylist_reasoning.length > 0 && (
-              <div className="flex flex-col gap-2 w-full max-w-[340px]">
+              <div className="flex flex-col gap-1 w-full max-w-[340px]">
                 {activeOutfit.stylist_reasoning.slice(0, 3).map((note: string, i: number) => (
                   <motion.div
                     key={i}
-                    initial={{ opacity: 0, scale: 0.7, y: [-40,-60,-80][i] }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.7, y: [-20,-30,-40][i] }}
+                    initial={{ opacity: 0, scale: 0.7 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.7 }}
                     transition={{ delay: 0.15 * (i + 1), type: "spring", stiffness: 100, damping: 25 }}
-                    className="flex justify-center"
+                    className="flex justify-center origin-center"
                   >
                     <LiquidGlassCard
                       width="320px"
@@ -354,11 +354,11 @@ export default function DressingRoomPage() {
                 {/* Accessory Note (if present) */}
                 {activeOutfit.accessory_note && (
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.7, y: -100 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.7, y: -50 }}
+                    initial={{ opacity: 0, scale: 0.7 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.7 }}
                     transition={{ delay: 0.45, type: "spring", stiffness: 100, damping: 25 }}
-                    className="flex justify-center"
+                    className="flex justify-center origin-center"
                   >
                     <LiquidGlassCard
                       width="320px"
