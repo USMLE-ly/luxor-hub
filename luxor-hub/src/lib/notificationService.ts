@@ -234,14 +234,6 @@ export function clearEngagementNudges() {
   _sessionScheduled = false; // allow re-schedule on next mount
 }
 /* ------------------------------------------------------------------ */
-/*  Cleanup — call on unmount                                         */
-/* ------------------------------------------------------------------ */
-export function clearEngagementNudges() {
-  engagementTimers.forEach(t => clearTimeout(t));
-  engagementTimers = [];
-}
-
-/* ------------------------------------------------------------------ */
 /*  Trigger a one-off notification for an event                       */
 /* ------------------------------------------------------------------ */
 export function notifyEvent(eventType: string, metadata?: Record<string, string>) {
