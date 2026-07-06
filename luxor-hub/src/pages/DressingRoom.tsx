@@ -345,20 +345,6 @@ export default function DressingRoomPage() {
               </Perspective>
             )}
             
-            {/* Post to Calendar Button */}
-            {activeOutfit && (
-              <button
-                onClick={() => {
-                  setCalendarDate(new Date().toISOString().split("T")[0]);
-                  setCalendarEventTitle("");
-                  setShowCalendarModal(true);
-                }}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-black/20 text-white/80 hover:text-white hover:border-white/20 transition-all text-sm font-medium"
-              >
-                <CalendarDays className="w-4 h-4" />
-                Add to Calendar
-              </button>
-            )}
           </motion.div>
         )}
 

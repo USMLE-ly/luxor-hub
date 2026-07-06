@@ -29,7 +29,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-background pb-16">
+    <div className="min-h-screen bg-background pb-20">
       <AnimatePresence mode="wait">
         <PageTransition key={location.pathname}>
           <main>{children}</main>

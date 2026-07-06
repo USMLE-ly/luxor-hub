@@ -386,7 +386,10 @@ export default function StyleRecommendationsPage() {
           {/* ── TAB: Analysis (Face + Body) ── */}
           {activeTab === "analyze" && analysis && (
             <motion.div key="analysis" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md shadow-lg shadow-black/20 p-6"><div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent pointer-events-none" />
+              <div className="relative p-1.5 rounded-[1.75rem] bg-white/[0.03] border border-white/10 shadow-lg shadow-black/20">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/[0.07] via-transparent to-transparent pointer-events-none rounded-[1.75rem]" />
+                <div className="relative overflow-hidden rounded-[1.25rem] bg-white/5 backdrop-blur-md p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent pointer-events-none" />
                 <div className="flex items-center gap-2 mb-4"><span className="text-primary"><ScanFaceIcon className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-white/80">Face Analysis</h3></div>
                 <InfoRow label="Face Shape" value={analysis.face_shape} />
                 <InfoRow label="Eye Shape" value={analysis.eye_shape} />
@@ -395,8 +398,12 @@ export default function StyleRecommendationsPage() {
                 <InfoRow label="Lip Shape" value={analysis.lip_shape} />
                 <InfoRow label="Age Est." value={analysis.age_estimation} />
                 <InfoRow label="Gender" value={analysis.gender_presentation} />
+                </div>
               </div>
-              <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md shadow-lg shadow-black/20 p-6"><div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent pointer-events-none" />
+              <div className="relative p-1.5 rounded-[1.75rem] bg-white/[0.03] border border-white/10 shadow-lg shadow-black/20">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/[0.07] via-transparent to-transparent pointer-events-none rounded-[1.75rem]" />
+                <div className="relative overflow-hidden rounded-[1.25rem] bg-white/5 backdrop-blur-md p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent pointer-events-none" />
                 <div className="flex items-center gap-2 mb-4"><span className="text-primary"><User className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-white/80">Body Analysis</h3></div>
                 <InfoRow label="Body Type" value={analysis.body_type} />
                 <InfoRow label="Height" value={analysis.height_estimation} />
@@ -407,17 +414,26 @@ export default function StyleRecommendationsPage() {
                 <InfoRow label="Waist/Hip" value={analysis.waist_to_hip_ratio} />
                 <InfoRow label="Neck" value={analysis.neck_length} />
                 <InfoRow label="Legs" value={analysis.leg_length} />
+                </div>
               </div>
-              <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md shadow-lg shadow-black/20 p-6"><div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent pointer-events-none" />
+              <div className="relative p-1.5 rounded-[1.75rem] bg-white/[0.03] border border-white/10 shadow-lg shadow-black/20">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/[0.07] via-transparent to-transparent pointer-events-none rounded-[1.75rem]" />
+                <div className="relative overflow-hidden rounded-[1.25rem] bg-white/5 backdrop-blur-md p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent pointer-events-none" />
                 <div className="flex items-center gap-2 mb-4"><span className="text-primary"><Palette className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-white/80">Skin & Hair</h3></div>
                 <InfoRow label="Skin Tone" value={analysis.skin_tone} />
                 <InfoRow label="Undertone" value={analysis.skin_undertone} />
                 <InfoRow label="Hair Color" value={analysis.hair_color} />
+                </div>
               </div>
-              <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md shadow-lg shadow-black/20 p-6"><div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent pointer-events-none" />
+              <div className="relative p-1.5 rounded-[1.75rem] bg-white/[0.03] border border-white/10 shadow-lg shadow-black/20">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/[0.07] via-transparent to-transparent pointer-events-none rounded-[1.75rem]" />
+                <div className="relative overflow-hidden rounded-[1.25rem] bg-white/5 backdrop-blur-md p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent pointer-events-none" />
                 <div className="flex items-center gap-2 mb-4"><span className="text-primary"><Star className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-white/80">Style Score</h3></div>
                 <div className="text-3xl font-bold mb-2 text-yellow-500">{Number(analysis.current_style_score) * 10}/100</div>
                 <p className="text-sm text-white/70 italic">"{analysis.overall_style_profile}"</p>
+                </div>
               </div>
             </motion.div>
           )}
@@ -432,7 +448,10 @@ export default function StyleRecommendationsPage() {
                !recommendations.face_recommendations?.best_collar_types?.length &&
                !recommendations.body_recommendations?.shirt_fit &&
                !recommendations.honest_tips?.length && (
-                <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md shadow-lg shadow-black/20 p-8 text-center"><div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent pointer-events-none" />
+                <div className="relative p-1.5 rounded-[1.75rem] bg-white/[0.03] border border-white/10 shadow-lg shadow-black/20">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/[0.07] via-transparent to-transparent pointer-events-none rounded-[1.75rem]" />
+                  <div className="relative overflow-hidden rounded-[1.25rem] bg-white/5 backdrop-blur-md p-8 text-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent pointer-events-none" />
                   <Lightbulb className="w-10 h-10 text-amber-500/50 mx-auto mb-3" />
                   <h3 className="text-sm font-semibold text-white/70 mb-1">No AI Recommendations Yet</h3>
                   <p className="text-xs text-white/40 max-w-md mx-auto">
@@ -440,12 +459,16 @@ export default function StyleRecommendationsPage() {
                     This can happen if the image is unclear or the AI service is busy. 
                     Try uploading a clearer full-body photo and click Analyze again.
                   </p>
+                  </div>
                 </div>
               )}
 
               {/* Confidence Score — circular badge */}
               {recommendations && recommendations.confidence_score > 0 && (
-                <div className="relative overflow-hidden flex justify-center items-center gap-4 mt-4 p-4 rounded-xl border border-white/10 bg-zinc-900/40 backdrop-blur-sm"><div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent pointer-events-none" />
+                <div className="relative p-1 rounded-[1.25rem] bg-white/[0.03] border border-white/10 shadow-lg shadow-black/20">
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/[0.07] via-transparent to-transparent pointer-events-none rounded-[1.25rem]" />
+                    <div className="relative overflow-hidden flex justify-center items-center gap-4 p-4 rounded-[0.85rem] bg-zinc-900/40 backdrop-blur-sm shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent pointer-events-none" />
                   <div className="relative w-16 h-16 flex items-center justify-center flex-shrink-0">
                     <svg className="absolute w-full h-full -rotate-90" viewBox="0 0 72 72">
                       <circle cx="36" cy="36" r="30" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="5" />
@@ -468,6 +491,7 @@ export default function StyleRecommendationsPage() {
                     <p className="text-xs text-white/40 uppercase tracking-wider">Recommendation</p>
                     <p className="text-sm font-medium text-white/80">Confidence Score</p>
                   </div>
+                </div>
                 </div>
               )}
             </motion.div>
