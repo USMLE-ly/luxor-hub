@@ -1713,7 +1713,6 @@ def closet_add():
         print(f"[ADD-DEBUG] Label: '{label}', Category: {category}, Color: {color}, User: {user_id[:12]}...", flush=True)
         print(f"[ADD-DEBUG] Item ID: {item_id}, Image URL: {image_url[:60] if image_url else 'NONE'}", flush=True)
         print(f"[ADD-DEBUG] Image B64 length: {len(image_b64)}", flush=True)
-        print(f"[ADD-DEBUG] JSON path: {os.path.abspath(_LOCAL_CLOSET_FILE)}", flush=True)
         ok = qdrant_upsert_item(item)
         if not ok:
             _log.error("[CLOSET] Failed to persist item %s", item_id)
@@ -1722,14 +1721,6 @@ def closet_add():
         # Debug: confirm base64 was persisted
         if image_b64:
             print(f"[ADD-DEBUG] Saved Base64 for '{label}', b64 length: {len(image_b64)}", flush=True)
-        
-        # Verify the write by reading back (process-safe)
-        try:
-            verify_items = _read_json_file()
-            print(f"[ADD-DEBUG] Save successful. Total items in JSON: {len(verify_items)}", flush=True)
-            print(f"[ADD-DEBUG] Items in JSON: {[v.get('id','')+':'+v.get('label','unnamed')[:20] for v in verify_items]}", flush=True)
-        except Exception as ve:
-            print(f"[ADD-DEBUG] Verification read failed: {ve}", flush=True)
         
         return jsonify({"success": True, "item": item})
     except Exception as e:
@@ -1740,15 +1731,14 @@ def closet_add():
         return jsonify(_qdrant_error("upsert", str(e), traceback.format_exc())), 500
 @app.route("/api/v1/closet/list-items", methods=["GET", "OPTIONS"], strict_slashes=False)
 def closet_list():
-    """List all closet items — Qdrant first (persistent), JSON fallback.
+    """List all closet items — Qdrant only (persistent, no JSON fallback).
     Supports ?user_id=xxx for per-user filtering.
     """
     if request.method == "OPTIONS":
         return "", 204
-    # Primary: fetch from Qdrant Cloud (persists across restarts)
     uid = request.args.get("user_id", "")
     print(f"[LIST-DEBUG] ===== LIST ITEMS CALLED for user_id={uid} =====", flush=True)
-    # Retry Qdrant up to 2 times before falling back to JSON
+    # Retry Qdrant up to 2 times
     for attempt in range(2):
         try:
             items = qdrant_get_all_items(user_id=uid, timeout=10.0)
@@ -1762,24 +1752,8 @@ def closet_list():
             if attempt == 0:
                 _log.warning("[CLOSET] Qdrant read attempt %d failed: %s — retrying...", attempt + 1, qe)
             else:
-                _log.warning("[CLOSET] Qdrant read attempt %d failed: %s — falling back to JSON", attempt + 1, qe)
-    # Fallback: read from local JSON file (process-safe)
-    try:
-        items = _read_json_file()
-        print(f"[LIST-DEBUG] JSON fallback: {len(items)} items", flush=True)
-        if isinstance(items, list):
-                # Filter by user_id if provided
-                if uid:
-                    items = [i for i in items if i.get("user_id") == uid]
-                _log.info("[CLOSET] list-items returning %d items from JSON fallback (user_id=%s)", len(items), uid or "all")
-                return jsonify({"success": True, "items": items})
-    except FileNotFoundError:
-        _log.info("[CLOSET] No JSON file yet — returning empty")
-    except json.JSONDecodeError as e:
-        _log.error("[CLOSET] Corrupt JSON: %s — returning empty", e)
-    except Exception as e:
-        _log.error("[CLOSET] JSON fallback error: %s — returning empty", e)
-    print(f"[LIST-DEBUG] Returning EMPTY list", flush=True)
+                _log.warning("[CLOSET] Qdrant read attempt %d failed: %s — returning empty", attempt + 1, qe)
+    print(f"[LIST-DEBUG] Qdrant unavailable — returning empty list", flush=True)
     return jsonify({"success": True, "items": []})
 @app.route("/api/v1/closet/delete-item", methods=["POST", "OPTIONS"], strict_slashes=False)
 def closet_delete():

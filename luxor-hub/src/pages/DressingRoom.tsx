@@ -158,6 +158,7 @@ export default function DressingRoomPage() {
         event_date: calendarDate,
         occasion: "casual",
         outfit_items: outfitItems,
+        outfit_type: activeOutfit.type || 'regular',
         notes: activeOutfit.accessory_note || null,
       });
       
