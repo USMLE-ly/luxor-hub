@@ -292,6 +292,54 @@ const HeightStep = ({ answers, onSelect }: { answers: Record<string, string[]>; 
 };
 
 const NotificationStep = ({ step }: { step: OnboardingStep }) => {
+  const { permissions, requestNotification, requestLocation } = useAppPermissions();
+  const [done, setDone] = useState(false);
+
+  const handleAllow = async () => {
+    // Request both permissions
+    await requestNotification();
+    await requestLocation();
+    setDone(true);
+  };
+
+  const handleDeny = async () => {
+    // Mark as denied so we never ask again
+    try {
+      localStorage.setItem("luxor_permission_notification", JSON.stringify({ state: "denied", timestamp: Date.now() }));
+      localStorage.setItem("luxor_permission_location", JSON.stringify({ state: "denied", timestamp: Date.now() }));
+    } catch {}
+    setDone(true);
+  };
+
+  if (done) {
+    return (
+      <div className="flex flex-col items-center text-center pt-8">
+        <h2 className="font-display text-2xl lg:text-3xl font-bold text-foreground mb-3">
+          {step.question}
+        </h2>
+        <p className="text-muted-foreground font-sans mb-12">{step.description}</p>
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+            <Bell className="w-8 h-8 text-primary" />
+          </div>
+          <p className="text-sm text-muted-foreground font-sans">
+            {permissions.notification === "granted"
+              ? "Notifications enabled ✓"
+              : "Notifications skipped"}
+          </p>
+          <p className="text-sm text-muted-foreground font-sans">
+            {permissions.location === "granted"
+              ? "Location access enabled ✓"
+              : "Location access skipped"}
+          </p>
+          <p className="text-xs text-muted-foreground/60 font-sans mt-2">
+            You can change these anytime in Settings.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center text-center pt-8">
       <h2 className="font-display text-2xl lg:text-3xl font-bold text-foreground mb-3">
@@ -301,21 +349,36 @@ const NotificationStep = ({ step }: { step: OnboardingStep }) => {
 
       <div className="border border-border rounded-2xl p-6 max-w-xs w-full shadow-sm bg-card">
         <h3 className="font-sans font-semibold text-foreground text-sm mb-1">
-          "Style DNA" Would Like to Send You Notifications
+          "LEXOR" Would Like to Access:
         </h3>
+        <div className="space-y-3 my-4">
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+            <Bell className="w-4 h-4 text-primary" />
+            <span>Send you notifications</span>
+          </div>
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+            <MapPin className="w-4 h-4 text-primary" />
+            <span>Your location for weather-based styling</span>
+          </div>
+        </div>
         <p className="text-muted-foreground text-xs font-sans mb-4">
-          Notifications may include alerts, sounds and icon badges. These can be configured in Settings.
+          These can be configured in Settings anytime. We only ask once.
         </p>
         <div className="flex border-t border-border">
-          <button className="flex-1 py-2 text-sm font-sans text-blue-500 border-r border-border">
+          <button
+            onClick={handleDeny}
+            className="flex-1 py-2 text-sm font-sans text-blue-500 border-r border-border hover:bg-muted/30 transition-colors"
+          >
             Don't Allow
           </button>
-          <button className="flex-1 py-2 text-sm font-sans text-blue-500 font-semibold">
+          <button
+            onClick={handleAllow}
+            className="flex-1 py-2 text-sm font-sans text-blue-500 font-semibold hover:bg-muted/30 transition-colors"
+          >
             Allow
           </button>
         </div>
       </div>
-      <div className="mt-3 text-[hsl(0,70%,68%)] text-2xl">↗</div>
     </div>
   );
 };

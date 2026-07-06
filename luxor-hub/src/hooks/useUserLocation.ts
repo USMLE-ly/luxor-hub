@@ -8,6 +8,7 @@ interface UserLocation {
 }
 
 const STORAGE_KEY = "luxor-user-location";
+const PERM_CACHE_KEY = "luxor_permission_location";
 const CACHE_TTL = 30 * 60 * 1000; // 30 minutes
 
 interface CachedLocation {
@@ -39,11 +40,23 @@ export function useUserLocation(): UserLocation {
         }
       } catch {}
 
-      // Try browser geolocation
+      // Check if location permission was previously denied — skip prompt
+      let previouslyDenied = false;
+      try {
+        const permCache = localStorage.getItem(PERM_CACHE_KEY);
+        if (permCache) {
+          const parsed = JSON.parse(permCache);
+          if (parsed.state === "denied" || parsed.state === "granted") {
+            previouslyDenied = parsed.state === "denied";
+          }
+        }
+      } catch {}
+
+      // Try browser geolocation (respecting prior denial)
       let lat = 40.7128, lon = -74.006;
       let gotGeo = false;
 
-      if (navigator.geolocation) {
+      if (!previouslyDenied && navigator.geolocation) {
         try {
           const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
             navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 })
@@ -51,10 +64,14 @@ export function useUserLocation(): UserLocation {
           lat = pos.coords.latitude;
           lon = pos.coords.longitude;
           gotGeo = true;
-        } catch {}
+          // Cache granted state
+          localStorage.setItem(PERM_CACHE_KEY, JSON.stringify({ state: "granted", timestamp: Date.now() }));
+        } catch {
+          localStorage.setItem(PERM_CACHE_KEY, JSON.stringify({ state: "denied", timestamp: Date.now() }));
+        }
       }
 
-      // If no browser geolocation, try IP-based fallback
+      // If no browser geolocation, try IP-based fallback (always works without permission)
       if (!gotGeo) {
         try {
           const resp = await fetch("https://ipapi.co/json/", { signal: AbortSignal.timeout(4000) });

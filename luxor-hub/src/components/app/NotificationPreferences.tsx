@@ -78,8 +78,28 @@ export function NotificationPreferences() {
       toast.error("Notifications not supported in this browser");
       return;
     }
+
+    // Check if we already asked and were denied — don't re-prompt
+    try {
+      const cached = localStorage.getItem("luxor_permission_notification");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed.state === "denied") {
+          toast.error("Notification permission was denied. Enable it in your browser settings.");
+          return;
+        }
+        if (parsed.state === "granted") {
+          setPermissionState("granted");
+          callback();
+          return;
+        }
+      }
+    } catch {}
+
     const permission = await Notification.requestPermission();
     setPermissionState(permission);
+    // Cache the result
+    localStorage.setItem("luxor_permission_notification", JSON.stringify({ state: permission, timestamp: Date.now() }));
     if (permission === "granted") {
       callback();
       toast.success("Notifications enabled!");
