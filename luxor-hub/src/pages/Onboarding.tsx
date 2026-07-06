@@ -149,6 +149,16 @@ const Onboarding = () => {
     }
   }, [isGenerating]);
 
+  // Bypass: if the API fails or hangs, force-redirect to /paywall after 10s
+  useEffect(() => {
+    if (isGenerating) {
+      const fallbackTimer = setTimeout(() => {
+        navigate("/paywall");
+      }, 10000);
+      return () => clearTimeout(fallbackTimer);
+    }
+  }, [isGenerating, navigate]);
+
   useEffect(() => {
     if (!currentStepData || currentStepData.type !== "detectionResult") return;
     const mode = currentStepData.detectionMode;
