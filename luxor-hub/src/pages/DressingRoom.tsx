@@ -203,9 +203,9 @@ export default function DressingRoomPage() {
           <AnimatePresence>
             {showNotifications && activeOutfit && activeOutfit.stylist_reasoning && activeOutfit.stylist_reasoning.length > 0 && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.7 }}
-                animate={{ opacity: 1, scale: 1, y: -120 }}
-                exit={{ opacity: 0, scale: 0.7, y: -60 }}
+                initial={{ opacity: 0, scale: 0.7, y: 60 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.7, y: 30 }}
                 transition={{ type: "spring", stiffness: 100, damping: 25 }}
                 className="w-full flex justify-center"
               >
@@ -328,9 +328,9 @@ export default function DressingRoomPage() {
                 {activeOutfit.stylist_reasoning.slice(0, 3).map((note: string, i: number) => (
                   <motion.div
                     key={i}
-                    initial={{ opacity: 0, scale: 0.7 }}
-                    animate={{ opacity: 1, scale: 1, y: [110,200,290][i] }}
-                    exit={{ opacity: 0, scale: 0.7, y: [55,100,145][i] }}
+                    initial={{ opacity: 0, scale: 0.7, y: [-40,-60,-80][i] }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.7, y: [-20,-30,-40][i] }}
                     transition={{ delay: 0.15 * (i + 1), type: "spring", stiffness: 100, damping: 25 }}
                     className="flex justify-center"
                   >
@@ -354,9 +354,9 @@ export default function DressingRoomPage() {
                 {/* Accessory Note (if present) */}
                 {activeOutfit.accessory_note && (
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.7 }}
-                    animate={{ opacity: 1, scale: 1, y: 380 }}
-                    exit={{ opacity: 0, scale: 0.7, y: 190 }}
+                    initial={{ opacity: 0, scale: 0.7, y: -100 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.7, y: -50 }}
                     transition={{ delay: 0.45, type: "spring", stiffness: 100, damping: 25 }}
                     className="flex justify-center"
                   >
