@@ -8,15 +8,18 @@ import { supabase } from "@/integrations/supabase/client";
  * Users must be authenticated AND have an active subscription OR free tier to access protected content.
  */
 const PaywallGate = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
+  const { user, loading, isReady } = useAuth();
 
   const { data: hasAccess, isLoading: subLoading } = useQuery({
     queryKey: ["subscription-check", user?.id],
     queryFn: async () => {
       if (!user) return false;
 
-      const localPaid = localStorage.getItem("luxor_paid");
-      if (localPaid && localPaid !== "false") return true;
+      // Per-user cache — never leaks across accounts
+      const cacheKey = "luxor_sub_" + user.id;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached === "true") return true;
+      if (cached === "false") return false;
 
       const { data } = await supabase
         .from("subscriptions")
@@ -27,16 +30,18 @@ const PaywallGate = ({ children }: { children: React.ReactNode }) => {
         .maybeSingle();
 
       if (data) {
-        localStorage.setItem("luxor_paid", (data as any).plan_tier || "starter");
+        localStorage.setItem(cacheKey, "true");
         return true;
       }
+      localStorage.setItem(cacheKey, "false");
       return false;
     },
-    enabled: !!user,
+    enabled: !!user && isReady,
     staleTime: 5 * 60 * 1000,
   });
 
-  if (loading || subLoading) return null;
+  // Wait for auth hydration before deciding
+  if (!isReady || loading || subLoading) return null;
 
   if (!user) return <Navigate to="/auth" replace />;
 

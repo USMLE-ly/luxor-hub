@@ -4,7 +4,9 @@
   "scripts": {
     "build": "sh build.sh",
     "dev": "cd luxor-hub && npm install && npm run dev",
-    "preview": "cd luxor-hub && npm run preview"
+    "preview": "cd luxor-hub && npm run preview",
+    "build:dev": "npm --prefix luxor-hub run dev",
+    "dev2": "npm --prefix luxor-hub run dev"
   },
   "dependencies": {}
 }

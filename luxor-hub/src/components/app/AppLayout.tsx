@@ -6,17 +6,19 @@ import { PageTransition } from "./PageTransition";
 import { AnimatePresence } from "framer-motion";
 
 export function AppLayout({ children }: { children: ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading, isReady } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    if (!loading && !user) {
+    // Only redirect after session hydration is complete (isReady)
+    if (isReady && !user) {
       navigate("/auth");
     }
-  }, [user, loading, navigate]);
+  }, [user, isReady, navigate]);
 
-  if (loading) {
+  // Show spinner while auth is still hydrating
+  if (!isReady || loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
