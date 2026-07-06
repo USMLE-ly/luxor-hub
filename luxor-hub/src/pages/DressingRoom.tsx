@@ -187,7 +187,7 @@ export default function DressingRoomPage() {
 
   return (
     <AppLayout>
-      <div className="p-4 md:p-8 mx-auto max-w-5xl space-y-4 overflow-x-hidden">
+      <div className="p-4 md:p-8 mx-auto max-w-5xl space-y-4 overflow-x-hidden pb-32">
 
         {/* ---- HEADER ---- */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
@@ -324,7 +324,7 @@ export default function DressingRoomPage() {
           {/* Three Bottom Notifications — Stylist Reasoning (below iPhone) */}
           <AnimatePresence>
             {showNotifications && activeOutfit && activeOutfit.stylist_reasoning && activeOutfit.stylist_reasoning.length > 0 && (
-              <div className="flex flex-col gap-3 w-full max-w-[340px]">
+              <div className="flex flex-col gap-2 w-full max-w-[340px]">
                 {activeOutfit.stylist_reasoning.slice(0, 3).map((note: string, i: number) => (
                   <motion.div
                     key={i}
