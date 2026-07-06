@@ -96,7 +96,7 @@ const Auth = () => {
         }
         navigate(onboardingDone ? "/dashboard" : "/onboarding");
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { data: signUpData, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -106,8 +106,16 @@ const Auth = () => {
         });
         if (error) throw error;
         trackEvent("CompleteRegistration", { content_name: "LEXOR® Signup" });
-        toast.success("Account created! Welcome to LEXOR®!");
-        navigate("/onboarding");
+
+        // If session is returned, user was auto-confirmed — go to onboarding
+        if (signUpData?.session) {
+          toast.success("Account created! Welcome to LEXOR®!");
+          navigate("/onboarding");
+        } else {
+          // Email confirmation is still required — inform user
+          toast.success("Account created! Check your email to confirm your account, then sign in.");
+          setIsLogin(true);
+        }
       }
     } catch (error: any) {
       const msg = error.message || "";
