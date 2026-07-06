@@ -34,6 +34,14 @@ export function usePlanTier(): { tier: PlanTier; isLoading: boolean } {
         return t;
       }
 
+      // Fallback to per-user cache only when the DB read returned nothing.
+      try {
+        const cached = localStorage.getItem(`luxor_paid_${user.id}`);
+        if (cached && ["free", "starter", "pro", "elite"].includes(cached)) {
+          return cached as PlanTier;
+        }
+      } catch {}
+
       return "free";
     },
     // Don't fetch until auth is fully hydrated
