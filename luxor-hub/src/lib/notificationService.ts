@@ -118,43 +118,43 @@ export interface EngagementNudge {
   condition?: () => boolean; // skip if returns false
 }
 
+// ---- Nudge definitions ----
 const ENGAGEMENT_NUDGES: EngagementNudge[] = [
   {
     id: "welcome-back",
     title: "👋 Welcome back to LEXOR",
     body: "Your style journey awaits — check out what's new in your closet.",
     url: "/closet",
-    delayMinutes: 0.1,  // 6 seconds after page load
+    delayMinutes: 2,  // 2 minutes — not 6 seconds (was too aggressive for SPA navigation)
   },
   {
     id: "try-dressing-room",
     title: "✨ Mix & Match Today",
     body: "Generate fresh outfit combinations from your closet in the Dressing Room.",
     url: "/dressing-room",
-    delayMinutes: 1,
+    delayMinutes: 3,  // was 1
   },
   {
     id: "calendar-check",
     title: "📅 Plan Your Week",
     body: "Your outfit calendar is ready — schedule looks for the days ahead.",
     url: "/outfit-calendar",
-    delayMinutes: 3,
+    delayMinutes: 5,  // was 3
   },
   {
     id: "style-report",
     title: "📊 Your Monthly Style Report",
     body: "See how your style has evolved. New insights waiting for you.",
     url: "/monthly-report",
-    delayMinutes: 10,
+    delayMinutes: 15,  // was 10
   },
   {
     id: "unlock-premium",
     title: "⭐ Unlock Premium Styling",
     body: "Get AI-powered color analysis, unlimited outfits, and priority support.",
     url: "/paywall",
-    delayMinutes: 30,
+    delayMinutes: 60,  // was 30
     condition: () => {
-      // Only show if user hasn't subscribed (check localStorage flag)
       try {
         return !localStorage.getItem("luxor_subscription_active");
       } catch { return true; }
@@ -162,30 +162,55 @@ const ENGAGEMENT_NUDGES: EngagementNudge[] = [
   },
 ];
 
+// ---- Session guard: only schedule nudges once per page load, not on every SPA navigation ----
+let _sessionScheduled = false;
+
+// ---- Page Visibility: detect when user returns from another tab ----
+let _visibilityTimer: ReturnType<typeof setTimeout> | null = null;
+if (typeof document !== "undefined") {
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      // User came back to this tab — schedule a "welcome back" nudge
+      if (_visibilityTimer) clearTimeout(_visibilityTimer);
+      _visibilityTimer = setTimeout(() => {
+        // Only send if user has been away for > 30 min
+        try {
+          const lastVisit = parseInt(localStorage.getItem("luxor_last_visit") || "0", 10);
+          const minutesAway = (Date.now() - lastVisit) / 60000;
+          if (minutesAway > 30) {
+            sendBrowserNotification("👋 Welcome back to LEXOR", {
+              body: "You've been away for a while — your outfits are waiting.",
+              url: "/closet",
+              id: "vis-welcome-" + Date.now(),
+            });
+          }
+        } catch {}
+      }, 5000); // 5s delay after tab becomes visible
+    }
+  });
+}
+
 /* ------------------------------------------------------------------ */
 /*  Schedule engagement nudges — call once on app mount               */
+/*  Only fires once per session; ignores SPA route changes.           */
 /* ------------------------------------------------------------------ */
 let engagementTimers: ReturnType<typeof setTimeout>[] = [];
 
-export function scheduleEngagementNudges(clearExisting = true) {
-  if (clearExisting) {
-    engagementTimers.forEach(t => clearTimeout(t));
-    engagementTimers = [];
-  }
+export function scheduleEngagementNudges() {
+  // Guard: only schedule nudges once per page load
+  if (_sessionScheduled) return;
+  _sessionScheduled = true;
 
   if (typeof Notification === "undefined" || Notification.permission !== "granted") {
-    // No permission — schedule a re-check when main thread is free
-    // (user might grant during onboarding later)
     return;
   }
 
-  // Mark visit timestamp
+  // Mark this visit
   try {
     localStorage.setItem("luxor_last_visit", Date.now().toString());
   } catch {}
 
   ENGAGEMENT_NUDGES.forEach(nudge => {
-    // Check condition
     if (nudge.condition && !nudge.condition()) return;
 
     const timer = setTimeout(() => {
@@ -200,6 +225,14 @@ export function scheduleEngagementNudges(clearExisting = true) {
   });
 }
 
+/* ------------------------------------------------------------------ */
+/*  Cleanup — call on unmount                                         */
+/* ------------------------------------------------------------------ */
+export function clearEngagementNudges() {
+  engagementTimers.forEach(t => clearTimeout(t));
+  engagementTimers = [];
+  _sessionScheduled = false; // allow re-schedule on next mount
+}
 /* ------------------------------------------------------------------ */
 /*  Cleanup — call on unmount                                         */
 /* ------------------------------------------------------------------ */

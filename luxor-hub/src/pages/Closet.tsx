@@ -542,36 +542,7 @@ const Closet = () => {
         console.warn("[CLOSET] Failed to get session token:", tokErr);
       }
 
-      // 1. Delete from Supabase directly (RLS will allow if user owns the items)
-      const directErrors: string[] = [];
-
-      // Delete in dependency order: children first, then parents
-      // wear_logs depends on clothing_items
-      const { error: wearErr } = await supabase.from("wear_logs").delete().eq("user_id", user.id);
-      if (wearErr) directErrors.push("wear_logs: " + wearErr.message);
-      else console.log("[CLOSET] Deleted wear_logs");
-
-      // outfits (CASCADE handles outfit_items)
-      const { error: outfitsErr } = await supabase.from("outfits").delete().eq("user_id", user.id);
-      if (outfitsErr) console.warn("[CLOSET] Outfits delete:", outfitsErr.message);
-      else console.log("[CLOSET] Deleted outfits");
-
-      // clothing_items (CASCADE handles outfit_items + wear_logs if cascade is set)
-      const { error: itemsErr } = await supabase.from("clothing_items").delete().eq("user_id", user.id);
-      if (itemsErr) directErrors.push("clothing_items: " + itemsErr.message);
-      else console.log("[CLOSET] Deleted clothing_items");
-
-      // calendar_events
-      const { error: calErr } = await supabase.from("calendar_events").delete().eq("user_id", user.id);
-      if (calErr) console.warn("[CLOSET] Calendar delete:", calErr.message);
-
-      // challenge_entries
-      const { error: challengeErr } = await supabase.from("challenge_entries").delete().eq("user_id", user.id);
-      if (challengeErr) console.warn("[CLOSET] Challenge entries delete:", challengeErr.message);
-
-      console.log("[CLOSET] Direct Supabase deletes done. Errors:", directErrors);
-
-      // 2. Delete from Qdrant + Supabase via backend (proxy with access_token)
+      // 1. Delete from Qdrant + Supabase + JSON via backend proxy (single authoritative call)
       let backendOk = false;
       try {
         const backendResp = await fetch(apiBase + '/api/v1/closet/clear-all', {
@@ -599,7 +570,7 @@ const Closet = () => {
         console.warn("[CLOSET] Backend clear warning:", qe);
       }
 
-      // 3. Update local state
+      // 2. Update local state
       setItems([]);
 
       toast.dismiss();

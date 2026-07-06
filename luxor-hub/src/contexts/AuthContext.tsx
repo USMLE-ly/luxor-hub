@@ -27,11 +27,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
+    // Timeout: if auth takes >6s, force-ready to prevent permanent spinner
+    const timeout = setTimeout(() => {
+      if (!resolved) {
+        resolved = true;
+        setLoading(false);
+        setIsReady(true);
+        console.warn("[AUTH] Fallback timeout fired — forcing isReady=true");
+      }
+    }, 6000);
+
     let resolved = false;
 
     // Subscribe FIRST — guarantees no auth event is missed while getSession() resolves
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (resolved) return; // getSession() already set state
+      resolved = true;
+      clearTimeout(timeout);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -42,6 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (resolved) return; // onAuthStateChange already fired
       resolved = true;
+      clearTimeout(timeout);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -49,6 +62,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => {
+      clearTimeout(timeout);
       resolved = true; // prevent state updates after unmount
       subscription.unsubscribe();
     };

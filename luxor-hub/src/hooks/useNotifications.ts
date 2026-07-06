@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { sendBrowserNotification } from "@/lib/notificationService";
 
 export interface Notification {
   id: string;
@@ -95,6 +96,23 @@ export function useNotifications() {
           setUnreadCount((prev) => prev + 1);
 
           // Show toast
+          // Browser push for social notifications (fires even if tab is in background)
+          const eventLabel = newNotif.type;
+          const pushTitle = {
+            like: `${actorName} liked your look! ❤️`,
+            follow: `${actorName} started following you! ✨`,
+            design_like: `${actorName} liked your design! ❤️`,
+            design_comment: `${actorName} commented on your design! 💬`,
+          }[eventLabel] || "New notification";
+
+          sendBrowserNotification(pushTitle, {
+            body: `From ${actorName}`,
+            tag: `social-${newNotif.id}`,
+            id: `social-${newNotif.id}`,
+            url: "/notifications",
+          });
+
+          // Show in-app toast
           if (newNotif.type === "like") {
             toast(`${actorName} liked your look! ❤️`);
           } else if (newNotif.type === "follow") {

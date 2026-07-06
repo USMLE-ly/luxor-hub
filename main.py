@@ -515,7 +515,16 @@ except Exception as _qdrant_init_err:
     _qdrant_closet = None
 
 # Register health routes after Qdrant init attempt
-init_health_routes(app, get_closet_count=lambda: (len(qdrant_get_all_items()) if _qdrant_closet is not None else 0))
+def _safe_closet_count():
+    '''Safe wrapper for health endpoint — returns 0 instead of crashing on Qdrant timeout.'''
+    if _qdrant_closet is None:
+        return 0
+    try:
+        return len(qdrant_get_all_items())
+    except Exception:
+        return 0
+
+init_health_routes(app, get_closet_count=_safe_closet_count)
 
 
 
