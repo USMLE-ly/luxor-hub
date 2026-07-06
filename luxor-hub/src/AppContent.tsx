@@ -33,9 +33,7 @@ const Leaderboard = React.lazy(() => import("./pages/Leaderboard"));
 const WeeklyChallenge = React.lazy(() => import("./pages/WeeklyChallenge"));
 const Badges = React.lazy(() => import("./pages/Badges"));
 const NotificationCenter = React.lazy(() => import("./pages/NotificationCenter"));
-const StyleDNA = React.lazy(() => import("./pages/StyleDNA"));
 const Calibration = React.lazy(() => import("./pages/Calibration"));
-const ColorType = React.lazy(() => import("./pages/ColorType"));
 const Paywall = React.lazy(() => import("./pages/Paywall"));
 const OutfitCalendar = React.lazy(() => import("./pages/OutfitCalendar"));
 const MoodBoard = React.lazy(() => import("./pages/MoodBoard"));
@@ -104,9 +102,9 @@ const AppContent = () => {
             <Route path="/weekly-challenge" element={<PaywallGate><WeeklyChallenge /></PaywallGate>} />
             <Route path="/badges" element={<PaywallGate><Badges /></PaywallGate>} />
             <Route path="/notifications" element={<PaywallGate><NotificationCenter /></PaywallGate>} />
-            <Route path="/style-dna" element={<PaywallGate><StyleDNA /></PaywallGate>} />
+
             <Route path="/calibration" element={<PaywallGate><Calibration /></PaywallGate>} />
-            <Route path="/color-type" element={<PaywallGate><ColorType /></PaywallGate>} />
+
             <Route path="/paywall" element={<Paywall />} />
             <Route path="/outfit-calendar" element={<OutfitCalendar />} />
             <Route path="/mood-board" element={<PaywallGate><MoodBoard /></PaywallGate>} />

@@ -1,10 +1,9 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home, CalendarDays, ScanLine, Layers, Shirt, Sparkles } from "lucide-react";
+import { CalendarDays, ScanLine, Layers, Shirt, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { haptic } from "@/lib/haptics";
 
 const tabs = [
-  { label: "DNA", icon: Home, path: "/dashboard" },
   { label: "Schedule", icon: CalendarDays, path: "/outfit-calendar" },
   { label: "Analysis", icon: ScanLine, path: "/outfit-analysis" },
   { label: "Dressing Room", icon: Layers, path: "/dressing-room" },
@@ -18,12 +17,10 @@ export function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 inset-x-0 z-50 pb-[env(safe-area-inset-bottom)] pointer-events-none">
-      <div className="flex items-center justify-around h-14 max-w-lg mx-auto mb-3 mt-1 rounded-full border border-white/10 bg-zinc-900/80 backdrop-blur-2xl shadow-lg shadow-black/30 pointer-events-auto">
+      <div className="grid grid-cols-5 items-center h-14 max-w-lg mx-auto mb-3 mt-1 rounded-full border border-white/10 bg-zinc-900/80 backdrop-blur-2xl shadow-lg shadow-black/30 pointer-events-auto">
         {tabs.map((tab) => {
           const isActive =
-            location.pathname === tab.path ||
-            (tab.path === "/dashboard" && location.pathname === "/style-dna") ||
-            (tab.path === "/dashboard" && location.pathname === "/color-type");
+            location.pathname === tab.path;
           return (
             <button
               key={tab.label}

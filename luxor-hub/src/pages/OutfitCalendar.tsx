@@ -1632,14 +1632,7 @@ const OutfitCalendarInner = () => {
                   {occasions.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
                 </SelectContent>
               </Select>
-              {savedOutfits.length > 0 && (
-                <Select value={newEvent.outfitId} onValueChange={v => setNewEvent(p => ({ ...p, outfitId: v }))}>
-                  <SelectTrigger><SelectValue placeholder="Attach saved outfit (optional)" /></SelectTrigger>
-                  <SelectContent>
-                    {savedOutfits.map(o => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              )}
+
               {/* Manual Clothing Picker */}
               {!newEvent.outfitId && closetItems.length === 0 && (
                 <div className="text-center py-4 px-2 rounded-xl border border-dashed border-white/10">
@@ -1677,84 +1670,43 @@ const OutfitCalendarInner = () => {
                       })}
                     </div>
                   )}
-                  <div className="max-h-48 overflow-y-auto rounded-xl border border-border/50 p-2 space-y-2">
-                    {Object.entries(closetCategoryMap).map(([label, cats]) => {
-                      const catItems = closetItems.filter(c => cats.includes(c.category.toLowerCase()));
-                      if (catItems.length === 0) return null;
+                  <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto rounded-xl p-2">
+                    {closetItems.map(ci => {
+                      const isSelected = newEvent.manualItems.includes(ci.id);
                       return (
-                        <div key={label}>
-                          <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-wider mb-1 mt-1">{label}</p>
-                          <div className="flex flex-wrap gap-1.5">
-                            {catItems.map(ci => {
-                              const isSelected = newEvent.manualItems.includes(ci.id);
-                              return (
-                                <button
-                                  key={ci.id}
-                                  type="button"
-                                  onClick={() => setNewEvent(p => ({
-                                    ...p,
-                                    manualItems: isSelected
-                                      ? p.manualItems.filter(id => id !== ci.id)
-                                      : [...p.manualItems, ci.id]
-                                  }))}
-                                  className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-[11px] font-sans transition-all ${
-                                    isSelected
-                                      ? "bg-primary/15 text-primary ring-1 ring-primary/30"
-                                      : "bg-secondary/50 text-muted-foreground hover:bg-secondary"
-                                  }`}
-                                >
-                                  {ci.photo_url && (
-                                    <img src={ci.photo_url} alt="" className="w-5 h-5 rounded object-contain bg-white" style={{ mixBlendMode: "multiply" }} />
-                                  )}
-                                  <span className="truncate max-w-[80px]">{ci.name || label}</span>
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
+                        <button
+                          key={ci.id}
+                          type="button"
+                          onClick={() => setNewEvent(p => ({
+                            ...p,
+                            manualItems: isSelected
+                              ? p.manualItems.filter(id => id !== ci.id)
+                              : [...p.manualItems, ci.id]
+                          }))}
+                          className={`flex flex-col items-center gap-1 p-2 rounded-xl text-[11px] font-sans transition-all ${
+                            isSelected
+                              ? "bg-primary/15 text-primary ring-1 ring-primary/30"
+                              : "bg-white/5 hover:bg-white/10 text-muted-foreground"
+                          }`}
+                        >
+                          {ci.photo_url ? (
+                            <div className="w-12 h-14 rounded-lg bg-white/90 flex items-center justify-center overflow-hidden">
+                              <img src={ci.photo_url} alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "multiply" }} />
+                            </div>
+                          ) : (
+                            <div className="w-12 h-14 rounded-lg bg-white/5 flex items-center justify-center">
+                              <Shirt className="w-5 h-5 text-muted-foreground/30" />
+                            </div>
+                          )}
+                          <span className="truncate w-full text-center text-[10px]">{ci.name || 'Item'}</span>
+                        </button>
                       );
                     })}
                   </div>
                 </div>
               )}
-              {/* Live Outfit Score */}
-              {newEvent.manualItems.length >= 2 && (() => {
-                const scoreData = computeOutfitScore(newEvent.manualItems, newEvent.occasion);
-                return (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="flex items-center gap-3 p-3 rounded-xl"
-                    style={{ background: "hsl(var(--secondary) / 0.6)", border: "1px solid hsl(var(--border) / 0.5)" }}
-                  >
-                    <div className="relative w-10 h-10 flex-shrink-0">
-                      <svg viewBox="0 0 36 36" className="w-10 h-10 -rotate-90">
-                        <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--muted))" strokeWidth="3" />
-                        <circle cx="18" cy="18" r="15.5" fill="none" stroke={scoreData.color} strokeWidth="3"
-                          strokeDasharray={`${scoreData.score * 0.975} 100`} strokeLinecap="round" />
-                      </svg>
-                      <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold" style={{ color: scoreData.color }}>
-                        {scoreData.score}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="text-xs font-sans font-semibold" style={{ color: scoreData.color }}>{scoreData.label}</p>
-                      <p className="text-[10px] font-sans text-muted-foreground">Color harmony • Category coverage • Occasion fit</p>
-                    </div>
-                  </motion.div>
-                );
-              })()}
-              {(() => {
-                const w = selectedDate ? getWeatherForDate(selectedDate) : null;
-                if (!w) return null;
-                return (
-                  <div className="flex items-center gap-2 p-3 rounded-xl bg-secondary/50 text-xs font-sans text-muted-foreground">
-                    {weatherCodeToIcon(w.code)}
-                    <span>{w.description}, {w.tempMax}°/{w.tempMin}°C</span>
-                    {w.rain && <span className="text-blue-400 flex items-center gap-0.5"><Droplets className="w-3 h-3" /> Rain</span>}
-                  </div>
-                );
-              })()}
+
+
               <Input placeholder="Notes (optional)" value={newEvent.notes} onChange={e => setNewEvent(p => ({ ...p, notes: e.target.value }))} />
               <Button onClick={addEvent} disabled={!newEvent.title.trim()} className="w-full gold-gradient text-primary-foreground font-sans">
                 Save to Calendar
@@ -1779,14 +1731,7 @@ const OutfitCalendarInner = () => {
                   {occasions.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
                 </SelectContent>
               </Select>
-              {savedOutfits.length > 0 && (
-                <Select value={editEvent.outfitId} onValueChange={v => setEditEvent(p => ({ ...p, outfitId: v }))}>
-                  <SelectTrigger><SelectValue placeholder="Change outfit (optional)" /></SelectTrigger>
-                  <SelectContent>
-                    {savedOutfits.map(o => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              )}
+
               {/* Manual Clothing Picker for Edit */}
               {!editEvent.outfitId && closetItems.length > 0 && (
                 <div className="space-y-2">
