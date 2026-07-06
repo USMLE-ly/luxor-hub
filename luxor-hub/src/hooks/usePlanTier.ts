@@ -4,20 +4,15 @@ import { supabase } from "@/integrations/supabase/client";
 import type { PlanTier } from "@/lib/planRestrictions";
 
 export function usePlanTier(): { tier: PlanTier; isLoading: boolean } {
-  const { user } = useAuth();
+  const { user, isReady } = useAuth();
 
   const { data: tier, isLoading } = useQuery({
     queryKey: ["plan-tier", user?.id],
     queryFn: async (): Promise<PlanTier> => {
       if (!user) return "free";
 
-      const local = localStorage.getItem("luxor_paid");
-      if (local && local !== "true" && local !== "false") {
-        if (["free", "starter", "pro", "elite"].includes(local)) {
-          return local as PlanTier;
-        }
-      }
-
+      // Always trust the database as the source of truth. localStorage is only
+      // a warm cache used as fallback if the query itself fails.
       const { data } = await supabase
         .from("subscriptions")
         .select("plan_tier")
@@ -28,13 +23,23 @@ export function usePlanTier(): { tier: PlanTier; isLoading: boolean } {
 
       if (data?.plan_tier) {
         const t = data.plan_tier as PlanTier;
-        localStorage.setItem("luxor_paid", t);
+        try { localStorage.setItem(`luxor_paid_${user.id}`, t); } catch {}
         return t;
       }
 
+      // Fallback to per-user cache only when the DB read returned nothing.
+      try {
+        const cached = localStorage.getItem(`luxor_paid_${user.id}`);
+        if (cached && ["free", "starter", "pro", "elite"].includes(cached)) {
+          return cached as PlanTier;
+        }
+      } catch {}
+
       return "free";
     },
-    enabled: !!user,
+    // Wait for auth restoration so we don't query with a null session and
+    // get a false "free" result cached for 5 minutes.
+    enabled: isReady && !!user,
     staleTime: 5 * 60 * 1000,
   });
 
