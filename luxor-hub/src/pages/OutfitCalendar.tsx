@@ -1093,7 +1093,7 @@ const OutfitCalendarInner = () => {
                             if (evItems.some((i: any) => i.url)) {
                               return (
                                 <div className="flex-1 w-full rounded-lg overflow-hidden" style={{ minHeight: "60px" }}>
-                                  <OutfitComposition items={evItems} minHeight="60px" />
+                                  <OutfitComposition items={evItems} minHeight="60px" showDividers={false} />
                                 </div>
                               );
                             }
@@ -1239,7 +1239,7 @@ const OutfitCalendarInner = () => {
                         if (items.length > 0 && items.some((i: any) => i.url)) {
                           return (
                             <div className="p-3 pb-0">
-                              <OutfitComposition items={items} minHeight="100px" maxHeight="200px" />
+                              <OutfitComposition items={items} minHeight="100px" maxHeight="200px" showDividers={true} />
                             </div>
                           );
                         }
@@ -1889,7 +1889,7 @@ const OutfitCalendarInner = () => {
                     if (hasUrlItems) {
                       return (
                         <div className="rounded-xl overflow-hidden" style={{ minHeight: "300px" }}>
-                          <OutfitComposition items={flItems} minHeight="300px" className="h-80" />
+                          <OutfitComposition items={flItems} minHeight="300px" className="h-80" aspectRatio="9/16" showDividers={true} />
                         </div>
                       );
                     }

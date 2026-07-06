@@ -49,74 +49,15 @@ const SECTION_BASE: React.CSSProperties = {
 
 const DIVIDER_STYLE: React.CSSProperties = {
   position: 'absolute',
-  left: '10%',
-  width: '80%',
+  left: '8%',
+  width: '84%',
   height: '1px',
-  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent)',
+  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.18), rgba(255,255,255,0.06), transparent)',
   transform: 'translateY(-50%)',
   zIndex: 10,
+  boxShadow: '0 0 8px rgba(255,255,255,0.04)',
 };
 
-const CONTROL_BOTTOM_LEFT: React.CSSProperties = {
-  position: 'absolute',
-  bottom: '16px',
-  left: '16px',
-  zIndex: 20,
-};
-
-const CONTROL_BOTTOM_RIGHT: React.CSSProperties = {
-  position: 'absolute',
-  bottom: '16px',
-  right: '16px',
-  zIndex: 20,
-  display: 'flex',
-  gap: '12px',
-  alignItems: 'center',
-};
-
-const PURPLE_BTN: React.CSSProperties = {
-  backgroundColor: '#9333ea',
-  color: 'white',
-  padding: '8px 16px',
-  borderRadius: '6px',
-  fontWeight: 500,
-  fontSize: '14px',
-  border: 'none',
-  cursor: 'pointer',
-};
-
-const DISABLED_ARROW: React.CSSProperties = {
-  color: 'rgba(255,255,255,0.2)',
-  cursor: 'not-allowed',
-  background: 'none',
-  border: 'none',
-  padding: 0,
-};
-
-const ACTIVE_ARROW: React.CSSProperties = {
-  color: 'rgba(255,255,255,0.7)',
-  cursor: 'pointer',
-  background: 'none',
-  border: 'none',
-  padding: 0,
-};
-
-const DISMISS_BTN: React.CSSProperties = {
-  fontSize: '14px',
-  color: 'rgba(255,255,255,0.7)',
-  background: 'none',
-  border: 'none',
-  cursor: 'pointer',
-  padding: 0,
-};
-
-const IMG_STYLE: React.CSSProperties = {
-  width: '100%',
-  height: '100%',
-  objectFit: 'contain',
-  objectPosition: 'center',
-  display: 'block',
-};
 
 const FLIP_SPEED = 400;
 const DOMINO_DELAY = 150;
@@ -388,9 +329,9 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
 
   const getSectionStyle = (idx: number): React.CSSProperties => {
     const isAnimating = flipState !== 'idle';
-    let transform = 'rotateX(0deg)';
+    let transform = 'rotateX(0deg) scale(1)';
     if (flipState === 'out') {
-      transform = 'rotateX(-90deg)';
+      transform = 'rotateX(-90deg) scale(0.92)';
     }
     const outfitsKey = outfits[currentIndex]?.top + '-' + outfits[currentIndex]?.mid + '-' + outfits[currentIndex]?.bottom;
     const sectionKey = outfitsKey + '-' + idx;
@@ -417,6 +358,10 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
       backgroundRepeat: 'no-repeat',
       borderRadius: '12px',
       zIndex: 1,
+      // Glass overlay shine effect
+      boxShadow: isAnimating && flipState === 'in'
+        ? 'inset 0 0 30px rgba(255,255,255,0.03)'
+        : 'inset 0 0 0px rgba(255,255,255,0)',
     };
   };
 
