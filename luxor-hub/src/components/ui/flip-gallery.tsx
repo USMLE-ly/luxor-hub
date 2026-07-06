@@ -140,6 +140,7 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flipState, setFlipState] = useState<'idle' | 'out' | 'in'>('idle');
   const [preloadingDir, setPreloadingDir] = useState<'next' | 'prev' | null>(null);
+  const [imagesReady, setImagesReady] = useState(false);
   const [animDirection, setAnimDirection] = useState<'next' | 'prev'>('next');
   const flipTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -245,6 +246,24 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
     return () => ctrl.abort();
   }, [currentIndex, outfits]);
 
+  // ── Preload FULL current outfit before showing (prevents piece-by-piece) ──
+  useEffect(() => {
+    if (outfits.length === 0) {
+      setImagesReady(false);
+      return;
+    }
+    setImagesReady(false);
+    const outfit = outfits[currentIndex];
+    if (!outfit) return;
+    Promise.all([
+      preloadImage(outfit.top),
+      preloadImage(outfit.mid),
+      preloadImage(outfit.bottom),
+    ]).then(() => {
+      setImagesReady(true);
+    });
+  }, [outfits, currentIndex]);
+
   // ── Wait for preloaded images before flipping back in ──
   const pendingPreloadRef = useRef<Promise<void> | null>(null);
 
@@ -295,8 +314,10 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
     if (flipState !== 'idle' || outfits.length === 0 || preloadingDir !== null) return;
     const nextIndex = (currentIndex + 1) % outfits.length;
     const nextOutfit = outfits[nextIndex];
-    if (nextOutfit) {
-      setPreloadingDir('next');
+    if (!nextOutfit) return;
+    setPreloadingDir('next');
+    // Use requestAnimationFrame to let React paint the spinner before preloading
+    requestAnimationFrame(() => {
       pendingPreloadRef.current = Promise.all([
         preloadImage(nextOutfit.top),
         preloadImage(nextOutfit.mid),
@@ -305,15 +326,16 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
         setPreloadingDir(null);
         triggerFlip('next');
       });
-    }
+    });
   };
 
   const handlePrev = () => {
     if (flipState !== 'idle' || outfits.length === 0 || preloadingDir !== null) return;
     const nextIndex = (currentIndex - 1 + outfits.length) % outfits.length;
     const nextOutfit = outfits[nextIndex];
-    if (nextOutfit) {
-      setPreloadingDir('prev');
+    if (!nextOutfit) return;
+    setPreloadingDir('prev');
+    requestAnimationFrame(() => {
       pendingPreloadRef.current = Promise.all([
         preloadImage(nextOutfit.top),
         preloadImage(nextOutfit.mid),
@@ -322,7 +344,7 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
         setPreloadingDir(null);
         triggerFlip('prev');
       });
-    }
+    });
   };
 
   /* ======================= EMPTY STATE ======================= */
@@ -389,6 +411,33 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
       zIndex: 1,
     };
   };
+
+  if (!imagesReady && outfits.length > 0) {
+    // Show a spinner while initial outfit images are preloading
+    return (
+      <div style={{
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+        aspectRatio: '9 / 16',
+        perspective: '800px',
+        overflow: 'hidden',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#0a0a0a',
+        borderRadius: '12px',
+      }}>
+        <div style={{
+          width: '40px', height: '40px',
+          borderRadius: '50%',
+          border: '3px solid rgba(255,255,255,0.08)',
+          borderTopColor: '#e5c785',
+          animation: 'spin 0.8s linear infinite',
+        }} />
+      </div>
+    );
+  }
 
   return (
     <div style={{
