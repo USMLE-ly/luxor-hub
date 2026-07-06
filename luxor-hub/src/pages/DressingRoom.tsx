@@ -6,7 +6,8 @@ import IPhoneMockup from "@/components/ui/iphone-mockup";
 import { Perspective, Highlight } from "@/components/ui/perspective-highlight";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { CalendarDays, Check } from "lucide-react";
+import { CalendarDays, Check, Sparkles, Shirt, Layers, Footprints } from "lucide-react";
+import { LiquidGlassCard } from "@/components/ui/liquid-notification";
 import { supabase } from "@/integrations/supabase/client";
 import { humanizeTextArray } from "@/lib/humanizer";
 
@@ -37,6 +38,7 @@ export default function DressingRoomPage() {
   const [postingToCalendar, setPostingToCalendar] = useState(false);
   const [showCountModal, setShowCountModal] = useState(false);
   const [selectedOccasion, setSelectedOccasion] = useState("");
+  const [showNotifications, setShowNotifications] = useState(false);
 
   /* ---------- Generate Outfit ---------- */
   const generateOutfits = async (occasion: string, count: number) => {
@@ -139,6 +141,16 @@ export default function DressingRoomPage() {
     
     return () => clearInterval(timer);
   }, [isGenerating]);
+
+  // Show notifications when outfit generation completes
+  useEffect(() => {
+    if (!isGenerating && activeOutfit && activeOutfit.stylist_reasoning?.length > 0) {
+      setShowNotifications(true);
+    }
+    if (isGenerating) {
+      setShowNotifications(false);
+    }
+  }, [isGenerating, activeOutfit]);
 
   
   const handlePostToCalendar = async () => {
@@ -278,77 +290,117 @@ export default function DressingRoomPage() {
           </IPhoneMockup>
         </div>
 
-        {/* ---- STYLIST NOTES & ACCESSORY NOTE ---- */}
-        {activeOutfit && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-sm mx-auto space-y-4"
-          >
-            {activeOutfit.accessory_note && (
-              <div className="bg-[#2a1f1a] border border-[#4a2f1a] text-amber-200/90 p-3 rounded-lg text-center text-sm">
-                {activeOutfit.accessory_note}
-              </div>
-            )}
-
-            {activeOutfit.stylist_reasoning && activeOutfit.stylist_reasoning.length > 0 && (
-              <Perspective>
-                <div className="p-6 rounded-lg bg-[#1F1F1F] border border-white/10">
-                  <h4 className="text-sm font-semibold mb-4 text-center"><span className="bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-300 bg-clip-text text-transparent">Stylist Notes</span></h4>
-                  {/* Important phrases as MarketingBadges-style pills */}
-                                    {/* Inline phrase highlighting - only key fashion terms pop */}
-                  <div className="flex flex-col gap-4">
-                    {activeOutfit.stylist_reasoning.map((note: string, i: number) => {
-                      const noteColors: Array<'purple' | 'green' | 'red'> = ['red', 'green', 'purple'];
-                      const highlightColor = noteColors[i % noteColors.length];
-                      
-                      // Split note around key fashion terms, highlighting only those terms
-                      const fashionTerms = [
-                        'black','navy','cream','brown','white','gray','beige','olive',
-                        'burgundy','camel','charcoal','taupe','ivory','khaki','rust','mauve',
-                        'slate','ebony','mocha','terracotta','indigo','cobalt','emerald',
-                        'silk','cotton','wool','linen','cashmere','denim','velvet','leather',
-                        'suede','chiffon','tweed','lace','satin','jersey','flannel','corduroy',
-                        'mesh','knit','woven','textured','ribbed',
-                        'blazer','trousers','loafers','structured','oversized','tailored',
-                        'A-line','wrap','pleated','crop','high-waisted','wide-leg','slim-fit',
-                        'pumps','mules','sandals','heels','flats','sneakers','boots',
-                        'blouse','cardigan','sweater','hoodie','jacket','coat','parka',
-                        'skirt','dress','jumpsuit','romper','shorts','jeans','chinos',
-                        'silhouette','texture','earthy','neutral','monochrome','layered',
-                        'minimalist','polished','effortless','sophisticated','refined',
-                        'versatile','timeless','classic','modern','edgy','chic',
-                        'elegant','luxurious','cozy','relaxed','sharp','crisp',
-                        'flattering','elongating','grounding','softening','balancing',
-                      ];
-                      
-                      // Escape and build regex
-                      const escaped = fashionTerms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-                      const pattern = new RegExp('(' + escaped.join('|') + ')', 'gi');
-                      const parts = note.split(pattern);
-                      
-                      
-                      return (
-                        <p key={i} className="text-sm text-gray-300 leading-relaxed">
-                          {parts.map((part, pi) => {
-                            const isKeyword = fashionTerms.some(t => t.toLowerCase() === part.toLowerCase());
-                            if (isKeyword) {
-                              return <Highlight key={pi} color={highlightColor}>{part}</Highlight>;
-                            }
-                            return part ? <span key={pi}>{part}</span> : null;
-                          })}
-                        </p>
-                      );
-                    })}
+        {/* ---- LIQUID GLASS NOTIFICATIONS ---- */}
+        <AnimatePresence>
+          {showNotifications && activeOutfit && activeOutfit.stylist_reasoning && activeOutfit.stylist_reasoning.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="max-w-sm mx-auto space-y-3"
+            >
+              {/* Top Notification — Outfit Title (slides up from iPhone top) */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ delay: 0.1, type: "spring", stiffness: 80, damping: 15 }}
+              >
+                <LiquidGlassCard
+                  width="340px"
+                  height="72px"
+                  borderRadius="20px"
+                  blurIntensity="xl"
+                  glowIntensity="md"
+                  shadowIntensity="md"
+                  draggable={false}
+                >
+                  <div className="flex items-center gap-3 px-4 py-3 h-full">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-400/30 to-yellow-500/20 flex items-center justify-center flex-shrink-0">
+                      <Sparkles className="w-4 h-4 text-amber-300" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-white/90 truncate">
+                        {activeOutfit.stylist_reasoning[0]?.split(' ').slice(0, 6).join(' ') || 'Styled Look'}
+                      </p>
+                      <p className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5">Ready to wear</p>
+                    </div>
+                    <div className="w-2 h-2 rounded-full bg-emerald-400/70 flex-shrink-0" />
                   </div>
-                </div>
-              </Perspective>
-            )}
-            
-          </motion.div>
-        )}
+                </LiquidGlassCard>
+              </motion.div>
 
+              {/* Three Bottom Notifications — Stylist Reasoning (cascade down) */}
+              <div className="flex flex-col gap-3">
+                {activeOutfit.stylist_reasoning.slice(0, 3).map((note: string, i: number) => {
+                  const labels = ['Top', 'Middle', 'Bottom'];
+                  const icons = [Shirt, Layers, Footprints];
+                  const Icon = icons[i] || Sparkles;
+                  const colors = ['from-blue-400/30 to-blue-500/20', 'from-emerald-400/30 to-emerald-500/20', 'from-purple-400/30 to-purple-500/20'];
+                  const iconColors = ['text-blue-300', 'text-emerald-300', 'text-purple-300'];
+                  
+                  return (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      transition={{ delay: 0.2 + i * 0.15, type: "spring", stiffness: 60, damping: 15 }}
+                    >
+                      <LiquidGlassCard
+                        width="340px"
+                        height="80px"
+                        borderRadius="20px"
+                        blurIntensity="xl"
+                        glowIntensity="sm"
+                        shadowIntensity="md"
+                        draggable={true}
+                        expandable={true}
+                      >
+                        <div className="flex items-start gap-3 px-4 py-3 h-full">
+                          <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${colors[i]} flex items-center justify-center flex-shrink-0 mt-0.5`}>
+                            <Icon className={`w-4 h-4 ${iconColors[i]}`} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[11px] font-semibold text-white/50 uppercase tracking-wider mb-1">{labels[i]}</p>
+                            <p className="text-xs text-white/85 leading-relaxed line-clamp-2">{note}</p>
+                          </div>
+                        </div>
+                      </LiquidGlassCard>
+                    </motion.div>
+                  );
+                })}
+              </div>
 
+              {/* Accessory Note (if present) — slides in last */}
+              {activeOutfit.accessory_note && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  transition={{ delay: 0.7, type: "spring", stiffness: 60, damping: 15 }}
+                >
+                  <LiquidGlassCard
+                    width="340px"
+                    height="64px"
+                    borderRadius="20px"
+                    blurIntensity="xl"
+                    glowIntensity="xs"
+                    shadowIntensity="sm"
+                    draggable={false}
+                  >
+                    <div className="flex items-center gap-3 px-4 py-3 h-full">
+                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-400/20 to-amber-500/10 flex items-center justify-center flex-shrink-0">
+                        <Sparkles className="w-3.5 h-3.5 text-amber-300/70" />
+                      </div>
+                      <p className="text-xs text-amber-200/80 leading-relaxed">{activeOutfit.accessory_note}</p>
+                    </div>
+                  </LiquidGlassCard>
+                </motion.div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* ---- Occasion Modal ---- */}
         <AnimatePresence>
