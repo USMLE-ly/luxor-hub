@@ -233,7 +233,6 @@ export default function DressingRoomPage() {
           </AnimatePresence>
 
           {/* iPhone Mockup */}
-          <div className="w-full max-w-[340px] mx-auto flex justify-center">
           <IPhoneMockup
             model="15-pro"
             color="golden-sands"
@@ -241,6 +240,7 @@ export default function DressingRoomPage() {
             scale={0.85}
             showHomeIndicator={true}
             safeArea={true}
+            style={{ transformOrigin: "center" }}
           >
             {isGenerating ? (
               <div style={{
@@ -319,7 +319,6 @@ export default function DressingRoomPage() {
               />
             )}
           </IPhoneMockup>
-          </div>
 
           {/* Three Bottom Notifications — Stylist Reasoning (below iPhone) */}
           <AnimatePresence>
