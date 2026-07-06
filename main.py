@@ -2025,7 +2025,7 @@ def closet_clear_all():
         supabase_errors = []
 
         # ---- STEP 1: Delete from Supabase via REST API ----
-        supabase_rest_url = "https://uakkwvdjoqsceewhsfjb.supabase.co/rest/v1"
+        supabase_rest_url = "https://rpxsicsakggmitgqhalw.supabase.co/rest/v1"
         
         # Determine auth header: prefer service_role_key (bypasses RLS), else access_token
         if service_role_key:
@@ -2040,7 +2040,7 @@ def closet_clear_all():
 
         if auth_header and uid:
             headers = {
-                "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVha2t3dmRqb3FzY2Vld2hzZmpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NjE2ODEsImV4cCI6MjA4NzIzNzY4MX0.2bqKl0gFyNESBduLwg6GNYbFIMwF5XjDw_9xlWd1Nfo",
+                "apikey": "sb_publishable_X7EDgWhQM21N7ykgjLQKbQ_IfvkjGbU",
                 "Authorization": auth_header,
                 "Content-Type": "application/json",
                 "Prefer": "return=minimal",
@@ -2221,8 +2221,8 @@ def closet_force_clear():
         results = {"qdrant": False, "json": False, "supabase": {}, "errors": []}
         
         # ---- STEP 1: Supabase deletion via REST API ----
-        SUPABASE_URL = "https://uakkwvdjoqsceewhsfjb.supabase.co"
-        SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVha2t3dmRqb3FzY2Vld2hzZmpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NjE2ODEsImV4cCI6MjA4NzIzNzY4MX0.2bqKl0gFyNESBduLwg6GNYbFIMwF5XjDw_9xlWd1Nfo"
+        SUPABASE_URL = "https://rpxsicsakggmitgqhalw.supabase.co"
+        SUPABASE_ANON_KEY = "sb_publishable_X7EDgWhQM21N7ykgjLQKbQ_IfvkjGbU"
         supabase_rest_url = f"{SUPABASE_URL}/rest/v1"
         
         headers = {
