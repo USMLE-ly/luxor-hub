@@ -77,12 +77,24 @@ const Auth = () => {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Welcome back to LEXOR®!");
-        const { data: profile } = await supabase
-          .from("style_profiles")
-          .select("onboarding_completed")
-          .eq("user_id", (await supabase.auth.getUser()).data.user!.id)
-          .single();
-        navigate(profile?.onboarding_completed ? "/dashboard" : "/onboarding");
+        // Get the user from the session we already have
+        const { data: { user: sessionUser } } = await supabase.auth.getUser();
+        const uid = sessionUser?.id;
+        // Check if onboarding was completed — gracefully handle missing profile table
+        let onboardingDone = false;
+        if (uid) {
+          try {
+            const { data: profile } = await supabase
+              .from("style_profiles")
+              .select("onboarding_completed")
+              .eq("user_id", uid)
+              .maybeSingle();
+            onboardingDone = profile?.onboarding_completed === true;
+          } catch {
+            // profile table may not exist yet — treat as not onboarded
+          }
+        }
+        navigate(onboardingDone ? "/dashboard" : "/onboarding");
       } else {
         const { error } = await supabase.auth.signUp({
           email,
