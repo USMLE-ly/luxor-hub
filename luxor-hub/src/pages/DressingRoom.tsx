@@ -187,7 +187,7 @@ export default function DressingRoomPage() {
 
   return (
     <AppLayout>
-      <div className="p-4 md:p-8 mx-auto max-w-7xl space-y-8 overflow-x-hidden">
+      <div className="p-4 md:p-8 mx-auto max-w-5xl space-y-4 overflow-x-hidden">
 
         {/* ---- HEADER ---- */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
