@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { AppLayout } from "@/components/app/AppLayout";
 import { toast } from "sonner";
+import { notifyEvent } from "@/lib/notificationService";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Upload, Camera, Palette, ScanFaceIcon, User, Star, Lightbulb, AlertTriangle } from "lucide-react";
 import { humanizeText } from "@/lib/humanizer";
@@ -272,6 +273,7 @@ export default function StyleRecommendationsPage() {
       setProgressStage("Complete!");
       setActiveTab("analyze");
       toast.success("Full analysis complete! ✨");
+      notifyEvent("analyze-complete");
     } catch (e: any) {
       setError(e.message || "Analysis failed");
       toast.error(e.message || "Analysis failed. Please try again.");

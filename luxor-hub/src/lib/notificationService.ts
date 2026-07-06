@@ -5,7 +5,6 @@
 /* ------------------------------------------------------------------ */
 
 const SENT_LOG_KEY = "luxor_notif_sent_log";
-const ENGAGEMENT_KEY = "luxor_notif_engagement";
 
 interface NtfyPayload {
   topic: string;

@@ -27,8 +27,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
+    let resolved = false;
+
     // Subscribe FIRST — guarantees no auth event is missed while getSession() resolves
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (resolved) return; // getSession() already set state
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -37,6 +40,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Then hydrate from the stored session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (resolved) return; // onAuthStateChange already fired
+      resolved = true;
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -44,6 +49,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => {
+      resolved = true; // prevent state updates after unmount
       subscription.unsubscribe();
     };
   }, []);
