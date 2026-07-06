@@ -6,7 +6,7 @@ import IPhoneMockup from "@/components/ui/iphone-mockup";
 import { Perspective, Highlight } from "@/components/ui/perspective-highlight";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { CalendarDays, Check, Sparkles, Shirt, Layers, Footprints } from "lucide-react";
+import { CalendarDays, Check } from "lucide-react";
 import { LiquidGlassCard } from "@/components/ui/liquid-notification";
 import { supabase } from "@/integrations/supabase/client";
 import { humanizeTextArray } from "@/lib/humanizer";
@@ -197,8 +197,42 @@ export default function DressingRoomPage() {
           </p>
         </motion.div>
 
-        {/* ---- IPHONE MOCKUP + FLIPGALLERY ---- */}
-        <div className="flex justify-center items-start">
+        {/* ---- IPHONE MOCKUP + NOTIFICATIONS ---- */}
+        <div className="flex flex-col items-center w-full max-w-sm mx-auto">
+          {/* Top Notification — Outfit Title (above iPhone) */}
+          <AnimatePresence>
+            {showNotifications && activeOutfit && activeOutfit.stylist_reasoning && activeOutfit.stylist_reasoning.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ delay: 0.1, type: "spring", stiffness: 80, damping: 15 }}
+                className="mb-3 w-full flex justify-center"
+              >
+                <LiquidGlassCard
+                  width="320px"
+                  height="64px"
+                  borderRadius="20px"
+                  blurIntensity="xl"
+                  glowIntensity="sm"
+                  shadowIntensity="md"
+                  draggable={false}
+                >
+                  <div className="flex items-center px-5 py-3 h-full">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-white/90 truncate">
+                        {activeOutfit.stylist_reasoning[0]?.split(' ').slice(0, 6).join(' ') || 'Styled Look'}
+                      </p>
+                      <p className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5">Ready to wear</p>
+                    </div>
+                    <div className="w-2 h-2 rounded-full bg-emerald-400/70 flex-shrink-0 ml-3" />
+                  </div>
+                </LiquidGlassCard>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* iPhone Mockup */}
           <IPhoneMockup
             model="15-pro"
             color="golden-sands"
@@ -218,7 +252,6 @@ export default function DressingRoomPage() {
                 backgroundColor: 'rgba(0,0,0,0.7)',
                 zIndex: 50,
               }}>
-                {/* Spinning halo ring — golden sand gradient */}
                 <div style={{
                   position: 'relative',
                   width: '96px',
@@ -227,7 +260,6 @@ export default function DressingRoomPage() {
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}>
-                  {/* Outer spinning ring — golden sand gradient */}
                   <div style={{
                     position: 'absolute',
                     width: '100%',
@@ -239,7 +271,6 @@ export default function DressingRoomPage() {
                   }}
                     className="animate-spin"
                   />
-                  {/* Inner pulse glow */}
                   <div style={{
                     position: 'absolute',
                     width: '64px',
@@ -249,7 +280,6 @@ export default function DressingRoomPage() {
                   }}
                     className="animate-pulse"
                   />
-                  {/* Percentage text - smoothly animated */}
                   <span style={{
                     fontSize: '16px',
                     fontWeight: 600,
@@ -288,121 +318,66 @@ export default function DressingRoomPage() {
               />
             )}
           </IPhoneMockup>
-        </div>
 
-        {/* ---- LIQUID GLASS NOTIFICATIONS ---- */}
-        <AnimatePresence>
-          {showNotifications && activeOutfit && activeOutfit.stylist_reasoning && activeOutfit.stylist_reasoning.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="max-w-sm mx-auto space-y-3"
-            >
-              {/* Top Notification — Outfit Title (slides up from iPhone top) */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ delay: 0.1, type: "spring", stiffness: 80, damping: 15 }}
-              >
-                <LiquidGlassCard
-                  width="340px"
-                  height="72px"
-                  borderRadius="20px"
-                  blurIntensity="xl"
-                  glowIntensity="md"
-                  shadowIntensity="md"
-                  draggable={false}
-                >
-                  <div className="flex items-center gap-3 px-4 py-3 h-full">
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-400/30 to-yellow-500/20 flex items-center justify-center flex-shrink-0">
-                      <Sparkles className="w-4 h-4 text-amber-300" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-white/90 truncate">
-                        {activeOutfit.stylist_reasoning[0]?.split(' ').slice(0, 6).join(' ') || 'Styled Look'}
-                      </p>
-                      <p className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5">Ready to wear</p>
-                    </div>
-                    <div className="w-2 h-2 rounded-full bg-emerald-400/70 flex-shrink-0" />
-                  </div>
-                </LiquidGlassCard>
-              </motion.div>
-
-              {/* Three Bottom Notifications — Stylist Reasoning (cascade down) */}
-              <div className="flex flex-col gap-3">
-                {activeOutfit.stylist_reasoning.slice(0, 3).map((note: string, i: number) => {
-                  const labels = ['Top', 'Middle', 'Bottom'];
-                  const icons = [Shirt, Layers, Footprints];
-                  const Icon = icons[i] || Sparkles;
-                  const colors = ['from-blue-400/30 to-blue-500/20', 'from-emerald-400/30 to-emerald-500/20', 'from-purple-400/30 to-purple-500/20'];
-                  const iconColors = ['text-blue-300', 'text-emerald-300', 'text-purple-300'];
-                  
-                  return (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      transition={{ delay: 0.2 + i * 0.15, type: "spring", stiffness: 60, damping: 15 }}
-                    >
-                      <LiquidGlassCard
-                        width="340px"
-                        height="80px"
-                        borderRadius="20px"
-                        blurIntensity="xl"
-                        glowIntensity="sm"
-                        shadowIntensity="md"
-                        draggable={true}
-                        expandable={true}
-                      >
-                        <div className="flex items-start gap-3 px-4 py-3 h-full">
-                          <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${colors[i]} flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                            <Icon className={`w-4 h-4 ${iconColors[i]}`} />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[11px] font-semibold text-white/50 uppercase tracking-wider mb-1">{labels[i]}</p>
-                            <p className="text-xs text-white/85 leading-relaxed line-clamp-2">{note}</p>
-                          </div>
-                        </div>
-                      </LiquidGlassCard>
-                    </motion.div>
-                  );
-                })}
-              </div>
-
-              {/* Accessory Note (if present) — slides in last */}
-              {activeOutfit.accessory_note && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  transition={{ delay: 0.7, type: "spring", stiffness: 60, damping: 15 }}
-                >
-                  <LiquidGlassCard
-                    width="340px"
-                    height="64px"
-                    borderRadius="20px"
-                    blurIntensity="xl"
-                    glowIntensity="xs"
-                    shadowIntensity="sm"
-                    draggable={false}
+          {/* Three Bottom Notifications — Stylist Reasoning (below iPhone) */}
+          <AnimatePresence>
+            {showNotifications && activeOutfit && activeOutfit.stylist_reasoning && activeOutfit.stylist_reasoning.length > 0 && (
+              <div className="flex flex-col gap-3 mt-4 w-full">
+                {activeOutfit.stylist_reasoning.slice(0, 3).map((note: string, i: number) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ delay: 0.2 + i * 0.15, type: "spring", stiffness: 60, damping: 15 }}
+                    className="flex justify-center"
                   >
-                    <div className="flex items-center gap-3 px-4 py-3 h-full">
-                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-400/20 to-amber-500/10 flex items-center justify-center flex-shrink-0">
-                        <Sparkles className="w-3.5 h-3.5 text-amber-300/70" />
+                    <LiquidGlassCard
+                      width="320px"
+                      height="80px"
+                      borderRadius="20px"
+                      blurIntensity="xl"
+                      glowIntensity="sm"
+                      shadowIntensity="md"
+                      draggable={true}
+                      expandable={true}
+                    >
+                      <div className="flex flex-col justify-center px-5 py-3 h-full">
+                        <p className="text-[11px] font-semibold text-white/40 uppercase tracking-wider mb-1">Reason {i + 1}</p>
+                        <p className="text-xs text-white/85 leading-relaxed line-clamp-2">{note}</p>
                       </div>
-                      <p className="text-xs text-amber-200/80 leading-relaxed">{activeOutfit.accessory_note}</p>
-                    </div>
-                  </LiquidGlassCard>
-                </motion.div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+                    </LiquidGlassCard>
+                  </motion.div>
+                ))}
 
-        {/* ---- Occasion Modal ---- */}
+                {/* Accessory Note (if present) */}
+                {activeOutfit.accessory_note && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ delay: 0.7, type: "spring", stiffness: 60, damping: 15 }}
+                    className="flex justify-center"
+                  >
+                    <LiquidGlassCard
+                      width="320px"
+                      height="56px"
+                      borderRadius="20px"
+                      blurIntensity="xl"
+                      glowIntensity="xs"
+                      shadowIntensity="sm"
+                      draggable={false}
+                    >
+                      <div className="flex items-center px-5 py-3 h-full">
+                        <p className="text-xs text-amber-200/80 leading-relaxed">{activeOutfit.accessory_note}</p>
+                      </div>
+                    </LiquidGlassCard>
+                  </motion.div>
+                )}
+              </div>
+            )}
+          </AnimatePresence>
+        </div>        {/* ---- Occasion Modal ---- */}
         <AnimatePresence>
           {showOccasionModal && (
             <motion.div
