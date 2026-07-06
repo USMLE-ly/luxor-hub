@@ -268,6 +268,63 @@ const Closet = () => {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(mannequinClothing)); } catch {}
   }, [mannequinClothing, STORAGE_KEY]);
 
+  // ── Supabase-backed mannequin state persistence ──
+  const MANNEQUIN_STATE_LOADED = useRef(false);
+
+  // Load mannequin state from Supabase on mount
+  useEffect(() => {
+    if (!user || MANNEQUIN_STATE_LOADED.current) return;
+    MANNEQUIN_STATE_LOADED.current = true;
+    supabase
+      .from("mannequin_state")
+      .select("*")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (error) { console.warn("[MANNEQUIN] Failed to load state:", error.message); return; }
+        if (data) {
+          if (data.gender) setGender(data.gender as "male" | "female");
+          if (data.dna) setDna(data.dna as BodyDNA);
+          if (data.pose) setPose(data.pose as PosePreset);
+          if (data.tracing_url) setTracingUrl(data.tracing_url);
+          if (typeof data.tracing_opacity === "number") setTracingOpacity(data.tracing_opacity);
+          if (typeof data.show_measurements === "boolean") setShowMeasurements(data.show_measurements);
+          if (Array.isArray(data.clothing) && data.clothing.length > 0) {
+            // Only override if localStorage doesn't have a saved outfit
+            const local = localStorage.getItem(STORAGE_KEY || "");
+            if (!local || JSON.parse(local).length === 0) {
+              setMannequinClothing(data.clothing as MannequinClothingItem[]);
+            }
+          }
+          console.log("[MANNEQUIN] Loaded state from Supabase");
+        }
+      });
+  }, [user]);
+
+  // Debounced save to Supabase (3s after last change)
+  useEffect(() => {
+    if (!user || !MANNEQUIN_STATE_LOADED.current) return;
+    const timer = setTimeout(() => {
+      supabase
+        .from("mannequin_state")
+        .upsert({
+          user_id: user.id,
+          gender,
+          dna: dna as any,
+          pose,
+          tracing_url: tracingUrl || null,
+          tracing_opacity: tracingOpacity,
+          show_measurements: showMeasurements,
+          clothing: mannequinClothing as any,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: "user_id" })
+        .then(({ error }) => {
+          if (error) console.warn("[MANNEQUIN] Failed to save state:", error.message);
+        });
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [user, gender, dna, pose, tracingUrl, tracingOpacity, showMeasurements, mannequinClothing]);
+
   // Fetch saved mannequin outfits
   const fetchSavedOutfits = useCallback(async () => {
     if (!user) return;

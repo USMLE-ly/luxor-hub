@@ -710,6 +710,91 @@ def qdrant_get_item(item_id: str) -> Optional[Dict[str, Any]]:
     except Exception as exc:
         _log.error("[QDRANT] Get error for item %s: %s", item_id, exc)
         raise
+
+
+def qdrant_find_similar(item_id: str, user_id: str = "", limit: int = 8) -> List[Dict[str, Any]]:
+    """Find similar items in Qdrant by category/color/style payload filters.
+    Uses payload filtering (not vector similarity) since we don't have an embedding model.
+    """
+    try:
+        source_item = qdrant_get_item(item_id)
+        if not source_item:
+            return []
+        
+        # Build filter from source item attributes
+        must_conditions = []
+        
+        # Same category
+        cat = source_item.get("category") or source_item.get("type", "")
+        if cat:
+            must_conditions.append(
+                qdrant_models.FieldCondition(
+                    key="category", match=qdrant_models.MatchValue(value=cat)
+                )
+            )
+        
+        # Same user (unless searching globally)
+        uid = user_id or source_item.get("user_id", "")
+        if uid:
+            must_conditions.append(
+                qdrant_models.FieldCondition(
+                    key="user_id", match=qdrant_models.MatchValue(value=uid)
+                )
+            )
+        
+        # Exclude self
+        must_conditions.append(
+            qdrant_models.FieldCondition(
+                key="id", match=qdrant_models.MatchValue(value=item_id)
+            )
+        )
+        
+        must_not = [qdrant_models.FieldCondition(
+            key="id", match=qdrant_models.MatchValue(value=item_id)
+        )]
+        
+        result = _qdrant_closet.scroll(
+            collection_name=_CLOSET_COLLECTION,
+            limit=limit,
+            with_payload=True,
+            scroll_filter=qdrant_models.Filter(
+                must=must_conditions,
+            ),
+        )
+        points = result[0] if isinstance(result, tuple) else result
+        items = [dict(p.payload) for p in points if p.payload]
+        _log.info("[QDRANT] find_similar for %s: found %d items", item_id, len(items))
+        return items
+    except Exception as exc:
+        _log.error("[QDRANT] find_similar error for %s: %s", item_id, exc)
+        return []
+
+
+# API endpoint for find-similar
+@app.route("/api/v1/closet/find-similar", methods=["GET", "OPTIONS"], strict_slashes=False)
+def closet_find_similar():
+    """Find items similar to a given item, filtered by category/color/style.
+    Query params: item_id (required), user_id (optional), limit (optional, default 8)
+    """
+    if request.method == "OPTIONS":
+        return "", 204
+    try:
+        item_id = request.args.get("item_id", "")
+        user_id = request.args.get("user_id", "")
+        limit = int(request.args.get("limit", "8"))
+        
+        if not item_id:
+            return jsonify({"error": "item_id is required", "success": False}), 400
+        
+        items = qdrant_find_similar(item_id, user_id, limit)
+        return jsonify({"success": True, "items": items})
+    except Exception as e:
+        import traceback
+        print(f"[FIND-SIMILAR] Error: {e}", flush=True)
+        traceback.print_exc()
+        return jsonify({"error": str(e), "success": False}), 500
+
+
 # Prompts
 # ---------------------------------------------------------------------------
 CLOSET_PROMPT = """You are a professional fashion stylist. Given a user's closet items, select outfits that work well together.

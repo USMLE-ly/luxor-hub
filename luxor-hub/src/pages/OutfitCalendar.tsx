@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useUserLocation } from "@/hooks/useUserLocation";
+import { OutfitComposition } from "@/components/ui/OutfitComposition";
 import {
   CalendarDays, ChevronLeft, ChevronRight, Plus, X, Shirt, Sparkles, Loader2,
   Cloud, Sun, CloudRain, Snowflake, Wind, Droplets, Thermometer, Pencil, Bell, BellOff,
@@ -1089,25 +1090,10 @@ const OutfitCalendarInner = () => {
                           });
                           if (firstOutfitEv) {
                             const evItems = Array.isArray(firstOutfitEv.outfit_items) ? firstOutfitEv.outfit_items : [];
-                            const orderedItems = ['top', 'mid', 'bottom']
-                              .map(t => evItems.find((i: any) => i.type === t))
-                              .filter(Boolean);
-                            if (orderedItems.length > 0) {
+                            if (evItems.some((i: any) => i.url)) {
                               return (
-                                <div className="flex-1 flex flex-col w-full rounded-lg bg-[#0a0a0a] overflow-hidden" style={{ minHeight: "60px" }}>
-                                  {orderedItems.map((item: any, idx: number) => (
-                                    <div
-                                      key={idx}
-                                      className="flex-1 border-b border-[#1a1a1a] last:border-b-0"
-                                      style={{
-                                        backgroundImage: `url(${item.url})`,
-                                        backgroundSize: 'contain',
-                                        backgroundPosition: 'center',
-                                        backgroundRepeat: 'no-repeat',
-                                        backgroundColor: '#0a0a0a',
-                                      }}
-                                    />
-                                  ))}
+                                <div className="flex-1 w-full rounded-lg overflow-hidden" style={{ minHeight: "60px" }}>
+                                  <OutfitComposition items={evItems} minHeight="60px" />
                                 </div>
                               );
                             }
@@ -1251,27 +1237,9 @@ const OutfitCalendarInner = () => {
 
                         // Split-screen layout for DressingRoom outfits
                         if (items.length > 0 && items.some((i: any) => i.url)) {
-                          const hasMid = items.some((i: any) => i.type === 'mid');
-                          const orderedItems = ['top', 'mid', 'bottom']
-                            .map(t => items.find((i: any) => i.type === t))
-                            .filter(Boolean);
                           return (
                             <div className="p-3 pb-0">
-                              <div className="rounded-lg overflow-hidden bg-[#0a0a0a] flex flex-col" style={{ minHeight: "100px", maxHeight: "200px" }}>
-                                {orderedItems.map((item: any, idx: number) => (
-                                  <div
-                                    key={idx}
-                                    className="flex-1 border-b border-[#1a1a1a] last:border-b-0"
-                                    style={{
-                                      backgroundImage: `url(${item.url})`,
-                                      backgroundSize: 'contain',
-                                      backgroundPosition: 'center',
-                                      backgroundRepeat: 'no-repeat',
-                                      backgroundColor: '#0a0a0a',
-                                    }}
-                                  />
-                                ))}
-                              </div>
+                              <OutfitComposition items={items} minHeight="100px" maxHeight="200px" />
                             </div>
                           );
                         }
@@ -1917,32 +1885,13 @@ const OutfitCalendarInner = () => {
                 {(() => {
                     const flItems = Array.isArray(flatLayEvent?.outfit_items) ? flatLayEvent.outfit_items : [];
                     const hasUrlItems = flItems.some((i: any) => i.url);
-                    // DressingRoom outfits: vertical split-screen
+                    // DressingRoom outfits: vertical split-screen via shared component
                     if (hasUrlItems) {
-                      const orderedItems = ['top', 'mid', 'bottom']
-                        .map(t => flItems.find((i: any) => i.type === t))
-                        .filter(Boolean);
-                      if (orderedItems.length > 0) {
-                        return (
-                          <div className="rounded-xl overflow-hidden bg-[#0a0a0a]" style={{ minHeight: "300px" }}>
-                            <div className="flex flex-col h-80">
-                              {orderedItems.map((item: any, idx: number) => (
-                                <div
-                                  key={idx}
-                                  className="flex-1 border-b border-[#1a1a1a] last:border-b-0"
-                                  style={{
-                                    backgroundImage: `url(${item.url})`,
-                                    backgroundSize: 'contain',
-                                    backgroundPosition: 'center',
-                                    backgroundRepeat: 'no-repeat',
-                                    backgroundColor: '#0a0a0a',
-                                  }}
-                                />
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      }
+                      return (
+                        <div className="rounded-xl overflow-hidden" style={{ minHeight: "300px" }}>
+                          <OutfitComposition items={flItems} minHeight="300px" className="h-80" />
+                        </div>
+                      );
                     }
                     // Mannequin image (legacy outfits)
                     if (flatLayEvent.mannequin_image_url) {
