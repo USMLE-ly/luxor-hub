@@ -384,6 +384,7 @@ const OutfitCalendarInner = () => {
     if (error) toast.error("Failed to add event");
     else {
       toast.success("Event added!");
+      notifyEvent("outfit-added-calendar");
       setShowAddDialog(false);
       setNewEvent({ title: "", occasion: "Casual", notes: "", outfitId: "", manualItems: [] });
       fetchEvents();
