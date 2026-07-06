@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
-import { Check, Camera, Smartphone, Video, User, FlipHorizontal, Shirt, Glasses, Watch, Gem, Scissors } from "lucide-react";
+import { Check, Camera, Smartphone, Video, User, FlipHorizontal, Shirt, Glasses, Watch, Gem, Scissors, Bell } from "lucide-react";
 import { useAppPermissions } from "@/hooks/useAppPermissions";
 
 // Haptic + audio tick for card selection
@@ -233,9 +233,11 @@ const HeightStep = ({ answers, onSelect }: { answers: Record<string, string[]>; 
       {unit === "inch" ? (
         <div className="flex gap-4 max-w-xs mx-auto">
           <div className="flex-1">
-            <label className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-2 block text-center">Feet</label>
+            <label htmlFor="height-feet" className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-2 block text-center">Feet</label>
             <div className="relative rounded-xl bg-secondary/50 border border-border/40 focus-within:border-primary/40 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
               <input
+                id="height-feet"
+                name="height-feet"
                 type="number"
                 inputMode="numeric"
                 placeholder="5"
@@ -249,9 +251,11 @@ const HeightStep = ({ answers, onSelect }: { answers: Record<string, string[]>; 
             </div>
           </div>
           <div className="flex-1">
-            <label className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-2 block text-center">Inches</label>
+            <label htmlFor="height-inches" className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-2 block text-center">Inches</label>
             <div className="relative rounded-xl bg-secondary/50 border border-border/40 focus-within:border-primary/40 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
               <input
+                id="height-inches"
+                name="height-inches"
                 type="number"
                 inputMode="numeric"
                 placeholder="8"
@@ -267,9 +271,11 @@ const HeightStep = ({ answers, onSelect }: { answers: Record<string, string[]>; 
         </div>
       ) : (
         <div className="max-w-xs mx-auto">
-          <label className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-2 block text-center">Centimeters</label>
+          <label htmlFor="height-cm" className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-2 block text-center">Centimeters</label>
           <div className="relative rounded-xl bg-secondary/50 border border-border/40 focus-within:border-primary/40 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
             <input
+              id="height-cm"
+              name="height-cm"
               type="number"
               inputMode="numeric"
               placeholder="172"
