@@ -115,6 +115,7 @@ create table if not exists public.calendar_events (
   occasion text,
   notes text,
   outfit_items jsonb default '[]',
+  outfit_data jsonb default '{}',
   outfit_type text default 'regular',
   mannequin_image_url text,
   badge_key text,
