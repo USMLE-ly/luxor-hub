@@ -246,14 +246,14 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
     return () => ctrl.abort();
   }, [currentIndex, outfits]);
 
-  // ── Preload FULL current outfit before showing (prevents piece-by-piece) ──
+  // ── Preload FIRST outfit before showing (prevents piece-by-piece on initial load) ──
   useEffect(() => {
     if (outfits.length === 0) {
       setImagesReady(false);
       return;
     }
     setImagesReady(false);
-    const outfit = outfits[currentIndex];
+    const outfit = outfits[0] || outfits[currentIndex];
     if (!outfit) return;
     Promise.all([
       preloadImage(outfit.top),
@@ -262,18 +262,21 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
     ]).then(() => {
       setImagesReady(true);
     });
-  }, [outfits, currentIndex]);
+  // Only run when outfits array reference changes (new generation), NOT on currentIndex change
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [outfits]);
 
   // ── Wait for preloaded images before flipping back in ──
   const pendingPreloadRef = useRef<Promise<void> | null>(null);
 
   // ── Domino flip state machine ──
+  const flipSectionCountRef = useRef(3);
+
   useEffect(() => {
     if (flipState === 'idle') return;
 
-    const sectionCount = outfits[currentIndex]
-      ? getSections(outfits[currentIndex]).count
-      : 3;
+    // Capture sectionCount at trigger time via ref to avoid deps change
+    const sectionCount = flipSectionCountRef.current;
 
     if (flipState === 'out') {
       const delay = (sectionCount - 1) * DOMINO_DELAY + FLIP_SPEED + 50;
@@ -300,13 +303,18 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
         setFlipState('idle');
       }, (sectionCount - 1) * DOMINO_DELAY + FLIP_SPEED);
     }
-  }, [flipState, animDirection, outfits, currentIndex]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flipState, animDirection]);
 
 
 
   const triggerFlip = (direction: 'next' | 'prev') => {
     if (flipState !== 'idle') return;
     setAnimDirection(direction);
+    // Capture sectionCount at flip start so the state machine doesn't depend on currentIndex
+    flipSectionCountRef.current = currentIndex !== undefined && outfits[currentIndex]
+      ? getSections(outfits[currentIndex]).count
+      : 3;
     setFlipState('out');
   };
 
@@ -396,7 +404,7 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
       top: `${(idx / sectionCount) * 100}%`,
       height: `${(1 / sectionCount) * 100}%`,
       transform,
-      transition: isAnimating ? `transform ${FLIP_SPEED}ms ease-in-out` : 'none',
+      transition: isAnimating ? `transform ${FLIP_SPEED}ms cubic-bezier(0.65, 0, 0.35, 1)` : 'none',
       transitionDelay: isAnimating ? `${idx * DOMINO_DELAY}ms` : '0ms',
       overflow: 'hidden',
       display: 'flex',
@@ -412,33 +420,6 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
     };
   };
 
-  if (!imagesReady && outfits.length > 0) {
-    // Show a spinner while initial outfit images are preloading
-    return (
-      <div style={{
-        position: 'relative',
-        width: '100%',
-        height: '100%',
-        aspectRatio: '9 / 16',
-        perspective: '800px',
-        overflow: 'hidden',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#0a0a0a',
-        borderRadius: '12px',
-      }}>
-        <div style={{
-          width: '40px', height: '40px',
-          borderRadius: '50%',
-          border: '3px solid rgba(255,255,255,0.08)',
-          borderTopColor: '#e5c785',
-          animation: 'spin 0.8s linear infinite',
-        }} />
-      </div>
-    );
-  }
-
   return (
     <div style={{
       position: 'relative',
@@ -448,6 +429,23 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
       perspective: '800px',
       overflow: 'hidden',
     }}>
+      {/* Spinner overlay — shown only on initial load, does NOT unmount gallery */}
+      {!imagesReady && outfits.length > 0 && (
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 50,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          backgroundColor: '#0a0a0a',
+          borderRadius: '12px',
+        }}>
+          <div style={{
+            width: '40px', height: '40px',
+            borderRadius: '50%',
+            border: '3px solid rgba(255,255,255,0.08)',
+            borderTopColor: '#e5c785',
+            animation: 'spin 0.8s linear infinite',
+          }} />
+        </div>
+      )}
       {sections.map((url, idx) => {
         return (
         <div key={idx} style={getSectionStyle(idx)} />
