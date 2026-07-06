@@ -30,7 +30,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   if (!isReady || loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+        <div className="border-primary flex h-10 w-10 animate-spin items-center justify-center rounded-full border-4 border-t-transparent"></div>
       </div>
     );
   }
