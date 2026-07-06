@@ -3,8 +3,9 @@
   "private": true,
   "scripts": {
     "build": "sh build.sh",
-    "dev": "cd luxor-hub && npm install && npm run dev",
-    "preview": "cd luxor-hub && npm run preview"
+    "build:dev": "sh build.sh",
+    "dev": "npm --prefix luxor-hub run dev",
+    "preview": "npm --prefix luxor-hub run preview"
   },
   "dependencies": {}
 }
