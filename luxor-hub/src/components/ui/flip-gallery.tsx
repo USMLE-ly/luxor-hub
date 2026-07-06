@@ -122,6 +122,18 @@ const FLIP_SPEED = 400;
 const DOMINO_DELAY = 150;
 
 /* ------------------------------------------------------------------ */
+/*  Preload a single image URL into browser cache                      */
+/* ------------------------------------------------------------------ */
+const preloadImage = (url: string): Promise<void> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve();
+    img.onerror = () => resolve(); // Don't hang UI on broken image
+    img.src = url;
+  });
+};
+
+/* ------------------------------------------------------------------ */
 /*  Component                                                         */
 /* ------------------------------------------------------------------ */
 export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCalendar, isLoading, onOutfitChange }: FlipGalleryProps) {
@@ -235,8 +247,33 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
     setFlipState('out');
   };
 
-  const handleNext = () => triggerFlip('next');
-  const handlePrev = () => triggerFlip('prev');
+  const handleNext = async () => {
+    if (flipState !== 'idle' || outfits.length === 0) return;
+    const nextIndex = (currentIndex + 1) % outfits.length;
+    const nextOutfit = outfits[nextIndex];
+    if (nextOutfit) {
+      await Promise.all([
+        preloadImage(nextOutfit.top),
+        preloadImage(nextOutfit.mid),
+        preloadImage(nextOutfit.bottom),
+      ]);
+    }
+    triggerFlip('next');
+  };
+
+  const handlePrev = async () => {
+    if (flipState !== 'idle' || outfits.length === 0) return;
+    const nextIndex = (currentIndex - 1 + outfits.length) % outfits.length;
+    const nextOutfit = outfits[nextIndex];
+    if (nextOutfit) {
+      await Promise.all([
+        preloadImage(nextOutfit.top),
+        preloadImage(nextOutfit.mid),
+        preloadImage(nextOutfit.bottom),
+      ]);
+    }
+    triggerFlip('prev');
+  };
 
   /* ======================= EMPTY STATE ======================= */
   if (outfits.length === 0) {
