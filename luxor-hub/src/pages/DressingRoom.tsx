@@ -198,7 +198,7 @@ export default function DressingRoomPage() {
         </motion.div>
 
         {/* ---- IPHONE MOCKUP + NOTIFICATIONS ---- */}
-        <div className="flex flex-col items-center w-full max-w-sm mx-auto">
+        <div className="flex flex-col items-center w-full">
           {/* Top Notification — Outfit Title (above iPhone) */}
           <AnimatePresence>
             {showNotifications && activeOutfit && activeOutfit.stylist_reasoning && activeOutfit.stylist_reasoning.length > 0 && (
@@ -207,7 +207,7 @@ export default function DressingRoomPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ delay: 0.1, type: "spring", stiffness: 80, damping: 15 }}
-                className="mb-3 w-full flex justify-center"
+                className="mb-2 w-full flex justify-center"
               >
                 <LiquidGlassCard
                   width="320px"
@@ -225,7 +225,7 @@ export default function DressingRoomPage() {
                       </p>
                       <p className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5">Ready to wear</p>
                     </div>
-                    <div className="w-2 h-2 rounded-full bg-emerald-400/70 flex-shrink-0 ml-3" />
+
                   </div>
                 </LiquidGlassCard>
               </motion.div>
@@ -322,7 +322,7 @@ export default function DressingRoomPage() {
           {/* Three Bottom Notifications — Stylist Reasoning (below iPhone) */}
           <AnimatePresence>
             {showNotifications && activeOutfit && activeOutfit.stylist_reasoning && activeOutfit.stylist_reasoning.length > 0 && (
-              <div className="flex flex-col gap-3 mt-4 w-full">
+              <div className="flex flex-col gap-3 mt-3 w-full">
                 {activeOutfit.stylist_reasoning.slice(0, 3).map((note: string, i: number) => (
                   <motion.div
                     key={i}
@@ -343,8 +343,7 @@ export default function DressingRoomPage() {
                       expandable={true}
                     >
                       <div className="flex flex-col justify-center px-5 py-3 h-full">
-                        <p className="text-[11px] font-semibold text-white/40 uppercase tracking-wider mb-1">Reason {i + 1}</p>
-                        <p className="text-xs text-white/85 leading-relaxed line-clamp-2">{note}</p>
+                        <p className="text-sm text-white/90 leading-relaxed line-clamp-2">{note}</p>
                       </div>
                     </LiquidGlassCard>
                   </motion.div>
