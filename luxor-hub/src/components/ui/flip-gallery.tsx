@@ -139,6 +139,7 @@ const preloadImage = (url: string): Promise<void> => {
 export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCalendar, isLoading, onOutfitChange }: FlipGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flipState, setFlipState] = useState<'idle' | 'out' | 'in'>('idle');
+  const [preloadingDir, setPreloadingDir] = useState<'next' | 'prev' | null>(null);
   const [animDirection, setAnimDirection] = useState<'next' | 'prev'>('next');
   const flipTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -291,31 +292,37 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
   };
 
   const handleNext = () => {
-    if (flipState !== 'idle' || outfits.length === 0) return;
+    if (flipState !== 'idle' || outfits.length === 0 || preloadingDir !== null) return;
     const nextIndex = (currentIndex + 1) % outfits.length;
     const nextOutfit = outfits[nextIndex];
     if (nextOutfit) {
+      setPreloadingDir('next');
       pendingPreloadRef.current = Promise.all([
         preloadImage(nextOutfit.top),
         preloadImage(nextOutfit.mid),
         preloadImage(nextOutfit.bottom),
-      ]).then(() => {});
+      ]).then(() => {
+        setPreloadingDir(null);
+        triggerFlip('next');
+      });
     }
-    triggerFlip('next');
   };
 
   const handlePrev = () => {
-    if (flipState !== 'idle' || outfits.length === 0) return;
+    if (flipState !== 'idle' || outfits.length === 0 || preloadingDir !== null) return;
     const nextIndex = (currentIndex - 1 + outfits.length) % outfits.length;
     const nextOutfit = outfits[nextIndex];
     if (nextOutfit) {
+      setPreloadingDir('prev');
       pendingPreloadRef.current = Promise.all([
         preloadImage(nextOutfit.top),
         preloadImage(nextOutfit.mid),
         preloadImage(nextOutfit.bottom),
-      ]).then(() => {});
+      ]).then(() => {
+        setPreloadingDir(null);
+        triggerFlip('prev');
+      });
     }
-    triggerFlip('prev');
   };
 
   /* ======================= EMPTY STATE ======================= */
@@ -427,7 +434,7 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
               <button
                 onClick={handlePrev}
                 style={{
-                  backgroundColor: '#60a5fa',
+                  backgroundColor: preloadingDir === 'prev' ? '#3b82f6' : '#60a5fa',
                   color: 'white',
                   border: 'none',
                   borderRadius: '50%',
@@ -436,19 +443,30 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  cursor: 'pointer',
+                  cursor: preloadingDir === 'prev' ? 'default' : 'pointer',
                   boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
                   transition: 'transform 0.2s ease',
+                  position: 'relative',
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                onMouseEnter={(e) => { if (preloadingDir !== 'prev') e.currentTarget.style.transform = 'scale(1.1)'; }}
                 onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
               >
-                <ChevronLeft size={20} />
+                {preloadingDir === 'prev' ? (
+                  <div style={{
+                    width: '20px', height: '20px',
+                    borderRadius: '50%',
+                    border: '2px solid rgba(255,255,255,0.2)',
+                    borderTopColor: '#ffffff',
+                    animation: 'spin 0.8s linear infinite',
+                  }} />
+                ) : (
+                  <ChevronLeft size={20} />
+                )}
               </button>
               <button
                 onClick={handleNext}
                 style={{
-                  backgroundColor: '#60a5fa',
+                  backgroundColor: preloadingDir === 'next' ? '#3b82f6' : '#60a5fa',
                   color: 'white',
                   border: 'none',
                   borderRadius: '50%',
@@ -457,14 +475,25 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  cursor: 'pointer',
+                  cursor: preloadingDir === 'next' ? 'default' : 'pointer',
                   boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
                   transition: 'transform 0.2s ease',
+                  position: 'relative',
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                onMouseEnter={(e) => { if (preloadingDir !== 'next') e.currentTarget.style.transform = 'scale(1.1)'; }}
                 onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
               >
-                <ChevronRight size={20} />
+                {preloadingDir === 'next' ? (
+                  <div style={{
+                    width: '20px', height: '20px',
+                    borderRadius: '50%',
+                    border: '2px solid rgba(255,255,255,0.2)',
+                    borderTopColor: '#ffffff',
+                    animation: 'spin 0.8s linear infinite',
+                  }} />
+                ) : (
+                  <ChevronRight size={20} />
+                )}
               </button>
             </>
           )}

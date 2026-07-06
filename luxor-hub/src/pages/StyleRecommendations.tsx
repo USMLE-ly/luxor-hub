@@ -320,7 +320,7 @@ export default function StyleRecommendationsPage() {
             >
               {analyzing ? (
                 <span className="relative z-10 flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <div className="w-4 h-4 rounded-full border-2 border-slate-800/20 border-t-slate-800 animate-spin" />
                   Analyzing...
                 </span>
               ) : (
@@ -340,8 +340,8 @@ export default function StyleRecommendationsPage() {
               className="absolute inset-0 bg-transparent flex flex-col items-center justify-center gap-6 z-20 rounded-xl"
             >
               <div style={{ position: 'relative', width: '96px', height: '96px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ position: 'absolute', width: '100%', height: '100%', borderRadius: '50%', border: '4px solid rgba(255,255,255,0.06)', borderTopColor: '#e5c785', borderRightColor: '#d4b06a' }} className="animate-spin" />
-                <div style={{ position: 'absolute', width: '64px', height: '64px', borderRadius: '50%', backgroundColor: 'rgba(229, 199, 133, 0.12)' }} className="animate-pulse" />
+                <div style={{ position: 'absolute', width: '100%', height: '100%', borderRadius: '9999px', border: '4px solid rgba(255,255,255,0.06)', borderTopColor: '#e5c785', borderRightColor: '#d4b06a' }} className="animate-spin" />
+                <div style={{ position: 'absolute', width: '64px', height: '64px', borderRadius: '9999px', backgroundColor: 'rgba(229, 199, 133, 0.12)' }} className="animate-pulse" />
                 <span style={{ fontSize: '16px', fontWeight: 600, color: 'rgba(229, 199, 133, 0.85)', zIndex: 1 }}>
                   {displayProgress}%
                 </span>
@@ -357,8 +357,8 @@ export default function StyleRecommendationsPage() {
               className="flex flex-col items-center justify-center gap-6 mt-6"
             >
               <div style={{ position: 'relative', width: '96px', height: '96px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ position: 'absolute', width: '100%', height: '100%', borderRadius: '50%', border: '4px solid rgba(255,255,255,0.06)', borderTopColor: '#e5c785', borderRightColor: '#d4b06a' }} className="animate-spin" />
-                <div style={{ position: 'absolute', width: '64px', height: '64px', borderRadius: '50%', backgroundColor: 'rgba(229, 199, 133, 0.12)' }} className="animate-pulse" />
+                <div style={{ position: 'absolute', width: '100%', height: '100%', borderRadius: '9999px', border: '4px solid rgba(255,255,255,0.06)', borderTopColor: '#e5c785', borderRightColor: '#d4b06a' }} className="animate-spin" />
+                <div style={{ position: 'absolute', width: '64px', height: '64px', borderRadius: '9999px', backgroundColor: 'rgba(229, 199, 133, 0.12)' }} className="animate-pulse" />
                 <span style={{ fontSize: '16px', fontWeight: 600, color: 'rgba(229, 199, 133, 0.85)', zIndex: 1 }}>
                   {displayProgress}%
                 </span>
