@@ -198,7 +198,7 @@ export default function DressingRoomPage() {
         </motion.div>
 
         {/* ---- IPHONE MOCKUP + NOTIFICATIONS ---- */}
-        <div className="flex flex-col items-center w-full">
+        <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto gap-3">
           {/* Top Notification — Outfit Title (above iPhone) */}
           <AnimatePresence>
             {showNotifications && activeOutfit && activeOutfit.stylist_reasoning && activeOutfit.stylist_reasoning.length > 0 && (
@@ -207,7 +207,7 @@ export default function DressingRoomPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ delay: 0.1, type: "spring", stiffness: 80, damping: 15 }}
-                className="mb-2 w-full flex justify-center"
+                className="w-full flex justify-center"
               >
                 <LiquidGlassCard
                   width="320px"
@@ -233,6 +233,7 @@ export default function DressingRoomPage() {
           </AnimatePresence>
 
           {/* iPhone Mockup */}
+          <div className="w-full max-w-[340px] mx-auto flex justify-center">
           <IPhoneMockup
             model="15-pro"
             color="golden-sands"
@@ -318,11 +319,12 @@ export default function DressingRoomPage() {
               />
             )}
           </IPhoneMockup>
+          </div>
 
           {/* Three Bottom Notifications — Stylist Reasoning (below iPhone) */}
           <AnimatePresence>
             {showNotifications && activeOutfit && activeOutfit.stylist_reasoning && activeOutfit.stylist_reasoning.length > 0 && (
-              <div className="flex flex-col gap-3 mt-3 w-full">
+              <div className="flex flex-col gap-3 w-full max-w-[340px]">
                 {activeOutfit.stylist_reasoning.slice(0, 3).map((note: string, i: number) => (
                   <motion.div
                     key={i}
