@@ -225,6 +225,7 @@ export default function DressingRoomPage() {
                       </p>
                       <p className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5">Ready to wear</p>
                     </div>
+                    <div className="w-2 h-2 rounded-full bg-emerald-400/70 flex-shrink-0 ml-3 animate-pulse" />
 
                   </div>
                 </LiquidGlassCard>
