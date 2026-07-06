@@ -47,7 +47,9 @@ export type Database = {
           mannequin_image_url: string | null
           notes: string | null
           occasion: string | null
+          outfit_data: Json | null
           outfit_items: Json | null
+          outfit_type: string | null
           title: string
           user_id: string
         }
@@ -59,7 +61,9 @@ export type Database = {
           mannequin_image_url?: string | null
           notes?: string | null
           occasion?: string | null
+          outfit_data?: Json | null
           outfit_items?: Json | null
+          outfit_type?: string | null
           title: string
           user_id: string
         }
@@ -71,7 +75,9 @@ export type Database = {
           mannequin_image_url?: string | null
           notes?: string | null
           occasion?: string | null
+          outfit_data?: Json | null
           outfit_items?: Json | null
+          outfit_type?: string | null
           title?: string
           user_id?: string
         }

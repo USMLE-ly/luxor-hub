@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
-import { Check, Camera, Smartphone, Video, User, FlipHorizontal, Shirt, Glasses, Watch, Gem, Scissors, Bell } from "lucide-react";
+import { Check, Camera, Smartphone, Video, User, FlipHorizontal, Shirt, Glasses, Watch, Gem, Scissors, Bell, MapPin } from "lucide-react";
 import { useAppPermissions } from "@/hooks/useAppPermissions";
 
 // Haptic + audio tick for card selection
