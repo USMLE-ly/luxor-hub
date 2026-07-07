@@ -139,7 +139,7 @@ const renderCellValue = (header: string, value: string | string[] | null) => {
     <div className="flex flex-wrap gap-x-3 gap-y-1 items-start text-sm">
       {sentences.map((s, idx) => (
         <div key={idx} className="flex items-start gap-1.5">
-          <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+          <Check className="w-4 h-4 text-[#91856a] shrink-0 mt-0.5" />
           <span className="text-foreground/90">{s.trim()}</span>
         </div>
       ))}

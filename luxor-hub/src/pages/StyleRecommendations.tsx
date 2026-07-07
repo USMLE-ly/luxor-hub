@@ -339,12 +339,12 @@ export default function StyleRecommendationsPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-transparent flex flex-col items-center justify-center gap-6 z-20 rounded-xl"
+              className="absolute inset-0 overflow-hidden will-change-transform flex flex-col items-center justify-center gap-6 z-20 rounded-xl"
             >
-              <div style={{ position: 'relative', width: '96px', height: '96px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ position: 'absolute', width: '100%', height: '100%', borderRadius: '9999px', border: '4px solid rgba(255,255,255,0.06)', borderTopColor: '#e5c785', borderRightColor: '#d4b06a' }} className="animate-spin" />
-                <div style={{ position: 'absolute', width: '64px', height: '64px', borderRadius: '9999px', backgroundColor: 'rgba(229, 199, 133, 0.12)' }} className="animate-pulse" />
-                <span style={{ fontSize: '16px', fontWeight: 600, color: 'rgba(229, 199, 133, 0.85)', zIndex: 1 }}>
+              <div className="relative w-24 h-24 flex items-center justify-center shrink-0">
+                <div className="absolute inset-0 rounded-full border-4 border-white/10 border-t-amber-400 border-r-amber-400 animate-spin" />
+                <div className="absolute w-16 h-16 rounded-full bg-amber-400/10 animate-pulse" />
+                <span className="text-lg font-semibold text-amber-400/90 z-10">
                   {displayProgress}%
                 </span>
               </div>
@@ -356,12 +356,12 @@ export default function StyleRecommendationsPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex flex-col items-center justify-center gap-6 mt-6"
+              className="flex flex-col items-center justify-center gap-6 mt-6 overflow-hidden will-change-transform"
             >
-              <div style={{ position: 'relative', width: '96px', height: '96px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ position: 'absolute', width: '100%', height: '100%', borderRadius: '9999px', border: '4px solid rgba(255,255,255,0.06)', borderTopColor: '#e5c785', borderRightColor: '#d4b06a' }} className="animate-spin" />
-                <div style={{ position: 'absolute', width: '64px', height: '64px', borderRadius: '9999px', backgroundColor: 'rgba(229, 199, 133, 0.12)' }} className="animate-pulse" />
-                <span style={{ fontSize: '16px', fontWeight: 600, color: 'rgba(229, 199, 133, 0.85)', zIndex: 1 }}>
+              <div className="relative w-24 h-24 flex items-center justify-center shrink-0">
+                <div className="absolute inset-0 rounded-full border-4 border-white/10 border-t-amber-400 border-r-amber-400 animate-spin" />
+                <div className="absolute w-16 h-16 rounded-full bg-amber-400/10 animate-pulse" />
+                <span className="text-lg font-semibold text-amber-400/90 z-10">
                   {displayProgress}%
                 </span>
               </div>
