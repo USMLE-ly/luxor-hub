@@ -162,7 +162,7 @@ const ScrollExpansionHero = ({
               className='w-screen h-screen object-cover object-center'
               loading="eager"
             />
-            <div className='absolute inset-0 bg-black/10' />
+            <div className='absolute inset-0 bg-forest/10' />
           </motion.div>
 
           <div className='container mx-auto flex flex-col items-center justify-start relative z-10'>

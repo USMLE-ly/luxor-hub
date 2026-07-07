@@ -194,7 +194,7 @@ function VirtualTryOnInner() {
                     onClick={() => setSelectedDesign(design)}
                   >
                     <img src={design.image_url} alt={design.prompt} className="w-full aspect-square object-cover" />
-                    <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                    <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-forest/70 to-transparent p-2">
                       <p className="text-[10px] text-white line-clamp-1">{design.garment_type}</p>
                     </div>
                     {selectedDesign?.id === design.id && (

@@ -78,10 +78,10 @@ export function AIInputWithLoading({
             id={id}
             placeholder={placeholder}
             className={cn(
-              "max-w-xl bg-black/5 dark:bg-white/5 w-full rounded-3xl pl-6 pr-10 py-4",
-              "placeholder:text-black/70 dark:placeholder:text-white/70",
+              "max-w-xl bg-forest/5 dark:bg-white/5 w-full rounded-3xl pl-6 pr-10 py-4",
+              "placeholder:text-foreground/70 dark:placeholder:text-white/70",
               "border-none ring-black/30 dark:ring-white/30",
-              "text-black dark:text-white resize-none text-wrap leading-[1.2]",
+              "text-foreground dark:text-white resize-none text-wrap leading-[1.2]",
               `min-h-[${minHeight}px]`
             )}
             ref={textareaRef}
@@ -102,14 +102,14 @@ export function AIInputWithLoading({
             onClick={handleSubmit}
             className={cn(
               "absolute right-3 top-1/2 -translate-y-1/2 rounded-xl py-1 px-1",
-              submitted ? "bg-none" : "bg-black/5 dark:bg-white/5"
+              submitted ? "bg-none" : "bg-forest/5 dark:bg-white/5"
             )}
             type="button"
             disabled={submitted}
           >
             {submitted ? (
               <div
-                className="w-4 h-4 bg-black dark:bg-white rounded-sm animate-spin transition duration-700"
+                className="w-4 h-4 bg-forest dark:bg-white rounded-sm animate-spin transition duration-700"
                 style={{ animationDuration: "3s" }}
               />
             ) : (
@@ -122,7 +122,7 @@ export function AIInputWithLoading({
             )}
           </button>
         </div>
-        <p className="pl-4 h-4 text-xs mx-auto text-black/70 dark:text-white/70">
+        <p className="pl-4 h-4 text-xs mx-auto text-foreground/70 dark:text-white/70">
           {submitted ? "AI is thinking..." : "Ready to submit!"}
         </p>
       </div>

@@ -104,7 +104,7 @@ const Testimonials = () => (
               className="w-full h-auto rounded-t-2xl"
               loading="lazy"
             />
-            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/80 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-forest/80 to-transparent" />
             <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between">
               <div>
                 <p className="font-display text-lg md:text-xl font-bold text-white">Revenue Overview</p>

@@ -113,7 +113,7 @@ interface FashionHeroProps {
 
 const colorSwatchMap: Record<string, string> = {
   "Pink": "bg-pink-500", "Red": "bg-red-500", "Blue": "bg-blue-500",
-  "Black": "bg-gray-900", "White": "bg-white border border-zinc-600",
+  "Black": "bg-forest", "White": "bg-white border border-zinc-600",
   "Cream": "bg-yellow-100", "Green": "bg-green-500", "Brown": "bg-amber-800",
   "Gold": "bg-yellow-500", "Silver": "bg-gray-300", "Navy": "bg-blue-900",
   "Tan": "bg-amber-200", "Beige": "bg-amber-100", "Yellow": "bg-yellow-400",
@@ -202,7 +202,7 @@ export function FashionHero({
                 </div>
 
                 {/* Vibe Type */}
-                <div className="flex items-center gap-3 bg-zinc-800/40 rounded-xl p-4 border border-zinc-700/40">
+                <div className="flex items-center gap-3 bg-emerald/40 rounded-xl p-4 border border-zinc-700/40">
                   <span className="text-3xl">{vibeEmojis[vibeType] || "✨"}</span>
                   <div>
                     <p className="text-xs text-muted-foreground uppercase tracking-wider">Vibe Classification</p>
@@ -212,7 +212,7 @@ export function FashionHero({
 
                 {/* Style Score Ring */}
                 {!isNA && (
-                  <div className="flex items-center gap-4 bg-zinc-800/40 rounded-xl p-4 border border-zinc-700/40">
+                  <div className="flex items-center gap-4 bg-emerald/40 rounded-xl p-4 border border-zinc-700/40">
                     <div className="relative w-16 h-16 flex-shrink-0">
                       <svg width="64" height="64" viewBox="0 0 64 64" className="-rotate-90">
                         <circle cx="32" cy="32" r="26" fill="none" stroke="hsl(var(--muted))" strokeWidth="4" />
@@ -244,7 +244,7 @@ export function FashionHero({
                 )}
 
                 {/* Breakdown */}
-                <div className="flex-1 bg-zinc-800/40 rounded-xl p-4 border border-zinc-700/40">
+                <div className="flex-1 bg-emerald/40 rounded-xl p-4 border border-zinc-700/40">
                   <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Breakdown</p>
                   {audit && (
                     <p className="text-sm text-foreground/70 leading-relaxed mb-3">&ldquo;{audit}&rdquo;</p>
@@ -419,7 +419,7 @@ export function FashionHero({
 
               {/* SECTION 5: AUDIT (Neutral/Dark) */}
               {audit && (
-                <div className="relative min-h-[45px] overflow-hidden rounded-xl border border-white/10 bg-gradient-to-r from-black/60 via-zinc-900/60 to-black/60 flex-shrink-0">
+                <div className="relative min-h-[45px] overflow-hidden rounded-xl border border-white/10 bg-gradient-to-r from-forest/60 via-zinc-900/60 to-forest/60 flex-shrink-0">
                   <div className="relative z-10 p-3 backdrop-blur-sm h-full w-full flex items-center">
                     <p className="text-xs text-white/50 leading-relaxed tracking-wide">{audit}</p>
                   </div>

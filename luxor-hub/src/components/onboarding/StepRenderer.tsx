@@ -756,7 +756,7 @@ const CameraCaptureStep = ({ step, answers, onSelect }: { step: OnboardingStep; 
       </h2>
       <p className="text-muted-foreground font-sans text-sm text-center mb-4">{step.description}</p>
 
-      <div className="relative w-full rounded-2xl overflow-hidden bg-black" style={{ aspectRatio: isSelfie ? "3/4" : "9/16" }}>
+      <div className="relative w-full rounded-2xl overflow-hidden bg-forest" style={{ aspectRatio: isSelfie ? "3/4" : "9/16" }}>
         {cameraError ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center p-6">
             <Camera className="w-12 h-12 mb-4 opacity-50" />
@@ -1606,7 +1606,7 @@ const DetectionResultStep = ({ step, answers, gender, aiResults }: { step: Onboa
                   <User className="w-10 h-10 text-muted-foreground" />
                 </div>
               )}
-              <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-black/60 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-forest/60 to-transparent" />
               <span className="absolute bottom-1.5 left-0 right-0 text-center text-[9px] font-sans text-white/70 uppercase tracking-widest">You</span>
             </motion.div>
 

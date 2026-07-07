@@ -31,7 +31,7 @@ const GenderStep = ({ selected, onSelect }: GenderStepProps) => (
           <div className="aspect-square overflow-hidden bg-muted relative">
             <img src={img} alt={label} className="w-full h-full object-cover" />
             {/* Frosted glass overlay */}
-            <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/60 via-black/20 to-transparent backdrop-blur-[2px]" />
+            <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-forest/60 via-black/20 to-transparent backdrop-blur-[2px]" />
             <span className="absolute bottom-3 left-0 right-0 text-center text-white font-sans font-semibold text-sm tracking-wide">
               {label}
             </span>
