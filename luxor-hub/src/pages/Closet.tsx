@@ -3,6 +3,7 @@ import { usePlanTier } from "@/hooks/usePlanTier";
 import { PLAN_LIMITS } from "@/lib/planRestrictions";
 import { motion, AnimatePresence } from "framer-motion";
 import { StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
+import { EmptyWardrobe, EmptySearch } from "@/components/ui/luxury-empty-state";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
@@ -1017,20 +1018,11 @@ const Closet = () => {
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : filtered.length === 0 ? (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16">
-                <Shirt className="h-14 w-14 text-muted-foreground mx-auto mb-3" />
-                <h3 className="font-display text-lg text-foreground mb-1.5">
-                  {items.length === 0 ? "Your closet is empty" : "No items match"}
-                </h3>
-                <p className="text-muted-foreground font-sans text-xs mb-5">
-                  {items.length === 0 ? "Start by adding your first clothing item" : "Try adjusting your search or filters"}
-                </p>
-                {items.length === 0 && (
-                  <Button onClick={() => setUploadOpen(true)} className="gold-gradient text-primary-foreground font-sans text-sm h-10 px-5">
-                    <Plus className="h-4 w-4 mr-2" /> Add Your First Item
-                  </Button>
-                )}
-              </motion.div>
+              {items.length === 0 ? (
+                <EmptyWardrobe onAdd={() => setUploadOpen(true)} />
+              ) : (
+                <EmptySearch query={searchQuery} />
+              )}
             ) : flatLayView ? (
               /* ═══ FLAT-LAY MAGAZINE VIEW ═══ */
               <div className="space-y-8">
