@@ -2,6 +2,7 @@ import {ArrowLeft, ArrowRight} from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { ProgressiveImage } from "@/components/ui/progressive-image";
 import {
   Carousel,
   CarouselApi,
@@ -115,11 +116,12 @@ const Gallery4 = ({
               >
                 <a href={item.href} className="group rounded-xl block">
                   <div className="group relative h-full min-h-[27rem] max-w-full overflow-hidden rounded-xl md:aspect-[5/4] lg:aspect-[16/9]">
-                    <img
+                    <ProgressiveImage
                       src={item.image}
                       alt={item.title}
                       className="absolute h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
-                      loading="lazy"
+                      wrapperClassName="absolute inset-0"
+                      aspectRatio=""
                     />
                     {/* Luxurious gradient overlay — covers bottom 40% with rich depth */}
                     <div className="absolute inset-0 h-full bg-[linear-gradient(to_top,hsl(var(--primary)/0.95)_0%,hsl(var(--primary)/0.85)_15%,hsl(var(--primary)/0.6)_30%,hsl(var(--primary)/0.2)_45%,transparent_60%)]" />

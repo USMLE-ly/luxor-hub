@@ -7,6 +7,7 @@ import { NumberTicker } from "@/components/ui/number-ticker";
 import Pressable from "@/components/ui/pressable";
 import { DoubleBezel, DoubleBezelCard } from "@/components/ui/double-bezel";
 import CursorSpotlight from "@/components/ui/cursor-spotlight";
+import { ProgressiveImage } from "@/components/ui/progressive-image";
 import {ArrowRight, Play, Target, Crown, Star, Hexagon, Triangle, Command, Ghost, Gem, Cpu, CaretDown, } from "@phosphor-icons/react";
 import heroVideo from "@/assets/hero-video.mp4";
 
