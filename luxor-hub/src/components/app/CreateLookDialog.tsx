@@ -209,7 +209,7 @@ export const CreateLookDialog = ({ open, onOpenChange, onCreated }: CreateLookDi
           </div>
 
           <Button onClick={handleSave} disabled={saving || uploading} className="w-full gold-gradient text-primary-foreground font-sans">
-            {(saving || uploading) ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ImageIcon className="h-4 w-4 mr-2" />}
+            {(saving || uploading) ? <Spinner className="h-4 w-4 animate-spin mr-2" /> : <ImageIcon className="h-4 w-4 mr-2" />}
             Create Look
           </Button>
         </div>

@@ -259,7 +259,7 @@ const ColorTypeInner = () => {
       <div className="sticky top-0 z-20 bg-background border-b border-border px-4 py-3 flex items-center justify-between">
         <button onClick={() => navigate(-1)}><ArrowLeft className="w-5 h-5 text-foreground" /></button>
         <h1 className="font-sans font-semibold text-foreground">Color type</h1>
-        <button><Edit2 className="w-4 h-4 text-foreground" /></button>
+        <button><Pencil className="w-4 h-4 text-foreground" /></button>
       </div>
 
       <div className="px-5 pt-5 space-y-5">
@@ -297,7 +297,7 @@ const ColorTypeInner = () => {
 
           {extracting ? (
             <div className="flex items-center justify-center py-4 gap-2">
-              <Loader2 className="w-5 h-5 animate-spin text-primary" />
+              <Spinner className="w-5 h-5 animate-spin text-primary" />
               <span className="text-sm font-sans text-muted-foreground">Extracting colors...</span>
             </div>
           ) : extractedPalette ? (
@@ -378,7 +378,7 @@ const ColorTypeInner = () => {
                     onClick={() => copyHex(selectedColor.hex)}
                     className="flex items-center gap-1.5 mt-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    <Copy className="w-3.5 h-3.5" />
+                    <CopySimple className="w-3.5 h-3.5" />
                     <span className="font-sans font-mono">{hslToHex(selectedColor.hex)}</span>
                   </button>
                 </div>
@@ -388,7 +388,7 @@ const ColorTypeInner = () => {
                 <p className="text-sm font-sans text-foreground">{selectedColor.tip}</p>
               </div>
               <Button onClick={() => copyHex(selectedColor.hex)} className="w-full" variant="outline">
-                <Copy className="w-4 h-4 mr-2" /> Copy Hex Code
+                <CopySimple className="w-4 h-4 mr-2" /> Copy Hex Code
               </Button>
             </motion.div>
           </motion.div>

@@ -214,17 +214,17 @@ const MonthlyReportInner = () => {
         {/* Month Nav */}
         <div className="flex items-center justify-between mt-5 mb-5">
           <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="p-2.5 rounded-xl hover:bg-secondary transition-colors">
-            <ChevronLeft className="w-4 h-4 text-foreground" />
+            <CaretLeft className="w-4 h-4 text-foreground" />
           </button>
           <h2 className="font-display text-base font-bold text-foreground">{format(currentMonth, "MMMM yyyy")}</h2>
           <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="p-2.5 rounded-xl hover:bg-secondary transition-colors">
-            <ChevronRight className="w-4 h-4 text-foreground" />
+            <CaretRight className="w-4 h-4 text-foreground" />
           </button>
         </div>
 
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            <Spinner className="w-6 h-6 animate-spin text-primary" />
           </div>
         ) : (
           <div className="space-y-5">
@@ -235,7 +235,7 @@ const MonthlyReportInner = () => {
                 { icon: <CalendarDays className="w-4 h-4 text-primary" />, value: stats.totalOutfits, label: "Outfits Planned" },
                 { icon: <Star className="w-4 h-4 text-primary" />, value: `${stats.varietyScore}%`, label: "Variety Score" },
                 { icon: <Flame className="w-4 h-4 text-orange-400" />, value: stats.streak, label: "Current Streak" },
-                { icon: <TrendingUp className="w-4 h-4 text-primary" />, value: stats.uniqueOutfits, label: "Unique Combos" },
+                { icon: <TrendUp className="w-4 h-4 text-primary" />, value: stats.uniqueOutfits, label: "Unique Combos" },
               ].map((card, i) => (
                 <motion.div key={i} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 + i * 0.05 }}
                   className="rounded-2xl border border-border bg-card p-4 text-center">
@@ -250,7 +250,7 @@ const MonthlyReportInner = () => {
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
               className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-forest/40 p-4 overflow-hidden">
               <div className="flex items-center gap-2 mb-3">
-                <BarChart3 className="w-4 h-4 text-primary" />
+                <ChartBar className="w-4 h-4 text-primary" />
                 <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.15em]">Planning Consistency</p>
               </div>
               <div className="flex items-center justify-between mb-2">
@@ -492,7 +492,7 @@ const MonthlyReportInner = () => {
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
                 className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-forest/40 p-4 overflow-hidden">
                 <div className="flex items-center gap-2 mb-3">
-                  <PieChart className="w-4 h-4 text-primary" />
+                  <ChartPie className="w-4 h-4 text-primary" />
                   <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.15em]">Occasion Breakdown</p>
                 </div>
                 <div className="flex flex-wrap gap-2">

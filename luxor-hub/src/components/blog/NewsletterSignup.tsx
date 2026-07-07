@@ -61,7 +61,7 @@ const NewsletterSignup = () => {
       className="rounded-2xl border border-border/20 bg-card/30 backdrop-blur-sm p-8"
     >
       <div className="flex items-center gap-2 mb-3">
-        <Mail className="w-5 h-5 text-primary" />
+        <Envelope className="w-5 h-5 text-primary" />
         <h3 className="font-display text-lg font-bold text-foreground">Style Intelligence Weekly</h3>
       </div>
       <p className="text-sm text-muted-foreground mb-5">
@@ -83,7 +83,7 @@ const NewsletterSignup = () => {
           className="inline-flex items-center gap-1.5 rounded-lg bg-primary text-primary-foreground px-4 h-10 text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
           {status === "loading" ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
+            <Spinner className="w-4 h-4 animate-spin" />
           ) : (
             <>
               Subscribe

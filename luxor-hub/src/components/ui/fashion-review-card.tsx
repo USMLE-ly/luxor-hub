@@ -123,7 +123,7 @@ export default function FashionReviewCard({
             <h3 className="text-sm font-semibold text-foreground/80">Score Breakdown</h3>
           </div>
           <div className="h-[220px] w-full">
-            <BarChart
+            <ChartBarHorizontal
               data={chartData}
               height={220}
               series={

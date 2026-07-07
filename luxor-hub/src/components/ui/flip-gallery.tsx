@@ -452,7 +452,7 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
                     animation: 'spin 0.8s linear infinite',
                   }} />
                 ) : (
-                  <ChevronLeft size={20} />
+                  <CaretLeft size={20} />
                 )}
               </button>
               <button
@@ -484,7 +484,7 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
                     animation: 'spin 0.8s linear infinite',
                   }} />
                 ) : (
-                  <ChevronRight size={20} />
+                  <CaretRight size={20} />
                 )}
               </button>
             </>

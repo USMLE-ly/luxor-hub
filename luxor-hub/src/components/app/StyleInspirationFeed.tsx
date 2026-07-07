@@ -304,7 +304,7 @@ export const StyleInspirationFeed = () => {
                 onClick={() => setMatchDialog({ open: true, title: look.title, items: look.items })}
               >
                 Recreate from My Closet
-                <ChevronRight className="h-3 w-3 ml-1" />
+                <CaretRight className="h-3 w-3 ml-1" />
               </Button>
             </motion.div>
           ))}

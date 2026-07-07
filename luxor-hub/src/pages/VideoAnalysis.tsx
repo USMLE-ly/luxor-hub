@@ -285,7 +285,7 @@ export default function VideoAnalysis() {
                       disabled={isExtracting || isAnalyzing}
                       className="w-full"
                     >
-                      {isExtracting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Camera className="w-4 h-4 mr-2" />}
+                      {isExtracting ? <Spinner className="w-4 h-4 animate-spin mr-2" /> : <Camera className="w-4 h-4 mr-2" />}
                       Extract Frames
                     </RainbowButton>
 
@@ -295,13 +295,13 @@ export default function VideoAnalysis() {
                         disabled={isAnalyzing || isExtracting}
                         className="w-full"
                       >
-                        {isAnalyzing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
+                        {isAnalyzing ? <Spinner className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
                         Analyze All Frames
                       </RainbowButton>
                     )}
 
                     <Button variant="outline" onClick={reset} className="w-full">
-                      <Trash2 className="w-4 h-4 mr-2" /> Start Over
+                      <TrashSimple className="w-4 h-4 mr-2" /> Start Over
                     </Button>
                   </div>
                 </div>
@@ -336,7 +336,7 @@ export default function VideoAnalysis() {
                       <img src={frame.imageDataUrl} alt={`Frame ${frame.frameIndex + 1}`} className="w-full aspect-[3/4] object-cover" />
                       <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-forest/80 to-transparent p-2">
                         <p className="text-xs text-foreground/80">{frame.timestamp.toFixed(1)}s</p>
-                        {frame.status === "analyzing" && <Loader2 className="w-3 h-3 animate-spin text-primary absolute top-2 right-2" />}
+                        {frame.status === "analyzing" && <Spinner className="w-3 h-3 animate-spin text-primary absolute top-2 right-2" />}
                         {frame.status === "done" && <CheckCircle className="w-3 h-3 text-green-400 absolute top-2 right-2" />}
                         {frame.status === "error" && <Warning className="w-3 h-3 text-destructive absolute top-2 right-2" />}
                       </div>

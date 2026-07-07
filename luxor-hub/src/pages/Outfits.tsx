@@ -184,7 +184,7 @@ const Outfits = () => {
             </div>
             <div className="flex items-end">
               <Button onClick={generate} disabled={generating} className="w-full gold-gradient text-primary-foreground font-sans">
-                {generating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
+                {generating ? <Spinner className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
                 {generating ? "Generating..." : "Generate Outfits"}
               </Button>
             </div>

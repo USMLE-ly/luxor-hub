@@ -226,7 +226,7 @@ const Analytics = () => {
       <div className="p-6 lg:p-8 max-w-7xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
           <h1 className="font-display text-3xl font-bold text-foreground flex items-center gap-2">
-            <BarChart3 className="h-6 w-6 text-primary" /> Wardrobe Analytics
+            <ChartBar className="h-6 w-6 text-primary" /> Wardrobe Analytics
           </h1>
           <p className="text-muted-foreground font-sans text-sm mt-1 mb-4">Insights into your wardrobe usage</p>
         </motion.div>
@@ -266,12 +266,12 @@ const Analytics = () => {
                 <h3 className="font-display text-lg font-bold text-foreground mb-4">Category Distribution</h3>
                 {categoryData.length > 0 ? (
                   <ResponsiveContainer width="100%" height={250}>
-                    <PieChart>
+                    <ChartPie>
                       <Pie data={categoryData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} dataKey="value" label={({ name, value }) => `${name} (${value})`}>
                         {categoryData.map((_, i) => (<Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />))}
                       </Pie>
                       <Tooltip contentStyle={{ background: "hsl(240, 8%, 10%)", border: "1px solid hsl(240, 5%, 22%)", borderRadius: "8px", color: "hsl(40, 20%, 95%)" }} />
-                    </PieChart>
+                    </ChartPie>
                   </ResponsiveContainer>
                 ) : (<p className="text-muted-foreground font-sans text-sm text-center py-10">No items yet</p>)}
               </motion.div>
@@ -280,12 +280,12 @@ const Analytics = () => {
                 <h3 className="font-display text-lg font-bold text-foreground mb-4">Most Worn Items</h3>
                 {mostWorn.length > 0 ? (
                   <ResponsiveContainer width="100%" height={250}>
-                    <BarChart data={mostWorn} layout="vertical">
+                    <ChartBarHorizontal data={mostWorn} layout="vertical">
                       <XAxis type="number" stroke="hsl(240, 5%, 55%)" fontSize={12} />
                       <YAxis type="category" dataKey="name" width={100} stroke="hsl(240, 5%, 55%)" fontSize={11} tick={{ fill: "hsl(40, 20%, 90%)" }} />
                       <Tooltip contentStyle={{ background: "hsl(240, 8%, 10%)", border: "1px solid hsl(240, 5%, 22%)", borderRadius: "8px", color: "hsl(40, 20%, 95%)" }} />
                       <Bar dataKey="count" fill="hsl(43, 74%, 49%)" radius={[0, 4, 4, 0]} />
-                    </BarChart>
+                    </ChartBarHorizontal>
                   </ResponsiveContainer>
                 ) : (<p className="text-muted-foreground font-sans text-sm text-center py-10">Log some wears to see data</p>)}
               </motion.div>
@@ -343,7 +343,7 @@ const Analytics = () => {
                   Let AI analyze your closet to find missing essentials, seasonal gaps, and pieces that would elevate your wardrobe.
                 </p>
                 <Button onClick={runGapAnalysis} disabled={gapLoading} className="gap-2">
-                  {gapLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                  {gapLoading ? <Spinner className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                   {gapLoading ? "Analyzing..." : "Run AI Analysis"}
                 </Button>
               </div>
@@ -377,7 +377,7 @@ const Analytics = () => {
                   ))}
                 </div>
                 <Button variant="outline" onClick={runGapAnalysis} disabled={gapLoading} className="gap-2">
-                  {gapLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                  {gapLoading ? <Spinner className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                   Re-analyze
                 </Button>
               </div>
@@ -476,7 +476,7 @@ const Analytics = () => {
                   <Recycle className="w-5 h-5 text-green-500" /> CO₂ Impact by Category
                 </h3>
                 <ResponsiveContainer width="100%" height={250}>
-                  <BarChart data={co2ByCategory}>
+                  <ChartBarHorizontal data={co2ByCategory}>
                     <XAxis dataKey="name" stroke="hsl(240, 5%, 55%)" fontSize={11} tick={{ fill: "hsl(40, 20%, 90%)" }} />
                     <YAxis stroke="hsl(240, 5%, 55%)" fontSize={11} tick={{ fill: "hsl(40, 20%, 90%)" }} unit=" kg" />
                     <Tooltip
@@ -484,7 +484,7 @@ const Analytics = () => {
                       formatter={(value: number) => [`${value} kg CO₂`, "Impact"]}
                     />
                     <Bar dataKey="value" fill="hsl(150, 50%, 45%)" radius={[4, 4, 0, 0]} />
-                  </BarChart>
+                  </ChartBarHorizontal>
                 </ResponsiveContainer>
                 <p className="text-[10px] text-muted-foreground font-sans mt-2 text-center">
                   Estimates based on industry averages per garment category

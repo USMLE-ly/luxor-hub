@@ -46,7 +46,7 @@ export function StylePointsWidget() {
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Zap className="w-5 h-5 text-[hsl(45,80%,55%)]" />
+          <Lightning className="w-5 h-5 text-[hsl(45,80%,55%)]" />
           <h3 className="font-display text-base font-bold text-foreground">Style Points</h3>
         </div>
         <div className="flex items-center gap-1.5">

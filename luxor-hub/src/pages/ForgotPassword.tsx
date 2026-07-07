@@ -77,7 +77,7 @@ const ForgotPassword = () => {
           {sent ? (
             <div className="text-center space-y-4">
               <div className="w-16 h-16 rounded-full bg-[hsl(43,80%,58%,0.15)] flex items-center justify-center mx-auto">
-                <Mail className="w-8 h-8 text-[hsl(43,80%,58%)]" />
+                <Envelope className="w-8 h-8 text-[hsl(43,80%,58%)]" />
               </div>
               <p className="text-sm text-muted-foreground font-sans">
                 Check your inbox for <span className="text-foreground">{email}</span> and click the link to reset your password.
@@ -97,7 +97,7 @@ const ForgotPassword = () => {
                   Email
                 </Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Envelope className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     id="email"
                     type="email"

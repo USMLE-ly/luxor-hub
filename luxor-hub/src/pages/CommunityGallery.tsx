@@ -276,7 +276,7 @@ export default function CommunityGallery() {
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Search designs..."
               value={searchQuery}
@@ -297,7 +297,7 @@ export default function CommunityGallery() {
           </Select>
           <Select value={sortBy} onValueChange={(v: "recent" | "popular") => setSortBy(v)}>
             <SelectTrigger className="w-[140px] bg-background/50">
-              <TrendingUp className="w-4 h-4 mr-2" />
+              <TrendUp className="w-4 h-4 mr-2" />
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -370,9 +370,9 @@ export default function CommunityGallery() {
                         onClick={() => toggleComments(design.id)}
                         className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
                       >
-                        <MessageCircle className="w-4 h-4" />
+                        <ChatCircle className="w-4 h-4" />
                         {design.commentCount}
-                        {expandedComments === design.id ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                        {expandedComments === design.id ? <CaretUp className="w-3 h-3" /> : <CaretDown className="w-3 h-3" />}
                       </button>
                       <button
                         onClick={() => handleGetRecommendations(design)}
@@ -380,7 +380,7 @@ export default function CommunityGallery() {
                         className="ml-auto flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors disabled:opacity-50"
                       >
                         {recommendingId === design.id ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <Spinner className="w-3.5 h-3.5 animate-spin" />
                         ) : (
                           <Sparkles className="w-3.5 h-3.5" />
                         )}
@@ -418,7 +418,7 @@ export default function CommunityGallery() {
                           className="space-y-2 pt-2 border-t border-border"
                         >
                           {loadingComments ? (
-                            <Loader2 className="w-4 h-4 animate-spin text-muted-foreground mx-auto" />
+                            <Spinner className="w-4 h-4 animate-spin text-muted-foreground mx-auto" />
                           ) : (
                             <>
                               {(comments[design.id] || []).map(c => (

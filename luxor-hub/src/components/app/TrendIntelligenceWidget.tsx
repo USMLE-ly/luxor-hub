@@ -60,7 +60,7 @@ export const TrendIntelligenceWidget = () => {
       <div className="rounded-2xl border border-border bg-card overflow-hidden">
         <div className="p-5">
           <div className="flex items-center gap-2 mb-3">
-            <TrendingUp className="w-5 h-5 text-primary" />
+            <TrendUp className="w-5 h-5 text-primary" />
             <h3 className="font-display text-lg font-bold text-foreground">Trending Now For You</h3>
           </div>
           <p className="text-muted-foreground text-xs font-sans mb-4">
@@ -68,9 +68,9 @@ export const TrendIntelligenceWidget = () => {
           </p>
           <GradientButton onClick={fetchTrends} disabled={loading} className="w-full rounded-full h-10 text-sm">
             {loading ? (
-              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Analyzing trends...</>
+              <><Spinner className="w-4 h-4 mr-2 animate-spin" /> Analyzing trends...</>
             ) : (
-              <><TrendingUp className="w-4 h-4 mr-2" /> Discover Trends</>
+              <><TrendUp className="w-4 h-4 mr-2" /> Discover Trends</>
             )}
           </GradientButton>
         </div>
@@ -83,7 +83,7 @@ export const TrendIntelligenceWidget = () => {
       <div className="p-5">
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-primary" />
+            <TrendUp className="w-5 h-5 text-primary" />
             <h3 className="font-display text-lg font-bold text-foreground">Trending Now</h3>
           </div>
           <button onClick={fetchTrends} disabled={loading} className="text-xs text-primary font-sans hover:underline">
@@ -119,7 +119,7 @@ export const TrendIntelligenceWidget = () => {
                       <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ${mc.bg} ${mc.text}`}>
                         {mc.label}
                       </span>
-                      <ChevronRight className={`w-3.5 h-3.5 text-muted-foreground transition-transform ${isExpanded ? "rotate-90" : ""}`} />
+                      <CaretRight className={`w-3.5 h-3.5 text-muted-foreground transition-transform ${isExpanded ? "rotate-90" : ""}`} />
                     </div>
                   </div>
 

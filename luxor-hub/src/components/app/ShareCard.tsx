@@ -190,7 +190,7 @@ export function ShareCard({ outfit, onClose }: ShareCardProps) {
           </div>
           <div className="grid grid-cols-4 gap-2">
             <Button variant="outline" className="border-glass-border flex-col h-auto py-3" onClick={handleNativeShare}>
-              <Share2 className="h-4 w-4 mb-1" />
+              <ShareNetwork className="h-4 w-4 mb-1" />
               <span className="text-[10px]">Share</span>
             </Button>
             <Button variant="outline" className="border-glass-border flex-col h-auto py-3" onClick={handleShareTwitter}>
@@ -224,7 +224,7 @@ export function ShareButton({ outfit }: { outfit: OutfitShareData }) {
         className="text-muted-foreground hover:text-primary"
         title="Share outfit"
       >
-        <Share2 className="h-4 w-4" />
+        <ShareNetwork className="h-4 w-4" />
       </Button>
       <AnimatePresence>
         {open && <ShareCard outfit={outfit} onClose={() => setOpen(false)} />}

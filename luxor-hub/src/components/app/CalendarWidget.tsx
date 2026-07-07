@@ -162,7 +162,7 @@ export const CalendarWidget = () => {
                 </div>
               </div>
               <button onClick={() => handleDelete(event.id)} className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:text-destructive">
-                <Trash2 className="h-3.5 w-3.5" />
+                <TrashSimple className="h-3.5 w-3.5" />
               </button>
             </div>
           ))}

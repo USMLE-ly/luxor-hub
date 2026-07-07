@@ -191,7 +191,7 @@ export function NotificationPreferences() {
         {anyEnabled ? (
           <Bell className="h-5 w-5 text-primary" />
         ) : (
-          <BellOff className="h-5 w-5 text-muted-foreground" />
+          <BellSlash className="h-5 w-5 text-muted-foreground" />
         )}
         <div>
           <h3 className="font-display text-lg font-bold text-foreground">Smart Reminders</h3>

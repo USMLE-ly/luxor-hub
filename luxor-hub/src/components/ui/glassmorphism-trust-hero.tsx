@@ -215,7 +215,7 @@ export default function GlassmorphismTrustHero() {
                 className="group inline-flex items-center justify-center gap-2 rounded-full border border-border/30 bg-card/30 px-8 py-4 text-sm font-semibold text-foreground backdrop-blur-sm transition-colors hover:bg-card/50 hover:border-border/50"
               >
                 See How It Works
-                <ChevronDown className="w-4 h-4" />
+                <CaretDown className="w-4 h-4" />
               </motion.button>
             </ScrollReveal>
           </div>

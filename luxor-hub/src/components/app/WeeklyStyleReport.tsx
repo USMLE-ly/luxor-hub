@@ -196,7 +196,7 @@ export const WeeklyStyleReport = () => {
         {report.underusedItems.length > 0 && (
           <div>
             <div className="flex items-center gap-1.5 mb-2">
-              <TrendingDown className="h-3.5 w-3.5 text-gold-light" />
+              <TrendDown className="h-3.5 w-3.5 text-gold-light" />
               <p className="text-xs text-muted-foreground font-sans">Try Wearing Again</p>
             </div>
             <div className="space-y-1.5">

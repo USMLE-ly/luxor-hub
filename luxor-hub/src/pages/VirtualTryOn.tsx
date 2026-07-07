@@ -217,7 +217,7 @@ function VirtualTryOnInner() {
               disabled={!userPhoto || !selectedDesign || isProcessing}
               className="w-full mb-3"
             >
-              {isProcessing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
+              {isProcessing ? <Spinner className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
               {isProcessing ? "Processing…" : "Try It On"}
             </RainbowButton>
 
@@ -225,7 +225,7 @@ function VirtualTryOnInner() {
               <CardContent className="p-0">
                 {isProcessing ? (
                   <div className="aspect-[3/4] flex flex-col items-center justify-center gap-3">
-                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                    <Spinner className="w-8 h-8 animate-spin text-primary" />
                     <p className="text-sm text-muted-foreground">AI is dressing you…</p>
                   </div>
                 ) : resultImage ? (
@@ -233,7 +233,7 @@ function VirtualTryOnInner() {
                     <img src={resultImage} alt="Try-on result" className="w-full aspect-[3/4] object-cover rounded-lg" />
                     <div className="absolute bottom-3 right-3 flex gap-2">
                       <Button variant="secondary" size="sm" onClick={() => handleShare(resultImage)}>
-                        {shareLink === resultImage ? <Check className="w-3 h-3 mr-1" /> : <Share2 className="w-3 h-3 mr-1" />}
+                        {shareLink === resultImage ? <Check className="w-3 h-3 mr-1" /> : <ShareNetwork className="w-3 h-3 mr-1" />}
                         {shareLink === resultImage ? "Copied!" : "Share"}
                       </Button>
                       <Button variant="secondary" size="sm" onClick={() => handleDownload(resultImage)}>

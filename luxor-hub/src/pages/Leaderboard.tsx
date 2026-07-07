@@ -104,7 +104,7 @@ export default function Leaderboard() {
 
         {loading ? (
           <div className="flex justify-center py-20">
-            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            <Spinner className="w-6 h-6 animate-spin text-primary" />
           </div>
         ) : entries.length === 0 ? (
           <div className="text-center py-16">

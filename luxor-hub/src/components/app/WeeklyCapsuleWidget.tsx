@@ -64,7 +64,7 @@ export const WeeklyCapsuleWidget = () => {
           </p>
           <GradientButton onClick={generatePlan} disabled={loading} className="w-full rounded-full h-10 text-sm">
             {loading ? (
-              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating...</>
+              <><Spinner className="w-4 h-4 mr-2 animate-spin" /> Generating...</>
             ) : (
               <><Sparkles className="w-4 h-4 mr-2" /> Generate Weekly Plan</>
             )}
@@ -123,7 +123,7 @@ export const WeeklyCapsuleWidget = () => {
                         <p className="text-[10px] text-muted-foreground font-sans">{day.occasion}</p>
                       </div>
                     </div>
-                    <ChevronRight className={`w-4 h-4 text-muted-foreground transition-transform ${isExpanded ? "rotate-90" : ""}`} />
+                    <CaretRight className={`w-4 h-4 text-muted-foreground transition-transform ${isExpanded ? "rotate-90" : ""}`} />
                   </div>
 
                   <AnimatePresence>

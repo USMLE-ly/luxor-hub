@@ -75,7 +75,7 @@ export const WardrobeStats = () => {
     >
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-display text-xl font-bold text-foreground flex items-center gap-2">
-          <TrendingUp className="h-5 w-5 text-primary" />
+          <TrendUp className="h-5 w-5 text-primary" />
           Wardrobe Insights
         </h2>
         <button

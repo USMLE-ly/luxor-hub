@@ -274,7 +274,7 @@ export default function FashionDesigner() {
                         </SelectContent>
                       </Select>
                       <RainbowButton onClick={handleGenerate} disabled={isGenerating || !prompt.trim()} className="w-full">
-                        {isGenerating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Wand2 className="w-4 h-4 mr-2" />}
+                        {isGenerating ? <Spinner className="w-4 h-4 animate-spin mr-2" /> : <Wand2 className="w-4 h-4 mr-2" />}
                         Design
                       </RainbowButton>
                     </div>
@@ -348,7 +348,7 @@ export default function FashionDesigner() {
           <TabsContent value="gallery" className="space-y-6">
             {loadingGallery ? (
               <div className="flex justify-center py-12">
-                <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                <Spinner className="w-6 h-6 animate-spin text-primary" />
               </div>
             ) : gallery.length === 0 ? (
               <Card className="glass-card">
@@ -374,10 +374,10 @@ export default function FashionDesigner() {
                             <Download className="w-3 h-3" />
                           </Button>
                           <Button variant="secondary" size="sm" onClick={() => setShareOpen(shareOpen === design.id ? null : design.id)}>
-                            <Share2 className="w-3 h-3" />
+                            <ShareNetwork className="w-3 h-3" />
                           </Button>
                           <Button variant="secondary" size="sm" onClick={() => handleDeleteDesign(design.id)}>
-                            <Trash2 className="w-3 h-3" />
+                            <TrashSimple className="w-3 h-3" />
                           </Button>
                         </div>
                         <div className="absolute top-3 left-3 flex gap-2">

@@ -163,7 +163,7 @@ export default function NotificationCenter() {
     award: <Trophy className="w-4 h-4 text-yellow-500" />,
     trophy: <Trophy className="w-4 h-4 text-primary" />,
     flame: <Flame className="w-4 h-4 text-orange-400" />,
-    message: <MessageCircle className="w-4 h-4 text-blue-400" />,
+    message: <ChatCircle className="w-4 h-4 text-blue-400" />,
   };
 
   const typeBgMap: Record<string, string> = {
@@ -208,7 +208,7 @@ export default function NotificationCenter() {
 
         {loading ? (
           <div className="flex justify-center py-20">
-            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            <Spinner className="w-6 h-6 animate-spin text-primary" />
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-16">

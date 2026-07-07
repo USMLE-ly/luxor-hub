@@ -269,7 +269,7 @@ export default function RadialOrbitalTimeline({
                       <div className="mt-4 pt-3 border-t border-border">
                         <div className="flex justify-between items-center text-xs mb-1">
                           <span className="flex items-center">
-                            <Zap size={10} className="mr-1" />
+                            <Lightning size={10} className="mr-1" />
                             Energy Level
                           </span>
                           <span className="font-mono">{item.energy}%</span>

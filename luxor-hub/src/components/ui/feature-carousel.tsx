@@ -106,7 +106,7 @@ export const HeroSection = React.forwardRef<HTMLDivElement, HeroProps>(
               className="absolute left-2 sm:left-8 top-1/2 -translate-y-1/2 rounded-full h-10 w-10 z-20 bg-background/50 backdrop-blur-sm"
               onClick={handlePrev}
             >
-              <ChevronLeft className="h-5 w-5" />
+              <CaretLeft className="h-5 w-5" />
             </Button>
             <Button
               variant="outline"
@@ -114,7 +114,7 @@ export const HeroSection = React.forwardRef<HTMLDivElement, HeroProps>(
               className="absolute right-2 sm:right-8 top-1/2 -translate-y-1/2 rounded-full h-10 w-10 z-20 bg-background/50 backdrop-blur-sm"
               onClick={handleNext}
             >
-              <ChevronRight className="h-5 w-5" />
+              <CaretRight className="h-5 w-5" />
             </Button>
           </div>
         </div>

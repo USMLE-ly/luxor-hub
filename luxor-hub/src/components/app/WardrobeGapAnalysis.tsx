@@ -117,7 +117,7 @@ export function WardrobeGapAnalysis() {
               <span className="text-base">{cat.icon}</span>
               <p className="text-[10px] font-sans font-medium text-foreground mt-0.5">{cat.label}</p>
               {missing ? (
-                <AlertCircle className="w-3 h-3 text-destructive mx-auto mt-0.5" />
+                <WarningCircle className="w-3 h-3 text-destructive mx-auto mt-0.5" />
               ) : !weak ? (
                 <Check className="w-3 h-3 text-emerald-500 mx-auto mt-0.5" />
               ) : null}

@@ -233,7 +233,7 @@ export default function WeeklyChallenge() {
           <TabsContent value="current" className="space-y-6">
             {loading ? (
               <div className="flex justify-center py-20">
-                <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                <Spinner className="w-6 h-6 animate-spin text-primary" />
               </div>
             ) : (
               <>
@@ -306,7 +306,7 @@ export default function WeeklyChallenge() {
                         Analyze an outfit this week to enter the challenge!
                       </p>
                       <Button onClick={() => navigate("/outfit-analysis")} variant="outline" className="border-primary/30">
-                        Go to Outfit Analysis <ChevronRight className="w-4 h-4 ml-1" />
+                        Go to Outfit Analysis <CaretRight className="w-4 h-4 ml-1" />
                       </Button>
                     </CardContent>
                   </Card>
@@ -423,7 +423,7 @@ export default function WeeklyChallenge() {
           <TabsContent value="history" className="space-y-6">
             {loadingPast ? (
               <div className="flex justify-center py-20">
-                <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                <Spinner className="w-6 h-6 animate-spin text-primary" />
               </div>
             ) : pastChallenges.length === 0 ? (
               <div className="text-center py-16">

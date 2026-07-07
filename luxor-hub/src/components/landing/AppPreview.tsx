@@ -80,7 +80,7 @@ const AppPreview = () => {
           {/* AI Chat widget with typing indicator */}
           <div className="rounded-xl border border-border bg-card p-3 mb-4">
             <div className="flex items-center gap-2 mb-2">
-              <MessageSquare className="w-3.5 h-3.5 text-primary" />
+              <ChatSquare className="w-3.5 h-3.5 text-primary" />
               <span className="text-[10px] font-sans font-semibold text-foreground">AI Stylist</span>
             </div>
             <div className="flex items-center gap-1.5 pl-1">

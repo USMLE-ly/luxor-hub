@@ -162,7 +162,7 @@ function WardrobeValueContent() {
           <Card className="border-border/60 bg-card/60 backdrop-blur-xl">
             <CardHeader className="pb-2">
               <CardTitle className="text-base font-display flex items-center gap-2 text-foreground">
-                <TrendingUp className="w-4 h-4 text-green-500" /> Best Value Items
+                <TrendUp className="w-4 h-4 text-green-500" /> Best Value Items
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
@@ -192,7 +192,7 @@ function WardrobeValueContent() {
           <Card className="border-border/60 bg-card/60 backdrop-blur-xl">
             <CardHeader className="pb-2">
               <CardTitle className="text-base font-display flex items-center gap-2 text-foreground">
-                <TrendingDown className="w-4 h-4 text-destructive" /> Highest Cost-Per-Wear
+                <TrendDown className="w-4 h-4 text-destructive" /> Highest Cost-Per-Wear
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
@@ -266,7 +266,7 @@ function WardrobeValueContent() {
               <div className="flex items-center gap-4">
                 <div className="w-32 h-32">
                   <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
+                    <ChartPie>
                       <Pie data={categoryData} cx="50%" cy="50%" innerRadius={30} outerRadius={55} dataKey="value" stroke="none">
                         {categoryData.map((_, i) => (
                           <Cell key={i} fill={COLORS[i % COLORS.length]} />
@@ -276,7 +276,7 @@ function WardrobeValueContent() {
                         formatter={(value: number) => [`$${value}`, ""]}
                         contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
                       />
-                    </PieChart>
+                    </ChartPie>
                   </ResponsiveContainer>
                 </div>
                 <div className="flex-1 space-y-1.5">

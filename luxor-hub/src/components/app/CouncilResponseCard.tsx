@@ -45,7 +45,7 @@ export function CouncilResponseCard({ model, response, ranking, rank }: CouncilR
             </span>
           )}
         </div>
-        <ChevronDown
+        <CaretDown
           className={cn(
             "w-3.5 h-3.5 text-muted-foreground transition-transform",
             expanded && "rotate-180"

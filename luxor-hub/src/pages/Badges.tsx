@@ -41,8 +41,8 @@ const iconMap: Record<string, React.ReactNode> = {
   flame: <Flame className="w-6 h-6" />,
   crown: <Crown className="w-6 h-6" />,
   star: <Star className="w-6 h-6" />,
-  trending_up: <TrendingUp className="w-6 h-6" />,
-  zap: <Zap className="w-6 h-6" />,
+  trending_up: <TrendUp className="w-6 h-6" />,
+  zap: <Lightning className="w-6 h-6" />,
   award: <Trophy className="w-6 h-6" />,
 };
 
@@ -161,7 +161,7 @@ export default function Badges() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            {checking && <Loader2 className="w-5 h-5 animate-spin text-primary" />}
+            {checking && <Spinner className="w-5 h-5 animate-spin text-primary" />}
             <div className="flex rounded-lg border border-border overflow-hidden">
               <button
                 onClick={() => setViewMode("grid")}

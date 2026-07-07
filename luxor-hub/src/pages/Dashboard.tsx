@@ -97,7 +97,7 @@ function TrendingDesigns({ navigate }: { navigate: (path: string) => void }) {
     <>
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-foreground" />
+          <TrendUp className="w-5 h-5 text-foreground" />
           <h2 className="font-display text-xl font-bold text-foreground">Trending Designs</h2>
         </div>
         <button onClick={() => navigate("/community-gallery")} className="text-xs font-sans text-primary hover:underline">
@@ -343,7 +343,7 @@ const Dashboard = () => {
     : outfitsList;
 
   const chatPrompts = [
-    { text: "Pieces that never go out of style", icon: <TrendingUp className="w-4 h-4 text-primary" /> },
+    { text: "Pieces that never go out of style", icon: <TrendUp className="w-4 h-4 text-primary" /> },
     { text: "Main winter trends this season", icon: <Snowflake className="w-4 h-4 text-primary" /> },
     { text: "What sporty items are essential?", icon: <Barbell className="w-4 h-4 text-primary" /> },
   ];
@@ -363,7 +363,7 @@ const Dashboard = () => {
     return (
       <AppLayout>
         <div className="flex flex-col items-center justify-center min-h-[80vh] p-8 text-center max-w-md mx-auto">
-          <AlertCircle className="w-12 h-12 text-primary mb-4 mx-auto" />
+          <WarningCircle className="w-12 h-12 text-primary mb-4 mx-auto" />
           <h2 className="font-display text-xl font-bold text-foreground mb-2">Something went wrong</h2>
           <p className="text-muted-foreground font-sans text-sm mb-6">
             We couldn't load your dashboard. This might be a temporary issue.
@@ -586,7 +586,7 @@ const Dashboard = () => {
                 <div className="space-y-1">
                   {wardrobeCompleteness.gaps.map((gap, i) => (
                     <div key={i} className="flex items-center gap-1.5">
-                      <AlertCircle className="w-3 h-3 text-primary flex-shrink-0" />
+                      <WarningCircle className="w-3 h-3 text-primary flex-shrink-0" />
                       <span className="text-[11px] font-sans text-foreground">{gap}</span>
                     </div>
                   ))}
@@ -709,7 +709,7 @@ const Dashboard = () => {
                       <span className="font-sans text-sm font-medium text-foreground">{outfit.name}</span>
                       <div className="flex gap-3 mt-2">
                         <button className="text-[10px] font-sans text-muted-foreground flex items-center gap-1">
-                          View items <ChevronRight className="w-2.5 h-2.5" />
+                          View items <CaretRight className="w-2.5 h-2.5" />
                         </button>
                         <button
                           onClick={() => navigate("/closet")}
@@ -785,7 +785,7 @@ const Dashboard = () => {
                       <p className="text-xs font-sans font-medium text-foreground truncate">{product.name}</p>
                       <div className="flex items-center justify-between mt-1.5">
                         <span className="text-xs font-bold text-foreground">{product.price}</span>
-                        <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                        <ArrowSquareOut className="w-3 h-3 text-muted-foreground" />
                       </div>
                     </div>
                   </a>

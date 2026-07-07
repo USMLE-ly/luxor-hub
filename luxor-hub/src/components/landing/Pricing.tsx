@@ -272,7 +272,7 @@ const Pricing = () => {
           <Collapsible open={compareOpen} onOpenChange={setCompareOpen}>
             <CollapsibleTrigger className="mx-auto flex items-center gap-2 text-sm font-sans font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
               <span>Compare All Features</span>
-              <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${compareOpen ? "rotate-180" : ""}`} />
+              <CaretDown className={`w-4 h-4 transition-transform duration-200 ${compareOpen ? "rotate-180" : ""}`} />
             </CollapsibleTrigger>
             <CollapsibleContent>
               <div className="mt-8 overflow-x-auto">

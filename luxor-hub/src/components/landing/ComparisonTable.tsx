@@ -117,7 +117,7 @@ export default function ComparisonTable() {
                 className="w-full grid grid-cols-[1.4fr_1fr_1fr_1fr] gap-0 px-3 sm:px-4 py-3 bg-muted/30 hover:bg-muted/50 transition-colors border-b border-border"
               >
                 <span className="font-sans text-xs font-bold text-foreground flex items-center gap-2 col-span-4">
-                  <ChevronDown
+                  <CaretDown
                     className={cn(
                       "w-3.5 h-3.5 text-muted-foreground transition-transform duration-200",
                       open[cat.label] ? "rotate-0" : "-rotate-90"

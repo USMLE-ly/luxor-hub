@@ -112,7 +112,7 @@ export function AppSidebar() {
           onClick={handleSignOut}
           className="flex items-center gap-3 px-3 py-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all w-full font-sans text-sm"
         >
-          <LogOut className="h-4 w-4 shrink-0" />
+          <SignOut className="h-4 w-4 shrink-0" />
           {!collapsed && <span>Sign Out</span>}
         </button>
       </div>

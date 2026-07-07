@@ -173,7 +173,7 @@ const Inspiration = () => {
           >
             <div className="flex items-center gap-2 mb-2">
               <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <AlertCircle className="w-4 h-4 text-primary" />
+                <WarningCircle className="w-4 h-4 text-primary" />
               </div>
               <div>
                 <p className="font-sans font-semibold text-foreground text-sm">Fill Your Wardrobe Gaps</p>
@@ -203,7 +203,7 @@ const Inspiration = () => {
             <p className="font-sans font-semibold text-sm">Check if item is a Match</p>
             <p className="text-xs opacity-70 font-sans">Scan any item to see if it fits your Style DNA</p>
           </div>
-          <ChevronRight className="w-4 h-4 opacity-50" />
+          <CaretRight className="w-4 h-4 opacity-50" />
         </motion.button>
 
         {/* Brand Logos */}
@@ -317,7 +317,7 @@ const Inspiration = () => {
                       </span>
                     </div>
                     <a href={product.affiliateUrl} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                      <ArrowSquareOut className="w-3 h-3 text-muted-foreground" />
                     </a>
                   </div>
                   <div className="flex gap-1 mt-2 flex-wrap">

@@ -189,7 +189,7 @@ export const SocialFeed = () => {
                 className="flex-shrink-0 w-48 rounded-xl bg-secondary/50 p-3 border border-glass-border hover:border-primary/30 transition-colors"
               >
                 <div className="flex items-center gap-1 mb-2">
-                  <TrendingUp className="h-3 w-3 text-orange-400" />
+                  <TrendUp className="h-3 w-3 text-orange-400" />
                   <span className="text-[10px] font-sans text-orange-400 font-medium">#{i + 1}</span>
                 </div>
                 {look.photo_url && (
@@ -304,7 +304,7 @@ export const SocialFeed = () => {
                     }}
                     className="flex items-center gap-1.5 text-xs font-sans text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    <Share2 className="h-4 w-4" />
+                    <ShareNetwork className="h-4 w-4" />
                   </button>
                   <LookComments lookId={look.id} lookType="user" lookAuthorId={look.author_id} />
                 </div>

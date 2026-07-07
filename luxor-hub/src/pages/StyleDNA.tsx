@@ -614,7 +614,7 @@ const StyleDNA = () => {
                   className="rounded-2xl border border-border bg-card p-5"
                 >
                   <div className="flex items-center gap-2 mb-4">
-                    <TrendingUp className="w-4 h-4 text-primary" />
+                    <TrendUp className="w-4 h-4 text-primary" />
                     <h3 className="font-display text-base font-bold text-foreground">Where Your Style Is Headed</h3>
                   </div>
                   <p className="text-xs text-muted-foreground font-sans mb-4">
@@ -648,7 +648,7 @@ const StyleDNA = () => {
                               ))}
                             </div>
                             <p className="text-[10px] text-muted-foreground font-sans italic flex items-start gap-1">
-                              <ChevronRight className="w-3 h-3 mt-0.5 flex-shrink-0" /> {stage.trigger}
+                              <CaretRight className="w-3 h-3 mt-0.5 flex-shrink-0" /> {stage.trigger}
                             </p>
                           </div>
                         </motion.div>

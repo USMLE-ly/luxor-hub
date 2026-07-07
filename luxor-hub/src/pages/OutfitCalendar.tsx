@@ -935,7 +935,7 @@ const OutfitCalendarInner = () => {
                 }`}
                 title={notificationsEnabled ? "Reminders on" : "Enable reminders"}
               >
-                {notificationsEnabled ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
+                {notificationsEnabled ? <Bell className="h-4 w-4" /> : <BellSlash className="h-4 w-4" />}
               </motion.button>
               <motion.button
                 onClick={autoFillWeek}
@@ -944,7 +944,7 @@ const OutfitCalendarInner = () => {
                 whileTap={{ scale: 0.96 }}
                 className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-sans font-semibold gold-gradient text-primary-foreground shadow-[0_4px_12px_-2px_hsl(var(--gold)/0.4)] disabled:opacity-50"
               >
-                {autoFilling ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                {autoFilling ? <Spinner className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
                 {autoFilling ? "Generating..." : "Auto-Fill Week"}
               </motion.button>
             </div>
@@ -998,11 +998,11 @@ const OutfitCalendarInner = () => {
           className="flex items-center justify-between mb-4"
         >
           <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="p-2.5 rounded-xl hover:bg-secondary transition-colors">
-            <ChevronLeft className="w-4 h-4 text-foreground" />
+            <CaretLeft className="w-4 h-4 text-foreground" />
           </button>
           <h2 className="font-display text-base font-bold text-foreground tracking-wide">{format(currentMonth, "MMMM yyyy")}</h2>
           <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="p-2.5 rounded-xl hover:bg-secondary transition-colors">
-            <ChevronRight className="w-4 h-4 text-foreground" />
+            <CaretRight className="w-4 h-4 text-foreground" />
           </button>
         </motion.div>
 
@@ -1186,7 +1186,7 @@ const OutfitCalendarInner = () => {
                     );
                   })()}
                   <Button size="sm" variant="outline" onClick={duplicateYesterday} className="gap-1 rounded-xl text-xs" title="Copy yesterday's outfit">
-                    <Copy className="w-3 h-3" />
+                    <CopySimple className="w-3 h-3" />
                   </Button>
                   <Button size="sm" onClick={() => setShowAddDialog(true)} className="gap-1.5 rounded-xl">
                     <Plus className="w-3.5 h-3.5" /> Add
@@ -1348,7 +1348,7 @@ const OutfitCalendarInner = () => {
                                     color: "hsl(35 90% 40%)",
                                     border: "1px solid hsl(35 90% 55% / 0.2)",
                                   }}>
-                                  <RefreshCw className="w-3 h-3" />
+                                  <ArrowsClockwise className="w-3 h-3" />
                                   <span>Same combo worn on {matchStr} — try mixing it up!</span>
                                 </div>
                                 {suggestions.length > 0 && (
@@ -1383,7 +1383,7 @@ const OutfitCalendarInner = () => {
                             className="text-muted-foreground/50 hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors"
                             title="Share outfit"
                           >
-                            <Share2 className="w-3.5 h-3.5" />
+                            <ShareNetwork className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => setFlatLayEvent(ev)}
@@ -1517,7 +1517,7 @@ const OutfitCalendarInner = () => {
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center gap-1 mb-1">
-              <BarChart3 className="w-3.5 h-3.5 text-primary" />
+              <ChartBar className="w-3.5 h-3.5 text-primary" />
             </div>
             <p className="font-display text-sm font-bold text-foreground capitalize">{calendarStats.topCategory}</p>
             <p className="text-[9px] font-sans text-muted-foreground">Top Category</p>
@@ -1535,14 +1535,14 @@ const OutfitCalendarInner = () => {
         >
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "hsl(var(--primary) / 0.12)" }}>
-              <BarChart3 className="w-4 h-4 text-primary" />
+              <ChartBar className="w-4 h-4 text-primary" />
             </div>
             <div className="text-left">
               <p className="text-xs font-sans font-semibold text-foreground">Monthly Style Report</p>
               <p className="text-[10px] font-sans text-muted-foreground">Variety score, color stats & more</p>
             </div>
           </div>
-          <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+          <CaretRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
         </motion.button>
 
 

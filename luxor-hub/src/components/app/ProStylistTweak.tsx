@@ -128,7 +128,7 @@ export function ProStylistTweak({ imagePreview, imageUrl }: ProStylistTweakProps
                 animate={{ opacity: 1 }}
                 className="text-center py-10 space-y-4"
               >
-                <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" />
+                <Spinner className="h-10 w-10 animate-spin text-primary mx-auto" />
                 <p className="font-display text-base text-foreground">Consulting the cosmic style deities...</p>
                 <p className="text-sm text-muted-foreground">Generating your AI-enhanced look</p>
                 <div className="max-w-xs mx-auto space-y-2">
@@ -149,7 +149,7 @@ export function ProStylistTweak({ imagePreview, imageUrl }: ProStylistTweakProps
                 <Warning className="h-8 w-8 text-destructive mx-auto" />
                 <p className="text-sm text-destructive">{error}</p>
                 <Button variant="outline" onClick={handleGenerateTweak}>
-                  <RefreshCw className="h-4 w-4 mr-2" /> Try Again
+                  <ArrowsClockwise className="h-4 w-4 mr-2" /> Try Again
                 </Button>
               </motion.div>
             )}
@@ -217,7 +217,7 @@ export function ProStylistTweak({ imagePreview, imageUrl }: ProStylistTweakProps
                     onClick={handleGenerateTweak}
                     className="border-primary/30 hover:bg-primary/10"
                   >
-                    <RefreshCw className="w-3 h-3 mr-1" /> Regenerate
+                    <ArrowsClockwise className="w-3 h-3 mr-1" /> Regenerate
                   </Button>
                 </div>
               </motion.div>

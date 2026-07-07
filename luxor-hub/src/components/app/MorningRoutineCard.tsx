@@ -208,7 +208,7 @@ export function MorningRoutineCard() {
                 onClick={() => setActiveSuggestion((prev) => (prev + 1) % suggestions.length)}
                 className="text-[10px] font-sans text-primary hover:underline flex items-center gap-0.5"
               >
-                Next <ChevronRight className="w-3 h-3" />
+                Next <CaretRight className="w-3 h-3" />
               </button>
             </div>
           </div>

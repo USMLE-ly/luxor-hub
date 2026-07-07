@@ -723,7 +723,7 @@ export default function Analysis() {
                 <motion.div variants={childVariants} className="flex items-center gap-3 justify-end">
                   {!savedId ? (
                     <Button onClick={handleSave} disabled={saving} variant="outline" className="border-primary/30 hover:bg-primary/10" whileTap={{ scale: 0.95 }}>
-                      {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Layers className="w-4 h-4 mr-2" />}
+                      {saving ? <Spinner className="w-4 h-4 mr-2 animate-spin" /> : <Layers className="w-4 h-4 mr-2" />}
                       Save Analysis
                     </Button>
                   ) : (
@@ -750,7 +750,7 @@ export default function Analysis() {
                     </p>
                     <div className="flex items-center justify-center gap-3">
                       <Button onClick={() => { if (imageFile) analyzeOutfit(imageFile); }} disabled={loading} variant="default" className="gap-2">
-                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                        {loading ? <Spinner className="w-4 h-4 animate-spin" /> : <ArrowsClockwise className="w-4 h-4" />}
                         {loading ? "Analyzing..." : "🔄 Retry Analysis"}
                       </Button>
                       <Button onClick={() => { setImagePreview(null); setImageFile(null); setAnalysisFailed(false); }} variant="outline" className="gap-2">

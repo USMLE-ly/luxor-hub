@@ -768,7 +768,7 @@ const Closet = () => {
                 disabled={scanningReceipt}
                 className="text-xs font-sans font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full hover:bg-primary/20 transition-colors flex items-center gap-1"
               >
-                {scanningReceipt ? <Loader2 className="w-3 h-3 animate-spin" /> : <Receipt className="w-3 h-3" />}
+                {scanningReceipt ? <Spinner className="w-3 h-3 animate-spin" /> : <Receipt className="w-3 h-3" />}
                 Scan Receipt
               </button>
               <input ref={receiptInputRef} type="file" accept="image/*" className="hidden" onChange={handleReceiptScan} />
@@ -889,7 +889,7 @@ const Closet = () => {
                       )}
                     </div>
                     <Button variant="outline" onClick={analyzeWithAI} disabled={analyzing || (!previewUrl && !newItem.name)} className="w-full border-primary/30 text-primary hover:bg-primary/10 font-sans">
-                      {analyzing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
+                      {analyzing ? <Spinner className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
                       {analyzing ? "Analyzing..." : "Let AI fill the details"}
                     </Button>
                     <div className="grid grid-cols-2 gap-3">
@@ -927,7 +927,7 @@ const Closet = () => {
                       </div>
                     </div>
                     <Button onClick={handleUpload} disabled={uploading} className="w-full gold-gradient text-primary-foreground font-sans">
-                      {uploading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+                      {uploading ? <Spinner className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
                       Add to Closet
                     </Button>
                   </div>
@@ -952,7 +952,7 @@ const Closet = () => {
 
             {/* Search */}
             <div className="relative mb-4">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input id="closet-search" name="search" placeholder="Search items..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 bg-secondary border-border rounded-xl h-10" />
             </div>
@@ -1016,7 +1016,7 @@ const Closet = () => {
             {/* Items */}
             {loading ? (
               <div className="flex items-center justify-center py-20">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <Spinner className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : filtered.length === 0 ? (
               items.length === 0 ? (
@@ -1099,7 +1099,7 @@ const Closet = () => {
                                   onClick={() => handleDelete(item.id)}
                                   className="p-1.5 rounded-full bg-destructive/90 text-destructive-foreground"
                                 >
-                                  <Trash2 className="w-3 h-3" />
+                                  <TrashSimple className="w-3 h-3" />
                                 </button>
                               </div>
                             </div>
@@ -1139,7 +1139,7 @@ const Closet = () => {
                         <h2 className="font-sans font-semibold text-foreground text-sm">{section}</h2>
                         {sectionItems.length > 0 && (
                           <button className="flex items-center gap-1 text-xs text-muted-foreground font-sans hover:text-foreground transition-colors">
-                            {sectionItems.length} items <ChevronRight className="w-3 h-3" />
+                            {sectionItems.length} items <CaretRight className="w-3 h-3" />
                           </button>
                         )}
                       </div>
@@ -1264,7 +1264,7 @@ const Closet = () => {
                   </Button>
                   <Button size="sm" variant="ghost" onClick={() => setMannequinClothing([])}
                     className="rounded-full text-xs px-3 text-destructive hover:bg-destructive/10">
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <TrashSimple className="w-3.5 h-3.5" />
                   </Button>
                 </div>
               )}
@@ -1286,7 +1286,7 @@ const Closet = () => {
                         Cancel
                       </Button>
                       <Button size="sm" className="flex-1 rounded-lg text-xs" onClick={saveOutfit} disabled={savingOutfit || !outfitName.trim()}>
-                        {savingOutfit ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : <Save className="w-3.5 h-3.5 mr-1" />}
+                        {savingOutfit ? <Spinner className="w-3.5 h-3.5 animate-spin mr-1" /> : <Save className="w-3.5 h-3.5 mr-1" />}
                         Save
                       </Button>
                     </div>
@@ -1312,7 +1312,7 @@ const Closet = () => {
                 )}
               </div>
               {loadingSavedOutfits ? (
-                <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
+                <div className="flex justify-center py-4"><Spinner className="w-5 h-5 animate-spin text-muted-foreground" /></div>
               ) : savedOutfits.length === 0 ? (
                 <p className="text-xs text-muted-foreground font-sans text-center py-4">
                   No saved outfits yet. Dress the mannequin and save your look!
@@ -1351,7 +1351,7 @@ const Closet = () => {
                               <FolderOpen className="w-3.5 h-3.5 text-primary" />
                             </Button>
                             <Button size="sm" variant="ghost" className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => deleteSavedOutfit(outfit.id)}>
-                              <Trash2 className="w-3.5 h-3.5 text-destructive" />
+                              <TrashSimple className="w-3.5 h-3.5 text-destructive" />
                             </Button>
                           </div>
                         </motion.div>
@@ -1627,7 +1627,7 @@ function ItemCard({
             <CheckCircle className="h-3.5 w-3.5" />
           </button>
           <button onClick={() => onDelete(item.id)} className="p-1.5 rounded-full bg-destructive/80 text-destructive-foreground hover:bg-destructive transition-colors">
-            <Trash2 className="h-3.5 w-3.5" />
+            <TrashSimple className="h-3.5 w-3.5" />
           </button>
         </div>
       </div>

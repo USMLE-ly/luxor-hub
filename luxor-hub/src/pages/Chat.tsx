@@ -275,7 +275,7 @@ const Chat = () => {
             </button>
             {messages.length > 0 && (
               <button onClick={clearHistory} className="text-muted-foreground hover:text-destructive transition-colors p-1.5">
-                <Trash2 className="h-4 w-4" />
+                <TrashSimple className="h-4 w-4" />
               </button>
             )}
           </div>

@@ -123,7 +123,7 @@ const PayPalButton = ({ tier, onApprove }: PayPalButtonProps) => {
     <div className="w-full">
       {loading && (
         <div className="flex items-center justify-center py-4 rounded-2xl bg-gradient-to-b from-white/[0.06] to-white/[0.02] backdrop-blur-md border border-white/[0.08] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.4)]">
-          <Loader2 className="w-4 h-4 animate-spin text-white/60" />
+          <Spinner className="w-4 h-4 animate-spin text-white/60" />
           <span className="ml-2 text-[11px] text-white/50 font-sans tracking-wide">Preparing checkout…</span>
         </div>
       )}

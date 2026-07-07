@@ -37,8 +37,8 @@ export function StyleComparison({ history }: StyleComparisonProps) {
   };
 
   const diffIcon = (a: number, b: number) => {
-    if (a > b) return <TrendingUp className="w-3 h-3 text-green-500" />;
-    if (a < b) return <TrendingDown className="w-3 h-3 text-red-400" />;
+    if (a > b) return <TrendUp className="w-3 h-3 text-green-500" />;
+    if (a < b) return <TrendDown className="w-3 h-3 text-red-400" />;
     return <Minus className="w-3 h-3 text-muted-foreground" />;
   };
 
