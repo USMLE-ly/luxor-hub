@@ -607,8 +607,7 @@ const Calibration = () => {
                 transition={{ delay: 0.3 + i * 0.1 }}
                 className="flex-1 aspect-[3/4] rounded-xl overflow-hidden relative"
               >
-                <div className="absolute inset-0 bg-secondary animate-pulse rounded-xl" />
-                <img src={src} alt={`Style inspiration ${i + 1}`} className="w-full h-full object-cover relative z-10" loading="lazy" onLoad={(e) => { (e.target as HTMLImageElement).style.opacity = '1'; (e.target as HTMLImageElement).previousElementSibling?.classList.add('hidden'); }} style={{ opacity: 0 }} />
+                <img src={src} alt={`Style inspiration ${i + 1}`} className="w-full h-full object-cover" loading="lazy" draggable={false} />
                 <div className="absolute inset-0 bg-gradient-to-t from-foreground/30 to-transparent" />
               </motion.div>
             ))}
@@ -902,6 +901,7 @@ const Calibration = () => {
               style={{
                 rotateX: tilt.rotateX,
                 rotateY: tilt.rotateY,
+                willChange: 'transform',
               }}
             >
               <h2 className="font-display text-xl font-bold text-foreground text-center mb-6 px-2">
@@ -933,15 +933,14 @@ const Calibration = () => {
                           boxShadow: isActive ? "0 8px 30px -8px hsl(var(--primary) / 0.4)" : "0 0 0 0 transparent",
                         }}
                         transition={{ duration: 0.3, ease: "easeOut" }}
+                        style={{ willChange: 'box-shadow' }}
                       >
-                        <div className="absolute inset-0 bg-secondary animate-pulse" />
                         <img
                           src={option.imageUrl}
                           alt={option.label}
-                          className="w-full h-full object-cover relative z-10"
+                          className="w-full h-full object-cover"
                           loading="lazy"
-                          onLoad={(e) => { (e.target as HTMLImageElement).style.opacity = '1'; (e.target as HTMLImageElement).previousElementSibling?.classList.add('hidden'); }}
-                          style={{ opacity: 0 }}
+                          draggable={false}
                         />
                         <AnimatePresence>
                           {isActive && (

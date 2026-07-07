@@ -91,7 +91,7 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-flash",
         messages: [
           {
             role: "system",
@@ -159,9 +159,19 @@ Rules:
 
     const data = await response.json();
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-    if (!toolCall) throw new Error("No plan returned");
-
-    const result = JSON.parse(toolCall.function.arguments);
+    let result;
+    if (toolCall) {
+      result = JSON.parse(toolCall.function.arguments);
+    } else {
+      // Fallback: parse JSON from text content
+      const text = data.choices?.[0]?.message?.content || "";
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        result = JSON.parse(jsonMatch[0]);
+      } else {
+        throw new Error("No weekly plan returned from AI");
+      }
+    }
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
