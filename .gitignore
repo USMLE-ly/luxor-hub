@@ -31,3 +31,4 @@ dist/
 # Prisma
 luxor-hub/.env.local
 luxor-hub/src/generated/prisma/
+luxor-hub/supabase/.temp/
