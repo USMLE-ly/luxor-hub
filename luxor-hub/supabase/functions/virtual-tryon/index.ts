@@ -12,15 +12,16 @@ serve(async (req) => {
     const { userPhotoUrl, designImageUrl, garmentType } = await req.json();
     if (!userPhotoUrl || !designImageUrl) throw new Error("userPhotoUrl and designImageUrl are required");
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const MIMO_API_KEY = Deno.env.get("MIMO_API_KEY");
+    if (!MIMO_API_KEY) throw new Error("MIMO_API_KEY is not configured");
 
     const editPrompt = `Take the person in the first image and dress them in the ${garmentType || "clothing"} garment shown in the second image. Create a realistic, photographic result showing the person wearing this exact garment. Maintain the person's face, body, and pose exactly. The garment should fit naturally on their body with proper proportions, shadows, and fabric draping. Professional fashion photography style.`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch("https://api.xiaomimimo.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        api-key: MIMO_API_KEY,
+        "HTTP-Referer": "https://luxor.ly",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({

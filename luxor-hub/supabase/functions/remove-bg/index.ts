@@ -19,16 +19,17 @@ serve(async (req) => {
       });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY not configured");
+    const MIMO_API_KEY = Deno.env.get("MIMO_API_KEY");
+    if (!MIMO_API_KEY) {
+      throw new Error("MIMO_API_KEY not configured");
     }
 
     const response = await fetch("https://api.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        api-key: MIMO_API_KEY,
+        "HTTP-Referer": "https://luxor.ly",
       },
       body: JSON.stringify({
         model: "google/gemini-3-pro-image-preview",

@@ -10,8 +10,8 @@ serve(async (req) => {
 
   try {
     const { designPrompt, garmentType, archetype, styleFormula, preferences } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const MIMO_API_KEY = Deno.env.get("MIMO_API_KEY");
+    if (!MIMO_API_KEY) throw new Error("MIMO_API_KEY is not configured");
 
     const bodyType = (preferences as any)?.bodyShape || (styleFormula as any)?.bodyShape || null;
     const colorSeason = (styleFormula as any)?.colorSeason || (preferences as any)?.colorSeason || null;
@@ -32,10 +32,11 @@ ${bestColors?.length ? `Best colors: ${bestColors.join(", ")}` : ""}
 
 Suggest modifications to make this design more flattering and on-trend for this person.`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch("https://api.xiaomimimo.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        api-key: MIMO_API_KEY,
+        "HTTP-Referer": "https://luxor.ly",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({

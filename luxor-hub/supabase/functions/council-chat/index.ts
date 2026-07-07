@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
+const GATEWAY_URL = "https://api.xiaomimimo.com/v1/chat/completions";
 
 const COUNCIL_MODELS = [
   { id: "google/gemini-2.5-pro", name: "Gemini Pro" },
@@ -31,7 +31,8 @@ async function callModel(
   return fetch(GATEWAY_URL, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${apiKey}`,
+      api-key: apiKey,
+        "HTTP-Referer": "https://luxor.ly",
       "Content-Type": "application/json",
     },
     body: JSON.stringify(body),
@@ -126,8 +127,8 @@ serve(async (req) => {
 
   try {
     const { messages, userId, styleProfile, closetSummary, image, mood } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const MIMO_API_KEY = Deno.env.get("MIMO_API_KEY");
+    if (!MIMO_API_KEY) throw new Error("MIMO_API_KEY is not configured");
 
     const memoryContext = userId ? await fetchMemory(userId, styleProfile) : "";
     const systemPrompt = buildSystemPrompt(styleProfile, closetSummary || "", memoryContext, mood);
@@ -163,7 +164,7 @@ serve(async (req) => {
 
           const stage1Results = await Promise.allSettled(
             COUNCIL_MODELS.map(async (m) => {
-              const resp = await callModel(LOVABLE_API_KEY, m.id, allMessages, false);
+              const resp = await callModel(MIMO_API_KEY, m.id, allMessages, false);
               if (!resp.ok) {
                 if (resp.status === 429 || resp.status === 402) throw new Error(`${resp.status}`);
                 throw new Error(`Model ${m.name} failed: ${resp.status}`);
@@ -240,7 +241,7 @@ serve(async (req) => {
           const stage2Results = await Promise.allSettled(
             COUNCIL_MODELS.slice(0, stage1Data.length).map(async (m) => {
               const resp = await callModel(
-                LOVABLE_API_KEY,
+                MIMO_API_KEY,
                 m.id,
                 [{ role: "system", content: "You are a fashion advice quality evaluator." }, { role: "user", content: rankingPrompt }],
                 false,
@@ -309,7 +310,7 @@ Instructions:
 - Do NOT mention that multiple models were consulted`;
 
           const synthResp = await callModel(
-            LOVABLE_API_KEY,
+            MIMO_API_KEY,
             CHAIRMAN_MODEL,
             [...allMessages, { role: "user", content: synthesisPrompt }],
             true,

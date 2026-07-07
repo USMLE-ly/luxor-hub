@@ -10,8 +10,8 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders, status: 200 });
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const MIMO_API_KEY = Deno.env.get("MIMO_API_KEY");
+    if (!MIMO_API_KEY) throw new Error("MIMO_API_KEY is not configured");
 
     const { imageUrl } = await req.json();
     if (!imageUrl) throw new Error("imageUrl is required");
@@ -19,10 +19,11 @@ serve(async (req) => {
     // Run both AI calls in parallel
     const [imageResponse, itemsResponse] = await Promise.all([
       // 1. Generate flat-lay image
-      fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      fetch("https://api.xiaomimimo.com/v1/chat/completions", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          api-key: MIMO_API_KEY,
+        "HTTP-Referer": "https://luxor.ly",
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -59,10 +60,11 @@ Generate the flat-lay image now.`,
       }),
 
       // 2. Extract item details via tool calling
-      fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      fetch("https://api.xiaomimimo.com/v1/chat/completions", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          api-key: MIMO_API_KEY,
+        "HTTP-Referer": "https://luxor.ly",
           "Content-Type": "application/json",
         },
         body: JSON.stringify({

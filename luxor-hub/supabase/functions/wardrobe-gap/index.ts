@@ -10,8 +10,8 @@ serve(async (req) => {
 
   try {
     const { closetItems, styleProfile } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const MIMO_API_KEY = Deno.env.get("MIMO_API_KEY");
+    if (!MIMO_API_KEY) throw new Error("MIMO_API_KEY is not configured");
 
     const systemPrompt = `You are a wardrobe analyst. Given a user's closet items and style profile, identify missing essential pieces.
 
@@ -33,10 +33,11 @@ Style archetype: ${styleProfile?.archetype || "Unknown"}
 Color season: ${(styleProfile?.preferences as any)?.aiAnalysis?.colorSeason || "Unknown"}
 Body shape: ${(styleProfile?.preferences as any)?.bodyShape || "Unknown"}`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch("https://api.xiaomimimo.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        api-key: MIMO_API_KEY,
+        "HTTP-Referer": "https://luxor.ly",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({

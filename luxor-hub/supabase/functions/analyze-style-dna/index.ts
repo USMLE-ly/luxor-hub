@@ -10,15 +10,15 @@ serve(async (req) => {
 
   try {
     const { selfieImage, fullBodyImage, preferences, mode } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const MIMO_API_KEY = Deno.env.get("MIMO_API_KEY");
+    if (!MIMO_API_KEY) throw new Error("MIMO_API_KEY is not configured");
 
     // Mode: "face" = face shape only, "body" = body shape only, default = full analysis
     if (mode === "face") {
-      return await analyzeFace(selfieImage, LOVABLE_API_KEY, corsHeaders);
+      return await analyzeFace(selfieImage, MIMO_API_KEY, corsHeaders);
     }
     if (mode === "body") {
-      return await analyzeBody(fullBodyImage, preferences, LOVABLE_API_KEY, corsHeaders);
+      return await analyzeBody(fullBodyImage, preferences, MIMO_API_KEY, corsHeaders);
     }
 
     // Full analysis (original behavior + face/body shape)
@@ -73,10 +73,11 @@ Return JSON with this exact structure:
       content.push({ type: "image_url", image_url: { url: fullBodyImage } });
     }
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch("https://api.xiaomimimo.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        api-key: MIMO_API_KEY,
+        "HTTP-Referer": "https://luxor.ly",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -145,10 +146,11 @@ async function analyzeFace(selfieImage: string, apiKey: string, corsHeaders: Rec
     });
   }
 
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  const response = await fetch("https://api.xiaomimimo.com/v1/chat/completions", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${apiKey}`,
+      api-key: apiKey,
+        "HTTP-Referer": "https://luxor.ly",
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -204,10 +206,11 @@ async function analyzeBody(fullBodyImage: string, preferences: any, apiKey: stri
     ? "Hourglass, Triangle, Inverted Triangle, Rectangle, Round"
     : "Rectangle, Triangle, Inverted Triangle, Oval, Trapezoid";
 
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  const response = await fetch("https://api.xiaomimimo.com/v1/chat/completions", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${apiKey}`,
+      api-key: apiKey,
+        "HTTP-Referer": "https://luxor.ly",
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
