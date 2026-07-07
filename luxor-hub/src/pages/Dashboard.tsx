@@ -630,19 +630,13 @@ const Dashboard = () => {
               </div>
             </div>
           ) : (
-            <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-none snap-x snap-mandatory">
+            <StaggerContainer className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-none snap-x snap-mandatory" staggerDelay={0.06}>
               {(filteredOutfits.length > 0 ? filteredOutfits : [{ id: "1", name: "Everyday", occasion: "everyday", items: [] }, { id: "2", name: "Work", occasion: "work", items: [] }, { id: "3", name: "Party", occasion: "party", items: [] }]).map((outfit, i) => {
                 const outfitItemPhotos = outfit.items
                   .map((itemId: string) => closetItems.find((ci) => ci.id === itemId))
                   .filter(Boolean);
                 return (
-                  <motion.div
-                    key={outfit.id}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.05, duration: 0.35 }}
-                    className="min-w-[180px] rounded-2xl border border-border bg-card overflow-hidden flex-shrink-0 snap-start"
-                  >
+                  <StaggerItem key={outfit.id}>
                     <div className="relative h-40 bg-secondary flex items-center justify-center">
                       {outfitItemPhotos.length > 0 ? (
                         <div className="grid grid-cols-2 gap-0.5 p-1 w-full h-full">
@@ -676,10 +670,10 @@ const Dashboard = () => {
                         </button>
                       </div>
                     </div>
-                  </motion.div>
+                  </StaggerItem>
                 );
               })}
-            </div>
+            </StaggerContainer>
           )}
         </ScrollReveal>
 
