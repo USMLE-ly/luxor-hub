@@ -1018,11 +1018,11 @@ const Closet = () => {
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : filtered.length === 0 ? (
-              {items.length === 0 ? (
+              items.length === 0 ? (
                 <EmptyWardrobe onAdd={() => setUploadOpen(true)} />
               ) : (
                 <EmptySearch query={searchQuery} />
-              )}
+              )
             ) : flatLayView ? (
               /* ═══ FLAT-LAY MAGAZINE VIEW ═══ */
               <div className="space-y-8">
