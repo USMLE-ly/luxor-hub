@@ -17,6 +17,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { ImageSwiper } from "@/components/ui/image-swiper";
 
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { FashionHero } from "@/components/ui/hero-fashion";
 import { humanizeText, humanizeTextArray } from "@/lib/humanizer";
 
