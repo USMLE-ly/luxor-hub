@@ -148,31 +148,33 @@ const userTestimonials = [
   {
     name: "Jessica M.",
     title: "Marketing Director, NYC",
-    text: "I've always considered myself someone with decent style, but the sheer mental load of getting dressed every morning was draining in a way I didn't fully realize until it was gone. LEXOR didn't just organize my closet—it completely changed how I think about my clothes. The first time it suggested an outfit, it paired this old navy blazer I'd forgotten I owned with a silk camisole I only ever wore for dates, and suddenly I had a client meeting look that made me feel like I'd just spent $800 at a boutique. It's been four months and I haven't stared blankly into my closet once.",
+    description: "Sharp brown eyes, mid-length dark hair always pulled back with a gold clip. Wears cream and navy — clean lines, nothing fussy. Speaks with her hands when she's excited, which is often.",
+    speech: "My closet used to stress me out. I'd stand there for fifteen minutes, nothing working. LEXOR paired a blazer I forgot I owned with a cami I only wore on dates — and I walked into a client meeting looking like I spent eight hundred bucks. That was four months ago. Haven't had a single bad morning since.",
     initial: "J",
     color: "from-amber-400/20 to-amber-600/10",
   },
   {
     name: "David R.",
     title: "Software Engineer, London",
-    text: "I was skeptical. I installed LEXOR because my girlfriend kept suggesting I 'think about what I wear' and I wanted to prove I was fine. Turns out I was not fine. I owned four identical gray t-shirts. The AI pointed out that crew necks were shortening my neck visually, and switching to V-necks would balance my frame. I didn't even know that was a thing. I went from someone who 'didn't care about clothes' to someone who gets stopped by coworkers asking where I bought my jacket. The jacket is from ASOS, 2019. It was buried in my closet. LEXOR just knew.",
+    description: "Tall, a bit lanky. Broad shoulders, narrow waist — the kind of frame that looks great in a tailored shirt but he'd never know it. Keeps his hair short, has a small tattoo on his left forearm he forgets is there.",
+    speech: "I installed this because my girlfriend told me to. Wasn't happy about it. Turns out I owned four grey t-shirts and thought that was a personality. The app said crew necks were making my neck look short — I didn't even know necks could look short. Now I get stopped at work asking where I bought my jacket. It's from ASOS, 2019. LEXOR just knew.",
     initial: "D",
     color: "from-emerald-400/20 to-emerald-600/10",
   },
   {
     name: "Aisha K.",
     title: "Architect, Dubai",
-    text: "Fashion for me has always been about geometry—how things fall, how they frame the body, how light interacts with texture. The body analysis feature was surprisingly accurate. Seeing it visualized on the mannequin—being able to rotate it and see how different silhouettes actually land on my body—that changed how I shop. My husband noticed before I did. He said 'you seem more confident when you walk out the door.' And he's right. Because I'm not guessing anymore.",
+    description: "High cheekbones, always wears gold hoops. Hair in a low bun that looks effortless but definitely took fifteen minutes. Long torso, pear-shaped. Has a way of pausing before she answers, like she's measuring her words for structural integrity.",
+    speech: "I think about clothes the way I think about buildings — how things fall, how they frame you. The mannequin showed me why high-waisted bottoms work on my body. I'd known it, but seeing it rotate in space? That clicked. My husband said I seem more confident now. He's right. I'm not guessing anymore.",
     initial: "A",
     color: "from-gold/20 to-amber-500/10",
   },
 ];
-
 const TestimonialMarquee = () => (
   <div className="mt-24 md:mt-32">
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.6 }}
       className="text-center mb-10"
@@ -202,7 +204,8 @@ const TestimonialMarquee = () => (
               </div>
             </div>
             <p className="text-sm text-muted-foreground/90 leading-relaxed font-sans flex-1 line-clamp-6">
-              &ldquo;{t.text}&rdquo;
+              <span className="block text-xs text-muted-foreground/70 italic mb-3 leading-relaxed font-sans border-l-2 border-border/30 pl-3">{t.description}</span>
+              <span className="text-sm text-foreground/90 leading-relaxed font-sans">&ldquo;{t.speech}&rdquo;</span>
             </p>
           </div>
         ))}
