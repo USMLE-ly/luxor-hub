@@ -216,10 +216,13 @@ const Dashboard = () => {
   }, [user, styleProfile.preferences]);
 
   useEffect(() => {
-    if (styleProfile.onboarding_completed === false && user) {
+    // Only redirect to onboarding if style_profile was loaded and 
+    // explicitly says onboarding is NOT complete
+    if (user && styleProfile && styleProfile.onboarding_completed === false) {
+      console.log("[DASHBOARD] style_profile loaded, onboarding_completed=false, redirecting to /onboarding");
       navigate("/onboarding");
     }
-  }, [styleProfile.onboarding_completed, user, navigate]);
+  }, [styleProfile?.onboarding_completed, user, navigate]);
 
   const refreshData = useCallback(async () => {
     if (!user || refreshing) return;

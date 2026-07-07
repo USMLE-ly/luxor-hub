@@ -95,14 +95,23 @@ const Auth = () => {
               onboardingDone = profile?.onboarding_completed === true;
             } else {
               // No profile row exists yet — create one
-              await supabase.from("style_profiles").insert({
+              const { error: insertErr } = await supabase.from("style_profiles").insert({
                 user_id: uid,
                 onboarding_completed: false,
                 style_score: 50,
                 preferences: {},
               });
+              if (insertErr) {
+                // Row may have been created by trigger — try fetching again
+                const { data: retryProfile } = await supabase
+                  .from("style_profiles")
+                  .select("onboarding_completed")
+                  .eq("user_id", uid)
+                  .maybeSingle();
+                onboardingDone = retryProfile?.onboarding_completed === true;
+              }
             }
-          } catch {
+          } catch (e) {
             // table may not exist yet — treat as not onboarded
           }
         }

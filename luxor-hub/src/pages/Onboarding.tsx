@@ -225,11 +225,20 @@ const Onboarding = () => {
       let styleScore = 25;
       let aiAnalysis = null;
 
+      // Attempt AI analysis with a 5-second timeout
+      // If the edge function isn't deployed or the key is missing, 
+      // we skip gracefully and use defaults
       if (selfieImage || fullBodyImage) {
         try {
-          const { data: fnData, error: fnError } = await supabase.functions.invoke("analyze-style-dna", {
+          const aiPromise = supabase.functions.invoke("analyze-style-dna", {
             body: { selfieImage, fullBodyImage, preferences: cleanPrefs },
-          });
+          }).catch(() => null); // swallow unhandled rejections
+          const timeoutPromise = new Promise<null>((resolve) => 
+            setTimeout(() => resolve(null), 5000)
+          );
+          const result = await Promise.race([aiPromise, timeoutPromise]);
+          const fnData = result?.data ?? null;
+          const fnError = result?.error ?? null;
           if (!fnError && fnData && !fnData.error) {
             aiAnalysis = fnData;
             archetype = fnData.archetype || archetype;
