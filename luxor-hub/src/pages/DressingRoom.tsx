@@ -6,6 +6,8 @@ import IPhoneMockup from "@/components/ui/iphone-mockup";
 import { Perspective, Highlight } from "@/components/ui/perspective-highlight";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { CalendarDays, Check } from "lucide-react";
 import { notifyEvent } from "@/lib/notificationService";
 import { LiquidGlassCard } from "@/components/ui/liquid-notification";
@@ -189,6 +191,7 @@ export default function DressingRoomPage() {
 
   return (
     <AppLayout>
+      <ScrollReveal delay={0.1}>
       <div className="p-4 md:p-8 mx-auto max-w-5xl space-y-4 overflow-x-hidden pb-32">
 
         {/* ---- HEADER ---- */}
@@ -547,6 +550,7 @@ export default function DressingRoomPage() {
           )}
         </AnimatePresence>
       </div>
+      </ScrollReveal>
     </AppLayout>
   );
 }

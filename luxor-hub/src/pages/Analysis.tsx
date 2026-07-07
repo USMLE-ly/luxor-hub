@@ -563,6 +563,7 @@ export default function Analysis() {
 
   return (
     <AppLayout>
+      <ScrollReveal delay={0.1}>
       <div className="p-4 md:p-8 mx-auto max-w-7xl space-y-8 overflow-x-hidden">
 
         {/* ---------- HEADER ---------- */}
@@ -806,6 +807,7 @@ export default function Analysis() {
         {/* ---------- FOOTER ---------- */}
         <Footer />
       </div>
+      </ScrollReveal>
     </AppLayout>
   );
 }

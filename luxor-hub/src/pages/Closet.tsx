@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import { PLAN_LIMITS } from "@/lib/planRestrictions";
 import { motion, AnimatePresence } from "framer-motion";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -757,6 +758,7 @@ const Closet = () => {
 
   return (
     <AppLayout>
+      <ScrollReveal delay={0.1}>
       <div className="px-4 sm:px-5 py-5 max-w-lg mx-auto overflow-x-hidden">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
@@ -1588,6 +1590,7 @@ const Closet = () => {
           </div>
         )}
       </div>
+      </ScrollReveal>
     </AppLayout>
   );
 };
