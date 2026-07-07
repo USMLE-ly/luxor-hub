@@ -1,7 +1,5 @@
 -- ============================================================
--- LEXOR — Full Supabase Schema
--- Generated from exhaustive codebase audit
--- Run this in Supabase SQL Editor (or via `supabase migration up`)
+-- LEXOR — Full Supabase Schema (Idempotent)
 -- ============================================================
 
 -- 0. Extensions
@@ -9,7 +7,7 @@ create extension if not exists "uuid-ossp";
 create extension if not exists "pgcrypto";
 
 -- ============================================================
--- 1. PROFILES (extends auth.users)
+-- 1. PROFILES
 -- ============================================================
 create table if not exists public.profiles (
   id uuid references auth.users(id) on delete cascade primary key,
@@ -19,9 +17,15 @@ create table if not exists public.profiles (
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
+drop policy if exists "Users can view own profile" on public.profiles;
+create policy "Users can view own profile" on public.profiles
+  for select using (auth.uid() = id);
+drop policy if exists "Users can update own profile" on public.profiles;
+create policy "Users can update own profile" on public.profiles
+  for update using (auth.uid() = id);
 
 -- ============================================================
--- 2. STYLE PROFILES (onboarding data)
+-- 2. STYLE PROFILES
 -- ============================================================
 create table if not exists public.style_profiles (
   id uuid default gen_random_uuid() primary key,
@@ -39,7 +43,7 @@ create table if not exists public.style_profiles (
 );
 
 -- ============================================================
--- 3. CLOTHING ITEMS (closet inventory)
+-- 3. CLOTHING ITEMS
 -- ============================================================
 create table if not exists public.clothing_items (
   id uuid default gen_random_uuid() primary key,
@@ -66,7 +70,7 @@ create index if not exists idx_clothing_items_user on public.clothing_items(user
 create index if not exists idx_clothing_items_category on public.clothing_items(category);
 
 -- ============================================================
--- 4. OUTFITS (saved mannequin compositions)
+-- 4. OUTFITS
 -- ============================================================
 create table if not exists public.outfits (
   id uuid default gen_random_uuid() primary key,
@@ -89,7 +93,7 @@ create table if not exists public.outfits (
 create index if not exists idx_outfits_user on public.outfits(user_id);
 
 -- ============================================================
--- 5. OUTFIT ITEMS (junction: outfit <-> clothing_item)
+-- 5. OUTFIT ITEMS
 -- ============================================================
 create table if not exists public.outfit_items (
   id uuid default gen_random_uuid() primary key,
@@ -184,7 +188,7 @@ create table if not exists public.fashion_designs (
 create index if not exists idx_fashion_designs_user on public.fashion_designs(user_id);
 
 -- ============================================================
--- 11. NOTIFICATIONS (social in-app)
+-- 11. NOTIFICATIONS
 -- ============================================================
 create table if not exists public.notifications (
   id uuid default gen_random_uuid() primary key,
@@ -241,7 +245,7 @@ create table if not exists public.look_likes (
 );
 
 -- ============================================================
--- 15. USER LOOKS (community posts)
+-- 15. USER LOOKS
 -- ============================================================
 create table if not exists public.user_looks (
   id uuid default gen_random_uuid() primary key,
@@ -281,7 +285,6 @@ create table if not exists public.mood_boards (
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
-
 create table if not exists public.mood_board_items (
   id uuid default gen_random_uuid() primary key,
   board_id uuid references public.mood_boards(id) on delete cascade not null,
@@ -331,7 +334,6 @@ create table if not exists public.weekly_challenges (
   end_date date,
   created_at timestamptz default now()
 );
-
 create table if not exists public.challenge_entries (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references auth.users(id) on delete cascade not null,
@@ -384,15 +386,9 @@ create table if not exists public.newsletter_subscribers (
   created_at timestamptz default now()
 );
 
--- ============================
--- ROW LEVEL SECURITY
--- ============================
-
 -- ============================================================
--- ROW LEVEL SECURITY
+-- ROW LEVEL SECURITY (ALL TABLES)
 -- ============================================================
-
--- Enable RLS on all tables
 alter table public.profiles enable row level security;
 alter table public.style_profiles enable row level security;
 alter table public.clothing_items enable row level security;
@@ -419,26 +415,9 @@ alter table public.user_badges enable row level security;
 alter table public.outfit_analyses enable row level security;
 alter table public.newsletter_subscribers enable row level security;
 
--- PROFILES: id = auth.uid()
-drop policy if exists "Users can view own profile" on public.profiles;
-create policy "Users can view own profile" on public.profiles
-  for select using (auth.uid() = id);
-drop policy if exists "Users can update own profile" on public.profiles;
-create policy "Users can update own profile" on public.profiles
-  for update using (auth.uid() = id);
-
--- FOLLOWS: follower_id = auth.uid()
-drop policy if exists "Users can view own follows" on public.follows;
-create policy "Users can view own follows" on public.follows
-  for select using (auth.uid() = follower_id);
-drop policy if exists "Users can insert own follows" on public.follows;
-create policy "Users can insert own follows" on public.follows
-  for insert with check (auth.uid() = follower_id);
-drop policy if exists "Users can delete own follows" on public.follows;
-create policy "Users can delete own follows" on public.follows
-  for delete using (auth.uid() = follower_id);
-
--- GENERAL RULE for all tables with user_id
+-- ============================================================
+-- POLICIES – dynamic loop for all user_id tables
+-- ============================================================
 do $$
 declare
   tbl text;
@@ -470,18 +449,19 @@ begin
   end loop;
 end $$;
 
--- NEWSLETTER: anyone can subscribe
+-- ============================================================
+-- NEWSLETTER & CHALLENGES – explicit policies
+-- ============================================================
 drop policy if exists "Anyone can subscribe" on public.newsletter_subscribers;
 create policy "Anyone can subscribe" on public.newsletter_subscribers
   for insert with check (true);
 
--- WEEKLY CHALLENGES: authenticated users can read
 drop policy if exists "Authenticated users can view challenges" on public.weekly_challenges;
 create policy "Authenticated users can view challenges" on public.weekly_challenges
   for select using (auth.role() = 'authenticated');
 
 -- ============================================================
--- TRIGGER: auto-create profile on signup
+-- AUTO-CREATE PROFILE ON SIGNUP + STYLE PROFILES
 -- ============================================================
 create or replace function public.handle_new_user()
 returns trigger as $$
@@ -502,7 +482,7 @@ create trigger on_auth_user_created
   for each row execute function public.handle_new_user();
 
 -- ============================================================
--- TRIGGER: update timestamps
+-- AUTO-UPDATE TIMESTAMPS
 -- ============================================================
 create or replace function public.update_updated_at()
 returns trigger as $$
@@ -512,7 +492,6 @@ begin
 end;
 $$ language plpgsql;
 
--- Apply to all tables with updated_at column
 do $$
 declare
   tbl text;
