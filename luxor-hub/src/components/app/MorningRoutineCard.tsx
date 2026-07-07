@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useUserLocation } from "@/hooks/useUserLocation";
-import { Sun, Cloud, CloudRain, Snowflake, Wind, Thermometer, Calendar, Sparkles, ChevronRight, Timer, RefreshCw, MapPin } from "lucide-react";
+import {Sun, Cloud, CloudRain, Snowflake, Wind, Thermometer, Calendar, Sparkle, CaretRight, Timer, ArrowsClockwise, MapPin} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { GradientButton } from "@/components/ui/gradient-button";
 

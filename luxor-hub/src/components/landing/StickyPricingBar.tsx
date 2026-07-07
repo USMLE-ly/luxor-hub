@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ArrowRight } from "lucide-react";
+import {X, ArrowRight} from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 import { trackEvent } from "@/lib/fbPixel";
 

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import Pressable from "@/components/ui/pressable";
-import { Shirt, ScanFace, CloudSun, ShieldCheck } from "lucide-react";
+import {TShirt, ScanFace, CloudSun, ShieldCheck} from "@phosphor-icons/react";
 
 const uvps = [
   { icon: Shirt, label: "Uses Your Existing Closet", sub: "No shopping required" },
@@ -68,7 +68,7 @@ const SocialProofStrip = () => (
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-40px" }}
-            transition={{ delay: i * 0.1, duration: 0.5, ease: "easeOut" }}
+            transition={{ delay: i * 0.1, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
             className="flex flex-col items-center text-center gap-2"
           >
             <item.icon className="w-6 h-6 text-foreground" />

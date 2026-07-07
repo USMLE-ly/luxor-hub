@@ -1,6 +1,6 @@
 "use client";
 
-import { CornerRightUp } from "lucide-react";
+import {CornerRightUp} from "@phosphor-icons/react";
 import { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Cloud, Droplets, Wind, Thermometer } from "lucide-react";
+import {Cloud, Droplets, Wind, Thermometer} from "@phosphor-icons/react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { supabase } from "@/integrations/supabase/client";

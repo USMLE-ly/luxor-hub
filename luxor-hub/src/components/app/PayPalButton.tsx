@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Loader2, Lock } from "lucide-react";
+import {Spinner, Lock} from "@phosphor-icons/react";
 
 const PAYPAL_CLIENT_ID =
   "ARa9CFxEtURh2bL23KEBSHEjQ7JJA39Dxl-Jn4JCR7fsRx6AaUEe7IXKl97AaApUq0pwXDUMe97sgco-";

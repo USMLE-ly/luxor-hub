@@ -1,6 +1,6 @@
 import NumberFlow from '@number-flow/react';
 import React from "react";
-import { Check } from "lucide-react";
+import {Check} from "@phosphor-icons/react";
 
 interface TierDetails {
   name: string;

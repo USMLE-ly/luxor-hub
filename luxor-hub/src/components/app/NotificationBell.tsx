@@ -1,4 +1,4 @@
-import { Bell, Heart, UserPlus } from "lucide-react";
+import {Bell, Heart, UserPlus} from "@phosphor-icons/react";
 import { useNotifications } from "@/hooks/useNotifications";
 import {
   Popover,

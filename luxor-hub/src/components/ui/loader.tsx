@@ -19,7 +19,7 @@ export function ClassicLoader() {
       <motion.div
         className="w-2 h-2 rounded-full bg-gold"
         animate={{ scale: [0.8, 1.2, 0.8] }}
-        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+        transition={{ duration: 1.5, repeat: Infinity, ease: [0.77, 0, 0.175, 1] }}
       />
     </div>
   );

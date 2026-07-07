@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Zap, Trophy, Target, Sparkles } from "lucide-react";
+import {Lightning, Trophy, Target, Sparkle} from "@phosphor-icons/react";
 
 interface PointEntry {
   points: number;
@@ -67,7 +67,7 @@ export function StylePointsWidget() {
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${progressInLevel}%` }}
-              transition={{ duration: 1, ease: "easeOut" }}
+              transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
               className="h-full rounded-full bg-gradient-to-r from-primary to-[hsl(45,80%,55%)]"
             />
           </div>

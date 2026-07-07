@@ -9,10 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import {
-  Heart, MessageCircle, Shirt, Loader2, Search, Filter,
-  Send, Sparkles, TrendingUp, ChevronDown, ChevronUp
-} from "lucide-react";
+import {Heart, ChatCircle, TShirt, Spinner, MagnifyingGlass, Funnel, PaperPlaneRight, Sparkle, TrendUp, CaretDown, CaretUp} from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface CommunityDesign {

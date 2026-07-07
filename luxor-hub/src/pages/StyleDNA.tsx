@@ -5,11 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import {
-  Sparkles, Palette, Star, ArrowRight, CheckCircle2, ShieldCheck,
-  Scissors, Shirt, Check, Dna, User, ScanFace, Glasses, Gem, Gift,
-  Layers, Shapes, Paintbrush, Briefcase, Heart, TrendingUp, ChevronRight,
-} from "lucide-react";
+import {Sparkle, Palette, Star, ArrowRight, CheckCircle2, ShieldCheck, Scissors, TShirt, Check, Dna, User, ScanFace, Glasses, Gem, Gift, StackSimple, Shapes, PaintBrush, Briefcase, Heart, TrendUp, CaretRight, } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { AppLayout } from "@/components/app/AppLayout";
 import { GradientButton } from "@/components/ui/gradient-button";
@@ -192,7 +188,7 @@ const StyleDNA = () => {
             style={{ background: "linear-gradient(105deg, transparent 40%, hsl(var(--primary) / 0.06) 50%, transparent 60%)" }}
             initial={{ x: "-100%" }}
             animate={{ x: "200%" }}
-            transition={{ duration: 2.5, delay: 0.8, ease: "easeInOut" }}
+            transition={{ duration: 2.5, delay: 0.8, ease: [0.77, 0, 0.175, 1] }}
           />
 
           <div className="p-5 relative z-10">
@@ -258,7 +254,7 @@ const StyleDNA = () => {
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${Math.max(calibrationProgress || 30, 10)}%` }}
-                    transition={{ duration: 1.2, ease: "easeOut", delay: 0.5 }}
+                    transition={{ duration: 1.2, ease: [0.23, 1, 0.32, 1], delay: 0.5 }}
                     className="h-full rounded-full flex items-center justify-between px-3"
                     style={{
                       background: "linear-gradient(90deg, hsl(142, 60%, 48%), hsl(var(--primary)))",

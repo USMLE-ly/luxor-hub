@@ -1,6 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useCallback } from "react";
-import { GripVertical, Diamond, Star, TrendingUp, Palette } from "lucide-react";
+import {GripVertical, Diamond, Star, TrendUp, Palette} from "@phosphor-icons/react";
 import { TextReveal } from "@/components/ui/animated-text-reveal";
 
 const MockDashboard = ({ mode }: { mode: "light" | "dark" }) => {

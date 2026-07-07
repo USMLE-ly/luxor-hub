@@ -4,9 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
-import {
-  Sparkles, Loader2, AlertTriangle, ArrowLeftRight, Eye, RefreshCw, ImageIcon
-} from "lucide-react";
+import {Sparkle, Spinner, Warning, ArrowsLeftRight, Eye, ArrowsClockwise, ImageIcon} from "@phosphor-icons/react";
 import { toast } from "sonner";
 
 interface ProStylistTweakProps {

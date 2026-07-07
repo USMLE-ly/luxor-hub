@@ -176,7 +176,7 @@ export function FashionHero({
                           strokeDasharray={264}
                           initial={{ strokeDashoffset: 264 }}
                           animate={{ strokeDashoffset: 264 - (styleScore! / 100) * 264 }}
-                          transition={{ duration: 1.5, ease: "easeOut" }}
+                          transition={{ duration: 1.5, ease: [0.23, 1, 0.32, 1] }}
                         />
                         <defs>
                           <linearGradient id="goldArcOverlay" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -222,7 +222,7 @@ export function FashionHero({
                           strokeDasharray={163.36}
                           initial={{ strokeDashoffset: 163.36 }}
                           animate={{ strokeDashoffset: 163.36 - (styleScore! / 100) * 163.36 }}
-                          transition={{ duration: 1.5, ease: "easeOut" }}
+                          transition={{ duration: 1.5, ease: [0.23, 1, 0.32, 1] }}
                         />
                         <defs>
                           <linearGradient id="goldArcMind" x1="0%" y1="0%" x2="100%" y2="100%">

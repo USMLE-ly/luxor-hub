@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { ArrowRight, ArrowLeft } from "lucide-react";
+import {ArrowRight, ArrowLeft} from "@phosphor-icons/react";
 import GenderStep from "@/components/onboarding/GenderStep";
 import StepRenderer from "@/components/onboarding/StepRenderer";
 import { getStepsForGender, type OnboardingStep } from "@/components/onboarding/onboardingSteps";
@@ -301,7 +301,7 @@ const Onboarding = () => {
           className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full opacity-[0.04]"
           style={{ background: "radial-gradient(circle, hsl(var(--primary)), transparent 70%)" }}
           animate={{ scale: [1, 1.15, 1], opacity: [0.04, 0.07, 0.04] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 6, repeat: Infinity, ease: [0.77, 0, 0.175, 1] }}
         />
       </div>
 
@@ -385,7 +385,7 @@ const Onboarding = () => {
                   className="absolute inset-y-0 w-8 rounded-full"
                   style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)" }}
                   animate={{ left: ["-10%", "110%"] }}
-                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, ease: "easeInOut" }}
+                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, ease: [0.77, 0, 0.175, 1] }}
                 />
               )}
             </div>
@@ -409,7 +409,7 @@ const Onboarding = () => {
                 <motion.div
                   className="flex items-center gap-2 bg-foreground/90 backdrop-blur-sm text-background px-4 py-2 rounded-full shadow-lg"
                   animate={{ x: [0, -8, 8, 0] }}
-                  transition={{ duration: 1.8, repeat: 2, repeatDelay: 1, ease: "easeInOut" }}
+                  transition={{ duration: 1.8, repeat: 2, repeatDelay: 1, ease: [0.77, 0, 0.175, 1] }}
                 >
                   <span className="text-xs">←</span>
                   <span className="text-xs font-sans font-medium">Swipe to navigate</span>
@@ -516,7 +516,7 @@ const Onboarding = () => {
                     {ctaText}
                     <motion.span
                       animate={canProceed ? { x: [0, 4, 0] } : {}}
-                      transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                      transition={{ duration: 1.5, repeat: Infinity, ease: [0.77, 0, 0.175, 1] }}
                     >
                       <ArrowRight className="h-4 w-4" />
                     </motion.span>

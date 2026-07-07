@@ -8,9 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import {
-  Video, Play, Pause, SkipForward, Loader2, Sparkles, Camera, Trash2, CheckCircle2, AlertTriangle, Image as ImageIcon
-} from "lucide-react";
+import {Video, Play, Pause, SkipForward, Spinner, Sparkle, Camera, TrashSimple, CheckCircle2, Warning, Image} from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { RainbowButton } from "@/components/ui/rainbow-button";

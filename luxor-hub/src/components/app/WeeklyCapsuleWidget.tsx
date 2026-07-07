@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CalendarDays, Sparkles, ChevronRight, Loader2, Shirt } from "lucide-react";
+import {CalendarDots, Sparkle, CaretRight, Spinner, TShirt} from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { GradientButton } from "@/components/ui/gradient-button";

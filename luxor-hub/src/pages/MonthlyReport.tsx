@@ -3,11 +3,7 @@ import { motion } from "framer-motion";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  BarChart3, Palette, TrendingUp, Shirt, CalendarDays, ChevronLeft, ChevronRight,
-  Award, Flame, Star, Loader2, PieChart, DollarSign, Snowflake, Sun, Leaf, CloudRain,
-  ArrowUpRight, ArrowDownRight,
-} from "lucide-react";
+import {ChartBar, Palette, TrendUp, TShirt, CalendarDots, CaretLeft, CaretRight, Award, Flame, Star, Spinner, ChartPieSlice, DollarSign, Snowflake, Sun, Leaf, CloudRain, ArrowUpRight, ArrowDownRight, } from "@phosphor-icons/react";
 import { format, startOfMonth, endOfMonth, addMonths, subMonths, eachDayOfInterval } from "date-fns";
 import { Progress } from "@/components/ui/progress";
 

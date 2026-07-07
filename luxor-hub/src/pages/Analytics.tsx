@@ -6,10 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import {
-  BarChart3, TrendingUp, Leaf, AlertTriangle, DollarSign, Calendar,
-  Sparkles, Loader2, ShoppingBag, ChevronRight, Clock, Recycle, Heart, PackageOpen,
-} from "lucide-react";
+import {ChartBar, TrendUp, Leaf, Warning, DollarSign, Calendar, Sparkle, Spinner, ShoppingBag, CaretRight, Clock, Recycle, Heart, PackageOpen, } from "@phosphor-icons/react";
 import {
   PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   RadialBarChart, RadialBar,

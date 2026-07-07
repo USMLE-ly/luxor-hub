@@ -16,7 +16,7 @@ export function PremiumSkeleton({ className, variant = "shimmer" }: PremiumSkele
             background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent)",
           }}
           animate={{ x: ["-100%", "200%"] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: [0.77, 0, 0.175, 1] }}
         />
       )}
       {variant === "shine" && (
@@ -27,14 +27,14 @@ export function PremiumSkeleton({ className, variant = "shimmer" }: PremiumSkele
             backgroundSize: "200% 100%",
           }}
           animate={{ backgroundPosition: ["200% 0", "-200% 0"] }}
-          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: [0.77, 0, 0.175, 1] }}
         />
       )}
       {variant === "pulse" && (
         <motion.div
           className="absolute inset-0 bg-emerald/20"
           animate={{ opacity: [0.3, 0.6, 0.3] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 2, repeat: Infinity, ease: [0.77, 0, 0.175, 1] }}
         />
       )}
     </div>

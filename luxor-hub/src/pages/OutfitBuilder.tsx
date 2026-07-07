@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Shirt, Save, Trash2, RotateCcw, GripVertical, X, ZoomIn, ZoomOut, Move } from "lucide-react";
+import {TShirt, FloppyDisk, TrashSimple, RotateCcw, GripVertical, X, ZoomIn, ZoomOut, ArrowsOut} from "@phosphor-icons/react";
 
 interface ClosetItem {
   id: string;

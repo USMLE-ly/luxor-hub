@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Share2, Download, X, Twitter, Facebook, Link, Check } from "lucide-react";
+import {ShareNetwork, DownloadSimple, X, TwitterLogo, FacebookLogo, LinkSimple, Check} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 

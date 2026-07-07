@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Settings as SettingsIcon, Save, User, Sun, Moon, Palette } from "lucide-react";
+import {GearSix, FloppyDisk, User, Sun, Moon, Palette} from "@phosphor-icons/react";
 import { NotificationPreferences } from "@/components/app/NotificationPreferences";
 import { useTheme } from "next-themes";
 import { haptic } from "@/lib/haptics";

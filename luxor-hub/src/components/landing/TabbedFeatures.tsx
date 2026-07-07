@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import Pressable from "@/components/ui/pressable";
-import { Check } from "lucide-react";
+import {Check} from "@phosphor-icons/react";
 import { motion } from "framer-motion";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import Pressable from "@/components/ui/pressable";

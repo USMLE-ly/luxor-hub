@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Menu } from "lucide-react";
+import {List} from "@phosphor-icons/react";
 import {
   Sheet,
   SheetContent,
@@ -50,22 +50,21 @@ const Navbar = () => {
   return (
     <motion.nav
       aria-label="Main navigation"
-      initial={{ y: -20, opacity: 0 }}
+      initial={{ y: -30, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled ? "glass-strong py-2.5" : "py-5"
+      transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
+      className={`fixed top-0 left-0 right-0 z-50 flex justify-center transition-all duration-500 ${
+        scrolled ? "py-2" : "py-5"
       }`}
     >
-      {scrolled && (
-        <motion.div
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/20 to-transparent"
-        />
-      )}
-
-      <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
+      <div
+        className={`transition-all duration-500 ${
+          scrolled
+            ? "w-[95%] max-w-4xl bg-emerald/70 backdrop-blur-2xl border border-white/[0.06] shadow-2xl shadow-forest/30 rounded-full px-4"
+            : "w-full max-w-6xl bg-transparent px-4"
+        }`}
+      >
+        <div className="flex items-center justify-between h-12 md:h-14">
         <motion.h1
           className="font-display text-2xl font-bold text-foreground cursor-pointer relative"
           onClick={() => navigate("/")}
@@ -104,6 +103,8 @@ const Navbar = () => {
               )}
             </motion.button>
           ))}
+        </div>
+
         </div>
 
         <div className="flex items-center gap-3">
@@ -146,34 +147,53 @@ const Navbar = () => {
                 <span className="sr-only">Open menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-72 glass-strong border-l border-border p-0">
-              <div className="flex flex-col h-full pt-16 px-6">
+            <SheetContent side="right" className="w-80 glass border-l border-border/10 p-0 backdrop-blur-3xl bg-forest/95">
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
+              <div className="flex flex-col h-full pt-20 px-6">
                 <div className="flex flex-col gap-1">
-                  {navLinks.map((link) => (
-                    <button
+                  {navLinks.map((link, idx) => (
+                    <motion.div
                       key={link.id}
-                      onClick={() => (link as any).isRoute ? (() => { setSheetOpen(false); navigate(`/${link.id}`); })() : scrollTo(link.id)}
-                      className={`text-left py-3 text-base font-sans transition-colors border-b border-border ${
-                        activeSection === link.id ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
-                      }`}
+                      initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
+                      animate={sheetOpen ? { opacity: 1, y: 0, filter: "blur(0px)" } : { opacity: 0, y: 10, filter: "blur(2px)" }}
+                      transition={{ delay: sheetOpen ? 0.1 + idx * 0.04 : 0, duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
                     >
-                      {link.label}
-                    </button>
+                      <button
+                        onClick={() => (link as any).isRoute ? (() => { setSheetOpen(false); navigate(`/${link.id}`); })() : scrollTo(link.id)}
+                        className={`text-left py-3 text-base font-sans transition-colors border-b border-border w-full ${
+                          activeSection === link.id ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        {link.label}
+                      </button>
+                    </motion.div>
                   ))}
                 </div>
 
                 <div className="h-px w-full bg-border my-6" />
 
                 <div className="flex flex-col gap-3">
-                  <Button variant="outline" className="w-full font-sans" onClick={() => { setSheetOpen(false); navigate("/auth"); }}>
-                    Log In
-                  </Button>
-                  <Button
-                    onClick={() => { setSheetOpen(false); navigate("/auth"); }}
-                    className="w-full h-10 text-sm font-semibold"
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={sheetOpen ? { opacity: 1, y: 0 } : { opacity: 0 }}
+                    transition={{ delay: sheetOpen ? 0.35 : 0, duration: 0.4 }}
                   >
-                    Try LEXOR®
-                  </Button>
+                    <Button variant="outline" className="w-full font-sans border-white/10 hover:bg-white/5" onClick={() => { setSheetOpen(false); navigate("/auth"); }}>
+                      Log In
+                    </Button>
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={sheetOpen ? { opacity: 1, y: 0 } : { opacity: 0 }}
+                    transition={{ delay: sheetOpen ? 0.4 : 0, duration: 0.4 }}
+                  >
+                    <Button
+                      onClick={() => { setSheetOpen(false); navigate("/auth"); }}
+                      className="w-full h-10 text-sm font-semibold gold-gradient text-primary-foreground"
+                    >
+                      Try LEXOR®
+                    </Button>
+                  </motion.div>
                 </div>
               </div>
             </SheetContent>

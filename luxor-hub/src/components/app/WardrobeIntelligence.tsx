@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { AlertTriangle, Calendar, DollarSign, Flame, Shirt, TrendingDown, Award } from "lucide-react";
+import {Warning, Calendar, DollarSign, Flame, TShirt, TrendDown, Award} from "@phosphor-icons/react";
 
 interface DormantItem {
   id: string;

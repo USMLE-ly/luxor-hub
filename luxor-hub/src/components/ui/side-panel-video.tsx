@@ -3,7 +3,7 @@ import { AnimatePresence, MotionConfig, motion, type Transition } from "framer-m
 import useMeasure from "react-use-measure"
 import { cn } from "@/lib/utils"
 
-const panelTransition: Transition = { type: "tween", ease: "easeInOut", duration: 0.4 }
+const panelTransition: Transition = { type: "tween", ease: [0.77, 0, 0.175, 1], duration: 0.4 }
 
 const ResizablePanelInternal = React.forwardRef<HTMLDivElement, { children: React.ReactNode }>(
   ({ children }, ref) => (
@@ -71,17 +71,17 @@ const sectionVariants = {
     width: "97%",
     transition: {
       duration: 0.3,
-      ease: "easeInOut" as const,
+      ease: [0.77, 0, 0.175, 1] as const,
       delayChildren: 0.3,
       staggerChildren: 0.2,
     },
   },
   closed: {
-    transition: { duration: 0.2, ease: "easeInOut" as const },
+    transition: { duration: 0.2, ease: [0.77, 0, 0.175, 1] as const },
   },
 }
 
-const sharedTransition: Transition = { duration: 0.6, ease: "easeInOut" as const }
+const sharedTransition: Transition = { duration: 0.6, ease: [0.77, 0, 0.175, 1] as const }
 
 export const SidePanelVideo = forwardRef<HTMLDivElement, ComponentProps>(
   ({ panelOpen, handlePanelOpen, className, renderButton, children }, ref) => {

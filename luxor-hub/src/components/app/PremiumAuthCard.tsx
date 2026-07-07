@@ -8,7 +8,7 @@ export function GoldDivider() {
       <motion.div
         className="absolute inset-y-0 w-12 bg-gradient-to-r from-transparent via-gold/60 to-transparent"
         animate={{ x: ["-3rem", "6rem"] }}
-        transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+        transition={{ duration: 2.5, repeat: Infinity, ease: [0.77, 0, 0.175, 1] }}
       />
     </div>
   );
@@ -45,7 +45,7 @@ export function GoldShimmerButton({ children, ...props }: React.ComponentProps<"
       <motion.div
         className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12"
         animate={{ x: ["-100%", "200%"] }}
-        transition={{ duration: 3, repeat: Infinity, repeatDelay: 2, ease: "easeInOut" }}
+        transition={{ duration: 3, repeat: Infinity, repeatDelay: 2, ease: [0.77, 0, 0.175, 1] }}
       />
       {children}
     </div>

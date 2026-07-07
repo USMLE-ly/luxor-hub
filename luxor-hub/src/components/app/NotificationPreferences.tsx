@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bell, BellOff, Clock, Sun, Moon } from "lucide-react";
+import {Bell, BellSlash, Clock, Sun, Moon} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {

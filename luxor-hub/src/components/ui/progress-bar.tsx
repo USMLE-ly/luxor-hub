@@ -51,7 +51,7 @@ export function ProgressBar({
           className={`absolute inset-y-0 left-0 rounded-full ${variantColors[variant]}`}
           initial={{ width: 0 }}
           animate={{ width: `${clamped}%` }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
+          transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
         />
         {animated && clamped > 0 && clamped < 100 && (
           <motion.div

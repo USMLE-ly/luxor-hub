@@ -1,7 +1,7 @@
 import { motion, useReducedMotion } from "framer-motion";
-import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
+import { ScrollReveal, StaggerContainer, StaggerItem, MagneticCard } from "@/components/ui/scroll-reveal";
 import Pressable from "@/components/ui/pressable";
-import { Camera, Brain, Sun, ShoppingBag, BarChart3 } from "lucide-react";
+import {Camera, Brain, Sun, ShoppingBag, ChartBar} from "@phosphor-icons/react";
 import { FeatureCard } from "@/components/ui/grid-feature-cards";
 
 const steps = [

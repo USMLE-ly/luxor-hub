@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Twitter, Linkedin, Link2, Check } from "lucide-react";
+import {TwitterLogo, LinkedinLogo, Link2, Check} from "@phosphor-icons/react";
 
 interface ShareButtonsProps {
   title: string;

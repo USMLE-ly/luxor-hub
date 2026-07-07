@@ -8,7 +8,7 @@ import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Sparkles, Trash2, ArrowUp, Camera, X, Users } from "lucide-react";
+import {Sparkle, TrashSimple, ArrowUp, Camera, X, Users} from "@phosphor-icons/react";
 import ReactMarkdown from "react-markdown";
 import { VoiceInput } from "@/components/app/VoiceInput";
 import { useAnimatedText } from "@/components/ui/animated-text";
@@ -350,7 +350,7 @@ const Chat = () => {
                       className="absolute inset-0 pointer-events-none"
                       initial={{ opacity: 0.6 }}
                       animate={{ opacity: 0 }}
-                      transition={{ duration: 2.5, ease: "easeOut" }}
+                      transition={{ duration: 2.5, ease: [0.23, 1, 0.32, 1] }}
                     >
                       <div
                         className="absolute inset-0"

@@ -3,7 +3,7 @@ import { AppLayout } from "@/components/app/AppLayout";
 import { toast } from "sonner";
 import { notifyEvent } from "@/lib/notificationService";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, Upload, Camera, Palette, ScanFaceIcon, User, Star, Lightbulb, AlertTriangle } from "lucide-react";
+import {Spinner, UploadSimple, Camera, Palette, ScanFaceIcon, User, Star, Lightbulb, Warning} from "@phosphor-icons/react";
 import { humanizeText } from "@/lib/humanizer";
 import InfoCardsTable, { type RowData, type CellData } from "@/components/ui/info-cards-table";
 import FashionReviewCard from "@/components/ui/fashion-review-card";
@@ -483,7 +483,7 @@ export default function StyleRecommendationsPage() {
                         strokeDasharray={188.5}
                         initial={{ strokeDashoffset: 188.5 }}
                         animate={{ strokeDashoffset: 188.5 - (recommendations.confidence_score / 100) * 188.5 }}
-                        transition={{ duration: 1.5, ease: "easeOut" }}
+                        transition={{ duration: 1.5, ease: [0.23, 1, 0.32, 1] }}
                         style={{ filter: "drop-shadow(0 0 4px rgba(229,199,133,0.4))" }}
                       />
                     </svg>

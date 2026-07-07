@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
-import { Check, Camera, Smartphone, Video, User, FlipHorizontal, Shirt, Glasses, Watch, Gem, Scissors, Bell, MapPin } from "lucide-react";
+import {Check, Camera, Smartphone, Video, User, FlipHorizontal, TShirt, Glasses, Watch, Gem, Scissors, Bell, MapPin} from "@phosphor-icons/react";
 import { useAppPermissions } from "@/hooks/useAppPermissions";
 
 // Haptic + audio tick for card selection
@@ -54,7 +54,7 @@ const SelectionFlip = ({
       controls.start({
         rotateY: [0, -6, 0],
         scale: [1, 0.97, 1],
-        transition: { duration: 0.3, ease: "easeOut" },
+        transition: { duration: 0.3, ease: [0.23, 1, 0.32, 1] },
       });
     }
     prevActive.current = isActive;
@@ -405,7 +405,7 @@ const SelfieIntroStep = ({ step, gender }: { step: OnboardingStep; gender?: "fem
           alt="Style analysis"
           className="w-full h-full object-contain rounded-2xl"
           animate={{ y: [0, -6, 0] }}
-          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 3, repeat: Infinity, ease: [0.77, 0, 0.175, 1] }}
         />
       </motion.div>
       <motion.h2
@@ -455,7 +455,7 @@ const SelfieGuideStep = ({ step, gender }: { step: OnboardingStep; gender?: "fem
             className="w-full h-full object-contain"
             initial={{ scale: 1.1, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.15, ease: "easeOut" }}
+            transition={{ duration: 0.8, delay: 0.15, ease: [0.23, 1, 0.32, 1] }}
           />
         ) : (
           <div className="text-center">
@@ -476,7 +476,7 @@ const SelfieGuideStep = ({ step, gender }: { step: OnboardingStep; gender?: "fem
                 stroke="hsl(120, 60%, 55%)" strokeWidth="4" strokeDasharray="8 6" fill="none"
                 initial={{ pathLength: 0 }}
                 animate={{ pathLength: 1 }}
-                transition={{ duration: 1.2, delay: 0.5, ease: "easeInOut" }}
+                transition={{ duration: 1.2, delay: 0.5, ease: [0.77, 0, 0.175, 1] }}
               />
             </svg>
           </motion.div>
@@ -848,7 +848,7 @@ const CameraCaptureStep = ({ step, answers, onSelect }: { step: OnboardingStep; 
                     className="absolute inset-0 flex items-center justify-center pointer-events-none"
                     initial={{ scale: 0.8, opacity: 0.8 }}
                     animate={{ scale: 2.5, opacity: 0 }}
-                    transition={{ duration: 0.7, ease: "easeOut" }}
+                    transition={{ duration: 0.7, ease: [0.23, 1, 0.32, 1] }}
                   >
                     <span className="w-24 h-24 rounded-full border-2 border-white/60" />
                   </motion.span>
@@ -982,7 +982,7 @@ const SparkleParticles = ({ progress, garmentCount = 5 }: { progress?: number[];
             fill="hsl(43,74%,70%)"
             initial={{ opacity: 0, cx: p.cx, cy: 55 }}
             animate={{ opacity: [0, 1, 0], cx: p.tx, cy: p.ty, r: [p.size, p.size * 0.3, 0] }}
-            transition={{ duration: 0.8, delay: p.delay, ease: "easeOut" }}
+            transition={{ duration: 0.8, delay: p.delay, ease: [0.23, 1, 0.32, 1] }}
           />
         );
       })}
@@ -996,7 +996,7 @@ const SparkleParticles = ({ progress, garmentCount = 5 }: { progress?: number[];
           fill="hsl(43,74%,65%)"
           initial={{ opacity: 0, cy: 90 }}
           animate={{ opacity: [0, 0.6, 0], cy: [90, 30 + Math.random() * 30, 10] }}
-          transition={{ duration: 2.5 + Math.random() * 2, delay: Math.random() * 3, repeat: Infinity, ease: "easeOut" }}
+          transition={{ duration: 2.5 + Math.random() * 2, delay: Math.random() * 3, repeat: Infinity, ease: [0.23, 1, 0.32, 1] }}
         />
       ))}
     </>
@@ -1209,8 +1209,8 @@ const GeneratingStep = ({ step, gender }: { step: OnboardingStep; gender?: "fema
                 transition={{
                   scale: { delay: i * 0.3, duration: 0.5, type: "spring", stiffness: 200 },
                   opacity: { delay: i * 0.3, duration: 0.4 },
-                  rotate: { delay: i * 0.3 + 0.5, duration: 4, repeat: Infinity, ease: "easeInOut" },
-                  y: { delay: i * 0.3 + 0.5, duration: 3, repeat: Infinity, ease: "easeInOut" },
+                  rotate: { delay: i * 0.3 + 0.5, duration: 4, repeat: Infinity, ease: [0.77, 0, 0.175, 1] },
+                  y: { delay: i * 0.3 + 0.5, duration: 3, repeat: Infinity, ease: [0.77, 0, 0.175, 1] },
                 }}
                 style={{ transformOrigin: `${60 + i * 20}px 24px` }}
               />

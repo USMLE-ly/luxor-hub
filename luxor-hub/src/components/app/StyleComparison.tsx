@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeftRight, Trophy, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import {ArrowsLeftRight, Trophy, TrendUp, TrendDown, Minus} from "@phosphor-icons/react";
 
 interface SavedAnalysis {
   id: string;

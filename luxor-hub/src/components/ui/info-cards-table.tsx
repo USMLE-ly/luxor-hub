@@ -1,6 +1,6 @@
 "use client"
 
-import { Palette, ScanFaceIcon, Shirt, Lightbulb, Check, X } from "lucide-react"
+import {Palette, ScanFaceIcon, TShirt, Lightbulb, Check, X} from "@phosphor-icons/react"
 import {
   Table,
   TableBody,

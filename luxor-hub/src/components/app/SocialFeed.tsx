@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, UserPlus, UserCheck, Share2, Sparkles, TrendingUp, Flame } from "lucide-react";
+import {Heart, UserPlus, UserCheck, ShareNetwork, Sparkle, TrendUp, Flame} from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 import { LookComments } from "./LookComments";
 import { Button } from "@/components/ui/button";

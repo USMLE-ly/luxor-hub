@@ -1,4 +1,4 @@
-import { ArrowRight, ArrowUp, Check } from "lucide-react";
+import {ArrowRight, ArrowUp, Check} from "@phosphor-icons/react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";

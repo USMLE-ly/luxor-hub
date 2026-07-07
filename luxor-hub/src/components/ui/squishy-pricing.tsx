@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import React from 'react';
-import { Check, Crown, X } from 'lucide-react';
+import {Check, Crown, X} from "@phosphor-icons/react";
 
 // --- Types --- //
 export interface PricingFeature {

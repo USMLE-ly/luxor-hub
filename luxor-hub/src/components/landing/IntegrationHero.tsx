@@ -1,6 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect, useMemo } from "react";
-import { Diamond } from "lucide-react";
+import {Diamond} from "@phosphor-icons/react";
 
 const platforms = [
   { name: "Instagram", logo: "/logos/instagram.png" },
@@ -48,7 +48,7 @@ function CenterParticles() {
             duration: p.duration,
             delay: p.delay,
             repeat: Infinity,
-            ease: "easeInOut",
+            ease: [0.77, 0, 0.175, 1],
           }}
         />
       ))}

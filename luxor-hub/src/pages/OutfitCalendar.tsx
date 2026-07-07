@@ -8,12 +8,7 @@ import { toast } from "sonner";
 import { notifyEvent } from "@/lib/notificationService";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { OutfitComposition } from "@/components/ui/OutfitComposition";
-import {
-  CalendarDays, ChevronLeft, ChevronRight, Plus, X, Shirt, Sparkles, Loader2,
-  Cloud, Sun, CloudRain, Snowflake, Wind, Droplets, Thermometer, Pencil, Bell, BellOff,
-  MapPin, TrendingUp, Flame, BarChart3, Layers, Copy, Palette, Star, Share2, Umbrella, ThermometerSnowflake, AlertTriangle,
-  Award, Trophy, Zap, Target, Crown, RefreshCw, Lightbulb,
-} from "lucide-react";
+import {CalendarDots, CaretLeft, CaretRight, Plus, X, TShirt, Sparkle, Spinner, Cloud, Sun, CloudRain, Snowflake, Wind, Droplets, Thermometer, Pencil, Bell, BellSlash, MapPin, TrendUp, Flame, ChartBar, StackSimple, CopySimple, Palette, Star, ShareNetwork, Umbrella, ThermometerSnowflake, Warning, Award, Trophy, Lightning, Target, Crown, ArrowsClockwise, Lightbulb, } from "@phosphor-icons/react";
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, addMonths, subMonths, subDays, isSameMonth, isSameDay, isToday, isSunday, differenceInMilliseconds, set as setDate } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -1583,7 +1578,7 @@ const OutfitCalendarInner = () => {
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${streakRewards.progress}%` }}
-                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
                     className="h-full rounded-full gold-gradient"
                   />
                 </div>

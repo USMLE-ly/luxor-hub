@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Bookmark, BookmarkCheck, ChevronRight, Plus, Users, User } from "lucide-react";
+import {Sparkle, Bookmark, BookmarkCheck, CaretRight, Plus, Users, User} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";

@@ -73,7 +73,7 @@ const Features = () => {
                   initial={{ opacity: 0, y: 14 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -14 }}
-                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
                   className="font-sans text-sm font-medium tracking-wider uppercase text-primary/80"
                 >
                   {featureNames[activeFeature]}
@@ -87,7 +87,7 @@ const Features = () => {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={isInView ? { opacity: 1, scale: 1 } : {}}
-          transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+          transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1], delay: 0.2 }}
           style={{ y: mockupY }}
           className="flex justify-center relative mb-[-340px] md:mb-[-140px]"
         >
@@ -98,7 +98,7 @@ const Features = () => {
               opacity: [0, 0.25, 0.08, 0.25, 0],
               scale: [0.7, 1.05, 1.1, 1.05, 0.7],
             } : {}}
-            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+            transition={{ duration: 5, repeat: Infinity, ease: [0.77, 0, 0.175, 1] }}
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/20 pointer-events-none"
             style={{ width: isMobile ? 200 : 320, height: isMobile ? 200 : 320 }}
           />
@@ -108,7 +108,7 @@ const Features = () => {
               opacity: [0, 0.15, 0.05, 0.15, 0],
               scale: [0.6, 1.15, 1.2, 1.15, 0.6],
             } : {}}
-            transition={{ duration: 6, delay: 1.5, repeat: Infinity, ease: "easeInOut" }}
+            transition={{ duration: 6, delay: 1.5, repeat: Infinity, ease: [0.77, 0, 0.175, 1] }}
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/10 pointer-events-none"
             style={{ width: isMobile ? 260 : 400, height: isMobile ? 260 : 400 }}
           />
@@ -127,7 +127,7 @@ const Features = () => {
                 duration: p.duration,
                 delay: p.delay,
                 repeat: Infinity,
-                ease: "easeInOut",
+                ease: [0.77, 0, 0.175, 1],
               }}
               className="absolute rounded-full bg-primary pointer-events-none"
               style={{

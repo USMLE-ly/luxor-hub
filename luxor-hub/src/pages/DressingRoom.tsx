@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
-import { CalendarDays, Check } from "lucide-react";
+import {CalendarDots, Check} from "@phosphor-icons/react";
 import { notifyEvent } from "@/lib/notificationService";
 import { LiquidGlassCard } from "@/components/ui/liquid-notification";
 import { supabase } from "@/integrations/supabase/client";

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Check } from "lucide-react";
+import {Check} from "@phosphor-icons/react";
 import femaleImg from "@/assets/onboarding-female.jpg";
 import maleImg from "@/assets/onboarding-male.jpg";
 

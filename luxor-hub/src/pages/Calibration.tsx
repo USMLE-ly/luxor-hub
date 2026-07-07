@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { ArrowRight, ArrowLeft, Check, Eye, Gift } from "lucide-react";
+import {ArrowRight, ArrowLeft, Check, Eye, Gift} from "@phosphor-icons/react";
 import SwipeParticles from "@/components/onboarding/SwipeParticles";
 import { useGyroTilt } from "@/hooks/useGyroTilt";
 import { haptic } from "@/lib/haptics";
@@ -791,7 +791,7 @@ const Calibration = () => {
         <motion.div
           className="absolute top-1/3 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full bg-primary/5 blur-[100px]"
           animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.8, 0.5] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 6, repeat: Infinity, ease: [0.77, 0, 0.175, 1] }}
         />
       </div>
 
@@ -932,7 +932,7 @@ const Calibration = () => {
                         animate={{
                           boxShadow: isActive ? "0 8px 30px -8px hsl(var(--primary) / 0.4)" : "0 0 0 0 transparent",
                         }}
-                        transition={{ duration: 0.3, ease: "easeOut" }}
+                        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
                         style={{ willChange: 'box-shadow' }}
                       >
                         <img
@@ -1021,7 +1021,7 @@ const Calibration = () => {
           <motion.span
             className="ml-2 inline-flex"
             animate={canProceed ? { x: [0, 4, 0] } : {}}
-            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: [0.77, 0, 0.175, 1] }}
           >
             <ArrowRight className="h-4 w-4" />
           </motion.span>

@@ -9,11 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
-import {
-  Upload, Camera,
-  Loader2, Instagram, Twitter, ExternalLink, RefreshCw, AlertTriangle,
-  Layers
-} from "lucide-react";
+import {UploadSimple, Camera, Spinner, InstagramLogo, TwitterLogo, ArrowSquareOut, ArrowsClockwise, Warning, StackSimple} from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 import { ImageSwiper } from "@/components/ui/image-swiper";
 
@@ -98,7 +94,7 @@ const container = {
 };
 const itemAnim = {
   hidden: { opacity: 0, y: 16 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.23, 1, 0.32, 1] } },
 };
 
 /* ------------------------------------------------------------------ */
@@ -505,7 +501,7 @@ export default function Analysis() {
   const containerVariants = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
   const childVariants = {
     hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" } },
+    show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.23, 1, 0.32, 1] } },
   };
 
   /* ---------- Pre-computed lists ---------- */
@@ -712,7 +708,7 @@ export default function Analysis() {
                                   style={{ background: `linear-gradient(90deg, ${v.color}, ${v.color}dd)` }}
                                   initial={{ width: 0 }}
                                   animate={{ width: `${v.score}%` }}
-                                  transition={{ duration: 0.8, ease: "easeOut", delay: 0.1 * (i + 1) }}
+                                  transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1], delay: 0.1 * (i + 1) }}
                                 />
                               </div>
                             </div>

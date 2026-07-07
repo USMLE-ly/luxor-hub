@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Circle } from "lucide-react";
+import {Circle} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 function ElegantShape({
@@ -31,7 +31,7 @@ function ElegantShape({
     >
       <motion.div
         animate={{ y: [0, 15, 0] }}
-        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+        transition={{ duration: 12, repeat: Infinity, ease: [0.77, 0, 0.175, 1] }}
         style={{ width, height }}
         className="relative"
       >

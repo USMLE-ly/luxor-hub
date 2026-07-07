@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { ContainerScroll } from "@/components/ui/container-scroll";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { motion } from "framer-motion";
-import { Diamond, TrendingUp, Palette, Calendar, ShoppingBag, BarChart3, MessageSquare } from "lucide-react";
+import {Diamond, TrendUp, Palette, Calendar, ShoppingBag, ChartBar, ChatSquareText} from "@phosphor-icons/react";
 
 const outfitThumbs = [
   { label: "Casual Friday", gradient: "from-amber-700 via-stone-300 to-blue-900" },
@@ -104,7 +104,7 @@ const AppPreview = () => {
                 initial={{ pathLength: 0, opacity: 0 }}
                 whileInView={{ pathLength: 1, opacity: 1 }}
                 viewport={{ once: true }}
-                transition={{ duration: 2, ease: "easeInOut" }}
+                transition={{ duration: 2, ease: [0.77, 0, 0.175, 1] }}
               />
               <motion.path
                 d="M0,35 Q25,30 50,25 T100,15 T150,20 T200,5 L200,40 L0,40 Z"

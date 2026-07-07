@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Clock, Tag, ArrowRight } from "lucide-react";
+import {ArrowLeft, Clock, Tag, ArrowRight} from "@phosphor-icons/react";
 import { useEffect } from "react";
 import NewsletterSignup from "@/components/blog/NewsletterSignup";
 import { LinkPreview } from "@/components/ui/link-preview";

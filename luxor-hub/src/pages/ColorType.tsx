@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Edit2, Upload, Loader2, CheckCircle, XCircle, Camera, Copy, X, Shirt, Glasses, Watch } from "lucide-react";
+import {ArrowLeft, ArrowRight, PencilSimpleLine, UploadSimple, Spinner, CheckCircle, XCircle, Camera, CopySimple, X, TShirt, Glasses, Watch} from "@phosphor-icons/react";
 import { BottomNav } from "@/components/app/BottomNav";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart } from 'lucide-react';
+import {Heart} from "@phosphor-icons/react";
 import { cn } from '@/lib/utils';
 
 interface TravelRouteCardProps {

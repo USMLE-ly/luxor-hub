@@ -2,7 +2,9 @@ import { useState, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
-import { Shield, ChevronDown, Check, Minus } from "lucide-react";
+import { DoubleBezel } from "@/components/ui/double-bezel";
+import { MagneticCard } from "@/components/ui/scroll-reveal";
+import {Shield, CaretDown, Check, Minus} from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 import { trackEvent } from "@/lib/fbPixel";
 import PayPalButton from "@/components/app/PayPalButton";
@@ -217,7 +219,7 @@ const Pricing = () => {
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.15 }}
-              transition={{ duration: 0.5, delay: i * 0.1, ease: "easeOut" }}
+              transition={{ duration: 0.5, delay: i * 0.1, ease: [0.23, 1, 0.32, 1] }}
               className={t.isFree ? "relative" : ""}
             >
               {t.isFree && (

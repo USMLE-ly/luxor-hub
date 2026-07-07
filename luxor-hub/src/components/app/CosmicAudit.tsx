@@ -2,9 +2,7 @@ import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
-import {
-  Sparkles, Palette, Shirt, ShieldCheck, Star, Eye
-} from "lucide-react";
+import {Sparkle, Palette, TShirt, ShieldCheck, Star, Eye} from "@phosphor-icons/react";
 
 interface CosmicAuditProps {
   styleName: string;

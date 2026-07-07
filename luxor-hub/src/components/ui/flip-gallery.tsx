@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
+import {CaretLeft, CaretRight, CalendarDots} from "@phosphor-icons/react";
 import { MarketingBadges } from '@/components/ui/marketing-badges';
 
 export interface OutfitImages {

@@ -1,6 +1,6 @@
 import { useParams, Link, Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Clock, Tag, ArrowRight, List } from "lucide-react";
+import {ArrowLeft, Clock, Tag, ArrowRight, List} from "@phosphor-icons/react";
 import { useEffect, useState, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import NewsletterSignup from "@/components/blog/NewsletterSignup";

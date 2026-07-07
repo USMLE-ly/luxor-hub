@@ -4,9 +4,7 @@ import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import {
-  LayoutGrid, Plus, Trash2, Image, Type, Palette, Link2, X, GripVertical,
-} from "lucide-react";
+import {LayoutGrid, Plus, TrashSimple, Image, TextT, Palette, Link2, X, GripVertical, } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";

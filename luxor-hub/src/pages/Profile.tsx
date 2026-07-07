@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { UserPlus, UserCheck, Sparkles, Users } from "lucide-react";
+import {UserPlus, UserCheck, Sparkle, Users} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 

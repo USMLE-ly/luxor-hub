@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { CalendarDays, ScanLine, Layers, Shirt, Sparkles } from "lucide-react";
+import {CalendarDots, Scan, StackSimple, TShirt, Sparkle} from "@phosphor-icons/react";
 import { motion } from "framer-motion";
 import { haptic } from "@/lib/haptics";
 

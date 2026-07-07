@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Lock, ArrowRight } from "lucide-react";
+import {Lock, ArrowRight} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import { hasTierAccess, type PlanTier } from "@/lib/planRestrictions";

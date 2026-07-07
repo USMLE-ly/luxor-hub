@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
-import { ArrowUpRight } from "lucide-react";
+import {ArrowUpRight} from "@phosphor-icons/react";
 import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
 import { useState } from "react";
 import { TestimonialCard } from "@/components/ui/testimonial-cards";

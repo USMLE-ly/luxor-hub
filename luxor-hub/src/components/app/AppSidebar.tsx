@@ -1,4 +1,4 @@
-import { Home, Shirt, Wand2, MessageCircle, BarChart3, Settings, LogOut, Sparkles, Move, User, ScanEye, Trophy, Flame, Award, Bell, CalendarDays, LayoutGrid, Video, Paintbrush, Layers, Globe, Crown, DollarSign } from "lucide-react";
+import {Home, TShirt, MagicWand, ChatCircle, ChartBar, GearSix, SignOut, Sparkle, ArrowsOut, User, ScanEye, Trophy, Flame, Award, Bell, CalendarDots, LayoutGrid, Video, PaintBrush, StackSimple, GlobeHemisphereWest, Crown, DollarSign} from "@phosphor-icons/react";
 import { NotificationBell } from "./NotificationBell";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";

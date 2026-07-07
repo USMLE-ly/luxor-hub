@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { AlertCircle, Shirt, Palette, ShoppingBag, Check } from "lucide-react";
+import {WarningCircle, TShirt, Palette, ShoppingBag, Check} from "@phosphor-icons/react";
 
 interface ClothingItem {
   id: string;

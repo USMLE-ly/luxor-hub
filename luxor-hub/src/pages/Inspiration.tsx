@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Heart, ExternalLink, ShoppingBag, Sparkles, ChevronRight, Loader2, Camera, ArrowUpDown, AlertCircle, ArrowRight } from "lucide-react";
+import {Heart, ArrowSquareOut, ShoppingBag, Sparkle, CaretRight, Spinner, Camera, ArrowsDownUp, WarningCircle, ArrowRight} from "@phosphor-icons/react";
 
 interface Product {
   id: string;

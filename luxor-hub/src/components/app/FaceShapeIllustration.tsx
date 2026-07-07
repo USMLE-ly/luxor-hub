@@ -51,7 +51,7 @@ const FaceShapeIllustration = ({ shape, size = 120, className = "", morphing = f
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
+      transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
       className={className}
     >
       <svg width={size} height={size} viewBox="0 0 100 100" fill="none">

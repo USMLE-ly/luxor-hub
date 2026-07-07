@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DollarSign, TrendingDown, TrendingUp, AlertTriangle, X, Shirt, Footprints, Watch, ShoppingBag } from "lucide-react";
+import {DollarSign, TrendDown, TrendUp, Warning, X, TShirt, Footprints, Watch, ShoppingBag} from "@phosphor-icons/react";
 import TierGate from "@/components/app/TierGate";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 

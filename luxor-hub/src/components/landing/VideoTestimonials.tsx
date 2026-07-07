@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Play, Star } from "lucide-react";
+import {Play, Star} from "@phosphor-icons/react";
 import { useState } from "react";
 import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
 

@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import {ArrowLeft, ArrowRight} from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -59,7 +59,7 @@ const Gallery4 = ({
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
+          transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
           className="mb-8 flex flex-col md:flex-row items-start md:items-end justify-between md:mb-14 lg:mb-16 gap-4"
         >
           <div className="flex flex-col gap-4">
@@ -94,7 +94,7 @@ const Gallery4 = ({
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.15 }}
-        transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }}
+        transition={{ duration: 0.7, delay: 0.15, ease: [0.23, 1, 0.32, 1] }}
         className="w-full"
       >
         <Carousel
@@ -147,7 +147,7 @@ const Gallery4 = ({
                           >
                             <motion.div
                               animate={{ x: [0, -16, 0] }}
-                              transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+                              transition={{ duration: 1.2, repeat: Infinity, ease: [0.77, 0, 0.175, 1] }}
                               className="mr-3 flex items-center gap-1.5 rounded-full bg-background/80 backdrop-blur-sm px-3 py-1.5 shadow-lg"
                             >
                               <ArrowLeft className="size-3.5 text-foreground/70" />

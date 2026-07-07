@@ -40,7 +40,7 @@ function FloatingAccent({
         duration,
         delay,
         repeat: Infinity,
-        ease: "easeInOut",
+        ease: [0.77, 0, 0.175, 1],
       }}
     >
       <div
@@ -65,7 +65,7 @@ function GoldShimmerLine({ delay = 0, top = "50%", width = 120 }: { delay?: numb
       style={{ top, left: "50%", marginLeft: -width / 2, width }}
       initial={{ scaleX: 0, opacity: 0 }}
       animate={{ scaleX: [0, 1, 1, 0], opacity: [0, 0.4, 0.4, 0] }}
-      transition={{ duration: 6, delay, repeat: Infinity, ease: "easeInOut" }}
+      transition={{ duration: 6, delay, repeat: Infinity, ease: [0.77, 0, 0.175, 1] }}
     >
       <div
         className="w-full h-full"

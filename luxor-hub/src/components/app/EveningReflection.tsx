@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Moon, ThumbsUp, ThumbsDown, Heart, MessageCircle, Check, Sparkles } from "lucide-react";
+import {Moon, ThumbsUp, ThumbsDown, Heart, ChatCircle, Check, Sparkle} from "@phosphor-icons/react";
 import { toast } from "sonner";
 
 const moods = [

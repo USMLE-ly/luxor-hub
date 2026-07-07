@@ -7,9 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import {
-  Trophy, Crown, Medal, Flame, Clock, Loader2, User, Sparkles, ChevronRight, History, Swords, Target, Recycle, Shirt
-} from "lucide-react";
+import {Trophy, Crown, Medal, Flame, Clock, Spinner, User, Sparkle, CaretRight, History, Swords, Target, Recycle, TShirt} from "@phosphor-icons/react";
 import { motion } from "framer-motion";
 import { PremiumSkeleton, PremiumCardSkeleton, PremiumTextSkeleton } from "@/components/ui/premium-skeleton";
 import { useNavigate } from "react-router-dom";

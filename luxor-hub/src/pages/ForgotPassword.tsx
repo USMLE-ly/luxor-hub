@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, Mail } from "lucide-react";
+import {ArrowLeft, Envelope} from "@phosphor-icons/react";
 import { GoldParticles } from "@/components/app/GoldParticles";
 import { GoldDivider, PremiumCardWrapper, GoldShimmerButton } from "@/components/app/PremiumAuthCard";
 

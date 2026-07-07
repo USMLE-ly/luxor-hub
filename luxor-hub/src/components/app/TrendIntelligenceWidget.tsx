@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { TrendingUp, Sparkles, Loader2, ChevronRight, ShoppingBag, Shirt } from "lucide-react";
+import {TrendUp, Sparkle, Spinner, CaretRight, ShoppingBag, TShirt} from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { GradientButton } from "@/components/ui/gradient-button";

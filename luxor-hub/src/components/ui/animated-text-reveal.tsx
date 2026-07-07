@@ -28,7 +28,7 @@ const charVariants: Variants = {
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.3, delay: i * 0.02, ease: "easeOut" },
+    transition: { duration: 0.3, delay: i * 0.02, ease: [0.23, 1, 0.32, 1] },
   }),
 };
 
@@ -37,7 +37,7 @@ const blurVariants: Variants = {
   visible: (i: number) => ({
     opacity: 1,
     filter: "blur(0px)",
-    transition: { duration: 0.5, delay: i * 0.05, ease: "easeOut" },
+    transition: { duration: 0.5, delay: i * 0.05, ease: [0.23, 1, 0.32, 1] },
   }),
 };
 

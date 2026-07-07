@@ -1,6 +1,6 @@
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import {ArrowLeft} from "@phosphor-icons/react";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import AIFashionEditorial from "@/components/landing/AIFashionEditorial";

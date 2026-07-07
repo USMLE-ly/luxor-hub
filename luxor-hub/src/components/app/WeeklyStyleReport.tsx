@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Leaf, TrendingDown, Award, Calendar, Shirt, ArrowRight } from "lucide-react";
+import {Leaf, TrendDown, Award, Calendar, TShirt, ArrowRight} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 

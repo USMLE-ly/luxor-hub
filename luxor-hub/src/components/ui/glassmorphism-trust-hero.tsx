@@ -5,20 +5,8 @@ import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { GoldParticles } from "@/components/app/GoldParticles";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import Pressable from "@/components/ui/pressable";
-import {
-  ArrowRight,
-  Play,
-  Target,
-  Crown,
-  Star,
-  Hexagon,
-  Triangle,
-  Command,
-  Ghost,
-  Gem,
-  Cpu,
-  ChevronDown,
-} from "lucide-react";
+import { DoubleBezel, DoubleBezelCard } from "@/components/ui/double-bezel";
+import {ArrowRight, Play, Target, Crown, Star, Hexagon, Triangle, Command, Ghost, Gem, Cpu, CaretDown, } from "@phosphor-icons/react";
 import heroVideo from "@/assets/hero-video.mp4";
 
 const FloatingCircle = ({
@@ -41,7 +29,7 @@ const FloatingCircle = ({
     animate={{ opacity: 1, y: [0, 15, 0] }}
     transition={{
       opacity: { duration: 1.5, delay },
-      y: { duration, repeat: Infinity, ease: "easeInOut", delay },
+      y: { duration, repeat: Infinity, ease: [0.77, 0, 0.175, 1], delay },
     }}
     className="absolute rounded-full pointer-events-none border border-white/[0.08] backdrop-blur-[2px]"
     style={{
@@ -202,7 +190,7 @@ export default function GlassmorphismTrustHero() {
                 <span>Try Free — No Card Needed</span>
                 <motion.span
                   animate={{ x: [0, 4, 0] }}
-                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, ease: "easeInOut" }}
+                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, ease: [0.77, 0, 0.175, 1] }}
                 >
                   <ArrowRight className="w-4 h-4" />
                 </motion.span>
@@ -227,7 +215,8 @@ export default function GlassmorphismTrustHero() {
           <div className="lg:col-span-5 space-y-6 lg:mt-12">
 
             {/* Stats Card */}
-            <ScrollReveal direction="up" delay={0.5} className="relative overflow-hidden rounded-3xl border border-border/20 bg-card/30 p-8 backdrop-blur-xl shadow-2xl">
+            <DoubleBezelCard radius="xl" glow="gold" className="backdrop-blur-xl">
+            <ScrollReveal direction="up" delay={0.5}>
               <div className="absolute top-0 right-0 -mr-16 -mt-16 h-64 w-64 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
 
               <div className="relative z-10">
@@ -273,12 +262,14 @@ export default function GlassmorphismTrustHero() {
                 </div>
               </div>
             </ScrollReveal>
+            </DoubleBezelCard>
 
             {/* Testimonial Card */}
-            <motion.div
-              whileHover={{ y: -4, boxShadow: "0 20px 40px rgba(0,0,0,0.2)" }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              className="hero-animate-fade-in hero-delay-500 relative overflow-hidden rounded-3xl border border-border/20 bg-card/30 p-6 backdrop-blur-xl border-ivory/5 touch-pan-y"
+            <DoubleBezelCard radius="xl" glow="gold" className="backdrop-blur-xl">
+              <motion.div
+                whileHover={{ y: -2 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                className="p-6 touch-pan-y"
               onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
               onTouchEnd={(e) => {
                 const diff = touchStartX.current - e.changedTouches[0].clientX;

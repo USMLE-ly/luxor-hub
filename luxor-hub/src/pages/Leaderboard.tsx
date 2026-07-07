@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Trophy, Medal, Crown, TrendingUp, Loader2, User } from "lucide-react";
+import {Trophy, Medal, Crown, TrendUp, Spinner, User} from "@phosphor-icons/react";
 import { motion } from "framer-motion";
 
 interface LeaderboardEntry {

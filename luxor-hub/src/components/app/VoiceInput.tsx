@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { Mic, MicOff } from "lucide-react";
+import {Mic, MicOff} from "@phosphor-icons/react";
 import { toast } from "sonner";
 
 interface VoiceInputProps {

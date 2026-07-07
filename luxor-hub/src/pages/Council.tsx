@@ -6,7 +6,7 @@ import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Users, Trash2, ArrowUp, Camera, X, Sparkles, ChevronDown, ChevronUp, Brain, CalendarPlus, Heart, Share2, Shirt } from "lucide-react";
+import {Users, TrashSimple, ArrowUp, Camera, X, Sparkle, CaretDown, CaretUp, Brain, CalendarPlus, Heart, ShareNetwork, TShirt} from "@phosphor-icons/react";
 import { haptic } from "@/lib/haptics";
 import ReactMarkdown from "react-markdown";
 import { VoiceInput } from "@/components/app/VoiceInput";
@@ -525,7 +525,7 @@ const CouncilInner = () => {
                             className="absolute inset-0 pointer-events-none"
                             initial={{ opacity: 0.6 }}
                             animate={{ opacity: 0 }}
-                            transition={{ duration: 2.5, ease: "easeOut" }}
+                            transition={{ duration: 2.5, ease: [0.23, 1, 0.32, 1] }}
                           >
                             <div
                               className="absolute inset-0"

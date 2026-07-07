@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Shirt, TrendingUp, DollarSign, Crown } from "lucide-react";
+import {TShirt, TrendUp, DollarSign, Crown} from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 
 interface WearData {

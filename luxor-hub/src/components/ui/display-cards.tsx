@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Sparkles } from "lucide-react";
+import {Sparkle} from "@phosphor-icons/react";
 
 interface DisplayCardProps {
   className?: string;

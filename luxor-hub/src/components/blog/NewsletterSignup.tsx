@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, ArrowRight, CheckCircle, Loader2 } from "lucide-react";
+import {Envelope, ArrowRight, CheckCircle, Spinner} from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 
 const NewsletterSignup = () => {

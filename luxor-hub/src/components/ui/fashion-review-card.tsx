@@ -15,7 +15,7 @@ import {
   LinearXAxisTickLabel,
 } from "reaviz";
 import { motion } from "framer-motion";
-import { Check, AlertTriangle, Sparkles, Star } from "lucide-react";
+import {Check, Warning, Sparkle, Star} from "@phosphor-icons/react";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -75,7 +75,7 @@ export default function FashionReviewCard({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
+      transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
       className="w-full rounded-2xl border border-white/10 bg-gradient-to-b from-zinc-900/80 to-zinc-950/80 backdrop-blur-xl overflow-hidden"
     >
       {/* ── HEADER: Overall Score with arc ── */}
@@ -93,7 +93,7 @@ export default function FashionReviewCard({
               strokeDasharray={264}
               initial={{ strokeDashoffset: 264 }}
               animate={{ strokeDashoffset: 264 - (overallScore / 100) * 264 }}
-              transition={{ duration: 1.5, ease: "easeOut" }}
+              transition={{ duration: 1.5, ease: [0.23, 1, 0.32, 1] }}
               style={{ filter: "drop-shadow(0 0 6px rgba(229,199,133,0.3))" }}
             />
             <defs>

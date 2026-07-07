@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
+import { StaggerContainer, StaggerItem, MagneticCard } from "@/components/ui/scroll-reveal";
 import ombraBg from "@/assets/brand/ombra.png";
 import {
   Accordion,
@@ -60,6 +60,7 @@ const FAQ = () => (
         <Accordion type="single" collapsible className="space-y-0">
           {faqs.map((faq, i) => (
             <StaggerItem key={i}>
+              <MagneticCard>
             <AccordionItem
               key={i}
               value={`faq-${i}`}
@@ -72,6 +73,7 @@ const FAQ = () => (
                 {faq.a}
               </AccordionContent>
             </AccordionItem>
+              </MagneticCard>
             </StaggerItem>
           ))}
         </Accordion>

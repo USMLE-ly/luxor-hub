@@ -5,9 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import {
-  Award, Target, Flame, Star, Zap, Crown, Eye, TrendingUp, Loader2, Lock
-} from "lucide-react";
+import {Award, Target, Flame, Star, Lightning, Crown, Eye, TrendUp, Spinner, Lock} from "@phosphor-icons/react";
 import { motion } from "framer-motion";
 import Pressable from "@/components/ui/pressable";
 import { PremiumSkeleton, PremiumCardSkeleton, PremiumTextSkeleton } from "@/components/ui/premium-skeleton";

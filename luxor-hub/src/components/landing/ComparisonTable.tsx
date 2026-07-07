@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Check, X, ChevronDown } from "lucide-react";
+import {Check, X, CaretDown} from "@phosphor-icons/react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
