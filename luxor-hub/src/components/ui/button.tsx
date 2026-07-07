@@ -3,6 +3,7 @@ import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { motion } from "framer-motion";
 import { haptic } from "@/lib/haptics";
+import { playClick, playGoldClick } from "@/lib/audio-system";
 
 import { cn } from "@/lib/utils";
 
@@ -49,6 +50,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const Comp = asChild ? Slot : "button";
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
       haptic("light");
+      if (variant === "default" || variant === "reverse") {
+        playGoldClick();
+      } else {
+        playClick();
+      }
       onClick?.(e);
     };
     // Wrap with motion.button for premium spring physics (only for non-asChild)

@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {ArrowLeft, Envelope, Lock, User} from "@phosphor-icons/react";
 import { trackEvent } from "@/lib/fbPixel";
+import { playSuccess } from "@/lib/audio-system";
 import { GoldParticles } from "@/components/app/GoldParticles";
 import { GoldDivider, PremiumCardWrapper, GoldShimmerButton } from "@/components/app/PremiumAuthCard";
 
@@ -77,6 +78,7 @@ const Auth = () => {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Welcome back to LEXOR®!");
+        playSuccess();
         // Get the user from the session we already have
         const { data: { user: sessionUser } } = await supabase.auth.getUser();
         const uid = sessionUser?.id;
@@ -131,6 +133,7 @@ const Auth = () => {
         // If session is returned, user was auto-confirmed — go to onboarding
         if (signUpData?.session) {
           toast.success("Account created! Welcome to LEXOR®!");
+          playSuccess();
           navigate("/onboarding");
         } else {
           // Email confirmation is still required — inform user

@@ -8,6 +8,7 @@ import Pressable from "@/components/ui/pressable";
 import { DoubleBezel, DoubleBezelCard } from "@/components/ui/double-bezel";
 import CursorSpotlight from "@/components/ui/cursor-spotlight";
 import { ProgressiveImage } from "@/components/ui/progressive-image";
+import { ThreeGarmentShowcase } from "@/components/ui/three-garment-showcase";
 import {ArrowRight, Play, Target, Crown, Star, Hexagon, Triangle, Command, Ghost, Gem, Cpu, CaretDown, } from "@phosphor-icons/react";
 import heroVideo from "@/assets/hero-video.mp4";
 
@@ -138,6 +139,10 @@ export default function GlassmorphismTrustHero() {
 
       {/* Floating premium circles */}
       <GoldParticles />
+            {/* 3D Floating Garment Showcase */}
+      <div className="absolute right-[-5%] top-[5%] w-[45%] h-[80%] z-[1] pointer-events-none opacity-70 hidden lg:block">
+        <ThreeGarmentShowcase />
+      </div>
       <div className="absolute inset-0 z-[1] overflow-hidden pointer-events-none">
         <FloatingCircle size={320} top="-5%" left="-8%" gradient="radial-gradient(circle, hsl(var(--gold) / 0.08) 0%, transparent 70%)" duration={14} delay={0} />
         <FloatingCircle size={200} top="15%" left="75%" gradient="radial-gradient(circle, hsl(var(--accent) / 0.08) 0%, transparent 70%)" duration={12} delay={1} />

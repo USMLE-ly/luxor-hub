@@ -1,5 +1,6 @@
-import React, { lazy, Suspense, Component } from "react";
+import React, { lazy, Suspense, Component, useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
+import { initAudio } from "@/lib/audio-system";
 
 import { ClassicLoader } from "@/components/ui/loader";
 const AppContent = lazy(() => import("./AppContent"));
@@ -85,9 +86,27 @@ class AppErrorBoundary extends Component<
   }
 }
 
+const AudioInit = () => {
+  useEffect(() => {
+    const handleInteraction = () => {
+      initAudio();
+      window.removeEventListener("click", handleInteraction);
+      window.removeEventListener("touchstart", handleInteraction);
+    };
+    window.addEventListener("click", handleInteraction);
+    window.addEventListener("touchstart", handleInteraction);
+    return () => {
+      window.removeEventListener("click", handleInteraction);
+      window.removeEventListener("touchstart", handleInteraction);
+    };
+  }, []);
+  return null;
+};
+
 const App = () => (
   <AppErrorBoundary>
     <BrowserRouter>
+      <AudioInit />
       <Suspense fallback={<Loading />}>
         <AppContent />
       </Suspense>

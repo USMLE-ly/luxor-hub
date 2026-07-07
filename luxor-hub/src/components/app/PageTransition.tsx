@@ -1,7 +1,12 @@
 import { motion } from "framer-motion";
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
+import { playWhoosh } from "@/lib/audio-system";
 
 export function PageTransition({ children }: { children: ReactNode }) {
+  useEffect(() => {
+    playWhoosh();
+  }, []);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}

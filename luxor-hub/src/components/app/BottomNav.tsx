@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {CalendarDots, Scan, StackSimple, TShirt, Sparkle} from "@phosphor-icons/react";
 import { motion } from "framer-motion";
 import { haptic } from "@/lib/haptics";
+import { playGoldClick } from "@/lib/audio-system";
 
 const tabs = [
   { label: "Schedule", icon: CalendarDays, path: "/outfit-calendar" },
@@ -24,7 +25,7 @@ export function BottomNav() {
           return (
             <motion.button
               key={tab.label}
-              onClick={() => { haptic("selection"); navigate(tab.path); }}
+              onClick={() => { haptic("selection"); playGoldClick(); navigate(tab.path); }}
               whileHover={{ y: -2 }}
               whileTap={{ scale: 0.93 }}
               transition={{ type: "spring", stiffness: 400, damping: 17 }}
