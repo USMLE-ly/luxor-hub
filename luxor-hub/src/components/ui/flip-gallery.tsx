@@ -95,7 +95,7 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
       }
       const canvas = canvasRef.current;
       const ctx = canvas.getContext('2d');
-      if (!ctx) return '#0a0a0a';
+      if (!ctx) return '#1D3937';
       
       const w = Math.min(img.naturalWidth, 200);
       const h = Math.min(img.naturalHeight, 200);
@@ -119,7 +119,7 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
         }
       }
       
-      if (count === 0) return '#0a0a0a';
+      if (count === 0) return '#1D3937';
       
       const avgR = totalR / count;
       const avgG = totalG / count;
@@ -134,13 +134,13 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
         const hex = Math.round(brightness);
         return `rgb(${hex}, ${hex}, ${hex})`;
       }
-      if (brightness < 40 && isGray) return '#0a0a0a';
-      if (brightness < 80 && isGray) return '#1a1a1a';
+      if (brightness < 40 && isGray) return '#1D3937';
+      if (brightness < 80 && isGray) return '#195042';
       
       // For colored backgrounds, return the average color
       return `rgb(${Math.round(avgR)}, ${Math.round(avgG)}, ${Math.round(avgB)})`;
     } catch {
-      return '#0a0a0a';
+      return '#1D3937';
     }
   }, []);
 
@@ -335,7 +335,7 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
     }
     const outfitsKey = outfits[currentIndex]?.top + '-' + outfits[currentIndex]?.mid + '-' + outfits[currentIndex]?.bottom;
     const sectionKey = outfitsKey + '-' + idx;
-    const bgColor = sectionBgColors[sectionKey] || '#0a0a0a';
+    const bgColor = sectionBgColors[sectionKey] || '#1D3937';
     const url = sections[idx];
     
     return {
@@ -379,7 +379,7 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
         <div style={{
           position: 'absolute', inset: 0, zIndex: 50,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          backgroundColor: '#0a0a0a',
+          backgroundColor: '#1D3937',
           borderRadius: '12px',
         }}>
           <div style={{

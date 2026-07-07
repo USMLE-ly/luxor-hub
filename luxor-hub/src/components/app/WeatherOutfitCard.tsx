@@ -32,8 +32,9 @@ export function WeatherOutfitCard() {
           body: { lat, lon },
         });
         if (data) setWeather(data);
+        console.log("[WEATHER] Fetching weather for lat:", lat, "lon:", lon);
       } catch (e) {
-        console.error("Weather fetch error:", e);
+        console.error("[WEATHER] Fetch error:", e);
       } finally {
         setLoading(false);
       }
@@ -50,7 +51,21 @@ export function WeatherOutfitCard() {
     );
   }
 
-  if (!weather) return null;
+  if (!weather) {
+    return (
+      <Card className="border-border/60 bg-card/60 backdrop-blur-xl">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-3 text-muted-foreground">
+            <Cloud className="w-8 h-8 text-muted-foreground/40" />
+            <div>
+              <p className="text-sm font-sans">Weather unavailable</p>
+              <p className="text-[10px] font-sans">Location or weather data temporarily offline</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const showTip = hasTierAccess(tier, "starter");
 

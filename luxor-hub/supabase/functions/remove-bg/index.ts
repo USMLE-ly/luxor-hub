@@ -24,7 +24,7 @@ serve(async (req) => {
       throw new Error("MIMO_API_KEY not configured");
     }
 
-    const response = await fetch("https://api.lovable.dev/v1/chat/completions", {
+    const response = await fetch("https://api.xiaomimimo.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

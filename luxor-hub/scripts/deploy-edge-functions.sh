@@ -11,9 +11,12 @@ if [ -z "$SUPABASE_ACCESS_TOKEN" ]; then
 fi
 
 PROJECT_REF="zmqfcyweqllmupszbppd"
-FUNCTIONS_DIR="../supabase/functions"
+# Functions dir relative to script location: scripts/../supabase/functions
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+FUNCTIONS_DIR="$SCRIPT_DIR/../supabase/functions"
 
-echo "🔗 Linking to Supabase project $PROJECT_REF..."
+echo "🔗 Deploying to Supabase project $PROJECT_REF..."
+echo "📁 Functions directory: $FUNCTIONS_DIR"
 
 echo "🚀 Deploying all edge functions..."
 for func_dir in "$FUNCTIONS_DIR"/*/; do
@@ -24,5 +27,5 @@ done
 
 echo "✅ All functions deployed!"
 echo ""
-echo "🔑 Don't forget to set secrets:"
-echo "   supabase secrets set LOVABLE_API_KEY=your_key --project-ref $PROJECT_REF"
+echo "🔑 Set required secrets:"
+echo "   npx supabase secrets set MIMO_API_KEY=your_key --project-ref $PROJECT_REF"

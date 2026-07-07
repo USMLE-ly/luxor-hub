@@ -154,6 +154,8 @@ const Dashboard = () => {
   const [activeOccasion, setActiveOccasion] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
+  const [hasError, setHasError] = useState<string | null>(null);
+  const [pageLoading, setPageLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   const touchStartY = useRef(0);
   const isPulling = useRef(false);
@@ -161,15 +163,28 @@ const Dashboard = () => {
   useEffect(() => {
     if (!user) return;
     const fetchData = async () => {
-      const [itemsRes, outfitsRes, profileRes, styleRes, closetRes, outfitsListRes, allItemsRes] = await Promise.all([
-        supabase.from("clothing_items").select("id", { count: "exact", head: true }).eq("user_id", user.id),
-        supabase.from("outfits").select("id", { count: "exact", head: true }).eq("user_id", user.id),
-        supabase.from("profiles").select("display_name").eq("user_id", user.id).single(),
-        supabase.from("style_profiles").select("onboarding_completed, archetype, style_score, preferences").eq("user_id", user.id).single(),
-        supabase.from("clothing_items").select("id, photo_url, name, category, color").eq("user_id", user.id).order("created_at", { ascending: false }).limit(12),
-        supabase.from("outfits").select("id, name, occasion").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
-        supabase.from("clothing_items").select("category, color").eq("user_id", user.id),
-      ]);
+      try {
+        setPageLoading(true);
+        setHasError(null);
+        console.log("[DASHBOARD] Fetching dashboard data for user:", user.id);
+        
+        const [
+          itemsRes, outfitsRes, profileRes, styleRes, closetRes, outfitsListRes, allItemsRes
+        ] = await Promise.all([
+          supabase.from("clothing_items").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+          supabase.from("outfits").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+          supabase.from("profiles").select("display_name").eq("user_id", user.id).single(),
+          supabase.from("style_profiles").select("onboarding_completed, archetype, style_score, preferences").eq("user_id", user.id).single(),
+          supabase.from("clothing_items").select("id, photo_url, name, category, color").eq("user_id", user.id).order("created_at", { ascending: false }).limit(12),
+          supabase.from("outfits").select("id, name, occasion").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
+          supabase.from("clothing_items").select("category, color").eq("user_id", user.id),
+        ]);
+        
+        console.log("[DASHBOARD] Data fetched:", { 
+          items: itemsRes.count, outfits: outfitsRes.count, 
+          profile: profileRes.data?.display_name, 
+          closetItems: closetRes.data?.length 
+        });
       setStats({
         items: itemsRes.count || 0,
         outfits: outfitsRes.count || 0,
@@ -192,6 +207,12 @@ const Dashboard = () => {
           })
         );
         setOutfitsList(outfitsWithItems);
+      }
+        setPageLoading(false);
+      } catch (error: any) {
+        console.error("[DASHBOARD] Failed to fetch data:", error.message);
+        setHasError(error.message || "Failed to load dashboard data");
+        setPageLoading(false);
       }
     };
     fetchData();
@@ -330,6 +351,38 @@ const Dashboard = () => {
     { text: "Main winter trends this season", icon: <Snowflake className="w-4 h-4 text-primary" /> },
     { text: "What sporty items are essential?", icon: <Dumbbell className="w-4 h-4 text-primary" /> },
   ];
+
+  if (pageLoading) {
+    return (
+      <AppLayout>
+        <div className="flex flex-col items-center justify-center min-h-[80vh] p-8">
+          <div className="w-10 h-10 border-2 border-primary/30 border-t-primary rounded-full animate-spin mb-4" />
+          <p className="text-muted-foreground font-sans text-sm">Loading your style dashboard...</p>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (hasError) {
+    return (
+      <AppLayout>
+        <div className="flex flex-col items-center justify-center min-h-[80vh] p-8 text-center max-w-md mx-auto">
+          <AlertCircle className="w-12 h-12 text-primary mb-4 mx-auto" />
+          <h2 className="font-display text-xl font-bold text-foreground mb-2">Something went wrong</h2>
+          <p className="text-muted-foreground font-sans text-sm mb-6">
+            We couldn't load your dashboard. This might be a temporary issue.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-2.5 rounded-full bg-primary text-primary-foreground font-sans text-sm font-semibold hover:bg-primary/90 transition-colors"
+          >
+            Try Again
+          </button>
+          <p className="text-[10px] text-muted-foreground/40 mt-4 font-mono">{hasError}</p>
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>

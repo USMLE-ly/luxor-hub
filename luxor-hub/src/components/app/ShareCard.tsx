@@ -56,8 +56,8 @@ export function ShareCard({ outfit, onClose }: ShareCardProps) {
 
       // Draw gradient background
       const grad = ctx.createLinearGradient(0, 0, 600, 400);
-      grad.addColorStop(0, "#1a1a2e");
-      grad.addColorStop(1, "#16213e");
+      grad.addColorStop(0, "#1D3937");
+      grad.addColorStop(1, "#195042");
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, 600, 400);
 

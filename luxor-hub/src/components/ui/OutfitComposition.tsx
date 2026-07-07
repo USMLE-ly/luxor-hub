@@ -62,7 +62,7 @@ export function OutfitComposition({ items, maxHeight, minHeight, className, aspe
     display: 'flex',
     flexDirection: 'column',
     width: '100%',
-    backgroundColor: '#0a0a0a',
+    backgroundColor: '#1D3937',
     borderRadius: '0.75rem',
     overflow: 'hidden',
     minHeight: typeof minHeight === 'number' ? minHeight : (minHeight as string) || '100px',
@@ -82,7 +82,7 @@ export function OutfitComposition({ items, maxHeight, minHeight, className, aspe
               backgroundSize: 'contain',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
-              backgroundColor: '#0a0a0a',
+              backgroundColor: '#1D3937',
             }}
           />
           {showDividers && idx < orderedItems.length - 1 && (

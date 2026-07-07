@@ -7,7 +7,6 @@ import { Perspective, Highlight } from "@/components/ui/perspective-highlight";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
-import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { CalendarDays, Check } from "lucide-react";
 import { notifyEvent } from "@/lib/notificationService";
 import { LiquidGlassCard } from "@/components/ui/liquid-notification";
@@ -242,7 +241,7 @@ export default function DressingRoomPage() {
           <IPhoneMockup
             model="15-pro"
             color="golden-sands"
-            screenBg="#0a0a0a"
+            screenBg="#1D3937"
             scale={0.85}
             showHomeIndicator={true}
             safeArea={true}
