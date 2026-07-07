@@ -15,6 +15,10 @@ import CTABanner from "@/components/landing/CTABanner";
 import AnnouncementBanner from "@/components/landing/AnnouncementBanner";
 import StickyPricingBar from "@/components/landing/StickyPricingBar";
 import ScrollToTop from "@/components/landing/ScrollToTop";
+import BrandMarquee from "@/components/landing/BrandMarquee";
+import AIFashionEditorial from "@/components/landing/AIFashionEditorial";
+import VideoTestimonials from "@/components/landing/VideoTestimonials";
+import AppPreview from "@/components/landing/AppPreview";
 
 const Index = () => {
   const { scrollYProgress } = useScroll();
@@ -46,6 +50,15 @@ const Index = () => {
         viewport={{ once: true }}
         transition={{ duration: 0.8 }}
       >
+        <BrandMarquee />
+      </motion.div>
+      
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+      >
         <TabbedFeatures />
       </motion.div>
 
@@ -57,12 +70,21 @@ const Index = () => {
       >
         <Features />
       </motion.div>
-      
+
       <motion.div
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.8, delay: 0.15 }}
+      >
+        <AIFashionEditorial />
+      </motion.div>
+      
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8, delay: 0.2 }}
       >
         <HowItWorks />
       </motion.div>
@@ -75,17 +97,36 @@ const Index = () => {
       >
         <Testimonials />
       </motion.div>
-      
+
       <motion.div
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.8, delay: 0.25 }}
       >
+        <VideoTestimonials />
+      </motion.div>
+      
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8, delay: 0.3 }}
+      >
         <Pricing />
       </motion.div>
       
       <FAQ />
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8, delay: 0.15 }}
+      >
+        <AppPreview />
+      </motion.div>
+      
       <CTABanner />
       <Footer />
       <StickyPricingBar />

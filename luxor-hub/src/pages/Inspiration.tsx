@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
+import { PremiumSkeleton, PremiumCardSkeleton } from "@/components/ui/premium-skeleton";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
@@ -254,8 +255,8 @@ const Inspiration = () => {
 
         {/* Products */}
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          <div className="grid grid-cols-2 gap-3 py-4">
+            {[1,2,3,4].map(i => <PremiumCardSkeleton key={i} />)}
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">

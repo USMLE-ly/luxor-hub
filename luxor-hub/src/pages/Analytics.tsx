@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { PremiumSkeleton, PremiumCardSkeleton, PremiumTextSkeleton } from "@/components/ui/premium-skeleton";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -195,8 +196,29 @@ const Analytics = () => {
   if (loading) {
     return (
       <AppLayout>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+        <div className="p-6 lg:p-8 max-w-7xl mx-auto">
+          {/* Header skeleton */}
+          <div className="mb-8">
+            <PremiumSkeleton className="h-8 w-64 mb-3 rounded-lg" variant="shimmer" />
+            <PremiumSkeleton className="h-4 w-96 rounded-lg" variant="shine" />
+          </div>
+          {/* Card grid skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {[1,2,3,4].map(i => <PremiumCardSkeleton key={i} />)}
+          </div>
+          {/* Chart skeleton */}
+          <div className="mb-8">
+            <PremiumCardSkeleton />
+          </div>
+          {/* Text skeletons */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="rounded-2xl border border-white/5 bg-emerald/20 backdrop-blur-sm p-6">
+              <PremiumTextSkeleton lines={5} />
+            </div>
+            <div className="rounded-2xl border border-white/5 bg-emerald/20 backdrop-blur-sm p-6">
+              <PremiumTextSkeleton lines={5} />
+            </div>
+          </div>
         </div>
       </AppLayout>
     );

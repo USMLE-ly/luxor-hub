@@ -11,6 +11,7 @@ import {
   Trophy, Crown, Medal, Flame, Clock, Loader2, User, Sparkles, ChevronRight, History, Swords, Target, Recycle, Shirt
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { PremiumSkeleton, PremiumCardSkeleton, PremiumTextSkeleton } from "@/components/ui/premium-skeleton";
 import { useNavigate } from "react-router-dom";
 
 interface ChallengeEntry {

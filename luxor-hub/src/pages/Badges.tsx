@@ -9,6 +9,8 @@ import {
   Award, Target, Flame, Star, Zap, Crown, Eye, TrendingUp, Loader2, Lock
 } from "lucide-react";
 import { motion } from "framer-motion";
+import Pressable from "@/components/ui/pressable";
+import { PremiumSkeleton, PremiumCardSkeleton, PremiumTextSkeleton } from "@/components/ui/premium-skeleton";
 import RadialOrbitalTimeline from "@/components/ui/radial-orbital-timeline";
 
 const BADGE_DEFINITIONS = [
@@ -180,8 +182,8 @@ export default function Badges() {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-20">
-            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-4">
+            {[1,2,3,4].map(i => <PremiumCardSkeleton key={i} />)}
           </div>
         ) : viewMode === "orbital" ? (
           <div className="h-[600px] rounded-2xl overflow-hidden border border-border">
@@ -213,6 +215,7 @@ export default function Badges() {
                     </CardContent>
                   </Card>
                 </motion.div>
+                </Pressable>
               );
             })}
           </div>

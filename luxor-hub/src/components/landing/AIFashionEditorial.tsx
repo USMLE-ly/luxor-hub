@@ -1,4 +1,6 @@
 import { motion, useReducedMotion } from "framer-motion";
+import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
+import Pressable from "@/components/ui/pressable";
 import { Camera, Brain, Sun, ShoppingBag, BarChart3 } from "lucide-react";
 import { FeatureCard } from "@/components/ui/grid-feature-cards";
 
@@ -96,7 +98,8 @@ const AIFashionEditorial = () => (
         </div>
       </AnimatedContainer>
     </div>
-  </section>
+  </ScrollReveal>
+    </section>
 );
 
 export default AIFashionEditorial;
