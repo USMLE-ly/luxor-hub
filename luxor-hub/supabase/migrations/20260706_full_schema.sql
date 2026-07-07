@@ -383,9 +383,6 @@ create table if not exists public.newsletter_subscribers (
   created_at timestamptz default now()
 );
 
--- ============================
--- ROW LEVEL SECURITY
--- ============================
 
 -- ============================================================
 -- ROW LEVEL SECURITY
@@ -419,16 +416,21 @@ alter table public.outfit_analyses enable row level security;
 alter table public.newsletter_subscribers enable row level security;
 
 -- PROFILES: id = auth.uid()
+drop policy if exists "Users can view own profile" on public.profiles;
 create policy "Users can view own profile" on public.profiles
   for select using (auth.uid() = id);
+drop policy if exists "Users can update own profile" on public.profiles;
 create policy "Users can update own profile" on public.profiles
   for update using (auth.uid() = id);
 
 -- FOLLOWS: follower_id = auth.uid()
+drop policy if exists "Users can view own follows" on public.follows;
 create policy "Users can view own follows" on public.follows
   for select using (auth.uid() = follower_id);
+drop policy if exists "Users can insert own follows" on public.follows;
 create policy "Users can insert own follows" on public.follows
   for insert with check (auth.uid() = follower_id);
+drop policy if exists "Users can delete own follows" on public.follows;
 create policy "Users can delete own follows" on public.follows
   for delete using (auth.uid() = follower_id);
 
@@ -474,16 +476,6 @@ drop policy if exists "Authenticated users can view challenges" on public.weekly
 create policy "Authenticated users can view challenges" on public.weekly_challenges
   for select using (auth.role() = 'authenticated');
 
--- Newsletter subscribers: allow insert for anyone
-drop policy if exists "Anyone can subscribe" on public.newsletter_subscribers;
-create policy "Anyone can subscribe" on public.newsletter_subscribers
-  for insert with check (true);
-
--- Weekly challenges: allow read for authenticated users
-alter table public.weekly_challenges enable row level security;
-drop policy if exists "Authenticated users can view challenges" on public.weekly_challenges;
-create policy "Authenticated users can view challenges" on public.weekly_challenges
-  for select using (auth.role() = 'authenticated');
 
 -- ============================================================
 -- TRIGGER: auto-create profile on signup
