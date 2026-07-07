@@ -312,8 +312,8 @@ export default function CommunityGallery() {
 
         {/* Designs Grid */}
         {loading ? (
-          <div className="flex justify-center py-16">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 py-4">
+            {[1,2,3,4,5,6].map(i => <PremiumCardSkeleton key={i} />)}
           </div>
         ) : filteredDesigns.length === 0 ? (
           <Card className="glass-card">
