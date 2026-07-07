@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import { ArrowUpRight } from "lucide-react";
 import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
 import { useState } from "react";
@@ -116,7 +117,7 @@ const Testimonials = () => (
               </span>
             </div>
           </div>
-        </div>
+        </ScrollReveal>
       </motion.div>
 
       {/* Shuffle cards */}

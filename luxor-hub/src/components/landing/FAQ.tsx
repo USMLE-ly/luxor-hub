@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import ombraBg from "@/assets/brand/ombra.png";
 import {
   Accordion,
@@ -55,8 +56,10 @@ const FAQ = () => (
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-80px" }}
       >
+        <StaggerContainer staggerDelay={0.04}>
         <Accordion type="single" collapsible className="space-y-0">
           {faqs.map((faq, i) => (
+            <StaggerItem key={i}>
             <AccordionItem
               key={i}
               value={`faq-${i}`}
@@ -69,8 +72,10 @@ const FAQ = () => (
                 {faq.a}
               </AccordionContent>
             </AccordionItem>
+            </StaggerItem>
           ))}
         </Accordion>
+        </StaggerContainer>
       </motion.div>
     </div>
   </section>

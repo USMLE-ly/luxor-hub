@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
+import { StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import { Shield, ChevronDown, Check, Minus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { trackEvent } from "@/lib/fbPixel";
@@ -255,6 +256,7 @@ const Pricing = () => {
                 />
               </div>
             </motion.div>
+            </StaggerItem>
           ))}
         </div>
 

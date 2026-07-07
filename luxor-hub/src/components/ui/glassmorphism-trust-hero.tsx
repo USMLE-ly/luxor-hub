@@ -2,6 +2,9 @@ import React, { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useScroll, useTransform, motion } from "framer-motion";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
+import { GoldParticles } from "@/components/app/GoldParticles";
+import { NumberTicker } from "@/components/ui/number-ticker";
+import Pressable from "@/components/ui/pressable";
 import {
   ArrowRight,
   Play,
@@ -142,6 +145,7 @@ export default function GlassmorphismTrustHero() {
       </motion.div>
 
       {/* Floating premium circles */}
+      <GoldParticles />
       <div className="absolute inset-0 z-[1] overflow-hidden pointer-events-none">
         <FloatingCircle size={320} top="-5%" left="-8%" gradient="radial-gradient(circle, hsl(var(--gold) / 0.08) 0%, transparent 70%)" duration={14} delay={0} />
         <FloatingCircle size={200} top="15%" left="75%" gradient="radial-gradient(circle, hsl(var(--accent) / 0.08) 0%, transparent 70%)" duration={12} delay={1} />
@@ -228,14 +232,14 @@ export default function GlassmorphismTrustHero() {
 
               <div className="relative z-10">
               <div className="mb-8">
-                  <div className="text-3xl font-bold tracking-tight text-foreground">2,400+</div>
+                  <div className="text-3xl font-bold tracking-tight text-foreground"><NumberTicker value={2400} suffix="+" /></div>
                   <div className="text-sm text-muted-foreground">Active Members</div>
               </div>
 
                 <div className="space-y-3 mb-8">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Outfit Match Accuracy</span>
-                    <span className="text-foreground font-medium">96%</span>
+                    <span className="text-foreground font-medium"><NumberTicker value={96} suffix="%" /></span>
                   </div>
                   <div className="h-2 w-full overflow-hidden rounded-full bg-muted/30">
                     <div className="h-full w-[96%] rounded-full" style={{ background: "linear-gradient(90deg, hsl(var(--gold) / 0.6), hsl(var(--gold)))" }} />
@@ -251,17 +255,21 @@ export default function GlassmorphismTrustHero() {
                 </div>
 
                 <div className="mt-8 flex flex-wrap gap-2">
-                  <div className="inline-flex items-center gap-1.5 rounded-full border border-border/20 bg-card/30 px-3 py-1 text-[10px] font-medium tracking-wide text-muted-foreground">
+                  <Pressable hapticStyle="selection">
+                  <div className="inline-flex items-center gap-1.5 rounded-full border border-border/20 bg-card/30 px-3 py-1 text-[10px] font-medium tracking-wide text-muted-foreground cursor-pointer">
                     <span className="relative flex h-2 w-2">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold/60 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-gold"></span>
                     </span>
                     LIVE
                   </div>
-                  <div className="inline-flex items-center gap-1.5 rounded-full border border-border/20 bg-card/30 px-3 py-1 text-[10px] font-medium tracking-wide text-muted-foreground">
+                  </Pressable>
+                  <Pressable hapticStyle="selection">
+                  <div className="inline-flex items-center gap-1.5 rounded-full border border-border/20 bg-card/30 px-3 py-1 text-[10px] font-medium tracking-wide text-muted-foreground cursor-pointer">
                     <Crown className="w-3 h-3 text-gold" />
                     PREMIUM
                   </div>
+                  </Pressable>
                 </div>
               </div>
             </ScrollReveal>
