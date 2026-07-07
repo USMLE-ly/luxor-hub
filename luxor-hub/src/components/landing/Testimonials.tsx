@@ -136,9 +136,79 @@ const Testimonials = () => (
         className="text-center mt-8 text-[11px] text-muted-foreground/50 font-sans"
       >
         All screenshots are unedited. Revenue figures from live dashboards.
+      <TestimonialMarquee />
       </motion.p>
     </div>
   </section>
+);
+
+/* ── User Testimonials Marquee ────────────────────────────── */
+
+const userTestimonials = [
+  {
+    name: "Jessica M.",
+    title: "Marketing Director, NYC",
+    text: "I've always considered myself someone with decent style, but the sheer mental load of getting dressed every morning was draining in a way I didn't fully realize until it was gone. LEXOR didn't just organize my closet—it completely changed how I think about my clothes. The first time it suggested an outfit, it paired this old navy blazer I'd forgotten I owned with a silk camisole I only ever wore for dates, and suddenly I had a client meeting look that made me feel like I'd just spent $800 at a boutique. It's been four months and I haven't stared blankly into my closet once.",
+    initial: "J",
+    color: "from-amber-400/20 to-amber-600/10",
+  },
+  {
+    name: "David R.",
+    title: "Software Engineer, London",
+    text: "I was skeptical. I installed LEXOR because my girlfriend kept suggesting I 'think about what I wear' and I wanted to prove I was fine. Turns out I was not fine. I owned four identical gray t-shirts. The AI pointed out that crew necks were shortening my neck visually, and switching to V-necks would balance my frame. I didn't even know that was a thing. I went from someone who 'didn't care about clothes' to someone who gets stopped by coworkers asking where I bought my jacket. The jacket is from ASOS, 2019. It was buried in my closet. LEXOR just knew.",
+    initial: "D",
+    color: "from-emerald-400/20 to-emerald-600/10",
+  },
+  {
+    name: "Aisha K.",
+    title: "Architect, Dubai",
+    text: "Fashion for me has always been about geometry—how things fall, how they frame the body, how light interacts with texture. The body analysis feature was surprisingly accurate. Seeing it visualized on the mannequin—being able to rotate it and see how different silhouettes actually land on my body—that changed how I shop. My husband noticed before I did. He said 'you seem more confident when you walk out the door.' And he's right. Because I'm not guessing anymore.",
+    initial: "A",
+    color: "from-gold/20 to-amber-500/10",
+  },
+];
+
+const TestimonialMarquee = () => (
+  <div className="mt-24 md:mt-32">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.6 }}
+      className="text-center mb-10"
+    >
+      <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground">
+        What Our <span className="gold-text">Users Say</span>
+      </h2>
+      <p className="mt-4 max-w-lg mx-auto font-sans text-sm text-muted-foreground leading-relaxed">
+        Real people. Real wardrobes. Real results.
+      </p>
+    </motion.div>
+
+    <div className="relative flex overflow-hidden marquee-fade-mask">
+      <div className="flex shrink-0 animate-marquee items-stretch gap-6 [--duration:45s] [--gap:1.5rem]">
+        {[...userTestimonials, ...userTestimonials].map((t, i) => (
+          <div
+            key={`a-${i}`}
+            className="w-[360px] md:w-[420px] shrink-0 rounded-2xl border border-border/30 bg-card/40 backdrop-blur-sm p-6 flex flex-col hover:border-primary/30 transition-all duration-500"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${t.color} flex items-center justify-center border border-white/10`}>
+                <span className="text-sm font-bold text-foreground">{t.initial}</span>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground font-sans">{t.name}</p>
+                <p className="text-[10px] text-muted-foreground font-sans tracking-wide">{t.title}</p>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground/90 leading-relaxed font-sans flex-1 line-clamp-6">
+              &ldquo;{t.text}&rdquo;
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
 );
 
 export default Testimonials;
