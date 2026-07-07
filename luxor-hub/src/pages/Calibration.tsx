@@ -607,7 +607,8 @@ const Calibration = () => {
                 transition={{ delay: 0.3 + i * 0.1 }}
                 className="flex-1 aspect-[3/4] rounded-xl overflow-hidden relative"
               >
-                <img src={src} alt={`Style inspiration ${i + 1}`} className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-secondary animate-pulse rounded-xl" />
+                <img src={src} alt={`Style inspiration ${i + 1}`} className="w-full h-full object-cover relative z-10" loading="lazy" onLoad={(e) => { (e.target as HTMLImageElement).style.opacity = '1'; (e.target as HTMLImageElement).previousElementSibling?.classList.add('hidden'); }} style={{ opacity: 0 }} />
                 <div className="absolute inset-0 bg-gradient-to-t from-foreground/30 to-transparent" />
               </motion.div>
             ))}
@@ -933,11 +934,14 @@ const Calibration = () => {
                         }}
                         transition={{ duration: 0.3, ease: "easeOut" }}
                       >
+                        <div className="absolute inset-0 bg-secondary animate-pulse" />
                         <img
                           src={option.imageUrl}
                           alt={option.label}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover relative z-10"
                           loading="lazy"
+                          onLoad={(e) => { (e.target as HTMLImageElement).style.opacity = '1'; (e.target as HTMLImageElement).previousElementSibling?.classList.add('hidden'); }}
+                          style={{ opacity: 0 }}
                         />
                         <AnimatePresence>
                           {isActive && (
