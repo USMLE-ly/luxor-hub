@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
+import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
+import Pressable from "@/components/ui/pressable";
 import { Shirt, ScanFace, CloudSun, ShieldCheck } from "lucide-react";
 
 const uvps = [
