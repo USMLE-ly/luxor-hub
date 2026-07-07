@@ -17,6 +17,7 @@ import { MorningRoutineCard } from "@/components/app/MorningRoutineCard";
 import { EveningReflection } from "@/components/app/EveningReflection";
 import { StylePointsWidget } from "@/components/app/StylePointsWidget";
 import { WeatherOutfitCard } from "@/components/app/WeatherOutfitCard";
+import { ScrollReveal, MagneticCard, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 
 interface ShopProduct {
   name: string;
@@ -364,7 +365,8 @@ const Dashboard = () => {
           animate="show"
         >
         {/* Header */}
-        <motion.div variants={fadeUp} className="flex items-center justify-between">
+        <ScrollReveal delay={0.1}>
+          <div className="flex items-center justify-between">
           <div className="w-10 h-10">
             <Wand2 className="w-8 h-8 text-foreground" />
           </div>
@@ -381,33 +383,36 @@ const Dashboard = () => {
               </span>
             </button>
           </div>
-        </motion.div>
+          </div>
+        </ScrollReveal>
 
         {/* ── Weather Card ─────────────────────────── */}
-        <motion.div variants={fadeUp}>
-          <WeatherOutfitCard />
-        </motion.div>
+        <ScrollReveal delay={0.1}>
+          <MagneticCard>
+            <WeatherOutfitCard />
+          </MagneticCard>
+        </ScrollReveal>
 
         {/* ── Morning Routine Card ─────────────────────────── */}
-        <motion.div variants={fadeUp}>
-          <MorningRoutineCard />
-        </motion.div>
+        <ScrollReveal delay={0.2}>
+          <MagneticCard>
+            <MorningRoutineCard />
+          </MagneticCard>
+        </ScrollReveal>
 
         {/* ── My Style Formula Card ─────────────────────────── */}
-        <motion.div
-          variants={fadeUp}
-          className="rounded-2xl border border-border/60 overflow-hidden relative bg-card/60 backdrop-blur-xl"
-        >
-          {/* Shimmer sweep */}
-          <motion.div
-            className="absolute inset-0 pointer-events-none"
-            style={{ background: "linear-gradient(105deg, transparent 40%, hsl(var(--primary) / 0.06) 50%, transparent 60%)" }}
-            initial={{ x: "-100%" }}
-            animate={{ x: "200%" }}
-            transition={{ duration: 2.5, delay: 0.8, ease: "easeInOut" }}
-          />
+        <ScrollReveal delay={0.3}>
+          <div className="rounded-2xl border border-border/60 overflow-hidden relative bg-card/60 backdrop-blur-xl">
+            {/* Shimmer sweep */}
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              style={{ background: "linear-gradient(105deg, transparent 40%, hsl(var(--primary) / 0.06) 50%, transparent 60%)" }}
+              initial={{ x: "-100%" }}
+              animate={{ x: "200%" }}
+              transition={{ duration: 2.5, delay: 0.8, ease: "easeInOut" }}
+            />
 
-          <div className="p-5 relative z-10">
+            <div className="p-5 relative z-10">
             {/* Title row */}
             <div className="flex items-center justify-between mb-5">
               <h2 className="font-display text-xl font-bold text-foreground">My Style Formula</h2>
@@ -494,11 +499,12 @@ const Dashboard = () => {
               </GradientButton>
             </div>
           </div>
-        </motion.div>
+          </div>
+        </ScrollReveal>
 
         {/* ── Wardrobe Completeness Widget ──────────────────── */}
         {wardrobeCompleteness && (
-          <motion.div variants={fadeUp} className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-xl p-5">
+          <ScrollReveal delay={0.4}>
             <div className="flex items-center gap-4">
               {/* SVG Ring */}
               <div className="relative w-20 h-20 flex-shrink-0">
@@ -546,11 +552,11 @@ const Dashboard = () => {
                 )}
               </div>
             </div>
-          </motion.div>
+          </ScrollReveal>
         )}
 
         {/* ── My Closet Outfits ─────────────────────────────── */}
-        <motion.div variants={fadeUp}>
+        <ScrollReveal delay={0.5}>
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-display text-xl font-bold text-foreground">All My Outfits</h2>
             <button
@@ -675,10 +681,10 @@ const Dashboard = () => {
               })}
             </div>
           )}
-        </motion.div>
+        </ScrollReveal>
 
         {/* ── Shop Similar ──────────────────────────────────── */}
-        <motion.div variants={fadeUp}>
+        <ScrollReveal delay={0.5}>
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <ShoppingBag className="w-5 h-5 text-foreground" />
@@ -754,30 +760,30 @@ const Dashboard = () => {
               </Button>
             </div>
           )}
-        </motion.div>
+        </ScrollReveal>
 
         {/* ── Trending Now For You ─────────────────────────── */}
-        <motion.div variants={fadeUp}>
+        <ScrollReveal delay={0.6}>
           <TrendIntelligenceWidget />
-        </motion.div>
+        </ScrollReveal>
 
         {/* ── Trending Community Designs ────────────────────── */}
-        <motion.div variants={fadeUp}>
+        <ScrollReveal delay={0.7}>
           <TrendingDesigns navigate={navigate} />
-        </motion.div>
+        </ScrollReveal>
 
         {/* ── Weekly Capsule Plan ───────────────────────────── */}
-        <motion.div variants={fadeUp}>
+        <ScrollReveal delay={0.8}>
           <WeeklyCapsuleWidget />
-        </motion.div>
+        </ScrollReveal>
 
         {/* ── Style Points ────────────────────────────────── */}
-        <motion.div variants={fadeUp}>
+        <ScrollReveal delay={0.9}>
           <StylePointsWidget />
-        </motion.div>
+        </ScrollReveal>
 
         {/* ── Chat with AI Stylist ──────────────────────────── */}
-        <motion.div variants={fadeUp}>
+        <ScrollReveal delay={1.0}>
           <h2 className="font-display text-xl font-bold text-foreground mb-3">Chat with AI Stylist</h2>
           <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-none snap-x snap-mandatory">
             {chatPrompts.map((prompt) => (
@@ -795,12 +801,12 @@ const Dashboard = () => {
               </button>
             ))}
           </div>
-        </motion.div>
+        </ScrollReveal>
 
         {/* ── Evening Reflection ─────────────────────────────── */}
-        <motion.div variants={fadeUp} className="pb-8">
+        <ScrollReveal delay={1.1}>
           <EveningReflection />
-        </motion.div>
+        </ScrollReveal>
       </motion.div>
       </div>
     </AppLayout>
