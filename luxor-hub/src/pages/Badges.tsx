@@ -30,7 +30,7 @@ const iconComponentMap: Record<string, React.ElementType> = {
   flame: Flame,
   crown: Crown,
   star: Star,
-  trending_up: TrendingUp,
+  trending_up: TrendUp,
   zap: Zap,
   award: Trophy,
 };

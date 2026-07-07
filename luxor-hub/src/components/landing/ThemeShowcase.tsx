@@ -30,7 +30,7 @@ const MockDashboard = ({ mode }: { mode: "light" | "dark" }) => {
         {[
           { label: "Warm Autumn", sub: "Color Type", icon: Palette },
           { label: "Modern Classic", sub: "Style Type", icon: Star },
-          { label: "Inverted Triangle", sub: "Body Type", icon: TrendingUp },
+          { label: "Inverted Triangle", sub: "Body Type", icon: TrendUp },
         ].map((item) => (
           <div key={item.label} className={`${card} border rounded-xl p-3 flex items-center gap-3`}>
             <div className={`w-8 h-8 rounded-lg ${primaryBg} flex items-center justify-center shrink-0`}>

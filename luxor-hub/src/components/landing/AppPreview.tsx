@@ -52,7 +52,7 @@ const AppPreview = () => {
             <div className="grid grid-cols-3 gap-3">
               {[
                 { icon: Palette, label: "Color Type", value: "Warm Autumn" },
-                { icon: TrendingUp, label: "Style Type", value: "Modern Classic" },
+                { icon: TrendUp, label: "Style Type", value: "Modern Classic" },
                 { icon: ChartBar, label: "Body Type", value: "Inverted Triangle" },
               ].map((item, i) => (
                 <div key={i} className="flex flex-col items-center gap-1 p-2 rounded-xl bg-card/80 border border-border/50">
@@ -122,7 +122,7 @@ const AppPreview = () => {
             {[
               { icon: Calendar, label: "Calendar", count: "3 events" },
               { icon: ShoppingBag, label: "Closet", count: "48 items" },
-              { icon: TrendingUp, label: "Style Score", count: "100/100" },
+              { icon: TrendUp, label: "Style Score", count: "100/100" },
               { icon: ChartBar, label: "Analytics", count: "View" },
             ].map((item, i) => (
               <div key={i} className="rounded-xl border border-border bg-card p-3 flex flex-col items-center gap-2 hover-lift cursor-default">

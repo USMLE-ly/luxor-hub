@@ -6,7 +6,7 @@ import { GoldParticles } from "@/components/app/GoldParticles";
 import NumberTicker from "@/components/ui/number-ticker";
 import Pressable from "@/components/ui/pressable";
 import { DoubleBezel, DoubleBezelCard } from "@/components/ui/double-bezel";
-import CursorSpotlight from "@/components/ui/cursor-spotlight";
+import CursorSpotlight, { CursorSpotlightLight } from "@/components/ui/cursor-spotlight";
 import { ProgressiveImage } from "@/components/ui/progressive-image";
 import { ThreeGarmentShowcase } from "@/components/ui/three-garment-showcase";
 import {ArrowRight, Play, Target, Crown, Star, Hexagon, Triangle, Command, Ghost, Diamond, Cpu, CaretDown, } from "@phosphor-icons/react";
