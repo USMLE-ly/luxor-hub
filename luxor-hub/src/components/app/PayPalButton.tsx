@@ -112,7 +112,7 @@ const PayPalButton = ({ tier, onApprove }: PayPalButtonProps) => {
         <p className="text-[12px] text-white/50 font-sans leading-relaxed">
           PayPal loads on the published site.
         </p>
-        <p className="text-[12px] text-white/80 font-sans font-medium mt-1">
+        <p className="text-[12px] text-foreground/80 font-sans font-medium mt-1">
           Publish to test payments.
         </p>
       </div>

@@ -962,7 +962,7 @@ const OutfitCalendarInner = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="mb-5 rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-black/20 p-4 relative overflow-hidden"
+            className="mb-5 rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-forest/40 p-4 relative overflow-hidden"
             style={{
               background: "linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--secondary)) 100%)",
               border: "1px solid hsl(var(--border))",
@@ -1016,7 +1016,7 @@ const OutfitCalendarInner = () => {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="rounded-2xl overflow-hidden mb-5 border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-black/20"
+          className="rounded-2xl overflow-hidden mb-5 border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-forest/40"
           style={{
             border: "1px solid hsl(var(--border))",
             background: "hsl(var(--card))",
@@ -1163,7 +1163,7 @@ const OutfitCalendarInner = () => {
               animate={{ opacity: 1, height: "auto", scale: 1 }}
               exit={{ opacity: 0, height: 0, scale: 0.97 }}
               transition={{ type: "spring", stiffness: 300, damping: 30, mass: 0.8 }}
-              className="rounded-2xl mb-5 border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-black/20 relative overflow-hidden"
+              className="rounded-2xl mb-5 border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-forest/40 relative overflow-hidden"
               style={{
                 background: "hsl(var(--card))",
                 border: "1px solid hsl(var(--border))",
@@ -1637,10 +1637,10 @@ const OutfitCalendarInner = () => {
 
               {/* Manual Clothing Picker */}
               {!newEvent.outfitId && closetItems.length === 0 && (
-                <div className="text-center py-4 px-2 rounded-xl border border-dashed border-white/10">
-                  <Shirt className="w-6 h-6 text-white/20 mx-auto mb-2" />
-                  <p className="text-xs text-white/40">Your closet is empty.</p>
-                  <p className="text-[10px] text-white/30 mt-0.5">Add items to the Closet page first.</p>
+                <div className="text-center py-4 px-2 rounded-xl border border-dashed border-gold/20">
+                  <Shirt className="w-6 h-6 text-muted-foreground/30 mx-auto mb-2" />
+                  <p className="text-xs text-muted-foreground">Your closet is empty.</p>
+                  <p className="text-[10px] text-muted-foreground/70 mt-0.5">Add items to the Closet page first.</p>
                 </div>
               )}
               {!newEvent.outfitId && closetItems.length > 0 && (
@@ -1657,7 +1657,7 @@ const OutfitCalendarInner = () => {
                             key={ci.id}
                             type="button"
                             onClick={() => setNewEvent(p => ({ ...p, manualItems: p.manualItems.filter(id => id !== ci.id) }))}
-                            className="relative w-12 h-14 rounded-lg bg-white/95 dark:bg-white/90 flex-shrink-0 flex items-center justify-center overflow-hidden ring-1 ring-primary/20 group"
+                            className="relative w-12 h-14 rounded-lg bg-emerald/60 flex-shrink-0 flex items-center justify-center overflow-hidden ring-1 ring-gold/30 group"
                           >
                             {ci.photo_url ? (
                               <img src={ci.photo_url} alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "multiply" }} />
@@ -1749,7 +1749,7 @@ const OutfitCalendarInner = () => {
                             key={ci.id}
                             type="button"
                             onClick={() => setEditEvent(p => ({ ...p, manualItems: p.manualItems.filter(id => id !== ci.id) }))}
-                            className="relative w-12 h-14 rounded-lg bg-white/95 dark:bg-white/90 flex-shrink-0 flex items-center justify-center overflow-hidden ring-1 ring-primary/20 group"
+                            className="relative w-12 h-14 rounded-lg bg-emerald/60 flex-shrink-0 flex items-center justify-center overflow-hidden ring-1 ring-gold/30 group"
                           >
                             {ci.photo_url ? (
                               <img src={ci.photo_url} alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "multiply" }} />

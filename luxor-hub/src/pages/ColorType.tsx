@@ -201,7 +201,7 @@ const ColorTypeInner = () => {
               className="group relative aspect-square rounded-lg transition-transform hover:scale-105 active:scale-95"
               style={{ backgroundColor: color.hex }}
             >
-              <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 flex items-center justify-center">
+              <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity bg-forest/20 flex items-center justify-center">
                 <span className="text-[8px] font-bold text-white font-sans">{hslToHex(color.hex)}</span>
               </div>
             </button>
@@ -354,7 +354,7 @@ const ColorTypeInner = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end justify-center"
+            className="fixed inset-0 z-50 bg-forest/60 backdrop-blur-sm flex items-end justify-center"
             onClick={() => setSelectedColor(null)}
           >
             <motion.div

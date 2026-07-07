@@ -520,9 +520,9 @@ const LightingIndicator = () => {
 
   return (
     <div className="absolute top-4 right-4 z-10 pointer-events-none">
-      <div className="flex items-center gap-1.5 bg-black/50 backdrop-blur-sm rounded-full px-3 py-1.5">
+      <div className="flex items-center gap-1.5 bg-forest/50 backdrop-blur-sm rounded-full px-3 py-1.5">
         <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: color }} />
-        <span className="text-white/90 text-[10px] font-sans font-medium tracking-wider uppercase">{quality} light</span>
+        <span className="text-foreground/90 text-[10px] font-sans font-medium tracking-wider uppercase">{quality} light</span>
       </div>
     </div>
   );
@@ -799,7 +799,7 @@ const CameraCaptureStep = ({ step, answers, onSelect }: { step: OnboardingStep; 
                   </div>
                 </div>
                 <div className="absolute bottom-6 left-0 right-0 flex justify-center">
-                  <span className="text-white/80 text-xs font-sans tracking-wide bg-black/30 backdrop-blur-sm px-3 py-1 rounded-full">Position your face within the frame</span>
+                  <span className="text-foreground/80 text-xs font-sans tracking-wide bg-forest/30 backdrop-blur-sm px-3 py-1 rounded-full">Position your face within the frame</span>
                 </div>
               </div>
             )}
@@ -816,7 +816,7 @@ const CameraCaptureStep = ({ step, answers, onSelect }: { step: OnboardingStep; 
                   </svg>
                 </div>
                 <div className="absolute bottom-6 left-0 right-0 flex justify-center">
-                  <span className="text-white/80 text-xs font-sans tracking-wide bg-black/30 backdrop-blur-sm px-3 py-1 rounded-full">Stand back and fit your full body</span>
+                  <span className="text-foreground/80 text-xs font-sans tracking-wide bg-forest/30 backdrop-blur-sm px-3 py-1 rounded-full">Stand back and fit your full body</span>
                 </div>
               </div>
             )}
@@ -831,7 +831,7 @@ const CameraCaptureStep = ({ step, answers, onSelect }: { step: OnboardingStep; 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 z-20 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+              className="absolute inset-0 z-20 flex items-center justify-center bg-forest/40 backdrop-blur-sm"
             >
               <AnimatePresence mode="wait">
                 <motion.span
@@ -1449,7 +1449,7 @@ const DetectionResultStep = ({ step, answers, gender, aiResults }: { step: Onboa
             </div>
           )}
           {isLoading && (
-            <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+            <div className="absolute inset-0 bg-forest/30 flex items-center justify-center">
               <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             </div>
           )}
@@ -1577,7 +1577,7 @@ const DetectionResultStep = ({ step, answers, gender, aiResults }: { step: Onboa
                   <User className="w-12 h-12 text-muted-foreground" />
                 </div>
               )}
-              <div className="absolute inset-0 bg-black/20" />
+              <div className="absolute inset-0 bg-forest/20" />
               <motion.div
                 className="absolute left-0 right-0 h-[2px]"
                 style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary)), transparent)" }}

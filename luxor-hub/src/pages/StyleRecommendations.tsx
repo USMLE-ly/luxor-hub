@@ -295,18 +295,18 @@ export default function StyleRecommendationsPage() {
           </p>
         </motion.div>
 
-        <div className="relative flex flex-col items-center gap-6 p-8 rounded-2xl border border-white/10 bg-zinc-900/30 backdrop-blur-sm">
+        <div className="relative flex flex-col items-center gap-6 p-8 rounded-2xl border border-white/10 bg-emerald/30 backdrop-blur-sm">
           {imagePreview ? (
             <div className="relative w-full max-w-md overflow-hidden rounded-xl">
               <img src={imagePreview} alt="Upload" className="w-full h-auto max-h-[50vh] object-contain rounded-xl" />
               {analyzing && (
-                <div className="absolute inset-0 bg-black/30 backdrop-blur-md z-10" />
+                <div className="absolute inset-0 bg-forest/30 backdrop-blur-md z-10" />
               )}
               <button onClick={() => { setImagePreview(null); setAnalysis(null); setRecommendations(null); setOutfitReview(null); setError(null); }}
-                className="absolute top-2 right-2 p-2 rounded-full bg-black/60 hover:bg-black/80 text-white text-xs">✕</button>
+                className="absolute top-2 right-2 p-2 rounded-full bg-forest/60 hover:bg-forest/80 text-white text-xs">✕</button>
             </div>
           ) : (
-            <div onClick={() => fileInputRef.current?.click()} className="w-full max-w-md aspect-[4/3] rounded-xl border-2 border-dashed border-white/20 flex flex-col items-center justify-center gap-4 cursor-pointer hover:border-primary/50 transition-all bg-zinc-900/40">
+            <div onClick={() => fileInputRef.current?.click()} className="w-full max-w-md aspect-[4/3] rounded-xl border-2 border-dashed border-white/20 flex flex-col items-center justify-center gap-4 cursor-pointer hover:border-primary/50 transition-all bg-emerald/40">
               <Camera className="w-12 h-12 text-white/30" />
               <p className="text-white/50 text-sm">Tap to upload a full-body photo</p>
             </div>
@@ -388,11 +388,11 @@ export default function StyleRecommendationsPage() {
           {/* ── TAB: Analysis (Face + Body) ── */}
           {activeTab === "analyze" && analysis && (
             <motion.div key="analysis" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="relative p-1.5 rounded-[1.75rem] bg-white/[0.03] border border-white/10 shadow-lg shadow-black/20">
+              <div className="relative p-1.5 rounded-[1.75rem] bg-white/[0.03] border border-white/10 shadow-lg shadow-forest/40">
                 <div className="absolute inset-0 bg-gradient-to-br from-white/[0.07] via-transparent to-transparent pointer-events-none rounded-[1.75rem]" />
                 <div className="relative overflow-hidden rounded-[1.25rem] bg-white/5 backdrop-blur-md p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent pointer-events-none" />
-                <div className="flex items-center gap-2 mb-4"><span className="text-primary"><ScanFaceIcon className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-white/80">Face Analysis</h3></div>
+                <div className="flex items-center gap-2 mb-4"><span className="text-primary"><ScanFaceIcon className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-foreground/80">Face Analysis</h3></div>
                 <InfoRow label="Face Shape" value={analysis.face_shape} />
                 <InfoRow label="Eye Shape" value={analysis.eye_shape} />
                 <InfoRow label="Eye Size" value={analysis.eye_size} />
@@ -402,11 +402,11 @@ export default function StyleRecommendationsPage() {
                 <InfoRow label="Gender" value={analysis.gender_presentation} />
                 </div>
               </div>
-              <div className="relative p-1.5 rounded-[1.75rem] bg-white/[0.03] border border-white/10 shadow-lg shadow-black/20">
+              <div className="relative p-1.5 rounded-[1.75rem] bg-white/[0.03] border border-white/10 shadow-lg shadow-forest/40">
                 <div className="absolute inset-0 bg-gradient-to-br from-white/[0.07] via-transparent to-transparent pointer-events-none rounded-[1.75rem]" />
                 <div className="relative overflow-hidden rounded-[1.25rem] bg-white/5 backdrop-blur-md p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent pointer-events-none" />
-                <div className="flex items-center gap-2 mb-4"><span className="text-primary"><User className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-white/80">Body Analysis</h3></div>
+                <div className="flex items-center gap-2 mb-4"><span className="text-primary"><User className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-foreground/80">Body Analysis</h3></div>
                 <InfoRow label="Body Type" value={analysis.body_type} />
                 <InfoRow label="Height" value={analysis.height_estimation} />
                 <InfoRow label="Weight" value={analysis.weight_estimation} />
@@ -418,21 +418,21 @@ export default function StyleRecommendationsPage() {
                 <InfoRow label="Legs" value={analysis.leg_length} />
                 </div>
               </div>
-              <div className="relative p-1.5 rounded-[1.75rem] bg-white/[0.03] border border-white/10 shadow-lg shadow-black/20">
+              <div className="relative p-1.5 rounded-[1.75rem] bg-white/[0.03] border border-white/10 shadow-lg shadow-forest/40">
                 <div className="absolute inset-0 bg-gradient-to-br from-white/[0.07] via-transparent to-transparent pointer-events-none rounded-[1.75rem]" />
                 <div className="relative overflow-hidden rounded-[1.25rem] bg-white/5 backdrop-blur-md p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent pointer-events-none" />
-                <div className="flex items-center gap-2 mb-4"><span className="text-primary"><Palette className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-white/80">Skin & Hair</h3></div>
+                <div className="flex items-center gap-2 mb-4"><span className="text-primary"><Palette className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-foreground/80">Skin & Hair</h3></div>
                 <InfoRow label="Skin Tone" value={analysis.skin_tone} />
                 <InfoRow label="Undertone" value={analysis.skin_undertone} />
                 <InfoRow label="Hair Color" value={analysis.hair_color} />
                 </div>
               </div>
-              <div className="relative p-1.5 rounded-[1.75rem] bg-white/[0.03] border border-white/10 shadow-lg shadow-black/20">
+              <div className="relative p-1.5 rounded-[1.75rem] bg-white/[0.03] border border-white/10 shadow-lg shadow-forest/40">
                 <div className="absolute inset-0 bg-gradient-to-br from-white/[0.07] via-transparent to-transparent pointer-events-none rounded-[1.75rem]" />
                 <div className="relative overflow-hidden rounded-[1.25rem] bg-white/5 backdrop-blur-md p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent pointer-events-none" />
-                <div className="flex items-center gap-2 mb-4"><span className="text-primary"><Star className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-white/80">Style Score</h3></div>
+                <div className="flex items-center gap-2 mb-4"><span className="text-primary"><Star className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-foreground/80">Style Score</h3></div>
                 <div className="text-3xl font-bold mb-2 text-yellow-500">{Number(analysis.current_style_score) * 10}/100</div>
                 <p className="text-sm text-white/70 italic">"{analysis.overall_style_profile}"</p>
                 </div>
@@ -450,7 +450,7 @@ export default function StyleRecommendationsPage() {
                !recommendations.face_recommendations?.best_collar_types?.length &&
                !recommendations.body_recommendations?.shirt_fit &&
                !recommendations.honest_tips?.length && (
-                <div className="relative p-1.5 rounded-[1.75rem] bg-white/[0.03] border border-white/10 shadow-lg shadow-black/20">
+                <div className="relative p-1.5 rounded-[1.75rem] bg-white/[0.03] border border-white/10 shadow-lg shadow-forest/40">
                   <div className="absolute inset-0 bg-gradient-to-br from-white/[0.07] via-transparent to-transparent pointer-events-none rounded-[1.75rem]" />
                   <div className="relative overflow-hidden rounded-[1.25rem] bg-white/5 backdrop-blur-md p-8 text-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
                   <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent pointer-events-none" />
@@ -467,9 +467,9 @@ export default function StyleRecommendationsPage() {
 
               {/* Confidence Score — circular badge */}
               {recommendations && recommendations.confidence_score > 0 && (
-                <div className="relative p-1 rounded-[1.25rem] bg-white/[0.03] border border-white/10 shadow-lg shadow-black/20">
+                <div className="relative p-1 rounded-[1.25rem] bg-white/[0.03] border border-white/10 shadow-lg shadow-forest/40">
                     <div className="absolute inset-0 bg-gradient-to-br from-white/[0.07] via-transparent to-transparent pointer-events-none rounded-[1.25rem]" />
-                    <div className="relative overflow-hidden flex justify-center items-center gap-4 p-4 rounded-[0.85rem] bg-zinc-900/40 backdrop-blur-sm shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
+                    <div className="relative overflow-hidden flex justify-center items-center gap-4 p-4 rounded-[0.85rem] bg-emerald/40 backdrop-blur-sm shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
                     <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent pointer-events-none" />
                   <div className="relative w-16 h-16 flex items-center justify-center flex-shrink-0">
                     <svg className="absolute w-full h-full -rotate-90" viewBox="0 0 72 72">
@@ -491,7 +491,7 @@ export default function StyleRecommendationsPage() {
                   </div>
                   <div className="text-left">
                     <p className="text-xs text-white/40 uppercase tracking-wider">Recommendation</p>
-                    <p className="text-sm font-medium text-white/80">Confidence Score</p>
+                    <p className="text-sm font-medium text-foreground/80">Confidence Score</p>
                   </div>
                 </div>
                 </div>
@@ -527,7 +527,7 @@ function InfoRow({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="flex justify-between py-1.5 border-b border-white/5 last:border-0">
       <span className="text-xs text-white/50">{label}</span>
-      <span className="text-xs text-white/80 font-medium capitalize">{String(value).replace(/_/g, " ")}</span>
+      <span className="text-xs text-foreground/80 font-medium capitalize">{String(value).replace(/_/g, " ")}</span>
     </div>
   );
 }

@@ -252,7 +252,7 @@ const MonthlyReportInner = () => {
 
             {/* Planning Consistency */}
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-              className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-black/20 p-4 overflow-hidden">
+              className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-forest/40 p-4 overflow-hidden">
               <div className="flex items-center gap-2 mb-3">
                 <BarChart3 className="w-4 h-4 text-primary" />
                 <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.15em]">Planning Consistency</p>
@@ -272,7 +272,7 @@ const MonthlyReportInner = () => {
             {/* Cost-Per-Wear Analytics */}
             {cpwAnalytics && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }}
-                className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-black/20 p-4 overflow-hidden">
+                className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-forest/40 p-4 overflow-hidden">
                 <div className="flex items-center gap-2 mb-3">
                   <DollarSign className="w-4 h-4 text-emerald-500" />
                   <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.15em]">Cost-Per-Wear Analytics</p>
@@ -365,7 +365,7 @@ const MonthlyReportInner = () => {
             {/* Seasonal Wardrobe Analysis */}
             {(() => { if (closetItems.length === 0) { return <div className="text-center py-8"><Shirt className="w-8 h-8 text-white/20 mx-auto mb-2" /><p className="text-xs text-white/40">Your wardrobe is empty. Add items to your closet to see seasonal rotation recommendations.</p></div>; } if (seasonalAnalysis.rotateIn.length > 0 || seasonalAnalysis.rotateOut.length > 0) { return (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24 }}
-                className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-black/20 p-4 overflow-hidden">
+                className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-forest/40 p-4 overflow-hidden">
                 <div className="flex items-center gap-2 mb-1">
                   {seasonIcon(seasonalAnalysis.next)}
                   <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.15em]">Seasonal Rotation</p>
@@ -427,7 +427,7 @@ const MonthlyReportInner = () => {
             {/* Most Worn Items */}
             {stats.mostWorn.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
-                className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-black/20 p-4 overflow-hidden">
+                className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-forest/40 p-4 overflow-hidden">
                 <div className="flex items-center gap-2 mb-3">
                   <Shirt className="w-4 h-4 text-primary" />
                   <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.15em]">Most Worn Items</p>
@@ -459,7 +459,7 @@ const MonthlyReportInner = () => {
             {/* Color Distribution */}
             {stats.colorDist.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-black/20 p-4 overflow-hidden">
+                className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-forest/40 p-4 overflow-hidden">
                 <div className="flex items-center gap-2 mb-3">
                   <Palette className="w-4 h-4 text-primary" />
                   <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.15em]">Color Distribution</p>
@@ -494,7 +494,7 @@ const MonthlyReportInner = () => {
             {/* Occasion Breakdown */}
             {stats.occasions.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
-                className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-black/20 p-4 overflow-hidden">
+                className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-forest/40 p-4 overflow-hidden">
                 <div className="flex items-center gap-2 mb-3">
                   <PieChart className="w-4 h-4 text-primary" />
                   <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.15em]">Occasion Breakdown</p>
@@ -514,7 +514,7 @@ const MonthlyReportInner = () => {
             {/* Empty state */}
             {!loading && events.length === 0 && !cpwAnalytics && seasonalAnalysis.rotateIn.length === 0 && seasonalAnalysis.rotateOut.length === 0 && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-black/20 p-8 text-center mt-4 overflow-hidden">
+                className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-forest/40 p-8 text-center mt-4 overflow-hidden">
                 <CalendarDays className="w-10 h-10 text-amber-500/50 mx-auto mb-3" />
                 <h3 className="text-sm font-semibold text-white/70 mb-1">No Data Yet</h3>
                 <p className="text-xs text-white/40 max-w-md mx-auto">

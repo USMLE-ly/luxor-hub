@@ -109,7 +109,7 @@ export default function FashionReviewCard({
         </div>
         <div className="flex-1">
           <p className="text-xs text-white/50 uppercase tracking-wider mb-1">Overall Score</p>
-          <p className="text-lg text-white/80 font-medium">
+          <p className="text-lg text-foreground/80 font-medium">
             {overallScore >= 80 ? "Excellent" : overallScore >= 60 ? "Good" : "Needs Work"}
           </p>
         </div>
@@ -120,7 +120,7 @@ export default function FashionReviewCard({
         <div className="px-4 pb-4">
           <div className="flex items-center gap-2 mb-3 px-2">
             <Sparkles className="w-4 h-4 text-primary" />
-            <h3 className="text-sm font-semibold text-white/80">Score Breakdown</h3>
+            <h3 className="text-sm font-semibold text-foreground/80">Score Breakdown</h3>
           </div>
           <div className="h-[220px] w-full">
             <BarChart
@@ -232,7 +232,7 @@ export default function FashionReviewCard({
       {/* ── HONEST SUMMARY ── */}
       {honestSummary && (
         <div className="px-6 pb-6">
-          <div className="rounded-xl border border-white/10 bg-zinc-900/40 p-4">
+          <div className="rounded-xl border border-white/10 bg-emerald/40 p-4">
             <p className="text-sm text-white/60 italic text-center leading-relaxed">
               &ldquo;{honestSummary}&rdquo;
             </p>

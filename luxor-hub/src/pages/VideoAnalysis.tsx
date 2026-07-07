@@ -276,7 +276,7 @@ export default function VideoAnalysis() {
                     <video
                       ref={videoRef}
                       src={videoUrl}
-                      className="w-full rounded-lg max-h-[400px] object-contain bg-black/50"
+                      className="w-full rounded-lg max-h-[400px] object-contain bg-forest/50"
                       controls
                       onLoadedMetadata={() => toast.info(`Video loaded: ${videoRef.current?.duration.toFixed(1)}s`)}
                     />
@@ -337,14 +337,14 @@ export default function VideoAnalysis() {
                     >
                       <img src={frame.imageDataUrl} alt={`Frame ${frame.frameIndex + 1}`} className="w-full aspect-[3/4] object-cover" />
                       <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-2">
-                        <p className="text-xs text-white/80">{frame.timestamp.toFixed(1)}s</p>
+                        <p className="text-xs text-foreground/80">{frame.timestamp.toFixed(1)}s</p>
                         {frame.status === "analyzing" && <Loader2 className="w-3 h-3 animate-spin text-primary absolute top-2 right-2" />}
                         {frame.status === "done" && <CheckCircle2 className="w-3 h-3 text-green-400 absolute top-2 right-2" />}
                         {frame.status === "error" && <AlertTriangle className="w-3 h-3 text-destructive absolute top-2 right-2" />}
                       </div>
                       {frame.analysis && (
                         <div className="absolute top-2 left-2">
-                          <Badge variant="secondary" className="text-[10px] bg-black/60 text-white border-0">
+                          <Badge variant="secondary" className="text-[10px] bg-forest/60 text-white border-0">
                             {frame.analysis.styleScore}/100
                           </Badge>
                         </div>

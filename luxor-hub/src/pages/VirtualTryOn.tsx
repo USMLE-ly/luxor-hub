@@ -148,7 +148,7 @@ function VirtualTryOnInner() {
                       <img src={userPhoto} alt="Your photo" className="w-full aspect-[3/4] object-cover rounded-lg" />
                       <button
                         onClick={() => { setUserPhoto(null); setUserPhotoFile(null); setResultImage(null); }}
-                        className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 flex items-center justify-center hover:bg-black/70"
+                        className="absolute top-2 right-2 w-8 h-8 rounded-full bg-forest/50 flex items-center justify-center hover:bg-forest/70"
                       >
                         <X className="w-4 h-4 text-white" />
                       </button>
@@ -268,7 +268,7 @@ function VirtualTryOnInner() {
                   onClick={() => setResultImage(r.imageUrl)}
                 >
                   <img src={r.imageUrl} alt="Try-on" className="w-full aspect-[3/4] object-cover" />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <div className="absolute inset-0 bg-forest/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <Button variant="secondary" size="sm" onClick={(e) => { e.stopPropagation(); handleDownload(r.imageUrl); }}>
                       <Download className="w-3 h-3" />
                     </Button>

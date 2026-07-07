@@ -140,7 +140,7 @@ const renderCellValue = (header: string, value: string | string[] | null) => {
       {sentences.map((s, idx) => (
         <div key={idx} className="flex items-start gap-1.5">
           <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-          <span className="text-white/90">{s.trim()}</span>
+          <span className="text-foreground/90">{s.trim()}</span>
         </div>
       ))}
     </div>
@@ -156,7 +156,7 @@ export default function InfoCardsTable({ rows = [] }: InfoCardsTableProps) {
   const allHeaders = Array.from(new Set(rows.flatMap((r) => r.columns.map((c) => c.header))))
 
   return (
-    <div className="relative w-full overflow-x-auto rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-black/20">
+    <div className="relative w-full overflow-x-auto rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-forest/40">
       <div className="min-w-[900px]">
         <Table className="w-full">
           <TableHeader>
@@ -186,7 +186,7 @@ export default function InfoCardsTable({ rows = [] }: InfoCardsTableProps) {
                     isEven && "bg-white/[0.02]"
                   )}
                 >
-                  <TableCell className="font-semibold text-white/80 py-4 pl-5 border-r border-white/5 align-top">
+                  <TableCell className="font-semibold text-foreground/80 py-4 pl-5 border-r border-white/5 align-top">
                     <div className="flex items-center gap-2.5">
                       <span className="text-primary/80 shrink-0">{categoryIcon(row.category)}</span>
                       <span className="text-sm whitespace-nowrap">{row.category}</span>

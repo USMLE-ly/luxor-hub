@@ -336,7 +336,7 @@ export default function CommunityGallery() {
                   {/* Image */}
                   <div className="relative aspect-square">
                     <img src={design.image_url} alt={design.prompt} className="w-full h-full object-cover" />
-                    <Badge className="absolute top-3 left-3 bg-black/60 text-white border-0">
+                    <Badge className="absolute top-3 left-3 bg-forest/60 text-white border-0">
                       <Shirt className="w-3 h-3 mr-1" /> {design.garment_type}
                     </Badge>
                   </div>

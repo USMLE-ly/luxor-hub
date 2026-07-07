@@ -329,7 +329,7 @@ export default function FashionDesigner() {
                                 <Badge variant="secondary" className="text-xs"><Check className="w-3 h-3 mr-1" /> Saved</Badge>
                               )}
                             </div>
-                            <Badge className="absolute top-3 left-3 bg-black/60 text-white border-0">
+                            <Badge className="absolute top-3 left-3 bg-forest/60 text-white border-0">
                               <Shirt className="w-3 h-3 mr-1" /> {design.garmentType}
                             </Badge>
                           </div>
@@ -384,20 +384,20 @@ export default function FashionDesigner() {
                           </Button>
                         </div>
                         <div className="absolute top-3 left-3 flex gap-2">
-                          <Badge className="bg-black/60 text-white border-0">
+                          <Badge className="bg-forest/60 text-white border-0">
                             <Shirt className="w-3 h-3 mr-1" /> {design.garment_type}
                           </Badge>
                         </div>
                         <div className="absolute top-3 right-3 flex gap-1">
                           <button
                             onClick={() => handleToggleFavorite(design.id)}
-                            className="w-8 h-8 rounded-full bg-black/50 flex items-center justify-center hover:bg-black/70 transition-colors"
+                            className="w-8 h-8 rounded-full bg-forest/50 flex items-center justify-center hover:bg-forest/70 transition-colors"
                           >
                             <Heart className={`w-4 h-4 ${design.is_favorite ? "fill-red-500 text-red-500" : "text-white"}`} />
                           </button>
                           <button
                             onClick={() => handleTogglePublic(design.id)}
-                            className="w-8 h-8 rounded-full bg-black/50 flex items-center justify-center hover:bg-black/70 transition-colors"
+                            className="w-8 h-8 rounded-full bg-forest/50 flex items-center justify-center hover:bg-forest/70 transition-colors"
                           >
                             <Eye className={`w-4 h-4 ${design.is_public ? "text-primary" : "text-white"}`} />
                           </button>

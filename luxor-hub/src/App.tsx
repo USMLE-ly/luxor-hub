@@ -47,10 +47,10 @@ class AppErrorBoundary extends Component<
     if (this.state.hasError) {
       const isChunk = this.state.isChunkError;
       return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-[#0a0a0f] p-8 text-center">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-forest p-8 text-center">
           <div className="max-w-md">
-            <div className={`w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center ${isChunk ? 'bg-amber-500/20' : 'bg-red-500/20'}`}>
-              <svg className={`w-8 h-8 ${isChunk ? 'text-amber-400' : 'text-red-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <div className={`w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center ${isChunk ? 'bg-gold/20' : 'bg-red-500/20'}`}>
+              <svg className={`w-8 h-8 ${isChunk ? 'text-gold' : 'text-red-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 {isChunk
                   ? <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182" />
                   : <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
@@ -69,7 +69,7 @@ class AppErrorBoundary extends Component<
 
             <button
               onClick={this.handleRetry}
-              className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-medium rounded-xl hover:from-amber-400 hover:to-amber-500 transition-all shadow-lg shadow-amber-500/20"
+              className="px-6 py-2.5 bg-gradient-to-r from-gold to-gold/80 text-white font-medium rounded-xl hover:from-gold/90 hover:to-gold/70 transition-all shadow-lg shadow-gold/20"
             >
               {isChunk ? 'Load Latest Version' : 'Try Again'}
             </button>

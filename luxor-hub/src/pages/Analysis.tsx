@@ -622,7 +622,7 @@ export default function Analysis() {
                     {loading && (
                       <motion.div
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        className="absolute inset-0 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center gap-6 z-10 px-6"
+                        className="absolute inset-0 bg-forest/70 backdrop-blur-sm flex flex-col items-center justify-center gap-6 z-10 px-6"
                       >
                         <div style={{ position: 'relative', width: '96px', height: '96px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <div style={{ position: 'absolute', width: '100%', height: '100%', borderRadius: '50%', border: '4px solid rgba(255,255,255,0.06)', borderTopColor: '#e5c785', borderRightColor: '#d4b06a' }} className="animate-spin" />
@@ -694,14 +694,14 @@ export default function Analysis() {
                   {(() => {
                     const versatilityScores = determineVersatility(data?.items_detected || [], data?.vibe_type || '', data?.style_name || '');
                     return (
-                      <div className="w-full p-5 rounded-xl border border-white/10 bg-black/40 backdrop-blur-sm">
+                      <div className="w-full p-5 rounded-xl border border-white/10 bg-forest/40 backdrop-blur-sm">
                         <h3 className="text-xs uppercase tracking-[0.15em] text-white/60 mb-1 font-semibold">Outfit Versatility</h3>
                         <p className="text-[11px] text-white/40 mb-4">How well this outfit adapts to different occasions.</p>
                         <div className="space-y-4">
                           {Array.isArray(versatilityScores) && versatilityScores.map((v, i) => (
                             <div key={v.label}>
                               <div className="flex justify-between mb-1.5">
-                                <span className="text-xs font-medium text-white/80">{v.label}</span>
+                                <span className="text-xs font-medium text-foreground/80">{v.label}</span>
                                 <span className="text-xs font-medium text-white/60">{v.score}%</span>
                               </div>
                               <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">

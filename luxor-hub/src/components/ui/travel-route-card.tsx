@@ -79,7 +79,7 @@ export const TravelRouteCard: React.FC<TravelRouteCardProps> = ({
           </motion.button>
         </div>
         <div className="col-span-1 flex items-center justify-center">
-          <h1 className="text-8xl font-bold tracking-tighter text-white/90 select-none">{distance}</h1>
+          <h1 className="text-8xl font-bold tracking-tighter text-foreground/90 select-none">{distance}</h1>
         </div>
       </div>
     </motion.div>

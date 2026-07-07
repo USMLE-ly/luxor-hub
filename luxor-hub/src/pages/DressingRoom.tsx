@@ -222,7 +222,7 @@ export default function DressingRoomPage() {
                 >
                   <div className="flex items-center px-5 py-3 h-full">
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-white/90 truncate">
+                      <p className="text-sm font-semibold text-foreground/90 truncate">
                         {activeOutfit.stylist_reasoning[0]?.split(' ').slice(0, 6).join(' ') || 'Styled Look'}
                       </p>
                       <p className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5">Ready to wear</p>
@@ -347,7 +347,7 @@ export default function DressingRoomPage() {
                       expandable={true}
                     >
                       <div className="flex flex-col justify-center px-5 py-3 h-full">
-                        <p className="text-sm text-white/90 leading-relaxed line-clamp-2">{note}</p>
+                        <p className="text-sm text-foreground/90 leading-relaxed line-clamp-2">{note}</p>
                       </div>
                     </LiquidGlassCard>
                   </motion.div>
@@ -387,14 +387,14 @@ export default function DressingRoomPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+              className="fixed inset-0 z-50 flex items-center justify-center bg-forest/60 backdrop-blur-sm"
               onClick={() => setShowOccasionModal(false)}
             >
               <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-zinc-900/95 border border-white/10 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl"
+                className="bg-emerald/95 border border-white/10 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl"
                 onClick={(e) => e.stopPropagation()}
               >
                 <h3 className="text-lg font-semibold text-white mb-4">Pick an Occasion</h3>
@@ -436,14 +436,14 @@ export default function DressingRoomPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+              className="fixed inset-0 z-50 flex items-center justify-center bg-forest/60 backdrop-blur-sm"
               onClick={() => setShowCalendarModal(false)}
             >
               <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-zinc-900/95 border border-white/10 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl"
+                className="bg-emerald/95 border border-white/10 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl"
                 onClick={(e) => e.stopPropagation()}
               >
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
@@ -504,14 +504,14 @@ export default function DressingRoomPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+              className="fixed inset-0 z-50 flex items-center justify-center bg-forest/60 backdrop-blur-sm"
               onClick={() => setShowCountModal(false)}
             >
               <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-zinc-900/95 border border-white/10 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl"
+                className="bg-emerald/95 border border-white/10 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl"
                 onClick={(e) => e.stopPropagation()}
               >
                 <h3 className="text-lg font-semibold text-white mb-4">How many outfits?</h3>

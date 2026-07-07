@@ -127,11 +127,11 @@ export default function GlassmorphismTrustHero() {
           className="absolute inset-0 w-full h-[120%] object-cover"
           style={{ animation: "heroKenBurns 20s ease-in-out infinite" }}
         />
-        <div className="absolute inset-0 bg-background/40" />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, hsl(var(--background) / 0.55), hsl(var(--background) / 0.35))" }} />
         <div
           className="absolute inset-0 opacity-30"
           style={{
-            background: "radial-gradient(ellipse at 30% 20%, hsl(var(--primary) / 0.2), transparent 60%), radial-gradient(ellipse at 70% 80%, hsl(var(--accent) / 0.15), transparent 60%)",
+            background: "radial-gradient(ellipse at 30% 20%, hsl(var(--gold) / 0.15), transparent 60%), radial-gradient(ellipse at 70% 80%, hsl(var(--forest) / 0.25), transparent 60%)",
           }}
         />
         <div
@@ -142,9 +142,9 @@ export default function GlassmorphismTrustHero() {
 
       {/* Floating premium circles */}
       <div className="absolute inset-0 z-[1] overflow-hidden pointer-events-none">
-        <FloatingCircle size={320} top="-5%" left="-8%" gradient="radial-gradient(circle, hsl(var(--primary) / 0.1) 0%, transparent 70%)" duration={14} delay={0} />
+        <FloatingCircle size={320} top="-5%" left="-8%" gradient="radial-gradient(circle, hsl(var(--gold) / 0.08) 0%, transparent 70%)" duration={14} delay={0} />
         <FloatingCircle size={200} top="15%" left="75%" gradient="radial-gradient(circle, hsl(var(--accent) / 0.08) 0%, transparent 70%)" duration={12} delay={1} />
-        <FloatingCircle size={400} top="55%" left="60%" gradient="radial-gradient(circle, hsl(var(--primary) / 0.06) 0%, transparent 70%)" duration={16} delay={2} />
+        <FloatingCircle size={400} top="55%" left="60%" gradient="radial-gradient(circle, hsl(var(--gold) / 0.05) 0%, transparent 70%)" duration={16} delay={2} />
         <FloatingCircle size={150} top="70%" left="10%" gradient="radial-gradient(circle, hsla(0, 0%, 100%, 0.06) 0%, transparent 70%)" duration={10} delay={0.5} />
         <FloatingCircle size={250} top="30%" left="40%" gradient="radial-gradient(circle, hsl(var(--accent) / 0.06) 0%, transparent 70%)" duration={13} delay={1.5} />
       </div>
@@ -160,7 +160,7 @@ export default function GlassmorphismTrustHero() {
               <div className="inline-flex items-center gap-2 rounded-full border border-border/30 bg-card/50 px-3 py-1.5 backdrop-blur-md transition-colors hover:bg-card/80">
                 <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
                   AI-Powered Styling
-                  <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
+                  <Star className="w-3.5 h-3.5 text-gold fill-gold" />
                 </span>
               </div>
             </div>
@@ -226,7 +226,7 @@ export default function GlassmorphismTrustHero() {
                     <span className="text-foreground font-medium">96%</span>
                   </div>
                   <div className="h-2 w-full overflow-hidden rounded-full bg-muted/30">
-                    <div className="h-full w-[96%] rounded-full gold-gradient" />
+                    <div className="h-full w-[96%] rounded-full" style={{ background: "linear-gradient(90deg, hsl(var(--gold) / 0.6), hsl(var(--gold)))" }} />
                   </div>
                 </div>
 
@@ -241,13 +241,13 @@ export default function GlassmorphismTrustHero() {
                 <div className="mt-8 flex flex-wrap gap-2">
                   <div className="inline-flex items-center gap-1.5 rounded-full border border-border/20 bg-card/30 px-3 py-1 text-[10px] font-medium tracking-wide text-muted-foreground">
                     <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold/60 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-gold"></span>
                     </span>
                     LIVE
                   </div>
                   <div className="inline-flex items-center gap-1.5 rounded-full border border-border/20 bg-card/30 px-3 py-1 text-[10px] font-medium tracking-wide text-muted-foreground">
-                    <Crown className="w-3 h-3 text-yellow-500" />
+                    <Crown className="w-3 h-3 text-gold" />
                     PREMIUM
                   </div>
                 </div>
@@ -289,7 +289,7 @@ export default function GlassmorphismTrustHero() {
                       </div>
                       <div className="ml-auto flex gap-0.5">
                         {[...Array(t.stars)].map((_, j) => (
-                          <Star key={j} className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                          <Star key={j} className="w-3 h-3 text-gold fill-gold" />
                         ))}
                       </div>
                     </div>

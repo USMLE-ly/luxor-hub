@@ -119,7 +119,7 @@ function TrendingDesigns({ navigate }: { navigate: (path: string) => void }) {
           >
             <div className="relative h-32 bg-secondary">
               <img src={d.image_url} alt={d.prompt} className="w-full h-full object-cover" loading="lazy" />
-              <div className="absolute top-2 right-2 flex items-center gap-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded-full">
+              <div className="absolute top-2 right-2 flex items-center gap-1 bg-forest/60 text-white text-[10px] px-1.5 py-0.5 rounded-full">
                 <Heart className="w-2.5 h-2.5 fill-current" /> {d.likeCount}
               </div>
             </div>

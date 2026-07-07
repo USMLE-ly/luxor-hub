@@ -166,7 +166,7 @@ export function FashionHero({
                 />
                 {/* Score ring overlaid top-right */}
                 {!isNA && (
-                  <div className="absolute top-2 right-2 z-10 drop-shadow-lg bg-black/20 backdrop-blur-sm rounded-full p-0.5">
+                  <div className="absolute top-2 right-2 z-10 drop-shadow-lg bg-forest/20 backdrop-blur-sm rounded-full p-0.5">
                     <div className="relative w-20 h-20 md:w-24 md:h-24">
                       <svg width="100%" height="100%" viewBox="0 0 100 100" className="-rotate-90">
                         <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="6" />
@@ -187,7 +187,7 @@ export function FashionHero({
                       </svg>
                       <div className="absolute inset-0 flex flex-col items-center justify-center">
                         <span className="text-xl md:text-2xl font-bold gold-text">{styleScore}</span>
-                        <span className="text-[8px] text-white/80">/ 100</span>
+                        <span className="text-[8px] text-foreground/80">/ 100</span>
                       </div>
                     </div>
                   </div>
@@ -195,7 +195,7 @@ export function FashionHero({
               </div>
             ) : showMindMap ? (
               /* ---- Style Mind Map & Vibe ---- */
-              <div className="rounded-2xl border border-zinc-800/60 bg-zinc-900/40 backdrop-blur-xl p-6 h-full min-h-[300px] flex flex-col gap-4">
+              <div className="rounded-2xl border border-zinc-800/60 bg-emerald/40 backdrop-blur-xl p-6 h-full min-h-[300px] flex flex-col gap-4">
                 <div className="flex items-center gap-2">
                   <span className="text-xl">🧠</span>
                   <h3 className="font-bold text-foreground text-sm uppercase tracking-wider">Style Mind Map</h3>
@@ -276,7 +276,7 @@ export function FashionHero({
           {/* Content Side — Multi-Color Animated Blocks */}
           <div className="md:order-1 flex flex-col justify-between">
             <motion.div
-              className="relative flex-1 flex flex-col gap-3 h-full w-full bg-black/20 backdrop-blur-sm border border-white/10 rounded-2xl p-3 overflow-hidden"
+              className="relative flex-1 flex flex-col gap-3 h-full w-full bg-forest/20 backdrop-blur-sm border border-white/10 rounded-2xl p-3 overflow-hidden"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
@@ -357,7 +357,7 @@ export function FashionHero({
                   </h3>
                   <div className="space-y-2 pb-2">
                     {Array.isArray(strengths) && strengths.length > 0 ? strengths.map((s, idx) => (
-                      <div key={idx} className="flex items-start gap-2.5 text-sm text-white/90 leading-relaxed">
+                      <div key={idx} className="flex items-start gap-2.5 text-sm text-foreground/90 leading-relaxed">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] mt-1.5 flex-shrink-0" />
                         <ShimmerBgText><span className="tracking-wide">{humanizeText(s)}</span></ShimmerBgText>
                       </div>
@@ -379,7 +379,7 @@ export function FashionHero({
                     {(() => {
                       const text = tweakPlan || "Consider adding a structured blazer for a more polished look.";
                       return (
-                        <p className="text-sm italic text-white/90 leading-relaxed tracking-wide">
+                        <p className="text-sm italic text-foreground/90 leading-relaxed tracking-wide">
                           {renderHighlightedTweak(humanizeText(text))}
                         </p>
                       );
@@ -405,7 +405,7 @@ export function FashionHero({
                             {imp.priority === "high" ? "\uD83D\uDD34" : imp.priority === "medium" ? "\uD83D\uDFE1" : "\uD83D\uDD35"}
                           </span>
                           <div className="flex-1">
-                            <p className="text-sm text-white/90 leading-relaxed">{imp.issue}</p>
+                            <p className="text-sm text-foreground/90 leading-relaxed">{imp.issue}</p>
                             {imp.suggestion && (
                               <p className="text-xs text-amber-300/70 mt-0.5">\u2192 {imp.suggestion}</p>
                             )}

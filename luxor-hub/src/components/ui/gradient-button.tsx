@@ -18,7 +18,7 @@ const gradientButtonVariants = cva(
   {
     variants: {
       variant: {
-        default: "border-b-[hsl(43_74%_32%)]",
+        default: "border-b-[hsl(47_23%_36%)]",
         variant: "gradient-button-variant border-b-[rgba(255,255,255,0.1)]",
       },
     },
@@ -38,7 +38,7 @@ const GradientButton = React.forwardRef<HTMLButtonElement, GradientButtonProps>(
   ({ className, variant, asChild = false, onClick, ...props }, ref) => {
     const shadowColor = variant === "variant"
       ? "rgba(255,255,255,0.08)"
-      : "hsl(43 74% 32%)"
+      : "hsl(47 23% 36%)"
 
     return (
       <motion.button

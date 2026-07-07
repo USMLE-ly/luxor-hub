@@ -1560,7 +1560,7 @@ const Closet = () => {
             <AnimatePresence>
               {showCalendar && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                  className="fixed inset-0 z-50 bg-black/50 flex items-end" onClick={() => setShowCalendar(false)}>
+                  className="fixed inset-0 z-50 bg-forest/50 flex items-end" onClick={() => setShowCalendar(false)}>
                   <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
                     transition={{ type: "spring", damping: 25 }}
                     className="w-full bg-background rounded-t-2xl p-5" onClick={(e) => e.stopPropagation()}>
