@@ -28,7 +28,7 @@ serve(async (req) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        api-key: MIMO_API_KEY,
+        "api-key": MIMO_API_KEY,
         "HTTP-Referer": "https://luxor.ly",
       },
       body: JSON.stringify({

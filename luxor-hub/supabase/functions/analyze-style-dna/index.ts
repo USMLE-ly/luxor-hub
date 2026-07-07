@@ -76,7 +76,7 @@ Return JSON with this exact structure:
     const response = await fetch("https://api.xiaomimimo.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        api-key: MIMO_API_KEY,
+        "api-key": MIMO_API_KEY,
         "HTTP-Referer": "https://luxor.ly",
         "Content-Type": "application/json",
       },
@@ -149,7 +149,7 @@ async function analyzeFace(selfieImage: string, apiKey: string, corsHeaders: Rec
   const response = await fetch("https://api.xiaomimimo.com/v1/chat/completions", {
     method: "POST",
     headers: {
-      api-key: apiKey,
+      "api-key": apiKey,
         "HTTP-Referer": "https://luxor.ly",
       "Content-Type": "application/json",
     },
@@ -209,7 +209,7 @@ async function analyzeBody(fullBodyImage: string, preferences: any, apiKey: stri
   const response = await fetch("https://api.xiaomimimo.com/v1/chat/completions", {
     method: "POST",
     headers: {
-      api-key: apiKey,
+      "api-key": apiKey,
         "HTTP-Referer": "https://luxor.ly",
       "Content-Type": "application/json",
     },

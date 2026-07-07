@@ -31,7 +31,7 @@ async function callModel(
   return fetch(GATEWAY_URL, {
     method: "POST",
     headers: {
-      api-key: apiKey,
+      "api-key": apiKey,
         "HTTP-Referer": "https://luxor.ly",
       "Content-Type": "application/json",
     },

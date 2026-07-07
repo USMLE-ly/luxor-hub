@@ -22,7 +22,7 @@ Use the provided tool to return your analysis.`;
     const response = await fetch("https://api.xiaomimimo.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        api-key: MIMO_API_KEY,
+        "api-key": MIMO_API_KEY,
         "HTTP-Referer": "https://luxor.ly",
         "Content-Type": "application/json",
       },
