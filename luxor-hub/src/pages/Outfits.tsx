@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -202,14 +203,13 @@ const Outfits = () => {
           </div>
         )}
 
-        <div className="grid gap-6">
+        <StaggerContainer staggerDelay={0.08}>
           <AnimatePresence>
             {outfits.map((outfit, i) => (
+              <StaggerItem key={i}>
               <motion.div
-                key={i}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.15 }}
                 className="glass rounded-2xl p-6"
               >
                 <div className="flex items-start justify-between mb-4">
@@ -256,8 +256,10 @@ const Outfits = () => {
 
                 <p className="text-sm font-sans text-muted-foreground italic">"{outfit.explanation}"</p>
               </motion.div>
+              </StaggerItem>
             ))}
           </AnimatePresence>
+        </StaggerContainer>
         </div>
 
         {/* Schedule Outfit Dialog */}

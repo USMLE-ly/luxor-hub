@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import { PLAN_LIMITS } from "@/lib/planRestrictions";
 import { motion, AnimatePresence } from "framer-motion";
+import { StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
@@ -853,7 +854,8 @@ const Closet = () => {
             </div>
 
             {/* Action Cards */}
-            <div className="grid grid-cols-2 gap-3 mb-5">
+            <StaggerContainer staggerDelay={0.06} className="grid grid-cols-2 gap-3 mb-5">
+              <StaggerItem>
               <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
                 <DialogTrigger asChild>
                   <motion.button
@@ -935,8 +937,9 @@ const Closet = () => {
                 </DialogContent>
               </Dialog>
 
+              <StaggerItem>
               <motion.button
-                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
                 onClick={() => setUploadOpen(true)}
                 className="rounded-2xl border border-border bg-card p-4 text-left hover:border-primary/40 transition-colors"
               >
@@ -946,7 +949,8 @@ const Closet = () => {
                 <p className="font-sans font-semibold text-sm text-foreground">Upload Pieces</p>
                 <p className="text-xs text-muted-foreground font-sans mt-0.5">Snap or upload</p>
               </motion.button>
-            </div>
+              </StaggerItem>
+            </StaggerContainer>
 
             {/* Search */}
             <div className="relative mb-4">
@@ -958,7 +962,7 @@ const Closet = () => {
             {/* Occasion Outfit Tabs */}
             <div className="mb-5">
               <h2 className="font-sans font-semibold text-foreground text-sm mb-3">My Closet Outfits</h2>
-              <div className="grid grid-cols-4 gap-2 mb-3">
+              <StaggerContainer staggerDelay={0.05} className="grid grid-cols-4 gap-2 mb-3">
                 {[
                   { label: "Everyday", icon: "☀️" },
                   { label: "Weekend", icon: "🌸" },
@@ -967,21 +971,24 @@ const Closet = () => {
                 ].map((tab) => {
                   const count = items.filter(i => i.occasion?.toLowerCase() === tab.label.toLowerCase()).length;
                   return (
+                    <StaggerItem key={tab.label}>
                     <button key={tab.label}
                       className="flex flex-col items-center gap-1 p-3 rounded-xl bg-card border border-border hover:border-primary/40 transition-colors">
                       <span className="text-lg">{tab.icon}</span>
                       <span className="font-sans text-[10px] font-semibold text-foreground">{tab.label}</span>
                       <span className="text-[9px] font-sans text-muted-foreground">{count} OUTFITS</span>
                     </button>
+                    </StaggerItem>
                   );
                 })}
-              </div>
+              </StaggerContainer>
             </div>
 
             {/* Category Pills */}
             <div className="flex items-center gap-2 mb-4">
-              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none flex-1">
+              <StaggerContainer staggerDelay={0.03} className="flex gap-2 overflow-x-auto pb-1 scrollbar-none flex-1">
                 {filterPills.map((pill) => (
+                  <StaggerItem key={pill}>
                   <button key={pill} onClick={() => setActiveFilter(pill)}
                     className={`px-4 py-1.5 rounded-full text-xs font-sans whitespace-nowrap transition-all ${
                       activeFilter === pill
@@ -990,8 +997,9 @@ const Closet = () => {
                     }`}>
                     {pill}
                   </button>
+                  </StaggerItem>
                 ))}
-              </div>
+              </StaggerContainer>
               <motion.button
                 onClick={() => {
                   haptic(flatLayView ? "light" : "medium");
@@ -1036,18 +1044,18 @@ const Closet = () => {
                   return (
                     <motion.div key={section} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: si * 0.08 }}>
                       {/* Section divider */}
-                      <div className="flex items-center gap-3 mb-4">
+                      <StaggerContainer staggerDelay={0.03} className="flex items-center gap-3 mb-4">
                         <div className="flex-1 h-px bg-border/60" />
                         <span className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.2em]">{section}</span>
                         <div className="flex-1 h-px bg-border/60" />
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
+                      </StaggerContainer>
+                      <StaggerContainer staggerDelay={0.04} className="grid grid-cols-2 gap-3">
                         {sectionItems.map((item, i) => (
+                          <StaggerItem key={item.id}>
                           <motion.div
                             key={item.id}
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: i * 0.05 }}
                             className="rounded-2xl overflow-hidden group"
                             style={{
                               background: "hsl(40 30% 96%)",
@@ -1116,8 +1124,9 @@ const Closet = () => {
                               </div>
                             </div>
                           </motion.div>
+                          </StaggerItem>
                         ))}
-                      </div>
+                      </StaggerContainer>
                     </motion.div>
                   );
                 })}
