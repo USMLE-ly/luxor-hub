@@ -27,3 +27,7 @@ qdrant_db/
 closet_items.json
 public/images/
 dist/
+
+# Prisma
+luxor-hub/.env.local
+luxor-hub/src/generated/prisma/
