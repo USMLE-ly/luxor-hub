@@ -1,11 +1,41 @@
+import { motion } from "framer-motion";
+
 export function ClassicLoader() {
   return (
-    <div className="border-primary flex h-10 w-10 animate-spin items-center justify-center rounded-full border-4 border-t-transparent"></div>
+    <div className="relative flex items-center justify-center">
+      {/* Outer spinning ring with gold accent */}
+      <motion.div
+        className="absolute w-12 h-12 rounded-full border-2 border-gold/20 border-t-gold"
+        animate={{ rotate: 360 }}
+        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+      />
+      {/* Middle ring */}
+      <motion.div
+        className="absolute w-8 h-8 rounded-full border-2 border-emerald/20 border-b-emerald"
+        animate={{ rotate: -360 }}
+        transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+      />
+      {/* Inner dot */}
+      <motion.div
+        className="w-2 h-2 rounded-full bg-gold"
+        animate={{ scale: [0.8, 1.2, 0.8] }}
+        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+      />
+    </div>
   );
 }
 
 export function ModifiedClassicLoader() {
   return (
-    <div className="border-primary ml-3 h-10 w-10 animate-spin rounded-full border-t-2 border-b-2 ease-linear"></div>
+    <div className="flex items-center gap-3">
+      <div className="relative flex items-center justify-center">
+        <motion.div
+          className="w-6 h-6 rounded-full border-2 border-gold/20 border-t-gold"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
+        />
+      </div>
+      <span className="text-xs text-muted-foreground font-sans">Loading...</span>
+    </div>
   );
 }

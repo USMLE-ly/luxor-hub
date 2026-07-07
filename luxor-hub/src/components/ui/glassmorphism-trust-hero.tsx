@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useScroll, useTransform, motion } from "framer-motion";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import {
   ArrowRight,
   Play,
@@ -186,32 +187,43 @@ export default function GlassmorphismTrustHero() {
             </p>
 
             {/* CTA Buttons */}
-            <div className="hero-animate-fade-in hero-delay-400 flex flex-col sm:flex-row gap-4">
-              <button
+            <ScrollReveal direction="up" delay={0.4} className="flex flex-col sm:flex-row gap-4">
+              <motion.button
                 onClick={() => navigate("/auth")}
-                className="group inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-8 py-4 text-sm font-semibold text-background transition-all hover:scale-[1.02] hover:opacity-90 active:scale-[0.98]"
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                className="group inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-8 py-4 text-sm font-semibold text-background transition-colors hover:opacity-90"
               >
-                Try Free — No Card Needed
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </button>
+                <span>Try Free — No Card Needed</span>
+                <motion.span
+                  animate={{ x: [0, 4, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, ease: "easeInOut" }}
+                >
+                  <ArrowRight className="w-4 h-4" />
+                </motion.span>
+              </motion.button>
 
-              <button
+              <motion.button
                 onClick={() =>
                   document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })
                 }
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 className="group inline-flex items-center justify-center gap-2 rounded-full border border-border/30 bg-card/30 px-8 py-4 text-sm font-semibold text-foreground backdrop-blur-sm transition-colors hover:bg-card/50 hover:border-border/50"
               >
                 See How It Works
                 <ChevronDown className="w-4 h-4" />
-              </button>
-            </div>
+              </motion.button>
+            </ScrollReveal>
           </div>
 
           {/* RIGHT COLUMN */}
           <div className="lg:col-span-5 space-y-6 lg:mt-12">
 
             {/* Stats Card */}
-            <div className="hero-animate-fade-in hero-delay-500 relative overflow-hidden rounded-3xl border border-border/20 bg-card/30 p-8 backdrop-blur-xl shadow-2xl">
+            <ScrollReveal direction="up" delay={0.5} className="relative overflow-hidden rounded-3xl border border-border/20 bg-card/30 p-8 backdrop-blur-xl shadow-2xl">
               <div className="absolute top-0 right-0 -mr-16 -mt-16 h-64 w-64 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
 
               <div className="relative z-10">
@@ -252,10 +264,12 @@ export default function GlassmorphismTrustHero() {
                   </div>
                 </div>
               </div>
-            </div>
+            </ScrollReveal>
 
             {/* Testimonial Card */}
-            <div
+            <motion.div
+              whileHover={{ y: -4, boxShadow: "0 20px 40px rgba(0,0,0,0.2)" }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
               className="hero-animate-fade-in hero-delay-500 relative overflow-hidden rounded-3xl border border-border/20 bg-card/30 p-6 backdrop-blur-xl border-ivory/5 touch-pan-y"
               onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
               onTouchEnd={(e) => {
@@ -310,8 +324,8 @@ export default function GlassmorphismTrustHero() {
                     aria-label={`Show testimonial ${i + 1}`}
                   />
                 ))}
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
       </div>

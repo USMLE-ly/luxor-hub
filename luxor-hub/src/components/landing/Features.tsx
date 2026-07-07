@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { motion, useInView, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import { IPhoneMockup } from "@/components/ui/iphone-mockup";
 import featureDemo from "@/assets/feature-demo.mp4";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -47,37 +48,40 @@ const Features = () => {
     <section id="features" className="pt-16 md:pt-24 pb-0 bg-muted/20 overflow-hidden" ref={sectionRef}>
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          className="text-center mb-6"
-        >
-          <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase mb-3">Features</p>
-          <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground">
-            Every Fashion Tool You Need.{" "}
-            <span className="gold-text">One App.</span>
-          </h2>
-          <p className="mt-4 max-w-2xl mx-auto text-sm text-muted-foreground leading-relaxed">
-            AI outfit analysis, trend forecasting, wardrobe management, and virtual try-on — all in one app.
-          </p>
+        <StaggerContainer>
+          <StaggerItem>
+            <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase mb-3 text-center">Features</p>
+          </StaggerItem>
+          <StaggerItem>
+            <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground text-center">
+              Every Fashion Tool You Need.{" "}
+              <span className="gold-text">One App.</span>
+            </h2>
+          </StaggerItem>
+          <StaggerItem>
+            <p className="mt-4 max-w-2xl mx-auto text-sm text-muted-foreground leading-relaxed text-center">
+              AI outfit analysis, trend forecasting, wardrobe management, and virtual try-on — all in one app.
+            </p>
+          </StaggerItem>
 
           {/* Rotating feature text */}
-          <div className="mt-4 h-7 flex items-center justify-center overflow-hidden">
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={activeFeature}
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -14 }}
-                transition={{ duration: 0.4, ease: "easeOut" }}
-                className="font-sans text-sm font-medium tracking-wider uppercase text-primary/80"
-              >
-                {featureNames[activeFeature]}
-              </motion.span>
-            </AnimatePresence>
-          </div>
-        </motion.div>
+          <StaggerItem>
+            <div className="mt-4 h-7 flex items-center justify-center overflow-hidden">
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={activeFeature}
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -14 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  className="font-sans text-sm font-medium tracking-wider uppercase text-primary/80"
+                >
+                  {featureNames[activeFeature]}
+                </motion.span>
+              </AnimatePresence>
+            </div>
+          </StaggerItem>
+        </StaggerContainer>
 
         {/* iPhone Mockup with Video + Parallax + Shimmer */}
         <motion.div

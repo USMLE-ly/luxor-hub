@@ -22,37 +22,39 @@ export function BottomNav() {
           const isActive =
             location.pathname === tab.path;
           return (
-            <button
+            <motion.button
               key={tab.label}
               onClick={() => { haptic("selection"); navigate(tab.path); }}
+              whileHover={{ y: -2 }}
+              whileTap={{ scale: 0.93 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
               className="flex flex-col items-center gap-0.5 min-w-[44px] pt-1.5 pb-1 relative"
             >
               <motion.div
-                animate={{ scale: isActive ? 1.12 : 1 }}
+                animate={{ scale: isActive ? 1.12 : 1, y: isActive ? -2 : 0 }}
                 transition={{ type: "spring", stiffness: 400, damping: 20 }}
               >
                 <tab.icon
-                  className={`w-[18px] h-[18px] transition-colors ${
-                    isActive ? "text-primary" : "text-muted-foreground"
+                  className={`w-[18px] h-[18px] transition-colors duration-300 ${
+                    isActive ? "text-primary drop-shadow-[0_0_6px_hsl(var(--gold)/0.3)]" : "text-muted-foreground"
                   }`}
                   strokeWidth={isActive ? 2.4 : 1.8}
                 />
               </motion.div>
-              <span
-                className={`text-[9px] font-sans transition-colors ${
-                  isActive ? "text-primary font-semibold" : "text-muted-foreground"
-                }`}
+              <motion.span
+                animate={{ color: isActive ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }}
+                className={`text-[9px] font-sans`}
               >
                 {tab.label}
-              </span>
+              </motion.span>
               {isActive && (
                 <motion.div
                   layoutId="bottomNavDot"
-                  className="absolute -bottom-0.5 w-1 h-1 rounded-full bg-primary"
+                  className="absolute -bottom-0.5 w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_6px_hsl(var(--gold)/0.4)]"
                   transition={{ type: "spring", stiffness: 500, damping: 30 }}
                 />
               )}
-            </button>
+            </motion.button>
           );
         })}
       </div>

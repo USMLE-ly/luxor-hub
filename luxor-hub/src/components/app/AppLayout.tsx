@@ -1,4 +1,5 @@
 import { ReactNode, useEffect } from "react";
+import { motion } from "framer-motion";
 import { scheduleEngagementNudges, clearEngagementNudges } from "@/lib/notificationService";
 import { ClassicLoader } from "@/components/ui/loader";
 import { useAuth } from "@/contexts/AuthContext";
@@ -49,7 +50,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-background pb-20">
       <AnimatePresence mode="wait">
         <PageTransition key={location.pathname}>
-          <main>{children}</main>
+          <motion.main
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            {children}
+          </motion.main>
         </PageTransition>
       </AnimatePresence>
       <BottomNav />

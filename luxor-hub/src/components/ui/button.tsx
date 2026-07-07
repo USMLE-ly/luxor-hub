@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
+import { motion } from "framer-motion";
 import { haptic } from "@/lib/haptics";
 
 import { cn } from "@/lib/utils";
@@ -50,11 +51,25 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       haptic("light");
       onClick?.(e);
     };
+    // Wrap with motion.button for premium spring physics (only for non-asChild)
+    if (asChild) {
+      return (
+        <Comp
+          className={cn(buttonVariants({ variant, size, className }))}
+          ref={ref}
+          onClick={onClick}
+          {...props}
+        />
+      );
+    }
     return (
-      <Comp
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.97 }}
+        transition={{ type: "spring", stiffness: 400, damping: 17 }}
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
-        onClick={asChild ? onClick : handleClick}
+        onClick={handleClick}
         {...props}
       />
     );

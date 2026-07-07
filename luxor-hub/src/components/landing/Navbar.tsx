@@ -67,20 +67,29 @@ const Navbar = () => {
 
       <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
         <motion.h1
-          className="font-display text-2xl font-bold text-foreground cursor-pointer"
+          className="font-display text-2xl font-bold text-foreground cursor-pointer relative"
           onClick={() => navigate("/")}
           whileHover={{ letterSpacing: "0.08em" }}
-          transition={{ duration: 0.3 }}
+          transition={{ type: "spring", stiffness: 200, damping: 15 }}
         >
-          LEXOR®
+          <motion.span
+            animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+            className="bg-gradient-to-r from-foreground via-gold to-foreground bg-[length:200%_100%] bg-clip-text text-transparent"
+          >
+            LEXOR®
+          </motion.span>
         </motion.h1>
 
         <div className="hidden md:flex items-center gap-8 text-sm font-sans">
           {navLinks.map((link) => (
-            <button
+            <motion.button
               key={link.id}
               onClick={() => (link as any).isRoute ? navigate(`/${link.id}`) : scrollTo(link.id)}
               aria-current={activeSection === link.id ? "page" : undefined}
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
               className="relative py-1 transition-colors hover:text-foreground"
             >
               <span className={activeSection === link.id ? "text-foreground font-medium" : "text-muted-foreground"}>
@@ -89,31 +98,45 @@ const Navbar = () => {
               {activeSection === link.id && (
                 <motion.div
                   layoutId="nav-underline"
-                  className="absolute -bottom-1 left-0 right-0 h-0.5 bg-foreground rounded-full will-change-transform"
+                  className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-gold/80 to-gold rounded-full will-change-transform"
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
               )}
-            </button>
+            </motion.button>
           ))}
         </div>
 
         <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="hidden md:inline-flex font-sans"
-            onClick={() => navigate("/auth")}
+          <motion.div
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            className="hidden md:inline-flex"
           >
-            Log In
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="hidden md:inline-flex font-sans border-foreground/20 hover:bg-foreground/5"
-            onClick={() => navigate("/auth")}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="font-sans"
+              onClick={() => navigate("/auth")}
+            >
+              Log In
+            </Button>
+          </motion.div>
+          <motion.div
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            className="hidden md:inline-flex"
           >
-            Try LEXOR®
-          </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="font-sans border-foreground/20 hover:bg-foreground/5"
+              onClick={() => navigate("/auth")}
+            >
+              Try LEXOR®
+            </Button>
+          </motion.div>
 
           {/* Mobile hamburger */}
           <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
