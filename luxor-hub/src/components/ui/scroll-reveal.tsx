@@ -2,20 +2,26 @@ import { motion, type HTMLMotionProps } from "framer-motion";
 import { type ReactNode, forwardRef } from "react";
 import { cn } from "@/lib/utils";
 
+/* Premium spring presets for luxury feel */
+const SPRING_GENTLE = { type: "spring" as const, stiffness: 100, damping: 24, mass: 0.9 } as const;
+const SPRING_SNAPPY = { type: "spring" as const, stiffness: 180, damping: 22, mass: 0.7 } as const;
+const SPRING_HOVER = { type: "spring" as const, stiffness: 350, damping: 16, mass: 0.5 } as const;
+
 interface ScrollRevealProps extends HTMLMotionProps<"div"> {
   children: ReactNode;
   className?: string;
   delay?: number;
   direction?: "up" | "down" | "left" | "right" | "none";
+  distance?: number;
 }
 
 export const ScrollReveal = forwardRef<HTMLDivElement, ScrollRevealProps>(
-  ({ children, className, delay = 0, direction = "up", ...props }, ref) => {
+  ({ children, className, delay = 0, direction = "up", distance = 40, ...props }, ref) => {
     const directionOffset = {
-      up: { y: 40 },
-      down: { y: -40 },
-      left: { x: 40 },
-      right: { x: -40 },
+      up: { y: distance },
+      down: { y: -distance },
+      left: { x: distance },
+      right: { x: -distance },
       none: {},
     };
 
@@ -24,14 +30,8 @@ export const ScrollReveal = forwardRef<HTMLDivElement, ScrollRevealProps>(
         ref={ref}
         initial={{ opacity: 0, ...directionOffset[direction] }}
         whileInView={{ opacity: 1, x: 0, y: 0 }}
-        viewport={{ once: true, margin: "-80px" }}
-        transition={{
-          type: "spring",
-          stiffness: 120,
-          damping: 20,
-          mass: 0.8,
-          delay,
-        }}
+        viewport={{ once: true, margin: "-60px" }}
+        transition={{ ...SPRING_GENTLE, delay }}
         className={cn(className)}
         {...props}
       >
@@ -42,6 +42,7 @@ export const ScrollReveal = forwardRef<HTMLDivElement, ScrollRevealProps>(
 );
 ScrollReveal.displayName = "ScrollReveal";
 
+/* ── Stagger container for list animations ────────────── */
 interface StaggerContainerProps {
   children: ReactNode;
   className?: string;
@@ -51,19 +52,17 @@ interface StaggerContainerProps {
 export function StaggerContainer({
   children,
   className,
-  staggerDelay = 0.06,
+  staggerDelay = 0.05,
 }: StaggerContainerProps) {
   return (
     <motion.div
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, margin: "-60px" }}
+      viewport={{ once: true, margin: "-40px" }}
       variants={{
         hidden: {},
         visible: {
-          transition: {
-            staggerChildren: staggerDelay,
-          },
+          transition: { staggerChildren: staggerDelay },
         },
       }}
       className={cn(className)}
@@ -73,21 +72,18 @@ export function StaggerContainer({
   );
 }
 
+/* ── Stagger item ─────────────────────────────────────── */
 export function StaggerItem({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <motion.div
       variants={{
-        hidden: { opacity: 0, y: 24, scale: 0.98 },
+        hidden: { opacity: 0, y: 20, scale: 0.98, filter: "blur(4px)" },
         visible: {
           opacity: 1,
           y: 0,
           scale: 1,
-          transition: {
-            type: "spring",
-            stiffness: 150,
-            damping: 22,
-            mass: 0.7,
-          },
+          filter: "blur(0px)",
+          transition: SPRING_SNAPPY,
         },
       }}
       className={cn(className)}
@@ -97,7 +93,7 @@ export function StaggerItem({ children, className }: { children: ReactNode; clas
   );
 }
 
-// Magnetic hover effect for cards
+/* ── Magnetic hover card ──────────────────────────────── */
 export function MagneticCard({
   children,
   className,
@@ -105,16 +101,34 @@ export function MagneticCard({
 }: { children: ReactNode; className?: string } & HTMLMotionProps<"div">) {
   return (
     <motion.div
-      whileHover={{ scale: 1.02, y: -4 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{
-        type: "spring",
-        stiffness: 300,
-        damping: 18,
-        mass: 0.6,
-      }}
+      whileHover={{ scale: 1.02, y: -6 }}
+      whileTap={{ scale: 0.97 }}
+      transition={SPRING_HOVER}
       className={cn("cursor-pointer", className)}
       {...props}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+/* ── Fade-in (simplest reveal, no direction) ──────────── */
+export function FadeIn({
+  children,
+  className,
+  delay = 0,
+}: {
+  children: ReactNode;
+  className?: string;
+  delay?: number;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay }}
+      className={cn(className)}
     >
       {children}
     </motion.div>

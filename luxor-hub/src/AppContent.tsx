@@ -1,6 +1,7 @@
 import React, { useRef } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route, useLocation } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "next-themes";
 import { HelmetProvider } from "react-helmet-async";
@@ -83,6 +84,14 @@ const AppContent = () => {
         <AuthProvider>
           <ErrorBoundary>
           <React.Suspense fallback={<Loading />}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            >
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
@@ -124,6 +133,8 @@ const AppContent = () => {
             <Route path="/style-recommendations" element={<PaywallGate><StyleRecommendations /></PaywallGate>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+            </motion.div>
+          </AnimatePresence>
           </React.Suspense>
           </ErrorBoundary>
         </AuthProvider>
