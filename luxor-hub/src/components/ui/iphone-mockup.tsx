@@ -259,7 +259,7 @@ export const IPhoneMockup: React.FC<IPhoneMockupProps> = ({
     position: 'absolute',
     left: '50%',
     transform: 'translateX(-50%)',
-    background: '#000',
+    background: 'hsl(var(--forest))',
     zIndex: 2,
     boxShadow: '0 1px 2px rgba(0,0,0,0.7)'
   };

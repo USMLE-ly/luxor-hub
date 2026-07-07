@@ -430,7 +430,7 @@ export default function Analysis() {
       .map(([label, score]) => ({
         label,
         score: Math.min(100, Math.max(0, Math.round(score))),
-        color: COLOR_MAP[label] || '#666666'
+        color: COLOR_MAP[label] || 'hsl(var(--muted-foreground))'
       }));
   }, []);
 

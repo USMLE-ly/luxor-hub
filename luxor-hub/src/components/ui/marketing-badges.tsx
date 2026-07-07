@@ -44,14 +44,14 @@ export function MarketingBadges({
 
   const badges: Badge[] = hasOutfits
     ? [
-        { id: "dismiss", label: "Dismiss", color: "from-[#e5c785] to-[#d4b06a]", size: "md", rotation: -2, zIndex: 10, offsetX: -60, offsetY: 0 },
+        { id: "dismiss", label: "Dismiss", color: "from-gold to-gold/60", size: "md", rotation: -2, zIndex: 10, offsetX: -60, offsetY: 0 },
         ...(hasMultiple ? [
           { id: "prev", label: "←", color: "from-blue-400 to-blue-500", size: "sm", rotation: 0, zIndex: 11, offsetX: 30, offsetY: -15 },
           { id: "next", label: "→", color: "from-blue-400 to-blue-500", size: "sm", rotation: 0, zIndex: 12, offsetX: 60, offsetY: 0 },
         ] : []),
       ]
     : [
-        { id: "generate", label: isLoading ? "Consulting MiMo..." : "Generate Outfit", color: "from-[#e5c785] to-[#d4b06a]", size: "md", rotation: 1, zIndex: 10, offsetX: 0, offsetY: 0 },
+        { id: "generate", label: isLoading ? "Consulting MiMo..." : "Generate Outfit", color: "from-gold to-gold/60", size: "md", rotation: 1, zIndex: 10, offsetX: 0, offsetY: 0 },
       ]
 
   const handleClick = (id: string) => {

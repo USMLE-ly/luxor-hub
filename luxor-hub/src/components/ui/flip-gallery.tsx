@@ -497,7 +497,7 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
             <button
               onClick={() => onAddToCalendar(outfits[currentIndex])}
               style={{
-                background: 'linear-gradient(135deg, #9ca3af, #6b7280)',
+                background: 'linear-gradient(135deg, hsl(var(--emerald)), hsl(var(--forest)))',
                 color: 'white',
                 border: 'none',
                 borderRadius: '50%',
@@ -520,8 +520,8 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
           <button
             onClick={onDismiss}
             style={{
-              background: 'linear-gradient(135deg, #e5c785, #d4b06a)',
-              color: '#1e293b',
+              background: 'linear-gradient(135deg, hsl(var(--gold)), hsl(var(--gold) / 0.6))',
+              color: 'hsl(var(--forest))',
               border: 'none',
               borderRadius: '9999px',
               padding: '10px 24px',

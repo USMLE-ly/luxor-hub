@@ -142,16 +142,16 @@ export function ShareCard({ outfit, onClose }: ShareCardProps) {
       >
         {/* Preview Card */}
         <div ref={cardRef} className="rounded-2xl overflow-hidden mb-4" style={{
-          background: "linear-gradient(135deg, #1a1a2e, #16213e)",
+          background: "linear-gradient(135deg, hsl(var(--forest)), hsl(var(--emerald)))",
           padding: "2rem",
         }}>
           <div className="h-1 w-20 rounded-full mb-6" style={{
-            background: "linear-gradient(90deg, #C6A55C, #E8D5A3)",
+            background: "linear-gradient(90deg, hsl(var(--gold)), hsl(var(--gold) / 0.7))",
           }} />
-          <h3 className="font-display text-2xl font-bold mb-1" style={{ color: "#E8D5A3" }}>
+          <h3 className="font-display text-2xl font-bold mb-1" style={{ color: "hsl(var(--gold) / 0.8)" }}>
             {outfit.name}
           </h3>
-          <p className="text-sm mb-6" style={{ color: "#a0a0b0" }}>{outfit.description}</p>
+          <p className="text-sm mb-6" style={{ color: "hsl(var(--muted-foreground))" }}>{outfit.description}</p>
 
           <div className="flex flex-wrap gap-2 mb-6">
             {outfit.items.map((item, i) => (
@@ -166,13 +166,13 @@ export function ShareCard({ outfit, onClose }: ShareCardProps) {
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="font-display text-lg font-bold" style={{ color: "#C6A55C" }}>LEXOR®</span>
-              <span className="text-xs" style={{ color: "#606070" }}>AI-Powered Style</span>
+              <span className="font-display text-lg font-bold" style={{ color: "hsl(var(--gold))" }}>LEXOR®</span>
+              <span className="text-xs" style={{ color: "hsl(var(--muted-foreground) / 0.6)" }}>AI-Powered Style</span>
             </div>
             {outfit.confidence && (
               <span className="text-xs px-2 py-1 rounded-full" style={{
                 background: "rgba(198, 165, 92, 0.2)",
-                color: "#C6A55C",
+                color: "hsl(var(--gold))",
               }}>
                 {outfit.confidence}% match
               </span>

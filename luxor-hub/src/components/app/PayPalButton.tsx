@@ -130,7 +130,7 @@ const PayPalButton = ({ tier, onApprove }: PayPalButtonProps) => {
       <div
         ref={containerRef}
         className="w-full min-h-[40px] rounded-2xl overflow-hidden [&_iframe]:rounded-2xl border border-white/[0.08] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.4)]"
-        style={{ background: 'linear-gradient(to bottom, #111, #0a0a0a)' }}
+        style={{ background: 'linear-gradient(to bottom, hsl(var(--forest)), hsl(var(--forest)))' }}
       />
       {!loading && !error && (
         <p className="mt-3 text-center text-[10px] text-white/30 font-sans flex items-center justify-center gap-1.5 tracking-wide">
