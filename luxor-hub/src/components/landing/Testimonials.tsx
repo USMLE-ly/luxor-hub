@@ -117,7 +117,7 @@ const Testimonials = () => (
               </span>
             </div>
           </div>
-        </ScrollReveal>
+        </div>
       </motion.div>
 
       {/* Shuffle cards */}

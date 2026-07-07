@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { haptic } from "@/lib/haptics";
-import {Plus, MagnifyingGlass, TShirt, TrashSimple, UploadSimple, X, Spinner, Sparkle, CheckCircle, Camera, CaretRight, Sliders, Activity, Eye, User, StackSimple, CalendarDots, Image, FloppyDisk, FolderOpen, Heart, Receipt, } from "@phosphor-icons/react";
+import {Plus, MagnifyingGlass, TShirt, TrashSimple, UploadSimple, X, Spinner, Sparkle, CheckCircle, Camera, CaretRight, Sliders, Pulse, Eye, User, StackSimple, CalendarDots, Image, FloppyDisk, FolderOpen, Heart, Receipt, } from "@phosphor-icons/react";
 import Mannequin3D, { type ClothingItem as MannequinClothingItem, type BodyDNA, type PosePreset } from "@/components/app/Mannequin3D";
 import { SLOT_MAP, DRESS_REPLACES, type GarmentFit } from "@/components/app/GarmentGeometry";
 import type { FabricType } from "@/components/app/FabricMaterials";
@@ -594,7 +594,7 @@ const Closet = () => {
       const { error } = await supabase.from("wear_logs").insert({ user_id: user.id, clothing_item_id: itemId });
       if (error) toast.error("Failed to log wear");
       else {
-        // Award style points
+        // Trophy style points
         try {
           await (supabase.from("style_points" as any).insert({ user_id: user.id, points: 5, reason: "Logged wear" }) as any);
         } catch (spErr) {
@@ -933,6 +933,7 @@ const Closet = () => {
                   </div>
                 </DialogContent>
               </Dialog>
+              </StaggerItem>
 
               <StaggerItem>
               <motion.button
@@ -1456,7 +1457,7 @@ const Closet = () => {
             <div className="flex items-center justify-around px-2 py-2 border-t border-border bg-background">
               {[
                 { key: "dna" as MannequinPanel, icon: SlidersHorizontal, label: "Body DNA" },
-                { key: "pose" as MannequinPanel, icon: Activity, label: "Pose" },
+                { key: "pose" as MannequinPanel, icon: Pulse, label: "Pose" },
                 { key: "trace" as MannequinPanel, icon: Eye, label: "Trace" },
                 { key: "measure" as MannequinPanel, icon: User, label: "Measure" },
               ].map(({ key, icon: Icon, label }) => (

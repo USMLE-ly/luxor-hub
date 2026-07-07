@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import {Award, Target, Flame, Star, Lightning, Crown, Eye, TrendUp, Spinner, Lock} from "@phosphor-icons/react";
+import {Trophy, Target, Flame, Star, Lightning, Crown, Eye, TrendUp, Spinner, Lock} from "@phosphor-icons/react";
 import { motion } from "framer-motion";
 import Pressable from "@/components/ui/pressable";
 import { PremiumSkeleton, PremiumCardSkeleton, PremiumTextSkeleton } from "@/components/ui/premium-skeleton";
@@ -32,7 +32,7 @@ const iconComponentMap: Record<string, React.ElementType> = {
   star: Star,
   trending_up: TrendingUp,
   zap: Zap,
-  award: Award,
+  award: Trophy,
 };
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -43,7 +43,7 @@ const iconMap: Record<string, React.ReactNode> = {
   star: <Star className="w-6 h-6" />,
   trending_up: <TrendingUp className="w-6 h-6" />,
   zap: <Zap className="w-6 h-6" />,
-  award: <Award className="w-6 h-6" />,
+  award: <Trophy className="w-6 h-6" />,
 };
 
 export default function Badges() {
@@ -142,7 +142,7 @@ export default function Badges() {
     date: unlockedKeys.has(badge.key) ? "Unlocked" : `Need ${badge.threshold}`,
     content: badge.description,
     category: badge.type,
-    icon: iconComponentMap[badge.icon] || Award,
+    icon: iconComponentMap[badge.icon] || Trophy,
     relatedIds: index < BADGE_DEFINITIONS.length - 1 ? [index + 2] : [],
     status: unlockedKeys.has(badge.key) ? "completed" as const : "pending" as const,
     energy: unlockedKeys.has(badge.key) ? 100 : 20,
@@ -192,7 +192,7 @@ export default function Badges() {
             {BADGE_DEFINITIONS.map((badge, i) => {
               const unlocked = unlockedKeys.has(badge.key);
               return (
-                <motion.div
+                <Pressable
                   key={badge.key}
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -201,7 +201,7 @@ export default function Badges() {
                   <Card className={`glass-card overflow-hidden transition-all ${unlocked ? "border-primary/30" : "opacity-50"}`}>
                     <CardContent className="p-5 flex items-center gap-4">
                       <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${unlocked ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>
-                        {unlocked ? iconMap[badge.icon] || <Award className="w-6 h-6" /> : <Lock className="w-6 h-6" />}
+                        {unlocked ? iconMap[badge.icon] || <Trophy className="w-6 h-6" /> : <Lock className="w-6 h-6" />}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
@@ -212,7 +212,6 @@ export default function Badges() {
                       </div>
                     </CardContent>
                   </Card>
-                </motion.div>
                 </Pressable>
               );
             })}

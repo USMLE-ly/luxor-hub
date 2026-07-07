@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {Sparkle, Bookmark, BookmarkCheck, CaretRight, Plus, Users, User} from "@phosphor-icons/react";
+import {Sparkle, Bookmark, BookmarkSimple, CaretRight, Plus, Users, User} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -279,7 +279,7 @@ export const StyleInspirationFeed = () => {
                   className="p-1.5 rounded-full hover:bg-secondary transition-colors"
                 >
                   {look.saved ? (
-                    <BookmarkCheck className="h-4 w-4 text-primary" />
+                    <BookmarkSimple className="h-4 w-4 text-primary" />
                   ) : (
                     <Bookmark className="h-4 w-4 text-muted-foreground" />
                   )}

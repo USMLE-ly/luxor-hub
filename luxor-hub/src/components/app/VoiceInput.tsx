@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import {Mic, MicOff} from "@phosphor-icons/react";
+import {Microphone, MicrophoneSlash} from "@phosphor-icons/react";
 import { toast } from "sonner";
 
 interface VoiceInputProps {
@@ -82,7 +82,7 @@ export const VoiceInput = ({ onTranscript, disabled }: VoiceInputProps) => {
       }`}
       title={isListening ? "Stop listening" : "Voice input"}
     >
-      {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+      {isListening ? <MicrophoneSlash className="w-4 h-4" /> : <Microphone className="w-4 h-4" />}
     </button>
   );
 };

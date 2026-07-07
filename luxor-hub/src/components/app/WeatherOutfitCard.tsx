@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import {Cloud, Droplets, Wind, Thermometer} from "@phosphor-icons/react";
+import {Cloud, Drop, Wind, Thermometer} from "@phosphor-icons/react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { supabase } from "@/integrations/supabase/client";
@@ -90,7 +90,7 @@ export function WeatherOutfitCard() {
               <p className="text-sm font-medium text-foreground font-sans">{weather.description}</p>
               <div className="flex items-center gap-3 mt-1.5 text-[11px] text-muted-foreground font-sans">
                 <span className="flex items-center gap-1">
-                  <Droplets className="w-3 h-3" /> {weather.humidity}%
+                  <Drop className="w-3 h-3" /> {weather.humidity}%
                 </span>
                 <span className="flex items-center gap-1">
                   <Wind className="w-3 h-3" /> {weather.wind} km/h

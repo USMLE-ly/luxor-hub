@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import {Trophy, Crown, Medal, Flame, Clock, Spinner, User, Sparkle, CaretRight, History, Swords, Target, Recycle, TShirt} from "@phosphor-icons/react";
+import {Trophy, Crown, Medal, Flame, Clock, Spinner, User, Sparkle, CaretRight, ClockCounterClockwise, Sword, Target, Recycle, TShirt} from "@phosphor-icons/react";
 import { motion } from "framer-motion";
 import { PremiumSkeleton, PremiumCardSkeleton, PremiumTextSkeleton } from "@/components/ui/premium-skeleton";
 import { useNavigate } from "react-router-dom";
@@ -226,7 +226,7 @@ export default function WeeklyChallenge() {
               <Target className="w-4 h-4" /> Challenges
             </TabsTrigger>
             <TabsTrigger value="history" className="flex items-center gap-2" onClick={fetchPastChallenges}>
-              <History className="w-4 h-4" /> Past
+              <ClockCounterClockwise className="w-4 h-4" /> Past
             </TabsTrigger>
           </TabsList>
 
@@ -375,7 +375,7 @@ export default function WeeklyChallenge() {
                 badge: "Eco Warrior",
               },
               {
-                icon: <Swords className="w-5 h-5 text-[hsl(15,80%,55%)]" />,
+                icon: <Sword className="w-5 h-5 text-[hsl(15,80%,55%)]" />,
                 title: "Outfit Battle",
                 description: "Submit your best outfit — community votes on style, fit & creativity",
                 points: 30,
@@ -427,7 +427,7 @@ export default function WeeklyChallenge() {
               </div>
             ) : pastChallenges.length === 0 ? (
               <div className="text-center py-16">
-                <History className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                <ClockCounterClockwise className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
                 <p className="text-muted-foreground text-sm">No past challenges yet.</p>
               </div>
             ) : (

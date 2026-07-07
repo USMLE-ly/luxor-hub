@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import {Bell, Heart, UserPlus, Award, Trophy, Flame, Check, CheckDouble, Spinner, ChatCircle, Funnel} from "@phosphor-icons/react";
+import {Bell, Heart, UserPlus, Trophy, Trophy, Flame, Check, CheckFat, Spinner, ChatCircle, Funnel} from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
@@ -160,7 +160,7 @@ export default function NotificationCenter() {
   const iconMap = {
     heart: <Heart className="w-4 h-4 text-pink-400" />,
     "user-plus": <UserPlus className="w-4 h-4 text-primary" />,
-    award: <Award className="w-4 h-4 text-yellow-500" />,
+    award: <Trophy className="w-4 h-4 text-yellow-500" />,
     trophy: <Trophy className="w-4 h-4 text-primary" />,
     flame: <Flame className="w-4 h-4 text-orange-400" />,
     message: <MessageCircle className="w-4 h-4 text-blue-400" />,

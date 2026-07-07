@@ -458,6 +458,7 @@ export default function CommunityGallery() {
                   </CardContent>
                 </Card>
               </motion.div>
+                </Pressable>
             ))}
           </div>
         )}

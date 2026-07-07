@@ -1,6 +1,6 @@
 "use client";
 
-import {CornerRightUp} from "@phosphor-icons/react";
+import {CornersOut} from "@phosphor-icons/react";
 import { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -113,7 +113,7 @@ export function AIInputWithLoading({
                 style={{ animationDuration: "3s" }}
               />
             ) : (
-              <CornerRightUp
+              <CornersOut
                 className={cn(
                   "w-4 h-4 transition-opacity dark:text-white",
                   inputValue ? "opacity-100" : "opacity-30"

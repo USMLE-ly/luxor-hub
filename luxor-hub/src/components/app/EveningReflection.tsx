@@ -33,7 +33,7 @@ export function EveningReflection() {
       }) as any);
       if (error) throw error;
 
-      // Award style points for reflection
+      // Trophy style points for reflection
       await (supabase.from("style_points" as any).insert({
         user_id: user.id,
         points: 5,

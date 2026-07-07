@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import {TShirt, FloppyDisk, TrashSimple, RotateCcw, GripVertical, X, ZoomIn, ZoomOut, ArrowsOut} from "@phosphor-icons/react";
+import {TShirt, FloppyDisk, TrashSimple, ArrowCounterClockwise, DotsSixVertical, X, MagnifyingGlassPlus, MagnifyingGlassMinus, ArrowsOut} from "@phosphor-icons/react";
 
 interface ClosetItem {
   id: string;
@@ -226,7 +226,7 @@ const OutfitBuilder = () => {
                           : "bg-secondary/50 hover:bg-secondary border border-transparent"
                       }`}
                     >
-                      <GripVertical className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                      <DotsSixVertical className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                       <div className="w-8 h-8 rounded bg-secondary flex-shrink-0 overflow-hidden">
                         {item.photo_url ? (
                           <img src={item.photo_url} alt="" className="w-full h-full object-cover" />
@@ -277,7 +277,7 @@ const OutfitBuilder = () => {
                       if (item) updateCanvasItem(selectedItem, { scale: Math.min(2, item.scale + 0.1) });
                     }}
                   >
-                    <ZoomIn className="h-3.5 w-3.5" />
+                    <MagnifyingGlassPlus className="h-3.5 w-3.5" />
                   </Button>
                   <Button
                     variant="outline"
@@ -288,7 +288,7 @@ const OutfitBuilder = () => {
                       if (item) updateCanvasItem(selectedItem, { scale: Math.max(0.3, item.scale - 0.1) });
                     }}
                   >
-                    <ZoomOut className="h-3.5 w-3.5" />
+                    <MagnifyingGlassMinus className="h-3.5 w-3.5" />
                   </Button>
                   <Button
                     variant="outline"
@@ -299,7 +299,7 @@ const OutfitBuilder = () => {
                       if (item) updateCanvasItem(selectedItem, { rotation: item.rotation + 15 });
                     }}
                   >
-                    <RotateCcw className="h-3.5 w-3.5" />
+                    <ArrowCounterClockwise className="h-3.5 w-3.5" />
                   </Button>
                   <Button
                     variant="outline"

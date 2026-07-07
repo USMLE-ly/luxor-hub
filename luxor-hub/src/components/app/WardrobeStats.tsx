@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import {TShirt, TrendUp, DollarSign, Crown} from "@phosphor-icons/react";
+import {TShirt, TrendUp, CurrencyDollar, Crown} from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 
 interface WearData {
@@ -119,7 +119,7 @@ export const WardrobeStats = () => {
         {/* Best Cost Per Wear */}
         <div className="bg-secondary/50 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-2">
-            <DollarSign className="h-4 w-4 text-primary" />
+            <CurrencyDollar className="h-4 w-4 text-primary" />
             <span className="text-xs text-muted-foreground font-sans">Best Cost/Wear</span>
           </div>
           {topCostPerWear.length > 0 ? (

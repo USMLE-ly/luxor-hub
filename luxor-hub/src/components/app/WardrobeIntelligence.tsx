@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import {Warning, Calendar, DollarSign, Flame, TShirt, TrendDown, Award} from "@phosphor-icons/react";
+import {Warning, Calendar, CurrencyDollar, Flame, TShirt, TrendDown, Trophy} from "@phosphor-icons/react";
 
 interface DormantItem {
   id: string;
@@ -122,7 +122,7 @@ export function WardrobeIntelligence() {
       >
         <div className="flex items-center gap-2 mb-3">
           <Flame className="w-5 h-5 text-[hsl(15,80%,55%)]" />
-          <h3 className="font-display text-base font-bold text-foreground">Wear Activity</h3>
+          <h3 className="font-display text-base font-bold text-foreground">Wear Pulse</h3>
           <span className="text-xs text-muted-foreground font-sans ml-auto">{totalWears} total wears</span>
         </div>
         <div className="flex gap-[3px] flex-wrap">
@@ -157,7 +157,7 @@ export function WardrobeIntelligence() {
           className="rounded-2xl border border-border bg-card p-5"
         >
           <div className="flex items-center gap-2 mb-3">
-            <DollarSign className="w-5 h-5 text-[hsl(142,60%,45%)]" />
+            <CurrencyDollar className="w-5 h-5 text-[hsl(142,60%,45%)]" />
             <h3 className="font-display text-base font-bold text-foreground">Best Value Items</h3>
           </div>
           <div className="space-y-2">
@@ -169,7 +169,7 @@ export function WardrobeIntelligence() {
                   <p className="text-[10px] text-muted-foreground font-sans">{item.wears} wears · ${item.price}</p>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  {item.paidOff && <Award className="w-3.5 h-3.5 text-[hsl(45,80%,55%)]" />}
+                  {item.paidOff && <Trophy className="w-3.5 h-3.5 text-[hsl(45,80%,55%)]" />}
                   <span className={`text-sm font-sans font-bold ${item.cpw < 5 ? "text-[hsl(142,60%,45%)]" : "text-foreground"}`}>
                     ${item.cpw}
                   </span>

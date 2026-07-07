@@ -1,6 +1,6 @@
 "use client"
 
-import {Palette, ScanFaceIcon, TShirt, Lightbulb, Check, X} from "@phosphor-icons/react"
+import {Palette, FaceMask, TShirt, Lightbulb, Check, X} from "@phosphor-icons/react"
 import {
   Table,
   TableBody,
@@ -77,7 +77,7 @@ const getColorHex = (str: string): string => {
 const categoryIcon = (cat: string): React.ReactNode => {
   const lower = cat.toLowerCase()
   if (lower.includes("color")) return <Palette className="w-4 h-4" />
-  if (lower.includes("face")) return <ScanFaceIcon className="w-4 h-4" />
+  if (lower.includes("face")) return <FaceMask className="w-4 h-4" />
   if (lower.includes("body")) return <Shirt className="w-4 h-4" />
   return <Lightbulb className="w-4 h-4" />
 }

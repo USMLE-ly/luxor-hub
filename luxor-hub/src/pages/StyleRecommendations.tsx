@@ -3,7 +3,7 @@ import { AppLayout } from "@/components/app/AppLayout";
 import { toast } from "sonner";
 import { notifyEvent } from "@/lib/notificationService";
 import { motion, AnimatePresence } from "framer-motion";
-import {Spinner, UploadSimple, Camera, Palette, ScanFaceIcon, User, Star, Lightbulb, Warning} from "@phosphor-icons/react";
+import {Spinner, UploadSimple, Camera, Palette, FaceMask, User, Star, Lightbulb, Warning} from "@phosphor-icons/react";
 import { humanizeText } from "@/lib/humanizer";
 import InfoCardsTable, { type RowData, type CellData } from "@/components/ui/info-cards-table";
 import FashionReviewCard from "@/components/ui/fashion-review-card";
@@ -166,7 +166,7 @@ export default function StyleRecommendationsPage() {
       const columns: CellData[] = [];
       columns.push({ header: "Collars", value: fr.best_collar_types?.length ? fr.best_collar_types : null });
       columns.push({ header: "Necklines", value: fr.best_neckline_styles?.length ? fr.best_neckline_styles : null });
-      columns.push({ header: "Glasses", value: fr.glasses_recommendation ? humanizeText(fr.glasses_recommendation) : null });
+      columns.push({ header: "Eyeglasses", value: fr.glasses_recommendation ? humanizeText(fr.glasses_recommendation) : null });
       columns.push({ header: "Hats", value: fr.hat_recommendation ? humanizeText(fr.hat_recommendation) : null });
       columns.push({ header: "Hairstyle", value: fr.hairstyle_advice ? humanizeText(fr.hairstyle_advice) : null });
       columns.push({ header: "Beard", value: fr.beard_advice ? humanizeText(fr.beard_advice) : null });
@@ -392,7 +392,7 @@ export default function StyleRecommendationsPage() {
                 <div className="absolute inset-0 bg-gradient-to-br from-white/[0.07] via-transparent to-transparent pointer-events-none rounded-[1.75rem]" />
                 <div className="relative overflow-hidden rounded-[1.25rem] bg-white/5 backdrop-blur-md p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent pointer-events-none" />
-                <div className="flex items-center gap-2 mb-4"><span className="text-primary"><ScanFaceIcon className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-foreground/80">Face Analysis</h3></div>
+                <div className="flex items-center gap-2 mb-4"><span className="text-primary"><FaceMask className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-foreground/80">Face Analysis</h3></div>
                 <InfoRow label="Face Shape" value={analysis.face_shape} />
                 <InfoRow label="Eye Shape" value={analysis.eye_shape} />
                 <InfoRow label="Eye Size" value={analysis.eye_size} />

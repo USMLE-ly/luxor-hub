@@ -771,7 +771,7 @@ export default function Analysis() {
               </>
             )}
 
-            {/* ---- History ---- */}
+            {/* ---- ClockCounterClockwise ---- */}
             {history.length > 0 && (
               <motion.div variants={childVariants} className="pt-4">
                 <h3 className="font-display text-lg text-foreground mb-4 flex items-center gap-2">

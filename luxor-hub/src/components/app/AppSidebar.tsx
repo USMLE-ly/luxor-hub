@@ -1,4 +1,4 @@
-import {Home, TShirt, MagicWand, ChatCircle, ChartBar, GearSix, SignOut, Sparkle, ArrowsOut, User, ScanEye, Trophy, Flame, Award, Bell, CalendarDots, LayoutGrid, Video, PaintBrush, StackSimple, GlobeHemisphereWest, Crown, DollarSign} from "@phosphor-icons/react";
+import {House, TShirt, MagicWand, ChatCircle, ChartBar, GearSix, SignOut, Sparkle, ArrowsOut, User, Scan, Trophy, Flame, Trophy, Bell, CalendarDots, SquaresFour, Video, PaintBrush, StackSimple, GlobeHemisphereWest, Crown, CurrencyDollar} from "@phosphor-icons/react";
 import { NotificationBell } from "./NotificationBell";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
@@ -22,20 +22,20 @@ const navItems = [
   { title: "My Closet", url: "/closet", icon: Shirt },
   { title: "Outfit Generator", url: "/outfits", icon: Wand2 },
   { title: "Outfit Builder", url: "/outfit-builder", icon: Move },
-  { title: "Outfit Analysis", url: "/outfit-analysis", icon: ScanEye },
+  { title: "Outfit Analysis", url: "/outfit-analysis", icon: Scan },
   { title: "Outfit Calendar", url: "/outfit-calendar", icon: CalendarDays },
   { title: "AI Stylist", url: "/chat", icon: MessageCircle },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Inspiration", url: "/inspiration", icon: Sparkles },
-  { title: "Mood Board", url: "/mood-board", icon: LayoutGrid },
+  { title: "Mood Board", url: "/mood-board", icon: SquaresFour },
   { title: "Video Analysis", url: "/video-analysis", icon: Video },
   { title: "Fashion Designer", url: "/fashion-designer", icon: Paintbrush },
   { title: "Virtual Try-On", url: "/virtual-tryon", icon: Layers },
   { title: "Community Gallery", url: "/community-gallery", icon: Globe },
   { title: "Leaderboard", url: "/leaderboard", icon: Trophy },
   { title: "Weekly Challenge", url: "/weekly-challenge", icon: Flame },
-  { title: "Badges", url: "/badges", icon: Award },
-  { title: "Wardrobe Value", url: "/wardrobe-value", icon: DollarSign },
+  { title: "Badges", url: "/badges", icon: Trophy },
+  { title: "Wardrobe Value", url: "/wardrobe-value", icon: CurrencyDollar },
   { title: "Notifications", url: "/notifications", icon: Bell },
   { title: "Settings", url: "/settings", icon: Settings },
 ];

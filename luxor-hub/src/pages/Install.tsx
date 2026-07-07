@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import {DownloadSimple, Smartphone, Share, Plus, ArrowRight, Check} from "@phosphor-icons/react";
+import {DownloadSimple, DeviceMobile, Share, Plus, ArrowRight, Check} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -58,7 +58,7 @@ const Install = () => {
       >
         <div>
           <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-primary/20 flex items-center justify-center">
-            <Smartphone className="w-10 h-10 text-primary" />
+            <DeviceMobile className="w-10 h-10 text-primary" />
           </div>
           <h1 className="font-display text-3xl font-bold text-foreground mb-2">Install LEXOR®</h1>
           <p className="text-muted-foreground font-sans text-sm">
@@ -102,7 +102,7 @@ const Install = () => {
                   <Plus className="w-4 h-4 text-primary" />
                 </div>
                 <div>
-                  <p className="font-sans text-sm text-foreground">Tap "Add to Home Screen"</p>
+                  <p className="font-sans text-sm text-foreground">Tap "Add to House Screen"</p>
                   <p className="font-sans text-xs text-muted-foreground">Scroll down in the share menu</p>
                 </div>
               </div>
@@ -121,7 +121,7 @@ const Install = () => {
           <div className="glass rounded-2xl p-8 space-y-4">
             <p className="font-sans text-sm text-foreground">Use the browser menu to install</p>
             <p className="text-muted-foreground font-sans text-xs">
-              Look for "Install app" or "Add to Home Screen" in your browser's menu (⋮)
+              Look for "Install app" or "Add to House Screen" in your browser's menu (⋮)
             </p>
           </div>
         )}

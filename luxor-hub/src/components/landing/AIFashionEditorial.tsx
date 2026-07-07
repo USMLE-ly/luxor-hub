@@ -98,7 +98,6 @@ const AIFashionEditorial = () => (
         </div>
       </AnimatedContainer>
     </div>
-  </ScrollReveal>
     </section>
 );
 

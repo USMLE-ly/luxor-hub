@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import {ChartBar, Palette, TrendUp, TShirt, CalendarDots, CaretLeft, CaretRight, Award, Flame, Star, Spinner, ChartPieSlice, DollarSign, Snowflake, Sun, Leaf, CloudRain, ArrowUpRight, ArrowDownRight, } from "@phosphor-icons/react";
+import {ChartBar, Palette, TrendUp, TShirt, CalendarDots, CaretLeft, CaretRight, Trophy, Flame, Star, Spinner, ChartPieSlice, CurrencyDollar, Snowflake, Sun, Leaf, CloudRain, ArrowUpRight, ArrowDownRight, } from "@phosphor-icons/react";
 import { format, startOfMonth, endOfMonth, addMonths, subMonths, eachDayOfInterval } from "date-fns";
 import { Progress } from "@/components/ui/progress";
 
@@ -270,7 +270,7 @@ const MonthlyReportInner = () => {
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }}
                 className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-forest/40 p-4 overflow-hidden">
                 <div className="flex items-center gap-2 mb-3">
-                  <DollarSign className="w-4 h-4 text-emerald-500" />
+                  <CurrencyDollar className="w-4 h-4 text-emerald-500" />
                   <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.15em]">Cost-Per-Wear Analytics</p>
                 </div>
                 {/* Summary row */}
@@ -309,7 +309,7 @@ const MonthlyReportInner = () => {
                             <p className="text-[9px] text-muted-foreground font-sans">{item.wears} wears · ${item.priceNum}</p>
                           </div>
                           <div className="flex items-center gap-1">
-                            {item.paidOff && <Award className="w-3 h-3 text-amber-400" />}
+                            {item.paidOff && <Trophy className="w-3 h-3 text-amber-400" />}
                             <span className={`text-xs font-sans font-bold ${item.cpw < 5 ? "text-emerald-500" : "text-foreground"}`}>${item.cpw}</span>
                             <span className="text-[8px] text-muted-foreground">/wear</span>
                           </div>

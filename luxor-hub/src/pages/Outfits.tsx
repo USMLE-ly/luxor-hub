@@ -371,7 +371,6 @@ const Outfits = () => {
             )}
           </DialogContent>
         </Dialog>
-      </div>
     </AppLayout>
   );
 };

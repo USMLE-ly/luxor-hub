@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import {Sparkle, Spinner, DownloadSimple, Palette, TShirt, MagicWand, Heart, ShareNetwork, TrashSimple, History, Image, TwitterLogo, LinkSimple, Check, Eye} from "@phosphor-icons/react";
+import {Sparkle, Spinner, DownloadSimple, Palette, TShirt, MagicWand, Heart, ShareNetwork, TrashSimple, ClockCounterClockwise, Image, TwitterLogo, LinkSimple, Check, Eye} from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { RainbowButton } from "@/components/ui/rainbow-button";
@@ -243,7 +243,7 @@ export default function FashionDesigner() {
               <Wand2 className="w-4 h-4" /> Create
             </TabsTrigger>
             <TabsTrigger value="gallery" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground" onClick={fetchGallery}>
-              <History className="w-4 h-4" /> Gallery ({gallery.length})
+              <ClockCounterClockwise className="w-4 h-4" /> Gallery ({gallery.length})
             </TabsTrigger>
           </TabsList>
 

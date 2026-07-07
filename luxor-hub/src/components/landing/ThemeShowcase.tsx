@@ -1,6 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useCallback } from "react";
-import {GripVertical, Diamond, Star, TrendUp, Palette} from "@phosphor-icons/react";
+import {DotsSixVertical, Diamond, Star, TrendUp, Palette} from "@phosphor-icons/react";
 import { TextReveal } from "@/components/ui/animated-text-reveal";
 
 const MockDashboard = ({ mode }: { mode: "light" | "dark" }) => {
@@ -148,7 +148,7 @@ const ThemeShowcase = () => {
             >
               <div className="w-px h-full bg-primary/60" />
               <div className="absolute w-10 h-10 rounded-full bg-card/90 backdrop-blur-md border-2 border-primary shadow-[0_0_16px_hsl(var(--primary)/0.3)] flex items-center justify-center">
-                <GripVertical className="w-4 h-4 text-primary" />
+                <DotsSixVertical className="w-4 h-4 text-primary" />
               </div>
             </div>
 

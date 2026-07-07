@@ -258,7 +258,6 @@ const Pricing = () => {
                 />
               </div>
             </motion.div>
-            </StaggerItem>
           ))}
         </div>
 

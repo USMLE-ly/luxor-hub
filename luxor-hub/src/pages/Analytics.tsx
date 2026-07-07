@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import {ChartBar, TrendUp, Leaf, Warning, DollarSign, Calendar, Sparkle, Spinner, ShoppingBag, CaretRight, Clock, Recycle, Heart, PackageOpen, } from "@phosphor-icons/react";
+import {ChartBar, TrendUp, Leaf, Warning, CurrencyDollar, Calendar, Sparkle, Spinner, ShoppingBag, CaretRight, Clock, Recycle, Heart, Package, } from "@phosphor-icons/react";
 import {
   PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   RadialBarChart, RadialBar,
@@ -180,7 +180,7 @@ const Analytics = () => {
   const statCards = [
     { label: "Total Items", value: totalItems, icon: BarChart3, color: "text-primary" },
     { label: "Total Wears Logged", value: totalWears, icon: Calendar, color: "text-gold-light" },
-    { label: "Closet Value", value: `$${totalValue.toLocaleString()}`, icon: DollarSign, color: "text-primary" },
+    { label: "Closet Value", value: `$${totalValue.toLocaleString()}`, icon: CurrencyDollar, color: "text-primary" },
     { label: "Sustainability", value: `${sustainabilityScore}/100`, icon: Leaf, color: sustainabilityScore > 50 ? "text-green-500" : "text-gold-light" },
   ];
 
@@ -236,7 +236,7 @@ const Analytics = () => {
           {([
             { key: "overview" as const, label: "📊 Overview" },
             { key: "gaps" as const, label: "🔍 Gaps" },
-            { key: "history" as const, label: "📅 History" },
+            { key: "history" as const, label: "📅 ClockCounterClockwise" },
             { key: "sustainability" as const, label: "🌱 Sustainability" },
           ]).map(tab => (
             <button key={tab.key} onClick={() => setActiveTab(tab.key)}
@@ -294,7 +294,7 @@ const Analytics = () => {
             {costPerWear.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="glass rounded-2xl p-6 mb-8">
                 <h3 className="font-display text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-                  <DollarSign className="h-5 w-5 text-primary" /> Cost Per Wear
+                  <CurrencyDollar className="h-5 w-5 text-primary" /> Cost Per Wear
                 </h3>
                 <div className="space-y-3">
                   {costPerWear.map((item) => (
@@ -390,7 +390,7 @@ const Analytics = () => {
             {wearLogs.length === 0 ? (
               <div className="glass rounded-2xl p-8 text-center">
                 <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="font-display text-xl font-bold text-foreground mb-2">No Wear History Yet</h3>
+                <h3 className="font-display text-xl font-bold text-foreground mb-2">No Wear ClockCounterClockwise Yet</h3>
                 <p className="text-muted-foreground font-sans text-sm">Log wears from your closet to see your timeline here.</p>
               </div>
             ) : (
@@ -502,7 +502,7 @@ const Analytics = () => {
               </p>
               {donationCandidates.length === 0 ? (
                 <div className="text-center py-6">
-                  <PackageOpen className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
+                  <Package className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
                   <p className="text-sm text-muted-foreground font-sans">All your items are well-loved! 🎉</p>
                 </div>
               ) : (
@@ -520,7 +520,7 @@ const Analytics = () => {
                             <img src={item.photo_url} alt="" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
                           ) : (
                             <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                              <PackageOpen className="w-4 h-4 text-muted-foreground" />
+                              <Package className="w-4 h-4 text-muted-foreground" />
                             </div>
                           )}
                           <div className="min-w-0">

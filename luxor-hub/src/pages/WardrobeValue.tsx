@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {DollarSign, TrendDown, TrendUp, Warning, X, TShirt, Footprints, Watch, ShoppingBag} from "@phosphor-icons/react";
+import {CurrencyDollar, TrendDown, TrendUp, Warning, X, TShirt, Footprints, Watch, ShoppingBag} from "@phosphor-icons/react";
 import TierGate from "@/components/app/TierGate";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
@@ -133,7 +133,7 @@ function WardrobeValueContent() {
       {/* Header */}
       <motion.div variants={fadeUp}>
         <h1 className="font-display text-2xl font-bold text-foreground flex items-center gap-2">
-          <DollarSign className="w-6 h-6" /> Wardrobe Value
+          <CurrencyDollar className="w-6 h-6" /> Wardrobe Value
         </h1>
         <p className="text-sm text-muted-foreground font-sans mt-1">
           Understand your closet investment

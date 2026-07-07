@@ -4,7 +4,7 @@ import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import {LayoutGrid, Plus, TrashSimple, Image, TextT, Palette, Link2, X, GripVertical, } from "@phosphor-icons/react";
+import {SquaresFour, Plus, TrashSimple, Image, TextT, Palette, Link, X, DotsSixVertical, } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -226,7 +226,7 @@ const MoodBoard = () => {
           <a href={item.content?.url} target="_blank" rel="noopener noreferrer" className="w-full h-full flex items-center justify-center p-2 bg-secondary/50 rounded-lg"
             onClick={e => { if (dragging) e.preventDefault(); }}>
             <div className="text-center">
-              <Link2 className="w-5 h-5 text-primary mx-auto mb-1" />
+              <Link className="w-5 h-5 text-primary mx-auto mb-1" />
               <p className="font-sans text-[10px] text-muted-foreground truncate">{item.content?.url}</p>
             </div>
           </a>
@@ -245,7 +245,7 @@ const MoodBoard = () => {
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-5">
           <div>
             <h1 className="font-display text-2xl font-bold text-foreground flex items-center gap-2">
-              <LayoutGrid className="h-6 w-6 text-primary" /> Mood Boards
+              <SquaresFour className="h-6 w-6 text-primary" /> Mood Boards
             </h1>
             <p className="text-muted-foreground font-sans text-xs mt-0.5">Curate your style inspiration</p>
           </div>
@@ -287,7 +287,7 @@ const MoodBoard = () => {
                 <Type className="w-3.5 h-3.5" /> Text
               </Button>
               <Button size="sm" variant="outline" onClick={() => { setNewItemType("link"); setShowAddItem(true); }} className="gap-1.5 text-xs">
-                <Link2 className="w-3.5 h-3.5" /> Link
+                <Link className="w-3.5 h-3.5" /> Link
               </Button>
               <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
             </div>
@@ -320,7 +320,7 @@ const MoodBoard = () => {
                   {renderItem(item)}
                   {/* Drag handle indicator */}
                   <div className="absolute top-1 left-1 w-5 h-5 rounded bg-background/60 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <GripVertical className="w-3 h-3 text-foreground/60" />
+                    <DotsSixVertical className="w-3 h-3 text-foreground/60" />
                   </div>
                   <button
                     onClick={(e) => { e.stopPropagation(); deleteItem(item.id); }}
@@ -336,7 +336,7 @@ const MoodBoard = () => {
           </>
         ) : (
           <div className="glass rounded-2xl p-10 text-center">
-            <LayoutGrid className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+            <SquaresFour className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
             <p className="text-muted-foreground font-sans text-sm mb-3">Create a board to start pinning inspiration</p>
             <Button onClick={() => setShowNewBoard(true)}>Create Board</Button>
           </div>

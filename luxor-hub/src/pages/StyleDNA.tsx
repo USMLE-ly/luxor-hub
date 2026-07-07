@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import {Sparkle, Palette, Star, ArrowRight, CheckCircle2, ShieldCheck, Scissors, TShirt, Check, Dna, User, ScanFace, Glasses, Gem, Gift, StackSimple, Shapes, PaintBrush, Briefcase, Heart, TrendUp, CaretRight, } from "@phosphor-icons/react";
+import {Sparkle, Palette, Star, ArrowRight, CheckCircle, ShieldCheck, Scissors, TShirt, Check, Dna, User, FaceMask, Eyeglasses, Diamond, Gift, StackSimple, Shapes, PaintBrush, Briefcase, Heart, TrendUp, CaretRight, } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { AppLayout } from "@/components/app/AppLayout";
 import { GradientButton } from "@/components/ui/gradient-button";
@@ -326,7 +326,7 @@ const StyleDNA = () => {
                   <FaceShapeIllustration shape={faceShape} size={100} />
                   <div className="flex-1 pt-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <ScanFace className="w-5 h-5 text-[hsl(200,50%,60%)]" />
+                      <FaceMask className="w-5 h-5 text-[hsl(200,50%,60%)]" />
                       <h3 className="font-display text-base font-bold text-foreground">{faceShape}</h3>
                     </div>
                     {faceShapeDescription && (
@@ -366,13 +366,13 @@ const StyleDNA = () => {
               className="rounded-2xl border border-border bg-card p-5"
             >
               <div className="flex items-center gap-2 mb-4">
-                <Glasses className="w-5 h-5 text-[hsl(200,50%,60%)]" />
+                <Eyeglasses className="w-5 h-5 text-[hsl(200,50%,60%)]" />
                 <h3 className="font-display text-base font-bold text-foreground">How to Work Your {faceShape} Face</h3>
               </div>
               <div className="space-y-3">
                 {getFaceShapeTips(faceShape).map((tip, i) => (
                   <div key={i} className="flex items-start gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-[hsl(200,50%,60%)] mt-0.5 flex-shrink-0" />
+                    <CheckCircle className="w-4 h-4 text-[hsl(200,50%,60%)] mt-0.5 flex-shrink-0" />
                     <p className="text-sm font-sans text-muted-foreground leading-relaxed">{tip}</p>
                   </div>
                 ))}
@@ -389,13 +389,13 @@ const StyleDNA = () => {
               className="rounded-2xl border border-border bg-card p-5"
             >
               <div className="flex items-center gap-2 mb-4">
-                <Gem className="w-5 h-5 text-[hsl(270,40%,65%)]" />
+                <Diamond className="w-5 h-5 text-[hsl(270,40%,65%)]" />
                 <h3 className="font-display text-base font-bold text-foreground">Dressing Your {bodyShape} Frame</h3>
               </div>
               <div className="space-y-3">
                 {getBodyShapeTips(bodyShape).map((tip, i) => (
                   <div key={i} className="flex items-start gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-[hsl(270,40%,65%)] mt-0.5 flex-shrink-0" />
+                    <CheckCircle className="w-4 h-4 text-[hsl(270,40%,65%)] mt-0.5 flex-shrink-0" />
                     <p className="text-sm font-sans text-muted-foreground leading-relaxed">{tip}</p>
                   </div>
                 ))}
@@ -492,7 +492,7 @@ const StyleDNA = () => {
                   <div className="space-y-3">
                     {dna.flatteringSilhouettes.map((sil, i) => (
                       <div key={i} className="flex items-start gap-3">
-                        <CheckCircle2 className="w-4 h-4 text-[hsl(270,40%,65%)] mt-0.5 flex-shrink-0" />
+                        <CheckCircle className="w-4 h-4 text-[hsl(270,40%,65%)] mt-0.5 flex-shrink-0" />
                         <p className="text-sm font-sans text-muted-foreground leading-relaxed">{sil}</p>
                       </div>
                     ))}
@@ -557,7 +557,7 @@ const StyleDNA = () => {
                 <div className="space-y-3">
                   {dna.recommendations.map((rec, i) => (
                     <div key={i} className="flex items-start gap-3">
-                      <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                      <CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
                       <p className="text-sm font-sans text-muted-foreground leading-relaxed">{rec}</p>
                     </div>
                   ))}

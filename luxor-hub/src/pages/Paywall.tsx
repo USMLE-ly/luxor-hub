@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import {Crown, Shield, Clock, RotateCcw} from "@phosphor-icons/react";
+import {Crown, Shield, Clock, ArrowCounterClockwise} from "@phosphor-icons/react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -307,7 +307,7 @@ const Paywall = () => {
             disabled={restoring}
             className="flex items-center gap-1.5 text-xs font-sans text-muted-foreground hover:text-primary transition-colors active:scale-95"
           >
-            <RotateCcw className={`w-3.5 h-3.5 ${restoring ? "animate-spin" : ""}`} />
+            <ArrowCounterClockwise className={`w-3.5 h-3.5 ${restoring ? "animate-spin" : ""}`} />
             Restore previous purchase
           </button>
         </motion.div>

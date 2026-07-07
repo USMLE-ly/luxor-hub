@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import Pressable from "@/components/ui/pressable";
-import {TShirt, ScanFace, CloudSun, ShieldCheck} from "@phosphor-icons/react";
+import {TShirt, FaceMask, CloudSun, ShieldCheck} from "@phosphor-icons/react";
 
 const uvps = [
   { icon: Shirt, label: "Uses Your Existing Closet", sub: "No shopping required" },
-  { icon: ScanFace, label: "Learns Your Body", sub: "Not a generic mannequin" },
+  { icon: FaceMask, label: "Learns Your Body", sub: "Not a generic mannequin" },
   { icon: CloudSun, label: "Weather-Checked Daily", sub: "Practical value every morning" },
   { icon: ShieldCheck, label: "30-Day Money Back", sub: "Zero risk" },
 ];

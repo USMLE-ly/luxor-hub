@@ -74,7 +74,7 @@ export function StylePointsWidget() {
         </div>
       </div>
 
-      {/* Recent Activity */}
+      {/* Recent Pulse */}
       {recentPoints.length > 0 && (
         <div className="space-y-1.5">
           {recentPoints.slice(0, 3).map((entry, i) => (

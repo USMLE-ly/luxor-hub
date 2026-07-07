@@ -1,5 +1,5 @@
 import { useState } from "react";
-import {TwitterLogo, LinkedinLogo, Link2, Check} from "@phosphor-icons/react";
+import {TwitterLogo, LinkedinLogo, Link, Check} from "@phosphor-icons/react";
 
 interface ShareButtonsProps {
   title: string;
@@ -44,7 +44,7 @@ const ShareButtons = ({ title, slug }: ShareButtonsProps) => {
         className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-border/30 text-muted-foreground hover:text-foreground hover:border-border/60 transition-colors"
         aria-label="Copy link"
       >
-        {copied ? <Check className="w-3.5 h-3.5 text-primary" /> : <Link2 className="w-3.5 h-3.5" />}
+        {copied ? <Check className="w-3.5 h-3.5 text-primary" /> : <Link className="w-3.5 h-3.5" />}
       </button>
     </div>
   );

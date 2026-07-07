@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import {Video, Play, Pause, SkipForward, Spinner, Sparkle, Camera, TrashSimple, CheckCircle2, Warning, Image} from "@phosphor-icons/react";
+import {Video, Play, Pause, SkipForward, Spinner, Sparkle, Camera, TrashSimple, CheckCircle, Warning, Image} from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { RainbowButton } from "@/components/ui/rainbow-button";
@@ -337,7 +337,7 @@ export default function VideoAnalysis() {
                       <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-forest/80 to-transparent p-2">
                         <p className="text-xs text-foreground/80">{frame.timestamp.toFixed(1)}s</p>
                         {frame.status === "analyzing" && <Loader2 className="w-3 h-3 animate-spin text-primary absolute top-2 right-2" />}
-                        {frame.status === "done" && <CheckCircle2 className="w-3 h-3 text-green-400 absolute top-2 right-2" />}
+                        {frame.status === "done" && <CheckCircle className="w-3 h-3 text-green-400 absolute top-2 right-2" />}
                         {frame.status === "error" && <AlertTriangle className="w-3 h-3 text-destructive absolute top-2 right-2" />}
                       </div>
                       {frame.analysis && (

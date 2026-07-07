@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { ContainerScroll } from "@/components/ui/container-scroll";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { motion } from "framer-motion";
-import {Diamond, TrendUp, Palette, Calendar, ShoppingBag, ChartBar, ChatSquareText} from "@phosphor-icons/react";
+import {Diamond, TrendUp, Palette, Calendar, ShoppingBag, ChartBar, ChatCircleDots} from "@phosphor-icons/react";
 
 const outfitThumbs = [
   { label: "Casual Friday", gradient: "from-amber-700 via-stone-300 to-blue-900" },

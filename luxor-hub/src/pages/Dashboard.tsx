@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import {TShirt, MagicWand, ArrowRight, Heart, Palette, Scissors, Eye, ShoppingBag, ArrowSquareOut, Check, Gift, Calendar, Briefcase, PartyPopper, Sun, CaretRight, TrendUp, Snowflake, Dumbbell, WarningCircle, } from "@phosphor-icons/react";
+import {TShirt, MagicWand, ArrowRight, Heart, Palette, Scissors, Eye, ShoppingBag, ArrowSquareOut, Check, Gift, Calendar, Briefcase, Confetti, Sun, CaretRight, TrendUp, Snowflake, Barbell, WarningCircle, } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { useNavigate } from "react-router-dom";
@@ -335,7 +335,7 @@ const Dashboard = () => {
     { label: "All", icon: <Shirt className="w-4 h-4" />, color: "hsl(var(--primary))", value: null },
     { label: "Everyday", icon: <Sun className="w-4 h-4" />, color: "hsl(142, 60%, 45%)", value: "everyday" },
     { label: "Work", icon: <Briefcase className="w-4 h-4" />, color: "hsl(30, 80%, 55%)", value: "work" },
-    { label: "Party", icon: <PartyPopper className="w-4 h-4" />, color: "hsl(270, 60%, 55%)", value: "party" },
+    { label: "Party", icon: <Confetti className="w-4 h-4" />, color: "hsl(270, 60%, 55%)", value: "party" },
   ];
 
   const filteredOutfits = activeOccasion
@@ -345,7 +345,7 @@ const Dashboard = () => {
   const chatPrompts = [
     { text: "Pieces that never go out of style", icon: <TrendingUp className="w-4 h-4 text-primary" /> },
     { text: "Main winter trends this season", icon: <Snowflake className="w-4 h-4 text-primary" /> },
-    { text: "What sporty items are essential?", icon: <Dumbbell className="w-4 h-4 text-primary" /> },
+    { text: "What sporty items are essential?", icon: <Barbell className="w-4 h-4 text-primary" /> },
   ];
 
   if (pageLoading) {

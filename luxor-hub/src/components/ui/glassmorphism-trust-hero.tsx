@@ -3,13 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { useScroll, useTransform, motion } from "framer-motion";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { GoldParticles } from "@/components/app/GoldParticles";
-import { NumberTicker } from "@/components/ui/number-ticker";
+import NumberTicker from "@/components/ui/number-ticker";
 import Pressable from "@/components/ui/pressable";
 import { DoubleBezel, DoubleBezelCard } from "@/components/ui/double-bezel";
 import CursorSpotlight from "@/components/ui/cursor-spotlight";
 import { ProgressiveImage } from "@/components/ui/progressive-image";
 import { ThreeGarmentShowcase } from "@/components/ui/three-garment-showcase";
-import {ArrowRight, Play, Target, Crown, Star, Hexagon, Triangle, Command, Ghost, Gem, Cpu, CaretDown, } from "@phosphor-icons/react";
+import {ArrowRight, Play, Target, Crown, Star, Hexagon, Triangle, Command, Ghost, Diamond, Cpu, CaretDown, } from "@phosphor-icons/react";
 import heroVideo from "@/assets/hero-video.mp4";
 
 const FloatingCircle = ({
@@ -50,7 +50,7 @@ const CLIENTS = [
   { name: "GLAMOUR", icon: Triangle },
   { name: "BAZAAR", icon: Command },
   { name: "ELLE", icon: Ghost },
-  { name: "GQ", icon: Gem },
+  { name: "GQ", icon: Diamond },
   { name: "WIRED", icon: Cpu },
 ];
 
@@ -332,11 +332,12 @@ export default function GlassmorphismTrustHero() {
                     aria-label={`Show testimonial ${i + 1}`}
                   />
                 ))}
-              </motion.div>
+              </div>
             </motion.div>
-          </div>
+          </DoubleBezelCard>
         </div>
       </div>
     </div>
+  </div>
   );
 }

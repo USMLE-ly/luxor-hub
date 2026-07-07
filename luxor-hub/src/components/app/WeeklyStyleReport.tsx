@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import {Leaf, TrendDown, Award, Calendar, TShirt, ArrowRight} from "@phosphor-icons/react";
+import {Leaf, TrendDown, Trophy, Calendar, TShirt, ArrowRight} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -168,7 +168,7 @@ export const WeeklyStyleReport = () => {
         {report.mostWornItem && (
           <div className="bg-secondary/50 rounded-xl p-3 flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg gold-gradient flex items-center justify-center flex-shrink-0">
-              <Award className="h-4 w-4 text-primary-foreground" />
+              <Trophy className="h-4 w-4 text-primary-foreground" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs text-muted-foreground font-sans">Most Worn This Week</p>

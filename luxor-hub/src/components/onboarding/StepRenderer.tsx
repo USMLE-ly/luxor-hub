@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
-import {Check, Camera, Smartphone, Video, User, FlipHorizontal, TShirt, Glasses, Watch, Gem, Scissors, Bell, MapPin} from "@phosphor-icons/react";
+import {Check, Camera, DeviceMobile, Video, User, FlipHorizontal, TShirt, Eyeglasses, Watch, Diamond, Scissors, Bell, MapPin} from "@phosphor-icons/react";
 import { useAppPermissions } from "@/hooks/useAppPermissions";
 
 // Haptic + audio tick for card selection
@@ -460,7 +460,7 @@ const SelfieGuideStep = ({ step, gender }: { step: OnboardingStep; gender?: "fem
         ) : (
           <div className="text-center">
             <Camera className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-            <Smartphone className="w-8 h-8 text-muted-foreground mx-auto" />
+            <DeviceMobile className="w-8 h-8 text-muted-foreground mx-auto" />
           </div>
         )}
         {step.stepNumber === 5 && (
@@ -1493,11 +1493,11 @@ const DetectionResultStep = ({ step, answers, gender, aiResults }: { step: Onboa
                   {recs.necklines.map(n => <p key={n} className="text-xs text-muted-foreground font-sans">• {n}</p>)}
                 </div>
                 <div className="p-3 rounded-xl bg-secondary/50 space-y-1">
-                  <div className="flex items-center gap-1.5"><Glasses className="w-4 h-4 text-primary" /><span className="text-xs font-semibold text-foreground font-sans">Glasses</span></div>
+                  <div className="flex items-center gap-1.5"><Eyeglasses className="w-4 h-4 text-primary" /><span className="text-xs font-semibold text-foreground font-sans">Eyeglasses</span></div>
                   {recs.glasses.map(n => <p key={n} className="text-xs text-muted-foreground font-sans">• {n}</p>)}
                 </div>
                 <div className="p-3 rounded-xl bg-secondary/50 space-y-1">
-                  <div className="flex items-center gap-1.5"><Gem className="w-4 h-4 text-primary" /><span className="text-xs font-semibold text-foreground font-sans">Earrings</span></div>
+                  <div className="flex items-center gap-1.5"><Diamond className="w-4 h-4 text-primary" /><span className="text-xs font-semibold text-foreground font-sans">Earrings</span></div>
                   {recs.earrings.map(n => <p key={n} className="text-xs text-muted-foreground font-sans">• {n}</p>)}
                 </div>
                 <div className="p-3 rounded-xl bg-secondary/50 space-y-1">
@@ -1709,7 +1709,7 @@ const DetectionResultStep = ({ step, answers, gender, aiResults }: { step: Onboa
                 { icon: <Shirt className="w-4 h-4 text-primary" />, label: "Silhouettes", items: recs.silhouettes },
                 { icon: <Scissors className="w-4 h-4 text-primary" />, label: "Dresses", items: recs.dresses },
                 { icon: <Watch className="w-4 h-4 text-primary" />, label: "Trousers", items: recs.trousers },
-                { icon: <Gem className="w-4 h-4 text-primary" />, label: "Jackets", items: recs.jackets },
+                { icon: <Diamond className="w-4 h-4 text-primary" />, label: "Jackets", items: recs.jackets },
               ].map((cat, idx) => (
                 <motion.div
                   key={cat.label}

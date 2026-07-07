@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { notifyEvent } from "@/lib/notificationService";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { OutfitComposition } from "@/components/ui/OutfitComposition";
-import {CalendarDots, CaretLeft, CaretRight, Plus, X, TShirt, Sparkle, Spinner, Cloud, Sun, CloudRain, Snowflake, Wind, Droplets, Thermometer, Pencil, Bell, BellSlash, MapPin, TrendUp, Flame, ChartBar, StackSimple, CopySimple, Palette, Star, ShareNetwork, Umbrella, ThermometerSnowflake, Warning, Award, Trophy, Lightning, Target, Crown, ArrowsClockwise, Lightbulb, } from "@phosphor-icons/react";
+import {CalendarDots, CaretLeft, CaretRight, Plus, X, TShirt, Sparkle, Spinner, Cloud, Sun, CloudRain, Snowflake, Wind, Drop, Thermometer, Pencil, Bell, BellSlash, MapPin, TrendUp, Flame, ChartBar, StackSimple, CopySimple, Palette, Star, ShareNetwork, Umbrella, ThermometerCold, Warning, Trophy, Trophy, Lightning, Target, Crown, ArrowsClockwise, Lightbulb, } from "@phosphor-icons/react";
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, addMonths, subMonths, subDays, isSameMonth, isSameDay, isToday, isSunday, differenceInMilliseconds, set as setDate } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -643,7 +643,7 @@ const OutfitCalendarInner = () => {
       });
     } else if (w.tempMin <= 12 && !hasOuterwear) {
       recs.push({
-        icon: <ThermometerSnowflake className="w-3.5 h-3.5" />,
+        icon: <ThermometerCold className="w-3.5 h-3.5" />,
         text: "Cool weather — consider adding a light jacket",
         severity: "info",
       });
@@ -883,7 +883,7 @@ const OutfitCalendarInner = () => {
     return { current, next, progress, streak };
   }, [calendarStats.streak]);
 
-  // Award streak badges automatically
+  // Trophy streak badges automatically
   useEffect(() => {
     if (!user || streakRewards.current.length === 0) return;
     const awardBadges = async () => {
@@ -982,7 +982,7 @@ const OutfitCalendarInner = () => {
                 </span>
                 {todayWeather.rain && (
                   <span className="flex items-center gap-1 text-blue-400">
-                    <Droplets className="w-3 h-3" /> Rain likely
+                    <Drop className="w-3 h-3" /> Rain likely
                   </span>
                 )}
               </div>
@@ -1181,7 +1181,7 @@ const OutfitCalendarInner = () => {
                       <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-secondary/60 text-xs font-sans text-muted-foreground">
                         {weatherCodeToIcon(w.code)}
                         <span>{w.tempMax}°/{w.tempMin}°</span>
-                        {w.rain && <Droplets className="w-3 h-3 text-blue-400" />}
+                        {w.rain && <Drop className="w-3 h-3 text-blue-400" />}
                       </div>
                     );
                   })()}
@@ -1482,7 +1482,7 @@ const OutfitCalendarInner = () => {
                     {weatherCodeToIcon(w.code)}
                     <span className="text-[11px] font-sans font-semibold text-foreground">{w.tempMax}°</span>
                     <span className="text-[9px] font-sans text-muted-foreground">{w.tempMin}°</span>
-                    {w.rain && <Droplets className="w-2.5 h-2.5 text-blue-400" />}
+                    {w.rain && <Drop className="w-2.5 h-2.5 text-blue-400" />}
                   </button>
                 );
               })}
