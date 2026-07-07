@@ -153,7 +153,7 @@ const Onboarding = () => {
   useEffect(() => {
     if (isGenerating) {
       const fallbackTimer = setTimeout(() => {
-        navigate("/paywall");
+        navigate("/dashboard");
       }, 10000);
       return () => clearTimeout(fallbackTimer);
     }
@@ -253,7 +253,7 @@ const Onboarding = () => {
       if (error) throw error;
       trackEvent("Lead", { content_name: "Onboarding Complete" });
       toast.success("Your Style DNA has been created!");
-      navigate("/paywall");
+      navigate("/dashboard");
     } catch (err: any) {
       toast.error(err.message);
     } finally {

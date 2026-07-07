@@ -84,14 +84,26 @@ const Auth = () => {
         let onboardingDone = false;
         if (uid) {
           try {
+            // Check if style_profiles row exists
             const { data: profile } = await supabase
               .from("style_profiles")
               .select("onboarding_completed")
               .eq("user_id", uid)
               .maybeSingle();
-            onboardingDone = profile?.onboarding_completed === true;
+
+            if (profile) {
+              onboardingDone = profile?.onboarding_completed === true;
+            } else {
+              // No profile row exists yet — create one
+              await supabase.from("style_profiles").insert({
+                user_id: uid,
+                onboarding_completed: false,
+                style_score: 50,
+                preferences: {},
+              });
+            }
           } catch {
-            // profile table may not exist yet — treat as not onboarded
+            // table may not exist yet — treat as not onboarded
           }
         }
         navigate(onboardingDone ? "/dashboard" : "/onboarding");
