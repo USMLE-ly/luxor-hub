@@ -388,7 +388,7 @@ const CouncilInner = () => {
                 }`}
                 title="Your Wardrobe"
               >
-                <Shirt className="w-3.5 h-3.5 text-muted-foreground" />
+                <TShirt className="w-3.5 h-3.5 text-muted-foreground" />
                 <span className="text-[10px] font-sans font-medium text-muted-foreground">{closetItems.length}</span>
               </button>
             )}
@@ -397,7 +397,7 @@ const CouncilInner = () => {
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border bg-card hover:border-primary/40 transition-colors"
               title="Switch to Quick Chat"
             >
-              <Sparkles className="w-3.5 h-3.5 text-muted-foreground" />
+              <Sparkle className="w-3.5 h-3.5 text-muted-foreground" />
               <span className="text-[10px] font-sans font-medium text-muted-foreground">Quick</span>
             </button>
             {messages.length > 0 && (
@@ -426,7 +426,7 @@ const CouncilInner = () => {
                         <img src={item.photo_url} alt={item.name || ""} className="w-10 h-10 rounded-lg object-cover border border-border/40" />
                       ) : (
                         <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center border border-border/40">
-                          <Shirt className="w-4 h-4 text-muted-foreground/40" />
+                          <TShirt className="w-4 h-4 text-muted-foreground/40" />
                         </div>
                       )}
                       <span className="text-[8px] font-sans text-muted-foreground truncate max-w-[40px]">{item.name || item.category}</span>
@@ -551,7 +551,7 @@ const CouncilInner = () => {
                                   <img src={item.photo_url} alt={item.name || ""} className="w-12 h-12 object-contain p-1" style={{ mixBlendMode: "multiply" }} />
                                 ) : (
                                   <div className="w-12 h-12 flex items-center justify-center">
-                                    <Shirt className="w-5 h-5 text-muted-foreground/30" />
+                                    <TShirt className="w-5 h-5 text-muted-foreground/30" />
                                   </div>
                                 )}
                                 <p className="text-[7px] font-sans text-muted-foreground text-center truncate px-1 pb-1 max-w-[48px]">{item.name}</p>

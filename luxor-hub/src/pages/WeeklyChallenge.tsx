@@ -272,7 +272,7 @@ export default function WeeklyChallenge() {
                   <Card className="glass-card">
                     <CardContent className="p-6">
                       <h3 className="font-display text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-primary" /> Submit Your Best Analysis
+                        <Sparkle className="w-4 h-4 text-primary" /> Submit Your Best Analysis
                       </h3>
                       <p className="text-sm text-muted-foreground mb-4">Pick your highest-scoring analysis from this week:</p>
                       <div className="space-y-2">
@@ -301,7 +301,7 @@ export default function WeeklyChallenge() {
                 {!userEntry && userAnalyses.length === 0 && (
                   <Card className="glass-card">
                     <CardContent className="p-6 text-center">
-                      <Sparkles className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
+                      <Sparkle className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
                       <p className="text-muted-foreground text-sm mb-3">
                         Analyze an outfit this week to enter the challenge!
                       </p>
@@ -361,7 +361,7 @@ export default function WeeklyChallenge() {
           <TabsContent value="challenges" className="space-y-4">
             {[
               {
-                icon: <Shirt className="w-5 h-5 text-primary" />,
+                icon: <TShirt className="w-5 h-5 text-primary" />,
                 title: "7-Day Capsule Challenge",
                 description: "Create 7 unique outfits using only 10 items from your closet",
                 points: 50,

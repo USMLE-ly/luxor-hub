@@ -944,7 +944,7 @@ const OutfitCalendarInner = () => {
                 whileTap={{ scale: 0.96 }}
                 className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-sans font-semibold gold-gradient text-primary-foreground shadow-[0_4px_12px_-2px_hsl(var(--gold)/0.4)] disabled:opacity-50"
               >
-                {autoFilling ? <Spinner className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                {autoFilling ? <Spinner className="h-3.5 w-3.5 animate-spin" /> : <Sparkle className="h-3.5 w-3.5" />}
                 {autoFilling ? "Generating..." : "Auto-Fill Week"}
               </motion.button>
             </div>
@@ -1197,7 +1197,7 @@ const OutfitCalendarInner = () => {
               {getEventsForDate(selectedDate).length === 0 ? (
                 <div className="text-center py-8 pl-3">
                   <div className="w-12 h-12 rounded-2xl bg-secondary/60 flex items-center justify-center mx-auto mb-3">
-                    <Shirt className="w-6 h-6 text-muted-foreground/40" />
+                    <TShirt className="w-6 h-6 text-muted-foreground/40" />
                   </div>
                   <p className="text-muted-foreground font-sans text-sm">No outfits planned</p>
                   <p className="text-muted-foreground/60 font-sans text-xs mt-0.5">Tap "Add" or use Auto-Fill Week</p>
@@ -1390,7 +1390,7 @@ const OutfitCalendarInner = () => {
                             className="text-muted-foreground/50 hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors"
                             title="Flat-Lay View"
                           >
-                            <Layers className="w-3.5 h-3.5" />
+                            <StackSimple className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => openEditDialog(ev)}
@@ -1503,7 +1503,7 @@ const OutfitCalendarInner = () => {
         >
           <div className="text-center">
             <div className="flex items-center justify-center gap-1 mb-1">
-              <CalendarDays className="w-3.5 h-3.5 text-primary" />
+              <CalendarDots className="w-3.5 h-3.5 text-primary" />
             </div>
             <p className="font-display text-lg font-bold text-foreground">{calendarStats.planned}</p>
             <p className="text-[9px] font-sans text-muted-foreground">Outfits Planned</p>
@@ -1618,7 +1618,7 @@ const OutfitCalendarInner = () => {
           <DialogContent className="max-w-sm">
             <DialogHeader>
               <DialogTitle className="font-display flex items-center gap-2">
-                <CalendarDays className="h-5 w-5 text-primary" /> Plan Outfit
+                <CalendarDots className="h-5 w-5 text-primary" /> Plan Outfit
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-2">
@@ -1633,7 +1633,7 @@ const OutfitCalendarInner = () => {
               {/* Manual Clothing Picker */}
               {!newEvent.outfitId && closetItems.length === 0 && (
                 <div className="text-center py-4 px-2 rounded-xl border border-dashed border-gold/20">
-                  <Shirt className="w-6 h-6 text-muted-foreground/30 mx-auto mb-2" />
+                  <TShirt className="w-6 h-6 text-muted-foreground/30 mx-auto mb-2" />
                   <p className="text-xs text-muted-foreground">Your closet is empty.</p>
                   <p className="text-[10px] text-muted-foreground/70 mt-0.5">Add items to the Closet page first.</p>
                 </div>
@@ -1657,7 +1657,7 @@ const OutfitCalendarInner = () => {
                             {ci.photo_url ? (
                               <img src={ci.photo_url} alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "multiply" }} />
                             ) : (
-                              <Shirt className="w-5 h-5 text-muted-foreground/30" />
+                              <TShirt className="w-5 h-5 text-muted-foreground/30" />
                             )}
                             <div className="absolute inset-0 bg-destructive/0 group-hover:bg-destructive/20 transition-colors flex items-center justify-center">
                               <X className="w-3 h-3 text-destructive opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -1692,7 +1692,7 @@ const OutfitCalendarInner = () => {
                             </div>
                           ) : (
                             <div className="w-12 h-14 rounded-lg bg-white/5 flex items-center justify-center">
-                              <Shirt className="w-5 h-5 text-muted-foreground/30" />
+                              <TShirt className="w-5 h-5 text-muted-foreground/30" />
                             </div>
                           )}
                           <span className="truncate w-full text-center text-[10px]">{ci.name || 'Item'}</span>
@@ -1749,7 +1749,7 @@ const OutfitCalendarInner = () => {
                             {ci.photo_url ? (
                               <img src={ci.photo_url} alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "multiply" }} />
                             ) : (
-                              <Shirt className="w-5 h-5 text-muted-foreground/30" />
+                              <TShirt className="w-5 h-5 text-muted-foreground/30" />
                             )}
                             <div className="absolute inset-0 bg-destructive/0 group-hover:bg-destructive/20 transition-colors flex items-center justify-center">
                               <X className="w-3 h-3 text-destructive opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -1812,7 +1812,7 @@ const OutfitCalendarInner = () => {
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle className="font-display flex items-center gap-2">
-                <Layers className="h-5 w-5 text-primary" /> Flat-Lay View
+                <StackSimple className="h-5 w-5 text-primary" /> Flat-Lay View
               </DialogTitle>
             </DialogHeader>
             {flatLayEvent && (
@@ -1873,7 +1873,7 @@ const OutfitCalendarInner = () => {
                                 </div>
                               ) : (
                                 <div className="w-full aspect-square flex items-center justify-center" style={{ background: "hsl(var(--muted) / 0.2)" }}>
-                                  <Shirt className="w-8 h-8 text-muted-foreground/30" />
+                                  <TShirt className="w-8 h-8 text-muted-foreground/30" />
                                 </div>
                               )}
                               <div className="px-3 pb-2.5">

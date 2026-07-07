@@ -56,7 +56,7 @@ export const WeeklyCapsuleWidget = () => {
       <div className="rounded-2xl border border-border bg-card overflow-hidden">
         <div className="p-5">
           <div className="flex items-center gap-2 mb-3">
-            <CalendarDays className="w-5 h-5 text-primary" />
+            <CalendarDots className="w-5 h-5 text-primary" />
             <h3 className="font-display text-lg font-bold text-foreground">This Week's Plan</h3>
           </div>
           <p className="text-muted-foreground text-xs font-sans mb-4">
@@ -66,7 +66,7 @@ export const WeeklyCapsuleWidget = () => {
             {loading ? (
               <><Spinner className="w-4 h-4 mr-2 animate-spin" /> Generating...</>
             ) : (
-              <><Sparkles className="w-4 h-4 mr-2" /> Generate Weekly Plan</>
+              <><Sparkle className="w-4 h-4 mr-2" /> Generate Weekly Plan</>
             )}
           </GradientButton>
         </div>
@@ -79,7 +79,7 @@ export const WeeklyCapsuleWidget = () => {
       <div className="p-5">
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
-            <CalendarDays className="w-5 h-5 text-primary" />
+            <CalendarDots className="w-5 h-5 text-primary" />
             <h3 className="font-display text-lg font-bold text-foreground">This Week's Plan</h3>
           </div>
           <button
@@ -138,7 +138,7 @@ export const WeeklyCapsuleWidget = () => {
                           <div className="flex flex-wrap gap-1.5 mb-2">
                             {day.items.map((item, j) => (
                               <span key={j} className="text-[10px] font-sans bg-secondary text-foreground px-2 py-1 rounded-full flex items-center gap-1">
-                                <Shirt className="w-2.5 h-2.5" /> {item}
+                                <TShirt className="w-2.5 h-2.5" /> {item}
                               </span>
                             ))}
                           </div>

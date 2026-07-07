@@ -32,7 +32,7 @@ const OfflineIndicator = () => {
           transition={{ type: "spring", damping: 20 }}
           className="fixed top-0 left-0 right-0 z-[9999] bg-destructive text-destructive-foreground px-4 py-2.5 flex items-center justify-center gap-2 text-sm font-sans shadow-lg"
         >
-          <WifiOff className="w-4 h-4" />
+          <WifiSlash className="w-4 h-4" />
           You're offline — some features may be unavailable
         </motion.div>
       )}
@@ -44,7 +44,7 @@ const OfflineIndicator = () => {
           transition={{ type: "spring", damping: 20 }}
           className="fixed top-0 left-0 right-0 z-[9999] bg-primary text-primary-foreground px-4 py-2.5 flex items-center justify-center gap-2 text-sm font-sans shadow-lg"
         >
-          <Wifi className="w-4 h-4" />
+          <WifiHigh className="w-4 h-4" />
           You're back online!
         </motion.div>
       )}

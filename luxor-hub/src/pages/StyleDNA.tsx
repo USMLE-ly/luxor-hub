@@ -228,7 +228,7 @@ const StyleDNA = () => {
               <div className="text-left">
                 <div className="flex items-center gap-1.5 mb-1.5">
                   <div className="w-6 h-6 rounded-lg bg-accent/10 flex items-center justify-center shadow-[0_0_8px_hsl(var(--accent)/0.15)]">
-                    <Shirt className="w-3.5 h-3.5 text-accent" />
+                    <TShirt className="w-3.5 h-3.5 text-accent" />
                   </div>
                   <span className="text-[10px] font-sans text-muted-foreground">Body Type</span>
                 </div>
@@ -289,7 +289,7 @@ const StyleDNA = () => {
             className="rounded-2xl border border-border bg-card p-5"
           >
             <div className="flex items-center gap-2 mb-3">
-              <Sparkles className="w-5 h-5 text-primary" />
+              <Sparkle className="w-5 h-5 text-primary" />
               <p className="text-xs font-sans uppercase tracking-widest text-muted-foreground">Who You Are, Styled</p>
             </div>
             <h2 className="font-display text-xl font-bold text-foreground mb-3">{archetype}</h2>
@@ -445,7 +445,7 @@ const StyleDNA = () => {
                   className="rounded-2xl border border-border bg-card p-5"
                 >
                   <div className="flex items-center gap-2 mb-4">
-                    <Layers className="w-5 h-5 text-[hsl(15,80%,55%)]" />
+                    <StackSimple className="w-5 h-5 text-[hsl(15,80%,55%)]" />
                     <h3 className="font-display text-base font-bold text-foreground">Textures That Elevate You</h3>
                   </div>
                   {dna.recommendedPrints && dna.recommendedPrints.length > 0 && (
@@ -454,7 +454,7 @@ const StyleDNA = () => {
                       <div className="flex flex-wrap gap-2">
                         {dna.recommendedPrints.map((print, i) => (
                           <span key={i} className="px-3 py-1.5 rounded-full bg-secondary text-xs font-sans text-foreground flex items-center gap-1.5">
-                            <Paintbrush className="w-3 h-3 text-[hsl(15,80%,55%)]" />
+                            <PaintBrush className="w-3 h-3 text-[hsl(15,80%,55%)]" />
                             {print}
                           </span>
                         ))}
@@ -467,7 +467,7 @@ const StyleDNA = () => {
                       <div className="flex flex-wrap gap-2">
                         {dna.recommendedFabrics.map((fabric, i) => (
                           <span key={i} className="px-3 py-1.5 rounded-full bg-secondary text-xs font-sans text-foreground flex items-center gap-1.5">
-                            <Layers className="w-3 h-3 text-[hsl(45,80%,55%)]" />
+                            <StackSimple className="w-3 h-3 text-[hsl(45,80%,55%)]" />
                             {fabric}
                           </span>
                         ))}

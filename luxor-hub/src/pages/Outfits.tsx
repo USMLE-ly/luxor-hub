@@ -184,7 +184,7 @@ const Outfits = () => {
             </div>
             <div className="flex items-end">
               <Button onClick={generate} disabled={generating} className="w-full gold-gradient text-primary-foreground font-sans">
-                {generating ? <Spinner className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
+                {generating ? <Spinner className="h-4 w-4 animate-spin mr-2" /> : <Sparkle className="h-4 w-4 mr-2" />}
                 {generating ? "Generating..." : "Generate Outfits"}
               </Button>
             </div>
@@ -232,7 +232,7 @@ const Outfits = () => {
                       className="text-muted-foreground hover:text-primary"
                       title="Flat-Lay View"
                     >
-                      <Layers className="h-4 w-4" />
+                      <StackSimple className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="ghost"
@@ -250,7 +250,7 @@ const Outfits = () => {
                 <div className="flex flex-wrap gap-2 mb-4">
                   {outfit.items.map((item, j) => (
                     <span key={j} className="px-3 py-1.5 rounded-full text-xs font-sans bg-secondary text-foreground flex items-center gap-1">
-                      <Shirt className="h-3 w-3" /> {item}
+                      <TShirt className="h-3 w-3" /> {item}
                     </span>
                   ))}
                 </div>
@@ -268,7 +268,7 @@ const Outfits = () => {
           <DialogContent className="max-w-sm">
             <DialogHeader>
               <DialogTitle className="font-display flex items-center gap-2">
-                <CalendarDays className="h-5 w-5 text-primary" /> Schedule Outfit
+                <CalendarDots className="h-5 w-5 text-primary" /> Schedule Outfit
               </DialogTitle>
             </DialogHeader>
             {scheduleOutfit && (
@@ -282,7 +282,7 @@ const Outfits = () => {
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !scheduleDate && "text-muted-foreground")}>
-                        <CalendarDays className="h-4 w-4 mr-2" />
+                        <CalendarDots className="h-4 w-4 mr-2" />
                         {scheduleDate ? format(scheduleDate, "PPP") : "Select date"}
                       </Button>
                     </PopoverTrigger>
@@ -315,7 +315,7 @@ const Outfits = () => {
           <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle className="font-display flex items-center gap-2">
-                <Layers className="h-5 w-5 text-primary" /> Flat-Lay View
+                <StackSimple className="h-5 w-5 text-primary" /> Flat-Lay View
               </DialogTitle>
             </DialogHeader>
             {flatLayOutfit && (
@@ -350,7 +350,7 @@ const Outfits = () => {
                           </div>
                         ) : (
                           <div className="w-full aspect-square flex items-center justify-center" style={{ background: "hsl(var(--muted) / 0.2)" }}>
-                            <Shirt className="h-8 w-8 text-muted-foreground/40" />
+                            <TShirt className="h-8 w-8 text-muted-foreground/40" />
                           </div>
                         )}
                         <div className="px-3 pb-2.5">

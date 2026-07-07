@@ -223,7 +223,7 @@ const Inspiration = () => {
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
           className="rounded-2xl bg-primary/5 border border-primary/20 p-4 mb-5 flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-            <Sparkles className="w-5 h-5 text-primary" />
+            <Sparkle className="w-5 h-5 text-primary" />
           </div>
           <div className="flex-1">
             <p className="font-sans font-semibold text-foreground text-sm">Shop My Style Formula</p>
@@ -249,7 +249,7 @@ const Inspiration = () => {
             className={`ml-2 px-3 py-1.5 rounded-full text-[10px] font-sans flex items-center gap-1 transition-all flex-shrink-0 ${
               sortByMatch ? "bg-primary/20 text-primary" : "bg-secondary text-muted-foreground"
             }`}>
-            <ArrowUpDown className="w-3 h-3" /> Match
+            <ArrowsDownUp className="w-3 h-3" /> Match
           </button>
         </div>
 
@@ -276,7 +276,7 @@ const Inspiration = () => {
 
                   {/* Match score */}
                   <div className={`absolute top-2 left-2 backdrop-blur-sm rounded-full px-2 py-0.5 flex items-center gap-1 ${getScoreColor(product.matchScore)}`}>
-                    <Sparkles className="w-2.5 h-2.5" />
+                    <Sparkle className="w-2.5 h-2.5" />
                     <span className="text-[10px] font-bold font-sans">{product.matchScore}%</span>
                   </div>
 
@@ -301,7 +301,7 @@ const Inspiration = () => {
                       e.stopPropagation();
                       navigate(`/chat?prefill=${encodeURIComponent(`Is this a good match for me? ${product.name} by ${product.brand} in ${product.color} (${product.category})`)}`);
                     }} className="flex items-center gap-1.5 bg-primary text-primary-foreground px-3 py-1.5 rounded-full text-xs font-sans font-semibold">
-                      <Sparkles className="w-3 h-3" /> Check Match
+                      <Sparkle className="w-3 h-3" /> Check Match
                     </button>
                   </div>
                 </div>

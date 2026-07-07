@@ -28,7 +28,7 @@ const ShareButtons = ({ title, slug }: ShareButtonsProps) => {
         className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-border/30 text-muted-foreground hover:text-foreground hover:border-border/60 transition-colors"
         aria-label="Share on Twitter"
       >
-        <Twitter className="w-3.5 h-3.5" />
+        <TwitterLogo className="w-3.5 h-3.5" />
       </a>
       <a
         href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`}
@@ -37,7 +37,7 @@ const ShareButtons = ({ title, slug }: ShareButtonsProps) => {
         className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-border/30 text-muted-foreground hover:text-foreground hover:border-border/60 transition-colors"
         aria-label="Share on LinkedIn"
       >
-        <Linkedin className="w-3.5 h-3.5" />
+        <LinkedinLogo className="w-3.5 h-3.5" />
       </a>
       <button
         onClick={copyLink}

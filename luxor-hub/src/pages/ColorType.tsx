@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
-import {ArrowLeft, ArrowRight, PencilSimpleLine, UploadSimple, Spinner, CheckCircle, XCircle, Camera, CopySimple, X, TShirt, Eyeglasses, Watch} from "@phosphor-icons/react";
+import {ArrowLeft, ArrowRight, PencilSimpleLine, UploadSimple, Spinner, CheckCircle, XCircle, Camera, CopySimple, X, TShirt, Eyeglasses, Watch, Upload, Pencil} from "@phosphor-icons/react";
 import { BottomNav } from "@/components/app/BottomNav";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -384,7 +384,7 @@ const ColorTypeInner = () => {
                 </div>
               </div>
               <div className="flex items-center gap-2 p-3 rounded-xl bg-primary/5 border border-primary/10">
-                <Shirt className="w-5 h-5 text-primary flex-shrink-0" />
+                <TShirt className="w-5 h-5 text-primary flex-shrink-0" />
                 <p className="text-sm font-sans text-foreground">{selectedColor.tip}</p>
               </div>
               <Button onClick={() => copyHex(selectedColor.hex)} className="w-full" variant="outline">

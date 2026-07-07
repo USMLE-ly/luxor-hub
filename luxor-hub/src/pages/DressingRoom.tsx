@@ -453,7 +453,7 @@ export default function DressingRoomPage() {
                 onClick={(e) => e.stopPropagation()}
               >
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                  <CalendarDays className="w-5 h-5 text-amber-400" />
+                  <CalendarDots className="w-5 h-5 text-amber-400" />
                   Add to Calendar
                 </h3>
                 <div className="space-y-4">

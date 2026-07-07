@@ -332,7 +332,7 @@ const Dashboard = () => {
   }, [wardrobeItems]);
 
   const occasionTabs = [
-    { label: "All", icon: <Shirt className="w-4 h-4" />, color: "hsl(var(--primary))", value: null },
+    { label: "All", icon: <TShirt className="w-4 h-4" />, color: "hsl(var(--primary))", value: null },
     { label: "Everyday", icon: <Sun className="w-4 h-4" />, color: "hsl(142, 60%, 45%)", value: "everyday" },
     { label: "Work", icon: <Briefcase className="w-4 h-4" />, color: "hsl(30, 80%, 55%)", value: "work" },
     { label: "Party", icon: <Confetti className="w-4 h-4" />, color: "hsl(270, 60%, 55%)", value: "party" },
@@ -498,7 +498,7 @@ const Dashboard = () => {
               <div className="text-left">
                 <div className="flex items-center gap-1.5 mb-1.5">
                   <div className="w-6 h-6 rounded-lg bg-accent/10 flex items-center justify-center shadow-[0_0_8px_hsl(var(--accent)/0.15)]">
-                    <Shirt className="w-3.5 h-3.5 text-accent" />
+                    <TShirt className="w-3.5 h-3.5 text-accent" />
                   </div>
                   <span className="text-[10px] font-sans text-muted-foreground">Body Type</span>
                 </div>
@@ -656,7 +656,7 @@ const Dashboard = () => {
                             <img src={item.photo_url} alt={item.name || ""} className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
-                              <Shirt className="w-5 h-5 text-muted-foreground/30" />
+                              <TShirt className="w-5 h-5 text-muted-foreground/30" />
                             </div>
                           )}
                         </div>
@@ -664,7 +664,7 @@ const Dashboard = () => {
                     </div>
                   ) : (
                     <div className="text-center">
-                      <Shirt className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
+                      <TShirt className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
                       <p className="text-[10px] text-muted-foreground font-sans px-4">
                         Add your items and AI stylist will mix and match them into Outfits
                       </p>
@@ -695,14 +695,14 @@ const Dashboard = () => {
                                 <img src={item.photo_url} alt={item.name || ""} className="w-full h-full object-cover" />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center bg-background/30">
-                                  <Shirt className="w-4 h-4 text-muted-foreground/30" />
+                                  <TShirt className="w-4 h-4 text-muted-foreground/30" />
                                 </div>
                               )}
                             </div>
                           ))}
                         </div>
                       ) : (
-                        <Shirt className="w-12 h-12 text-muted-foreground/30" />
+                        <TShirt className="w-12 h-12 text-muted-foreground/30" />
                       )}
                     </div>
                     <div className="p-3">

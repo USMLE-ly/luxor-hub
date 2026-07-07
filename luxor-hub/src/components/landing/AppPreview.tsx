@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { ContainerScroll } from "@/components/ui/container-scroll";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { motion } from "framer-motion";
-import {Diamond, TrendUp, Palette, Calendar, ShoppingBag, ChartBar, ChatCircleDots} from "@phosphor-icons/react";
+import {Diamond, TrendUp, Palette, Calendar, ShoppingBag, ChartBar, ChatCircleDots, ChatCircleText} from "@phosphor-icons/react";
 
 const outfitThumbs = [
   { label: "Casual Friday", gradient: "from-amber-700 via-stone-300 to-blue-900" },
@@ -53,7 +53,7 @@ const AppPreview = () => {
               {[
                 { icon: Palette, label: "Color Type", value: "Warm Autumn" },
                 { icon: TrendingUp, label: "Style Type", value: "Modern Classic" },
-                { icon: BarChart3, label: "Body Type", value: "Inverted Triangle" },
+                { icon: ChartBar, label: "Body Type", value: "Inverted Triangle" },
               ].map((item, i) => (
                 <div key={i} className="flex flex-col items-center gap-1 p-2 rounded-xl bg-card/80 border border-border/50">
                   <item.icon className="w-4 h-4 text-primary" />
@@ -80,7 +80,7 @@ const AppPreview = () => {
           {/* AI Chat widget with typing indicator */}
           <div className="rounded-xl border border-border bg-card p-3 mb-4">
             <div className="flex items-center gap-2 mb-2">
-              <ChatSquare className="w-3.5 h-3.5 text-primary" />
+              <ChatCircleText className="w-3.5 h-3.5 text-primary" />
               <span className="text-[10px] font-sans font-semibold text-foreground">AI Stylist</span>
             </div>
             <div className="flex items-center gap-1.5 pl-1">
@@ -123,7 +123,7 @@ const AppPreview = () => {
               { icon: Calendar, label: "Calendar", count: "3 events" },
               { icon: ShoppingBag, label: "Closet", count: "48 items" },
               { icon: TrendingUp, label: "Style Score", count: "100/100" },
-              { icon: BarChart3, label: "Analytics", count: "View" },
+              { icon: ChartBar, label: "Analytics", count: "View" },
             ].map((item, i) => (
               <div key={i} className="rounded-xl border border-border bg-card p-3 flex flex-col items-center gap-2 hover-lift cursor-default">
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">

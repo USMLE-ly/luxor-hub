@@ -195,7 +195,7 @@ export const StyleInspirationFeed = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="font-display text-xl font-bold text-foreground flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-primary" />
+          <Sparkle className="h-5 w-5 text-primary" />
           Style Inspiration
         </h2>
         <Button
@@ -313,7 +313,7 @@ export const StyleInspirationFeed = () => {
 
       {filtered.length === 0 && (
         <div className="text-center py-12">
-          <Sparkles className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+          <Sparkle className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
           <p className="text-muted-foreground font-sans text-sm">
             {tab === "mine" ? "You haven't created any looks yet" : "No looks match your filters"}
           </p>

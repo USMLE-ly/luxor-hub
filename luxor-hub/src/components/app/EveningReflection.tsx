@@ -131,7 +131,7 @@ export function EveningReflection() {
                 disabled={submitting}
                 className="w-full h-10 rounded-full bg-foreground text-background font-sans text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {submitting ? <Sparkles className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                {submitting ? <Sparkle className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                 Save Reflection
               </button>
             </motion.div>

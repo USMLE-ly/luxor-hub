@@ -178,7 +178,7 @@ const Analytics = () => {
   const utilizationRate = totalItems > 0 ? Math.round((usedItems.length / totalItems) * 100) : 0;
 
   const statCards = [
-    { label: "Total Items", value: totalItems, icon: BarChart3, color: "text-primary" },
+    { label: "Total Items", value: totalItems, icon: ChartBar, color: "text-primary" },
     { label: "Total Wears Logged", value: totalWears, icon: Calendar, color: "text-gold-light" },
     { label: "Closet Value", value: `$${totalValue.toLocaleString()}`, icon: CurrencyDollar, color: "text-primary" },
     { label: "Sustainability", value: `${sustainabilityScore}/100`, icon: Leaf, color: sustainabilityScore > 50 ? "text-green-500" : "text-gold-light" },
@@ -337,13 +337,13 @@ const Analytics = () => {
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
             {!gapAnalysis ? (
               <div className="glass rounded-2xl p-8 text-center">
-                <Sparkles className="w-12 h-12 text-primary mx-auto mb-4" />
+                <Sparkle className="w-12 h-12 text-primary mx-auto mb-4" />
                 <h3 className="font-display text-xl font-bold text-foreground mb-2">AI Wardrobe Gap Analysis</h3>
                 <p className="text-muted-foreground font-sans text-sm mb-6 max-w-md mx-auto">
                   Let AI analyze your closet to find missing essentials, seasonal gaps, and pieces that would elevate your wardrobe.
                 </p>
                 <Button onClick={runGapAnalysis} disabled={gapLoading} className="gap-2">
-                  {gapLoading ? <Spinner className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                  {gapLoading ? <Spinner className="w-4 h-4 animate-spin" /> : <Sparkle className="w-4 h-4" />}
                   {gapLoading ? "Analyzing..." : "Run AI Analysis"}
                 </Button>
               </div>
@@ -377,7 +377,7 @@ const Analytics = () => {
                   ))}
                 </div>
                 <Button variant="outline" onClick={runGapAnalysis} disabled={gapLoading} className="gap-2">
-                  {gapLoading ? <Spinner className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                  {gapLoading ? <Spinner className="w-4 h-4 animate-spin" /> : <Sparkle className="w-4 h-4" />}
                   Re-analyze
                 </Button>
               </div>

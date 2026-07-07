@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import {Heart, ChatCircle, TShirt, Spinner, MagnifyingGlass, Funnel, PaperPlaneRight, Sparkle, TrendUp, CaretDown, CaretUp} from "@phosphor-icons/react";
+import {Heart, ChatCircle, TShirt, Spinner, MagnifyingGlass, Funnel, PaperPlaneRight, Sparkle, TrendUp, CaretDown, CaretUp, PaperPlaneTilt, FunnelSimple} from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface CommunityDesign {
@@ -286,7 +286,7 @@ export default function CommunityGallery() {
           </div>
           <Select value={garmentFilter} onValueChange={setGarmentFilter}>
             <SelectTrigger className="w-[160px] bg-background/50">
-              <Filter className="w-4 h-4 mr-2" />
+              <FunnelSimple className="w-4 h-4 mr-2" />
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -337,7 +337,7 @@ export default function CommunityGallery() {
                   <div className="relative aspect-square">
                     <ProgressiveImage src={design.image_url} alt={design.prompt || "Design"} className="w-full h-full object-cover" wrapperClassName="w-full h-full" aspectRatio="" />
                     <Badge className="absolute top-3 left-3 bg-forest/60 text-white border-0">
-                      <Shirt className="w-3 h-3 mr-1" /> {design.garment_type}
+                      <TShirt className="w-3 h-3 mr-1" /> {design.garment_type}
                     </Badge>
                   </div>
 
@@ -382,7 +382,7 @@ export default function CommunityGallery() {
                         {recommendingId === design.id ? (
                           <Spinner className="w-3.5 h-3.5 animate-spin" />
                         ) : (
-                          <Sparkles className="w-3.5 h-3.5" />
+                          <Sparkle className="w-3.5 h-3.5" />
                         )}
                         AI Tips
                       </button>
@@ -398,7 +398,7 @@ export default function CommunityGallery() {
                           className="rounded-lg bg-primary/5 border border-primary/20 p-3"
                         >
                           <div className="flex items-center gap-1.5 mb-2">
-                            <Sparkles className="w-3.5 h-3.5 text-primary" />
+                            <Sparkle className="w-3.5 h-3.5 text-primary" />
                             <span className="text-xs font-medium text-primary">Style Recommendations</span>
                           </div>
                           <p className="text-xs text-foreground/80 whitespace-pre-line leading-relaxed">
@@ -446,7 +446,7 @@ export default function CommunityGallery() {
                                     className="text-xs h-8 bg-background/50"
                                   />
                                   <Button size="sm" variant="ghost" className="h-8 px-2" onClick={() => handleAddComment(design.id)}>
-                                    <Send className="w-3.5 h-3.5" />
+                                    <PaperPlaneTilt className="w-3.5 h-3.5" />
                                   </Button>
                                 </div>
                               )}

@@ -1489,7 +1489,7 @@ const DetectionResultStep = ({ step, answers, gender, aiResults }: { step: Onboa
               <h4 className="font-display text-lg font-bold text-foreground text-center">Best For You</h4>
               <div className="grid grid-cols-2 gap-2">
                 <div className="p-3 rounded-xl bg-secondary/50 space-y-1">
-                  <div className="flex items-center gap-1.5"><Shirt className="w-4 h-4 text-primary" /><span className="text-xs font-semibold text-foreground font-sans">Necklines</span></div>
+                  <div className="flex items-center gap-1.5"><TShirt className="w-4 h-4 text-primary" /><span className="text-xs font-semibold text-foreground font-sans">Necklines</span></div>
                   {recs.necklines.map(n => <p key={n} className="text-xs text-muted-foreground font-sans">• {n}</p>)}
                 </div>
                 <div className="p-3 rounded-xl bg-secondary/50 space-y-1">
@@ -1706,7 +1706,7 @@ const DetectionResultStep = ({ step, answers, gender, aiResults }: { step: Onboa
             <h4 className="font-display text-lg font-bold text-foreground text-center">Best For You</h4>
             <div className="grid grid-cols-2 gap-2">
               {[
-                { icon: <Shirt className="w-4 h-4 text-primary" />, label: "Silhouettes", items: recs.silhouettes },
+                { icon: <TShirt className="w-4 h-4 text-primary" />, label: "Silhouettes", items: recs.silhouettes },
                 { icon: <Scissors className="w-4 h-4 text-primary" />, label: "Dresses", items: recs.dresses },
                 { icon: <Watch className="w-4 h-4 text-primary" />, label: "Trousers", items: recs.trousers },
                 { icon: <Diamond className="w-4 h-4 text-primary" />, label: "Jackets", items: recs.jackets },

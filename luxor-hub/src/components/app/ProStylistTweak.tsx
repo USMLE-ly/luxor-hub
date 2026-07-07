@@ -95,7 +95,7 @@ export function ProStylistTweak({ imagePreview, imageUrl }: ProStylistTweakProps
           <CardHeader className="pb-3">
             <CardTitle className="font-display flex items-center gap-2 text-foreground text-lg">
               <div className="w-0.5 h-5 gold-gradient rounded-full mr-1" />
-              <Sparkles className="w-5 h-5 text-primary" /> Pro Stylist Tweak
+              <Sparkle className="w-5 h-5 text-primary" /> Pro Stylist Tweak
             </CardTitle>
             <p className="text-sm text-muted-foreground">
               Let the AI fashion deity reimagine your outfit with a divine upgrade.
@@ -110,7 +110,7 @@ export function ProStylistTweak({ imagePreview, imageUrl }: ProStylistTweakProps
                     onClick={handleGenerateTweak}
                     className="gold-gradient text-primary-foreground font-sans px-8 py-3 text-base"
                   >
-                    <Sparkles className="h-5 w-5 mr-2" /> Generate Divine Tweak
+                    <Sparkle className="h-5 w-5 mr-2" /> Generate Divine Tweak
                   </Button>
                 ) : (
                   <div className="flex flex-col items-center gap-3 text-muted-foreground">
@@ -179,7 +179,7 @@ export function ProStylistTweak({ imagePreview, imageUrl }: ProStylistTweakProps
                   </div>
                   <div className="space-y-2">
                     <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-primary" /> AI-Enhanced
+                      <Sparkle className="w-3.5 h-3.5 text-primary" /> AI-Enhanced
                     </p>
                     <div className="rounded-2xl overflow-hidden border border-border shadow-lg bg-muted/20 aspect-[3/4]">
                       <img
@@ -198,7 +198,7 @@ export function ProStylistTweak({ imagePreview, imageUrl }: ProStylistTweakProps
                 {/* Suggestion */}
                 {tweakResult.suggestion && (
                   <div className="flex items-start gap-3 p-4 rounded-xl bg-primary/5 border border-primary/20">
-                    <Sparkles className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                    <Sparkle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="text-sm font-semibold text-foreground">Stylist's Verdict</p>
                       <p className="text-sm text-muted-foreground mt-1">{tweakResult.suggestion}</p>

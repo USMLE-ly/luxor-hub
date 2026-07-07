@@ -26,7 +26,7 @@ const steps = [
     description: "Instead of impulse buys, see what's actually missing. Users spend 35% less on clothing while wearing 60% more of what they own.",
   },
   {
-    icon: BarChart3,
+    icon: ChartBar,
     title: "Track Progress and Build Confidence",
     description: "See cost-per-wear, style scores, outfit variety, and wardrobe utilization. Earn badges. Stop second-guessing.",
   },

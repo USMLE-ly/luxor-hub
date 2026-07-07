@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { haptic } from "@/lib/haptics";
-import {Plus, MagnifyingGlass, TShirt, TrashSimple, UploadSimple, X, Spinner, Sparkle, CheckCircle, Camera, CaretRight, Sliders, Pulse, Eye, User, StackSimple, CalendarDots, Image, FloppyDisk, FolderOpen, Heart, Receipt, } from "@phosphor-icons/react";
+import {Plus, MagnifyingGlass, TShirt, TrashSimple, UploadSimple, X, Spinner, Sparkle, CheckCircle, Camera, CaretRight, Sliders, Pulse, Eye, User, StackSimple, CalendarDots, Image, FloppyDisk, FolderOpen, Heart, Receipt, File, Upload} from "@phosphor-icons/react";
 import Mannequin3D, { type ClothingItem as MannequinClothingItem, type BodyDNA, type PosePreset } from "@/components/app/Mannequin3D";
 import { SLOT_MAP, DRESS_REPLACES, type GarmentFit } from "@/components/app/GarmentGeometry";
 import type { FabricType } from "@/components/app/FabricMaterials";
@@ -889,7 +889,7 @@ const Closet = () => {
                       )}
                     </div>
                     <Button variant="outline" onClick={analyzeWithAI} disabled={analyzing || (!previewUrl && !newItem.name)} className="w-full border-primary/30 text-primary hover:bg-primary/10 font-sans">
-                      {analyzing ? <Spinner className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
+                      {analyzing ? <Spinner className="h-4 w-4 animate-spin mr-2" /> : <Sparkle className="h-4 w-4 mr-2" />}
                       {analyzing ? "Analyzing..." : "Let AI fill the details"}
                     </Button>
                     <div className="grid grid-cols-2 gap-3">
@@ -1009,7 +1009,7 @@ const Closet = () => {
                 }`}
                 title="Flat-Lay View"
               >
-                <Layers className="w-4 h-4" />
+                <StackSimple className="w-4 h-4" />
               </motion.button>
             </div>
 
@@ -1085,7 +1085,7 @@ const Closet = () => {
                                   }}
                                 />
                               ) : (
-                                <Shirt className="w-12 h-12 text-muted-foreground/30" />
+                                <TShirt className="w-12 h-12 text-muted-foreground/30" />
                               )}
                               {/* Hover actions */}
                               <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/5 transition-colors flex items-end justify-center opacity-0 group-hover:opacity-100 pb-3 gap-1.5">
@@ -1158,7 +1158,7 @@ const Closet = () => {
                           <div key={`ph-${i}`} className="aspect-square rounded-xl overflow-hidden border border-border bg-card relative group cursor-pointer" onClick={() => setUploadOpen(true)}>
                             <img src={src} alt="Example item" className="w-full h-full object-cover opacity-50" />
                             <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/30">
-                              <Shirt className="w-6 h-6 text-muted-foreground mb-1" />
+                              <TShirt className="w-6 h-6 text-muted-foreground mb-1" />
                               <span className="text-[9px] font-sans text-muted-foreground text-center px-2">Upload your own items</span>
                             </div>
                           </div>
@@ -1260,7 +1260,7 @@ const Closet = () => {
                   </Button>
                   <Button size="sm" onClick={() => setShowCalendar(true)}
                     className="rounded-full text-xs px-4 flex-1 bg-primary text-primary-foreground">
-                    <CalendarDays className="w-3.5 h-3.5 mr-1.5" /> Schedule
+                    <CalendarDots className="w-3.5 h-3.5 mr-1.5" /> Schedule
                   </Button>
                   <Button size="sm" variant="ghost" onClick={() => setMannequinClothing([])}
                     className="rounded-full text-xs px-3 text-destructive hover:bg-destructive/10">
@@ -1365,7 +1365,7 @@ const Closet = () => {
             {/* Add from closet - item grid */}
             <div className="px-4 py-3 border-t border-border">
               <h3 className="font-sans text-sm font-semibold text-foreground mb-3">
-                <Layers className="w-4 h-4 inline mr-1.5" />
+                <StackSimple className="w-4 h-4 inline mr-1.5" />
                 Add from Closet
               </h3>
 
@@ -1379,7 +1379,7 @@ const Closet = () => {
                         <img src={pendingItem.photo_url} alt={pendingItem.name || ""} className="w-14 h-14 rounded-lg object-cover" />
                       ) : (
                         <div className="w-14 h-14 rounded-lg bg-muted flex items-center justify-center">
-                          <Shirt className="w-6 h-6 text-muted-foreground" />
+                          <TShirt className="w-6 h-6 text-muted-foreground" />
                         </div>
                       )}
                       <div>
@@ -1428,7 +1428,7 @@ const Closet = () => {
 
               {items.length === 0 ? (
                 <div className="text-center py-8">
-                  <Shirt className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
+                  <TShirt className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
                   <p className="text-sm text-muted-foreground font-sans">No items in closet yet</p>
                   <Button size="sm" className="mt-3 rounded-full" onClick={() => setActiveTab("inventory")}>
                     Go to Inventory
@@ -1443,7 +1443,7 @@ const Closet = () => {
                         <img src={item.photo_url} alt={item.name || ""} className="w-full aspect-square rounded-lg object-cover mb-1" />
                       ) : (
                         <div className="w-full aspect-square rounded-lg bg-muted flex items-center justify-center mb-1">
-                          <Shirt className="w-5 h-5 text-muted-foreground" />
+                          <TShirt className="w-5 h-5 text-muted-foreground" />
                         </div>
                       )}
                       <p className="text-[9px] font-sans text-foreground truncate">{item.name || item.category}</p>
@@ -1612,7 +1612,7 @@ function ItemCard({
           <img src={item.photo_url} alt={item.name || "Item"} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <Shirt className="h-8 w-8 text-muted-foreground" />
+            <TShirt className="h-8 w-8 text-muted-foreground" />
           </div>
         )}
         {/* Try On button - always visible at bottom */}

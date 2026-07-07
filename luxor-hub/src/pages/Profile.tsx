@@ -157,7 +157,7 @@ const Profile = () => {
 
           {/* Public Looks */}
           <div className="flex items-center gap-2 mb-4">
-            <Sparkles className="h-5 w-5 text-primary" />
+            <Sparkle className="h-5 w-5 text-primary" />
             <h2 className="font-display text-xl font-bold text-foreground">Public Looks</h2>
           </div>
 

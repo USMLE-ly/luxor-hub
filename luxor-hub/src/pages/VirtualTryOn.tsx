@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import {UploadSimple, Spinner, Sparkle, Camera, DownloadSimple, ArrowRight, Image, TShirt, X, ShareNetwork, CopySimple, Check} from "@phosphor-icons/react";
+import {UploadSimple, Spinner, Sparkle, Camera, DownloadSimple, ArrowRight, Image, TShirt, X, ShareNetwork, CopySimple, Check, Download, File} from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { RainbowButton } from "@/components/ui/rainbow-button";
@@ -174,7 +174,7 @@ function VirtualTryOnInner() {
             {designs.length === 0 ? (
               <Card className="glass-card">
                 <CardContent className="p-8 text-center">
-                  <Shirt className="w-10 h-10 text-muted-foreground/40 mx-auto mb-2" />
+                  <TShirt className="w-10 h-10 text-muted-foreground/40 mx-auto mb-2" />
                   <p className="text-sm text-muted-foreground">No saved designs yet. Create designs in the Fashion Designer first!</p>
                 </CardContent>
               </Card>
@@ -197,7 +197,7 @@ function VirtualTryOnInner() {
                     </div>
                     {selectedDesign?.id === design.id && (
                       <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                        <Sparkles className="w-3 h-3 text-primary-foreground" />
+                        <Sparkle className="w-3 h-3 text-primary-foreground" />
                       </div>
                     )}
                   </motion.div>
@@ -217,7 +217,7 @@ function VirtualTryOnInner() {
               disabled={!userPhoto || !selectedDesign || isProcessing}
               className="w-full mb-3"
             >
-              {isProcessing ? <Spinner className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
+              {isProcessing ? <Spinner className="w-4 h-4 animate-spin mr-2" /> : <Sparkle className="w-4 h-4 mr-2" />}
               {isProcessing ? "Processing…" : "Try It On"}
             </RainbowButton>
 
@@ -243,7 +243,7 @@ function VirtualTryOnInner() {
                   </div>
                 ) : (
                   <div className="aspect-[3/4] flex flex-col items-center justify-center gap-3">
-                    <ImageIcon className="w-10 h-10 text-muted-foreground/30" />
+                    <Image className="w-10 h-10 text-muted-foreground/30" />
                     <p className="text-sm text-muted-foreground text-center">Upload a photo and select a design to begin</p>
                   </div>
                 )}

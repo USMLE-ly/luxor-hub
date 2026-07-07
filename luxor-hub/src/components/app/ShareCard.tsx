@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {ShareNetwork, DownloadSimple, X, TwitterLogo, FacebookLogo, LinkSimple, Check} from "@phosphor-icons/react";
+import {ShareNetwork, DownloadSimple, X, TwitterLogo, FacebookLogo, LinkSimple, Check, Download} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -194,7 +194,7 @@ export function ShareCard({ outfit, onClose }: ShareCardProps) {
               <span className="text-[10px]">Share</span>
             </Button>
             <Button variant="outline" className="border-glass-border flex-col h-auto py-3" onClick={handleShareTwitter}>
-              <Twitter className="h-4 w-4 mb-1" />
+              <TwitterLogo className="h-4 w-4 mb-1" />
               <span className="text-[10px]">X / Twitter</span>
             </Button>
             <Button variant="outline" className="border-glass-border flex-col h-auto py-3" onClick={handleDownload}>

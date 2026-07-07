@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import {Sparkle, Spinner, DownloadSimple, Palette, TShirt, MagicWand, Heart, ShareNetwork, TrashSimple, ClockCounterClockwise, Image, TwitterLogo, LinkSimple, Check, Eye} from "@phosphor-icons/react";
+import {Sparkle, Spinner, DownloadSimple, Palette, TShirt, MagicWand, Heart, ShareNetwork, TrashSimple, ClockCounterClockwise, Image, TwitterLogo, LinkSimple, Check, Eye, Download} from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { RainbowButton } from "@/components/ui/rainbow-button";
@@ -226,7 +226,7 @@ export default function FashionDesigner() {
         {/* Style DNA Context */}
         {(archetype || colorSeason) && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-wrap gap-2">
-            {archetype && <Badge variant="secondary" className="text-xs"><Sparkles className="w-3 h-3 mr-1" />{archetype}</Badge>}
+            {archetype && <Badge variant="secondary" className="text-xs"><Sparkle className="w-3 h-3 mr-1" />{archetype}</Badge>}
             {colorSeason && <Badge variant="secondary" className="text-xs"><Palette className="w-3 h-3 mr-1" />{colorSeason}</Badge>}
             {bestColors.slice(0, 4).map((c, i) => (
               <div key={i} className="flex items-center gap-1 px-2 py-1 rounded-full bg-muted/50 border border-border text-xs">
@@ -327,7 +327,7 @@ export default function FashionDesigner() {
                               )}
                             </div>
                             <Badge className="absolute top-3 left-3 bg-forest/60 text-white border-0">
-                              <Shirt className="w-3 h-3 mr-1" /> {design.garmentType}
+                              <TShirt className="w-3 h-3 mr-1" /> {design.garmentType}
                             </Badge>
                           </div>
                           <CardContent className="p-4">
@@ -353,7 +353,7 @@ export default function FashionDesigner() {
             ) : gallery.length === 0 ? (
               <Card className="glass-card">
                 <CardContent className="p-12 text-center">
-                  <ImageIcon className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" />
+                  <Image className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" />
                   <p className="text-muted-foreground">No saved designs yet. Create and save your first design!</p>
                 </CardContent>
               </Card>
@@ -382,7 +382,7 @@ export default function FashionDesigner() {
                         </div>
                         <div className="absolute top-3 left-3 flex gap-2">
                           <Badge className="bg-forest/60 text-white border-0">
-                            <Shirt className="w-3 h-3 mr-1" /> {design.garment_type}
+                            <TShirt className="w-3 h-3 mr-1" /> {design.garment_type}
                           </Badge>
                         </div>
                         <div className="absolute top-3 right-3 flex gap-1">
@@ -422,7 +422,7 @@ export default function FashionDesigner() {
                                 Copy
                               </Button>
                               <Button variant="outline" size="sm" onClick={() => handleShareTwitter(design)}>
-                                <Twitter className="w-3 h-3 mr-1" /> Tweet
+                                <TwitterLogo className="w-3 h-3 mr-1" /> Tweet
                               </Button>
                             </motion.div>
                           )}

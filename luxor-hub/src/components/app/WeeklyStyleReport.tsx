@@ -203,7 +203,7 @@ export const WeeklyStyleReport = () => {
               {report.underusedItems.slice(0, 3).map((item, i) => (
                 <div key={i} className="flex items-center justify-between text-sm font-sans">
                   <div className="flex items-center gap-2 min-w-0">
-                    <Shirt className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                    <TShirt className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                     <span className="text-foreground/80 truncate">{item.name}</span>
                   </div>
                   <span className="text-[10px] text-muted-foreground flex-shrink-0">

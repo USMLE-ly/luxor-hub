@@ -84,7 +84,7 @@ export const CalendarWidget = () => {
     <div className="glass rounded-2xl p-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-display text-xl font-bold text-foreground flex items-center gap-2">
-          <CalendarDays className="h-5 w-5 text-primary" />
+          <CalendarDots className="h-5 w-5 text-primary" />
           Upcoming Events
         </h2>
         <Dialog open={open} onOpenChange={setOpen}>
@@ -135,7 +135,7 @@ export const CalendarWidget = () => {
 
       {events.length === 0 ? (
         <div className="text-center py-6">
-          <CalendarDays className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+          <CalendarDots className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
           <p className="text-muted-foreground font-sans text-sm">No upcoming events this week</p>
           <p className="text-muted-foreground/60 font-sans text-xs mt-1">Add events to get occasion-based outfit suggestions</p>
         </div>

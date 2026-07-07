@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import {DownloadSimple, DeviceMobile, Share, Plus, ArrowRight, Check} from "@phosphor-icons/react";
+import {DownloadSimple, DeviceMobile, Share, Plus, ArrowRight, Check, Download, ShareNetwork} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 

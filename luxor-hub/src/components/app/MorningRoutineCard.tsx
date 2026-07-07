@@ -180,7 +180,7 @@ export function MorningRoutineCard() {
           <div className="rounded-xl border border-border bg-secondary/30 p-4 mb-3">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-primary" />
+                <Sparkle className="w-4 h-4 text-primary" />
                 <span className="text-sm font-sans font-semibold text-foreground">{current.name}</span>
               </div>
               <div className="flex items-center gap-1 text-xs font-sans">
@@ -220,7 +220,7 @@ export function MorningRoutineCard() {
             onClick={() => navigate("/outfits")}
             className="flex-1 rounded-full h-10 text-sm"
           >
-            <Sparkles className="w-3.5 h-3.5 mr-1.5" /> View Full Outfit
+            <Sparkle className="w-3.5 h-3.5 mr-1.5" /> View Full Outfit
           </GradientButton>
           <Button
             variant="outline"

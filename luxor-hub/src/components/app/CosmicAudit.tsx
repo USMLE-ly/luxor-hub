@@ -71,7 +71,7 @@ export function CosmicAudit({
             {/* Seasonal Fit */}
             {seasonalFit && (
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-primary" />
+                <Sparkle className="w-4 h-4 text-primary" />
                 <span className="text-sm text-muted-foreground">
                   Seasonal alignment: <span className="text-foreground font-medium">{seasonalFit}</span>
                 </span>
@@ -104,7 +104,7 @@ export function CosmicAudit({
               {/* Detected Items */}
               <div className="p-3 rounded-xl bg-muted/30 border border-border/50">
                 <div className="flex items-center gap-2 mb-2">
-                  <Shirt className="w-4 h-4 text-primary" />
+                  <TShirt className="w-4 h-4 text-primary" />
                   <span className="text-xs font-semibold text-foreground">Items</span>
                 </div>
                 <div className="space-y-1">

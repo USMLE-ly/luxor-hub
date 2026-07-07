@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import {Sparkle} from "@phosphor-icons/react";
+import {Sparkle, Image} from "@phosphor-icons/react";
 
 interface DisplayCardProps {
   className?: string;
@@ -15,7 +15,7 @@ interface DisplayCardProps {
 
 function DisplayCard({
   className,
-  icon = <Sparkles className="size-4 text-blue-300" />,
+  icon = <Sparkle className="size-4 text-blue-300" />,
   title = "Featured",
   description = "Discover amazing content",
   date = "Just now",

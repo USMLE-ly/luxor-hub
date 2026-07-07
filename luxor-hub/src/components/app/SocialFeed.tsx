@@ -171,7 +171,7 @@ export const SocialFeed = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2">
-        <Sparkles className="h-5 w-5 text-primary" />
+        <Sparkle className="h-5 w-5 text-primary" />
         <h2 className="font-display text-xl font-bold text-foreground">Community Feed</h2>
       </div>
 
@@ -205,7 +205,7 @@ export const SocialFeed = () => {
 
       {looks.length === 0 ? (
         <div className="text-center py-16">
-          <Sparkles className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+          <Sparkle className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
           <p className="text-muted-foreground font-sans text-sm">No public looks yet. Be the first to share!</p>
         </div>
       ) : (

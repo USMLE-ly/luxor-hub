@@ -78,7 +78,7 @@ const categoryIcon = (cat: string): React.ReactNode => {
   const lower = cat.toLowerCase()
   if (lower.includes("color")) return <Palette className="w-4 h-4" />
   if (lower.includes("face")) return <FaceMask className="w-4 h-4" />
-  if (lower.includes("body")) return <Shirt className="w-4 h-4" />
+  if (lower.includes("body")) return <TShirt className="w-4 h-4" />
   return <Lightbulb className="w-4 h-4" />
 }
 

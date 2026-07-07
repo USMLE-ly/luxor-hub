@@ -25,7 +25,7 @@ const navItems = [
   { title: "Outfit Analysis", url: "/outfit-analysis", icon: Scan },
   { title: "Outfit Calendar", url: "/outfit-calendar", icon: CalendarDays },
   { title: "AI Stylist", url: "/chat", icon: MessageCircle },
-  { title: "Analytics", url: "/analytics", icon: BarChart3 },
+  { title: "Analytics", url: "/analytics", icon: ChartBar },
   { title: "Inspiration", url: "/inspiration", icon: Sparkles },
   { title: "Mood Board", url: "/mood-board", icon: SquaresFour },
   { title: "Video Analysis", url: "/video-analysis", icon: Video },

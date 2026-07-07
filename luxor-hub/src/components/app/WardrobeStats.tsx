@@ -90,7 +90,7 @@ export const WardrobeStats = () => {
         {/* Total Items */}
         <div className="bg-secondary/50 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-2">
-            <Shirt className="h-4 w-4 text-primary" />
+            <TShirt className="h-4 w-4 text-primary" />
             <span className="text-xs text-muted-foreground font-sans">Total Items</span>
           </div>
           <p className="font-display text-2xl font-bold text-foreground">{totalItems}</p>

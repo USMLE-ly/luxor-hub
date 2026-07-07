@@ -9,7 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
-import {UploadSimple, Camera, Spinner, InstagramLogo, TwitterLogo, ArrowSquareOut, ArrowsClockwise, Warning, StackSimple} from "@phosphor-icons/react";
+import {UploadSimple, Camera, Spinner, InstagramLogo, TwitterLogo, ArrowSquareOut, ArrowsClockwise, Warning, StackSimple, File, Upload} from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 import { ImageSwiper } from "@/components/ui/image-swiper";
 
@@ -723,7 +723,7 @@ export default function Analysis() {
                 <motion.div variants={childVariants} className="flex items-center gap-3 justify-end">
                   {!savedId ? (
                     <Button onClick={handleSave} disabled={saving} variant="outline" className="border-primary/30 hover:bg-primary/10" whileTap={{ scale: 0.95 }}>
-                      {saving ? <Spinner className="w-4 h-4 mr-2 animate-spin" /> : <Layers className="w-4 h-4 mr-2" />}
+                      {saving ? <Spinner className="w-4 h-4 mr-2 animate-spin" /> : <StackSimple className="w-4 h-4 mr-2" />}
                       Save Analysis
                     </Button>
                   ) : (
@@ -735,7 +735,7 @@ export default function Analysis() {
                     className="border-primary/30 hover:bg-primary/10"
                     whileTap={{ scale: 0.95 }}
                   >
-                    <Layers className="w-4 h-4 mr-2" /> Open Dressing Room
+                    <StackSimple className="w-4 h-4 mr-2" /> Open Dressing Room
                   </Button>
                 </motion.div>
               </>
@@ -775,7 +775,7 @@ export default function Analysis() {
             {history.length > 0 && (
               <motion.div variants={childVariants} className="pt-4">
                 <h3 className="font-display text-lg text-foreground mb-4 flex items-center gap-2">
-                  <Layers className="w-5 h-5 text-primary" /> Previous Analyses
+                  <StackSimple className="w-5 h-5 text-primary" /> Previous Analyses
                 </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {Array.isArray(history) && history.slice(0, 6).map((h) => (

@@ -29,8 +29,8 @@ const COLORS = [
 ];
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
-  top: <Shirt className="w-4 h-4" />,
-  bottom: <Shirt className="w-4 h-4" />,
+  top: <TShirt className="w-4 h-4" />,
+  bottom: <TShirt className="w-4 h-4" />,
   shoes: <Footprints className="w-4 h-4" />,
   accessory: <Watch className="w-4 h-4" />,
 };

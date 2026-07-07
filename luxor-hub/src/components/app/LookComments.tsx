@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {ChatCircle, PaperPlaneRight, TrashSimple} from "@phosphor-icons/react";
+import {ChatCircle, PaperPlaneRight, TrashSimple, PaperPlaneTilt} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
@@ -186,7 +186,7 @@ export const LookComments = ({ lookId, lookType = "user", lookAuthorId }: LookCo
                     disabled={sending || !newComment.trim()}
                     className="h-8 w-8 p-0 gold-gradient"
                   >
-                    <Send className="h-3 w-3" />
+                    <PaperPlaneTilt className="h-3 w-3" />
                   </Button>
                 </div>
               )}

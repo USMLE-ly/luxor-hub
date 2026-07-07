@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import {Bell, Heart, UserPlus, Trophy, Trophy, Flame, Check, CheckFat, Spinner, ChatCircle, Funnel} from "@phosphor-icons/react";
+import {Bell, Heart, UserPlus, Trophy, Trophy, Flame, Check, CheckFat, Spinner, ChatCircle, Funnel, Checks} from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
@@ -192,7 +192,7 @@ export default function NotificationCenter() {
           </div>
           {unreadCount > 0 && (
             <Button variant="outline" size="sm" onClick={markAllRead} className="border-primary/30 text-primary">
-              <CheckCheck className="w-4 h-4 mr-1" /> Mark all read
+              <Checks className="w-4 h-4 mr-1" /> Mark all read
             </Button>
           )}
         </div>

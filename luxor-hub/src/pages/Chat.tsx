@@ -256,7 +256,7 @@ const Chat = () => {
         <div className="px-5 pt-4 pb-2 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
-              <Sparkles className="w-4.5 h-4.5 text-primary" />
+              <Sparkle className="w-4.5 h-4.5 text-primary" />
             </div>
             <div>
               <h1 className="font-sans font-semibold text-foreground text-sm">Your Stylist</h1>
@@ -287,7 +287,7 @@ const Chat = () => {
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="pt-8 pb-4">
               <div className="text-center mb-8">
                 <div className="w-16 h-16 rounded-2xl bg-primary/10 mx-auto mb-4 flex items-center justify-center">
-                  <Sparkles className="w-7 h-7 text-primary" />
+                  <Sparkle className="w-7 h-7 text-primary" />
                 </div>
                 <h2 className="font-display text-xl font-bold text-foreground mb-1.5">What are we wearing today?</h2>
                 <p className="text-muted-foreground font-sans text-xs max-w-xs mx-auto leading-relaxed">

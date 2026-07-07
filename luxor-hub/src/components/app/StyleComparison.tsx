@@ -45,7 +45,7 @@ export function StyleComparison({ history }: StyleComparisonProps) {
   if (history.length < 2) {
     return (
       <div className="text-center py-16">
-        <ArrowLeftRight className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+        <ArrowsLeftRight className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
         <p className="text-muted-foreground text-sm">You need at least 2 saved analyses to compare.</p>
       </div>
     );
@@ -121,7 +121,7 @@ export function StyleComparison({ history }: StyleComparisonProps) {
           <Card className="glass-card">
             <CardHeader>
               <CardTitle className="font-display text-foreground flex items-center gap-2">
-                <ArrowLeftRight className="w-5 h-5 text-primary" /> Occasion Breakdown
+                <ArrowsLeftRight className="w-5 h-5 text-primary" /> Occasion Breakdown
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">

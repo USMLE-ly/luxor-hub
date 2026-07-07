@@ -139,7 +139,7 @@ export const TrendIntelligenceWidget = () => {
                               <div className="flex flex-wrap gap-1">
                                 {trend.closetMatches.map((item, j) => (
                                   <span key={j} className="text-[10px] font-sans bg-green-500/10 text-green-500 px-2 py-0.5 rounded-full flex items-center gap-1">
-                                    <Shirt className="w-2.5 h-2.5" /> {item}
+                                    <TShirt className="w-2.5 h-2.5" /> {item}
                                   </span>
                                 ))}
                               </div>

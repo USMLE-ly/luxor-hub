@@ -232,7 +232,7 @@ const MonthlyReportInner = () => {
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
               className="grid grid-cols-2 gap-3">
               {[
-                { icon: <CalendarDays className="w-4 h-4 text-primary" />, value: stats.totalOutfits, label: "Outfits Planned" },
+                { icon: <CalendarDots className="w-4 h-4 text-primary" />, value: stats.totalOutfits, label: "Outfits Planned" },
                 { icon: <Star className="w-4 h-4 text-primary" />, value: `${stats.varietyScore}%`, label: "Variety Score" },
                 { icon: <Flame className="w-4 h-4 text-orange-400" />, value: stats.streak, label: "Current Streak" },
                 { icon: <TrendUp className="w-4 h-4 text-primary" />, value: stats.uniqueOutfits, label: "Unique Combos" },
@@ -301,7 +301,7 @@ const MonthlyReportInner = () => {
                             </div>
                           ) : (
                             <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
-                              <Shirt className="w-3.5 h-3.5 text-muted-foreground/40" />
+                              <TShirt className="w-3.5 h-3.5 text-muted-foreground/40" />
                             </div>
                           )}
                           <div className="flex-1 min-w-0">
@@ -328,7 +328,7 @@ const MonthlyReportInner = () => {
                       {cpwAnalytics.worstValue.map((item, i) => (
                         <div key={i} className="flex items-center gap-2.5">
                           <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
-                            <Shirt className="w-3.5 h-3.5 text-muted-foreground/40" />
+                            <TShirt className="w-3.5 h-3.5 text-muted-foreground/40" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-sans text-foreground truncate capitalize">{item.name || item.category}</p>
@@ -359,7 +359,7 @@ const MonthlyReportInner = () => {
             )}
 
             {/* Seasonal Wardrobe Analysis */}
-            {(() => { if (closetItems.length === 0) { return <div className="text-center py-8"><Shirt className="w-8 h-8 text-white/20 mx-auto mb-2" /><p className="text-xs text-white/40">Your wardrobe is empty. Add items to your closet to see seasonal rotation recommendations.</p></div>; } if (seasonalAnalysis.rotateIn.length > 0 || seasonalAnalysis.rotateOut.length > 0) { return (
+            {(() => { if (closetItems.length === 0) { return <div className="text-center py-8"><TShirt className="w-8 h-8 text-white/20 mx-auto mb-2" /><p className="text-xs text-white/40">Your wardrobe is empty. Add items to your closet to see seasonal rotation recommendations.</p></div>; } if (seasonalAnalysis.rotateIn.length > 0 || seasonalAnalysis.rotateOut.length > 0) { return (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24 }}
                 className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-forest/40 p-4 overflow-hidden">
                 <div className="flex items-center gap-2 mb-1">
@@ -383,7 +383,7 @@ const MonthlyReportInner = () => {
                               <img src={item.photo_url} alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "multiply" }} />
                             </div>
                           ) : (
-                            <Shirt className="w-3.5 h-3.5 text-emerald-500/60" />
+                            <TShirt className="w-3.5 h-3.5 text-emerald-500/60" />
                           )}
                           <span className="text-[10px] font-sans text-foreground capitalize">{item.name || item.category}</span>
                         </div>
@@ -405,7 +405,7 @@ const MonthlyReportInner = () => {
                               <img src={item.photo_url} alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "multiply" }} />
                             </div>
                           ) : (
-                            <Shirt className="w-3.5 h-3.5 text-orange-400/60" />
+                            <TShirt className="w-3.5 h-3.5 text-orange-400/60" />
                           )}
                           <span className="text-[10px] font-sans text-foreground capitalize">{item.name || item.category}</span>
                         </div>
@@ -425,7 +425,7 @@ const MonthlyReportInner = () => {
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
                 className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-forest/40 p-4 overflow-hidden">
                 <div className="flex items-center gap-2 mb-3">
-                  <Shirt className="w-4 h-4 text-primary" />
+                  <TShirt className="w-4 h-4 text-primary" />
                   <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.15em]">Most Worn Items</p>
                 </div>
                 <div className="space-y-2">
@@ -438,7 +438,7 @@ const MonthlyReportInner = () => {
                         </div>
                       ) : (
                         <div className="w-9 h-9 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
-                          <Shirt className="w-4 h-4 text-muted-foreground/40" />
+                          <TShirt className="w-4 h-4 text-muted-foreground/40" />
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
@@ -511,7 +511,7 @@ const MonthlyReportInner = () => {
             {!loading && events.length === 0 && !cpwAnalytics && seasonalAnalysis.rotateIn.length === 0 && seasonalAnalysis.rotateOut.length === 0 && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
                 className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-forest/40 p-8 text-center mt-4 overflow-hidden">
-                <CalendarDays className="w-10 h-10 text-amber-500/50 mx-auto mb-3" />
+                <CalendarDots className="w-10 h-10 text-amber-500/50 mx-auto mb-3" />
                 <h3 className="text-sm font-semibold text-white/70 mb-1">No Data Yet</h3>
                 <p className="text-xs text-white/40 max-w-md mx-auto">
                   Start planning outfits in your calendar and adding items to your closet.

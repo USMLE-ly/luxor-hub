@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import {Video, Play, Pause, SkipForward, Spinner, Sparkle, Camera, TrashSimple, CheckCircle, Warning, Image} from "@phosphor-icons/react";
+import {Video, Play, Pause, SkipForward, Spinner, Sparkle, Camera, TrashSimple, CheckCircle, Warning, Image, File} from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { RainbowButton } from "@/components/ui/rainbow-button";
@@ -295,7 +295,7 @@ export default function VideoAnalysis() {
                         disabled={isAnalyzing || isExtracting}
                         className="w-full"
                       >
-                        {isAnalyzing ? <Spinner className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
+                        {isAnalyzing ? <Spinner className="w-4 h-4 animate-spin mr-2" /> : <Sparkle className="w-4 h-4 mr-2" />}
                         Analyze All Frames
                       </RainbowButton>
                     )}

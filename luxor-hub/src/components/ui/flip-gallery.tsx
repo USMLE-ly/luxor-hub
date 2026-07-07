@@ -514,7 +514,7 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
               onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
               onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
             >
-              <CalendarDays size={18} />
+              <CalendarDots size={18} />
             </button>
           )}
           <button

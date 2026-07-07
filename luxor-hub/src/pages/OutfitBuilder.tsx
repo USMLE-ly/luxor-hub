@@ -232,7 +232,7 @@ const OutfitBuilder = () => {
                           <img src={item.photo_url} alt="" className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
-                            <Shirt className="h-4 w-4 text-muted-foreground" />
+                            <TShirt className="h-4 w-4 text-muted-foreground" />
                           </div>
                         )}
                       </div>
@@ -348,7 +348,7 @@ const OutfitBuilder = () => {
               {canvasItems.length === 0 && (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
-                    <Shirt className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
+                    <TShirt className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
                     <p className="text-sm text-muted-foreground font-sans">Drag items here</p>
                     <p className="text-xs text-muted-foreground/60 font-sans">or click items in your closet</p>
                   </div>
@@ -382,7 +382,7 @@ const OutfitBuilder = () => {
                         <img src={item.photo_url} alt={item.name || ""} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center p-1">
-                          <Shirt className="h-6 w-6 text-muted-foreground" />
+                          <TShirt className="h-6 w-6 text-muted-foreground" />
                           <span className="text-[8px] text-muted-foreground font-sans text-center mt-1 truncate w-full px-1">
                             {item.name || item.category}
                           </span>
@@ -404,7 +404,7 @@ const OutfitBuilder = () => {
                       key={ci.itemId}
                       className="px-2.5 py-1 rounded-full text-xs font-sans bg-secondary text-foreground flex items-center gap-1"
                     >
-                      <Shirt className="h-3 w-3 text-primary" />
+                      <TShirt className="h-3 w-3 text-primary" />
                       {item?.name || "Unnamed"}
                       <button onClick={() => removeFromCanvas(ci.itemId)} className="ml-1 text-muted-foreground hover:text-destructive">
                         <X className="h-3 w-3" />

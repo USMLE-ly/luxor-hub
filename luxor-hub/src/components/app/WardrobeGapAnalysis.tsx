@@ -146,7 +146,7 @@ export function WardrobeGapAnalysis() {
       <div className="space-y-1.5">
         {analysis.suggestions.slice(0, 4).map((s, i) => (
           <div key={i} className="flex items-start gap-2 py-1">
-            <Shirt className="w-3.5 h-3.5 text-primary mt-0.5 flex-shrink-0" />
+            <TShirt className="w-3.5 h-3.5 text-primary mt-0.5 flex-shrink-0" />
             <span className="text-xs font-sans text-foreground">{s}</span>
           </div>
         ))}
