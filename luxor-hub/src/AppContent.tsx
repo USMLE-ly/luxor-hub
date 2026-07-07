@@ -65,6 +65,7 @@ const RouteTracker = () => {
 const Loading = () => <div className="flex items-center justify-center min-h-screen bg-background"><ClassicLoader /></div>;
 
 const AppContent = () => {
+  const location = useLocation();
   const queryClientRef = useRef<QueryClient | null>(null);
   if (!queryClientRef.current) {
     queryClientRef.current = new QueryClient();

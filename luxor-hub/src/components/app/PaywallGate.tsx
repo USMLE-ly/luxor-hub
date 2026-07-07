@@ -2,6 +2,7 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { ClassicLoader } from "@/components/ui/loader";
 
 /**
  * Wraps app routes behind a paywall check.
@@ -9,6 +10,10 @@ import { supabase } from "@/integrations/supabase/client";
  */
 const PaywallGate = ({ children }: { children: React.ReactNode }) => {
   const { user, loading, isReady } = useAuth();
+
+  // Read from localStorage cache immediately to avoid flash of null
+  const cachedAccess = user ? localStorage.getItem("luxor_sub_" + user.id) : null;
+  const optimisticAccess = cachedAccess === "true" ? true : cachedAccess === "false" ? false : null;
 
   const { data: hasAccess, isLoading: subLoading } = useQuery({
     queryKey: ["subscription-check", user?.id],
@@ -40,10 +45,25 @@ const PaywallGate = ({ children }: { children: React.ReactNode }) => {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Wait for auth hydration before deciding
-  if (!isReady || loading || subLoading) return null;
+  // Wait for auth hydration before deciding — show loader instead of blank page
+  if (!isReady || loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <ClassicLoader />
+      </div>
+    );
+  }
 
   if (!user) return <Navigate to="/auth" replace />;
+
+  // Show loading state while subscription check runs (unless we already have cached data)
+  if (subLoading && optimisticAccess === null) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <ClassicLoader />
+      </div>
+    );
+  }
 
   if (!hasAccess) return <Navigate to="/paywall" replace />;
 

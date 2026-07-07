@@ -15,7 +15,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Only redirect after session hydration is complete (isReady)
     if (isReady && !user) {
-      navigate("/auth");
+      navigate("/auth", { replace: true });
     }
   }, [user, isReady, navigate]);
 
@@ -36,7 +36,14 @@ export function AppLayout({ children }: { children: ReactNode }) {
     );
   }
 
-  if (!user) return null;
+  // User is not authenticated — show loader while redirect happens
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <ClassicLoader />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-20">
