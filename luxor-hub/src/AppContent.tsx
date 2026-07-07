@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "next-themes";
@@ -98,7 +98,7 @@ const AppContent = () => {
             <Route path="/auth" element={<Auth />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/dashboard" element={<PaywallGate><Dashboard /></PaywallGate>} />
+            <Route path="/dashboard" element={<Navigate to="/closet" replace />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/closet" element={<PaywallGate><Closet /></PaywallGate>} />
             <Route path="/chat" element={<PaywallGate><Chat /></PaywallGate>} />

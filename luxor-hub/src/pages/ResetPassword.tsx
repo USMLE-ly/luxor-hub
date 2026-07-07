@@ -102,7 +102,7 @@ const ResetPassword = () => {
               </div>
               <GoldShimmerButton>
                 <Button
-                  onClick={() => navigate("/dashboard")}
+                  onClick={() => navigate("/closet")}
                   className="w-full gold-gradient text-primary-foreground font-semibold rounded-xl h-12 hover:shadow-[0_0_20px_hsl(43,80%,58%,0.3)] transition-all relative"
                 >
                   Go to Dashboard

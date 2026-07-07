@@ -73,7 +73,7 @@ const Install = () => {
             </div>
             <p className="font-sans text-foreground font-medium">LEXOR® is installed!</p>
             <p className="text-muted-foreground font-sans text-xs">Open it from your home screen for the full experience.</p>
-            <Button onClick={() => navigate("/dashboard")} className="gold-gradient rounded-xl">
+            <Button onClick={() => navigate("/closet")} className="gold-gradient rounded-xl">
               Go to Dashboard <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </div>

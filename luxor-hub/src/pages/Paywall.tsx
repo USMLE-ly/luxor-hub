@@ -141,7 +141,7 @@ const Paywall = () => {
         localStorage.setItem("luxor_paid", tier);
         grantAccess(tier);
         toast.success("Welcome to Lexor! Your style journey begins now.");
-        navigate("/dashboard");
+        navigate("/closet");
       } catch {
         toast.error("Something went wrong saving your subscription.");
       }
@@ -175,7 +175,7 @@ const Paywall = () => {
         localStorage.setItem("luxor_paid", restoredTier);
         grantAccess(restoredTier);
         toast.success("Purchase restored! Welcome back to Lexor.");
-        navigate("/dashboard");
+        navigate("/closet");
       } else {
         toast.info("No previous purchase found for this account.");
       }
@@ -233,7 +233,7 @@ const Paywall = () => {
                         onClick={() => {
                           try { localStorage.setItem("luxor_paid", "free"); } catch {}
                           grantAccess("free");
-                          navigate("/dashboard");
+                          navigate("/closet");
                         }}
                         className="w-full h-10 rounded-lg border border-foreground/20 text-foreground font-sans font-semibold text-sm hover:bg-foreground/5 transition-colors"
                       >

@@ -182,7 +182,7 @@ const Pricing = () => {
         localStorage.setItem("luxor_paid", "true");
         grantAccess();
         toast.success("Welcome to Lexor! Your style journey begins now.");
-        navigate("/dashboard");
+        navigate("/closet");
       } catch {
         toast.error("Something went wrong saving your subscription.");
       }

@@ -115,7 +115,7 @@ const Auth = () => {
             // table may not exist yet — treat as not onboarded
           }
         }
-        navigate(onboardingDone ? "/dashboard" : "/onboarding");
+        navigate(onboardingDone ? "/closet" : "/onboarding");
       } else {
         const { data: signUpData, error } = await supabase.auth.signUp({
           email,

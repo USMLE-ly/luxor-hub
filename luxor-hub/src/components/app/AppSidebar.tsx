@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/sidebar";
 
 const navItems = [
-  { title: "Dashboard", url: "/dashboard", icon: Home },
+  { title: "Closet", url: "/closet", icon: Shirt },
   { title: "My Closet", url: "/closet", icon: Shirt },
   { title: "Outfit Generator", url: "/outfits", icon: Wand2 },
   { title: "Outfit Builder", url: "/outfit-builder", icon: Move },

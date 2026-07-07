@@ -773,7 +773,7 @@ const Calibration = () => {
 
         <div className="fixed bottom-0 inset-x-0 p-5 bg-background/80 backdrop-blur-md border-t border-border/20">
           <Button
-            onClick={() => navigate("/dashboard")}
+            onClick={() => navigate("/closet")}
             className="w-full h-14 rounded-2xl font-semibold font-sans text-base bg-foreground text-background hover:bg-foreground/90"
           >
             CONTINUE
