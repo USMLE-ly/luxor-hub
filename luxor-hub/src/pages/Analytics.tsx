@@ -315,7 +315,7 @@ const Analytics = () => {
             {underused.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="glass rounded-2xl p-6">
                 <h3 className="font-display text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-gold-light" /> Underused Items
+                  <Warning className="h-5 w-5 text-gold-light" /> Underused Items
                 </h3>
                 <p className="text-muted-foreground font-sans text-sm mb-4">These items have been worn once or never.</p>
                 <div className="flex flex-wrap gap-2">

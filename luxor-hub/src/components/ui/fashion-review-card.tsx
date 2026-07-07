@@ -196,7 +196,7 @@ export default function FashionReviewCard({
         {Array.isArray(improvements) && improvements.length > 0 && (
           <div className="flex-1 min-w-0 rounded-xl border border-amber-500/20 bg-amber-950/20 p-4">
             <h4 className="text-amber-400 font-semibold text-sm mb-3 flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4" /> Improvements
+              <Warning className="w-4 h-4" /> Improvements
             </h4>
             <ul className="space-y-2">
               {improvements.slice(0, 4).map((imp, i) => (

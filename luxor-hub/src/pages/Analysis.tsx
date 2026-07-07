@@ -533,7 +533,7 @@ export default function Analysis() {
       <AppLayout>
         <div className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center max-w-md mx-auto">
           <div className="w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center mb-6">
-            <AlertTriangle className="w-8 h-8 text-amber-400" />
+            <Warning className="w-8 h-8 text-amber-400" />
           </div>
           <h2 className="font-display text-xl text-foreground mb-2">Analysis unavailable</h2>
           <p className="text-muted-foreground text-sm mb-8 max-w-sm">
@@ -743,7 +743,7 @@ export default function Analysis() {
               <>
                 {analysisFailed && imagePreview ? (
                   <motion.div variants={childVariants} className="text-center py-12">
-                    <AlertTriangle className="h-16 w-16 text-amber-500/70 mx-auto mb-4" />
+                    <Warning className="h-16 w-16 text-amber-500/70 mx-auto mb-4" />
                     <h3 className="font-display text-xl text-foreground mb-2">Analysis timed out</h3>
                     <p className="text-muted-foreground text-sm max-w-sm mx-auto mb-6">
                       The AI took too long to respond. You can retry with a longer timeout, or upload a different photo.

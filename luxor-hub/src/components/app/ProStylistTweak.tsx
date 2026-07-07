@@ -146,7 +146,7 @@ export function ProStylistTweak({ imagePreview, imageUrl }: ProStylistTweakProps
                 animate={{ opacity: 1 }}
                 className="text-center py-6 space-y-3"
               >
-                <AlertTriangle className="h-8 w-8 text-destructive mx-auto" />
+                <Warning className="h-8 w-8 text-destructive mx-auto" />
                 <p className="text-sm text-destructive">{error}</p>
                 <Button variant="outline" onClick={handleGenerateTweak}>
                   <RefreshCw className="h-4 w-4 mr-2" /> Try Again

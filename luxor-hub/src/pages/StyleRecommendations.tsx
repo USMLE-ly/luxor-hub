@@ -370,7 +370,7 @@ export default function StyleRecommendationsPage() {
           )}
           {error && (
             <div className="flex items-center gap-2 text-red-400 text-sm bg-red-500/10 px-4 py-2 rounded-lg border border-red-500/30">
-              <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+              <Warning className="w-4 h-4 flex-shrink-0" />
               <span>{error}</span>
             </div>
           )}

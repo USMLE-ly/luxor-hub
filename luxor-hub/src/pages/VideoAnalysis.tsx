@@ -338,7 +338,7 @@ export default function VideoAnalysis() {
                         <p className="text-xs text-foreground/80">{frame.timestamp.toFixed(1)}s</p>
                         {frame.status === "analyzing" && <Loader2 className="w-3 h-3 animate-spin text-primary absolute top-2 right-2" />}
                         {frame.status === "done" && <CheckCircle className="w-3 h-3 text-green-400 absolute top-2 right-2" />}
-                        {frame.status === "error" && <AlertTriangle className="w-3 h-3 text-destructive absolute top-2 right-2" />}
+                        {frame.status === "error" && <Warning className="w-3 h-3 text-destructive absolute top-2 right-2" />}
                       </div>
                       {frame.analysis && (
                         <div className="absolute top-2 left-2">

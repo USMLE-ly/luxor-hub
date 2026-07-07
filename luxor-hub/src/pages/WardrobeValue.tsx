@@ -222,7 +222,7 @@ function WardrobeValueContent() {
           <Card className="border-border/60 bg-card/60 backdrop-blur-xl">
             <CardHeader className="pb-2">
               <CardTitle className="text-base font-display flex items-center gap-2 text-foreground">
-                <AlertTriangle className="w-4 h-4 text-yellow-500" /> Dead Inventory
+                <Warning className="w-4 h-4 text-yellow-500" /> Dead Inventory
               </CardTitle>
               <p className="text-[11px] text-muted-foreground font-sans">Items over $20 not worn in 60+ days</p>
             </CardHeader>

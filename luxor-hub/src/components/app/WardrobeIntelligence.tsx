@@ -190,7 +190,7 @@ export function WardrobeIntelligence() {
           className="rounded-2xl border border-[hsl(40,80%,55%,0.3)] bg-card p-5"
         >
           <div className="flex items-center gap-2 mb-3">
-            <AlertTriangle className="w-5 h-5 text-[hsl(40,80%,55%)]" />
+            <Warning className="w-5 h-5 text-[hsl(40,80%,55%)]" />
             <h3 className="font-display text-base font-bold text-foreground">Dormant Items</h3>
           </div>
           <p className="text-xs text-muted-foreground font-sans mb-3">
