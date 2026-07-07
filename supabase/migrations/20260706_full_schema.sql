@@ -490,6 +490,8 @@ begin
   values (new.id, new.raw_user_meta_data->>'display_name');
   insert into public.subscriptions (user_id, plan_tier, status)
   values (new.id, 'free', 'active');
+  insert into public.style_profiles (user_id, onboarding_completed)
+  values (new.id, false);
   return new;
 end;
 $$ language plpgsql security definer;
