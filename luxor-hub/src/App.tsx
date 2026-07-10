@@ -1,6 +1,7 @@
 import React, { lazy, Suspense, Component, useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { initAudio } from "@/lib/audio-system";
+import { initMonitor } from "@/lib/support";
 
 import { ClassicLoader } from "@/components/ui/loader";
 const AppContent = lazy(() => import("./AppContent"));
@@ -88,6 +89,8 @@ class AppErrorBoundary extends Component<
 
 const AudioInit = () => {
   useEffect(() => {
+    initMonitor(); // Start production error monitor
+
     const handleInteraction = () => {
       initAudio();
       window.removeEventListener("click", handleInteraction);
