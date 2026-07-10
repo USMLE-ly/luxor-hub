@@ -8,7 +8,7 @@ import Pressable from "@/components/ui/pressable";
 import { DoubleBezel, DoubleBezelCard } from "@/components/ui/double-bezel";
 import CursorSpotlight, { CursorSpotlightLight } from "@/components/ui/cursor-spotlight";
 import { ProgressiveImage } from "@/components/ui/progressive-image";
-import { ThreeGarmentShowcase } from "@/components/ui/three-garment-showcase";
+// ThreeGarmentShowcase removed — heavy Three.js freezes mobile devices
 import {ArrowRight, Play, Target, Crown, Star, Hexagon, Triangle, Command, Ghost, Diamond, Cpu, CaretDown, } from "@phosphor-icons/react";
 import heroVideo from "@/assets/hero-video.mp4";
 
@@ -139,9 +139,14 @@ export default function GlassmorphismTrustHero() {
 
       {/* Floating premium circles */}
       <GoldParticles />
-            {/* 3D Floating Garment Showcase */}
-      <div className="absolute right-[-5%] top-[5%] w-[45%] h-[80%] z-[1] pointer-events-none opacity-70 hidden lg:block">
-        <ThreeGarmentShowcase />
+      {/* Luxury floating garment accent — CSS-only, zero JS */}
+      <div className="absolute right-[-2%] top-[8%] w-[40%] h-[70%] z-[1] pointer-events-none opacity-50 hidden lg:flex items-center justify-center">
+        <div className="relative w-[280px] h-[360px]">
+          <div className="absolute inset-0 rounded-[40%] border border-gold/10 animate-[spin_20s_linear_infinite]" />
+          <div className="absolute inset-[15%] rounded-[45%] border border-gold/15 animate-[spin_15s_linear_infinite_reverse]" />
+          <div className="absolute inset-[30%] rounded-full bg-gradient-to-br from-gold/20 via-gold/5 to-transparent animate-pulse" />
+          <div className="absolute inset-0 rounded-[40%] bg-gradient-to-tr from-transparent via-white/[0.03] to-transparent" />
+        </div>
       </div>
       <div className="absolute inset-0 z-[1] overflow-hidden pointer-events-none">
         <FloatingCircle size={320} top="-5%" left="-8%" gradient="radial-gradient(circle, hsl(var(--gold) / 0.08) 0%, transparent 70%)" duration={14} delay={0} />
