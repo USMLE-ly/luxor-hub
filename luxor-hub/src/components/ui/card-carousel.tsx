@@ -1,8 +1,7 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, EffectCoverflow, Pagination, Navigation } from "swiper/modules";
+import { Autoplay, Pagination, Navigation } from "swiper/modules";
 import "swiper/css";
-import "swiper/css/effect-coverflow";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
 import { motion } from "framer-motion";
@@ -21,26 +20,16 @@ const videos = [
 export const CardCarousel: React.FC = () => {
   const [activeIdx, setActiveIdx] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
-  const [playingIdx, setPlayingIdx] = useState<number | null>(null);
+  const [playingIdx, setPlayingIdx] = useState<number | null>(0);
   const [loadingMap, setLoadingMap] = useState<Record<number, boolean>>({});
   const [posters, setPosters] = useState<Record<number, string>>({});
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+  const swiperRef = useRef<any>(null);
 
-  // Extract poster (first frame) from each video on load
-  const extractPoster = useCallback((idx: number) => {
-    const video = videoRefs.current[idx];
-    if (!video || posters[idx]) return;
-    try {
-      video.currentTime = 0.01;
-    } catch { /* ignore */ }
-  }, [posters]);
-
-  // Handle video loadedmetadata — extract first frame as poster
-  const handleLoadedMetadata = (idx: number) => {
+  const handleLoadedMetadata = useCallback((idx: number) => {
     setLoadingMap((prev) => ({ ...prev, [idx]: false }));
     const video = videoRefs.current[idx];
     if (!video) return;
-    // Capture first frame as canvas
     try {
       const canvas = document.createElement("canvas");
       canvas.width = video.videoWidth || 300;
@@ -51,34 +40,31 @@ export const CardCarousel: React.FC = () => {
         const dataUrl = canvas.toDataURL("image/jpeg", 0.6);
         setPosters((prev) => ({ ...prev, [idx]: dataUrl }));
       }
-    } catch { /* ignore CORS issues */ }
-  };
+    } catch { /* ignore CORS */ }
+  }, []);
 
-  // Play a specific video
-  const togglePlay = (idx: number) => {
+  const togglePlay = useCallback((idx: number) => {
     const video = videoRefs.current[idx];
     if (!video) return;
     if (video.paused) {
-      video.play();
+      video.play().catch(() => {});
       setPlayingIdx(idx);
     } else {
       video.pause();
       setPlayingIdx(null);
     }
-  };
+  }, []);
 
-  // Global mute toggle (affects all videos)
-  const toggleMute = (e: React.MouseEvent) => {
+  const toggleMute = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    const newMuted = !isMuted;
-    setIsMuted(newMuted);
-    videoRefs.current.forEach((v) => {
-      if (v) v.muted = newMuted;
+    setIsMuted((prev) => {
+      const next = !prev;
+      videoRefs.current.forEach((v) => { if (v) v.muted = next; });
+      return next;
     });
-  };
+  }, []);
 
-  // On slide change — pause all, play active
-  const handleSlideChange = (swiper: any) => {
+  const handleSlideChange = useCallback((swiper: any) => {
     const newIdx = swiper.realIndex;
     setActiveIdx(newIdx);
     videoRefs.current.forEach((v, i) => {
@@ -89,13 +75,11 @@ export const CardCarousel: React.FC = () => {
           setPlayingIdx(i);
         } else {
           v.pause();
-          if (i === playingIdx) setPlayingIdx(null);
         }
       }
     });
-  };
+  }, []);
 
-  // Keep mute state synced
   useEffect(() => {
     videoRefs.current.forEach((v) => {
       if (v) v.muted = isMuted;
@@ -103,39 +87,16 @@ export const CardCarousel: React.FC = () => {
   }, [isMuted]);
 
   const swiperCSS = `
-    .swiper {
-      width: 100%;
-      padding-bottom: 50px;
-    }
-    .swiper-slide {
-      background-position: center;
-      background-size: cover;
-      width: 300px;
-      transition: transform 0.4s ease;
-    }
-    .swiper-slide-active {
-      transform: scale(1.08);
-      z-index: 10;
-    }
-    .swiper-slide:not(.swiper-slide-active) {
-      opacity: 0.5;
-    }
-    .swiper-3d .swiper-slide-shadow-left,
-    .swiper-3d .swiper-slide-shadow-right {
-      background: none;
-    }
-    .swiper-pagination-bullet {
-      background: hsl(43 74% 49% / 0.4) !important;
-      opacity: 0.5 !important;
-    }
-    .swiper-pagination-bullet-active {
-      background: hsl(43 74% 49%) !important;
-      opacity: 1 !important;
-    }
-    .swiper-button-next,
-    .swiper-button-prev {
-      color: hsl(43 74% 49%) !important;
-    }
+    .card-swiper { width: 100%; padding-bottom: 50px; }
+    .card-swiper .swiper-slide { transition: transform 0.5s cubic-bezier(0.23,1,0.32,1), opacity 0.5s ease; }
+    .card-swiper .swiper-slide-active { transform: scale(1.08); z-index: 10; }
+    .card-swiper .swiper-slide-prev,
+    .card-swiper .swiper-slide-next { opacity: 0.6; }
+    .card-swiper .swiper-slide:not(.swiper-slide-active):not(.swiper-slide-prev):not(.swiper-slide-next) { opacity: 0.3; }
+    .card-swiper .swiper-pagination-bullet { background: hsl(43 74% 49% / 0.4) !important; opacity: 0.5 !important; }
+    .card-swiper .swiper-pagination-bullet-active { background: hsl(43 74% 49%) !important; opacity: 1 !important; }
+    .card-swiper .swiper-button-next,
+    .card-swiper .swiper-button-prev { color: hsl(43 74% 49%) !important; }
   `;
 
   return (
@@ -158,38 +119,32 @@ export const CardCarousel: React.FC = () => {
       </motion.button>
 
       <Swiper
-        effect="coverflow"
-        grabCursor
+        slidesPerView={1.3}
         centeredSlides
-        slidesPerView="auto"
+        spaceBetween={16}
+        grabCursor
         loop
-        coverflowEffect={{
-          rotate: 0,
-          stretch: 0,
-          depth: 100,
-          modifier: 2.5,
-          slideShadows: false,
-        }}
-        autoplay={{ delay: 5000, disableOnInteraction: false }}
+        autoplay={{ delay: 6000, disableOnInteraction: false }}
         pagination={{ clickable: true }}
         navigation
         onSlideChange={handleSlideChange}
         onSwiper={(swiper) => {
-          // Auto-play first slide
+          swiperRef.current = swiper;
+          // Force loop initialization and start first video
+          swiper.update();
           setTimeout(() => {
             const v = videoRefs.current[0];
             if (v) {
-              v.currentTime = 0;
               v.play().catch(() => {});
               setPlayingIdx(0);
             }
-          }, 200);
+          }, 300);
         }}
-        modules={[Autoplay, EffectCoverflow, Pagination, Navigation]}
-        className="w-full"
+        modules={[Autoplay, Pagination, Navigation]}
+        className="card-swiper w-full"
       >
         {videos.map((v, i) => (
-          <SwiperSlide key={i} className="!w-[300px] md:!w-[380px]">
+          <SwiperSlide key={i}>
             <div className="relative rounded-2xl overflow-hidden border border-border/30 bg-card/40 backdrop-blur-sm shadow-xl group">
               {/* Loading spinner */}
               {loadingMap[i] && (
@@ -198,7 +153,7 @@ export const CardCarousel: React.FC = () => {
                 </div>
               )}
 
-              {/* Poster (instant first frame) */}
+              {/* Poster overlay */}
               {posters[i] && playingIdx !== i && (
                 <img
                   src={posters[i]}
@@ -219,7 +174,7 @@ export const CardCarousel: React.FC = () => {
                 onLoadedMetadata={() => handleLoadedMetadata(i)}
               />
 
-              {/* Play/Pause button */}
+              {/* Play/Pause overlay */}
               <div className="absolute inset-0 flex items-center justify-center bg-background/20 opacity-100 group-hover:opacity-100 transition-opacity z-15">
                 <motion.button
                   whileHover={{ scale: 1.15 }}
@@ -235,7 +190,7 @@ export const CardCarousel: React.FC = () => {
                 </motion.button>
               </div>
 
-              {/* Title overlay */}
+              {/* Title */}
               <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-background/90 to-transparent p-4 pt-12 z-10">
                 <p className="font-sans text-sm font-semibold text-foreground">{v.title}</p>
               </div>
