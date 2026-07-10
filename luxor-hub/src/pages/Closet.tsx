@@ -1478,10 +1478,10 @@ const Closet = () => {
                   exit={{ height: 0, opacity: 0 }} className="overflow-hidden border-t border-border bg-background">
                   <div className="flex items-center justify-between px-4 py-3 border-b border-border">
                     <h3 className="font-display text-sm font-bold text-foreground">
-                      {activePanel === "dna" && "Body DNA"}
-                      {activePanel === "pose" && "Pose Presets"}
-                      {activePanel === "trace" && "Tracing Mode"}
-                      {activePanel === "measure" && "Measurements"}
+                      {activePanel === "dna" && <span>Body DNA</span>}
+                      {activePanel === "pose" && <span>Pose Presets</span>}
+                      {activePanel === "trace" && <span>Tracing Mode</span>}
+                      {activePanel === "measure" && <span>Measurements</span>}
                     </h3>
                     <button onClick={() => setActivePanel(null)}>
                       <X className="w-4 h-4 text-muted-foreground" />
