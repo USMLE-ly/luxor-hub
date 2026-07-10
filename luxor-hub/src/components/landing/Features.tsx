@@ -147,6 +147,7 @@ const Features = () => {
           >
             <video
               src={featureDemo}
+              preload="metadata"
               autoPlay
               loop
               muted

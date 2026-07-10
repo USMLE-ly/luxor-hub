@@ -6,7 +6,7 @@ import { GoldParticles } from "@/components/app/GoldParticles";
 import NumberTicker from "@/components/ui/number-ticker";
 import Pressable from "@/components/ui/pressable";
 import { DoubleBezel, DoubleBezelCard } from "@/components/ui/double-bezel";
-import CursorSpotlight, { CursorSpotlightLight } from "@/components/ui/cursor-spotlight";
+import CursorSpotlight from "@/components/ui/cursor-spotlight";
 import { ProgressiveImage } from "@/components/ui/progressive-image";
 // ThreeGarmentShowcase removed — heavy Three.js freezes mobile devices
 import {ArrowRight, Play, Target, Crown, Star, Hexagon, Triangle, Command, Ghost, Diamond, Cpu, CaretDown, } from "@phosphor-icons/react";
@@ -34,7 +34,7 @@ const FloatingCircle = ({
       opacity: { duration: 1.5, delay },
       y: { duration, repeat: Infinity, ease: [0.77, 0, 0.175, 1], delay },
     }}
-    className="absolute rounded-full pointer-events-none border border-white/[0.08] backdrop-blur-[2px]"
+    className="absolute rounded-full pointer-events-none border border-white/[0.08] backdrop-blur-[2px] floating-circle"
     style={{
       width: size,
       height: size,
@@ -84,39 +84,12 @@ export default function GlassmorphismTrustHero() {
   return (
     <div ref={heroRef} className="relative w-full bg-background text-foreground overflow-hidden font-sans">
       <CursorSpotlight />
-      <CursorSpotlightLight />
-      <style>{`
-        @keyframes heroFadeSlideIn {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes heroKenBurns {
-          0% { transform: scale(1); }
-          50% { transform: scale(1.08); }
-          100% { transform: scale(1); }
-        }
-        @keyframes heroMarquee {
-          from { transform: translateX(0); }
-          to { transform: translateX(-50%); }
-        }
-        .hero-animate-fade-in {
-          animation: heroFadeSlideIn 0.8s ease-out forwards;
-          opacity: 0;
-        }
-        .hero-animate-marquee {
-          animation: heroMarquee 60s linear infinite;
-        }
-        .hero-delay-100 { animation-delay: 0.1s; }
-        .hero-delay-200 { animation-delay: 0.2s; }
-        .hero-delay-300 { animation-delay: 0.3s; }
-        .hero-delay-400 { animation-delay: 0.4s; }
-        .hero-delay-500 { animation-delay: 0.5s; }
-      `}</style>
 
       {/* Background video with parallax + scale */}
       <motion.div className="absolute inset-0 z-0" style={{ y: videoY, scale: videoScale }}>
         <video
           src={heroVideo}
+          preload="metadata"
           autoPlay
           loop
           muted
@@ -152,8 +125,6 @@ export default function GlassmorphismTrustHero() {
         <FloatingCircle size={320} top="-5%" left="-8%" gradient="radial-gradient(circle, hsl(var(--gold) / 0.08) 0%, transparent 70%)" duration={14} delay={0} />
         <FloatingCircle size={200} top="15%" left="75%" gradient="radial-gradient(circle, hsl(var(--accent) / 0.08) 0%, transparent 70%)" duration={12} delay={1} />
         <FloatingCircle size={400} top="55%" left="60%" gradient="radial-gradient(circle, hsl(var(--gold) / 0.05) 0%, transparent 70%)" duration={16} delay={2} />
-        <FloatingCircle size={150} top="70%" left="10%" gradient="radial-gradient(circle, hsla(0, 0%, 100%, 0.06) 0%, transparent 70%)" duration={10} delay={0.5} />
-        <FloatingCircle size={250} top="30%" left="40%" gradient="radial-gradient(circle, hsl(var(--accent) / 0.06) 0%, transparent 70%)" duration={13} delay={1.5} />
       </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 pt-24 pb-12 sm:px-6 md:pt-32 md:pb-20 lg:px-8">

@@ -680,3 +680,57 @@
   from { opacity: 0; filter: blur(10px); transform: translateY(6px); }
   to { opacity: 1; filter: blur(0); transform: translateY(0); }
 }
+
+/* ── Landing page performance optimizations ── */
+
+/* Below-fold sections: skip rendering until near viewport */
+.landing-section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 600px;
+}
+
+/* Hero scroll progress bar */
+.scroll-progress-bar {
+  will-change: transform, opacity;
+}
+
+/* Animated elements: promote to own compositor layer */
+.floating-circle {
+  will-change: transform;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .floating-circle,
+  .scroll-progress-bar {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ── Hero animations (moved from inline <style>) ── */
+@keyframes heroFadeSlideIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes heroKenBurns {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+@keyframes heroMarquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.hero-animate-fade-in {
+  animation: heroFadeSlideIn 0.8s ease-out forwards;
+  opacity: 0;
+}
+.hero-animate-marquee {
+  animation: heroMarquee 60s linear infinite;
+}
+.hero-delay-100 { animation-delay: 0.1s; }
+.hero-delay-200 { animation-delay: 0.2s; }
+.hero-delay-300 { animation-delay: 0.3s; }
+.hero-delay-400 { animation-delay: 0.4s; }
+.hero-delay-500 { animation-delay: 0.5s; }

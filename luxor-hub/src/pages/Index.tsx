@@ -32,7 +32,7 @@ const Index = () => {
     <div className="min-h-screen overflow-x-hidden dark">
       {/* Premium scroll progress bar with gold gradient */}
       <motion.div
-        className="fixed top-0 left-0 right-0 h-[2px] z-[100] origin-left"
+        className="fixed top-0 left-0 right-0 h-[2px] z-[100] origin-left scroll-progress-bar"
         style={{ scaleX, opacity }}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-gold/40 via-gold to-gold/40" />
