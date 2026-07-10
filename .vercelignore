@@ -1,4 +1,3 @@
-# Exclude everything except luxor-hub
 .git
 .gitignore
 .gitattributes
@@ -19,7 +18,6 @@ dist_built
 images
 backend
 supabase
-scripts
 src
 requirements.txt
 main.py
@@ -27,7 +25,6 @@ query_knowledge.py
 qdrant_cache.py
 color_dictionary.json
 lovable.toml
-*.pyc
 venv
 node_modules
 .cache-bust-trigger
@@ -36,11 +33,7 @@ node_modules
 api_interact.py
 cleanup_items.py
 ingest_books.py
-build.sh
 start.sh
-package.json
-package-lock.json
-vercel.json
 
 # Exclude non-essentials from luxor-hub
 luxor-hub/.env
@@ -57,6 +50,3 @@ luxor-hub/prisma
 
 # Exclude test files
 luxor-hub/src/test
-
-# Exclude supabase edge functions from build
-luxor-hub/supabase
