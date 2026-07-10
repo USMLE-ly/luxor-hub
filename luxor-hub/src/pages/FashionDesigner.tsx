@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import {Sparkle, Spinner, DownloadSimple, Palette, TShirt, MagicWand, Heart, ShareNetwork, TrashSimple, ClockCounterClockwise, Image, TwitterLogo, LinkSimple, Check, Eye, Download} from "@phosphor-icons/react";
+import {Sparkle, Spinner, DownloadSimple, Palette, TShirt, MagicWand, Heart, ShareNetwork, TrashSimple, ClockCounterClockwise, Image, TwitterLogo, LinkSimple, Check, Eye, Download, Link} from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { RainbowButton } from "@/components/ui/rainbow-button";

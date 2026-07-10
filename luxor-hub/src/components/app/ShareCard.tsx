@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {ShareNetwork, DownloadSimple, X, TwitterLogo, FacebookLogo, LinkSimple, Check, Download} from "@phosphor-icons/react";
+import {ShareNetwork, DownloadSimple, X, TwitterLogo, FacebookLogo, LinkSimple, Check, Download, Link} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
