@@ -1,12 +1,12 @@
 {
   "builds": [
     {
-      "src": "luxor-hub/package.json",
+      "src": "package.json",
       "use": "@vercel/static-build",
       "config": {
-        "installCommand": "npm install",
-        "buildCommand": "npm run build",
-        "outputDirectory": "dist"
+        "installCommand": "npm install --prefix luxor-hub",
+        "buildCommand": "npm run build --prefix luxor-hub",
+        "outputDirectory": "luxor-hub/dist"
       }
     }
   ],
