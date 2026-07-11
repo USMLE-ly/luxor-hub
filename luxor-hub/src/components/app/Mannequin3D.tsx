@@ -1,4 +1,5 @@
-import { useRef, useMemo, useState } from "react";
+import React, { useRef, useMemo, useState, useEffect } from "react";
+
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, ContactShadows, Environment } from "@react-three/drei";
 import * as THREE from "three";
@@ -522,6 +523,32 @@ export default function Mannequin3D({
   showMeasurements = false,
   autoRotate = true,
 }: Mannequin3DProps) {
+  const [webglOk, setWebglOk] = useState<boolean | null>(null);
+  const [canvasMounted, setCanvasMounted] = useState(false);
+  const [sceneError, setSceneError] = useState<string | null>(null);
+
+  useEffect(() => {
+    console.log("[MANNEQUIN3D] Component mounted");
+    // Check WebGL support
+    try {
+      const testCanvas = document.createElement("canvas");
+      const gl = testCanvas.getContext("webgl2") || testCanvas.getContext("webgl");
+      const supported = !!gl;
+      console.log("[MANNEQUIN3D] WebGL supported:", supported);
+      if (gl && "getExtension" in gl) {
+        const ext = gl.getExtension("WEBGL_debug_renderer_info");
+        if (ext) {
+          console.log("[MANNEQUIN3D] GPU:", gl.getParameter(ext.UNMASKED_RENDERER_WEBGL));
+        }
+      }
+      setWebglOk(supported);
+    } catch (e) {
+      console.error("[MANNEQUIN3D] WebGL check failed:", e);
+      setWebglOk(false);
+    }
+    return () => console.log("[MANNEQUIN3D] Component unmounted");
+  }, []);
+
   const isMale = gender === "male";
   const shoulderScale = 0.8 + dna.shoulder * 0.4;
   const waistScale = 0.75 + dna.waist * 0.5;
@@ -576,12 +603,36 @@ export default function Mannequin3D({
         </div>
       )}
 
+      {/* WebGL not supported fallback */}
+      {webglOk === false && (
+        <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-30">
+          <div className="text-center p-6">
+            <p className="text-sm font-sans text-muted-foreground mb-2">3D rendering is not available on this device.</p>
+            <p className="text-xs font-sans text-muted-foreground/60">Try using Chrome or Firefox on a desktop.</p>
+          </div>
+        </div>
+      )}
+
       <Canvas
         camera={{ position: [0, 0.3, 3.2], fov: 38 }}
         gl={{ antialias: true, alpha: true }}
         shadows
         style={{ background: "transparent" }}
+        onCreated={(state) => {
+          console.log("[MANNEQUIN3D] Canvas created successfully", state.gl.capabilities);
+          setCanvasMounted(true);
+        }}
       >
+        {/* Minimal scene test - will render even if SmoothBody fails */}
+        {sceneError && (
+          <>
+            <ambientLight intensity={0.6} />
+            <mesh position={[0, 0, 0]}>
+              <boxGeometry args={[1, 1, 1]} />
+              <meshStandardMaterial color="hotpink" wireframe />
+            </mesh>
+          </>
+        )}
         <ambientLight intensity={0.4} />
         <directionalLight
           position={[2, 4, 3]}
@@ -597,7 +648,9 @@ export default function Mannequin3D({
         <spotLight position={[0, 5, 0]} intensity={0.3} angle={0.6} penumbra={0.8} castShadow />
         <pointLight position={[0, -1, 2]} intensity={0.15} />
 
-        <SmoothBody gender={gender} dna={dna} pose={pose} clothing={clothing} autoRotate={autoRotate} />
+        <React.Suspense fallback={null}>
+          <SmoothBody gender={gender} dna={dna} pose={pose} clothing={clothing} autoRotate={autoRotate} />
+        </React.Suspense>
 
         <ContactShadows
           position={[0, -1.2, 0]}
@@ -614,6 +667,10 @@ export default function Mannequin3D({
           minDistance={2} maxDistance={6}
         />
       </Canvas>
+      {/* Debug overlay — shows mount status */}
+      <div className="absolute bottom-1 left-1 z-30 text-[8px] font-mono text-muted-foreground/40 bg-background/50 px-1 rounded pointer-events-none">
+        WebGL:{webglOk === null ? "?" : webglOk ? "✓" : "✗"} Canvas:{canvasMounted ? "✓" : "…"}
+      </div>
     </div>
   );
 }
