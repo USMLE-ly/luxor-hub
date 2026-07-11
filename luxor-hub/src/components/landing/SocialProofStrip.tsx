@@ -5,7 +5,7 @@ import Pressable from "@/components/ui/pressable";
 import {TShirt, FaceMask, CloudSun, ShieldCheck} from "@phosphor-icons/react";
 
 const uvps = [
-  { icon: Shirt, label: "Uses Your Existing Closet", sub: "No shopping required" },
+  { icon: TShirt, label: "Uses Your Existing Closet", sub: "No shopping required" },
   { icon: FaceMask, label: "Learns Your Body", sub: "Not a generic mannequin" },
   { icon: CloudSun, label: "Weather-Checked Daily", sub: "Practical value every morning" },
   { icon: ShieldCheck, label: "30-Day Money Back", sub: "Zero risk" },

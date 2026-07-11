@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { haptic } from "@/lib/haptics";
-import {Plus, MagnifyingGlass, TShirt, TrashSimple, UploadSimple, X, Spinner, Sparkle, CheckCircle, Camera, CaretRight, Sliders, Pulse, Eye, User, StackSimple, CalendarDots, Image, FloppyDisk, FolderOpen, Heart, Receipt, File, Upload} from "@phosphor-icons/react";
+import {Plus, MagnifyingGlass, TShirt, SlidersHorizontal, TrashSimple, UploadSimple, X, Spinner, Sparkle, CheckCircle, Camera, CaretRight, Sliders, Pulse, Eye, User, StackSimple, CalendarDots, Image, FloppyDisk, FolderOpen, Heart, Receipt, File, Upload} from "@phosphor-icons/react";
 import Mannequin3D, { type ClothingItem as MannequinClothingItem, type BodyDNA, type PosePreset } from "@/components/app/Mannequin3D";
 import { SLOT_MAP, DRESS_REPLACES, type GarmentFit } from "@/components/app/GarmentGeometry";
 import type { FabricType } from "@/components/app/FabricMaterials";
@@ -808,7 +808,7 @@ const Closet = () => {
         {/* Tab Switch: Inventory / Mannequin */}
         <div className="flex gap-1 bg-secondary rounded-xl p-1 mb-5">
           {([
-            { key: "inventory" as ClosetTab, label: "👗 Inventory", icon: Shirt },
+            { key: "inventory" as ClosetTab, label: "👗 Inventory", icon: TShirt },
             { key: "mannequin" as ClosetTab, label: "🧍 3D Mannequin", icon: User },
           ]).map(({ key, label }) => (
             <button

@@ -65,9 +65,9 @@ function Footer() {
         </p>
         <div className="flex items-center gap-4">
           {[
-            { icon: Instagram, href: "#" },
-            { icon: Twitter, href: "#" },
-            { icon: ExternalLink, href: "#" },
+            { icon: InstagramLogo, href: "#" },
+            { icon: TwitterLogo, href: "#" },
+            { icon: ArrowSquareOut, href: "#" },
           ].map(({ icon: Icon, href }, i) => (
             <motion.a
               key={i}

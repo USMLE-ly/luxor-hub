@@ -210,7 +210,7 @@ export const StyleInspirationFeed = () => {
       {/* Tabs */}
       <div className="flex gap-1 bg-secondary/50 rounded-xl p-1 w-fit">
         {([
-          { key: "all", label: "All", icon: Sparkles },
+          { key: "all", label: "All", icon: Sparkle },
           { key: "mine", label: "My Looks", icon: User },
           { key: "community", label: "Community", icon: Users },
         ] as const).map((t) => (
