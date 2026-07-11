@@ -297,8 +297,10 @@ function SmoothBody({
       .sort((a, b) => a.layerIdx - b.layerIdx);
   }, [clothing]);
 
-  // Body-relative anchor positions
-  const armX = (isMale ? 0.28 : 0.24) * shoulderScale;
+  // Body-relative anchor positions (matched to torso shoulder geometry)
+  const shoulderWidth = (isMale ? 0.26 : 0.22) * shoulderScale;
+  const armX = shoulderWidth; // arms attach at the shoulder edge
+  const armY = 0.48 + 0.47; // torso mesh position + shoulder profile y
   const legX = 0.1 * hipScale;
   const waistY = 0.0;
   const shoeY = -0.95 * legScale;
@@ -336,7 +338,7 @@ function SmoothBody({
         </group>
 
         {/* Left arm with hidden capsule joints */}
-        <group position={[-armX, 0.88, 0]}>
+        <group position={[-armX, armY, 0]}>
           <group rotation={poseData.leftUpperArm as [number, number, number]}>
             {/* Shoulder capsule (hidden connector) */}
             <mesh material={darkAccentMat} position={[0, 0, 0]}>
@@ -361,7 +363,7 @@ function SmoothBody({
         </group>
 
         {/* Right arm with hidden capsule joints */}
-        <group position={[armX, 0.88, 0]}>
+        <group position={[armX, armY, 0]}>
           <group rotation={poseData.rightUpperArm as [number, number, number]}>
             {/* Shoulder capsule */}
             <mesh material={darkAccentMat} position={[0, 0, 0]}>
@@ -447,12 +449,12 @@ function SmoothBody({
                 <mesh geometry={torso} material={item.mat} position={[0, 0.45, 0]} castShadow />
                 {sleeves && (
                   <>
-                    <group position={[-armX, 0.85, 0]}>
+                    <group position={[-armX, armY - 0.03, 0]}>
                       <group rotation={poseData.leftUpperArm as [number, number, number]}>
                         <mesh geometry={sleeves.geo} material={item.mat} position={[0, -0.02, 0]} castShadow />
                       </group>
                     </group>
-                    <group position={[armX, 0.85, 0]}>
+                    <group position={[armX, armY - 0.03, 0]}>
                       <group rotation={poseData.rightUpperArm as [number, number, number]}>
                         <mesh geometry={sleeves.geo} material={item.mat} position={[0, -0.02, 0]} castShadow />
                       </group>
@@ -503,12 +505,12 @@ function SmoothBody({
                 <mesh geometry={body} material={item.mat} position={[0, 0.30, 0]} castShadow />
                 {sleeves && (
                   <>
-                    <group position={[-armX, 0.85, 0]}>
+                    <group position={[-armX, armY - 0.03, 0]}>
                       <group rotation={poseData.leftUpperArm as [number, number, number]}>
                         <mesh geometry={sleeves.geo} material={item.mat} position={[0, -0.02, 0]} castShadow />
                       </group>
                     </group>
-                    <group position={[armX, 0.85, 0]}>
+                    <group position={[armX, armY - 0.03, 0]}>
                       <group rotation={poseData.rightUpperArm as [number, number, number]}>
                         <mesh geometry={sleeves.geo} material={item.mat} position={[0, -0.02, 0]} castShadow />
                       </group>
@@ -579,7 +581,7 @@ function SmoothBody({
             return (
               <AnimatedGarment key={`clothing-${i}`} category={item.category}>
                 {/* Position bag at left hand */}
-                <group position={[-armX, 0.85, 0]}>
+                <group position={[-armX, armY - 0.03, 0]}>
                   <group rotation={poseData.leftUpperArm as [number, number, number]}>
                     <group position={[0, -0.42, 0]}>
                       <group rotation={poseData.leftForearm as [number, number, number]}>
