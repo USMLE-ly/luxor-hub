@@ -77,7 +77,6 @@ const AppContent = () => {
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
       <React.Suspense fallback={null}><StarfieldBackground /></React.Suspense>
       <React.Suspense fallback={null}><OfflineIndicator /></React.Suspense>
-      <React.Suspense fallback={null}><SupportWidget /></React.Suspense>
       <React.Suspense fallback={null}><SplashScreen /></React.Suspense>
       <QueryClientProvider client={queryClientRef.current}>
         <React.Suspense fallback={null}><TooltipProvider /></React.Suspense>
@@ -86,6 +85,7 @@ const AppContent = () => {
         <RouteTracker />
         <AuthProvider>
           <ErrorBoundary>
+          <React.Suspense fallback={null}><SupportWidget /></React.Suspense>
           <React.Suspense fallback={<Loading />}>
           <AnimatePresence mode="wait">
             <motion.div

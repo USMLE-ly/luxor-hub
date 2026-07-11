@@ -43,7 +43,6 @@ luxor-hub/dist_built/
 luxor-hub/node_modules/
 luxor-hub/supabase/
 luxor-hub/public/videos/
-luxor-hub/public/fonts/
 luxor-hub/public/llms.txt
 luxor-hub/prisma/
 

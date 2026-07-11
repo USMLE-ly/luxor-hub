@@ -12,8 +12,8 @@ export interface HealthCheck {
   error?: string;
 }
 
-const SUPABASE_URL = import.meta.env.VITE_PUBLIC_SUPABASE_URL || "";
-const SUPABASE_ANON = import.meta.env.VITE_PUBLIC_SUPABASE_ANON_KEY || "";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "";
+const SUPABASE_ANON = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "";
 
 // ─── INDIVIDUAL CHECKS ────────────────────────────────────────────
 
