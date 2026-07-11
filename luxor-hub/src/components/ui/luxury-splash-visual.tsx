@@ -107,36 +107,6 @@ export function LuxurySplashScreen({
           <LuxurySplashVisual>
 
 
-            {/* Logo Icon */}
-            <motion.div
-              initial={{ scale: 0.6, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <svg width="80" height="80" viewBox="0 0 80 80" fill="none" className="text-gold" xmlns="http://www.w3.org/2000/svg">
-                {/* Main gemstone outline — faceted diamond shape */}
-                <path
-                  d="M40 8 L62 22 L56 58 L40 72 L24 58 L18 22 Z"
-                  stroke="currentColor"
-                  strokeWidth="1.4"
-                  strokeLinejoin="round"
-                  fill="none"
-                />
-                {/* Top facet lines */}
-                <path d="M18 22 L40 8 L62 22" stroke="currentColor" strokeWidth="1" strokeLinejoin="round" fill="none" />
-                {/* Left facet */}
-                <path d="M18 22 L40 38 L24 58" stroke="currentColor" strokeWidth="0.8" strokeLinejoin="round" fill="none" />
-                {/* Right facet */}
-                <path d="M62 22 L40 38 L56 58" stroke="currentColor" strokeWidth="0.8" strokeLinejoin="round" fill="none" />
-                {/* Center vertical line */}
-                <line x1="40" y1="8" x2="40" y2="72" stroke="currentColor" strokeWidth="0.6" opacity="0.4" />
-                {/* Bottom facet cross */}
-                <path d="M24 58 L56 58" stroke="currentColor" strokeWidth="0.6" opacity="0.3" />
-                {/* Inner highlight dot */}
-                <circle cx="40" cy="34" r="2" fill="currentColor" opacity="0.5" />
-              </svg>
-            </motion.div>
-
             {/* Wordmark */}
             <AnimatePresence mode="wait">
               {phase !== "logo" && (
