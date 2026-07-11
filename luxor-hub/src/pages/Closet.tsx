@@ -853,13 +853,13 @@ const Closet = () => {
             </div>
 
             {/* Action Cards */}
-            <StaggerContainer staggerDelay={0.06} className="grid grid-cols-2 gap-2 mb-2">
-              <StaggerItem>
+            <StaggerContainer staggerDelay={0.06} className="grid grid-cols-2 gap-2 mb-2 items-stretch">
+              <StaggerItem className="contents">
               <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
                 <DialogTrigger asChild>
                   <motion.button
                     initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
-                    className="rounded-2xl border border-border bg-card p-3 text-left hover:border-primary/40 transition-colors"
+                    className="w-full rounded-2xl border border-border bg-card p-3 text-left hover:border-primary/40 transition-colors"
                   >
                     <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-2">
                       <Plus className="w-5 h-5 text-primary" />
@@ -937,11 +937,11 @@ const Closet = () => {
               </Dialog>
               </StaggerItem>
 
-              <StaggerItem>
+              <StaggerItem className="contents">
               <motion.button
                 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
                 onClick={() => setUploadOpen(true)}
-                className="rounded-2xl border border-border bg-card p-3 text-left hover:border-primary/40 transition-colors"
+                className="w-full rounded-2xl border border-border bg-card p-3 text-left hover:border-primary/40 transition-colors"
               >
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-2">
                   <Camera className="w-5 h-5 text-primary" />
@@ -971,9 +971,9 @@ const Closet = () => {
                 ].map((tab) => {
                   const count = items.filter(i => i.occasion?.toLowerCase() === tab.label.toLowerCase()).length;
                   return (
-                    <StaggerItem key={tab.label}>
+                    <StaggerItem key={tab.label} className="contents">
                     <button key={tab.label}
-                      className="flex flex-col items-center gap-1 p-2 rounded-xl bg-card border border-border hover:border-primary/40 transition-colors">
+                      className="w-full flex flex-col items-center gap-1 p-2 rounded-xl bg-card border border-border hover:border-primary/40 transition-colors">
                       <span className="text-lg">{tab.icon}</span>
                       <span className="font-sans text-[10px] font-semibold text-foreground">{tab.label}</span>
                       <span className="text-[9px] font-sans text-muted-foreground">{count} OUTFITS</span>
