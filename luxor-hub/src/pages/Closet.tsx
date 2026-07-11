@@ -759,9 +759,9 @@ const Closet = () => {
   return (
     <AppLayout>
       <ScrollReveal delay={0.1}>
-      <div className="px-4 sm:px-5 py-5 max-w-lg mx-auto overflow-x-hidden">
+      <div className="px-4 sm:px-5 py-3 max-w-lg mx-auto overflow-x-hidden">
         {/* Header */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-3">
           <div className="flex items-center justify-between">
             <h1 className="font-display text-2xl font-bold text-foreground">Your Closet</h1>
             <div className="flex items-center gap-2">
@@ -806,7 +806,7 @@ const Closet = () => {
         </motion.div>
 
         {/* Tab Switch: Inventory / Mannequin */}
-        <div className="flex gap-1 bg-secondary rounded-xl p-1 mb-5">
+        <div className="flex gap-1 bg-secondary rounded-xl p-1 mb-3">
           {([
             { key: "inventory" as ClosetTab, label: "👗 Inventory", icon: TShirt },
             { key: "mannequin" as ClosetTab, label: "🧍 3D Mannequin", icon: User },
@@ -829,7 +829,7 @@ const Closet = () => {
         {activeTab === "inventory" && (
           <>
             {/* Upload progress */}
-            <div className="mb-5 space-y-2">
+            <div className="mb-3 space-y-1.5">
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-sans text-muted-foreground w-14">Tops</span>
                 <div className="flex-1 h-1.5 rounded-full bg-secondary overflow-hidden">
@@ -853,7 +853,7 @@ const Closet = () => {
             </div>
 
             {/* Action Cards */}
-            <StaggerContainer staggerDelay={0.06} className="grid grid-cols-2 gap-3 mb-5">
+            <StaggerContainer staggerDelay={0.06} className="grid grid-cols-2 gap-3 mb-3">
               <StaggerItem>
               <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
                 <DialogTrigger asChild>
@@ -872,7 +872,7 @@ const Closet = () => {
                   <DialogHeader>
                     <DialogTitle className="font-display text-xl">New Piece</DialogTitle>
                   </DialogHeader>
-                  <div className="space-y-4 mt-4">
+                  <div className="space-y-3 mt-3">
                     <div>
                       <Label className="font-sans text-sm text-muted-foreground">Photo</Label>
                       {previewUrl ? (
@@ -953,15 +953,15 @@ const Closet = () => {
             </StaggerContainer>
 
             {/* Search */}
-            <div className="relative mb-4">
+            <div className="relative mb-3">
               <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input id="closet-search" name="search" placeholder="Search items..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 bg-secondary border-border rounded-xl h-10" />
             </div>
 
             {/* Occasion Outfit Tabs */}
-            <div className="mb-5">
-              <h2 className="font-sans font-semibold text-foreground text-sm mb-3">My Closet Outfits</h2>
+            <div className="mb-3">
+              <h2 className="font-sans font-semibold text-foreground text-sm mb-2">My Closet Outfits</h2>
               <StaggerContainer staggerDelay={0.05} className="grid grid-cols-4 gap-2 mb-3">
                 {[
                   { label: "Everyday", icon: "☀️" },
@@ -985,7 +985,7 @@ const Closet = () => {
             </div>
 
             {/* Category Pills */}
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-2 mb-3">
               <StaggerContainer staggerDelay={0.03} className="flex gap-2 overflow-x-auto pb-1 scrollbar-none flex-1">
                 {filterPills.map((pill) => (
                   <StaggerItem key={pill}>
@@ -1028,14 +1028,14 @@ const Closet = () => {
               )
             ) : flatLayView ? (
               /* ═══ FLAT-LAY MAGAZINE VIEW ═══ */
-              <div className="space-y-8">
+              <div className="space-y-5">
                 {Object.entries(categoryMap).map(([section, { categories }], si) => {
                   const sectionItems = filtered.filter((item) => categories.includes(item.category));
                   if (sectionItems.length === 0) return null;
                   return (
                     <motion.div key={section} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: si * 0.08 }}>
                       {/* Section divider */}
-                      <StaggerContainer staggerDelay={0.03} className="flex items-center gap-3 mb-4">
+                      <StaggerContainer staggerDelay={0.03} className="flex items-center gap-3 mb-2">
                         <div className="flex-1 h-px bg-border/60" />
                         <span className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.2em]">{section}</span>
                         <div className="flex-1 h-px bg-border/60" />
