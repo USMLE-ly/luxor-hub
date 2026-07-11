@@ -5,11 +5,11 @@ import { haptic } from "@/lib/haptics";
 import { playGoldClick } from "@/lib/audio-system";
 
 const tabs = [
-  { label: "Schedule", icon: CalendarDays, path: "/outfit-calendar" },
-  { label: "Analysis", icon: ScanLine, path: "/outfit-analysis" },
-  { label: "Dressing Room", icon: Layers, path: "/dressing-room" },
-  { label: "Recommend", icon: Sparkles, path: "/style-recommendations" },
-  { label: "Closet", icon: Shirt, path: "/closet" },
+  { label: "Schedule", icon: CalendarDots, path: "/outfit-calendar" },
+  { label: "Analysis", icon: Scan, path: "/outfit-analysis" },
+  { label: "Dressing Room", icon: StackSimple, path: "/dressing-room" },
+  { label: "Recommend", icon: Sparkle, path: "/style-recommendations" },
+  { label: "Closet", icon: TShirt, path: "/closet" },
 ];
 
 export function BottomNav() {

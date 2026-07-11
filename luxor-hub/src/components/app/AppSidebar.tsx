@@ -1,4 +1,4 @@
-import {House, TShirt, MagicWand, ChatCircle, ChartBar, GearSix, SignOut, Sparkle, ArrowsOut, User, Scan, Trophy, Flame, Trophy, Bell, CalendarDots, SquaresFour, Video, PaintBrush, StackSimple, GlobeHemisphereWest, Crown, CurrencyDollar} from "@phosphor-icons/react";
+import {House, TShirt, MagicWand, ChatCircle, ChartBar, GearSix, SignOut, Sparkle, ArrowsOut, User, Scan, Trophy, Flame, Bell, CalendarDots, SquaresFour, Video, PaintBrush, StackSimple, GlobeHemisphereWest, Crown, CurrencyDollar} from "@phosphor-icons/react";
 import { NotificationBell } from "./NotificationBell";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,26 +18,26 @@ import {
 } from "@/components/ui/sidebar";
 
 const navItems = [
-  { title: "Closet", url: "/closet", icon: Shirt },
-  { title: "My Closet", url: "/closet", icon: Shirt },
-  { title: "Outfit Generator", url: "/outfits", icon: Wand2 },
-  { title: "Outfit Builder", url: "/outfit-builder", icon: Move },
+  { title: "Closet", url: "/closet", icon: TShirt },
+  { title: "My Closet", url: "/closet", icon: TShirt },
+  { title: "Outfit Generator", url: "/outfits", icon: MagicWand },
+  { title: "Outfit Builder", url: "/outfit-builder", icon: ArrowsOut },
   { title: "Outfit Analysis", url: "/outfit-analysis", icon: Scan },
-  { title: "Outfit Calendar", url: "/outfit-calendar", icon: CalendarDays },
-  { title: "AI Stylist", url: "/chat", icon: MessageCircle },
+  { title: "Outfit Calendar", url: "/outfit-calendar", icon: CalendarDots },
+  { title: "AI Stylist", url: "/chat", icon: ChatCircle },
   { title: "Analytics", url: "/analytics", icon: ChartBar },
-  { title: "Inspiration", url: "/inspiration", icon: Sparkles },
+  { title: "Inspiration", url: "/inspiration", icon: Sparkle },
   { title: "Mood Board", url: "/mood-board", icon: SquaresFour },
   { title: "Video Analysis", url: "/video-analysis", icon: Video },
-  { title: "Fashion Designer", url: "/fashion-designer", icon: Paintbrush },
-  { title: "Virtual Try-On", url: "/virtual-tryon", icon: Layers },
-  { title: "Community Gallery", url: "/community-gallery", icon: Globe },
+  { title: "Fashion Designer", url: "/fashion-designer", icon: PaintBrush },
+  { title: "Virtual Try-On", url: "/virtual-tryon", icon: StackSimple },
+  { title: "Community Gallery", url: "/community-gallery", icon: GlobeHemisphereWest },
   { title: "Leaderboard", url: "/leaderboard", icon: Trophy },
   { title: "Weekly Challenge", url: "/weekly-challenge", icon: Flame },
   { title: "Badges", url: "/badges", icon: Trophy },
   { title: "Wardrobe Value", url: "/wardrobe-value", icon: CurrencyDollar },
   { title: "Notifications", url: "/notifications", icon: Bell },
-  { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Settings", url: "/settings", icon: GearSix },
 ];
 
 export function AppSidebar() {

@@ -79,6 +79,8 @@ const Footer = () => {
             <form onSubmit={handleSubscribe} className="flex gap-2">
               <div className="relative flex-1">
                 <input
+                  id="newsletter-email"
+                  name="email"
                   type="email"
                   value={email}
                   onChange={(e) => { setEmail(e.target.value); setEmailError(""); }}
