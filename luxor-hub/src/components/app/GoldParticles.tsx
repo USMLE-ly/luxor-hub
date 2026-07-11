@@ -36,7 +36,6 @@ export function GoldParticles() {
           transition={{
             duration: p.duration,
             delay: p.delay,
-            repeat: Infinity,
             ease: "linear",
           }}
         />

@@ -29,10 +29,9 @@ const FloatingCircle = ({
 }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: [0, 15, 0] }}
+    animate={{ opacity: 0.6 }}
     transition={{
-      opacity: { duration: 1.5, delay },
-      y: { duration, repeat: Infinity, ease: [0.77, 0, 0.175, 1], delay },
+      opacity: { duration: 2, delay },
     }}
     className="absolute rounded-full pointer-events-none border border-white/[0.08] backdrop-blur-[2px] floating-circle"
     style={{
@@ -174,8 +173,8 @@ export default function GlassmorphismTrustHero() {
               >
                 <span>Try Free — No Card Needed</span>
                 <motion.span
-                  animate={{ x: [0, 4, 0] }}
-                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, ease: [0.77, 0, 0.175, 1] }}
+                  animate={{ x: [0, 3, 0] }}
+                  transition={{ duration: 1.5, ease: [0.77, 0, 0.175, 1] }}
                 >
                   <ArrowRight className="w-4 h-4" />
                 </motion.span>

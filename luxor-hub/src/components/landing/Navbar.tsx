@@ -73,7 +73,7 @@ const Navbar = () => {
         >
           <motion.span
             animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+            transition={{ duration: 1, ease: "easeOut" }}
             className="bg-gradient-to-r from-foreground via-gold to-foreground bg-[length:200%_100%] bg-clip-text text-transparent"
           >
             LUXOR®

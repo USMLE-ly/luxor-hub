@@ -39,7 +39,7 @@ const GoldParticles = ({ count = 30 }: { count?: number }) => {
           transition={{
             duration: p.duration,
             delay: p.delay,
-            repeat: Infinity,
+            
             ease: [0.77, 0, 0.175, 1],
           }}
         />
@@ -185,7 +185,7 @@ export function PulseFitHero({
                       }}
                       transition={{
                         duration: 2.5,
-                        repeat: Infinity,
+                        
                         ease: [0.77, 0, 0.175, 1],
                       }}
                     />
@@ -306,7 +306,7 @@ export function PulseFitHero({
             }}
             transition={{
               x: {
-                repeat: Infinity,
+                
                 repeatType: "loop",
                 duration: programs.length * 4,
                 ease: "linear",

@@ -149,7 +149,7 @@ const Gallery4 = ({
                           >
                             <motion.div
                               animate={{ x: [0, -16, 0] }}
-                              transition={{ duration: 1.2, repeat: Infinity, ease: [0.77, 0, 0.175, 1] }}
+                              transition={{ duration: 1, ease: [0.77, 0, 0.175, 1] }}
                               className="mr-3 flex items-center gap-1.5 rounded-full bg-background/80 backdrop-blur-sm px-3 py-1.5 shadow-lg"
                             >
                               <ArrowLeft className="size-3.5 text-foreground/70" />

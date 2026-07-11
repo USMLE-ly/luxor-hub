@@ -47,7 +47,7 @@ function CenterParticles() {
           transition={{
             duration: p.duration,
             delay: p.delay,
-            repeat: Infinity,
+            
             ease: [0.77, 0, 0.175, 1],
           }}
         />

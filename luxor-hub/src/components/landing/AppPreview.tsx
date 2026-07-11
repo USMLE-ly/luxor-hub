@@ -84,9 +84,9 @@ const AppPreview = () => {
               <span className="text-[10px] font-sans font-semibold text-foreground">AI Stylist</span>
             </div>
             <div className="flex items-center gap-1.5 pl-1">
-              <motion.div className="w-1.5 h-1.5 rounded-full bg-primary/60" animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0 }} />
-              <motion.div className="w-1.5 h-1.5 rounded-full bg-primary/60" animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }} />
-              <motion.div className="w-1.5 h-1.5 rounded-full bg-primary/60" animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }} />
+              <motion.div className="w-1.5 h-1.5 rounded-full bg-primary/60" animate={{ scale: 1 }} transition={{ duration: 0.5 }} />
+              <motion.div className="w-1.5 h-1.5 rounded-full bg-primary/60" animate={{ scale: 1 }} transition={{ duration: 0.5 }} />
+              <motion.div className="w-1.5 h-1.5 rounded-full bg-primary/60" animate={{ scale: 1 }} transition={{ duration: 0.5 }} />
               <span className="text-[10px] text-muted-foreground ml-1">Typing...</span>
             </div>
           </div>

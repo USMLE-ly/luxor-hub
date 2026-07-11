@@ -57,7 +57,7 @@ export function ProgressBar({
           <motion.div
             className="absolute inset-y-0 left-0 w-[30%] rounded-full bg-white/20"
             animate={{ x: ["-100%", "400%"] }}
-            transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
+            transition={{ duration: 1.2, ease: "linear" }}
           />
         )}
       </div>
