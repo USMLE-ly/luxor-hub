@@ -101,7 +101,7 @@ const AppContent = () => {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/dashboard" element={<Navigate to="/closet" replace />} />
-            <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/onboarding" element={<PaywallGate><Onboarding /></PaywallGate>} />
             <Route path="/closet" element={<PaywallGate><Closet /></PaywallGate>} />
             <Route path="/chat" element={<PaywallGate><Chat /></PaywallGate>} />
             <Route path="/outfits" element={<PaywallGate><Outfits /></PaywallGate>} />
@@ -119,7 +119,7 @@ const AppContent = () => {
             <Route path="/calibration" element={<PaywallGate><Calibration /></PaywallGate>} />
 
             <Route path="/paywall" element={<Paywall />} />
-            <Route path="/outfit-calendar" element={<OutfitCalendar />} />
+            <Route path="/outfit-calendar" element={<PaywallGate><OutfitCalendar /></PaywallGate>} />
             <Route path="/mood-board" element={<PaywallGate><MoodBoard /></PaywallGate>} />
             <Route path="/video-analysis" element={<PaywallGate><VideoAnalysis /></PaywallGate>} />
             <Route path="/fashion-designer" element={<PaywallGate><FashionDesigner /></PaywallGate>} />
@@ -127,7 +127,7 @@ const AppContent = () => {
             <Route path="/community-gallery" element={<PaywallGate><CommunityGallery /></PaywallGate>} />
             <Route path="/install" element={<Install />} />
             <Route path="/council" element={<PaywallGate><Council /></PaywallGate>} />
-            <Route path="/monthly-report" element={<MonthlyReport />} />
+            <Route path="/monthly-report" element={<PaywallGate><MonthlyReport /></PaywallGate>} />
             <Route path="/wardrobe-value" element={<PaywallGate><WardrobeValue /></PaywallGate>} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogArticle />} />
