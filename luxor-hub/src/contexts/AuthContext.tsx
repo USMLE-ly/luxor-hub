@@ -43,15 +43,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     let resolved = false;
 
-    // Subscribe FIRST — guarantees no auth event is missed while getSession() resolves
+    // Subscribe FIRST — handles ALL auth events (login, logout, token refresh, expiry)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (resolved) return; // getSession() already set state
-      resolved = true;
-      clearTimeout(timeout);
+      if (!resolved) {
+        // First event — hydration complete
+        resolved = true;
+        clearTimeout(timeout);
+        setLoading(false);
+        setIsReady(true);
+      }
+      // Always update session/user on every auth event (including SIGNED_OUT, TOKEN_REFRESHED)
       setSession(session);
       setUser(session?.user ?? null);
-      setLoading(false);
-      setIsReady(true);
     });
 
     // Then hydrate from the stored session
