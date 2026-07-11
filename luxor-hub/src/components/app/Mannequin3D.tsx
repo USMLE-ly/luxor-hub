@@ -243,12 +243,8 @@ function SmoothBody({
     ], 16);
   }, [isMale]);
 
-  // Hand: elegant, elongated with slender fingers (capsule shape)
-  const handGeo = useMemo(() => {
-    const w = isMale ? 0.038 : 0.032;
-    const h = isMale ? 0.07 : 0.06;
-    return new THREE.CapsuleGeometry(w, h, 8, 12);
-  }, [isMale]);
+  // Hand: refined sphere with elegant proportions
+  const handGeo = useMemo(() => new THREE.SphereGeometry(isMale ? 0.055 : 0.048, 16, 16), [isMale]);
 
   // Thigh: elongated, graceful taper
   const thighGeo = useMemo(() => {
@@ -358,7 +354,7 @@ function SmoothBody({
                 <mesh material={darkAccentMat} position={[0, -0.36, 0]}>
                   <sphereGeometry args={[0.02, 8, 8]} />
                 </mesh>
-                <mesh geometry={handGeo} material={ivoryPolymerMat} position={[0, -0.42, 0]} rotation={[0.2, 0, 0.1]} castShadow />
+                <mesh geometry={handGeo} material={ivoryPolymerMat} position={[0, -0.44, 0]} castShadow />
               </group>
             </group>
           </group>
@@ -383,7 +379,7 @@ function SmoothBody({
                 <mesh material={darkAccentMat} position={[0, -0.36, 0]}>
                   <sphereGeometry args={[0.02, 8, 8]} />
                 </mesh>
-                <mesh geometry={handGeo} material={ivoryPolymerMat} position={[0, -0.42, 0]} rotation={[0.2, 0, -0.1]} castShadow />
+                <mesh geometry={handGeo} material={ivoryPolymerMat} position={[0, -0.44, 0]} castShadow />
               </group>
             </group>
           </group>
