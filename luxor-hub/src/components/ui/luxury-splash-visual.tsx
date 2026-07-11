@@ -245,16 +245,35 @@ export function LuxurySplashScreen({
           className="fixed inset-0 z-[99999]"
         >
           <LuxurySplashVisual>
+
+
             {/* Logo Icon */}
             <motion.div
               initial={{ scale: 0.6, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             >
-              <svg width="56" height="56" viewBox="0 0 56 56" fill="none" className="text-gold">
-                <rect x="5" y="5" width="46" height="46" rx="14" stroke="currentColor" strokeWidth="1.2" strokeOpacity="0.3" />
-                <path d="M18 32L23 20L28 28L33 20L38 32" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M15 37H41" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+              <svg width="80" height="80" viewBox="0 0 80 80" fill="none" className="text-gold" xmlns="http://www.w3.org/2000/svg">
+                {/* Main gemstone outline — faceted diamond shape */}
+                <path
+                  d="M40 8 L62 22 L56 58 L40 72 L24 58 L18 22 Z"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  strokeLinejoin="round"
+                  fill="none"
+                />
+                {/* Top facet lines */}
+                <path d="M18 22 L40 8 L62 22" stroke="currentColor" strokeWidth="1" strokeLinejoin="round" fill="none" />
+                {/* Left facet */}
+                <path d="M18 22 L40 38 L24 58" stroke="currentColor" strokeWidth="0.8" strokeLinejoin="round" fill="none" />
+                {/* Right facet */}
+                <path d="M62 22 L40 38 L56 58" stroke="currentColor" strokeWidth="0.8" strokeLinejoin="round" fill="none" />
+                {/* Center vertical line */}
+                <line x1="40" y1="8" x2="40" y2="72" stroke="currentColor" strokeWidth="0.6" opacity="0.4" />
+                {/* Bottom facet cross */}
+                <path d="M24 58 L56 58" stroke="currentColor" strokeWidth="0.6" opacity="0.3" />
+                {/* Inner highlight dot */}
+                <circle cx="40" cy="34" r="2" fill="currentColor" opacity="0.5" />
               </svg>
             </motion.div>
 
@@ -266,9 +285,9 @@ export function LuxurySplashScreen({
                   initial={{ y: 30, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                  className="font-display text-5xl sm:text-6xl font-bold tracking-[0.18em] text-foreground mt-6"
+                  className="font-display text-5xl sm:text-6xl md:text-7xl font-bold tracking-[0.25em] text-foreground mt-8"
                 >
-                  LEXOR
+                  LUXOR
                 </motion.h1>
               )}
             </AnimatePresence>
@@ -282,7 +301,7 @@ export function LuxurySplashScreen({
                   animate={{ y: 0, opacity: 1 }}
                   exit={{ y: -15, opacity: 0 }}
                   transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                  className="font-sans text-xs sm:text-sm uppercase tracking-[0.3em] text-gold/60 mt-4"
+                  className="font-sans text-xs sm:text-sm uppercase tracking-[0.35em] text-gold/50 mt-5"
                 >
                   {tagline}
                 </motion.p>
