@@ -31,7 +31,7 @@ export default function AnnouncementBanner() {
     () => sessionStorage.getItem(DISMISSED_KEY) !== "1"
   );
   const [remaining, setRemaining] = useState(() => getOrCreateEndTime() - Date.now());
-  const [infoIndex, setInfoIndex] = useState(0);
+  // infoIndex removed
 
   useEffect(() => {
     if (!visible) return;
@@ -42,11 +42,7 @@ export default function AnnouncementBanner() {
     return () => clearInterval(id);
   }, [visible]);
 
-  useEffect(() => {
-    if (!visible) return;
-    const id = setInterval(() => setInfoIndex((i) => (i + 1) % 1), 4000);
-    return () => clearInterval(id);
-  }, [visible]);
+  // infoIndex removed — only 1 info slot, no cycling needed
 
   const dismiss = useCallback(() => {
     sessionStorage.setItem(DISMISSED_KEY, "1");
@@ -90,18 +86,7 @@ export default function AnnouncementBanner() {
               </span>
 
               <span className="sm:hidden inline-flex items-center gap-2">
-                <AnimatePresence mode="wait">
-                  <motion.span
-                    key={infoIndex}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    transition={{ duration: 0.25 }}
-                    className="inline-flex items-center gap-2"
-                  >
-                    {infoSlots[infoIndex]}
-                  </motion.span>
-                </AnimatePresence>
+                {infoSlots[0]}
               </span>
             </div>
 

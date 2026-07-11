@@ -42,20 +42,22 @@ const eveningPrompts = [
 
 export function NotificationPreferences() {
   const [settings, setSettings] = useState<NotificationSettings>(() => {
-    const saved = localStorage.getItem("luxor_notif_settings_v2");
-    if (saved) return JSON.parse(saved);
-    // Migrate from v1
-    const v1 = localStorage.getItem("luxor_notif_settings");
-    if (v1) {
-      const old = JSON.parse(v1);
-      return {
-        morningEnabled: old.enabled || false,
-        morningTime: old.time || "08:00",
-        eveningEnabled: false,
-        eveningTime: "21:00",
-        weatherBased: old.weatherBased ?? true,
-      };
-    }
+    try {
+      const saved = localStorage.getItem("luxor_notif_settings_v2");
+      if (saved) return JSON.parse(saved);
+      // Migrate from v1
+      const v1 = localStorage.getItem("luxor_notif_settings");
+      if (v1) {
+        const old = JSON.parse(v1);
+        return {
+          morningEnabled: old.enabled || false,
+          morningTime: old.time || "08:00",
+          eveningEnabled: false,
+          eveningTime: "21:00",
+          weatherBased: old.weatherBased ?? true,
+        };
+      }
+    } catch {}
     return DEFAULT_SETTINGS;
   });
   const [permissionState, setPermissionState] = useState<NotificationPermission>("default");

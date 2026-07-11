@@ -291,7 +291,9 @@ const Closet = () => {
           if (Array.isArray(data.clothing) && data.clothing.length > 0) {
             // Only override if localStorage doesn't have a saved outfit
             const local = localStorage.getItem(STORAGE_KEY || "");
-            if (!local || JSON.parse(local).length === 0) {
+            let localCount = 0;
+            try { if (local) localCount = JSON.parse(local).length; } catch {}
+            if (!local || localCount === 0) {
               setMannequinClothing(data.clothing as MannequinClothingItem[]);
             }
           }
