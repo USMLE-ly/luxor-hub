@@ -1,7 +1,7 @@
 import React, { useRef, useMemo, useState, useEffect } from "react";
 
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, ContactShadows, Environment } from "@react-three/drei";
+import { OrbitControls, ContactShadows } from "@react-three/drei";
 import * as THREE from "three";
 import {
   createTopGeometry,
@@ -619,20 +619,21 @@ export default function Mannequin3D({
         shadows
         style={{ background: "transparent" }}
         onCreated={(state) => {
-          console.log("[MANNEQUIN3D] Canvas created successfully", state.gl.capabilities);
+          console.log("[MANNEQUIN3D] Canvas created successfully");
+          console.log("[MANNEQUIN3D] Renderer:", state.gl.renderer);
+          console.log("[MANNEQUIN3D] Capabilities:", state.gl.capabilities);
           setCanvasMounted(true);
         }}
+        onError={(e) => {
+          console.error("[MANNEQUIN3D] Canvas error:", e);
+          setSceneError(String(e));
+        }}
       >
-        {/* Minimal scene test - will render even if SmoothBody fails */}
-        {sceneError && (
-          <>
-            <ambientLight intensity={0.6} />
-            <mesh position={[0, 0, 0]}>
-              <boxGeometry args={[1, 1, 1]} />
-              <meshStandardMaterial color="hotpink" wireframe />
-            </mesh>
-          </>
-        )}
+        {/* Fallback — always render a ground plane + pedestal so the scene is never empty */}
+        <mesh position={[0, -1.2, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+          <circleGeometry args={[2, 32]} />
+          <meshStandardMaterial color="#2A2A2A" roughness={0.9} />
+        </mesh>
         <ambientLight intensity={0.4} />
         <directionalLight
           position={[2, 4, 3]}
@@ -659,7 +660,11 @@ export default function Mannequin3D({
           blur={2.5}
           far={4}
         />
-        <Environment preset="studio" environmentIntensity={0.3} />
+        {/* Studio-quality lighting — no CDN dependency (replaces Environment preset) */}
+        <hemisphereLight args={["#E8D5B7", "#1A1A2E", 0.4]} />
+        <pointLight position={[3, 5, 3]} intensity={0.5} color="#FFF5E6" />
+        <pointLight position={[-3, 4, -2]} intensity={0.3} color="#D4E5FF" />
+        <pointLight position={[0, 2, 4]} intensity={0.2} color="#FFF" />
 
         <OrbitControls
           enablePan={false} enableZoom={true}
