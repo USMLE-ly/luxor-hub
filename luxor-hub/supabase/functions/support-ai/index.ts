@@ -16,8 +16,35 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const mimoApiKey = Deno.env.get("MIMO_API_KEY")!;
 
+    // ── TENANT ISOLATION: Validate ticket ownership via JWT ──
+    const authHeader = req.headers.get("Authorization");
+    let authUserId: string | null = null;
+    if (authHeader) {
+      const authSb = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
+        global: { headers: { Authorization: authHeader } }
+      });
+      const { data: { user } } = await authSb.auth.getUser();
+      authUserId = user?.id || null;
+    }
+
     const supabase = createClient(supabaseUrl, supabaseKey);
     const { ticket_id, action, user_message, error_context } = await req.json();
+
+    // Validate ticket ownership if ticket_id is provided
+    if (ticket_id && authUserId) {
+      const { data: ticket } = await supabase
+        .from("support_tickets")
+        .select("user_id")
+        .eq("id", ticket_id)
+        .single();
+      
+      if (ticket && ticket.user_id !== authUserId) {
+        console.error(`[TENANT ISOLATION] User ${authUserId} attempted to access ticket belonging to ${ticket.user_id}`);
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
 
     // ─── DIAGNOSE: MiMo Vision analyzes the error ─────────────
     if (action === "diagnose") {
