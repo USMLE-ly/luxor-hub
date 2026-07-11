@@ -890,6 +890,123 @@ export type Database = {
         }
         Relationships: []
       }
+      support_tickets: {
+        Row: {
+          ai_confidence: number | null
+          ai_diagnosis: Record<string, unknown> | null
+          ai_fix_suggestion: string | null
+          browser_info: string | null
+          category: string
+          created_at: string
+          description: string
+          id: string
+          page_url: string | null
+          resolved_at: string | null
+          severity: string
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_confidence?: number | null
+          ai_diagnosis?: Record<string, unknown> | null
+          ai_fix_suggestion?: string | null
+          browser_info?: string | null
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          page_url?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_confidence?: number | null
+          ai_diagnosis?: Record<string, unknown> | null
+          ai_fix_suggestion?: string | null
+          browser_info?: string | null
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          page_url?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      support_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          metadata: Record<string, unknown> | null
+          sender: string
+          ticket_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          metadata?: Record<string, unknown> | null
+          sender?: string
+          ticket_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          metadata?: Record<string, unknown> | null
+          sender?: string
+          ticket_id?: string
+        }
+        Relationships: []
+      }
+      support_stats: {
+        Row: {
+          avg_confidence: number | null
+          by_category: Record<string, unknown> | null
+          by_severity: Record<string, unknown> | null
+          created_at: string
+          date: string
+          escalated: number | null
+          id: string
+          resolved: number | null
+          total_tickets: number | null
+        }
+        Insert: {
+          avg_confidence?: number | null
+          by_category?: Record<string, unknown> | null
+          by_severity?: Record<string, unknown> | null
+          created_at?: string
+          date?: string
+          escalated?: number | null
+          id?: string
+          resolved?: number | null
+          total_tickets?: number | null
+        }
+        Update: {
+          avg_confidence?: number | null
+          by_category?: Record<string, unknown> | null
+          by_severity?: Record<string, unknown> | null
+          created_at?: string
+          date?: string
+          escalated?: number | null
+          id?: string
+          resolved?: number | null
+          total_tickets?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

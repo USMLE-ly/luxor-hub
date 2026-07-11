@@ -6,6 +6,7 @@
  */
 
 import { matchKnownIssue, createTriageReport, getAutomatedFix, type TriageReport } from "./playbook";
+import { supabase } from "@/integrations/supabase/client";
 
 type ErrorCategory = "auth" | "payment" | "ai" | "wardrobe" | "weather" | "dns" | "ui" | "unknown";
 
@@ -80,9 +81,10 @@ export function captureError(error: Error, context: Record<string, unknown> = {}
     console.warn(`[SUPPORT TIER 2] Triage report created:`, event.triage);
   }
 
-  // Incident response (Tier 3)
+  // Incident response (Tier 3) — auto-create support ticket
   if (event.tier === 3 || category === "payment" || category === "dns") {
     console.error(`[SUPPORT TIER 3] INCIDENT: ${error.message}`, event);
+    autoCreateTicket(event, error);
   }
 
   // Add to ring buffer
@@ -93,6 +95,70 @@ export function captureError(error: Error, context: Record<string, unknown> = {}
   console.error(`[LEXOR MONITOR] [${category.toUpperCase()}] [TIER ${event.tier}] ${error.message}`);
 
   return event;
+}
+
+// ─── AUTO-TICKET CREATION ─────────────────────────────────────────
+
+// Dedup: don't create tickets for the same error within 60 seconds
+const recentTicketCreation = new Map<string, number>();
+const TICKET_COOLDOWN_MS = 60_000;
+
+async function autoCreateTicket(event: ErrorEvent, originalError: Error): Promise<void> {
+  // Dedup check
+  const dedupKey = `${event.category}-${event.message.slice(0, 100)}`;
+  const lastCreated = recentTicketCreation.get(dedupKey) || 0;
+  if (Date.now() - lastCreated < TICKET_COOLDOWN_MS) return;
+  recentTicketCreation.set(dedupKey, Date.now());
+
+  // Get current user (silent — don't block on auth)
+  let userId: string | undefined;
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    userId = user?.id;
+  } catch {
+    // Not logged in — still log the incident
+  }
+
+  try {
+    // Create the support ticket
+    const { data: ticket } = await supabase
+      .from("support_tickets")
+      .insert({
+        user_id: userId || "00000000-0000-0000-0000-000000000000",
+        title: `[Auto] ${event.category.toUpperCase()} — ${event.message.slice(0, 80)}`,
+        description: `Automatically captured by LEXOR® Monitor.\n\nError: ${event.message}\nFeature: ${event.feature}\nURL: ${event.url}\nTier: ${event.tier}\n\nStack:\n${event.stack || "N/A"}`,
+        category: event.category,
+        severity: event.tier === 3 ? "critical" : "high",
+        status: "open",
+        page_url: event.url,
+        browser_info: typeof navigator !== "undefined" ? navigator.userAgent : "unknown",
+      })
+      .select("id")
+      .single();
+
+    if (!ticket) return;
+
+    // Create the initial system message
+    await supabase.from("support_messages").insert({
+      ticket_id: ticket.id,
+      sender: "system",
+      message: `[Auto-Captured] Tier ${event.tier} incident in ${event.feature}.\n\nError: ${event.message}`,
+      metadata: {
+        error_event: {
+          id: event.id,
+          category: event.category,
+          feature: event.feature,
+          tier: event.tier,
+          timestamp: event.timestamp,
+        },
+        triage: event.triage || null,
+      },
+    });
+
+    console.log(`[SUPPORT] Auto-created ticket ${ticket.id} for Tier ${event.tier} incident`);
+  } catch (ticketError) {
+    console.warn("[SUPPORT] Failed to auto-create ticket:", ticketError);
+  }
 }
 
 // ─── GLOBAL ERROR HANDLERS ────────────────────────────────────────

@@ -13,6 +13,7 @@ const Sonner = React.lazy(() => import("@/components/ui/sonner").then(m => ({ de
 const TooltipProvider = React.lazy(() => import("@/components/ui/tooltip").then(m => ({ default: m.TooltipProvider })));
 const StarfieldBackground = React.lazy(() => import("@/components/ui/starfield-background"));
 const OfflineIndicator = React.lazy(() => import("@/components/app/OfflineIndicator"));
+const SupportWidget = React.lazy(() => import("@/components/support/SupportWidget"));
 const SplashScreen = React.lazy(() => import("@/components/app/SplashScreen"));
 const PaywallGate = React.lazy(() => import("@/components/app/PaywallGate"));
 const Index = React.lazy(() => import("./pages/Index"));
@@ -76,6 +77,7 @@ const AppContent = () => {
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
       <React.Suspense fallback={null}><StarfieldBackground /></React.Suspense>
       <React.Suspense fallback={null}><OfflineIndicator /></React.Suspense>
+      <React.Suspense fallback={null}><SupportWidget /></React.Suspense>
       <React.Suspense fallback={null}><SplashScreen /></React.Suspense>
       <QueryClientProvider client={queryClientRef.current}>
         <React.Suspense fallback={null}><TooltipProvider /></React.Suspense>
