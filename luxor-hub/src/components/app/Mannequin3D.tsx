@@ -47,46 +47,66 @@ type PosePreset = "neutral" | "fashion" | "walking";
 
 const DEFAULT_DNA: BodyDNA = { height: 0.5, shoulder: 0.5, waist: 0.5, hips: 0.5, legLength: 0.5 };
 
-// --- Materials (premium) ---
-const clayMaterial = new THREE.MeshPhysicalMaterial({
-  color: "#D4B896", roughness: 0.88, metalness: 0, clearcoat: 0.15,
-  sheen: 0.3, sheenColor: new THREE.Color("#E8D5B7"),
+// --- Premium PBR Materials (LUXOR Signature) ---
+const ceramicMat = new THREE.MeshPhysicalMaterial({
+  color: "#F0E4D0", roughness: 0.65, metalness: 0, clearcoat: 0.18,
+  clearcoatRoughness: 0.2, sheen: 0.35, sheenColor: new THREE.Color("#E8D5B7"),
+  envMapIntensity: 0.6,
 });
-const darkClayMaterial = new THREE.MeshPhysicalMaterial({
-  color: "#C4A882", roughness: 0.85, metalness: 0, clearcoat: 0.1,
-  sheen: 0.2, sheenColor: new THREE.Color("#D8C5A7"),
+const warmMapleMat = new THREE.MeshPhysicalMaterial({
+  color: "#C4A882", roughness: 0.55, metalness: 0, clearcoat: 0.05,
+  sheen: 0.15, sheenColor: new THREE.Color("#D8C5A7"),
+  envMapIntensity: 0.4,
+});
+const ivoryPolymerMat = new THREE.MeshPhysicalMaterial({
+  color: "#E8DCC8", roughness: 0.7, metalness: 0, clearcoat: 0.12,
+  sheen: 0.25, sheenColor: new THREE.Color("#F0E4D0"),
+  envMapIntensity: 0.5,
+});
+const darkAccentMat = new THREE.MeshPhysicalMaterial({
+  color: "#8B7355", roughness: 0.75, metalness: 0.05, clearcoat: 0.08,
+  envMapIntensity: 0.3,
 });
 
-// --- Lathe Profile Builder ---
-function createBodyProfile(points: [number, number][], segments = 32): THREE.LatheGeometry {
+// --- Smoother Lathe Profile Builder (48 segments for elegance) ---
+function createBodyProfile(points: [number, number][], segments = 48): THREE.LatheGeometry {
   const curve = new THREE.CatmullRomCurve3(
     points.map(([x, y]) => new THREE.Vector3(x, y, 0)),
     false, "catmullrom", 0.5
   );
-  const sampledPoints = curve.getPoints(60);
+  const sampledPoints = curve.getPoints(80);
   const vec2Points = sampledPoints.map((p) => new THREE.Vector2(Math.max(p.x, 0.001), p.y));
   return new THREE.LatheGeometry(vec2Points, segments);
 }
 
-// --- Pose rotations ---
+// --- Editorial Pose Rotations (luxury fashion silhouettes) ---
 const POSES: Record<PosePreset, Record<string, [number, number, number]>> = {
   neutral: {
-    leftUpperArm: [0, 0, 0.15], rightUpperArm: [0, 0, -0.15],
-    leftForearm: [0, 0, 0], rightForearm: [0, 0, 0],
-    leftThigh: [0, 0, 0], rightThigh: [0, 0, 0],
-    leftCalf: [0, 0, 0], rightCalf: [0, 0, 0], torso: [0, 0, 0],
+    leftUpperArm: [-0.05, 0.02, 0.18], rightUpperArm: [0.05, -0.02, -0.15],
+    leftForearm: [-0.08, 0, 0.05], rightForearm: [-0.06, 0, 0.03],
+    leftThigh: [0.02, 0, -0.03], rightThigh: [-0.06, 0, 0.02],
+    leftCalf: [0.01, 0, 0], rightCalf: [0.02, 0, 0],
+    torso: [0.02, 0, 0],
+    hipShift: -0.03,
+    weightShift: 0.04,
   },
   fashion: {
-    leftUpperArm: [0, 0, 0.4], rightUpperArm: [0.2, 0, -0.6],
-    leftForearm: [-0.3, 0, 0.1], rightForearm: [-0.8, 0, -0.2],
-    leftThigh: [0, 0, 0], rightThigh: [-0.15, 0, 0],
-    leftCalf: [0, 0, 0], rightCalf: [0.2, 0, 0], torso: [0, 0.05, 0],
+    leftUpperArm: [0.05, 0.08, 0.45], rightUpperArm: [0.15, -0.1, -0.7],
+    leftForearm: [-0.4, 0.05, 0.15], rightForearm: [-0.9, -0.05, -0.2],
+    leftThigh: [0.03, 0, -0.02], rightThigh: [-0.2, 0, 0.04],
+    leftCalf: [0.02, 0, 0], rightCalf: [0.25, 0, 0.02],
+    torso: [0.03, 0.08, -0.02],
+    hipShift: -0.05,
+    weightShift: 0.06,
   },
   walking: {
-    leftUpperArm: [0.3, 0, 0.15], rightUpperArm: [-0.3, 0, -0.15],
-    leftForearm: [-0.2, 0, 0], rightForearm: [-0.2, 0, 0],
-    leftThigh: [-0.25, 0, 0], rightThigh: [0.25, 0, 0],
-    leftCalf: [0.15, 0, 0], rightCalf: [0, 0, 0], torso: [0, 0, 0],
+    leftUpperArm: [0.35, 0.02, 0.12], rightUpperArm: [-0.35, -0.02, -0.12],
+    leftForearm: [-0.25, 0, 0.05], rightForearm: [-0.2, 0, -0.03],
+    leftThigh: [-0.3, 0, 0.02], rightThigh: [0.3, 0, -0.02],
+    leftCalf: [0.2, 0, 0.01], rightCalf: [-0.2, 0, -0.01],
+    torso: [0.01, 0.04, 0],
+    hipShift: -0.04,
+    weightShift: 0.05,
   },
 };
 
@@ -154,7 +174,7 @@ function IdleRotation({ children, enabled }: { children: React.ReactNode; enable
   return <group ref={groupRef}>{children}</group>;
 }
 
-// --- Smooth Anatomical Body ---
+// --- Premium Editorial Mannequin (LUXOR Signature) ---
 function SmoothBody({
   gender, dna, pose, clothing, autoRotate,
 }: {
@@ -173,63 +193,89 @@ function SmoothBody({
   const hipScale = 0.8 + dna.hips * 0.4;
   const legScale = 0.9 + dna.legLength * 0.2;
 
+  // === FASHION PROPORTIONS (8-head, elongated legs, refined extremities) ===
+
+  // Torso: elegant hourglass (female) / V-taper (male) with reduced waist, refined pelvis
   const torsoGeo = useMemo(() => {
-    const shoulderR = (isMale ? 0.24 : 0.21) * shoulderScale;
-    const waistR = (isMale ? 0.18 : 0.15) * waistScale;
-    const hipR = (isMale ? 0.19 : 0.23) * hipScale;
-    const chestR = isMale ? 0.22 : 0.20;
+    const neckBaseR = (isMale ? 0.12 : 0.10) * shoulderScale;
+    const shoulderR = (isMale ? 0.26 : 0.22) * shoulderScale;  // Wider, more elegant
+    const chestR = (isMale ? 0.22 * shoulderScale : 0.19 * shoulderScale);
+    const waistR = (isMale ? 0.16 : 0.13) * waistScale;        // Narrower waist
+    const hipR = (isMale ? 0.18 : 0.20) * hipScale;            // Reduced pelvis
     return createBodyProfile([
-      [0.001, 0.55], [0.08, 0.52], [shoulderR, 0.45],
-      [chestR * shoulderScale, 0.35], [waistR, 0.15],
-      [hipR, 0.0], [hipR * 0.95, -0.05], [0.001, -0.08],
-    ], 32);
+      [neckBaseR, 0.60], [neckBaseR * 1.2, 0.55],
+      [shoulderR, 0.47], [chestR, 0.38],
+      [waistR, 0.18], [hipR, 0.02],
+      [hipR * 0.92, -0.03], [hipR * 0.7, -0.06], [0.001, -0.08],
+    ], 48);
   }, [isMale, shoulderScale, waistScale, hipScale]);
 
+  // Head: elegant oval, slightly smaller, refined chin
   const headGeo = useMemo(() => createBodyProfile([
-    [0.001, 0.22], [0.08, 0.21], [0.12, 0.18], [0.135, 0.12],
-    [0.14, 0.05], [0.135, -0.02], [0.12, -0.08], [0.10, -0.12],
-    [0.08, -0.14], [0.001, -0.15],
+    [0.001, 0.24], [0.06, 0.23], [0.10, 0.21], [0.12, 0.18],
+    [0.13, 0.14], [0.133, 0.08], [0.13, 0.02],
+    [0.125, -0.04], [0.11, -0.08], [0.09, -0.12],
+    [0.06, -0.14], [0.03, -0.145], [0.001, -0.15],
+  ], 24), []);
+
+  // Neck: longer, elegant tapering
+  const neckGeo = useMemo(() => createBodyProfile([
+    [0.001, 0.14], [0.04, 0.13], [0.06, 0.10], [0.065, 0.05],
+    [0.068, 0.0], [0.065, -0.05], [0.06, -0.10],
+    [0.045, -0.13], [0.001, -0.14],
   ], 20), []);
 
-  const neckGeo = useMemo(() => createBodyProfile([
-    [0.001, 0.08], [0.055, 0.06], [0.06, 0.0], [0.065, -0.06], [0.001, -0.08],
-  ], 16), []);
-
+  // Upper Arm: refined, elegant taper
   const upperArmGeo = useMemo(() => {
-    const r = isMale ? 0.065 : 0.055;
+    const r = isMale ? 0.06 : 0.05;
     return createBodyProfile([
-      [0.001, 0.2], [r * 0.7, 0.18], [r, 0.1], [r * 0.95, 0.0],
-      [r * 0.85, -0.1], [r * 0.7, -0.18], [0.001, -0.2],
-    ], 12);
+      [0.001, 0.22], [r * 0.65, 0.20], [r, 0.14], [r * 0.95, 0.06],
+      [r * 0.85, -0.04], [r * 0.7, -0.14], [r * 0.5, -0.20], [0.001, -0.22],
+    ], 16);
   }, [isMale]);
 
+  // Forearm: slender, with subtle muscle definition
   const forearmGeo = useMemo(() => {
-    const r = isMale ? 0.055 : 0.045;
+    const r = isMale ? 0.048 : 0.038;
     return createBodyProfile([
-      [0.001, 0.18], [r * 0.8, 0.16], [r, 0.08], [r * 0.9, 0.0],
-      [r * 0.7, -0.12], [r * 0.5, -0.17], [0.001, -0.18],
-    ], 12);
+      [0.001, 0.20], [r * 0.7, 0.18], [r * 0.95, 0.12], [r, 0.05],
+      [r * 0.85, -0.04], [r * 0.65, -0.12], [r * 0.4, -0.18], [0.001, -0.20],
+    ], 16);
   }, [isMale]);
 
-  const handGeo = useMemo(() => new THREE.SphereGeometry(isMale ? 0.045 : 0.038, 12, 12), [isMale]);
+  // Hand: elegant, elongated with slender fingers (capsule shape)
+  const handGeo = useMemo(() => {
+    const w = isMale ? 0.038 : 0.032;
+    const h = isMale ? 0.07 : 0.06;
+    return new THREE.CapsuleGeometry(w, h, 8, 12);
+  }, [isMale]);
 
+  // Thigh: elongated, graceful taper
   const thighGeo = useMemo(() => {
-    const r = isMale ? 0.1 : 0.105;
+    const r = isMale ? 0.09 : 0.085;
     return createBodyProfile([
-      [0.001, 0.25], [r * 0.85, 0.22], [r, 0.12], [r * 0.95, 0.0],
-      [r * 0.8, -0.12], [r * 0.65, -0.22], [0.001, -0.25],
-    ], 14);
+      [0.001, 0.28], [r * 0.75, 0.25], [r * 0.95, 0.18], [r, 0.08],
+      [r * 0.9, -0.04], [r * 0.75, -0.14], [r * 0.55, -0.22], [0.001, -0.28],
+    ], 18);
   }, [isMale]);
 
+  // Calf: elegant shape, slim ankle
   const calfGeo = useMemo(() => {
-    const r = isMale ? 0.07 : 0.065;
+    const r = isMale ? 0.06 : 0.052;
+    const ankleR = isMale ? 0.032 : 0.028;
     return createBodyProfile([
-      [0.001, 0.22], [r * 0.75, 0.2], [r, 0.1], [r * 0.85, 0.0],
-      [r * 0.65, -0.12], [r * 0.45, -0.2], [0.001, -0.22],
-    ], 12);
+      [0.001, 0.24], [r * 0.7, 0.22], [r * 0.9, 0.16], [r * 0.95, 0.08],
+      [r * 0.8, 0.0], [r * 0.65, -0.08], [ankleR, -0.16],
+      [ankleR * 0.85, -0.20], [0.001, -0.24],
+    ], 18);
   }, [isMale]);
 
-  const footGeo = useMemo(() => new THREE.BoxGeometry(0.1, 0.06, 0.22), []);
+  // Foot: slim, elegant wedge
+  const footGeo = useMemo(() => {
+    const w = isMale ? 0.045 : 0.038;
+    const d = isMale ? 0.14 : 0.12;
+    return new THREE.BoxGeometry(w, 0.04, d);
+  }, [isMale]);
 
   const poseData = POSES[pose];
 
@@ -261,76 +307,136 @@ function SmoothBody({
   const waistY = 0.0;
   const shoeY = -0.95 * legScale;
 
+  const animData = useRef({ phase: 0, breathOffset: Math.random() * Math.PI * 2 }).current;
+
+  // Idle breathing + subtle weight shift animation (runs every frame)
+  useFrame((state) => {
+    if (!groupRef.current) return;
+    const t = state.clock.elapsedTime;
+    const breath = Math.sin(t * 1.8 + animData.breathOffset) * 0.004;
+    const microWeight = Math.sin(t * 0.6 + animData.breathOffset) * poseData.weightShift * 0.5;
+
+    // Subtle breathing on torso
+    groupRef.current.children.forEach((child) => {
+      if (child.type === 'Group') {
+        child.scale.y = 1 + breath * 0.3;
+        child.scale.x = 1 - breath * 0.15;
+        child.position.x = microWeight * 0.3;
+      }
+    });
+  });
+
   return (
     <IdleRotation enabled={autoRotate}>
       <group ref={groupRef} scale={[heightScale, heightScale, heightScale]}>
-        {/* Head (slightly smaller for elegance) */}
-        <mesh geometry={headGeo} material={clayMaterial} position={[0, 1.18, 0]} scale={[0.95, 0.95, 0.95]} castShadow />
-        {/* Neck */}
-        <mesh geometry={neckGeo} material={darkClayMaterial} position={[0, 0.95, 0]} castShadow />
-        {/* Torso */}
-        <group rotation={poseData.torso.map(v => v) as [number, number, number]}>
-          <mesh geometry={torsoGeo} material={clayMaterial} position={[0, 0.45, 0]} castShadow />
+        {/* Head — elegant oval, ceramic finish */}
+        <mesh geometry={headGeo} material={ceramicMat} position={[0, 1.28, 0]} scale={[0.92, 0.95, 0.92]} castShadow />
+        {/* Neck — longer, elegant */}
+        <mesh geometry={neckGeo} material={ivoryPolymerMat} position={[0, 1.00, 0]} castShadow />
+
+        {/* Torso — refined hourglass/V-taper */}
+        <group rotation={poseData.torso as [number, number, number]} position={[poseData.hipShift || 0, 0, 0]}>
+          <mesh geometry={torsoGeo} material={ceramicMat} position={[0, 0.48, 0]} castShadow />
         </group>
 
-        {/* Left arm */}
-        <group position={[-armX, 0.85, 0]}>
+        {/* Left arm with hidden capsule joints */}
+        <group position={[-armX, 0.88, 0]}>
           <group rotation={poseData.leftUpperArm as [number, number, number]}>
-            <mesh geometry={upperArmGeo} material={clayMaterial} position={[0, -0.22, 0]} castShadow />
-            <group position={[0, -0.42, 0]}>
+            {/* Shoulder capsule (hidden connector) */}
+            <mesh material={darkAccentMat} position={[0, 0, 0]}>
+              <sphereGeometry args={[0.03, 12, 12]} />
+            </mesh>
+            <mesh geometry={upperArmGeo} material={warmMapleMat} position={[0, -0.22, 0]} castShadow />
+            {/* Elbow capsule */}
+            <mesh material={darkAccentMat} position={[0, -0.44, 0]}>
+              <sphereGeometry args={[0.025, 10, 10]} />
+            </mesh>
+            <group position={[0, -0.44, 0]}>
               <group rotation={poseData.leftForearm as [number, number, number]}>
-                <mesh geometry={forearmGeo} material={clayMaterial} position={[0, -0.18, 0]} castShadow />
-                <mesh geometry={handGeo} material={darkClayMaterial} position={[0, -0.38, 0]} castShadow />
+                <mesh geometry={forearmGeo} material={warmMapleMat} position={[0, -0.18, 0]} castShadow />
+                {/* Wrist capsule */}
+                <mesh material={darkAccentMat} position={[0, -0.36, 0]}>
+                  <sphereGeometry args={[0.02, 8, 8]} />
+                </mesh>
+                <mesh geometry={handGeo} material={ivoryPolymerMat} position={[0, -0.42, 0]} rotation={[0.2, 0, 0.1]} castShadow />
               </group>
             </group>
           </group>
         </group>
 
-        {/* Right arm */}
-        <group position={[armX, 0.85, 0]}>
+        {/* Right arm with hidden capsule joints */}
+        <group position={[armX, 0.88, 0]}>
           <group rotation={poseData.rightUpperArm as [number, number, number]}>
-            <mesh geometry={upperArmGeo} material={clayMaterial} position={[0, -0.22, 0]} castShadow />
-            <group position={[0, -0.42, 0]}>
+            {/* Shoulder capsule */}
+            <mesh material={darkAccentMat} position={[0, 0, 0]}>
+              <sphereGeometry args={[0.03, 12, 12]} />
+            </mesh>
+            <mesh geometry={upperArmGeo} material={warmMapleMat} position={[0, -0.22, 0]} castShadow />
+            {/* Elbow capsule */}
+            <mesh material={darkAccentMat} position={[0, -0.44, 0]}>
+              <sphereGeometry args={[0.025, 10, 10]} />
+            </mesh>
+            <group position={[0, -0.44, 0]}>
               <group rotation={poseData.rightForearm as [number, number, number]}>
-                <mesh geometry={forearmGeo} material={clayMaterial} position={[0, -0.18, 0]} castShadow />
-                <mesh geometry={handGeo} material={darkClayMaterial} position={[0, -0.38, 0]} castShadow />
+                <mesh geometry={forearmGeo} material={warmMapleMat} position={[0, -0.18, 0]} castShadow />
+                {/* Wrist capsule */}
+                <mesh material={darkAccentMat} position={[0, -0.36, 0]}>
+                  <sphereGeometry args={[0.02, 8, 8]} />
+                </mesh>
+                <mesh geometry={handGeo} material={ivoryPolymerMat} position={[0, -0.42, 0]} rotation={[0.2, 0, -0.1]} castShadow />
               </group>
             </group>
           </group>
         </group>
 
-        {/* Left leg */}
+        {/* Left leg — elongated, elegant */}
         <group position={[-legX, -0.05, 0]}>
           <group rotation={poseData.leftThigh as [number, number, number]}>
-            <mesh geometry={thighGeo} material={clayMaterial} position={[0, -0.3 * legScale, 0]} castShadow />
-            <group position={[0, -0.55 * legScale, 0]}>
+            <mesh geometry={thighGeo} material={ivoryPolymerMat} position={[0, -0.32 * legScale, 0]} castShadow />
+            {/* Knee capsule */}
+            <mesh material={darkAccentMat} position={[0, -0.56 * legScale, 0]}>
+              <sphereGeometry args={[0.025, 10, 10]} />
+            </mesh>
+            <group position={[0, -0.56 * legScale, 0]}>
               <group rotation={poseData.leftCalf as [number, number, number]}>
-                <mesh geometry={calfGeo} material={clayMaterial} position={[0, -0.22 * legScale, 0]} castShadow />
-                <mesh geometry={footGeo} material={darkClayMaterial} position={[0, -0.46 * legScale, 0.05]} castShadow />
+                <mesh geometry={calfGeo} material={ivoryPolymerMat} position={[0, -0.24 * legScale, 0]} castShadow />
+                {/* Ankle capsule */}
+                <mesh material={darkAccentMat} position={[0, -0.48 * legScale, 0]}>
+                  <sphereGeometry args={[0.018, 8, 8]} />
+                </mesh>
+                <mesh geometry={footGeo} material={darkAccentMat} position={[0, -0.52 * legScale, 0.08]} castShadow />
               </group>
             </group>
           </group>
         </group>
 
-        {/* Right leg */}
+        {/* Right leg — elongated, elegant */}
         <group position={[legX, -0.05, 0]}>
           <group rotation={poseData.rightThigh as [number, number, number]}>
-            <mesh geometry={thighGeo} material={clayMaterial} position={[0, -0.3 * legScale, 0]} castShadow />
-            <group position={[0, -0.55 * legScale, 0]}>
+            <mesh geometry={thighGeo} material={ivoryPolymerMat} position={[0, -0.32 * legScale, 0]} castShadow />
+            {/* Knee capsule */}
+            <mesh material={darkAccentMat} position={[0, -0.56 * legScale, 0]}>
+              <sphereGeometry args={[0.025, 10, 10]} />
+            </mesh>
+            <group position={[0, -0.56 * legScale, 0]}>
               <group rotation={poseData.rightCalf as [number, number, number]}>
-                <mesh geometry={calfGeo} material={clayMaterial} position={[0, -0.22 * legScale, 0]} castShadow />
-                <mesh geometry={footGeo} material={darkClayMaterial} position={[0, -0.46 * legScale, 0.05]} castShadow />
+                <mesh geometry={calfGeo} material={ivoryPolymerMat} position={[0, -0.24 * legScale, 0]} castShadow />
+                {/* Ankle capsule */}
+                <mesh material={darkAccentMat} position={[0, -0.48 * legScale, 0]}>
+                  <sphereGeometry args={[0.018, 8, 8]} />
+                </mesh>
+                <mesh geometry={footGeo} material={darkAccentMat} position={[0, -0.52 * legScale, 0.08]} castShadow />
               </group>
             </group>
           </group>
         </group>
 
-        {/* Stand */}
-        <mesh material={darkClayMaterial} position={[0, -1.1 * legScale, 0]} receiveShadow>
-          <cylinderGeometry args={[0.02, 0.02, 0.15, 8]} />
+        {/* Elegant stand — minimal pedestal */}
+        <mesh material={darkAccentMat} position={[0, -1.15 * legScale, 0]} receiveShadow>
+          <cylinderGeometry args={[0.015, 0.015, 0.12, 8]} />
         </mesh>
-        <mesh material={clayMaterial} position={[0, -1.18 * legScale, 0]} receiveShadow>
-          <cylinderGeometry args={[0.3, 0.35, 0.04, 24]} />
+        <mesh material={ceramicMat} position={[0, -1.23 * legScale, 0]} receiveShadow>
+          <cylinderGeometry args={[0.25, 0.28, 0.03, 32]} />
         </mesh>
 
         {/* ====== CLOTHING ====== */}
@@ -655,16 +761,21 @@ export default function Mannequin3D({
 
         <ContactShadows
           position={[0, -1.2, 0]}
-          opacity={0.35}
-          scale={3}
-          blur={2.5}
-          far={4}
+          opacity={0.5}
+          scale={3.5}
+          blur={3}
+          far={5}
         />
-        {/* Studio-quality lighting — no CDN dependency (replaces Environment preset) */}
-        <hemisphereLight args={["#E8D5B7", "#1A1A2E", 0.4]} />
-        <pointLight position={[3, 5, 3]} intensity={0.5} color="#FFF5E6" />
-        <pointLight position={[-3, 4, -2]} intensity={0.3} color="#D4E5FF" />
-        <pointLight position={[0, 2, 4]} intensity={0.2} color="#FFF" />
+        {/* HDRI-quality studio lighting — premium editorial setup */}
+        <hemisphereLight args={["#F0E4D0", "#1A1A2E", 0.5]} />
+        {/* Large soft key light from upper-left */}
+        <pointLight position={[3, 5, 4]} intensity={0.7} color="#FFFAF0" distance={12} decay={2} />
+        {/* Fill light from right, warmer */}
+        <pointLight position={[-2, 3, 3]} intensity={0.35} color="#E8D5B7" distance={10} decay={2} />
+        {/* Rim light from behind */}
+        <pointLight position={[-1, 3, -4]} intensity={0.25} color="#D4E5FF" distance={10} decay={2} />
+        {/* Subtle accent from below */}
+        <pointLight position={[0, -1, 2]} intensity={0.12} color="#E8D5B7" distance={8} decay={2} />
 
         <OrbitControls
           enablePan={false} enableZoom={true}
