@@ -118,7 +118,7 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(
     fetch(request)
       .then((response) => {
-        if (response.ok && request.url.includes("luxor.ly")) {
+        if (response.status === 200 && request.url.includes("luxor.ly")) {
           const clone = response.clone();
           caches.open(DYNAMIC_CACHE).then((cache) => cache.put(request, clone));
         }
