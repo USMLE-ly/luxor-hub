@@ -2,6 +2,7 @@ import React, { lazy, Suspense, Component, useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { initAudio } from "@/lib/audio-system";
 import { initMonitor } from "@/lib/support";
+import { initResilience } from "@/lib/resilience";
 
 import { ClassicLoader } from "@/components/ui/loader";
 const AppContent = lazy(() => import("./AppContent"));
@@ -90,6 +91,7 @@ class AppErrorBoundary extends Component<
 const AudioInit = () => {
   useEffect(() => {
     initMonitor(); // Start production error monitor
+    initResilience(); // Start resilience layer (service worker, offline queue, auto-retry)
 
     const handleInteraction = () => {
       initAudio();

@@ -11,10 +11,65 @@
     }
   ],
   "routes": [
-    { "handle": "filesystem" },
-    { "source": "/api/(.*)", "destination": "https://nice-useful-plot--al-bosify.replit.app/api/$1" },
-    { "source": "/images/(.*)", "destination": "https://nice-useful-plot--al-bosify.replit.app/images/$1" },
-    { "source": "/media/(.*)", "destination": "https://nice-useful-plot--al-bosify.replit.app/media/$1" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    {
+      "handle": "filesystem"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "https://nice-useful-plot--al-bosify.replit.app/api/$1"
+    },
+    {
+      "source": "/images/(.*)",
+      "destination": "https://nice-useful-plot--al-bosify.replit.app/images/$1"
+    },
+    {
+      "source": "/media/(.*)",
+      "destination": "https://nice-useful-plot--al-bosify.replit.app/media/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/fonts/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
+      ]
+    }
   ]
 }
