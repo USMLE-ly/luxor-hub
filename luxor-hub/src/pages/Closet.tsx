@@ -759,7 +759,7 @@ const Closet = () => {
   return (
     <AppLayout>
       <ScrollReveal delay={0.1}>
-      <div className="px-4 sm:px-5 py-2 max-w-lg mx-auto overflow-x-hidden">
+      <div className="px-4 sm:px-5 py-2 max-w-lg mx-auto">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-3">
           <div className="flex items-center justify-between">
@@ -1181,19 +1181,21 @@ const Closet = () => {
 
         {/* ==================== MANNEQUIN TAB ==================== */}
         {activeTab === "mannequin" && (
-          <div className="-mx-5 -mt-2">
+          <div className="-mx-4 sm:-mx-5 -mt-1">
             {/* 3D Scene */}
-            <div className="relative bg-gradient-to-b from-secondary/10 to-background" style={{ height: "50vh" }}>
-              <Mannequin3D
-                gender={gender}
-                clothing={mannequinClothing}
-                dna={dna}
-                pose={pose}
-                tracingImageUrl={tracingUrl}
-                tracingOpacity={tracingOpacity}
-                showMeasurements={showMeasurements}
-                className="w-full h-full"
-              />
+            <div className="relative bg-gradient-to-b from-secondary/10 to-background" style={{ height: "55vh", minHeight: "400px" }}>
+              <div className="w-full h-full" style={{ minHeight: "300px" }}>
+                <Mannequin3D
+                  gender={gender}
+                  clothing={mannequinClothing}
+                  dna={dna}
+                  pose={pose}
+                  tracingImageUrl={tracingUrl}
+                  tracingOpacity={tracingOpacity}
+                  showMeasurements={showMeasurements}
+                  className="w-full h-full"
+                />
+              </div>
 
               {/* Gender toggle */}
               <div className="absolute top-3 left-3 flex gap-1 bg-background/80 backdrop-blur rounded-full p-1">
