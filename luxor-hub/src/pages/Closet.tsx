@@ -759,7 +759,7 @@ const Closet = () => {
   return (
     <AppLayout>
       <ScrollReveal delay={0.1}>
-      <div className="px-4 sm:px-5 py-3 max-w-lg mx-auto overflow-x-hidden">
+      <div className="px-4 sm:px-5 py-2 max-w-lg mx-auto overflow-x-hidden">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-3">
           <div className="flex items-center justify-between">
@@ -853,15 +853,15 @@ const Closet = () => {
             </div>
 
             {/* Action Cards */}
-            <StaggerContainer staggerDelay={0.06} className="grid grid-cols-2 gap-3 mb-3">
+            <StaggerContainer staggerDelay={0.06} className="grid grid-cols-2 gap-2 mb-2">
               <StaggerItem>
               <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
                 <DialogTrigger asChild>
                   <motion.button
                     initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
-                    className="rounded-2xl border border-border bg-card p-4 text-left hover:border-primary/40 transition-colors"
+                    className="rounded-2xl border border-border bg-card p-3 text-left hover:border-primary/40 transition-colors"
                   >
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-2">
                       <Plus className="w-5 h-5 text-primary" />
                     </div>
                     <p className="font-sans font-semibold text-sm text-foreground">Add Piece</p>
@@ -941,9 +941,9 @@ const Closet = () => {
               <motion.button
                 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
                 onClick={() => setUploadOpen(true)}
-                className="rounded-2xl border border-border bg-card p-4 text-left hover:border-primary/40 transition-colors"
+                className="rounded-2xl border border-border bg-card p-3 text-left hover:border-primary/40 transition-colors"
               >
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-2">
                   <Camera className="w-5 h-5 text-primary" />
                 </div>
                 <p className="font-sans font-semibold text-sm text-foreground">Upload Pieces</p>
@@ -953,16 +953,16 @@ const Closet = () => {
             </StaggerContainer>
 
             {/* Search */}
-            <div className="relative mb-3">
+            <div className="relative mb-2">
               <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input id="closet-search" name="search" placeholder="Search items..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 bg-secondary border-border rounded-xl h-10" />
             </div>
 
             {/* Occasion Outfit Tabs */}
-            <div className="mb-3">
-              <h2 className="font-sans font-semibold text-foreground text-sm mb-2">My Closet Outfits</h2>
-              <StaggerContainer staggerDelay={0.05} className="grid grid-cols-4 gap-2 mb-3">
+            <div className="mb-2">
+              <h2 className="font-sans font-semibold text-foreground text-sm mb-1.5">My Closet Outfits</h2>
+              <StaggerContainer staggerDelay={0.05} className="grid grid-cols-4 gap-1.5 mb-2">
                 {[
                   { label: "Everyday", icon: "☀️" },
                   { label: "Weekend", icon: "🌸" },
@@ -973,7 +973,7 @@ const Closet = () => {
                   return (
                     <StaggerItem key={tab.label}>
                     <button key={tab.label}
-                      className="flex flex-col items-center gap-1 p-3 rounded-xl bg-card border border-border hover:border-primary/40 transition-colors">
+                      className="flex flex-col items-center gap-1 p-2 rounded-xl bg-card border border-border hover:border-primary/40 transition-colors">
                       <span className="text-lg">{tab.icon}</span>
                       <span className="font-sans text-[10px] font-semibold text-foreground">{tab.label}</span>
                       <span className="text-[9px] font-sans text-muted-foreground">{count} OUTFITS</span>
@@ -985,7 +985,7 @@ const Closet = () => {
             </div>
 
             {/* Category Pills */}
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-2 mb-2">
               <StaggerContainer staggerDelay={0.03} className="flex gap-2 overflow-x-auto pb-1 scrollbar-none flex-1">
                 {filterPills.map((pill) => (
                   <StaggerItem key={pill}>
