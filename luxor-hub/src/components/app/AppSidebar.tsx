@@ -58,7 +58,7 @@ export function AppSidebar() {
     <Sidebar className="border-r border-sidebar-border bg-sidebar" collapsible="icon">
       <div className="p-4 flex items-center gap-3">
         {!collapsed && (
-          <h1 className="font-display text-xl font-bold gold-text">LEXOR®</h1>
+          <h1 className="font-display text-xl font-bold gold-text">LUXOR®</h1>
         )}
         <div className="ml-auto flex items-center gap-1">
           <NotificationBell />

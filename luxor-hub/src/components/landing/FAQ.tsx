@@ -27,7 +27,7 @@ const faqs = [
   },
   {
     q: "I already know how to dress.",
-    a: "Even stylists use data. LEXOR® finds combinations you'd miss by cross-referencing weather, your calendar, and pieces buried in your closet.",
+    a: "Even stylists use data. LUXOR® finds combinations you'd miss by cross-referencing weather, your calendar, and pieces buried in your closet.",
   },
   {
     q: "Can I cancel?",

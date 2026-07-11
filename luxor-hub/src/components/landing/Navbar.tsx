@@ -76,7 +76,7 @@ const Navbar = () => {
             transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
             className="bg-gradient-to-r from-foreground via-gold to-foreground bg-[length:200%_100%] bg-clip-text text-transparent"
           >
-            LEXOR®
+            LUXOR®
           </motion.span>
         </motion.h1>
 
@@ -135,7 +135,7 @@ const Navbar = () => {
               className="font-sans border-foreground/20 hover:bg-foreground/5"
               onClick={() => navigate("/auth")}
             >
-              Try LEXOR®
+              Try LUXOR®
             </Button>
           </motion.div>
 
@@ -191,7 +191,7 @@ const Navbar = () => {
                       onClick={() => { setSheetOpen(false); navigate("/auth"); }}
                       className="w-full h-10 text-sm font-semibold gold-gradient text-primary-foreground"
                     >
-                      Try LEXOR®
+                      Try LUXOR®
                     </Button>
                   </motion.div>
                 </div>

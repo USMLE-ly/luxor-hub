@@ -1,5 +1,5 @@
 /**
- * LEXOR® Support Playbook — Generated alongside features, not after launch.
+ * LUXOR® Support Playbook — Generated alongside features, not after launch.
  * Every feature builds its support playbook in the same sprint.
  * 
  * TIER 1: Automated Resolution (60-70% of volume never reaches your desk)
@@ -177,7 +177,7 @@ export const playbooks: FeaturePlaybook[] = [
         symptoms: ["User reports bad suggestions", "Style DNA not loaded", "Weather data missing"],
         automatedFix: "Verify style DNA is loaded. Check if weather API returned data. Re-run with fallback style profile.",
         escalationPath: "Review MiMo prompt templates. Check if user's closet data is complete. Update prompts if needed.",
-        customerMessage: "We're refining your style profile. The more you use LEXOR®, the better your suggestions get.",
+        customerMessage: "We're refining your style profile. The more you use LUXOR®, the better your suggestions get.",
       },
     ],
     sla: { responseTime: "< 2 hours", resolutionTime: "< 8 hours" },

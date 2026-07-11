@@ -16,7 +16,7 @@ const articles = [
     date: "April 3, 2026",
     body: [
       "AI has reshaped how people get dressed. What once needed a personal stylist now happens inside an app in under a second.",
-      "At the core sits a neural network trained on millions of fashion images. But image recognition is only the start. LEXOR® layers contextual signals on top: calendar events, local forecast, dress codes, and mood.",
+      "At the core sits a neural network trained on millions of fashion images. But image recognition is only the start. LUXOR® layers contextual signals on top: calendar events, local forecast, dress codes, and mood.",
       "The algorithm maps your wardrobe into a style space. Each garment is encoded across 40+ attributes — silhouette, color temperature, pattern density, fabric drape, seasonal weight. When you request an outfit, the model finds combinations that maximize harmony while respecting weather and dress code constraints.",
       "What separates AI styling from a static lookbook is the feedback loop. Every time you accept or skip a suggestion, the system recalibrates. Within two weeks, most users say recommendations feel like their own choices — just faster.",
       "Your wardrobe data never leaves encrypted storage. The model runs without exposing individual preferences. Personal styling at scale, without sacrificing privacy.",
@@ -32,9 +32,9 @@ const articles = [
     date: "March 28, 2026",
     body: [
       "The capsule wardrobe concept dates back to the 1970s but has never been more relevant. Fast fashion left the average person with 100+ garments, yet most people wear fewer than 20% of what they own.",
-      "Start with an honest audit. Photograph every item — LEXOR® does this automatically, categorizing by type, color, season, and versatility. Patterns emerge fast: duplicate black tees, unworn blazers, zero transitional layers.",
+      "Start with an honest audit. Photograph every item — LUXOR® does this automatically, categorizing by type, color, season, and versatility. Patterns emerge fast: duplicate black tees, unworn blazers, zero transitional layers.",
       "A working capsule is 30–40 pieces that interlock. Every top pairs with at least three bottoms. AI tools calculate combinatorial coverage — how many unique outfits your capsule produces and where the gaps are.",
-      "Color cohesion beats trend-chasing. Pick a neutral base (navy, charcoal, ivory), add two accent colors that match your skin tone. LEXOR®'s color analysis maps your complexion to a personalized palette.",
+      "Color cohesion beats trend-chasing. Pick a neutral base (navy, charcoal, ivory), add two accent colors that match your skin tone. LUXOR®'s color analysis maps your complexion to a personalized palette.",
       "Users who switch to a capsule get dressed 70% faster and spend 35% less on clothing annually.",
     ],
   },
@@ -49,7 +49,7 @@ const articles = [
     body: [
       "Office dress codes have fragmented. The suit-and-tie era gave way to business casual, which split into 'smart casual,' 'creative professional,' and the vague 'dress appropriately.' Figuring out what to wear each morning is real friction.",
       "Build a flexible work wardrobe around three tiers. Tier one: polished staples — tailored trousers, structured blazers, quality button-downs. Tier two: smart-casual bridges — chinos, knit polos, loafers. These cover 80% of workdays. Tier three: creative accents that show personality without crossing lines.",
-      "Navy and charcoal project authority. Pastels read approachable. Jewel tones signal confidence. LEXOR® factors in your industry and meeting schedule to pick the right register each day.",
+      "Navy and charcoal project authority. Pastels read approachable. Jewel tones signal confidence. LUXOR® factors in your industry and meeting schedule to pick the right register each day.",
       "Seasonal transitions trip up even good dressers. AI handles this by checking the hourly forecast and picking pieces that work at 7 AM and 2 PM.",
       "A $200 blazer worn 100 times costs $2 per wear. A $30 trend piece worn twice costs $15 per wear. AI analytics make cost-per-wear visible for every item in your closet.",
     ],
@@ -64,7 +64,7 @@ const articles = [
     date: "March 12, 2026",
     body: [
       "Color analysis divides human coloring into seasonal archetypes — Spring, Summer, Autumn, Winter — based on undertone, value, and chroma. Knowing your season turns shopping from guesswork into precision.",
-      "The traditional method uses fabric drapes under neutral light. AI has made it instant. LEXOR® uses your selfie to map skin undertone, eye color, and hair shade, then outputs your season with 30+ complementary colors.",
+      "The traditional method uses fabric drapes under neutral light. AI has made it instant. LUXOR® uses your selfie to map skin undertone, eye color, and hair shade, then outputs your season with 30+ complementary colors.",
       "Colors that match your natural coloring make your skin look healthier and your appearance more intentional. Clashing colors create subtle discord people register as 'something's off.'",
       "Springs shine in coral and golden yellow. Winters command attention in cobalt and crisp white. Autumns glow in olive and burnt orange. Summers look effortless in dusty rose and sage.",
       "The biggest mistake is chasing trendy colors regardless of season. AI styling filters trends through your personal palette so you stay current without losing harmony.",
@@ -79,23 +79,23 @@ const articles = [
     readTime: "12 min read",
     date: "March 5, 2026",
     body: [
-      "The wardrobe app market has exploded. By 2026, there are over twenty options — but quality varies. Some are glorified photo albums. Others, like LEXOR®, are AI platforms that learn and evolve with your style.",
+      "The wardrobe app market has exploded. By 2026, there are over twenty options — but quality varies. Some are glorified photo albums. Others, like LUXOR®, are AI platforms that learn and evolve with your style.",
       "Baseline features every app should have: photo upload with background removal, category tagging, outfit creation, and search. What separates the best is intelligence — does it help you dress better, or just organize what you own?",
-      "LEXOR® leads in AI outfit generation (weather + calendar), Style DNA profiling, cost-per-wear analytics, wardrobe gap detection, and a social layer for sharing looks. The free tier works for casual users; Pro unlocks full AI capability.",
+      "LUXOR® leads in AI outfit generation (weather + calendar), Style DNA profiling, cost-per-wear analytics, wardrobe gap detection, and a social layer for sharing looks. The free tier works for casual users; Pro unlocks full AI capability.",
       "When evaluating any app, ask: Does it cut decision fatigue? Does it save money? Does it improve over time? Static tools plateau. You want a system that learns with every interaction.",
-      "Privacy is non-negotiable. Your wardrobe is intimate data. Look for end-to-end encryption and clear data policies. LEXOR® uses encrypted cloud storage with zero third-party sharing.",
+      "Privacy is non-negotiable. Your wardrobe is intimate data. Look for end-to-end encryption and clear data policies. LUXOR® uses encrypted cloud storage with zero third-party sharing.",
     ],
   },
 ];
 
 const Blog = () => {
   useEffect(() => {
-    document.title = "Fashion Blog — AI Styling Tips & Wardrobe Guides | LEXOR®";
+    document.title = "Fashion Blog — AI Styling Tips & Wardrobe Guides | LUXOR®";
     const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) metaDesc.setAttribute("content", "Expert fashion advice powered by AI. Read guides on capsule wardrobes, color analysis, office outfits, wardrobe management, and AI outfit recommendations from LEXOR®.");
+    if (metaDesc) metaDesc.setAttribute("content", "Expert fashion advice powered by AI. Read guides on capsule wardrobes, color analysis, office outfits, wardrobe management, and AI outfit recommendations from LUXOR®.");
     
     let ogTitle = document.querySelector('meta[property="og:title"]');
-    if (ogTitle) ogTitle.setAttribute("content", "Fashion Blog — AI Styling Tips & Wardrobe Guides | LEXOR®");
+    if (ogTitle) ogTitle.setAttribute("content", "Fashion Blog — AI Styling Tips & Wardrobe Guides | LUXOR®");
     let ogDesc = document.querySelector('meta[property="og:description"]');
     if (ogDesc) ogDesc.setAttribute("content", "Expert fashion advice powered by AI. Guides on capsule wardrobes, color analysis, and AI outfit recommendations.");
     let twitterCard = document.querySelector('meta[name="twitter:card"]');
@@ -114,7 +114,7 @@ const Blog = () => {
         <div className="max-w-5xl mx-auto flex items-center justify-between px-4 sm:px-6 h-14">
           <Link to="/" className="flex items-center gap-2 text-foreground font-display font-bold text-lg tracking-tight">
             <ArrowLeft className="w-4 h-4" />
-            LEXOR®
+            LUXOR®
           </Link>
           <Link
             to="/auth"
@@ -138,7 +138,7 @@ const Blog = () => {
             </span>
           </div>
           <h1 className="font-display text-4xl md:text-6xl font-bold text-foreground tracking-tight mb-4">
-            The LEXOR® Fashion Blog
+            The LUXOR® Fashion Blog
           </h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             Guides on AI styling, capsule wardrobes, color analysis, and smarter dressing — backed by data.
@@ -202,7 +202,7 @@ const Blog = () => {
                     to="/auth"
                     className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    Try LEXOR® Free
+                    Try LUXOR® Free
                   </Link>
                 </div>
               </div>

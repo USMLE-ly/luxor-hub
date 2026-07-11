@@ -48,7 +48,7 @@ serve(async (req) => {
 
     // ─── DIAGNOSE: MiMo Vision analyzes the error ─────────────
     if (action === "diagnose") {
-      const diagnosisPrompt = `You are LEXOR®'s AI support engineer. A user encountered this error:
+      const diagnosisPrompt = `You are LUXOR®'s AI support engineer. A user encountered this error:
 
 Error: ${error_context?.message || "Unknown error"}
 Page: ${error_context?.page || "Unknown"}
@@ -56,7 +56,7 @@ Feature: ${error_context?.feature || "Unknown"}
 Browser: ${error_context?.browser || "Unknown"}
 Timestamp: ${error_context?.timestamp || new Date().toISOString()}
 
-The LEXOR® app is a luxury AI fashion platform. Common issues include:
+The LUXOR® app is a luxury AI fashion platform. Common issues include:
 - Auth/login failures (Supabase Auth)
 - Payment/subscription issues (PayPal)
 - AI analysis failures (MiMo Vision API)
@@ -155,7 +155,7 @@ Provide a JSON response with:
 
       conversationHistory.push({ role: "user", content: user_message });
 
-      const chatPrompt = `You are LEXOR®'s AI support assistant. You help users with their fashion app issues. Be concise, helpful, and professional. If you can fix the issue automatically, do so. If not, guide the user through the fix.
+      const chatPrompt = `You are LUXOR®'s AI support assistant. You help users with their fashion app issues. Be concise, helpful, and professional. If you can fix the issue automatically, do so. If not, guide the user through the fix.
 
 Current conversation:
 ${conversationHistory.map((m: any) => `${m.role}: ${m.content}`).join("\n")}

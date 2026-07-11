@@ -52,7 +52,7 @@ export default function StickyPricingBar() {
           <div className="max-w-2xl mx-auto pointer-events-auto glass-strong rounded-2xl px-5 py-3 flex items-center justify-between gap-4 shadow-lg">
             <div className="flex flex-col min-w-0">
               <span className="font-display text-sm font-bold text-foreground truncate">
-                Join LEXOR® Now
+                Join LUXOR® Now
               </span>
               <span className="text-[11px] font-sans text-muted-foreground">
                 Founding member pricing — limited spots

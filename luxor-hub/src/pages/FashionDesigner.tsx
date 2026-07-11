@@ -183,7 +183,7 @@ export default function FashionDesigner() {
   };
 
   const handleCopyShareLink = (design: SavedDesign) => {
-    const text = `Check out my AI-designed ${design.garment_type}: "${design.prompt}" ✨ Created with LEXOR®`;
+    const text = `Check out my AI-designed ${design.garment_type}: "${design.prompt}" ✨ Created with LUXOR®`;
     navigator.clipboard.writeText(text);
     setCopied(true);
     toast.success("Copied to clipboard!");
@@ -191,7 +191,7 @@ export default function FashionDesigner() {
   };
 
   const handleShareTwitter = (design: SavedDesign) => {
-    const text = `Check out my AI-designed ${design.garment_type}: "${design.prompt}" ✨ Created with LEXOR®`;
+    const text = `Check out my AI-designed ${design.garment_type}: "${design.prompt}" ✨ Created with LUXOR®`;
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
   };
 

@@ -21,7 +21,7 @@ const TabbedFeatures = () => (
       titleComponent={
         <div className="flex flex-col items-center gap-3 mb-4">
           <p className="font-sans text-xs font-semibold text-primary tracking-widest uppercase">
-            Your Morning With LEXOR®
+            Your Morning With LUXOR®
           </p>
           <h3 className="font-display text-2xl md:text-4xl font-bold text-foreground leading-tight">
             Open the app. Your outfit is ready.
@@ -32,7 +32,7 @@ const TabbedFeatures = () => (
       <div className="relative h-full w-full">
         <img
           src={featureOutfitGen}
-          alt="Three elegant outfits on mannequins styled by LEXOR AI"
+          alt="Three elegant outfits on mannequins styled by LUXOR AI"
           className="mx-auto rounded-2xl object-cover h-full w-full object-center"
           draggable={false}
         />

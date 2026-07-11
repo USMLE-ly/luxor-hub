@@ -111,7 +111,7 @@ const Paywall = () => {
 
   // Track paywall view
   useState(() => {
-    trackEvent("InitiateCheckout", { content_name: "LEXOR® Paywall View" });
+    trackEvent("InitiateCheckout", { content_name: "LUXOR® Paywall View" });
   });
 
   const grantAccess = useCallback((tier: string) => {
@@ -135,7 +135,7 @@ const Paywall = () => {
           status: "active",
         });
         if (error) throw error;
-        const eventParams = { value: tier === "starter" ? 9.00 : tier === "pro" ? 29.00 : 99.00, currency: "USD", content_name: `LEXOR® ${tier}`, content_ids: [`lexor_${tier}`], content_type: "product", num_items: 1 };
+        const eventParams = { value: tier === "starter" ? 9.00 : tier === "pro" ? 29.00 : 99.00, currency: "USD", content_name: `LUXOR® ${tier}`, content_ids: [`lexor_${tier}`], content_type: "product", num_items: 1 };
         trackEvent("Subscribe", eventParams);
         trackEvent("Purchase", eventParams);
         localStorage.setItem("luxor_paid", tier);
@@ -189,7 +189,7 @@ const Paywall = () => {
   return (
     <div className="min-h-screen bg-background dark flex flex-col">
       <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-lg px-4 py-3 flex items-center justify-center border-b border-border/50">
-        <h1 className="font-display font-bold text-foreground text-lg tracking-wide gold-text">LEXOR®</h1>
+        <h1 className="font-display font-bold text-foreground text-lg tracking-wide gold-text">LUXOR®</h1>
       </div>
 
       <div className="flex-1 px-5 pb-10 overflow-y-auto">
@@ -244,7 +244,7 @@ const Paywall = () => {
                         className="w-full"
                         onClick={() => {
                           setSelectedTier(t.key);
-                          trackEvent("AddToCart", { content_name: `LEXOR® ${t.label}`, content_ids: [`lexor_${t.key}`], content_type: "product", value: parseFloat(t.price), currency: "USD" });
+                          trackEvent("AddToCart", { content_name: `LUXOR® ${t.label}`, content_ids: [`lexor_${t.key}`], content_type: "product", value: parseFloat(t.price), currency: "USD" });
                         }}
                         onFocus={() => setSelectedTier(t.key)}
                       >

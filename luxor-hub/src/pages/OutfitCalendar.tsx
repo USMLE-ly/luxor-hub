@@ -734,7 +734,7 @@ const OutfitCalendarInner = () => {
     // Title
     ctx.fillStyle = "#e8d48b";
     ctx.font = "bold 14px sans-serif";
-    ctx.fillText("LEXOR® • OUTFIT SCHEDULE", 30, 40);
+    ctx.fillText("LUXOR® • OUTFIT SCHEDULE", 30, 40);
 
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 28px sans-serif";
@@ -803,7 +803,7 @@ const OutfitCalendarInner = () => {
     // Watermark
     ctx.fillStyle = "#555555";
     ctx.font = "11px sans-serif";
-    ctx.fillText("Styled with LEXOR®", 30, 780);
+    ctx.fillText("Styled with LUXOR®", 30, 780);
 
     canvas.toBlob(async (blob) => {
       if (!blob) return;

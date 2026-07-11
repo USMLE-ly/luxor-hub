@@ -83,7 +83,7 @@ const ResetPassword = () => {
           <div className="text-center mb-6">
             <div className="flex items-center justify-center gap-3 mb-3">
               <div className="h-px w-8 bg-gradient-to-r from-transparent to-[hsl(43,80%,58%,0.4)]" />
-              <span className="text-[10px] tracking-[0.3em] text-[hsl(43,80%,58%,0.6)] font-sans uppercase">LEXOR®</span>
+              <span className="text-[10px] tracking-[0.3em] text-[hsl(43,80%,58%,0.6)] font-sans uppercase">LUXOR®</span>
               <div className="h-px w-8 bg-gradient-to-l from-transparent to-[hsl(43,80%,58%,0.4)]" />
             </div>
             <h1 className="font-display text-3xl font-bold gold-text">

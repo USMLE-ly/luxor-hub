@@ -11,29 +11,29 @@ const DeepDive = () => {
   return (
     <div className="min-h-screen bg-background dark">
       <Helmet>
-        <title>How AI Fashion Styling Works — Deep Dive | LEXOR®</title>
+        <title>How AI Fashion Styling Works — Deep Dive | LUXOR®</title>
         <meta
           name="description"
-          content="Five steps from cluttered closet to daily AI-picked outfits. How LEXOR® digitizes your wardrobe, learns your style, and dresses you for the weather."
+          content="Five steps from cluttered closet to daily AI-picked outfits. How LUXOR® digitizes your wardrobe, learns your style, and dresses you for the weather."
         />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Article",
             "headline": "How AI Fashion Styling Works — Deep Dive",
-            "description": "Five steps from cluttered closet to daily AI-picked outfits. How LEXOR® digitizes your wardrobe, learns your style, and dresses you for the weather.",
-            "author": { "@type": "Organization", "name": "LEXOR®", "url": "https://luxor.ly" },
-            "publisher": { "@type": "Organization", "name": "LEXOR®", "url": "https://luxor.ly" },
+            "description": "Five steps from cluttered closet to daily AI-picked outfits. How LUXOR® digitizes your wardrobe, learns your style, and dresses you for the weather.",
+            "author": { "@type": "Organization", "name": "LUXOR®", "url": "https://luxor.ly" },
+            "publisher": { "@type": "Organization", "name": "LUXOR®", "url": "https://luxor.ly" },
             "mainEntityOfPage": { "@type": "WebPage", "@id": "https://luxor.ly/deep-dive" },
           })}
         </script>
         <link rel="canonical" href="https://luxor.ly/deep-dive" />
-        <meta property="og:title" content="How AI Fashion Styling Works — Deep Dive | LEXOR®" />
+        <meta property="og:title" content="How AI Fashion Styling Works — Deep Dive | LUXOR®" />
         <meta property="og:description" content="Five steps from cluttered closet to daily AI-picked outfits." />
         <meta property="og:url" content="https://luxor.ly/deep-dive" />
         <meta property="og:type" content="article" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="How AI Fashion Styling Works — Deep Dive | LEXOR®" />
+        <meta name="twitter:title" content="How AI Fashion Styling Works — Deep Dive | LUXOR®" />
       </Helmet>
 
       <Navbar />

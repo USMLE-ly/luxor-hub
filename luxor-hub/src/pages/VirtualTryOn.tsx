@@ -105,7 +105,7 @@ function VirtualTryOnInner() {
     try {
       if (navigator.share) {
         await navigator.share({
-          title: "Virtual Try-On by LEXOR®",
+          title: "Virtual Try-On by LUXOR®",
           text: "Check out this virtual try-on!",
           url: imageUrl,
         });

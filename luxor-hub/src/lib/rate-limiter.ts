@@ -1,5 +1,5 @@
 /**
- * LEXOR® Server-Side Rate Limiter
+ * LUXOR® Server-Side Rate Limiter
  * 
  * Layer 9 of the production stack.
  * Prevents abuse, protects edge functions, and ensures fair usage.

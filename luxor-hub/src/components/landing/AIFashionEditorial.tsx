@@ -13,7 +13,7 @@ const steps = [
   {
     icon: Brain,
     title: "AI Learns Your Style DNA",
-    description: "LEXOR® builds a personal profile from your body, skin tone, lifestyle, and outfits you actually wear. 40+ style dimensions.",
+    description: "LUXOR® builds a personal profile from your body, skin tone, lifestyle, and outfits you actually wear. 40+ style dimensions.",
   },
   {
     icon: Sun,
@@ -90,7 +90,7 @@ const AIFashionEditorial = () => (
             The average person spends 20 minutes every morning deciding what to wear — 120+ hours a year. AI processes your entire wardrobe, the weather, your schedule, and current trends in under a second.
           </p>
           <p>
-            LEXOR® improves with every interaction. The more you use it, the better it reads your taste in fabrics, colors, and occasion-specific dress codes. It's not replacing your style — it's making it sharper.
+            LUXOR® improves with every interaction. The more you use it, the better it reads your taste in fabrics, colors, and occasion-specific dress codes. It's not replacing your style — it's making it sharper.
           </p>
           <p>
             Whether you're a busy professional, a fashion enthusiast with a curated closet, or someone rebuilding confidence through better self-presentation — AI styling adapts to you.

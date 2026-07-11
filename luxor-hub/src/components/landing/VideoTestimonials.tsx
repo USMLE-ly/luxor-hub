@@ -35,7 +35,7 @@ const VideoTestimonials = () => (
           How To <span className="gold-text">Get Started</span>
         </h2>
         <p className="mt-4 max-w-lg mx-auto font-sans text-sm text-muted-foreground">
-          Watch our quick walkthrough to see how LEXOR® works in practice.
+          Watch our quick walkthrough to see how LUXOR® works in practice.
         </p>
       </motion.div>
 

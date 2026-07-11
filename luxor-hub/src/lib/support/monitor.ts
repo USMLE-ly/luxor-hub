@@ -1,5 +1,5 @@
 /**
- * LEXOR® Production Error Monitor
+ * LUXOR® Production Error Monitor
  * Catches every error in real-time, categorizes it, and routes to the right tier.
  * 
  * This is your 2 AM engineer. It never sleeps.
@@ -92,7 +92,7 @@ export function captureError(error: Error, context: Record<string, unknown> = {}
   if (errorBuffer.length > MAX_BUFFER) errorBuffer.shift();
 
   // Log to console for DevTools visibility
-  console.error(`[LEXOR MONITOR] [${category.toUpperCase()}] [TIER ${event.tier}] ${error.message}`);
+  console.error(`[LUXOR MONITOR] [${category.toUpperCase()}] [TIER ${event.tier}] ${error.message}`);
 
   return event;
 }
@@ -126,7 +126,7 @@ async function autoCreateTicket(event: ErrorEvent, originalError: Error): Promis
       .insert({
         user_id: userId || "00000000-0000-0000-0000-000000000000",
         title: `[Auto] ${event.category.toUpperCase()} — ${event.message.slice(0, 80)}`,
-        description: `Automatically captured by LEXOR® Monitor.\n\nError: ${event.message}\nFeature: ${event.feature}\nURL: ${event.url}\nTier: ${event.tier}\n\nStack:\n${event.stack || "N/A"}`,
+        description: `Automatically captured by LUXOR® Monitor.\n\nError: ${event.message}\nFeature: ${event.feature}\nURL: ${event.url}\nTier: ${event.tier}\n\nStack:\n${event.stack || "N/A"}`,
         category: event.category,
         severity: event.tier === 3 ? "critical" : "high",
         status: "open",
@@ -194,7 +194,7 @@ export function initMonitor(): void {
     });
   }) as EventListener);
 
-  console.log("[LEXOR MONITOR] Production error monitor initialized. Tier 1-3 support active.");
+  console.log("[LUXOR MONITOR] Production error monitor initialized. Tier 1-3 support active.");
 }
 
 // ─── QUERY API ─────────────────────────────────────────────────────

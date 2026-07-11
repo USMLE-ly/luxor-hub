@@ -1,5 +1,5 @@
 /**
- * LEXOR® Service Worker
+ * LUXOR® Service Worker
  * 
  * Layer 10 (Caching/CDN) + Layer 13 (Availability/Recovery)
  * 
@@ -84,7 +84,7 @@ self.addEventListener("fetch", (event) => {
           // Return offline placeholder for images
           if (request.destination === "image") {
             return new Response(
-              '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect fill="#1a2e2a" width="200" height="200"/><text fill="#c9a84c" font-family="sans-serif" font-size="14" x="50%" y="50%" text-anchor="middle" dy=".3em">LEXOR®</text></svg>',
+              '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect fill="#1a2e2a" width="200" height="200"/><text fill="#c9a84c" font-family="sans-serif" font-size="14" x="50%" y="50%" text-anchor="middle" dy=".3em">LUXOR®</text></svg>',
               { headers: { "Content-Type": "image/svg+xml" } }
             );
           }

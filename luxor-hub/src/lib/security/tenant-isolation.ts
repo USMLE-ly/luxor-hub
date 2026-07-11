@@ -1,5 +1,5 @@
 /**
- * LEXOR® Tenant Isolation Monitor
+ * LUXOR® Tenant Isolation Monitor
  * 
  * Monitors for cross-tenant data access attempts in real-time.
  * This is your 2 AM security guard. It never sleeps.
@@ -152,7 +152,7 @@ async function createSecurityIncident(
   };
 
   console.error(
-    `[LEXOR SECURITY] [${severity.toUpperCase()}] ${event}: ${details}`,
+    `[LUXOR SECURITY] [${severity.toUpperCase()}] ${event}: ${details}`,
     incident
   );
 
@@ -172,7 +172,7 @@ async function createSecurityIncident(
 
   if (severity === "critical") {
     console.error(
-      `[LEXOR SECURITY] CRITICAL INCIDENT REQUIRES IMMEDIATE ATTENTION: ${incident.id}`
+      `[LUXOR SECURITY] CRITICAL INCIDENT REQUIRES IMMEDIATE ATTENTION: ${incident.id}`
     );
   }
 

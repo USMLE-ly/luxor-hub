@@ -356,7 +356,7 @@ const NotificationStep = ({ step }: { step: OnboardingStep }) => {
 
       <div className="border border-border rounded-2xl p-6 max-w-xs w-full shadow-sm bg-card">
         <h3 className="font-sans font-semibold text-foreground text-sm mb-1">
-          "LEXOR" Would Like to Access:
+          "LUXOR" Would Like to Access:
         </h3>
         <div className="space-y-3 my-4">
           <div className="flex items-center gap-3 text-sm text-muted-foreground">

@@ -1,5 +1,5 @@
 /**
- * LEXOR® Audio Experience System
+ * LUXOR® Audio Experience System
  * Premium fashion audio using Web Audio API — zero dependencies.
  * Synthesized ambient pads + interaction sounds.
  */

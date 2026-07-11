@@ -93,7 +93,7 @@ export async function sendViaNtfy(payload: NtfyPayload): Promise<boolean> {
       body: JSON.stringify({
         topic: payload.topic,
         message: payload.message,
-        title: payload.title || "LEXOR",
+        title: payload.title || "LUXOR",
         priority: payload.priority || 3,
         tags: payload.tags || [],
         click: payload.click || "https://luxor.ly",
@@ -122,7 +122,7 @@ export interface EngagementNudge {
 const ENGAGEMENT_NUDGES: EngagementNudge[] = [
   {
     id: "welcome-back",
-    title: "👋 Welcome back to LEXOR",
+    title: "👋 Welcome back to LUXOR",
     body: "Your style journey awaits — check out what's new in your closet.",
     url: "/closet",
     delayMinutes: 2,  // 2 minutes — not 6 seconds (was too aggressive for SPA navigation)
@@ -178,7 +178,7 @@ if (typeof document !== "undefined") {
           const lastVisit = parseInt(localStorage.getItem("luxor_last_visit") || "0", 10);
           const minutesAway = (Date.now() - lastVisit) / 60000;
           if (minutesAway > 30) {
-            sendBrowserNotification("👋 Welcome back to LEXOR", {
+            sendBrowserNotification("👋 Welcome back to LUXOR", {
               body: "You've been away for a while — your outfits are waiting.",
               url: "/closet",
               id: "vis-welcome-" + Date.now(),

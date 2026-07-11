@@ -150,7 +150,7 @@ export default function SupportWidget() {
           >
             <div className="p-4 border-b border-border/20 bg-gradient-to-r from-gold/10 to-transparent">
               <div className="flex items-center justify-between">
-                <div><h3 className="font-display text-sm font-bold text-foreground">LEXOR® Support</h3><p className="text-[10px] text-muted-foreground mt-0.5">AI-powered assistance</p></div>
+                <div><h3 className="font-display text-sm font-bold text-foreground">LUXOR® Support</h3><p className="text-[10px] text-muted-foreground mt-0.5">AI-powered assistance</p></div>
                 {view !== "menu" && <button onClick={() => setView("menu")} className="text-xs text-muted-foreground hover:text-foreground">Back</button>}
               </div>
             </div>

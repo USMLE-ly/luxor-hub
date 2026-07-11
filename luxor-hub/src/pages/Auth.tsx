@@ -77,7 +77,7 @@ const Auth = () => {
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        toast.success("Welcome back to LEXOR®!");
+        toast.success("Welcome back to LUXOR®!");
         playSuccess();
         // Get the user from the session we already have
         const { data: { user: sessionUser } } = await supabase.auth.getUser();
@@ -128,11 +128,11 @@ const Auth = () => {
           },
         });
         if (error) throw error;
-        trackEvent("CompleteRegistration", { content_name: "LEXOR® Signup" });
+        trackEvent("CompleteRegistration", { content_name: "LUXOR® Signup" });
 
         // If session is returned, user was auto-confirmed — go to onboarding
         if (signUpData?.session) {
-          toast.success("Account created! Welcome to LEXOR®!");
+          toast.success("Account created! Welcome to LUXOR®!");
           playSuccess();
           navigate("/onboarding");
         } else {
@@ -189,7 +189,7 @@ const Auth = () => {
               <span className="text-[10px] tracking-[0.3em] text-[hsl(43,80%,58%,0.6)] font-sans uppercase">Est. 2020</span>
               <div className="h-px w-8 bg-gradient-to-l from-transparent to-[hsl(43,80%,58%,0.4)]" />
             </div>
-            <h1 className="font-display text-3xl font-bold gold-text">LEXOR®</h1>
+            <h1 className="font-display text-3xl font-bold gold-text">LUXOR®</h1>
             <GoldDivider />
             <p className="text-muted-foreground font-sans text-sm">
               {isLogin ? "Welcome back. Your style awaits." : "Begin your style journey."}

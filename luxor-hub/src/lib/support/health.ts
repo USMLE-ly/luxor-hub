@@ -1,5 +1,5 @@
 /**
- * LEXOR® System Health Check
+ * LUXOR® System Health Check
  * Lightweight health probes for all critical services.
  * Run on page load + periodically to detect issues before users report them.
  */

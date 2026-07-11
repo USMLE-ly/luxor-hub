@@ -1,5 +1,5 @@
 /**
- * LEXOR® Resilience Layer
+ * LUXOR® Resilience Layer
  * 
  * Layer 13 of the production stack: Availability and Recovery.
  * 
@@ -49,7 +49,7 @@ export async function withRetry<T>(
         );
 
         console.warn(
-          `[LEXOR RETRY] Attempt ${attempt + 1}/${maxRetries} failed: ${lastError.message}. Retrying in ${Math.round(delay)}ms...`
+          `[LUXOR RETRY] Attempt ${attempt + 1}/${maxRetries} failed: ${lastError.message}. Retrying in ${Math.round(delay)}ms...`
         );
 
         onRetry?.(attempt + 1, lastError);
@@ -77,7 +77,7 @@ export async function withFallback<T>(
   } catch (error) {
     if (options?.logError !== false) {
       console.warn(
-        `[LEXOR DEGRADE] ${options?.errorMessage || "Operation failed"}, using fallback:`,
+        `[LUXOR DEGRADE] ${options?.errorMessage || "Operation failed"}, using fallback:`,
         error
       );
     }
@@ -200,7 +200,7 @@ export async function processOfflineQueue(): Promise<{ processed: number; failed
         remaining.push(mutation);
       } else {
         failed++;
-        console.error(`[LEXOR QUEUE] Mutation ${mutation.id} failed after ${MAX_RETRIES} retries:`, error);
+        console.error(`[LUXOR QUEUE] Mutation ${mutation.id} failed after ${MAX_RETRIES} retries:`, error);
       }
     }
   }
@@ -286,24 +286,24 @@ export function initResilience(): void {
 
   window.addEventListener("online", () => {
     isOnline = true;
-    console.log("[LEXOR RESILIENCE] Back online — processing offline queue...");
+    console.log("[LUXOR RESILIENCE] Back online — processing offline queue...");
     processOfflineQueue().then(({ processed, failed }) => {
-      if (processed > 0) console.log(`[LEXOR RESILIENCE] Synced ${processed} queued mutations`);
-      if (failed > 0) console.warn(`[LEXOR RESILIENCE] ${failed} mutations failed after retries`);
+      if (processed > 0) console.log(`[LUXOR RESILIENCE] Synced ${processed} queued mutations`);
+      if (failed > 0) console.warn(`[LUXOR RESILIENCE] ${failed} mutations failed after retries`);
     });
   });
 
   window.addEventListener("offline", () => {
     isOnline = false;
-    console.log("[LEXOR RESILIENCE] Gone offline — mutations will be queued");
+    console.log("[LUXOR RESILIENCE] Gone offline — mutations will be queued");
   });
 
   // Register service worker
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("/sw.js").then((reg) => {
-      console.log("[LEXOR RESILIENCE] Service worker registered:", reg.scope);
+      console.log("[LUXOR RESILIENCE] Service worker registered:", reg.scope);
     }).catch((err) => {
-      console.warn("[LEXOR RESILIENCE] Service worker registration failed:", err);
+      console.warn("[LUXOR RESILIENCE] Service worker registration failed:", err);
     });
   }
 }

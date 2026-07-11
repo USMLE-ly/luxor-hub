@@ -1,8 +1,8 @@
-# LEXOR® — Personal Style OS
+# LUXOR® — Personal Style OS
 > AI fashion stylist and virtual wardrobe platform at https://luxor.ly
 
-## What is LEXOR®?
-LEXOR® is an AI-powered fashion platform that helps users manage their wardrobe, get daily outfit recommendations, and track fashion trends. Users photograph their closet, and the AI learns their style, body type, and preferences to deliver personalized outfits every morning.
+## What is LUXOR®?
+LUXOR® is an AI-powered fashion platform that helps users manage their wardrobe, get daily outfit recommendations, and track fashion trends. Users photograph their closet, and the AI learns their style, body type, and preferences to deliver personalized outfits every morning.
 
 ## Core Features
 - **AI Outfit Analyzer**: Upload outfit photos for instant style scoring, color analysis, and improvement tips.
