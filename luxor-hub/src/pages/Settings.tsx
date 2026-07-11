@@ -65,7 +65,7 @@ const Settings = () => {
               <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="bg-secondary border-glass-border mt-1" />
             </div>
             <Button onClick={handleSave} disabled={saving} className="gold-gradient text-primary-foreground font-sans">
-              <Save className="h-4 w-4 mr-2" /> Save Changes
+              <FloppyDisk className="h-4 w-4 mr-2" /> Save Changes
             </Button>
           </div>
         </motion.div>

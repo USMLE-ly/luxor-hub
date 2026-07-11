@@ -1260,7 +1260,7 @@ const Closet = () => {
                 <div className="flex gap-2">
                   <Button size="sm" variant="outline" onClick={() => setShowSaveDialog(true)}
                     className="rounded-full text-xs px-4 flex-1">
-                    <Save className="w-3.5 h-3.5 mr-1.5" /> Save Outfit
+                    <FloppyDisk className="w-3.5 h-3.5 mr-1.5" /> Save Outfit
                   </Button>
                   <Button size="sm" onClick={() => setShowCalendar(true)}
                     className="rounded-full text-xs px-4 flex-1 bg-primary text-primary-foreground">
@@ -1290,7 +1290,7 @@ const Closet = () => {
                         Cancel
                       </Button>
                       <Button size="sm" className="flex-1 rounded-lg text-xs" onClick={saveOutfit} disabled={savingOutfit || !outfitName.trim()}>
-                        {savingOutfit ? <Spinner className="w-3.5 h-3.5 animate-spin mr-1" /> : <Save className="w-3.5 h-3.5 mr-1" />}
+                        {savingOutfit ? <Spinner className="w-3.5 h-3.5 animate-spin mr-1" /> : <FloppyDisk className="w-3.5 h-3.5 mr-1" />}
                         Save
                       </Button>
                     </div>

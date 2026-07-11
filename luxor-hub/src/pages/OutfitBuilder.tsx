@@ -312,7 +312,7 @@ const OutfitBuilder = () => {
                 </>
               )}
               <Button onClick={saveOutfit} disabled={saving || canvasItems.length === 0} className="gold-gradient text-primary-foreground font-sans text-sm">
-                <Save className="h-4 w-4 mr-1" /> Save Outfit
+                <FloppyDisk className="h-4 w-4 mr-1" /> Save Outfit
               </Button>
             </div>
 
