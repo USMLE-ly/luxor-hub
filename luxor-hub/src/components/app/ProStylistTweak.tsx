@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
-import {Sparkle, Spinner, Warning, ArrowsLeftRight, Eye, ArrowsClockwise, ImageIcon} from "@phosphor-icons/react";
+import {Sparkle, Spinner, Warning, ArrowsLeftRight, Eye, ArrowsClockwise, FileImage} from "@phosphor-icons/react";
 import { toast } from "sonner";
 
 interface ProStylistTweakProps {
@@ -114,7 +114,7 @@ export function ProStylistTweak({ imagePreview, imageUrl }: ProStylistTweakProps
                   </Button>
                 ) : (
                   <div className="flex flex-col items-center gap-3 text-muted-foreground">
-                    <ImageIcon className="w-12 h-12" />
+                    <FileImage className="w-12 h-12" />
                     <p className="text-sm">Upload an outfit photo in the Analyze tab first</p>
                   </div>
                 )}

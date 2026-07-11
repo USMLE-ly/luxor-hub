@@ -8,9 +8,9 @@
  * - Stale-while-revalidate for pages
  */
 
-const CACHE_NAME = "lexor-v1";
-const STATIC_CACHE = "lexor-static-v1";
-const DYNAMIC_CACHE = "lexor-dynamic-v1";
+const CACHE_NAME = "luxor-v1";
+const STATIC_CACHE = "luxor-static-v1";
+const DYNAMIC_CACHE = "luxor-dynamic-v1";
 
 // Assets to pre-cache on install
 const PRECACHE_ASSETS = [

@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import {Plus, X, Spinner, Camera, ImageIcon, File} from "@phosphor-icons/react";
+import {Plus, X, Spinner, Camera, FileImage, File} from "@phosphor-icons/react";
 import { toast } from "sonner";
 
 interface CreateLookDialogProps {
@@ -209,7 +209,7 @@ export const CreateLookDialog = ({ open, onOpenChange, onCreated }: CreateLookDi
           </div>
 
           <Button onClick={handleSave} disabled={saving || uploading} className="w-full gold-gradient text-primary-foreground font-sans">
-            {(saving || uploading) ? <Spinner className="h-4 w-4 animate-spin mr-2" /> : <ImageIcon className="h-4 w-4 mr-2" />}
+            {(saving || uploading) ? <Spinner className="h-4 w-4 animate-spin mr-2" /> : <FileImage className="h-4 w-4 mr-2" />}
             Create Look
           </Button>
         </div>
