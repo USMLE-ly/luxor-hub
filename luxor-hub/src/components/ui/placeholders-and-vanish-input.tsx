@@ -190,6 +190,7 @@ export function PlaceholdersAndVanishInput({
         ref={canvasRef}
       />
       <input
+        autoComplete="off"
         onChange={(e) => {
           if (!animating) {
             setValue(e.target.value);

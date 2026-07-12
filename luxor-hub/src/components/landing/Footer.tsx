@@ -79,6 +79,7 @@ const Footer = () => {
             <form onSubmit={handleSubscribe} className="flex gap-2">
               <div className="relative flex-1">
                 <input
+                  autoComplete="off"
                   id="newsletter-email"
                   name="email"
                   type="email"

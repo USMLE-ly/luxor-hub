@@ -236,6 +236,7 @@ const HeightStep = ({ answers, onSelect }: { answers: Record<string, string[]>; 
             <label htmlFor="height-feet" className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-2 block text-center">Feet</label>
             <div className="relative rounded-xl bg-secondary/50 border border-border/40 focus-within:border-primary/40 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
               <input
+                autoComplete="off"
                 id="height-feet"
                 name="height-feet"
                 type="number"
@@ -254,6 +255,7 @@ const HeightStep = ({ answers, onSelect }: { answers: Record<string, string[]>; 
             <label htmlFor="height-inches" className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-2 block text-center">Inches</label>
             <div className="relative rounded-xl bg-secondary/50 border border-border/40 focus-within:border-primary/40 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
               <input
+                autoComplete="off"
                 id="height-inches"
                 name="height-inches"
                 type="number"
@@ -274,6 +276,7 @@ const HeightStep = ({ answers, onSelect }: { answers: Record<string, string[]>; 
           <label htmlFor="height-cm" className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-2 block text-center">Centimeters</label>
           <div className="relative rounded-xl bg-secondary/50 border border-border/40 focus-within:border-primary/40 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
             <input
+              autoComplete="off"
               id="height-cm"
               name="height-cm"
               type="number"

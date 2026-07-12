@@ -178,6 +178,7 @@ export default function SupportWidget() {
                   </div>
                   <div><label className="text-xs font-medium text-muted-foreground">Title</label>
                     <input id="support-title" name="title" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Brief summary" className="w-full mt-1 p-2 rounded-lg bg-background border border-border/30 text-sm text-foreground placeholder:text-muted-foreground/50" />
+ autoComplete="off"
                   </div>
                   <div><label className="text-xs font-medium text-muted-foreground">Description</label>
                     <textarea id="support-description" name="description" value={newDescription} onChange={(e) => setNewDescription(e.target.value)} placeholder="What happened?" rows={3} className="w-full mt-1 p-2 rounded-lg bg-background border border-border/30 text-sm text-foreground placeholder:text-muted-foreground/50 resize-none" />
@@ -235,6 +236,7 @@ export default function SupportWidget() {
               <div className="p-3 border-t border-border/20">
                 <div className="flex gap-2">
                   <input id="support-message" name="message" value={newMessage} onChange={(e) => setNewMessage(e.target.value)} onKeyDown={(e) => e.key === "Enter" && sendMessage()} placeholder="Ask AI for help..." className="flex-1 p-2 rounded-lg bg-background border border-border/30 text-sm text-foreground placeholder:text-muted-foreground/50" />
+ autoComplete="off"
                   <button onClick={sendMessage} disabled={!newMessage.trim() || isTyping} className="p-2 rounded-lg bg-gold text-background hover:bg-gold/90 disabled:opacity-50"><PaperPlaneTilt className="w-4 h-4" /></button>
                 </div>
               </div>

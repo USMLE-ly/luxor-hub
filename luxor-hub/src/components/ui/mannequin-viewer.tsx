@@ -472,6 +472,48 @@ function LoadingFallback() {
   );
 }
 
+
+// ── Debug Overlay (shows Zustand store state in the DOM) ──
+function ClothingDebugOverlay() {
+  const catalogItems = useWardrobeStore((s) => s.catalogItems);
+  const selected = useWardrobeStore((s) => s.selected);
+
+  const activeCount = Object.values(selected).filter(Boolean).length;
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: 8,
+        left: 8,
+        zIndex: 999,
+        background: "rgba(0,0,0,0.85)",
+        color: "#0f0",
+        padding: "8px 12px",
+        borderRadius: 8,
+        fontSize: 11,
+        fontFamily: "monospace",
+        maxWidth: 280,
+        pointerEvents: "none",
+      }}
+    >
+      <div style={{ color: "#fff", fontWeight: "bold", marginBottom: 4 }}>
+        Clothing Debug
+      </div>
+      <div>Items in store: {catalogItems.length}</div>
+      <div>Active (selected): {activeCount}</div>
+      {catalogItems.map((item) => (
+        <div key={item.id} style={{ marginTop: 4, color: item.src ? "#0f0" : "#f00" }}>
+          {item.name}: {item.src ? `src=${item.src.substring(0, 40)}...` : "src=EMPTY"}
+        </div>
+      ))}
+      {catalogItems.length === 0 && (
+        <div style={{ color: "#ff0" }}>No clothing uploaded yet</div>
+      )}
+    </div>
+  );
+}
+
 // ── Main Export ─────────────────────────────────────────────
 export function MannequinViewer({ className }: { className?: string }) {
   const gender = useWardrobeStore((s) => s.gender);
@@ -481,6 +523,7 @@ export function MannequinViewer({ className }: { className?: string }) {
 
   return (
     <div className={`w-full h-full relative ${className || ""}`}>
+      <ClothingDebugOverlay />
       <MannequinErrorBoundary gender={gender}>
         <Suspense fallback={<LoadingFallback />}>
           <Canvas shadows camera={{ position: [0, 1.1, 3.2], fov: 32 }}>

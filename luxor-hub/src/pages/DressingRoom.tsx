@@ -3,6 +3,8 @@ import { MannequinViewer } from "@/components/ui/mannequin-viewer";
 import {
   useWardrobeStore,
   useWardrobeHydrated,
+  persistClothingToIDB,
+  restoreClothingFromIDB,
   type Category,
 } from "@/store/useWardrobeStore";
 import { cn } from "@/lib/utils";
@@ -49,25 +51,37 @@ function MannequinWardrobeSection() {
   const addCustomClothing = useWardrobeStore((s) => s.addCustomClothing);
   const hydrated = useWardrobeHydrated();
 
+  // On mount, restore blob URLs from IndexedDB (for clothing uploaded
+  // in a previous session that survived page reload)
+  useEffect(() => {
+    if (hydrated) {
+      restoreClothingFromIDB();
+    }
+  }, [hydrated]);
+
   const handleUpload = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) return;
 
-      // Read as base64 data URL — persists in localStorage via Zustand
-      // (blob: URLs expire on page reload; data: URLs survive serialization)
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        const dataUrl = evt.target?.result as string;
-        if (!dataUrl) return;
-        addCustomClothing({
-          id: crypto.randomUUID(),
-          name: file.name.replace(".glb", ""),
-          src: dataUrl,
-          category: "top",
-        });
-      };
-      reader.readAsDataURL(file);
+      // Create blob URL for immediate rendering in this session
+      const blobUrl = URL.createObjectURL(file);
+      const itemId = crypto.randomUUID();
+
+      // Store metadata in Zustand (sync, immediate)
+      addCustomClothing({
+        id: itemId,
+        name: file.name.replace(".glb", ""),
+        src: blobUrl,
+        category: "top",
+      });
+
+      // Persist binary to IndexedDB (async, for page reload)
+      persistClothingToIDB(itemId, file).catch((err) =>
+        console.error("[UPLOAD] Failed to persist to IndexedDB:", err)
+      );
+
+      toast.success(`Uploaded ${file.name.replace(".glb", "")}`);
       e.target.value = "";
     },
     [addCustomClothing]

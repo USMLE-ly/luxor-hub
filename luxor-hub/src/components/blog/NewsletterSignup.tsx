@@ -69,6 +69,7 @@ const NewsletterSignup = () => {
       </p>
       <form onSubmit={handleSubmit} className="flex gap-2">
         <input
+          autoComplete="off"
           type="email"
           value={email}
           onChange={(e) => { setEmail(e.target.value); setStatus("idle"); }}
