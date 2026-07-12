@@ -14,7 +14,8 @@ import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { haptic } from "@/lib/haptics";
 import {Plus, MagnifyingGlass, TShirt, SlidersHorizontal, TrashSimple, UploadSimple, X, Spinner, Sparkle, CheckCircle, Camera, CaretRight, Sliders, Pulse, Eye, User, StackSimple, CalendarDots, Image, FloppyDisk, FolderOpen, Heart, Receipt, File, Upload} from "@phosphor-icons/react";
-import Mannequin3D, { type ClothingItem as MannequinClothingItem, type BodyDNA, type PosePreset } from "@/components/app/Mannequin3D";
+import { MannequinViewer } from "@/components/ui/mannequin-viewer";
+import { type ClothingItem as MannequinClothingItem, type BodyDNA, type PosePreset } from "@/components/app/Mannequin3D";
 import { SLOT_MAP, DRESS_REPLACES, type GarmentFit } from "@/components/app/GarmentGeometry";
 import type { FabricType } from "@/components/app/FabricMaterials";
 import { WardrobeIntelligence } from "@/components/app/WardrobeIntelligence";
@@ -1185,16 +1186,7 @@ const Closet = () => {
             {/* 3D Scene */}
             <div className="relative bg-gradient-to-b from-secondary/10 to-background" style={{ height: "55vh", minHeight: "400px" }}>
               <div className="w-full h-full" style={{ minHeight: "300px" }}>
-                <Mannequin3D
-                  gender={gender}
-                  clothing={mannequinClothing}
-                  dna={dna}
-                  pose={pose}
-                  tracingImageUrl={tracingUrl}
-                  tracingOpacity={tracingOpacity}
-                  showMeasurements={showMeasurements}
-                  className="w-full h-full"
-                />
+                <MannequinViewer className="w-full h-full" />
               </div>
 
               {/* Gender toggle */}
