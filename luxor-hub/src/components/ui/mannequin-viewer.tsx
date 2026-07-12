@@ -286,7 +286,10 @@ function ClothingInner({
 
     if (isSkinned) {
       rootGroup.add(cloned);
-    } else if (hipsBone) {
+    } else {
+      // Add to rootGroup (same space as the mannequin mesh) for predictable positioning
+      rootGroup.add(cloned);
+
       // Use the geometry's own bounding box for local-space sizing
       let localSize = new THREE.Vector3(0.3, 0.4, 0.15);
       cloned.traverse((child) => {
@@ -314,18 +317,17 @@ function ClothingInner({
         if (s > 0.1 && s < 15) cloned.scale.setScalar(s);
       }
 
-      // Position relative to hipsBone using category offsets
-      // The hips are roughly at 50% of mannequin height
-      const hipsY = mannequinHeight * 0.5;
+      // Position in WORLD space (rootGroup is at the same level as the mannequin)
+      // Mannequin feet are at y=0, head at y=mannequinHeight
       if (category === "top") {
-        // Shirt: center at chest level (~75% height)
-        cloned.position.set(0, mannequinHeight * 0.25, 0);
+        // Shirt: center at ~75% of mannequin height (chest)
+        cloned.position.set(0, mannequinHeight * 0.72, 0);
       } else if (category === "bottom") {
-        // Pants: center at thigh level (~30% height from ground = -20% from hips)
-        cloned.position.set(0, -mannequinHeight * 0.20, 0);
+        // Pants: center at ~35% of mannequin height (thighs)
+        cloned.position.set(0, mannequinHeight * 0.32, 0);
       } else {
-        // Accessories: at hips
-        cloned.position.set(0, 0, 0);
+        // Accessories: at ~50% (hips)
+        cloned.position.set(0, mannequinHeight * 0.50, 0);
       }
 
       // Fabric material for untextured meshes
