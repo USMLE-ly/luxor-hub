@@ -312,7 +312,8 @@ const Closet = () => {
                 const id = `supabase-${zustandCat}-${(item.name || "").replace(/\s+/g, "-").toLowerCase()}`;
                 addCustomClothing({
                   id, name: item.name || "Unknown",
-                  src: item.imageUrl || "", category: zustandCat,
+                  src: "",
+                  category: zustandCat,
                   color: item.color, fit: item.fit, fabric: item.fabric,
                   imageUrl: item.imageUrl,
                 });
@@ -403,7 +404,8 @@ const Closet = () => {
       const id = `outfit-${zustandCat}-${(item.name || "").replace(/\s+/g, "-").toLowerCase()}-${Date.now()}`;
       addCustomClothing({
         id, name: item.name || "Unknown",
-        src: item.imageUrl || "", category: zustandCat,
+        src: "",
+        category: zustandCat,
         color: item.color, fit: item.fit, fabric: item.fabric,
         imageUrl: item.imageUrl,
       });
@@ -699,10 +701,12 @@ const Closet = () => {
       : "accessory") as Category;
     const itemId = `closet-${zustandCat}-${item.name.replace(/\s+/g, "-").toLowerCase()}`;
 
+    // photo_url is an image (jpg/png) — not a 3D model
+    // 3D clothing requires a .glb file; leave src empty for image-only items
     addCustomClothing({
       id: itemId,
       name: item.name || item.category,
-      src: item.photo_url || "",
+      src: "",
       category: zustandCat,
       color: item.color || "navy",
       fit: "regular",
@@ -737,7 +741,7 @@ const Closet = () => {
     addCustomClothing({
       id: itemId,
       name: pendingItem.name || pendingItem.category,
-      src: pendingItem.photo_url || "",
+      src: "",
       category: zustandCat,
       color: pendingItem.color || "navy",
       fit: selectedFit,

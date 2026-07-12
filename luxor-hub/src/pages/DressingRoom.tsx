@@ -64,6 +64,15 @@ function MannequinWardrobeSection() {
       const file = e.target.files?.[0];
       if (!file) return;
 
+      // Validate: only accept .glb or .gltf files
+      const validExts = [".glb", ".gltf"];
+      const ext = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
+      if (!validExts.includes(ext)) {
+        toast.error(`Invalid file type "${ext}". Please upload a .glb 3D model file.`);
+        e.target.value = "";
+        return;
+      }
+
       // Create blob URL for immediate rendering in this session
       const blobUrl = URL.createObjectURL(file);
       const itemId = crypto.randomUUID();
@@ -71,7 +80,7 @@ function MannequinWardrobeSection() {
       // Store metadata in Zustand (sync, immediate)
       addCustomClothing({
         id: itemId,
-        name: file.name.replace(".glb", ""),
+        name: file.name.replace(/\.(glb|gltf)$/i, ""),
         src: blobUrl,
         category: "top",
       });

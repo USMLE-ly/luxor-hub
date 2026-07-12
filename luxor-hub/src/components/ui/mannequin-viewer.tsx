@@ -6,9 +6,8 @@ import React, {
   useEffect,
   useMemo,
   Suspense,
-  useCallback,
 } from "react";
-import { Canvas, useFrame, useLoader, useThree } from "@react-three/fiber";
+import { Canvas, useFrame, useLoader } from "@react-three/fiber";
 import { ContactShadows, OrbitControls } from "@react-three/drei";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import * as THREE from "three";
@@ -16,7 +15,6 @@ import {
   useWardrobeStore,
   useWardrobeHydrated,
   type Category,
-  type ClothingItem,
 } from "@/store/useWardrobeStore";
 
 // ── Mannequin Context ──────────────────────────────────────
@@ -34,7 +32,6 @@ const MannequinContext = createContext<MannequinCtx>({
   mannequinHeight: 1.8,
 });
 
-// ── Resolve Hips Bone ──────────────────────────────────────
 function resolveHipsBone(skeleton: THREE.Skeleton): THREE.Bone {
   const targets = ["hips", "mixamorig:hips", "root", "pelvis"];
   for (const bone of skeleton.bones) {
@@ -44,7 +41,6 @@ function resolveHipsBone(skeleton: THREE.Skeleton): THREE.Bone {
   return skeleton.bones[0];
 }
 
-// ── Matte White Material ───────────────────────────────────
 const MATTE_WHITE = new THREE.MeshStandardMaterial({
   color: "#f2f2f2",
   roughness: 0.45,
@@ -57,6 +53,25 @@ function applyMatteWhite(object: THREE.Object3D) {
       (child as THREE.Mesh).material = MATTE_WHITE;
     }
   });
+}
+
+// ── Validate if a src string is a loadable 3D model ──
+function isValidModelSrc(src: string | null | undefined): boolean {
+  if (!src || src.length < 5) return false;
+  // Reject data:image URLs (user uploaded an image, not a 3D model)
+  if (src.startsWith("data:image")) return false;
+  // Reject blob URLs that are images
+  if (src.startsWith("blob:") && !src.includes("model")) {
+    // Blob URLs don't carry extension info — trust them (created by our upload)
+    return true;
+  }
+  // Accept file paths ending in .glb or .gltf
+  if (src.match(/\.(glb|gltf)(\?|$)/i)) return true;
+  // Accept blob: URLs (created by our upload handler)
+  if (src.startsWith("blob:")) return true;
+  // Accept data:application URLs (base64 GLB)
+  if (src.startsWith("data:application")) return true;
+  return false;
 }
 
 // ── Mannequin Model ────────────────────────────────────────
@@ -104,10 +119,7 @@ function MannequinModel() {
         skeleton = (child as THREE.SkinnedMesh).skeleton;
       }
     });
-
-    if (skeleton) {
-      skeleton.pose();
-    }
+    if (skeleton) skeleton.pose();
 
     const bbox = new THREE.Box3();
     cloned.traverse((child) => {
@@ -136,8 +148,7 @@ function MannequinModel() {
     const mannequinHeight = size.y || 1.8;
 
     console.log(
-      `[MANNEQUIN] Loaded: height=${mannequinHeight.toFixed(2)}, ` +
-      `bones=${skeleton?.bones?.length ?? 0}, hipsBone=${hipsBone?.name ?? "none"}`
+      `[MANNEQUIN] Loaded: height=${mannequinHeight.toFixed(2)}, bones=${skeleton?.bones?.length ?? 0}`
     );
 
     setCtx({ rootGroup: group.current, skeleton, hipsBone, mannequinHeight });
@@ -148,9 +159,7 @@ function MannequinModel() {
           const mesh = child as THREE.Mesh;
           if (mesh.geometry) mesh.geometry.dispose();
           const mat = mesh.material as THREE.Material;
-          if (mat && mat !== MATTE_WHITE && typeof mat.dispose === "function") {
-            mat.dispose();
-          }
+          if (mat && mat !== MATTE_WHITE && typeof mat.dispose === "function") mat.dispose();
         }
       });
       group.current?.remove(cloned);
@@ -164,7 +173,7 @@ function MannequinModel() {
   );
 }
 
-// ── Clothing Slot (router) ──
+// ── Clothing Slot (router with strict validation) ──
 function ClothingSlot({
   category,
   itemId,
@@ -178,11 +187,11 @@ function ClothingSlot({
     [catalogItems, itemId]
   );
 
-  if (!item?.src || item.src.length < 5) {
+  // Strict validation: reject images, empty strings, and invalid paths
+  if (!item?.src || !isValidModelSrc(item.src)) {
     if (item) {
-      console.error(
-        `[CLOTHING] Cannot load item "${item.name}" because src is empty/missing. ` +
-        `Item id: ${item.id}, category: ${item.category}`
+      console.warn(
+        `[CLOTHING] Skipping "${item.name}": src is not a valid 3D model (${item.src?.substring(0, 40) || "empty"})`
       );
     }
     return null;
@@ -212,6 +221,12 @@ function ClothingInner({
   const clonedRef = useRef<THREE.Object3D | null>(null);
   const boxHelperRef = useRef<THREE.BoxHelper | null>(null);
 
+  // Last-resort guard: if src somehow passed validation but is still an image, bail
+  if (src.startsWith("data:image")) {
+    console.error(`[CLOTHING] CRITICAL: Image data passed to GLTFLoader for ${itemKey}. Blocking.`);
+    return null;
+  }
+
   const gltf = useLoader(GLTFLoader, src);
 
   useEffect(() => {
@@ -222,7 +237,7 @@ function ClothingInner({
 
     console.log(`[CLOTHING] Processing ${itemKey}: ${gltf.scene.children.length} children`);
 
-    // ── STRICT CLEANUP of previous clothing for this slot ──
+    // Cleanup previous
     if (clonedRef.current) {
       clonedRef.current.traverse((child) => {
         if ((child as THREE.Mesh).isMesh) {
@@ -232,9 +247,7 @@ function ClothingInner({
           if (mat && typeof mat.dispose === "function") mat.dispose();
         }
       });
-      if (clonedRef.current.parent) {
-        clonedRef.current.parent.remove(clonedRef.current);
-      }
+      clonedRef.current.parent?.remove(clonedRef.current);
       clonedRef.current = null;
     }
     if (boxHelperRef.current) {
@@ -245,8 +258,6 @@ function ClothingInner({
 
     const cloned = gltf.scene.clone(true);
     clonedRef.current = cloned;
-
-    // Mark as clothing for later cleanup
     cloned.userData.isClothing = true;
     cloned.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
@@ -262,23 +273,17 @@ function ClothingInner({
           const mesh = child as THREE.SkinnedMesh;
           if (mesh.skeleton?.bones) {
             const clothBoneNames = new Set(
-              mesh.skeleton.bones.map((b) =>
-                b.name.toLowerCase().replace("mixamorig:", "")
-              )
+              mesh.skeleton.bones.map((b) => b.name.toLowerCase().replace("mixamorig:", ""))
             );
             const mannequinBoneNames = new Set(
-              skeleton.bones.map((b) =>
-                b.name.toLowerCase().replace("mixamorig:", "")
-              )
+              skeleton.bones.map((b) => b.name.toLowerCase().replace("mixamorig:", ""))
             );
             let overlap = 0;
             for (const bn of clothBoneNames) {
               if (mannequinBoneNames.has(bn)) overlap++;
             }
-            const ratio =
-              clothBoneNames.size > 0 ? overlap / clothBoneNames.size : 0;
+            const ratio = clothBoneNames.size > 0 ? overlap / clothBoneNames.size : 0;
             if (ratio >= 0.6) {
-              console.log(`[CLOTHING] Skinned path (${ratio.toFixed(2)} overlap)`);
               mesh.skeleton = skeleton;
               mesh.bind(skeleton);
               isSkinned = true;
@@ -302,21 +307,13 @@ function ClothingInner({
       box.getCenter(center);
       box.getSize(size);
 
-      const isDegenerate =
-        isNaN(size.x) || isNaN(size.y) || isNaN(size.z) ||
+      const isDegenerate = isNaN(size.x) || isNaN(size.y) || isNaN(size.z) ||
         size.x < 0.001 || size.y < 0.001 || size.z < 0.001;
 
       if (isDegenerate) {
-        console.error(
-          `[CLOTHING] ERROR: Degenerate geometry for ${itemKey}. ` +
-          `size=[${size.x}, ${size.y}, ${size.z}]`
-        );
+        console.error(`[CLOTHING] Degenerate geometry for ${itemKey}: [${size.x}, ${size.y}, ${size.z}]`);
         size.set(0.3, 0.3, 0.3);
         center.set(0, 0.15, 0);
-      } else {
-        console.log(
-          `[CLOTHING] Static fit: size=[${size.x.toFixed(3)}, ${size.y.toFixed(3)}, ${size.z.toFixed(3)}]`
-        );
       }
 
       cloned.position.x -= center.x;
@@ -325,16 +322,11 @@ function ClothingInner({
 
       const torsoHeight = mannequinHeight * 0.35;
       if (!isDegenerate && size.y > 0.001) {
-        const targetHeight =
-          category === "top"
-            ? torsoHeight
-            : category === "bottom"
-              ? mannequinHeight * 0.45
-              : torsoHeight * 0.5;
-
+        const targetHeight = category === "top" ? torsoHeight
+          : category === "bottom" ? mannequinHeight * 0.45
+          : torsoHeight * 0.5;
         const scaleFactor = targetHeight / size.y;
         if (scaleFactor > 0.1 && scaleFactor < 10) {
-          console.log(`[CLOTHING] Scaling ${itemKey} by ${scaleFactor.toFixed(3)}x`);
           cloned.scale.setScalar(scaleFactor);
         }
       }
@@ -356,7 +348,7 @@ function ClothingInner({
       });
     }
 
-    // BoxHelper for visual debugging
+    // BoxHelper
     try {
       const sceneRoot = rootGroup.parent;
       if (sceneRoot) {
@@ -365,9 +357,7 @@ function ClothingInner({
         boxHelperRef.current = helper;
         helper.update();
       }
-    } catch (err) {
-      console.warn(`[CLOTHING] BoxHelper failed:`, err);
-    }
+    } catch {}
 
     return () => {
       if (boxHelperRef.current) {
@@ -384,9 +374,7 @@ function ClothingInner({
             if (mat && typeof mat.dispose === "function") mat.dispose();
           }
         });
-        if (clonedRef.current.parent) {
-          clonedRef.current.parent.remove(clonedRef.current);
-        }
+        clonedRef.current.parent?.remove(clonedRef.current);
         clonedRef.current = null;
       }
     };
@@ -395,32 +383,19 @@ function ClothingInner({
   return null;
 }
 
-// ── Clothing Layer ──────────────────────────────────────────
+// ── Clothing Layer ──
 function ClothingLayer() {
   const selected = useWardrobeStore((s) => s.selected);
   const catalogItems = useWardrobeStore((s) => s.catalogItems);
 
   const activeSlots = useMemo(() => {
-    const slots = Object.entries(selected)
+    return Object.entries(selected)
       .filter(([, v]) => v !== null)
       .map(([cat, id]) => {
         const item = catalogItems.find((i) => i.id === id);
-        return {
-          category: cat as Category,
-          itemId: id as string,
-          src: item?.src ?? null,
-          name: item?.name ?? "unknown",
-        };
+        return { category: cat as Category, itemId: id as string, src: item?.src ?? null };
       })
       .filter((s) => s.src !== null && s.src.length > 5);
-
-    if (slots.length > 0) {
-      console.log(
-        `[CLOTHING LAYER] ${slots.length} active:`,
-        slots.map((s) => `${s.category}=${s.name}`)
-      );
-    }
-    return slots;
   }, [selected, catalogItems]);
 
   return (
@@ -429,61 +404,6 @@ function ClothingLayer() {
         <ClothingSlot key={`${category}-${itemId}`} category={category} itemId={itemId} />
       ))}
     </>
-  );
-}
-
-// ── Debug Overlay (raw Zustand state) ──────────────────────
-function ClothingDebugOverlay() {
-  const [tick, setTick] = useState(0);
-  useEffect(() => {
-    const id = setInterval(() => setTick((t) => t + 1), 500);
-    return () => clearInterval(id);
-  }, []);
-  // Force re-render — always shows latest
-  void tick;
-  const store = useWardrobeStore.getState();
-  const hydrated = useWardrobeHydrated();
-
-  return (
-    <div
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        zIndex: 999,
-        background: "rgba(0,0,0,0.85)",
-        color: "#00ff00",
-        padding: "10px",
-        fontSize: "12px",
-        whiteSpace: "pre-wrap",
-        textAlign: "left",
-        fontFamily: "monospace",
-        maxWidth: 400,
-        maxHeight: 300,
-        overflow: "auto",
-        pointerEvents: "none",
-      }}
-    >
-      <p style={{ margin: "0 0 4px", fontWeight: "bold" }}>
-        Store Items ({store.catalogItems.length}):
-      </p>
-      <pre style={{ margin: "0 0 8px" }}>
-        {JSON.stringify(
-          store.catalogItems.map((i: any) => ({
-            name: i.name,
-            src: i.src?.substring(0, 40) || "(empty)",
-            src_len: i.src?.length ?? 0,
-          })),
-          null,
-          2
-        )}
-      </pre>
-      <p style={{ margin: "0 0 4px", fontWeight: "bold" }}>Active Selection:</p>
-      <pre style={{ margin: "0 0 8px" }}>
-        {JSON.stringify(store.selected, null, 2)}
-      </pre>
-      <p style={{ margin: 0 }}><strong>Hydrated:</strong> {hydrated ? "YES" : "NO"}</p>
-    </div>
   );
 }
 
@@ -502,7 +422,7 @@ class MannequinErrorBoundary extends React.Component<
         <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-30">
           <div className="text-center p-6 max-w-sm">
             <p className="text-sm font-sans text-muted-foreground mb-2">3D viewer error</p>
-            <p className="text-xs font-sans text-muted-foreground/60 mb-2">{this.state.errorMsg}</p>
+            <p className="text-xs font-sans text-muted-foreground/60">{this.state.errorMsg}</p>
           </div>
         </div>
       );
@@ -511,7 +431,6 @@ class MannequinErrorBoundary extends React.Component<
   }
 }
 
-// ── Loading Fallback ──
 function LoadingFallback() {
   return (
     <div className="absolute inset-0 flex items-center justify-center">
@@ -528,7 +447,6 @@ export function MannequinViewer({ className }: { className?: string }) {
 
   return (
     <div className={`w-full h-full relative ${className || ""}`}>
-      <ClothingDebugOverlay />
       <MannequinErrorBoundary gender={useWardrobeStore.getState().gender}>
         <Suspense fallback={<LoadingFallback />}>
           <Canvas shadows camera={{ position: [0, 1.1, 3.2], fov: 32 }}>
@@ -557,7 +475,6 @@ export function MannequinViewer({ className }: { className?: string }) {
   );
 }
 
-// Preload
 if (typeof window !== "undefined") {
   useLoader.preload(GLTFLoader, "/models/mannequin_m.glb");
   useLoader.preload(GLTFLoader, "/models/mannequin_f.glb");
