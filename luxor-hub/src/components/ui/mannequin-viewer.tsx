@@ -95,9 +95,10 @@ function MannequinModel() {
 
     setCtx({ rootGroup: group.current, skeleton, hipsBone });
 
-    // Play idle
+    // Do NOT play animations — the Godot mannequin has game animations
+    // with translation channels that cause jumping/movement.
+    // Show the static rest pose instead (T-pose or natural standing).
     Object.values(actions).forEach((a) => a?.stop());
-    if (actions["idle"]) actions["idle"].play();
 
     return () => {
       // Cleanup cloned scene
@@ -134,11 +135,12 @@ function ClothingSlot({ category, itemId }: { category: Category; itemId: string
   const item = catalogItems.find((i) => i.id === itemId);
   const { rootGroup, skeleton, hipsBone } = useContext(MannequinContext);
 
+  // Only load if item exists and has a valid src
   const gltf = useLoader(GLTFLoader, item?.src || "");
   const clonedRef = useRef<THREE.Object3D | null>(null);
 
   useEffect(() => {
-    if (!item || !rootGroup || !gltf) return;
+    if (!item || !item.src || !rootGroup || !gltf || !gltf.scene) return;
 
     const cloned = gltf.scene.clone(true);
     clonedRef.current = cloned;
@@ -327,6 +329,8 @@ export function MannequinViewer({ className }: { className?: string }) {
   );
 }
 
-// Preload both gender models
-useGLTF.preload("/models/mannequin_m.glb");
-useGLTF.preload("/models/mannequin_f.glb");
+// Preload both gender models on module load
+if (typeof window !== "undefined") {
+  useGLTF.preload("/models/mannequin_m.glb");
+  useGLTF.preload("/models/mannequin_f.glb");
+}
