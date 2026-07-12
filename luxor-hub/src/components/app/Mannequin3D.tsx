@@ -225,21 +225,21 @@ function SmoothBody({
     [0.045, -0.13], [0.001, -0.14],
   ], 20), []);
 
-  // Upper Arm: refined, elegant taper
+  // Upper Arm: proportional, not elongated
   const upperArmGeo = useMemo(() => {
-    const r = isMale ? 0.06 : 0.05;
+    const r = isMale ? 0.055 : 0.045;
     return createBodyProfile([
-      [0.001, 0.22], [r * 0.65, 0.20], [r, 0.14], [r * 0.95, 0.06],
-      [r * 0.85, -0.04], [r * 0.7, -0.14], [r * 0.5, -0.20], [0.001, -0.22],
+      [0.001, 0.18], [r * 0.7, 0.16], [r, 0.10], [r * 0.95, 0.04],
+      [r * 0.85, -0.04], [r * 0.7, -0.12], [r * 0.55, -0.16], [0.001, -0.18],
     ], 16);
   }, [isMale]);
 
-  // Forearm: slender, with subtle muscle definition
+  // Forearm: proportional
   const forearmGeo = useMemo(() => {
-    const r = isMale ? 0.048 : 0.038;
+    const r = isMale ? 0.042 : 0.034;
     return createBodyProfile([
-      [0.001, 0.20], [r * 0.7, 0.18], [r * 0.95, 0.12], [r, 0.05],
-      [r * 0.85, -0.04], [r * 0.65, -0.12], [r * 0.4, -0.18], [0.001, -0.20],
+      [0.001, 0.16], [r * 0.7, 0.14], [r * 0.95, 0.08], [r, 0.02],
+      [r * 0.85, -0.04], [r * 0.65, -0.10], [r * 0.4, -0.14], [0.001, -0.16],
     ], 16);
   }, [isMale]);
 
@@ -344,19 +344,19 @@ function SmoothBody({
             <mesh material={darkAccentMat} position={[0, 0, 0]}>
               <sphereGeometry args={[0.03, 12, 12]} />
             </mesh>
-            <mesh geometry={upperArmGeo} material={warmMapleMat} position={[0, -0.22, 0]} castShadow />
+            <mesh geometry={upperArmGeo} material={ivoryPolymerMat} position={[0, -0.22, 0]} castShadow />
             {/* Elbow capsule */}
-            <mesh material={darkAccentMat} position={[0, -0.44, 0]}>
-              <sphereGeometry args={[0.025, 10, 10]} />
+            <mesh material={darkAccentMat} position={[0, -0.36, 0]}>
+              <sphereGeometry args={[0.02, 10, 10]} />
             </mesh>
-            <group position={[0, -0.44, 0]}>
+            <group position={[0, -0.36, 0]}>
               <group rotation={poseData.leftForearm as [number, number, number]}>
-                <mesh geometry={forearmGeo} material={warmMapleMat} position={[0, -0.18, 0]} castShadow />
+                <mesh geometry={forearmGeo} material={ivoryPolymerMat} position={[0, -0.14, 0]} castShadow />
                 {/* Wrist capsule */}
-                <mesh material={darkAccentMat} position={[0, -0.36, 0]}>
-                  <sphereGeometry args={[0.02, 8, 8]} />
+                <mesh material={darkAccentMat} position={[0, -0.30, 0]}>
+                  <sphereGeometry args={[0.018, 8, 8]} />
                 </mesh>
-                <mesh geometry={handGeo} material={ivoryPolymerMat} position={[0, -0.44, 0]} castShadow />
+                <mesh geometry={handGeo} material={ivoryPolymerMat} position={[0, -0.36, 0]} castShadow />
               </group>
             </group>
           </group>
@@ -369,19 +369,19 @@ function SmoothBody({
             <mesh material={darkAccentMat} position={[0, 0, 0]}>
               <sphereGeometry args={[0.03, 12, 12]} />
             </mesh>
-            <mesh geometry={upperArmGeo} material={warmMapleMat} position={[0, -0.22, 0]} castShadow />
+            <mesh geometry={upperArmGeo} material={ivoryPolymerMat} position={[0, -0.22, 0]} castShadow />
             {/* Elbow capsule */}
-            <mesh material={darkAccentMat} position={[0, -0.44, 0]}>
-              <sphereGeometry args={[0.025, 10, 10]} />
+            <mesh material={darkAccentMat} position={[0, -0.36, 0]}>
+              <sphereGeometry args={[0.02, 10, 10]} />
             </mesh>
-            <group position={[0, -0.44, 0]}>
+            <group position={[0, -0.36, 0]}>
               <group rotation={poseData.rightForearm as [number, number, number]}>
-                <mesh geometry={forearmGeo} material={warmMapleMat} position={[0, -0.18, 0]} castShadow />
+                <mesh geometry={forearmGeo} material={ivoryPolymerMat} position={[0, -0.14, 0]} castShadow />
                 {/* Wrist capsule */}
-                <mesh material={darkAccentMat} position={[0, -0.36, 0]}>
-                  <sphereGeometry args={[0.02, 8, 8]} />
+                <mesh material={darkAccentMat} position={[0, -0.30, 0]}>
+                  <sphereGeometry args={[0.018, 8, 8]} />
                 </mesh>
-                <mesh geometry={handGeo} material={ivoryPolymerMat} position={[0, -0.44, 0]} castShadow />
+                <mesh geometry={handGeo} material={ivoryPolymerMat} position={[0, -0.36, 0]} castShadow />
               </group>
             </group>
           </group>
