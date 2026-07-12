@@ -51,10 +51,10 @@ function MannequinWardrobeSection() {
   const addCustomClothing = useWardrobeStore((s) => s.addCustomClothing);
   const hydrated = useWardrobeHydrated();
 
-  // On mount, restore blob URLs from IndexedDB (for clothing uploaded
-  // in a previous session that survived page reload)
+  // On mount, restore 3D asset mappings and blob URLs
   useEffect(() => {
     if (hydrated) {
+      restoreAssetMappings();
       restoreClothingFromIDB();
     }
   }, [hydrated]);

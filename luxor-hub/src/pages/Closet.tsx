@@ -16,6 +16,7 @@ import { haptic } from "@/lib/haptics";
 import {Plus, MagnifyingGlass, TShirt, SlidersHorizontal, TrashSimple, UploadSimple, X, Spinner, Sparkle, CheckCircle, Camera, CaretRight, Sliders, Pulse, Eye, User, StackSimple, CalendarDots, Image, FloppyDisk, FolderOpen, Heart, Receipt, File, Upload} from "@phosphor-icons/react";
 import { MannequinViewer } from "@/components/ui/mannequin-viewer";
 import { useWardrobeStore, useWardrobeHydrated, type Category, type ClothingItem as WardrobeClothingItem } from "@/store/useWardrobeStore";
+import { resolve3DAsset, uploadAndAssignGLB, restoreAssetMappings } from "@/lib/assetResolver";
 import { type ClothingItem as MannequinClothingItem, type BodyDNA, type PosePreset } from "@/components/app/Mannequin3D";
 import { SLOT_MAP, DRESS_REPLACES, type GarmentFit } from "@/components/app/GarmentGeometry";
 import type { FabricType } from "@/components/app/FabricMaterials";
@@ -177,6 +178,27 @@ const Closet = () => {
   const cleanBgRequested = useRef<Set<string>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const receiptInputRef = useRef<HTMLInputElement>(null);
+  const glbAssignRef = useRef<HTMLInputElement>(null);
+  const [assigningItemId, setAssigningItemId] = useState<string | null>(null);
+
+  const handleAssignGLB = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !assigningItemId) return;
+    const validExts = [".glb", ".gltf"];
+    const ext = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
+    if (!validExts.includes(ext)) {
+      toast.error(`Invalid file type "${ext}". Please upload a .glb 3D model.`);
+      e.target.value = "";
+      return;
+    }
+    const item = currentlyWearing.find((c) => c.id === assigningItemId);
+    if (!item) return;
+    const glbUrl = await uploadAndAssignGLB(item.name, file);
+    useWardrobeStore.getState().updateClothingSrc(assigningItemId, glbUrl);
+    toast.success(`3D model assigned to "${item.name}"`);
+    setAssigningItemId(null);
+    e.target.value = "";
+  };
 
   const fetchItems = useCallback(async (): Promise<ClothingItem[]> => {
     if (!user) { console.log("[FETCH-DEBUG] No user — returning []"); return []; }
@@ -693,7 +715,7 @@ const Closet = () => {
     setActiveTab("mannequin");
   };
 
-  // Quick try-on: instantly add to mannequin via Zustand
+  // Quick try-on: resolve 3D asset or prompt upload
   const quickTryOn = (item: ClothingItem) => {
     const mappedCat = getMannequinCategory(item.category, item.name);
     const zustandCat: Category = (["tops", "outerwear", "top"].includes(mappedCat) ? "top"
@@ -701,12 +723,13 @@ const Closet = () => {
       : "accessory") as Category;
     const itemId = `closet-${zustandCat}-${item.name.replace(/\s+/g, "-").toLowerCase()}`;
 
-    // photo_url is an image (jpg/png) — not a 3D model
-    // 3D clothing requires a .glb file; leave src empty for image-only items
+    // Try to find a 3D GLB for this item
+    const glbPath = resolve3DAsset(item.name, item.category);
+
     addCustomClothing({
       id: itemId,
       name: item.name || item.category,
-      src: "",
+      src: glbPath || "",
       category: zustandCat,
       color: item.color || "navy",
       fit: "regular",
@@ -715,7 +738,12 @@ const Closet = () => {
     });
     toggleClothing(zustandCat, itemId);
     setActiveTab("mannequin");
-    toast.success(`👗 ${item.name} added to mannequin`);
+
+    if (glbPath) {
+      toast.success(`👗 ${item.name} added to mannequin with 3D model`);
+    } else {
+      toast.info(`👗 ${item.name} added — assign a .glb file for 3D view`);
+    }
   };
 
   // Same-category replacement logic
@@ -738,10 +766,12 @@ const Closet = () => {
       : "accessory") as Category;
     const itemId = `closet-${zustandCat}-${pendingItem.name.replace(/\s+/g, "-").toLowerCase()}`;
 
+    const glbPath = resolve3DAsset(pendingItem.name, pendingItem.category);
+
     addCustomClothing({
       id: itemId,
       name: pendingItem.name || pendingItem.category,
-      src: "",
+      src: glbPath || "",
       category: zustandCat,
       color: pendingItem.color || "navy",
       fit: selectedFit,
@@ -752,7 +782,12 @@ const Closet = () => {
     setPendingItem(null);
     setSelectedFit("regular");
     setSelectedFabric("default");
-    toast.success(`Added ${pendingItem.name} to mannequin`);
+
+    if (glbPath) {
+      toast.success(`Added ${pendingItem.name} to mannequin with 3D model`);
+    } else {
+      toast.info(`Added ${pendingItem.name} — assign a .glb file for 3D view`);
+    }
   };
 
   const removeFromMannequin = (item: WardrobeClothingItem) => {
@@ -1304,6 +1339,12 @@ const Closet = () => {
                           <p className="text-xs font-sans font-medium text-foreground truncate">{item.name}</p>
                           <p className="text-[10px] font-sans text-muted-foreground capitalize">{item.category} • {item.fit || "regular"}</p>
                         </div>
+                        {!item.src && (
+                          <button onClick={() => { setAssigningItemId(item.id); glbAssignRef.current?.click(); }}
+                            className="text-[10px] font-sans text-primary hover:text-primary/80 whitespace-nowrap">
+                            + 3D
+                          </button>
+                        )}
                         <button onClick={() => removeFromMannequin(item)}
                           className="w-6 h-6 rounded-full flex items-center justify-center opacity-60 hover:opacity-100 hover:bg-destructive/15 transition-all">
                           <X className="w-3.5 h-3.5 text-destructive" />
@@ -1313,6 +1354,9 @@ const Closet = () => {
                   })}
                 </div>
               )}
+
+              {/* Hidden GLB file input for "Assign 3D Model" */}
+              <input ref={glbAssignRef} type="file" accept=".glb,.gltf" className="hidden" onChange={handleAssignGLB} />
 
               {/* Actions: Save & Schedule */}
               {currentlyWearing.length > 0 && (
