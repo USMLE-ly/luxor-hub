@@ -287,47 +287,46 @@ function ClothingInner({
     if (isSkinned) {
       rootGroup.add(cloned);
     } else if (hipsBone) {
-      hipsBone.add(cloned);
-      cloned.position.set(0, 0, 0);
-      cloned.rotation.set(0, 0, 0);
-      cloned.scale.set(1, 1, 1);
-
-      const box = new THREE.Box3().setFromObject(cloned);
-      const center = new THREE.Vector3();
-      const size = new THREE.Vector3();
-      box.getCenter(center);
-      box.getSize(size);
-
-      const isDegenerate = isNaN(size.x) || isNaN(size.y) || isNaN(size.z) ||
-        size.x < 0.001 || size.y < 0.001 || size.z < 0.001;
-
-      if (isDegenerate) {
-        console.error(`[CLOTHING] Degenerate geometry for ${itemKey}: [${size.x}, ${size.y}, ${size.z}]`);
-        size.set(0.3, 0.3, 0.3);
-        center.set(0, 0.15, 0);
-      }
-
-      cloned.position.x -= center.x;
-      cloned.position.z -= center.z;
-      cloned.position.y -= center.y;
-
-      const torsoHeight = mannequinHeight * 0.35;
-      if (!isDegenerate && size.y > 0.001) {
-        const targetHeight = category === "top" ? torsoHeight
-          : category === "bottom" ? mannequinHeight * 0.45
-          : torsoHeight * 0.5;
-        const scaleFactor = targetHeight / size.y;
-        if (scaleFactor > 0.1 && scaleFactor < 10) {
-          cloned.scale.setScalar(scaleFactor);
+      // Use the geometry's own bounding box for local-space sizing
+      let localSize = new THREE.Vector3(0.3, 0.4, 0.15);
+      cloned.traverse((child) => {
+        const mesh = child as THREE.Mesh;
+        if (mesh.isMesh && mesh.geometry) {
+          mesh.geometry.computeBoundingBox();
+          if (mesh.geometry.boundingBox) {
+            const gb = mesh.geometry.boundingBox.clone();
+            gb.applyMatrix4(mesh.matrix);
+            const sz = new THREE.Vector3();
+            gb.getSize(sz);
+            localSize.x = Math.max(localSize.x, sz.x);
+            localSize.y = Math.max(localSize.y, sz.y);
+            localSize.z = Math.max(localSize.z, sz.z);
+          }
         }
+      });
+
+      // Scale to fit the mannequin
+      const targetH = category === "top" ? mannequinHeight * 0.35
+        : category === "bottom" ? mannequinHeight * 0.45
+        : mannequinHeight * 0.18;
+      if (localSize.y > 0.001) {
+        const s = targetH / localSize.y;
+        if (s > 0.1 && s < 15) cloned.scale.setScalar(s);
       }
 
-      // Category-based vertical offset AFTER scaling
-      // Tops sit at chest level, bottoms at thigh level, accessories at hips
-      const categoryYOffset = category === "top" ? mannequinHeight * 0.25
-        : category === "bottom" ? -mannequinHeight * 0.15
-        : 0;
-      cloned.position.y += categoryYOffset;
+      // Position relative to hipsBone using category offsets
+      // The hips are roughly at 50% of mannequin height
+      const hipsY = mannequinHeight * 0.5;
+      if (category === "top") {
+        // Shirt: center at chest level (~75% height)
+        cloned.position.set(0, mannequinHeight * 0.25, 0);
+      } else if (category === "bottom") {
+        // Pants: center at thigh level (~30% height from ground = -20% from hips)
+        cloned.position.set(0, -mannequinHeight * 0.20, 0);
+      } else {
+        // Accessories: at hips
+        cloned.position.set(0, 0, 0);
+      }
 
       // Fabric material for untextured meshes
       cloned.traverse((child) => {
@@ -342,8 +341,22 @@ function ClothingInner({
               sheen: 0.3, sheenColor: new THREE.Color("#ffffff"),
             });
           }
+          // Render clothing on top of mannequin to prevent Z-fighting
+          mesh.renderOrder = 1;
+          if (Array.isArray(mesh.material)) {
+            mesh.material.forEach((m) => { m.depthWrite = true; });
+          } else {
+            mesh.material.depthWrite = true;
+          }
         }
       });
+
+      // Temporary debug outline (green wireframe for 10 seconds)
+      try {
+        const debugBox = new THREE.BoxHelper(cloned, 0x00ff00);
+        rootGroup.add(debugBox);
+        setTimeout(() => { rootGroup.remove(debugBox); debugBox.dispose(); }, 10000);
+      } catch {}
     }
 
 
