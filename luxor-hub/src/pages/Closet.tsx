@@ -1406,25 +1406,29 @@ const Closet = () => {
                           <p className="text-xs font-sans font-medium text-foreground truncate">{item.name}</p>
                           <p className="text-[10px] font-sans text-muted-foreground capitalize">{item.category} • {item.fit || "regular"}</p>
                         </div>
-                        {!item.src && (
-                          <div className="flex gap-1 flex-wrap justify-end">
-                            <button onClick={() => handleGenerateDummy(item.id, item.category)}
-                              className="text-[10px] font-sans text-emerald-400 hover:text-emerald-300 whitespace-nowrap px-1.5 py-0.5 rounded bg-emerald-500/10"
-                              title="Generate a placeholder 3D shape">
-                              ✦ 3D
-                            </button>
-                            <button onClick={() => { setAssigningItemId(item.id); imageAssignRef.current?.click(); }}
-                              className="text-[10px] font-sans text-amber-400 hover:text-amber-300 whitespace-nowrap px-1.5 py-0.5 rounded bg-amber-500/10"
-                              title="Upload a photo — auto-maps image as 3D texture on garment shape">
-                              📸 Image
-                            </button>
-                            <button onClick={() => { setAssigningItemId(item.id); glbAssignRef.current?.click(); }}
-                              className="text-[10px] font-sans text-primary hover:text-primary/80 whitespace-nowrap"
-                              title="Upload a .glb 3D model file">
-                              + File
-                            </button>
-                          </div>
-                        )}
+                        <div className="flex gap-1 items-center">
+                          {item.src && item.src.length > 5 ? (
+                            <span className="text-[9px] font-sans text-emerald-400 px-1 py-0.5 rounded bg-emerald-500/10" title="3D model loaded">✓ 3D</span>
+                          ) : (
+                            <>
+                              <button onClick={() => handleGenerateDummy(item.id, item.category)}
+                                className="text-[10px] font-sans text-emerald-400 hover:text-emerald-300 whitespace-nowrap px-1.5 py-0.5 rounded bg-emerald-500/10"
+                                title="Generate a placeholder 3D shape">
+                                ✦ 3D
+                              </button>
+                              <button onClick={() => { setAssigningItemId(item.id); imageAssignRef.current?.click(); }}
+                                className="text-[10px] font-sans text-amber-400 hover:text-amber-300 whitespace-nowrap px-1.5 py-0.5 rounded bg-amber-500/10"
+                                title="Upload a photo — auto-maps image as 3D texture on garment shape">
+                                📸
+                              </button>
+                              <button onClick={() => { setAssigningItemId(item.id); glbAssignRef.current?.click(); }}
+                                className="text-[10px] font-sans text-primary hover:text-primary/80 whitespace-nowrap px-1.5 py-0.5 rounded bg-primary/10"
+                                title="Upload a .glb 3D model file">
+                                +GLB
+                              </button>
+                            </>
+                          )}
+                        </div>
                         <button onClick={() => removeFromMannequin(item)}
                           className="w-6 h-6 rounded-full flex items-center justify-center opacity-60 hover:opacity-100 hover:bg-destructive/15 transition-all">
                           <X className="w-3.5 h-3.5 text-destructive" />
