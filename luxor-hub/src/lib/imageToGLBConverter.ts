@@ -1,32 +1,25 @@
 /**
- * Image-to-GLB Converter — maps a 2D image onto a 3D clothing primitive.
+ * Image-to-GLB Converter — maps a 2D image onto 3D cylindrical garment shapes.
  *
- * Takes a JPG/PNG image file and category, generates a textured 3D mesh
- * exported as a GLB blob URL. The resulting shape is a recognizable garment
- * form (not just a flat plane) with the user's image as the fabric texture.
+ * Instead of flat BoxGeometry, this uses CylinderGeometry to create garments
+ * that visually wrap around the mannequin's volume. The user's uploaded image
+ * is mapped as a fabric texture around the curved surface.
  *
- * Limitations: This produces a texture-mapped primitive, not a true 3D scan.
- * For realistic folds and draping, use external AI models (CAPE, cloth2tex)
- * to generate a proper .glb and upload it manually.
+ * Categories:
+ *   top       → torso cylinder + two short sleeve cylinders + collar ring
+ *   bottom    → waistband ring + two leg cylinders
+ *   accessory → small sphere / box
  */
 import * as THREE from "three";
 
-/** Geometry dimensions per category (width × height × depth in meters) */
-const CATEGORY_GEOMETRY: Record<string, { width: number; height: number; depth: number }> = {
-  top:      { width: 0.38, height: 0.45, depth: 0.14 },
-  bottom:   { width: 0.30, height: 0.55, depth: 0.13 },
-  accessory:{ width: 0.12, height: 0.12, depth: 0.12 },
-  shoes:    { width: 0.10, height: 0.08, depth: 0.20 },
-};
+// ── Texture loader ─────────────────────────────────────────
 
-/**
- * Load an image File into a THREE.Texture.
- */
-function loadTextureFromFile(file: File): Promise<{ texture: THREE.Texture; url: string }> {
+function loadTextureFromFile(
+  file: File
+): Promise<{ texture: THREE.Texture; url: string }> {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file);
-    const loader = new THREE.TextureLoader();
-    loader.load(
+    new THREE.TextureLoader().load(
       url,
       (texture) => {
         texture.wrapS = THREE.RepeatWrapping;
@@ -43,94 +36,229 @@ function loadTextureFromFile(file: File): Promise<{ texture: THREE.Texture; url:
   });
 }
 
-/**
- * Apply subtle sine-wave vertex displacement to simulate fabric folds.
- */
-function applyFabricFolds(geometry: THREE.BufferGeometry, amplitude: number = 0.008) {
-  const positions = geometry.attributes.position;
-  if (!positions) return;
+// ── Fabric material from texture ───────────────────────────
 
-  for (let i = 0; i < positions.count; i++) {
-    const x = positions.getX(i);
-    const y = positions.getY(i);
-    const z = positions.getZ(i);
+function fabricMatFromTexture(
+  texture: THREE.Texture
+): THREE.MeshPhysicalMaterial {
+  return new THREE.MeshPhysicalMaterial({
+    map: texture.clone(),
+    roughness: 0.65,
+    metalness: 0.0,
+    clearcoat: 0.05,
+    clearcoatRoughness: 0.4,
+    sheen: 0.2,
+    sheenColor: new THREE.Color("#ffffff"),
+    side: THREE.DoubleSide,
+  });
+}
 
-    // Only displace the front face (z > 0) to simulate draping
-    if (z > 0) {
-      const foldX = Math.sin(x * 12 + y * 8) * amplitude;
-      const foldY = Math.sin(y * 10 + x * 6) * amplitude * 0.5;
-      positions.setZ(i, z + foldX + foldY);
+// ── Apply fabric fold displacement to a cylinder ───────────
+
+function applyFabricFolds(
+  geometry: THREE.BufferGeometry,
+  amplitude = 0.004
+) {
+  const pos = geometry.attributes.position;
+  if (!pos) return;
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i);
+    const y = pos.getY(i);
+    const z = pos.getZ(i);
+    const r = Math.sqrt(x * x + z * z);
+    if (r > 0.01) {
+      const angle = Math.atan2(z, x);
+      const fold = Math.sin(y * 14 + angle * 6) * amplitude;
+      pos.setX(i, x + (x / r) * fold);
+      pos.setZ(i, z + (z / r) * fold);
     }
   }
-  positions.needsUpdate = true;
+  pos.needsUpdate = true;
   geometry.computeVertexNormals();
 }
 
-/**
- * Generate a 3D clothing GLB from a 2D image.
- *
- * @param file - The image file (JPG/PNG)
- * @param category - One of 'top', 'bottom', 'accessory'
- * @returns A blob: URL pointing to the generated .glb
- */
+// ── Build a T-shirt / Polo from a texture ──────────────────
+
+function buildTop(texture: THREE.Texture): THREE.Group {
+  const group = new THREE.Group();
+  const mat = fabricMatFromTexture(texture);
+
+  // Main torso — open-ended tapered cylinder
+  const torsoGeo = new THREE.CylinderGeometry(
+    0.17, 0.14, 0.42, 20, 1, true
+  );
+  applyFabricFolds(torsoGeo, 0.005);
+  const torso = new THREE.Mesh(torsoGeo, mat);
+  torso.name = "torso";
+  group.add(torso);
+
+  // Shoulders ring
+  const shoulderRing = new THREE.Mesh(
+    new THREE.TorusGeometry(0.17, 0.015, 8, 20),
+    mat.clone()
+  );
+  shoulderRing.position.y = 0.21;
+  shoulderRing.rotation.x = Math.PI / 2;
+  shoulderRing.name = "shoulderRing";
+  group.add(shoulderRing);
+
+  // Left sleeve
+  const leftSleeve = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.055, 0.065, 0.14, 10),
+    mat.clone()
+  );
+  leftSleeve.position.set(-0.22, 0.14, 0);
+  leftSleeve.rotation.z = -0.45;
+  leftSleeve.name = "leftSleeve";
+  group.add(leftSleeve);
+
+  // Right sleeve
+  const rightSleeve = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.055, 0.065, 0.14, 10),
+    mat.clone()
+  );
+  rightSleeve.position.set(0.22, 0.14, 0);
+  rightSleeve.rotation.z = 0.45;
+  rightSleeve.name = "rightSleeve";
+  group.add(rightSleeve);
+
+  // Collar ring
+  const collarMat = new THREE.MeshStandardMaterial({
+    color: mat.color.clone().multiplyScalar(0.85),
+    roughness: 0.55,
+    metalness: 0.0,
+  });
+  const collar = new THREE.Mesh(
+    new THREE.TorusGeometry(0.07, 0.012, 8, 16),
+    collarMat
+  );
+  collar.position.y = 0.22;
+  collar.rotation.x = Math.PI / 2;
+  collar.name = "collar";
+  group.add(collar);
+
+  // Bottom hem ring
+  const hem = new THREE.Mesh(
+    new THREE.TorusGeometry(0.14, 0.01, 8, 20),
+    mat.clone()
+  );
+  hem.position.y = -0.21;
+  hem.rotation.x = Math.PI / 2;
+  hem.name = "hem";
+  group.add(hem);
+
+  return group;
+}
+
+// ── Build pants from a texture ─────────────────────────────
+
+function buildBottom(texture: THREE.Texture): THREE.Group {
+  const group = new THREE.Group();
+  const mat = fabricMatFromTexture(texture);
+
+  // Waistband ring
+  const waist = new THREE.Mesh(
+    new THREE.TorusGeometry(0.15, 0.018, 8, 20),
+    mat.clone()
+  );
+  waist.position.y = 0.26;
+  waist.rotation.x = Math.PI / 2;
+  waist.name = "waistband";
+  group.add(waist);
+
+  // Left leg
+  const leftGeo = new THREE.CylinderGeometry(0.055, 0.05, 0.46, 12);
+  applyFabricFolds(leftGeo, 0.003);
+  const leftLeg = new THREE.Mesh(leftGeo, mat.clone());
+  leftLeg.position.set(-0.08, -0.02, 0);
+  leftLeg.name = "leftLeg";
+  group.add(leftLeg);
+
+  // Right leg
+  const rightGeo = new THREE.CylinderGeometry(0.055, 0.05, 0.46, 12);
+  applyFabricFolds(rightGeo, 0.003);
+  const rightLeg = new THREE.Mesh(rightGeo, mat.clone());
+  rightLeg.position.set(0.08, -0.02, 0);
+  rightLeg.name = "rightLeg";
+  group.add(rightLeg);
+
+  // Crotch bridge
+  const bridge = new THREE.Mesh(
+    new THREE.BoxGeometry(0.06, 0.10, 0.10),
+    mat.clone()
+  );
+  bridge.position.set(0, 0.20, 0);
+  bridge.name = "crotchBridge";
+  group.add(bridge);
+
+  return group;
+}
+
+// ── Build accessory from a texture ─────────────────────────
+
+function buildAccessory(texture: THREE.Texture): THREE.Group {
+  const group = new THREE.Group();
+  const mat = fabricMatFromTexture(texture);
+
+  // Simple sphere for bags / hats
+  const sphere = new THREE.Mesh(
+    new THREE.SphereGeometry(0.08, 12, 10),
+    mat
+  );
+  sphere.name = "accessorySphere";
+  group.add(sphere);
+
+  return group;
+}
+
+// ── Main export ────────────────────────────────────────────
+
 export async function generateClothingFromImage(
   file: File,
   category: string
 ): Promise<string> {
-  const { GLTFExporter } = await import("three/examples/jsm/exporters/GLTFExporter.js");
+  const { GLTFExporter } = await import(
+    "three/examples/jsm/exporters/GLTFExporter.js"
+  );
 
-  // 1. Load the image as a texture
+  // 1. Load image as texture
   const { texture, url: textureUrl } = await loadTextureFromFile(file);
 
-  // 2. Get category-appropriate dimensions
-  const dims = CATEGORY_GEOMETRY[category] || CATEGORY_GEOMETRY.top;
+  // 2. Build category-specific garment group
+  let garment: THREE.Group;
+  switch (category) {
+    case "bottom":
+      garment = buildBottom(texture);
+      break;
+    case "accessory":
+      garment = buildAccessory(texture);
+      break;
+    default:
+      garment = buildTop(texture);
+  }
+  garment.name = "imageClothing";
 
-  // 3. Create the 3D geometry — a box with slight thickness for fabric feel
-  const geometry = new THREE.BoxGeometry(dims.width, dims.height, dims.depth, 4, 4, 1);
-
-  // 4. Apply fabric fold displacement to the front vertices
-  applyFabricFolds(geometry, 0.006);
-
-  // 5. Create PBR material with the image as texture
-  const material = new THREE.MeshPhysicalMaterial({
-    map: texture,
-    roughness: 0.7,
-    metalness: 0.0,
-    clearcoat: 0.1,
-    clearcoatRoughness: 0.4,
-    sheen: 0.3,
-    sheenColor: new THREE.Color("#ffffff"),
-    side: THREE.DoubleSide,
-  });
-
-  // 6. Build the scene
+  // 3. Wrap in a scene and export
   const scene = new THREE.Scene();
-  const mesh = new THREE.Mesh(geometry, material);
-  mesh.name = "imageClothing";
-  scene.add(mesh);
+  scene.add(garment);
 
-  // 7. Export to GLB
   const exporter = new GLTFExporter();
   const glbBlob = await new Promise<Blob>((resolve, reject) => {
     exporter.parse(
       scene,
       (result) => {
-        const blob = new Blob([result as ArrayBuffer], {
-          type: "model/gltf-binary",
-        });
-        resolve(blob);
+        resolve(
+          new Blob([result as ArrayBuffer], { type: "model/gltf-binary" })
+        );
       },
       (error) => reject(error),
       { binary: true }
     );
   });
 
-  // 8. Clean up — revoke texture URL and dispose resources
+  // 4. Cleanup
   URL.revokeObjectURL(textureUrl);
-  geometry.dispose();
-  material.dispose();
   texture.dispose();
 
-  // 9. Return as blob URL
   return URL.createObjectURL(glbBlob);
 }

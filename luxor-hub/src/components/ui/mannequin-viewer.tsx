@@ -311,21 +311,31 @@ function ClothingInner({
         }
       });
 
-      // Scale to fit the mannequin
+      // Scale to fit the mannequin (cylindrical shapes are ~0.42m tall for tops, ~0.46m for bottoms)
+      const isShoe2 = itemKey.toLowerCase().includes("shoe") ||
+                      itemKey.toLowerCase().includes("sneaker") ||
+                      itemKey.toLowerCase().includes("boot");
       const targetH = category === "top" ? mannequinHeight * 0.35
         : category === "bottom" ? mannequinHeight * 0.45
+        : isShoe2 ? mannequinHeight * 0.06
         : mannequinHeight * 0.18;
       if (localSize.y > 0.001) {
         const s = targetH / localSize.y;
         if (s > 0.1 && s < 15) cloned.scale.setScalar(s);
       }
 
-      // Position in WORLD space (rootGroup is at the same level as the mannequin)
-      // Mannequin feet are at y=0, head at y=mannequinHeight
+      // Detect shoe/accessory sub-type from itemKey for positioning
+      const isShoe = itemKey.toLowerCase().includes("shoe") ||
+                     itemKey.toLowerCase().includes("sneaker") ||
+                     itemKey.toLowerCase().includes("boot") ||
+                     itemKey.toLowerCase().includes("footwear");
+
       if (category === "top") {
         cloned.position.set(0, mannequinHeight * 0.72, 0.06);
       } else if (category === "bottom") {
         cloned.position.set(0, mannequinHeight * 0.32, 0.04);
+      } else if (isShoe) {
+        cloned.position.set(0, 0.04, 0.04);
       } else {
         cloned.position.set(0, mannequinHeight * 0.50, 0.05);
       }
@@ -333,24 +343,35 @@ function ClothingInner({
       cloned.traverse((child) => {
         if ((child as THREE.Mesh).isMesh) {
           const mesh = child as THREE.Mesh;
-          const mat = mesh.material as THREE.MeshStandardMaterial;
-          mesh.material = new THREE.MeshPhysicalMaterial({
-            color: mat?.color || new THREE.Color("#4a90d9"),
-            roughness: 0.65, metalness: 0.0,
-            clearcoat: 0.1, clearcoatRoughness: 0.4,
-            sheen: 0.3, sheenColor: new THREE.Color("#ffffff"),
-            side: THREE.DoubleSide,
-          });
+          const mat = mesh.material as any;
+          const hasTexture = mat?.map || mat?.normalMap || mat?.aoMap || mat?.emissiveMap;
+
+          if (!hasTexture) {
+            // No texture — replace with PBR fabric material (dummy GLBs)
+            mesh.material = new THREE.MeshPhysicalMaterial({
+              color: mat?.color || new THREE.Color("#4a90d9"),
+              roughness: 0.65, metalness: 0.0,
+              clearcoat: 0.05, clearcoatRoughness: 0.4,
+              sheen: 0.2, sheenColor: new THREE.Color("#ffffff"),
+              side: THREE.DoubleSide,
+            });
+          } else {
+            // Has texture (image-to-GLB) — preserve it, enhance with PBR
+            mat.side = THREE.DoubleSide;
+            mat.roughness = Math.max(mat.roughness || 0, 0.55);
+            mat.metalness = Math.min(mat.metalness || 0, 0.05);
+          }
           mesh.renderOrder = 1;
-          mesh.material.depthWrite = false;
+          const m = mesh.material as any;
+          if (Array.isArray(m)) {
+            m.forEach((x: any) => { x.depthWrite = false; });
+          } else {
+            m.depthWrite = false;
+          }
         }
       });
 
-      try {
-        const debugBox = new THREE.BoxHelper(cloned, 0xff00ff);
-        rootGroup.add(debugBox);
-        setTimeout(() => { rootGroup.remove(debugBox); debugBox.dispose(); }, 30000);
-      } catch {}
+      // Debug outline removed — clothing renders correctly now
       console.log(`[CLOTHING] ${itemKey} ADDED TO SCENE at pos=${JSON.stringify(cloned.position.toArray())} scale=${JSON.stringify(cloned.scale.toArray())} rootChildren=${rootGroup.children.length}`);
     }
 
