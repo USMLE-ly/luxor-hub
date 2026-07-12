@@ -53,13 +53,21 @@ function MannequinWardrobeSection() {
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) return;
-      const blobUrl = URL.createObjectURL(file);
-      addCustomClothing({
-        id: crypto.randomUUID(),
-        name: file.name.replace(".glb", ""),
-        src: blobUrl,
-        category: "top",
-      });
+
+      // Read as base64 data URL — persists in localStorage via Zustand
+      // (blob: URLs expire on page reload; data: URLs survive serialization)
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const dataUrl = evt.target?.result as string;
+        if (!dataUrl) return;
+        addCustomClothing({
+          id: crypto.randomUUID(),
+          name: file.name.replace(".glb", ""),
+          src: dataUrl,
+          category: "top",
+        });
+      };
+      reader.readAsDataURL(file);
       e.target.value = "";
     },
     [addCustomClothing]
@@ -137,9 +145,9 @@ function MannequinWardrobeSection() {
 
           {/* Upload Button */}
           <div className="mt-4 pt-3 border-t border-border">
-            <label className="flex flex-col items-center justify-center w-full py-3 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/40 transition-colors">
+            <label htmlFor="glbUpload" className="flex flex-col items-center justify-center w-full py-3 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/40 transition-colors">
               <span className="text-xs font-sans text-muted-foreground">Upload .glb clothing</span>
-              <input type="file" accept=".glb" onChange={handleUpload} className="hidden" />
+              <input id="glbUpload" type="file" accept=".glb" onChange={handleUpload} className="hidden" />
             </label>
             <p className="text-[9px] text-muted-foreground/40 mt-1.5 text-center">
               Session-only. For permanent items, add to public/models/clothing/.
@@ -587,7 +595,7 @@ export default function DressingRoomPage() {
                 </h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="text-sm text-white/60 block mb-1.5">Event Title</label>
+                    <label htmlFor="calendarEventTitle" className="text-sm text-white/60 block mb-1.5">Event Title</label>
                     <input
                       type="text"
                       id="calendarEventTitle"
@@ -600,7 +608,7 @@ export default function DressingRoomPage() {
                     />
                   </div>
                   <div>
-                    <label className="text-sm text-white/60 block mb-1.5">Date</label>
+                    <label htmlFor="calendarDate" className="text-sm text-white/60 block mb-1.5">Date</label>
                     <input
                       type="date"
                       id="calendarDate"

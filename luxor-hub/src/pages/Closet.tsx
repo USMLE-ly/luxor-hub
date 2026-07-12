@@ -777,7 +777,7 @@ const Closet = () => {
                 {scanningReceipt ? <Spinner className="w-3 h-3 animate-spin" /> : <Receipt className="w-3 h-3" />}
                 Scan Receipt
               </button>
-              <input ref={receiptInputRef} type="file" accept="image/*" className="hidden" onChange={handleReceiptScan} />
+              <input id="receiptScan" ref={receiptInputRef} type="file" accept="image/*" className="hidden" onChange={handleReceiptScan} />
               <span className="text-xs font-sans font-semibold text-muted-foreground bg-secondary px-3 py-1 rounded-full">
                 {items.length} ITEMS
               </span>
@@ -887,10 +887,10 @@ const Closet = () => {
                           </button>
                         </div>
                       ) : (
-                        <label className="mt-2 flex flex-col items-center justify-center h-32 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/50 transition-colors">
+                        <label htmlFor="closetUpload" className="mt-2 flex flex-col items-center justify-center h-32 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/50 transition-colors">
                           <Upload className="h-6 w-6 text-muted-foreground mb-2" />
                           <span className="text-sm text-muted-foreground font-sans">Snap or upload</span>
-                          <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+                          <input id="closetUpload" type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
                         </label>
                       )}
                     </div>
@@ -1519,7 +1519,7 @@ const Closet = () => {
 
                   {activePanel === "trace" && (
                     <div className="p-4 space-y-4">
-                      <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleTraceUpload} />
+                      <input id="garmentTrace" ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleTraceUpload} />
                       <Button variant="outline" className="w-full rounded-xl" onClick={() => fileInputRef.current?.click()}>
                         <Image className="w-4 h-4 mr-2" />
                         {tracingUrl ? "Change Reference Image" : "Upload Reference Image"}

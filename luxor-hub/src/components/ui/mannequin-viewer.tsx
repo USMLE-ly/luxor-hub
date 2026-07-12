@@ -106,7 +106,6 @@ function MannequinModel() {
     });
 
     if (skeleton) {
-      // Recompute inverse bind matrices from the now-identity bone positions
       skeleton.pose();
     }
 
@@ -182,8 +181,8 @@ function ClothingSlot({
     [catalogItems, itemId]
   );
 
-  // Only render the inner loader when src is valid — this avoids
-  // useLoader being called with an empty/invalid URL
+  // Only render the inner loader when src is guaranteed valid — this avoids
+  // useGLTF being called with an empty/invalid URL (which crashes R3F)
   if (!item?.src) return null;
 
   return (
@@ -198,6 +197,7 @@ function ClothingSlot({
 // ── ClothingInner (hooks called unconditionally) ──────────
 // This component is only rendered when src is guaranteed valid,
 // so useGLTF is always called with a non-empty string.
+// Supports both file paths (/models/...) and data: URLs (base64 uploads).
 function ClothingInner({
   src,
   category,
@@ -210,8 +210,10 @@ function ClothingInner({
   const { rootGroup, skeleton, hipsBone, mannequinHeight } =
     useContext(MannequinContext);
   const clonedRef = useRef<THREE.Object3D | null>(null);
+  const boxHelperRef = useRef<THREE.BoxHelper | null>(null);
 
-  // useGLTF is always called unconditionally — valid React hook
+  // useGLTF is always called unconditionally — valid React hook.
+  // Supports both file paths and data: URLs (Three.js GLTFLoader handles both).
   const { scene: clothScene } = useGLTF(src);
 
   useEffect(() => {
@@ -222,7 +224,7 @@ function ClothingInner({
 
     console.log(
       `[CLOTHING] Processing ${itemKey}: ` +
-      `children=${clothScene.children.length}`
+      `children=${clothScene.children.length}, src=${src.substring(0, 60)}...`
     );
 
     // Remove previous clothing mesh if any
@@ -237,6 +239,13 @@ function ClothingInner({
       });
       clonedRef.current.parent?.remove(clonedRef.current);
       clonedRef.current = null;
+    }
+
+    // Remove previous box helper
+    if (boxHelperRef.current) {
+      boxHelperRef.current.parent?.remove(boxHelperRef.current);
+      boxHelperRef.current.geometry.dispose();
+      boxHelperRef.current = null;
     }
 
     const cloned = clothScene.clone(true);
@@ -296,17 +305,24 @@ function ClothingInner({
       box.getSize(size);
 
       // Guard against NaN/zero-size geometry
-      if (isNaN(size.x) || size.x < 0.001) {
-        console.warn(`[CLOTHING] Degenerate geometry for ${itemKey}`);
-        size.set(1, 1, 1);
-        center.set(0, 0, 0);
-      }
+      const isDegenerate =
+        isNaN(size.x) || isNaN(size.y) || isNaN(size.z) ||
+        size.x < 0.001 || size.y < 0.001 || size.z < 0.001;
 
-      console.log(
-        `[CLOTHING] Static fit: ` +
-        `size=[${size.x.toFixed(3)}, ${size.y.toFixed(3)}, ${size.z.toFixed(3)}], ` +
-        `center=[${center.x.toFixed(3)}, ${center.y.toFixed(3)}, ${center.z.toFixed(3)}]`
-      );
+      if (isDegenerate) {
+        console.error(
+          `[CLOTHING] ERROR: Degenerate geometry detected for ${itemKey}. ` +
+          `size=[${size.x}, ${size.y}, ${size.z}]. ` +
+          `The GLB file may be corrupted or contain only a single quad. ` +
+          `Refer to a 3D clothing configurator to generate a proper 3D draped GLB.`
+        );
+        size.set(0.3, 0.3, 0.3);
+        center.set(0, 0.15, 0);
+      } else {
+        console.log(
+          `[CLOTHING] Bounding box size: [${size.x.toFixed(3)}, ${size.y.toFixed(3)}, ${size.z.toFixed(3)}]`
+        );
+      }
 
       // Center X/Z on the hips pivot
       cloned.position.x -= center.x;
@@ -316,7 +332,7 @@ function ClothingInner({
 
       // Auto-scale to fit mannequin proportions
       const torsoHeight = mannequinHeight * 0.35;
-      if (size.y > 0.001) {
+      if (!isDegenerate && size.y > 0.001) {
         const targetHeight =
           category === "top"
             ? torsoHeight
@@ -327,7 +343,8 @@ function ClothingInner({
         const scaleFactor = targetHeight / size.y;
         if (scaleFactor > 0.1 && scaleFactor < 10) {
           console.log(
-            `[CLOTHING] Scaling ${itemKey} by ${scaleFactor.toFixed(3)}x`
+            `[CLOTHING] Scaling ${itemKey} by ${scaleFactor.toFixed(3)}x ` +
+            `(target=${targetHeight.toFixed(3)}, actual=${size.y.toFixed(3)})`
           );
           cloned.scale.setScalar(scaleFactor);
         }
@@ -353,7 +370,17 @@ function ClothingInner({
       });
     }
 
+    // Add BoxHelper for visual debugging — shows bounding box in the scene
+    const helper = new THREE.BoxHelper(cloned, 0x00ff00);
+    rootGroup.parent?.add(helper);
+    boxHelperRef.current = helper;
+
     return () => {
+      if (boxHelperRef.current) {
+        boxHelperRef.current.parent?.remove(boxHelperRef.current);
+        boxHelperRef.current.geometry.dispose();
+        boxHelperRef.current = null;
+      }
       if (clonedRef.current) {
         clonedRef.current.traverse((child) => {
           if ((child as THREE.Mesh).isMesh) {
