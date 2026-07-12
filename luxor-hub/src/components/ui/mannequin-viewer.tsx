@@ -7,8 +7,9 @@ import React, {
   useMemo,
   Suspense,
 } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { useGLTF, ContactShadows, OrbitControls } from "@react-three/drei";
+import { Canvas, useFrame, useLoader } from "@react-three/fiber";
+import { ContactShadows, OrbitControls } from "@react-three/drei";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import * as THREE from "three";
 import {
   useWardrobeStore,
@@ -60,7 +61,12 @@ function applyMatteWhite(object: THREE.Object3D) {
 function MannequinModel() {
   const group = useRef<THREE.Group>(null);
   const gender = useWardrobeStore((s) => s.gender);
-  const { scene } = useGLTF(
+
+  // Use useLoader directly with GLTFLoader — NO DRACO, NO Meshopt
+  // This is critical: useGLTF from drei enables DRACO/Meshopt by default,
+  // which can silently fail on blob URLs or simple GLB files.
+  const { scene } = useLoader(
+    GLTFLoader,
     `/models/mannequin_${gender === "male" ? "m" : "f"}.glb`
   );
 
@@ -85,8 +91,7 @@ function MannequinModel() {
     const cloned = scene.clone(true);
     applyMatteWhite(cloned);
 
-    // Force ALL bones to identity as a safety net (the GLB was pre-processed
-    // to have identity bone transforms, but this guarantees it at runtime)
+    // Force ALL bones to identity as a safety net
     cloned.traverse((child) => {
       if ((child as THREE.Bone).isBone) {
         child.position.set(0, 0, 0);
@@ -181,8 +186,8 @@ function ClothingSlot({
     [catalogItems, itemId]
   );
 
-  // Only render the inner loader when src is guaranteed valid — this avoids
-  // useGLTF being called with an empty/invalid URL (which crashes R3F)
+  // Only render the inner loader when src is guaranteed valid.
+  // This prevents useLoader being called with empty string (which crashes R3F).
   if (!item?.src) return null;
 
   return (
@@ -195,9 +200,6 @@ function ClothingSlot({
 }
 
 // ── ClothingInner (hooks called unconditionally) ──────────
-// This component is only rendered when src is guaranteed valid,
-// so useGLTF is always called with a non-empty string.
-// Supports both file paths (/models/...) and data: URLs (base64 uploads).
 function ClothingInner({
   src,
   category,
@@ -212,19 +214,31 @@ function ClothingInner({
   const clonedRef = useRef<THREE.Object3D | null>(null);
   const boxHelperRef = useRef<THREE.BoxHelper | null>(null);
 
-  // useGLTF is always called unconditionally — valid React hook.
-  // Supports both file paths and data: URLs (Three.js GLTFLoader handles both).
-  const { scene: clothScene } = useGLTF(src);
+  // Use useLoader directly with GLTFLoader — NO DRACO, NO Meshopt.
+  // This is the #1 fix for clothing not loading from blob URLs.
+  // useGLTF from drei enables DRACO decoder which tries to fetch
+  // from https://www.gstatic.com/ and can silently fail on blob URLs.
+  let gltf;
+  try {
+    gltf = useLoader(GLTFLoader, src);
+  } catch (err) {
+    console.error(`[CLOTHING] useLoader failed for ${itemKey}:`, err);
+    return null;
+  }
 
   useEffect(() => {
-    if (!clothScene || !rootGroup) {
-      console.warn(`[CLOTHING] No scene or rootGroup for ${itemKey}`);
+    if (!gltf?.scene || !rootGroup) {
+      console.warn(
+        `[CLOTHING] No scene or rootGroup for ${itemKey} ` +
+        `(scene=${!!gltf?.scene}, rootGroup=${!!rootGroup})`
+      );
       return;
     }
 
     console.log(
       `[CLOTHING] Processing ${itemKey}: ` +
-      `children=${clothScene.children.length}, src=${src.substring(0, 60)}...`
+      `children=${gltf.scene.children.length}, ` +
+      `src=${src.substring(0, 50)}...`
     );
 
     // Remove previous clothing mesh if any
@@ -248,7 +262,7 @@ function ClothingInner({
       boxHelperRef.current = null;
     }
 
-    const cloned = clothScene.clone(true);
+    const cloned = gltf.scene.clone(true);
     clonedRef.current = cloned;
 
     // ── Try skinned path (bone-compatible clothing) ──
@@ -290,6 +304,7 @@ function ClothingInner({
 
     if (isSkinned) {
       rootGroup.add(cloned);
+      console.log(`[CLOTHING] Added ${itemKey} via skinned path`);
     } else if (hipsBone) {
       // ── Static-fitted path ──
       hipsBone.add(cloned);
@@ -311,16 +326,15 @@ function ClothingInner({
 
       if (isDegenerate) {
         console.error(
-          `[CLOTHING] ERROR: Degenerate geometry detected for ${itemKey}. ` +
+          `[CLOTHING] ERROR: Degenerate geometry for ${itemKey}. ` +
           `size=[${size.x}, ${size.y}, ${size.z}]. ` +
-          `The GLB file may be corrupted or contain only a single quad. ` +
-          `Refer to a 3D clothing configurator to generate a proper 3D draped GLB.`
+          `The GLB file may be corrupted or contain only a single quad.`
         );
         size.set(0.3, 0.3, 0.3);
         center.set(0, 0.15, 0);
       } else {
         console.log(
-          `[CLOTHING] Bounding box size: [${size.x.toFixed(3)}, ${size.y.toFixed(3)}, ${size.z.toFixed(3)}]`
+          `[CLOTHING] Static fit: size=[${size.x.toFixed(3)}, ${size.y.toFixed(3)}, ${size.z.toFixed(3)}]`
         );
       }
 
@@ -343,8 +357,7 @@ function ClothingInner({
         const scaleFactor = targetHeight / size.y;
         if (scaleFactor > 0.1 && scaleFactor < 10) {
           console.log(
-            `[CLOTHING] Scaling ${itemKey} by ${scaleFactor.toFixed(3)}x ` +
-            `(target=${targetHeight.toFixed(3)}, actual=${size.y.toFixed(3)})`
+            `[CLOTHING] Scaling ${itemKey} by ${scaleFactor.toFixed(3)}x`
           );
           cloned.scale.setScalar(scaleFactor);
         }
@@ -368,12 +381,23 @@ function ClothingInner({
           }
         }
       });
+
+      console.log(`[CLOTHING] Added ${itemKey} via static-fitted path`);
+    } else {
+      console.error(`[CLOTHING] No hipsBone available for ${itemKey}`);
     }
 
-    // Add BoxHelper for visual debugging — shows bounding box in the scene
-    const helper = new THREE.BoxHelper(cloned, 0x00ff00);
-    rootGroup.parent?.add(helper);
-    boxHelperRef.current = helper;
+    // Add BoxHelper for visual debugging
+    try {
+      const helper = new THREE.BoxHelper(cloned, 0x00ff00);
+      // Add to the scene root, not just rootGroup
+      rootGroup.parent?.add(helper);
+      boxHelperRef.current = helper;
+      helper.update();
+      console.log(`[CLOTHING] BoxHelper added for ${itemKey}`);
+    } catch (err) {
+      console.warn(`[CLOTHING] BoxHelper failed:`, err);
+    }
 
     return () => {
       if (boxHelperRef.current) {
@@ -394,7 +418,7 @@ function ClothingInner({
         clonedRef.current = null;
       }
     };
-  }, [clothScene, rootGroup, hipsBone, skeleton, mannequinHeight, itemKey, category, src]);
+  }, [gltf, rootGroup, hipsBone, skeleton, mannequinHeight, itemKey, category, src]);
 
   return null;
 }
@@ -405,7 +429,7 @@ function ClothingLayer() {
   const catalogItems = useWardrobeStore((s) => s.catalogItems);
 
   const activeSlots = useMemo(() => {
-    return Object.entries(selected)
+    const slots = Object.entries(selected)
       .filter(([, v]) => v !== null)
       .map(([cat, id]) => {
         const item = catalogItems.find((i) => i.id === id);
@@ -415,7 +439,16 @@ function ClothingLayer() {
           src: item?.src ?? null,
         };
       })
-      .filter((s) => s.src !== null);
+      .filter((s) => s.src !== null && s.src.length > 0);
+
+    if (slots.length > 0) {
+      console.log(
+        `[CLOTHING LAYER] ${slots.length} active slots:`,
+        slots.map((s) => `${s.category}=${s.itemId} src=${s.src?.substring(0, 30)}`)
+      );
+    }
+
+    return slots;
   }, [selected, catalogItems]);
 
   return (
@@ -428,6 +461,51 @@ function ClothingLayer() {
         />
       ))}
     </>
+  );
+}
+
+// ── Debug Overlay ──────────────────────────────────────────
+function ClothingDebugOverlay() {
+  const catalogItems = useWardrobeStore((s) => s.catalogItems);
+  const selected = useWardrobeStore((s) => s.selected);
+  const activeCount = Object.values(selected).filter(Boolean).length;
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: 8,
+        left: 8,
+        zIndex: 999,
+        background: "rgba(0,0,0,0.85)",
+        color: "#0f0",
+        padding: "8px 12px",
+        borderRadius: 8,
+        fontSize: 11,
+        fontFamily: "monospace",
+        maxWidth: 300,
+        pointerEvents: "none",
+      }}
+    >
+      <div style={{ color: "#fff", fontWeight: "bold", marginBottom: 4 }}>
+        Clothing Debug
+      </div>
+      <div>Items: {catalogItems.length} | Active: {activeCount}</div>
+      {catalogItems.map((item) => (
+        <div
+          key={item.id}
+          style={{
+            marginTop: 3,
+            color: item.src && item.src.length > 5 ? "#0f0" : "#f00",
+          }}
+        >
+          {item.name}: {item.src ? `${item.src.substring(0, 35)}...` : "EMPTY"}
+        </div>
+      ))}
+      {catalogItems.length === 0 && (
+        <div style={{ color: "#ff0" }}>No items uploaded</div>
+      )}
+    </div>
   );
 }
 
@@ -468,48 +546,6 @@ function LoadingFallback() {
   return (
     <div className="absolute inset-0 flex items-center justify-center">
       <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-    </div>
-  );
-}
-
-
-// ── Debug Overlay (shows Zustand store state in the DOM) ──
-function ClothingDebugOverlay() {
-  const catalogItems = useWardrobeStore((s) => s.catalogItems);
-  const selected = useWardrobeStore((s) => s.selected);
-
-  const activeCount = Object.values(selected).filter(Boolean).length;
-
-  return (
-    <div
-      style={{
-        position: "absolute",
-        top: 8,
-        left: 8,
-        zIndex: 999,
-        background: "rgba(0,0,0,0.85)",
-        color: "#0f0",
-        padding: "8px 12px",
-        borderRadius: 8,
-        fontSize: 11,
-        fontFamily: "monospace",
-        maxWidth: 280,
-        pointerEvents: "none",
-      }}
-    >
-      <div style={{ color: "#fff", fontWeight: "bold", marginBottom: 4 }}>
-        Clothing Debug
-      </div>
-      <div>Items in store: {catalogItems.length}</div>
-      <div>Active (selected): {activeCount}</div>
-      {catalogItems.map((item) => (
-        <div key={item.id} style={{ marginTop: 4, color: item.src ? "#0f0" : "#f00" }}>
-          {item.name}: {item.src ? `src=${item.src.substring(0, 40)}...` : "src=EMPTY"}
-        </div>
-      ))}
-      {catalogItems.length === 0 && (
-        <div style={{ color: "#ff0" }}>No clothing uploaded yet</div>
-      )}
     </div>
   );
 }
@@ -566,8 +602,8 @@ export function MannequinViewer({ className }: { className?: string }) {
   );
 }
 
-// Preload both gender models
+// Preload mannequin models using useLoader directly (no DRACO/Meshopt)
 if (typeof window !== "undefined") {
-  useGLTF.preload("/models/mannequin_m.glb");
-  useGLTF.preload("/models/mannequin_f.glb");
+  useLoader.preload(GLTFLoader, "/models/mannequin_m.glb");
+  useLoader.preload(GLTFLoader, "/models/mannequin_f.glb");
 }
