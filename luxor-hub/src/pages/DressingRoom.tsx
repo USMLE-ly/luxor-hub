@@ -590,9 +590,12 @@ export default function DressingRoomPage() {
                     <label className="text-sm text-white/60 block mb-1.5">Event Title</label>
                     <input
                       type="text"
+                      id="calendarEventTitle"
+                      name="calendarEventTitle"
                       value={calendarEventTitle}
                       onChange={(e) => setCalendarEventTitle(e.target.value)}
                       placeholder="e.g., Casual Friday Outfit"
+                      autoComplete="off"
                       className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-amber-400/50 placeholder:text-white/30"
                     />
                   </div>
@@ -600,8 +603,11 @@ export default function DressingRoomPage() {
                     <label className="text-sm text-white/60 block mb-1.5">Date</label>
                     <input
                       type="date"
+                      id="calendarDate"
+                      name="calendarDate"
                       value={calendarDate}
                       onChange={(e) => setCalendarDate(e.target.value)}
+                      autoComplete="date"
                       className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-amber-400/50"
                     />
                   </div>

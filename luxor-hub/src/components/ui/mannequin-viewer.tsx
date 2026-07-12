@@ -7,7 +7,7 @@ import React, {
   useMemo,
   Suspense,
 } from "react";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { useGLTF, ContactShadows, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import {
@@ -41,7 +41,7 @@ function resolveHipsBone(skeleton: THREE.Skeleton): THREE.Bone {
   return skeleton.bones[0];
 }
 
-// ── Matte White Material Override ───────────────────────────
+// ── Matte White Material ───────────────────────────────────
 const MATTE_WHITE = new THREE.MeshStandardMaterial({
   color: "#f2f2f2",
   roughness: 0.45,
@@ -71,6 +71,13 @@ function MannequinModel() {
     mannequinHeight: 1.8,
   });
 
+  // Every frame, enforce ground contact — prevents floating
+  useFrame(() => {
+    if (group.current && group.current.position.y !== 0) {
+      group.current.position.y = 0;
+    }
+  });
+
   useEffect(() => {
     if (!group.current) return;
 
@@ -78,19 +85,19 @@ function MannequinModel() {
     const cloned = scene.clone(true);
     applyMatteWhite(cloned);
 
-    // Compute bounding box to center the model at origin
-    const box = new THREE.Box3().setFromObject(cloned);
-    const size = new THREE.Vector3();
-    const center = new THREE.Vector3();
-    box.getSize(size);
-    box.getCenter(center);
+    // Force ALL bones to identity as a safety net (the GLB was pre-processed
+    // to have identity bone transforms, but this guarantees it at runtime)
+    cloned.traverse((child) => {
+      if ((child as THREE.Bone).isBone) {
+        child.position.set(0, 0, 0);
+        child.quaternion.set(0, 0, 0, 1);
+        child.scale.set(1, 1, 1);
+        child.updateMatrix();
+        child.updateMatrixWorld(true);
+      }
+    });
 
-    // Shift model so feet are at y=0 and centered on x/z
-    cloned.position.set(-center.x, -box.min.y, -center.z);
-
-    group.current.add(cloned);
-
-    // Find skeleton
+    // Find skeleton and rebind from the identity-pose bones
     let skeleton: THREE.Skeleton | null = null;
     cloned.traverse((child) => {
       if ((child as THREE.SkinnedMesh).isSkinnedMesh && !skeleton) {
@@ -98,8 +105,44 @@ function MannequinModel() {
       }
     });
 
+    if (skeleton) {
+      // Recompute inverse bind matrices from the now-identity bone positions
+      skeleton.pose();
+    }
+
+    // Compute bounding box from geometry to find the model extent
+    const bbox = new THREE.Box3();
+    cloned.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh) {
+        const mesh = child as THREE.Mesh;
+        if (mesh.geometry) {
+          mesh.geometry.computeBoundingBox();
+          if (mesh.geometry.boundingBox) {
+            const gb = mesh.geometry.boundingBox.clone();
+            gb.applyMatrix4(child.matrixWorld);
+            bbox.union(gb);
+          }
+        }
+      }
+    });
+
+    const size = new THREE.Vector3();
+    const center = new THREE.Vector3();
+    bbox.getSize(size);
+    bbox.getCenter(center);
+
+    // Position so feet (min.y) sit on the ground plane at y=0
+    cloned.position.set(-center.x, -bbox.min.y, -center.z);
+
+    group.current.add(cloned);
+
     const hipsBone = skeleton ? resolveHipsBone(skeleton) : null;
     const mannequinHeight = size.y || 1.8;
+
+    console.log(
+      `[MANNEQUIN] Loaded: height=${mannequinHeight.toFixed(2)}, ` +
+      `bones=${skeleton?.bones?.length ?? 0}, hipsBone=${hipsBone?.name ?? "none"}`
+    );
 
     setCtx({ rootGroup: group.current, skeleton, hipsBone, mannequinHeight });
 
@@ -125,10 +168,37 @@ function MannequinModel() {
   );
 }
 
-// ── Single Clothing Slot ───────────────────────────────────
-// Each slot gets its own component so useGLTF is called unconditionally
-// (no hooks inside conditionals or try/catch)
-function SingleClothingSlot({
+// ── Clothing Slot (router — renders only when src is valid) ──
+function ClothingSlot({
+  category,
+  itemId,
+}: {
+  category: Category;
+  itemId: string;
+}) {
+  const catalogItems = useWardrobeStore((s) => s.catalogItems);
+  const item = useMemo(
+    () => catalogItems.find((i) => i.id === itemId),
+    [catalogItems, itemId]
+  );
+
+  // Only render the inner loader when src is valid — this avoids
+  // useLoader being called with an empty/invalid URL
+  if (!item?.src) return null;
+
+  return (
+    <ClothingInner
+      src={item.src}
+      category={category}
+      itemKey={`${category}-${itemId}`}
+    />
+  );
+}
+
+// ── ClothingInner (hooks called unconditionally) ──────────
+// This component is only rendered when src is guaranteed valid,
+// so useGLTF is always called with a non-empty string.
+function ClothingInner({
   src,
   category,
   itemKey,
@@ -139,21 +209,40 @@ function SingleClothingSlot({
 }) {
   const { rootGroup, skeleton, hipsBone, mannequinHeight } =
     useContext(MannequinContext);
-  const loadedKeyRef = useRef<string | null>(null);
+  const clonedRef = useRef<THREE.Object3D | null>(null);
 
-  // useGLTF is always called — no try/catch, no conditional
+  // useGLTF is always called unconditionally — valid React hook
   const { scene: clothScene } = useGLTF(src);
 
   useEffect(() => {
-    if (!clothScene || !rootGroup) return;
+    if (!clothScene || !rootGroup) {
+      console.warn(`[CLOTHING] No scene or rootGroup for ${itemKey}`);
+      return;
+    }
 
-    // Skip if already loaded this exact item
-    if (loadedKeyRef.current === itemKey) return;
-    loadedKeyRef.current = itemKey;
+    console.log(
+      `[CLOTHING] Processing ${itemKey}: ` +
+      `children=${clothScene.children.length}`
+    );
+
+    // Remove previous clothing mesh if any
+    if (clonedRef.current) {
+      clonedRef.current.traverse((child) => {
+        if ((child as THREE.Mesh).isMesh) {
+          const mesh = child as THREE.Mesh;
+          if (mesh.geometry) mesh.geometry.dispose();
+          const mat = mesh.material as THREE.Material;
+          if (mat && typeof mat.dispose === "function") mat.dispose();
+        }
+      });
+      clonedRef.current.parent?.remove(clonedRef.current);
+      clonedRef.current = null;
+    }
 
     const cloned = clothScene.clone(true);
+    clonedRef.current = cloned;
 
-    // ── Try skinned path ──
+    // ── Try skinned path (bone-compatible clothing) ──
     let isSkinned = false;
     if (skeleton) {
       cloned.traverse((child) => {
@@ -180,6 +269,7 @@ function SingleClothingSlot({
               clothBoneNames.size > 0 ? overlap / clothBoneNames.size : 0;
 
             if (ratio >= 0.6) {
+              console.log(`[CLOTHING] Skinned path (${ratio.toFixed(2)} overlap)`);
               mesh.skeleton = skeleton;
               mesh.bind(skeleton);
               isSkinned = true;
@@ -205,15 +295,28 @@ function SingleClothingSlot({
       box.getCenter(center);
       box.getSize(size);
 
+      // Guard against NaN/zero-size geometry
+      if (isNaN(size.x) || size.x < 0.001) {
+        console.warn(`[CLOTHING] Degenerate geometry for ${itemKey}`);
+        size.set(1, 1, 1);
+        center.set(0, 0, 0);
+      }
+
+      console.log(
+        `[CLOTHING] Static fit: ` +
+        `size=[${size.x.toFixed(3)}, ${size.y.toFixed(3)}, ${size.z.toFixed(3)}], ` +
+        `center=[${center.x.toFixed(3)}, ${center.y.toFixed(3)}, ${center.z.toFixed(3)}]`
+      );
+
       // Center X/Z on the hips pivot
       cloned.position.x -= center.x;
       cloned.position.z -= center.z;
-      // Level Y so the visual center of the clothing sits at hips
+      // Level Y so the center of clothing sits at hips
       cloned.position.y -= center.y;
 
-      // Auto-scale clothing to fit the mannequin
+      // Auto-scale to fit mannequin proportions
       const torsoHeight = mannequinHeight * 0.35;
-      if (size.y > 0) {
+      if (size.y > 0.001) {
         const targetHeight =
           category === "top"
             ? torsoHeight
@@ -222,25 +325,49 @@ function SingleClothingSlot({
               : torsoHeight * 0.5;
 
         const scaleFactor = targetHeight / size.y;
-        // Only scale if clothing is way off (0.1x to 10x)
         if (scaleFactor > 0.1 && scaleFactor < 10) {
+          console.log(
+            `[CLOTHING] Scaling ${itemKey} by ${scaleFactor.toFixed(3)}x`
+          );
           cloned.scale.setScalar(scaleFactor);
         }
       }
-    }
 
-    return () => {
+      // Apply fabric-like PBR material when no textures exist
       cloned.traverse((child) => {
         if ((child as THREE.Mesh).isMesh) {
           const mesh = child as THREE.Mesh;
-          if (mesh.geometry) mesh.geometry.dispose();
-          const mat = mesh.material as THREE.Material;
-          if (mat && typeof mat.dispose === "function") mat.dispose();
+          const mat = mesh.material as THREE.MeshStandardMaterial;
+          if (mat && !mat.map && !mat.normalMap) {
+            mesh.material = new THREE.MeshPhysicalMaterial({
+              color: mat.color || new THREE.Color("#e8e8e8"),
+              roughness: 0.65,
+              metalness: 0.0,
+              clearcoat: 0.1,
+              clearcoatRoughness: 0.4,
+              sheen: 0.3,
+              sheenColor: new THREE.Color("#ffffff"),
+            });
+          }
         }
       });
-      cloned.parent?.remove(cloned);
+    }
+
+    return () => {
+      if (clonedRef.current) {
+        clonedRef.current.traverse((child) => {
+          if ((child as THREE.Mesh).isMesh) {
+            const mesh = child as THREE.Mesh;
+            if (mesh.geometry) mesh.geometry.dispose();
+            const mat = mesh.material as THREE.Material;
+            if (mat && typeof mat.dispose === "function") mat.dispose();
+          }
+        });
+        clonedRef.current.parent?.remove(clonedRef.current);
+        clonedRef.current = null;
+      }
     };
-  }, [clothScene, rootGroup, hipsBone, skeleton, mannequinHeight, itemKey, category]);
+  }, [clothScene, rootGroup, hipsBone, skeleton, mannequinHeight, itemKey, category, src]);
 
   return null;
 }
@@ -266,12 +393,11 @@ function ClothingLayer() {
 
   return (
     <>
-      {activeSlots.map(({ category, itemId, src }) => (
-        <SingleClothingSlot
+      {activeSlots.map(({ category, itemId }) => (
+        <ClothingSlot
           key={`${category}-${itemId}`}
-          src={src!}
           category={category}
-          itemKey={`${category}-${itemId}`}
+          itemId={itemId}
         />
       ))}
     </>
@@ -281,21 +407,24 @@ function ClothingLayer() {
 // ── Error Boundary ──────────────────────────────────────────
 class MannequinErrorBoundary extends React.Component<
   { children: React.ReactNode; gender: string },
-  { hasError: boolean }
+  { hasError: boolean; errorMsg: string }
 > {
-  state = { hasError: false };
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  state = { hasError: false, errorMsg: "" };
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, errorMsg: error.message };
   }
   render() {
     if (this.state.hasError) {
       return (
         <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-30">
-          <div className="text-center p-6">
+          <div className="text-center p-6 max-w-sm">
             <p className="text-sm font-sans text-muted-foreground mb-2">
-              Mannequin model not found.
+              3D viewer error
             </p>
-            <p className="text-xs font-sans text-muted-foreground/60">
+            <p className="text-xs font-sans text-muted-foreground/60 mb-2">
+              {this.state.errorMsg}
+            </p>
+            <p className="text-xs font-sans text-muted-foreground/40">
               Upload mannequin_{this.props.gender === "male" ? "m" : "f"}.glb
               to public/models/
             </p>
