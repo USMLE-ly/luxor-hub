@@ -13,10 +13,13 @@ function Model() {
   const { actions, names } = useAnimations(animations, group);
 
   useEffect(() => {
-    if (names.length > 0 && actions[names[0]]) {
-      actions[names[0]].play();
+    // Stop all animations first
+    Object.values(actions).forEach((a) => a?.stop());
+    // Play the idle animation (standing pose)
+    if (actions["idle"]) {
+      actions["idle"].play();
     }
-  }, [actions, names]);
+  }, [actions]);
 
   return <primitive ref={group} object={scene} />;
 }
