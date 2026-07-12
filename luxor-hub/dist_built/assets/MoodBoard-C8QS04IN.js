@@ -165,6 +165,9 @@ const MoodBoard = () => {
     reader.onload = async () => {
       const ext = file.name.split(".").pop();
       const path = `${user.id}/moodboard/${crypto.randomUUID()}.${ext}`;
+      if (path.includes('..')) {
+        throw new Error("Invalid path");
+      }
       const { error: uploadErr } = await supabase.storage.from("look-photos").upload(path, file);
       if (uploadErr) {
         toast.error("Upload failed");
