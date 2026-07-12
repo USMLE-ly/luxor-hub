@@ -162,7 +162,11 @@ const Closet = () => {
   // ── Auto-spawn: generate dummy 3D if item has no src ──
   useEffect(() => {
     const firstItem = currentlyWearing[0];
-    if (!firstItem || (firstItem.src && firstItem.src.length > 5)) return;
+    if (!firstItem || (firstItem.src && firstItem.src.length > 5)) {
+      if (firstItem) console.log(`[AUTO-SPAWN] SKIP ${firstItem.name} — already has src: "${firstItem.src?.substring(0, 40)}"`);
+      return;
+    }
+    console.log(`[AUTO-SPAWN] Triggering for ${firstItem?.name} (id=${firstItem?.id})`);
     const timer = setTimeout(() => {
       handleGenerateDummy(firstItem.id, firstItem.category);
       toast.info("Auto-generated 3D placeholder. Use 📸 Image or + File to assign your own model.");

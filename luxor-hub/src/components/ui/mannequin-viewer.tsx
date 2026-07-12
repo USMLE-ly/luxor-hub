@@ -169,6 +169,7 @@ function MannequinModel() {
   return (
     <MannequinContext.Provider value={ctx}>
       <group ref={group} />
+      <ClothingLayer />
     </MannequinContext.Provider>
   );
 }
@@ -190,11 +191,12 @@ function ClothingSlot({
   // Strict validation: reject images, empty strings, and invalid paths
   if (!item?.src || !isValidModelSrc(item.src)) {
     if (item) {
-
+      console.log(`[CLOTHING] SKIP ${item.name} — src invalid: "${(item.src || "").substring(0, 40)}"`);
     }
     return null;
   }
 
+  console.log(`[CLOTHING] SLOT OK: ${item.name} src=${item.src.substring(0, 60)}...`);
   return (
     <ClothingInner
       src={item.src}
@@ -228,9 +230,10 @@ function ClothingInner({
 
   useEffect(() => {
     if (!gltf?.scene || !rootGroup) {
-      console.warn(`[CLOTHING] No scene/rootGroup for ${itemKey}`);
+      console.error(`[CLOTHING] BLOCKED: ${itemKey} — scene=${!!gltf?.scene} rootGroup=${!!rootGroup}`);
       return;
     }
+    console.log(`[CLOTHING] PROCESSING ${itemKey}: ${gltf.scene.children.length} children, rootGroup children=${rootGroup.children.length}`);
 
     console.log(`[CLOTHING] Processing ${itemKey}: ${gltf.scene.children.length} children`);
 
@@ -320,45 +323,35 @@ function ClothingInner({
       // Position in WORLD space (rootGroup is at the same level as the mannequin)
       // Mannequin feet are at y=0, head at y=mannequinHeight
       if (category === "top") {
-        // Shirt: center at ~75% of mannequin height (chest)
-        cloned.position.set(0, mannequinHeight * 0.72, 0);
+        cloned.position.set(0, mannequinHeight * 0.72, 0.06);
       } else if (category === "bottom") {
-        // Pants: center at ~35% of mannequin height (thighs)
-        cloned.position.set(0, mannequinHeight * 0.32, 0);
+        cloned.position.set(0, mannequinHeight * 0.32, 0.04);
       } else {
-        // Accessories: at ~50% (hips)
-        cloned.position.set(0, mannequinHeight * 0.50, 0);
+        cloned.position.set(0, mannequinHeight * 0.50, 0.05);
       }
 
-      // Fabric material for untextured meshes
       cloned.traverse((child) => {
         if ((child as THREE.Mesh).isMesh) {
           const mesh = child as THREE.Mesh;
           const mat = mesh.material as THREE.MeshStandardMaterial;
-          if (mat && !mat.map && !mat.normalMap) {
-            mesh.material = new THREE.MeshPhysicalMaterial({
-              color: mat.color || new THREE.Color("#e8e8e8"),
-              roughness: 0.65, metalness: 0.0,
-              clearcoat: 0.1, clearcoatRoughness: 0.4,
-              sheen: 0.3, sheenColor: new THREE.Color("#ffffff"),
-            });
-          }
-          // Render clothing on top of mannequin to prevent Z-fighting
+          mesh.material = new THREE.MeshPhysicalMaterial({
+            color: mat?.color || new THREE.Color("#4a90d9"),
+            roughness: 0.65, metalness: 0.0,
+            clearcoat: 0.1, clearcoatRoughness: 0.4,
+            sheen: 0.3, sheenColor: new THREE.Color("#ffffff"),
+            side: THREE.DoubleSide,
+          });
           mesh.renderOrder = 1;
-          if (Array.isArray(mesh.material)) {
-            mesh.material.forEach((m) => { m.depthWrite = true; });
-          } else {
-            mesh.material.depthWrite = true;
-          }
+          mesh.material.depthWrite = false;
         }
       });
 
-      // Temporary debug outline (green wireframe for 10 seconds)
       try {
-        const debugBox = new THREE.BoxHelper(cloned, 0x00ff00);
+        const debugBox = new THREE.BoxHelper(cloned, 0xff00ff);
         rootGroup.add(debugBox);
-        setTimeout(() => { rootGroup.remove(debugBox); debugBox.dispose(); }, 10000);
+        setTimeout(() => { rootGroup.remove(debugBox); debugBox.dispose(); }, 30000);
       } catch {}
+      console.log(`[CLOTHING] ${itemKey} ADDED TO SCENE at pos=${JSON.stringify(cloned.position.toArray())} scale=${JSON.stringify(cloned.scale.toArray())} rootChildren=${rootGroup.children.length}`);
     }
 
 
@@ -455,7 +448,6 @@ export function MannequinViewer({ className }: { className?: string }) {
             <pointLight position={[0, 3, 3]} intensity={0.2} color="#E8D5B7" />
 
             <MannequinModel />
-            <ClothingLayer />
 
             <ContactShadows position={[0, 0, 0]} opacity={0.4} scale={3} blur={2.5} far={4} />
 
