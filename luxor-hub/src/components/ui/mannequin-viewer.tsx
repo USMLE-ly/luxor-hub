@@ -344,7 +344,7 @@ function ClothingInner({
         if ((child as THREE.Mesh).isMesh) {
           const mesh = child as THREE.Mesh;
           const mat = mesh.material as any;
-          const hasTexture = mat?.map || mat?.normalMap || mat?.aoMap || mat?.emissiveMap;
+          const hasTexture = mat?.map || mat?.normalMap || mat?.aoMap || mat?.emissiveMap || (mat?.image && mat?.image.width > 0);
 
           if (!hasTexture) {
             // No texture — replace with PBR fabric material (dummy GLBs)

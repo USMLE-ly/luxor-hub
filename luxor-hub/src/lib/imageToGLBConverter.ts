@@ -256,9 +256,9 @@ export async function generateClothingFromImage(
     );
   });
 
-  // 4. Cleanup
+  // 4. Cleanup — revoke the object URL but do NOT dispose the texture
+  // (the cloned texture in the material may still reference the image data)
   URL.revokeObjectURL(textureUrl);
-  texture.dispose();
 
   return URL.createObjectURL(glbBlob);
 }
