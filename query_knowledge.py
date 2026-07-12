@@ -43,7 +43,11 @@ def search_knowledge(query, domain="all", top_k=5):
         if not os.path.isdir(chunks_dir):
             continue
         for cf in sorted(glob.glob(os.path.join(chunks_dir, "*.json"))):
-            with open(cf) as f:
+            base_real = os.path.realpath(KBASE)
+            target_real = os.path.realpath(cf)
+            if os.path.commonpath([base_real, target_real]) != base_real:
+                raise Exception("Invalid file path")
+            with open(target_real) as f:
                 data = json.load(f)
             for i, chunk in enumerate(data.get("chunks", [])):
                 chunk_lower = chunk.lower()
