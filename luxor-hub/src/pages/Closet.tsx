@@ -15,8 +15,10 @@ import { toast } from "sonner";
 import { haptic } from "@/lib/haptics";
 import {Plus, MagnifyingGlass, TShirt, SlidersHorizontal, TrashSimple, UploadSimple, X, Spinner, Sparkle, CheckCircle, Camera, CaretRight, Sliders, Pulse, Eye, User, StackSimple, CalendarDots, Image, FloppyDisk, FolderOpen, Heart, Receipt, File, Upload} from "@phosphor-icons/react";
 import { MannequinViewer } from "@/components/ui/mannequin-viewer";
-import { useWardrobeStore, useWardrobeHydrated, type Category, type ClothingItem as WardrobeClothingItem } from "@/store/useWardrobeStore";
+import { useWardrobeStore, useWardrobeHydrated, restoreClothingFromIDB, type Category, type ClothingItem as WardrobeClothingItem } from "@/store/useWardrobeStore";
 import { resolve3DAsset, uploadAndAssignGLB, restoreAssetMappings } from "@/lib/assetResolver";
+import { generateDummyShirtGLB, generateDummyPantsGLB, generateDummyShoesGLB } from "@/lib/dummyGLBGenerator";
+import { generateClothingFromImage } from "@/lib/imageToGLBConverter";
 import { type BodyDNA, type PosePreset } from "@/components/app/Mannequin3D";
 import { SLOT_MAP, DRESS_REPLACES, type GarmentFit } from "@/components/app/GarmentGeometry";
 import type { FabricType } from "@/components/app/FabricMaterials";
@@ -157,6 +159,17 @@ const Closet = () => {
       .filter(Boolean);
   }, [wardrobeSelected, catalogItems]);
 
+  // ── Auto-spawn: generate dummy 3D if item has no src ──
+  useEffect(() => {
+    const firstItem = currentlyWearing[0];
+    if (!firstItem || (firstItem.src && firstItem.src.length > 5)) return;
+    const timer = setTimeout(() => {
+      handleGenerateDummy(firstItem.id, firstItem.category);
+      toast.info("Auto-generated 3D placeholder. Use 📸 Image or + File to assign your own model.");
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, [currentlyWearing]);
+
   const [dna, setDna] = useState<BodyDNA>({ height: 0.5, shoulder: 0.5, waist: 0.5, hips: 0.5, legLength: 0.5 });
   const [pose, setPose] = useState<PosePreset>("neutral");
   const [activePanel, setActivePanel] = useState<MannequinPanel>(null);
@@ -179,6 +192,7 @@ const Closet = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const receiptInputRef = useRef<HTMLInputElement>(null);
   const glbAssignRef = useRef<HTMLInputElement>(null);
+  const imageAssignRef = useRef<HTMLInputElement>(null);
   const [assigningItemId, setAssigningItemId] = useState<string | null>(null);
 
   const handleAssignGLB = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -195,15 +209,87 @@ const Closet = () => {
     if (!item) return;
     const glbUrl = await uploadAndAssignGLB(item.name, file);
     useWardrobeStore.getState().updateClothingSrc(assigningItemId, glbUrl);
+
+    // Also persist with the item ID key so restoreClothingFromIDB can find it
+    try {
+      const buffer = await file.arrayBuffer();
+      const { set: idbSet } = await import("idb-keyval");
+      await idbSet(`luxor-clothing-${assigningItemId}`, buffer);
+    } catch {}
+
     toast.success(`3D model assigned to "${item.name}"`);
     setAssigningItemId(null);
     e.target.value = "";
   };
 
-  const fetchItems = useCallback(async (): Promise<ClothingItem[]> => {
-    if (!user) { console.log("[FETCH-DEBUG] No user — returning []"); return []; }
+  const handleGenerateDummy = async (itemId: string, category: string) => {
     try {
-      console.log("[FETCH-DEBUG] Fetching items from backend for user:", user.id.slice(0,12));
+      let blobUrl: string;
+      if (category === "bottom") {
+        blobUrl = await generateDummyPantsGLB();
+      } else if (category === "accessory" || category === "shoes") {
+        blobUrl = await generateDummyShoesGLB();
+      } else {
+        blobUrl = await generateDummyShirtGLB();
+      }
+      useWardrobeStore.getState().updateClothingSrc(itemId, blobUrl);
+
+      // Persist to IndexedDB so the model survives page reload
+      try {
+        const response = await fetch(blobUrl);
+        const glbBlob = await response.blob();
+        const buffer = await glbBlob.arrayBuffer();
+        const { set: idbSet } = await import("idb-keyval");
+        await idbSet(`luxor-clothing-${itemId}`, buffer);
+      } catch {}
+
+      toast.success("3D model generated! View it on the mannequin.");
+    } catch (err) {
+      console.error("[CLOSET] Dummy generation failed:", err);
+      toast.error("Failed to generate 3D model");
+    }
+  };
+
+  const handleImageTo3D = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !assigningItemId) return;
+    const validExts = [".jpg", ".jpeg", ".png", ".webp"];
+    const ext = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
+    if (!validExts.includes(ext)) {
+      toast.error(`Invalid file type "${ext}". Please upload a JPG, PNG, or WebP image.`);
+      e.target.value = "";
+      return;
+    }
+    try {
+      toast.info("Generating 3D model from image...");
+      const item = currentlyWearing.find((c) => c.id === assigningItemId);
+      const category = item?.category || "top";
+      const blobUrl = await generateClothingFromImage(file, category);
+      useWardrobeStore.getState().updateClothingSrc(assigningItemId, blobUrl);
+
+      // Persist the generated GLB binary to IndexedDB so it survives page reload
+      try {
+        const response = await fetch(blobUrl);
+        const glbBlob = await response.blob();
+        const buffer = await glbBlob.arrayBuffer();
+        const { set: idbSet } = await import("idb-keyval");
+        await idbSet(`luxor-clothing-${assigningItemId}`, buffer);
+      } catch (idbErr) {
+        console.warn("[IMAGE-TO-3D] Failed to persist to IndexedDB:", idbErr);
+        // Non-fatal — the model still works in this session
+      }
+
+      toast.success("3D model generated from image! View it on the mannequin.");
+    } catch (err) {
+      console.error("[CLOSET] Image-to-3D failed:", err);
+      toast.error("Failed to generate 3D model from image");
+    }
+    setAssigningItemId(null);
+    e.target.value = "";
+  };
+
+  const fetchItems = useCallback(async (): Promise<ClothingItem[]> => {
+    try {
       const timeoutPromise = new Promise<Response>((_, reject) =>
         setTimeout(() => reject(new Error("Request timed out")), 10000)
       );
@@ -211,10 +297,7 @@ const Closet = () => {
         fetch(apiBase + '/api/v1/closet/list-items?user_id=' + encodeURIComponent(user.id)),
         timeoutPromise,
       ]);
-      console.log("[FETCH-DEBUG] Response status:", resp.status);
-      if (!resp.ok) { console.log("[FETCH-DEBUG] Response not OK — returning []"); return []; }
       const data = await resp.json();
-      console.log("[FETCH-DEBUG] Backend returned success:", data.success, "items count:", data.items?.length);
       if (data.success && Array.isArray(data.items)) {
         const mapped = data.items.map((item: any) => ({
           id: item.id || '',
@@ -229,13 +312,10 @@ const Closet = () => {
           notes: item.notes || null,
           price: item.price || null,
         }));
-        console.log("[FETCH-DEBUG] Mapped", mapped.length, "items:", mapped.map(i => i.id.slice(0,8)+":"+(i.name||"unnamed")?.slice(0,15)));
         return mapped;
       }
-      console.log("[FETCH-DEBUG] Backend returned empty/failed — returning []");
       return [];
     } catch (err) {
-      console.warn('[FETCH-DEBUG] Fetch failed or timed out:', err);
       return [];
     }
   }, [user, apiBase]);
@@ -243,22 +323,17 @@ const Closet = () => {
   useEffect(() => {
     let mounted = true;
     const forceTimeout = setTimeout(() => {
-      if (mounted) { console.log("[EFFECT-DEBUG] Force timeout fired — setting loading=false"); setLoading(false); }
     }, 8000);
     const load = async () => {
       setLoading(true);
-      console.log("[EFFECT-DEBUG] Load effect running (fetchItems)");
       try {
         const mapped = await fetchItems();
-        console.log("[EFFECT-DEBUG] Load effect got", mapped.length, "items");
         if (mounted) {
-          console.log("[EFFECT-DEBUG] Setting items state to", mapped.length, "items");
           setItems(mapped);
           clearTimeout(forceTimeout);
           setLoading(false);
         }
       } catch (e) {
-        console.warn("[EFFECT-DEBUG] Load effect error:", e);
         if (mounted) {
           clearTimeout(forceTimeout);
           setLoading(false);
@@ -266,7 +341,6 @@ const Closet = () => {
       }
     };
     load();
-    return () => { console.log("[EFFECT-DEBUG] Cleanup — mounted=false"); mounted = false; clearTimeout(forceTimeout); };
   }, [fetchItems]);  // Re-fetch when fetchItems changes (e.g. user auth resolves)
 
   // Auto-remove backgrounds when flat-lay view is active
@@ -297,6 +371,15 @@ const Closet = () => {
   }, [STORAGE_KEY]);
 
   // Persistence handled by Zustand store — no localStorage needed
+
+
+  // ── Restore 3D asset mappings and IndexedDB clothing on mount ──
+  useEffect(() => {
+    if (hydrated) {
+      restoreAssetMappings();
+      restoreClothingFromIDB();
+    }
+  }, [hydrated]);
 
   // ── Supabase-backed mannequin state persistence ──
   const MANNEQUIN_STATE_LOADED = useRef(false);
@@ -332,9 +415,10 @@ const Closet = () => {
                   : ["bottoms", "skirts", "dress"].includes(cat) ? "bottom"
                   : "accessory") as Category;
                 const id = `supabase-${zustandCat}-${(item.name || "").replace(/\s+/g, "-").toLowerCase()}`;
+                const resolvedSrc = resolve3DAsset(item.name || "", item.category || "top");
                 addCustomClothing({
                   id, name: item.name || "Unknown",
-                  src: "",
+                  src: resolvedSrc || "",
                   category: zustandCat,
                   color: item.color, fit: item.fit, fabric: item.fabric,
                   imageUrl: item.imageUrl,
@@ -343,7 +427,6 @@ const Closet = () => {
               });
             }
           }
-          console.log("[MANNEQUIN] Loaded state from Supabase");
         }
       });
   }, [user]);
@@ -424,9 +507,10 @@ const Closet = () => {
         : ["bottoms", "skirts", "dress"].includes(cat) ? "bottom"
         : "accessory") as Category;
       const id = `outfit-${zustandCat}-${(item.name || "").replace(/\s+/g, "-").toLowerCase()}-${Date.now()}`;
+      const outfitSrc = resolve3DAsset(item.name || "", item.category || "top");
       addCustomClothing({
         id, name: item.name || "Unknown",
-        src: "",
+        src: outfitSrc || "",
         category: zustandCat,
         color: item.color, fit: item.fit, fabric: item.fabric,
         imageUrl: item.imageUrl,
@@ -520,7 +604,6 @@ const Closet = () => {
     }
     setUploading(true);
     const itemName = newItem.name || selectedFile?.name?.replace(/\.[^/.]+$/, "") || "Unknown item";
-    console.log("[CLOSET-UPLOAD] Starting upload:", itemName);
     try {
       let image_b64 = "";
       if (selectedFile) {
@@ -534,7 +617,6 @@ const Closet = () => {
           reader.readAsDataURL(selectedFile as Blob);
         });
       }
-      console.log("[CLOSET-UPLOAD] Sending to backend:", itemName, "b64 length:", image_b64.length);
       const resp = await fetch(apiBase + "/api/v1/closet/add-item", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -555,15 +637,11 @@ const Closet = () => {
       });
       const data = await resp.json();
       if (!resp.ok) throw new Error(data.error || "Upload failed");
-      console.log("[CLOSET-UPLOAD] Backend response:", data);
       toast.success("Added. Your closet just got stronger.");
       setUploadOpen(false);
       setNewItem({ name: "", category: "top", color: "", brand: "", season: "all-season", occasion: "", style: "", notes: "", price: "" });
       setSelectedFile(null); setPreviewUrl(null);
-      console.log("[CLOSET-UPLOAD] Re-fetching items...");
       const refreshed = await fetchItems();
-      console.log("[CLOSET-UPLOAD] fetchItems returned", refreshed.length, "items");
-      console.log("[CLOSET-UPLOAD] Items:", refreshed.map(i => i.id+":"+(i.name||"unnamed")?.slice(0,20)));
       setItems(refreshed);
     } catch (err: any) { console.error("[CLOSET-UPLOAD] Error:", err); toast.error(err.message); }
     finally { setUploading(false); }
@@ -1329,10 +1407,23 @@ const Closet = () => {
                           <p className="text-[10px] font-sans text-muted-foreground capitalize">{item.category} • {item.fit || "regular"}</p>
                         </div>
                         {!item.src && (
-                          <button onClick={() => { setAssigningItemId(item.id); glbAssignRef.current?.click(); }}
-                            className="text-[10px] font-sans text-primary hover:text-primary/80 whitespace-nowrap">
-                            + 3D
-                          </button>
+                          <div className="flex gap-1 flex-wrap justify-end">
+                            <button onClick={() => handleGenerateDummy(item.id, item.category)}
+                              className="text-[10px] font-sans text-emerald-400 hover:text-emerald-300 whitespace-nowrap px-1.5 py-0.5 rounded bg-emerald-500/10"
+                              title="Generate a placeholder 3D shape">
+                              ✦ 3D
+                            </button>
+                            <button onClick={() => { setAssigningItemId(item.id); imageAssignRef.current?.click(); }}
+                              className="text-[10px] font-sans text-amber-400 hover:text-amber-300 whitespace-nowrap px-1.5 py-0.5 rounded bg-amber-500/10"
+                              title="Upload a photo — auto-maps image as 3D texture on garment shape">
+                              📸 Image
+                            </button>
+                            <button onClick={() => { setAssigningItemId(item.id); glbAssignRef.current?.click(); }}
+                              className="text-[10px] font-sans text-primary hover:text-primary/80 whitespace-nowrap"
+                              title="Upload a .glb 3D model file">
+                              + File
+                            </button>
+                          </div>
                         )}
                         <button onClick={() => removeFromMannequin(item)}
                           className="w-6 h-6 rounded-full flex items-center justify-center opacity-60 hover:opacity-100 hover:bg-destructive/15 transition-all">
@@ -1346,6 +1437,7 @@ const Closet = () => {
 
               {/* Hidden GLB file input for "Assign 3D Model" */}
               <input ref={glbAssignRef} type="file" accept=".glb,.gltf" className="hidden" onChange={handleAssignGLB} />
+              <input ref={imageAssignRef} type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden" onChange={handleImageTo3D} />
 
               {/* Actions: Save & Schedule */}
               {currentlyWearing.length > 0 && (

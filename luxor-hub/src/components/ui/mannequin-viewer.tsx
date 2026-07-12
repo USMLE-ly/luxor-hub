@@ -190,9 +190,7 @@ function ClothingSlot({
   // Strict validation: reject images, empty strings, and invalid paths
   if (!item?.src || !isValidModelSrc(item.src)) {
     if (item) {
-      console.warn(
-        `[CLOTHING] Skipping "${item.name}": src is not a valid 3D model (${item.src?.substring(0, 40) || "empty"})`
-      );
+
     }
     return null;
   }
@@ -219,7 +217,6 @@ function ClothingInner({
   const { rootGroup, skeleton, hipsBone, mannequinHeight } =
     useContext(MannequinContext);
   const clonedRef = useRef<THREE.Object3D | null>(null);
-  const boxHelperRef = useRef<THREE.BoxHelper | null>(null);
 
   // Last-resort guard: if src somehow passed validation but is still an image, bail
   if (src.startsWith("data:image")) {
@@ -250,12 +247,6 @@ function ClothingInner({
       clonedRef.current.parent?.remove(clonedRef.current);
       clonedRef.current = null;
     }
-    if (boxHelperRef.current) {
-      boxHelperRef.current.parent?.remove(boxHelperRef.current);
-      boxHelperRef.current.geometry.dispose();
-      boxHelperRef.current = null;
-    }
-
     const cloned = gltf.scene.clone(true);
     clonedRef.current = cloned;
     cloned.userData.isClothing = true;
@@ -331,6 +322,13 @@ function ClothingInner({
         }
       }
 
+      // Category-based vertical offset AFTER scaling
+      // Tops sit at chest level, bottoms at thigh level, accessories at hips
+      const categoryYOffset = category === "top" ? mannequinHeight * 0.25
+        : category === "bottom" ? -mannequinHeight * 0.15
+        : 0;
+      cloned.position.y += categoryYOffset;
+
       // Fabric material for untextured meshes
       cloned.traverse((child) => {
         if ((child as THREE.Mesh).isMesh) {
@@ -348,23 +346,9 @@ function ClothingInner({
       });
     }
 
-    // BoxHelper
-    try {
-      const sceneRoot = rootGroup.parent;
-      if (sceneRoot) {
-        const helper = new THREE.BoxHelper(cloned, 0x00ff00);
-        sceneRoot.add(helper);
-        boxHelperRef.current = helper;
-        helper.update();
-      }
-    } catch {}
+
 
     return () => {
-      if (boxHelperRef.current) {
-        boxHelperRef.current.parent?.remove(boxHelperRef.current);
-        boxHelperRef.current.geometry.dispose();
-        boxHelperRef.current = null;
-      }
       if (clonedRef.current) {
         clonedRef.current.traverse((child) => {
           if ((child as THREE.Mesh).isMesh) {
@@ -400,8 +384,8 @@ function ClothingLayer() {
 
   return (
     <>
-      {activeSlots.map(({ category, itemId }) => (
-        <ClothingSlot key={`${category}-${itemId}`} category={category} itemId={itemId} />
+      {activeSlots.map(({ category, itemId, src }) => (
+        <ClothingSlot key={`${category}-${itemId}-${src}`} category={category} itemId={itemId} />
       ))}
     </>
   );

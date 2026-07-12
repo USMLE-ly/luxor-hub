@@ -22,6 +22,8 @@ import { notifyEvent } from "@/lib/notificationService";
 import { LiquidGlassCard } from "@/components/ui/liquid-notification";
 import { supabase } from "@/integrations/supabase/client";
 import { humanizeTextArray } from "@/lib/humanizer";
+import { generateDummyShirtGLB, generateDummyPantsGLB, generateDummyShoesGLB } from "@/lib/dummyGLBGenerator";
+import { restoreAssetMappings } from "@/lib/assetResolver";
 
 /* ------------------------------------------------------------------ */
 /*  Constants                                                          */
@@ -95,6 +97,27 @@ function MannequinWardrobeSection() {
     },
     [addCustomClothing]
   );
+
+  // ── Test Mode: Generate dummy 3D models ──
+  const generateDummy = async (
+    name: string,
+    category: Category,
+    generator: () => Promise<string>
+  ) => {
+    try {
+      toast.info(`Generating dummy 3D ${name}...`);
+      const blobUrl = await generator();
+      const itemId = `dummy-${category}-${Date.now()}`;
+      addCustomClothing({
+        id: itemId, name, src: blobUrl, category,
+      });
+      toggleClothing(category, itemId);
+      toast.success(`Dummy "${name}" created and added to mannequin!`);
+    } catch (err) {
+      console.error("[DUMMY] Generation failed:", err);
+      toast.error("Failed to generate dummy model");
+    }
+  };
 
   return (
     <div className="rounded-2xl border border-border bg-card overflow-hidden">
@@ -175,6 +198,31 @@ function MannequinWardrobeSection() {
             <p className="text-[9px] text-muted-foreground/40 mt-1.5 text-center">
               Session-only. For permanent items, add to public/models/clothing/.
             </p>
+
+            {/* Test Mode: Generate dummy models */}
+            <div className="mt-3 pt-2 border-t border-border">
+              <p className="text-[9px] text-muted-foreground/50 mb-1.5 text-center font-sans">Quick Test (no .glb files needed)</p>
+              <div className="grid grid-cols-3 gap-1">
+                <button
+                  onClick={() => generateDummy("Dummy Shirt", "top", generateDummyShirtGLB)}
+                  className="text-[10px] font-sans py-1.5 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors"
+                >
+                  👕 Shirt
+                </button>
+                <button
+                  onClick={() => generateDummy("Dummy Pants", "bottom", generateDummyPantsGLB)}
+                  className="text-[10px] font-sans py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors"
+                >
+                  👖 Pants
+                </button>
+                <button
+                  onClick={() => generateDummy("Dummy Shoes", "accessory", generateDummyShoesGLB)}
+                  className="text-[10px] font-sans py-1.5 rounded-lg bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 transition-colors"
+                >
+                  👟 Shoes
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -567,7 +615,7 @@ export default function DressingRoomPage() {
                 <Perspective maxRotateX={8} maxRotateY={16} smoothing={0.08}>
                   <div className="grid grid-cols-2 gap-3">
                     {OCCASIONS.map((occ, idx) => {
-                      const occColors: Array<'red' | 'purple' | 'green'> = ['red', 'green', 'purple', 'blue', 'amber'];
+                      const occColors: Array<'red' | 'purple' | 'green'> = ['red', 'green', 'purple', 'red', 'green'];
                       
                       return (
                         <button
@@ -691,7 +739,7 @@ export default function DressingRoomPage() {
                 <Perspective maxRotateX={8} maxRotateY={16} smoothing={0.08}>
                   <div className="grid grid-cols-3 gap-3">
                     {[1, 2, 3].map((num, idx) => {
-                      const countColors: Array<'red' | 'purple' | 'green'> = ['amber', 'green', 'purple'];
+                      const countColors: Array<'red' | 'purple' | 'green'> = ['green', 'purple', 'red'];
                       
                       return (
                         <button

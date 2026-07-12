@@ -149,9 +149,6 @@ export async function restoreClothingFromIDB(): Promise<void> {
 }
 
 // ── Hydration hook ─────────────────────────────────────────
-const emptySubscribe = () => () => {};
-const emptySnapshot = () => false;
-
 export function useWardrobeHydrated(): boolean {
   return useSyncExternalStore(
     (callback) => {
