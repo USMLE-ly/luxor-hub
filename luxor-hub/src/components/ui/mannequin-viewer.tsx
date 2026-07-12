@@ -464,47 +464,44 @@ function ClothingLayer() {
   );
 }
 
-// ── Debug Overlay ──────────────────────────────────────────
+// ── Debug Overlay (raw Zustand state JSON) ──────────────────
 function ClothingDebugOverlay() {
-  const catalogItems = useWardrobeStore((s) => s.catalogItems);
-  const selected = useWardrobeStore((s) => s.selected);
-  const activeCount = Object.values(selected).filter(Boolean).length;
+  // Force re-render every 500ms to always show current store state
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => t + 1), 500);
+    return () => clearInterval(id);
+  }, []);
+
+  const store = useWardrobeStore.getState();
 
   return (
     <div
       style={{
         position: "absolute",
-        top: 8,
-        left: 8,
+        top: 0,
+        left: 0,
         zIndex: 999,
-        background: "rgba(0,0,0,0.85)",
-        color: "#0f0",
-        padding: "8px 12px",
-        borderRadius: 8,
-        fontSize: 11,
+        background: "rgba(0,0,0,0.8)",
+        color: "#00ff00",
+        padding: "10px",
+        fontSize: "12px",
+        whiteSpace: "pre-wrap",
         fontFamily: "monospace",
-        maxWidth: 300,
+        maxWidth: 350,
+        maxHeight: 300,
+        overflow: "auto",
         pointerEvents: "none",
       }}
     >
-      <div style={{ color: "#fff", fontWeight: "bold", marginBottom: 4 }}>
-        Clothing Debug
-      </div>
-      <div>Items: {catalogItems.length} | Active: {activeCount}</div>
-      {catalogItems.map((item) => (
-        <div
-          key={item.id}
-          style={{
-            marginTop: 3,
-            color: item.src && item.src.length > 5 ? "#0f0" : "#f00",
-          }}
-        >
-          {item.name}: {item.src ? `${item.src.substring(0, 35)}...` : "EMPTY"}
-        </div>
-      ))}
-      {catalogItems.length === 0 && (
-        <div style={{ color: "#ff0" }}>No items uploaded</div>
-      )}
+      <p style={{ margin: "0 0 4px", fontWeight: "bold" }}>Store Items:</p>
+      <pre style={{ margin: "0 0 8px" }}>
+        {JSON.stringify(store.catalogItems, null, 2)}
+      </pre>
+      <p style={{ margin: "0 0 4px", fontWeight: "bold" }}>Active Selection:</p>
+      <pre style={{ margin: 0 }}>
+        {JSON.stringify(store.selected, null, 2)}
+      </pre>
     </div>
   );
 }

@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { haptic } from "@/lib/haptics";
 import {Plus, MagnifyingGlass, TShirt, SlidersHorizontal, TrashSimple, UploadSimple, X, Spinner, Sparkle, CheckCircle, Camera, CaretRight, Sliders, Pulse, Eye, User, StackSimple, CalendarDots, Image, FloppyDisk, FolderOpen, Heart, Receipt, File, Upload} from "@phosphor-icons/react";
 import { MannequinViewer } from "@/components/ui/mannequin-viewer";
-import { useWardrobeStore, useWardrobeHydrated } from "@/store/useWardrobeStore";
+import { useWardrobeStore, useWardrobeHydrated, type Category } from "@/store/useWardrobeStore";
 import { type ClothingItem as MannequinClothingItem, type BodyDNA, type PosePreset } from "@/components/app/Mannequin3D";
 import { SLOT_MAP, DRESS_REPLACES, type GarmentFit } from "@/components/app/GarmentGeometry";
 import type { FabricType } from "@/components/app/FabricMaterials";
@@ -140,6 +140,55 @@ const Closet = () => {
   const gender = useWardrobeStore((s) => s.gender);
   const setGender = useWardrobeStore((s) => s.setGender);
   const hydrated = useWardrobeHydrated();
+
+  // ── Sync local mannequinClothing to Zustand store ──
+  // The MannequinViewer reads from Zustand (not local state),
+  // so we must keep them in sync for 3D clothing to appear.
+  const toggleClothing = useWardrobeStore((s) => s.toggleClothing);
+  const wardrobeSelected = useWardrobeStore((s) => s.selected);
+  const addCustomClothing = useWardrobeStore((s) => s.addCustomClothing);
+
+  useEffect(() => {
+    if (!hydrated) return;
+
+    // Map Closet categories to Zustand categories
+    const catMap: Record<string, Category> = {
+      tops: "top", outerwear: "top", top: "top",
+      bottoms: "bottom", skirts: "bottom", dress: "bottom",
+      shoes: "accessory", hat: "accessory", accessory: "accessory",
+    };
+
+    // Clear all current selections in Zustand
+    (Object.keys(wardrobeSelected) as Category[]).forEach((cat) => {
+      if (wardrobeSelected[cat]) {
+        toggleClothing(cat, wardrobeSelected[cat]!);
+      }
+    });
+
+    // Add each mannequinClothing item to Zustand
+    mannequinClothing.forEach((item) => {
+      const zustandCat = catMap[item.category] || "accessory";
+      const itemId = `closet-${zustandCat}-${item.name.replace(/\s+/g, "-").toLowerCase()}`;
+
+      // Check if already in catalog
+      const existing = useWardrobeStore.getState().catalogItems.find((c) => c.id === itemId);
+      if (!existing) {
+        addCustomClothing({
+          id: itemId,
+          name: item.name,
+          src: item.imageUrl || "",
+          category: zustandCat,
+        });
+      }
+
+      // Select it
+      const currentSelected = useWardrobeStore.getState().selected[zustandCat];
+      if (currentSelected !== itemId) {
+        toggleClothing(zustandCat, itemId);
+      }
+    });
+  }, [mannequinClothing, hydrated]);
+
   const [dna, setDna] = useState<BodyDNA>({ height: 0.5, shoulder: 0.5, waist: 0.5, hips: 0.5, legLength: 0.5 });
   const [pose, setPose] = useState<PosePreset>("neutral");
   const [activePanel, setActivePanel] = useState<MannequinPanel>(null);
