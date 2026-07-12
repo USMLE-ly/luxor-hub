@@ -8,8 +8,13 @@ export type Category = "top" | "bottom" | "accessory";
 export interface ClothingItem {
   id: string;
   name: string;
-  src: string; // blob: URL (session) or file path (/models/...)
+  src: string; // blob: URL, file path (/models/...), or data URL
   category: Category;
+  // Extended fields for richer UI (Closet page)
+  color?: string;
+  fit?: string;
+  fabric?: string;
+  imageUrl?: string;
 }
 
 interface WardrobeState {
@@ -20,13 +25,14 @@ interface WardrobeState {
   toggleClothing: (category: Category, id: string) => void;
   clearOutfit: () => void;
   addCustomClothing: (item: ClothingItem) => void;
+  removeClothing: (id: string) => void;
   updateClothingSrc: (id: string, src: string) => void;
 }
 
 // ── Store ──────────────────────────────────────────────────
 export const useWardrobeStore = create<WardrobeState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       gender: "male",
       selected: { top: null, bottom: null, accessory: null },
       catalogItems: [],
@@ -45,8 +51,28 @@ export const useWardrobeStore = create<WardrobeState>()(
         set({ selected: { top: null, bottom: null, accessory: null } }),
 
       addCustomClothing: (item) =>
+        set((state) => {
+          // Don't duplicate — if item with same id exists, update it
+          const exists = state.catalogItems.some((c) => c.id === item.id);
+          if (exists) {
+            return {
+              catalogItems: state.catalogItems.map((c) =>
+                c.id === item.id ? { ...c, ...item } : c
+              ),
+            };
+          }
+          return { catalogItems: [...state.catalogItems, item] };
+        }),
+
+      removeClothing: (id) =>
         set((state) => ({
-          catalogItems: [...state.catalogItems, item],
+          catalogItems: state.catalogItems.filter((c) => c.id !== id),
+          selected: {
+            ...state.selected,
+            top: state.selected.top === id ? null : state.selected.top,
+            bottom: state.selected.bottom === id ? null : state.selected.bottom,
+            accessory: state.selected.accessory === id ? null : state.selected.accessory,
+          },
         })),
 
       updateClothingSrc: (id, src) =>
@@ -60,13 +86,10 @@ export const useWardrobeStore = create<WardrobeState>()(
       name: "luxor-wardrobe",
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
-        // Only persist metadata — blob URLs can't survive serialization
         gender: state.gender,
         selected: state.selected,
-        catalogItems: state.catalogItems.map(({ id, name, category }) => ({
-          id,
-          name,
-          category,
+        catalogItems: state.catalogItems.map(({ id, name, category, color, fit, fabric, imageUrl }) => ({
+          id, name, category, color, fit, fabric, imageUrl,
         })),
       }),
       merge: (persistedState, currentState) => {
@@ -87,7 +110,7 @@ export const useWardrobeStore = create<WardrobeState>()(
   )
 );
 
-// ── IndexedDB helpers (called from components, not from store) ──
+// ── IndexedDB helpers ──────────────────────────────────────
 const IDB_PREFIX = "luxor-clothing-";
 
 export async function persistClothingToIDB(
@@ -107,9 +130,7 @@ export async function restoreClothingFromIDB(): Promise<void> {
 
   let restored = 0;
   for (const item of items) {
-    // Skip items that already have a valid src (blob: or /models/...)
     if (item.src && item.src.length > 5) continue;
-
     try {
       const buffer = await idbGet<ArrayBuffer>(`${IDB_PREFIX}${item.id}`);
       if (buffer) {
@@ -122,11 +143,8 @@ export async function restoreClothingFromIDB(): Promise<void> {
       console.error(`[STORAGE] Failed to restore ${item.id}:`, err);
     }
   }
-
   if (restored > 0) {
-    console.log(
-      `[STORAGE] Restored ${restored} clothing items from IndexedDB`
-    );
+    console.log(`[STORAGE] Restored ${restored} clothing items from IndexedDB`);
   }
 }
 

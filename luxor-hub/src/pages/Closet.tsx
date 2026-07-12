@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { haptic } from "@/lib/haptics";
 import {Plus, MagnifyingGlass, TShirt, SlidersHorizontal, TrashSimple, UploadSimple, X, Spinner, Sparkle, CheckCircle, Camera, CaretRight, Sliders, Pulse, Eye, User, StackSimple, CalendarDots, Image, FloppyDisk, FolderOpen, Heart, Receipt, File, Upload} from "@phosphor-icons/react";
 import { MannequinViewer } from "@/components/ui/mannequin-viewer";
-import { useWardrobeStore, useWardrobeHydrated, type Category } from "@/store/useWardrobeStore";
+import { useWardrobeStore, useWardrobeHydrated, type Category, type ClothingItem as WardrobeClothingItem } from "@/store/useWardrobeStore";
 import { type ClothingItem as MannequinClothingItem, type BodyDNA, type PosePreset } from "@/components/app/Mannequin3D";
 import { SLOT_MAP, DRESS_REPLACES, type GarmentFit } from "@/components/app/GarmentGeometry";
 import type { FabricType } from "@/components/app/FabricMaterials";
@@ -136,58 +136,11 @@ const Closet = () => {
 
   // Mannequin state
   const [activeTab, setActiveTab] = useState<ClosetTab>("inventory");
-  const [mannequinClothing, setMannequinClothing] = useState<MannequinClothingItem[]>([]);
   const gender = useWardrobeStore((s) => s.gender);
   const setGender = useWardrobeStore((s) => s.setGender);
   const hydrated = useWardrobeHydrated();
 
-  // ── Sync local mannequinClothing to Zustand store ──
-  // The MannequinViewer reads from Zustand (not local state),
-  // so we must keep them in sync for 3D clothing to appear.
-  const toggleClothing = useWardrobeStore((s) => s.toggleClothing);
-  const wardrobeSelected = useWardrobeStore((s) => s.selected);
-  const addCustomClothing = useWardrobeStore((s) => s.addCustomClothing);
 
-  useEffect(() => {
-    if (!hydrated) return;
-
-    // Map Closet categories to Zustand categories
-    const catMap: Record<string, Category> = {
-      tops: "top", outerwear: "top", top: "top",
-      bottoms: "bottom", skirts: "bottom", dress: "bottom",
-      shoes: "accessory", hat: "accessory", accessory: "accessory",
-    };
-
-    // Clear all current selections in Zustand
-    (Object.keys(wardrobeSelected) as Category[]).forEach((cat) => {
-      if (wardrobeSelected[cat]) {
-        toggleClothing(cat, wardrobeSelected[cat]!);
-      }
-    });
-
-    // Add each mannequinClothing item to Zustand
-    mannequinClothing.forEach((item) => {
-      const zustandCat = catMap[item.category] || "accessory";
-      const itemId = `closet-${zustandCat}-${item.name.replace(/\s+/g, "-").toLowerCase()}`;
-
-      // Check if already in catalog
-      const existing = useWardrobeStore.getState().catalogItems.find((c) => c.id === itemId);
-      if (!existing) {
-        addCustomClothing({
-          id: itemId,
-          name: item.name,
-          src: item.imageUrl || "",
-          category: zustandCat,
-        });
-      }
-
-      // Select it
-      const currentSelected = useWardrobeStore.getState().selected[zustandCat];
-      if (currentSelected !== itemId) {
-        toggleClothing(zustandCat, itemId);
-      }
-    });
-  }, [mannequinClothing, hydrated]);
 
   const [dna, setDna] = useState<BodyDNA>({ height: 0.5, shoulder: 0.5, waist: 0.5, hips: 0.5, legLength: 0.5 });
   const [pose, setPose] = useState<PosePreset>("neutral");
@@ -304,21 +257,10 @@ const Closet = () => {
 
   // Restore from localStorage on mount
   useEffect(() => {
-    if (!STORAGE_KEY) return;
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored) as MannequinClothingItem[];
-        if (Array.isArray(parsed) && parsed.length > 0) setMannequinClothing(parsed);
-      }
-    } catch {}
+    // Zustand store handles persistence — no localStorage load needed
   }, [STORAGE_KEY]);
 
-  // Persist on change
-  useEffect(() => {
-    if (!STORAGE_KEY) return;
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(mannequinClothing)); } catch {}
-  }, [mannequinClothing, STORAGE_KEY]);
+  // Persistence handled by Zustand store — no localStorage needed
 
   // ── Supabase-backed mannequin state persistence ──
   const MANNEQUIN_STATE_LOADED = useRef(false);
@@ -347,7 +289,21 @@ const Closet = () => {
             let localCount = 0;
             try { if (local) localCount = JSON.parse(local).length; } catch {}
             if (!local || localCount === 0) {
-              setMannequinClothing(data.clothing as MannequinClothingItem[]);
+              // Load Supabase clothing into Zustand store
+              (data.clothing || []).forEach((item: any) => {
+                const cat = item.category || "tops";
+                const zustandCat: Category = (["tops", "outerwear", "top"].includes(cat) ? "top"
+                  : ["bottoms", "skirts", "dress"].includes(cat) ? "bottom"
+                  : "accessory") as Category;
+                const id = `supabase-${zustandCat}-${(item.name || "").replace(/\s+/g, "-").toLowerCase()}`;
+                addCustomClothing({
+                  id, name: item.name || "Unknown",
+                  src: item.imageUrl || "", category: zustandCat,
+                  color: item.color, fit: item.fit, fabric: item.fabric,
+                  imageUrl: item.imageUrl,
+                });
+                toggleClothing(zustandCat, id);
+              });
             }
           }
           console.log("[MANNEQUIN] Loaded state from Supabase");
@@ -369,7 +325,7 @@ const Closet = () => {
           tracing_url: tracingUrl || null,
           tracing_opacity: tracingOpacity,
           show_measurements: showMeasurements,
-          clothing: mannequinClothing as any,
+          clothing: currentlyWearing as any,
           updated_at: new Date().toISOString(),
         }, { onConflict: "user_id" })
         .then(({ error }) => {
@@ -377,7 +333,7 @@ const Closet = () => {
         });
     }, 3000);
     return () => clearTimeout(timer);
-  }, [user, gender, dna, pose, tracingUrl, tracingOpacity, showMeasurements, mannequinClothing]);
+  }, [user, gender, dna, pose, tracingUrl, tracingOpacity, showMeasurements, currentlyWearing]);
 
   // Fetch saved mannequin outfits
   const fetchSavedOutfits = useCallback(async () => {
@@ -396,14 +352,14 @@ const Closet = () => {
   useEffect(() => { fetchSavedOutfits(); }, [fetchSavedOutfits]);
 
   const saveOutfit = async () => {
-    if (!user || !outfitName.trim() || mannequinClothing.length === 0) return;
+    if (!user || !outfitName.trim() || currentlyWearing.length === 0) return;
     setSavingOutfit(true);
     try {
       const { error } = await supabase.from("outfits").insert({
         user_id: user.id,
         name: outfitName.trim(),
-        description: `${mannequinClothing.length} items`,
-        mannequin_items: mannequinClothing as any,
+        description: `${currentlyWearing.length} items`,
+        mannequin_items: currentlyWearing as any,
         ai_generated: false,
       });
       if (error) toast.error("Failed to save outfit");
@@ -421,8 +377,24 @@ const Closet = () => {
   };
 
   const loadOutfit = (outfit: any) => {
-    const items = (outfit.mannequin_items || []) as MannequinClothingItem[];
-    setMannequinClothing(items);
+    const items = (outfit.mannequin_items || []) as any[];
+    // Clear current outfit first
+    clearOutfit();
+    // Load items into Zustand store
+    items.forEach((item: any) => {
+      const cat = item.category || "tops";
+      const zustandCat: Category = (["tops", "outerwear", "top"].includes(cat) ? "top"
+        : ["bottoms", "skirts", "dress"].includes(cat) ? "bottom"
+        : "accessory") as Category;
+      const id = `outfit-${zustandCat}-${(item.name || "").replace(/\s+/g, "-").toLowerCase()}-${Date.now()}`;
+      addCustomClothing({
+        id, name: item.name || "Unknown",
+        src: item.imageUrl || "", category: zustandCat,
+        color: item.color, fit: item.fit, fabric: item.fabric,
+        imageUrl: item.imageUrl,
+      });
+      toggleClothing(zustandCat, id);
+    });
     toast.success(`Loaded "${outfit.name}"`);
   };
 
@@ -705,20 +677,27 @@ const Closet = () => {
     setActiveTab("mannequin");
   };
 
-  // Quick try-on: instantly add to mannequin with defaults and switch tab (with replacement)
+  // Quick try-on: instantly add to mannequin via Zustand
   const quickTryOn = (item: ClothingItem) => {
     const mappedCat = getMannequinCategory(item.category, item.name);
-    const mapped: MannequinClothingItem = {
-      category: mappedCat,
-      color: item.color || "navy",
+    const zustandCat: Category = (["tops", "outerwear", "top"].includes(mappedCat) ? "top"
+      : ["bottoms", "skirts", "dress"].includes(mappedCat) ? "bottom"
+      : "accessory") as Category;
+    const itemId = `closet-${zustandCat}-${item.name.replace(/\s+/g, "-").toLowerCase()}`;
+
+    addCustomClothing({
+      id: itemId,
       name: item.name || item.category,
-      imageUrl: item.photo_url || undefined,
+      src: item.photo_url || "",
+      category: zustandCat,
+      color: item.color || "navy",
       fit: "regular",
       fabric: "default",
-    };
-    setMannequinClothing((prev) => replaceBySlot(prev, mapped));
+      imageUrl: item.photo_url || undefined,
+    });
+    toggleClothing(zustandCat, itemId);
     setActiveTab("mannequin");
-    toast.success(`👗 ${mapped.name} added to mannequin`);
+    toast.success(`👗 ${item.name} added to mannequin`);
   };
 
   // Same-category replacement logic
@@ -736,23 +715,39 @@ const Closet = () => {
   const confirmAddToMannequin = () => {
     if (!pendingItem) return;
     const mappedCat = getMannequinCategory(pendingItem.category, pendingItem.name);
-    const mapped: MannequinClothingItem = {
-      category: mappedCat,
-      color: pendingItem.color || "navy",
+    const zustandCat: Category = (["tops", "outerwear", "top"].includes(mappedCat) ? "top"
+      : ["bottoms", "skirts", "dress"].includes(mappedCat) ? "bottom"
+      : "accessory") as Category;
+    const itemId = `closet-${zustandCat}-${pendingItem.name.replace(/\s+/g, "-").toLowerCase()}`;
+
+    addCustomClothing({
+      id: itemId,
       name: pendingItem.name || pendingItem.category,
-      imageUrl: pendingItem.photo_url || undefined,
+      src: pendingItem.photo_url || "",
+      category: zustandCat,
+      color: pendingItem.color || "navy",
       fit: selectedFit,
       fabric: selectedFabric,
-    };
-    setMannequinClothing((prev) => replaceBySlot(prev, mapped));
+      imageUrl: pendingItem.photo_url || undefined,
+    });
+    toggleClothing(zustandCat, itemId);
     setPendingItem(null);
     setSelectedFit("regular");
     setSelectedFabric("default");
-    toast.success(`Added ${mapped.name} to mannequin`);
+    toast.success(`Added ${pendingItem.name} to mannequin`);
   };
 
-  const removeFromMannequin = (index: number) => {
-    setMannequinClothing((prev) => prev.filter((_, i) => i !== index));
+  const removeFromMannequin = (item: WardrobeClothingItem) => {
+    // Deselect in Zustand — this triggers MannequinViewer cleanup
+    const catMap: Record<string, Category> = {
+      tops: "top", outerwear: "top", top: "top",
+      bottoms: "bottom", skirts: "bottom", dress: "bottom",
+      shoes: "accessory", hat: "accessory", accessory: "accessory",
+    };
+    const zustandCat = catMap[item.category] || "accessory";
+    if (wardrobeSelected[zustandCat] === item.id) {
+      toggleClothing(zustandCat, item.id);
+    }
   };
 
   const saveToCalendar = async (date: string) => {
@@ -760,11 +755,11 @@ const Closet = () => {
     try {
       const { error } = await supabase.from("calendar_events").insert({
         user_id: user.id,
-        title: `Outfit: ${mannequinClothing.map((c) => c.name).join(", ")}`,
+        title: `Outfit: ${currentlyWearing.map((c) => c.name).join(", ")}`,
         event_date: date,
         occasion: "Planned Outfit",
-        notes: `Mannequin outfit with ${mannequinClothing.length} items`,
-        outfit_items: mannequinClothing as any,
+        notes: `Mannequin outfit with ${currentlyWearing.length} items`,
+        outfit_items: currentlyWearing as any,
       });
       if (error) toast.error("Failed to save to calendar");
       else { toast.success("Outfit saved to calendar!"); setShowCalendar(false); }
@@ -1258,21 +1253,21 @@ const Closet = () => {
               {/* Item count badge */}
               <div className="absolute top-3 right-3 bg-background/80 backdrop-blur rounded-full px-3 py-1.5">
                 <span className="text-xs font-sans font-semibold text-foreground">
-                  {mannequinClothing.length} item{mannequinClothing.length !== 1 ? "s" : ""}
+                  {currentlyWearing.length} item{currentlyWearing.length !== 1 ? "s" : ""}
                 </span>
               </div>
             </div>
 
-            {/* Currently Wearing */}
+            {/* Currently Wearing — reads from Zustand store */}
             <div className="px-4 py-3 border-t border-border">
               <h3 className="font-sans text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                 Currently Wearing
               </h3>
-              {mannequinClothing.length === 0 ? (
+              {currentlyWearing.length === 0 ? (
                 <p className="text-xs text-muted-foreground font-sans py-2">No items on mannequin. Use "Try On" to add clothes.</p>
               ) : (
                 <div className="space-y-1.5 mb-3">
-                  {mannequinClothing.map((item, i) => {
+                  {currentlyWearing.map((item) => {
                     const catIcons: Record<string, string> = {
                       tops: "👕", outerwear: "🧥", bottoms: "👖", skirts: "👗", dress: "👗",
                       shoes: "👟", hat: "🎩", accessory: "👜",
@@ -1283,7 +1278,7 @@ const Closet = () => {
                       hat: "hsl(45,70%,50%)", accessory: "hsl(160,50%,45%)",
                     };
                     return (
-                      <div key={i} className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg bg-secondary/60 group">
+                      <div key={item.id} className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg bg-secondary/60 group">
                         <span className="text-sm">{catIcons[item.category] || "👕"}</span>
                         <div className="w-4 h-4 rounded-full flex-shrink-0 border border-border"
                           style={{ backgroundColor: item.color || "#6b7b8d" }} />
@@ -1291,7 +1286,7 @@ const Closet = () => {
                           <p className="text-xs font-sans font-medium text-foreground truncate">{item.name}</p>
                           <p className="text-[10px] font-sans text-muted-foreground capitalize">{item.category} • {item.fit || "regular"}</p>
                         </div>
-                        <button onClick={() => removeFromMannequin(i)}
+                        <button onClick={() => removeFromMannequin(item)}
                           className="w-6 h-6 rounded-full flex items-center justify-center opacity-60 hover:opacity-100 hover:bg-destructive/15 transition-all">
                           <X className="w-3.5 h-3.5 text-destructive" />
                         </button>
@@ -1302,7 +1297,7 @@ const Closet = () => {
               )}
 
               {/* Actions: Save & Schedule */}
-              {mannequinClothing.length > 0 && (
+              {currentlyWearing.length > 0 && (
                 <div className="flex gap-2">
                   <Button size="sm" variant="outline" onClick={() => setShowSaveDialog(true)}
                     className="rounded-full text-xs px-4 flex-1">
@@ -1312,7 +1307,7 @@ const Closet = () => {
                     className="rounded-full text-xs px-4 flex-1 bg-primary text-primary-foreground">
                     <CalendarDots className="w-3.5 h-3.5 mr-1.5" /> Schedule
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={() => setMannequinClothing([])}
+                  <Button size="sm" variant="ghost" onClick={() => clearOutfit()}
                     className="rounded-full text-xs px-3 text-destructive hover:bg-destructive/10">
                     <TrashSimple className="w-3.5 h-3.5" />
                   </Button>
@@ -1616,7 +1611,7 @@ const Closet = () => {
                     className="w-full bg-background rounded-t-2xl p-5" onClick={(e) => e.stopPropagation()}>
                     <h3 className="font-display text-lg font-bold text-foreground mb-3">Schedule This Outfit</h3>
                     <p className="text-sm text-muted-foreground font-sans mb-4">
-                      Pick a date to wear this look ({mannequinClothing.length} item{mannequinClothing.length !== 1 ? "s" : ""})
+                      Pick a date to wear this look ({currentlyWearing.length} item{currentlyWearing.length !== 1 ? "s" : ""})
                     </p>
                     <div className="flex gap-2 overflow-x-auto pb-4">
                       {Array.from({ length: 7 }, (_, i) => {
