@@ -114,12 +114,19 @@ def chunk_text(text, max_chars=2000, overlap=200):
 def save_knowledge(domain, filename, chunks, metadata):
     """Save processed knowledge to knowledge_base/{domain}/."""
     domain_dir = os.path.join(KBASE, domain)
-    os.makedirs(domain_dir, exist_ok=True)
+    
+    # Validate path to prevent directory traversal
+    base_real = os.path.realpath(KBASE)
+    target_real = os.path.realpath(domain_dir)
+    if os.path.commonpath([base_real, target_real]) != base_real:
+        raise Exception("Invalid file path")
+    
+    os.makedirs(target_real, exist_ok=True)
     
     file_id = hashlib.md5(filename.encode()).hexdigest()[:12]
     
     # Save chunks
-    chunks_dir = os.path.join(domain_dir, "chunks")
+    chunks_dir = os.path.join(target_real, "chunks")
     os.makedirs(chunks_dir, exist_ok=True)
     chunk_file = os.path.join(chunks_dir, f"{file_id}.json")
     
@@ -137,7 +144,7 @@ def save_knowledge(domain, filename, chunks, metadata):
         json.dump(chunk_data, f, indent=2)
     
     # Update manifest
-    manifest_file = os.path.join(domain_dir, "manifest.json")
+    manifest_file = os.path.join(target_real, "manifest.json")
     manifest = []
     if os.path.exists(manifest_file):
         with open(manifest_file) as f:
