@@ -1,4 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { MannequinViewer } from "@/components/ui/mannequin-viewer";
+import {
+  useWardrobeStore,
+  useWardrobeHydrated,
+  type Category,
+} from "@/store/useWardrobeStore";
+import { cn } from "@/lib/utils";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import FlipGallery, { type OutfitImages } from "@/components/ui/flip-gallery";
@@ -24,6 +31,125 @@ const OCCASIONS = [
   { id: "date-night", label: "Date Night", emoji: "🌹" },
   { id: "sport", label: "Sport", emoji: "🏃" },
 ];
+
+/* ---- 3D WARDROBE SECTION ---- */
+const CATEGORIES: { key: Category; label: string }[] = [
+  { key: "top", label: "Tops" },
+  { key: "bottom", label: "Bottoms" },
+  { key: "accessory", label: "Accessories" },
+];
+
+function MannequinWardrobeSection() {
+  const gender = useWardrobeStore((s) => s.gender);
+  const setGender = useWardrobeStore((s) => s.setGender);
+  const selected = useWardrobeStore((s) => s.selected);
+  const catalogItems = useWardrobeStore((s) => s.catalogItems);
+  const toggleClothing = useWardrobeStore((s) => s.toggleClothing);
+  const clearOutfit = useWardrobeStore((s) => s.clearOutfit);
+  const addCustomClothing = useWardrobeStore((s) => s.addCustomClothing);
+  const hydrated = useWardrobeHydrated();
+
+  const handleUpload = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const blobUrl = URL.createObjectURL(file);
+      addCustomClothing({
+        id: crypto.randomUUID(),
+        name: file.name.replace(".glb", ""),
+        src: blobUrl,
+        category: "top",
+      });
+      e.target.value = "";
+    },
+    [addCustomClothing]
+  );
+
+  return (
+    <div className="rounded-2xl border border-border bg-card overflow-hidden">
+      <div className="grid grid-cols-1 md:grid-cols-[200px_1fr_240px] min-h-[500px]">
+        {/* Left Rail: Gender */}
+        <div className="p-4 border-b md:border-b-0 md:border-r border-border flex flex-col gap-3">
+          <p className="text-xs font-sans font-semibold text-muted-foreground uppercase tracking-wider">Gender</p>
+          <div className="flex gap-1 bg-secondary rounded-xl p-1">
+            {(["male", "female"] as const).map((g) => (
+              <button
+                key={g}
+                onClick={() => hydrated && setGender(g)}
+                disabled={!hydrated}
+                className={cn(
+                  "flex-1 py-2 rounded-lg text-xs font-sans font-semibold transition-all",
+                  gender === g ? "bg-foreground text-background" : "text-muted-foreground"
+                )}
+              >
+                {g === "male" ? "♂ Male" : "♀ Female"}
+              </button>
+            ))}
+          </div>
+          <div className="mt-auto">
+            <button
+              onClick={clearOutfit}
+              className="w-full py-2 rounded-lg text-xs font-sans font-semibold text-destructive bg-destructive/10 hover:bg-destructive/20 transition-colors"
+            >
+              Clear Outfit
+            </button>
+          </div>
+        </div>
+
+        {/* Center: 3D Viewer */}
+        <div className="relative bg-gradient-to-b from-secondary/10 to-background min-h-[400px]">
+          <MannequinViewer className="w-full h-full" />
+        </div>
+
+        {/* Right Rail: Catalog */}
+        <div className="p-4 border-t md:border-t-0 md:border-l border-border overflow-y-auto max-h-[500px]">
+          <p className="text-xs font-sans font-semibold text-muted-foreground uppercase tracking-wider mb-3">Catalog</p>
+          {CATEGORIES.map(({ key, label }) => (
+            <div key={key} className="mb-4">
+              <p className="text-[10px] font-sans text-muted-foreground mb-1.5">{label}</p>
+              <div className="space-y-1">
+                {catalogItems
+                  .filter((i) => i.category === key)
+                  .map((item) => {
+                    const isActive = selected[key] === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => toggleClothing(key, item.id)}
+                        className={cn(
+                          "w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-sans transition-all text-left",
+                          isActive
+                            ? "bg-primary/15 text-primary ring-1 ring-primary/40"
+                            : "bg-secondary text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        {isActive && <Check className="w-3 h-3 flex-shrink-0" />}
+                        <span className="truncate">{item.name}</span>
+                      </button>
+                    );
+                  })}
+                {catalogItems.filter((i) => i.category === key).length === 0 && (
+                  <p className="text-[10px] text-muted-foreground/50 italic">No items</p>
+                )}
+              </div>
+            </div>
+          ))}
+
+          {/* Upload Button */}
+          <div className="mt-4 pt-3 border-t border-border">
+            <label className="flex flex-col items-center justify-center w-full py-3 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/40 transition-colors">
+              <span className="text-xs font-sans text-muted-foreground">Upload .glb clothing</span>
+              <input type="file" accept=".glb" onChange={handleUpload} className="hidden" />
+            </label>
+            <p className="text-[9px] text-muted-foreground/40 mt-1.5 text-center">
+              Session-only. For permanent items, add to public/models/clothing/.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function DressingRoomPage() {
   const { user } = useAuth();
@@ -201,6 +327,9 @@ export default function DressingRoomPage() {
             Browse your analyzed outfits. Generate new combinations from your closet.
           </p>
         </motion.div>
+
+        {/* ---- 3D MANNEQUIN WARDROBE ---- */}
+        <MannequinWardrobeSection />
 
         {/* ---- IPHONE MOCKUP + NOTIFICATIONS ---- */}
         <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto gap-1 overflow-visible">

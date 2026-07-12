@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { haptic } from "@/lib/haptics";
 import {Plus, MagnifyingGlass, TShirt, SlidersHorizontal, TrashSimple, UploadSimple, X, Spinner, Sparkle, CheckCircle, Camera, CaretRight, Sliders, Pulse, Eye, User, StackSimple, CalendarDots, Image, FloppyDisk, FolderOpen, Heart, Receipt, File, Upload} from "@phosphor-icons/react";
 import { MannequinViewer } from "@/components/ui/mannequin-viewer";
+import { useWardrobeStore, useWardrobeHydrated } from "@/store/useWardrobeStore";
 import { type ClothingItem as MannequinClothingItem, type BodyDNA, type PosePreset } from "@/components/app/Mannequin3D";
 import { SLOT_MAP, DRESS_REPLACES, type GarmentFit } from "@/components/app/GarmentGeometry";
 import type { FabricType } from "@/components/app/FabricMaterials";
@@ -136,7 +137,9 @@ const Closet = () => {
   // Mannequin state
   const [activeTab, setActiveTab] = useState<ClosetTab>("inventory");
   const [mannequinClothing, setMannequinClothing] = useState<MannequinClothingItem[]>([]);
-  const [gender, setGender] = useState<"male" | "female">("male");
+  const gender = useWardrobeStore((s) => s.gender);
+  const setGender = useWardrobeStore((s) => s.setGender);
+  const hydrated = useWardrobeHydrated();
   const [dna, setDna] = useState<BodyDNA>({ height: 0.5, shoulder: 0.5, waist: 0.5, hips: 0.5, legLength: 0.5 });
   const [pose, setPose] = useState<PosePreset>("neutral");
   const [activePanel, setActivePanel] = useState<MannequinPanel>(null);
@@ -1190,16 +1193,18 @@ const Closet = () => {
               </div>
 
               {/* Gender toggle */}
-              <div className="absolute top-3 left-3 flex gap-1 bg-background/80 backdrop-blur rounded-full p-1">
-                {(["male", "female"] as const).map((g) => (
-                  <button key={g} onClick={() => setGender(g)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-sans font-semibold transition-colors ${
-                      gender === g ? "bg-foreground text-background" : "text-muted-foreground"
-                    }`}>
-                    {g === "male" ? "♂ Male" : "♀ Female"}
-                  </button>
-                ))}
-              </div>
+              {hydrated && (
+                <div className="absolute top-3 left-3 flex gap-1 bg-background/80 backdrop-blur rounded-full p-1">
+                  {(["male", "female"] as const).map((g) => (
+                    <button key={g} onClick={() => setGender(g)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-sans font-semibold transition-colors ${
+                        gender === g ? "bg-foreground text-background" : "text-muted-foreground"
+                      }`}>
+                      {g === "male" ? "♂ Male" : "♀ Female"}
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {/* Item count badge */}
               <div className="absolute top-3 right-3 bg-background/80 backdrop-blur rounded-full px-3 py-1.5">
