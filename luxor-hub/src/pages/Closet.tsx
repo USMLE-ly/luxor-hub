@@ -140,7 +140,21 @@ const Closet = () => {
   const setGender = useWardrobeStore((s) => s.setGender);
   const hydrated = useWardrobeHydrated();
 
+  // ── Zustand store hooks (single source of truth) ──
+  const toggleClothing = useWardrobeStore((s) => s.toggleClothing);
+  const addCustomClothing = useWardrobeStore((s) => s.addCustomClothing);
+  const removeClothing = useWardrobeStore((s) => s.removeClothing);
+  const clearOutfit = useWardrobeStore((s) => s.clearOutfit);
+  const wardrobeSelected = useWardrobeStore((s) => s.selected);
+  const catalogItems = useWardrobeStore((s) => s.catalogItems);
 
+  // Derived: currently wearing (items where selected[category] matches)
+  const currentlyWearing = useMemo(() => {
+    return (Object.entries(wardrobeSelected) as [Category, string | null][])
+      .filter(([, id]) => id !== null)
+      .map(([cat, id]) => catalogItems.find((c) => c.id === id))
+      .filter(Boolean);
+  }, [wardrobeSelected, catalogItems]);
 
   const [dna, setDna] = useState<BodyDNA>({ height: 0.5, shoulder: 0.5, waist: 0.5, hips: 0.5, legLength: 0.5 });
   const [pose, setPose] = useState<PosePreset>("neutral");
