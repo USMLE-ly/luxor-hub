@@ -17,7 +17,7 @@ import {Plus, MagnifyingGlass, TShirt, SlidersHorizontal, TrashSimple, UploadSim
 import { MannequinViewer } from "@/components/ui/mannequin-viewer";
 import { useWardrobeStore, useWardrobeHydrated, type Category, type ClothingItem as WardrobeClothingItem } from "@/store/useWardrobeStore";
 import { resolve3DAsset, uploadAndAssignGLB, restoreAssetMappings } from "@/lib/assetResolver";
-import { type ClothingItem as MannequinClothingItem, type BodyDNA, type PosePreset } from "@/components/app/Mannequin3D";
+import { type BodyDNA, type PosePreset } from "@/components/app/Mannequin3D";
 import { SLOT_MAP, DRESS_REPLACES, type GarmentFit } from "@/components/app/GarmentGeometry";
 import type { FabricType } from "@/components/app/FabricMaterials";
 import { WardrobeIntelligence } from "@/components/app/WardrobeIntelligence";
@@ -746,17 +746,6 @@ const Closet = () => {
     }
   };
 
-  // Same-category replacement logic
-  const replaceBySlot = (current: MannequinClothingItem[], newItem: MannequinClothingItem): MannequinClothingItem[] => {
-    const cat = newItem.category;
-    const conflictSlots = SLOT_MAP[cat] || [cat];
-    // If adding a dress, also remove tops/bottoms/skirts
-    const toRemove = cat === "dress"
-      ? [...conflictSlots, ...DRESS_REPLACES]
-      : conflictSlots;
-    const filtered = current.filter(item => !toRemove.includes(item.category));
-    return [...filtered, newItem];
-  };
 
   const confirmAddToMannequin = () => {
     if (!pendingItem) return;
@@ -1433,7 +1422,7 @@ const Closet = () => {
                 ) : (
                   <div className="space-y-2">
                     {displayed.map((outfit) => {
-                      const outfitItems = (outfit.mannequin_items || []) as MannequinClothingItem[];
+                      const outfitItems = (outfit.mannequin_items || []) as any[];
                       return (
                         <motion.div key={outfit.id}
                           initial={{ opacity: 0 }} animate={{ opacity: 1 }}
