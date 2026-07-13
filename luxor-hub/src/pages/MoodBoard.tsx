@@ -148,7 +148,9 @@ const MoodBoard = () => {
     if (!file || !user || !activeBoard) return;
     const reader = new FileReader();
     reader.onload = async () => {
-      const ext = file.name.split(".").pop();
+      // Sanitize extension: strip path separators and traversal chars
+      const rawExt = file.name.split(".").pop() || "bin";
+      const ext = rawExt.replace(/[^a-zA-Z0-9]/g, "").slice(0, 8) || "bin";
       const path = `${user.id}/moodboard/${crypto.randomUUID()}.${ext}`;
       const { error: uploadErr } = await supabase.storage.from("look-photos").upload(path, file);
       if (uploadErr) { toast.error("Upload failed"); return; }

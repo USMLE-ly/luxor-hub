@@ -58,7 +58,9 @@ export const CreateLookDialog = ({ open, onOpenChange, onCreated }: CreateLookDi
   const uploadPhoto = async (): Promise<string | null> => {
     if (!photoFile || !user) return null;
     setUploading(true);
-    const ext = photoFile.name.split(".").pop();
+          // Sanitize extension: strip path separators and traversal chars
+      const rawExt = photoFile.name.split(".").pop() || "bin";
+      const ext = rawExt.replace(/[^a-zA-Z0-9]/g, "").slice(0, 8) || "bin";
     const path = `${user.id}/${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from("look-photos").upload(path, photoFile);
     setUploading(false);

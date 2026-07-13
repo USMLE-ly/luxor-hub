@@ -438,7 +438,9 @@ export default function Analysis() {
       // Upload image
       let publicUrl = imagePreview;
       if (imageFile) {
-        const ext = imageFile.name.split(".").pop();
+              // Sanitize extension: strip path separators and traversal chars
+      const rawExt = imageFile.name.split(".").pop() || "bin";
+      const ext = rawExt.replace(/[^a-zA-Z0-9]/g, "").slice(0, 8) || "bin";
         const path = `${user.id}/${Date.now()}.${ext}`;
         const { error: upErr } = await supabase.storage.from("clothing-photos").upload(path, imageFile);
         if (!upErr) {
