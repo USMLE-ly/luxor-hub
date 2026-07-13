@@ -28,26 +28,23 @@ export function VerticalImageStack({ images = [] }: { images: StackImage[] }) {
 
   if (!images || images.length === 0) {
     return (
-      <div className="flex h-[400px] w-full items-center justify-center bg-zinc-100 dark:bg-zinc-800/50 rounded-2xl border border-dashed border-zinc-300 dark:border-zinc-700">
-        <div className="text-center">
-          <span className="text-4xl block mb-2">👗</span>
-          <p className="text-zinc-400 text-sm">Select items from the closet sidebar to build an outfit.</p>
-        </div>
+      <div className="flex h-full w-full items-center justify-center bg-zinc-900/50 rounded-xl">
+        <p className="text-zinc-500 text-xs text-center px-4">Select items from the gallery below to build your stack.</p>
       </div>
     );
   }
 
   return (
-    <div className="relative flex w-full h-[450px] items-center justify-center overflow-hidden">
+    <div className="relative flex w-full h-full items-center justify-center overflow-hidden">
       {images.map((image, index) => {
         let diff = index - currentIndex;
         const total = images.length;
         if (diff > total / 2) diff -= total;
         if (diff < -total / 2) diff += total;
 
-        const y = diff === 0 ? 0 : diff === -1 ? -120 : diff === 1 ? 120 : diff < 0 ? -220 : 220;
+        const y = diff === 0 ? 0 : diff === -1 ? -80 : diff === 1 ? 80 : diff < 0 ? -160 : 160;
         const scale = diff === 0 ? 1 : Math.abs(diff) === 1 ? 0.9 : 0.8;
-        const opacity = diff === 0 ? 1 : Math.abs(diff) === 1 ? 0.7 : 0;
+        const opacity = diff === 0 ? 1 : Math.abs(diff) === 1 ? 0.85 : 0.5;
         const zIndex = diff === 0 ? 5 : Math.abs(diff) === 1 ? 4 : 3;
 
         return (
@@ -61,28 +58,20 @@ export function VerticalImageStack({ images = [] }: { images: StackImage[] }) {
             dragElastic={0.2}
             onDragEnd={handleDragEnd}
           >
-            <div className="relative h-[380px] w-[260px] overflow-hidden rounded-2xl bg-white dark:bg-zinc-900 shadow-2xl ring-1 ring-zinc-200/50 dark:ring-zinc-800/50">
+            <div className="relative w-[180px] aspect-[3/4] overflow-hidden rounded-xl bg-zinc-800 shadow-2xl ring-1 ring-white/10">
               <img
                 src={image.src || "/placeholder.svg"}
                 alt={image.name || "Clothing item"}
-                className="absolute inset-0 w-full h-full object-contain p-4"
+                className="absolute inset-0 w-full h-full object-contain p-2"
                 draggable={false}
               />
-              <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent">
-                <p className="text-white text-xs font-medium truncate">{image.name}</p>
+              <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/70 to-transparent">
+                <p className="text-white text-[10px] font-medium truncate">{image.name}</p>
               </div>
             </div>
           </motion.div>
         );
       })}
-      {/* Counter */}
-      {images.length > 1 && (
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/40 backdrop-blur-sm rounded-full px-3 py-1 z-10">
-          <span className="text-[10px] text-white/70">
-            {currentIndex + 1} / {images.length} · Swipe
-          </span>
-        </div>
-      )}
     </div>
   );
 }

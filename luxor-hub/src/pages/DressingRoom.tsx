@@ -1,13 +1,11 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   useWardrobeStore,
   type Category,
 } from "@/store/useWardrobeStore";
-import { cn } from "@/lib/utils";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import FlipGallery, { type OutfitImages } from "@/components/ui/flip-gallery";
-import IPhoneMockup from "@/components/ui/iphone-mockup";
 import { Perspective, Highlight } from "@/components/ui/perspective-highlight";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -18,9 +16,7 @@ import { notifyEvent } from "@/lib/notificationService";
 import { LiquidGlassCard } from "@/components/ui/liquid-notification";
 import { supabase } from "@/integrations/supabase/client";
 import { humanizeTextArray } from "@/lib/humanizer";
-import { generateDummyShirtGLB, generateDummyPantsGLB, generateDummyShoesGLB } from "@/lib/dummyGLBGenerator";
 import { VerticalImageStack } from "@/components/ui/vertical-image-stack";
-import { restoreAssetMappings } from "@/lib/assetResolver";
 
 /* ------------------------------------------------------------------ */
 /*  Constants                                                          */
@@ -33,12 +29,6 @@ const OCCASIONS = [
   { id: "sport", label: "Sport", emoji: "🏃" },
 ];
 
-/* ---- 3D WARDROBE SECTION ---- */
-const CATEGORIES: { key: Category; label: string }[] = [
-  { key: "top", label: "Tops" },
-  { key: "bottom", label: "Bottoms" },
-  { key: "accessory", label: "Accessories" },
-];
 
 export default function DressingRoomPage() {
   const { user } = useAuth();
@@ -59,7 +49,7 @@ export default function DressingRoomPage() {
         if (!item) return null;
         return {
           id: item.id,
-          src: item.imageUrl || item.src || "/placeholder.svg",
+          src: item.imageUrl || "/placeholder.svg",
           name: item.name || "Unnamed",
         };
       })
@@ -230,205 +220,107 @@ export default function DressingRoomPage() {
       <ScrollReveal delay={0.1}>
       <div className="p-4 md:p-8 mx-auto max-w-5xl space-y-4 overflow-x-hidden pb-32">
 
-        {/* ---- HEADER ---- */}
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="font-display text-4xl font-bold text-foreground">Your Dressing Room</h1>
-          <p className="text-muted-foreground mt-2 text-lg">
-            Browse your analyzed outfits. Generate new combinations from your closet.
-          </p>
-        </motion.div>
+                {/* ---- DUAL PHONE FRAMES ---- */}
+        <div className="container mx-auto px-4 py-6 space-y-6">
+          <div className="text-center mb-6">
+            <h1 className="text-2xl font-bold text-foreground">Your Dressing Room</h1>
+            <p className="text-sm text-muted-foreground">Build outfits manually or let AI generate new combinations.</p>
+          </div>
 
-        {/* ---- OUTFIT FROM CLOSET ---- */}
+          {/* Two Phone Frames Side by Side */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
 
-        {/* ---- IPHONE MOCKUP + NOTIFICATIONS ---- */}
-        <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto gap-1 overflow-visible">
-          {/* Top Notification — Outfit Title (above iPhone) */}
-          <AnimatePresence>
-            {showNotifications && activeOutfit && activeOutfit.stylist_reasoning && activeOutfit.stylist_reasoning.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.7, y: 40 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.7 }}
-                transition={{ type: "spring", stiffness: 100, damping: 25 }}
-                className="w-full flex justify-center origin-center"
-              >
-                <LiquidGlassCard
-                  width="320px"
-                  height="64px"
-                  borderRadius="20px"
-                  blurIntensity="xl"
-                  glowIntensity="sm"
-                  shadowIntensity="md"
-                  draggable={false}
-                >
-                  <div className="flex items-center px-5 py-3 h-full">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-foreground/90 truncate">
-                        {activeOutfit.stylist_reasoning[0]?.split(' ').slice(0, 6).join(' ') || 'Styled Look'}
-                      </p>
-                      <p className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5">Ready to wear</p>
-                    </div>
-                    <div className="w-2 h-2 rounded-full bg-emerald-400/70 flex-shrink-0 ml-3 animate-pulse" />
-
+            {/* FRAME 1: MANUAL OUTFIT BUILDER (INSTAGRAM STYLE) */}
+            <div className="relative mx-auto w-full max-w-[320px] aspect-[9/19] rounded-[3rem] border-[6px] border-amber-200/80 bg-zinc-950 shadow-2xl p-2 overflow-hidden">
+              <div className="flex flex-col h-full w-full rounded-[2.75rem] bg-zinc-900 overflow-hidden">
+                {/* TOP HALF: Vertical Image Stack (Preview) */}
+                <div className="flex-1 w-full relative overflow-hidden border-b border-zinc-800/50">
+                  <VerticalImageStack images={currentStackImages} />
+                </div>
+                {/* BOTTOM HALF: Gallery Picker */}
+                <div className="h-[45%] bg-zinc-900 p-3 flex flex-col gap-2 overflow-hidden">
+                  <div className="flex justify-between items-center shrink-0">
+                    <span className="text-xs font-medium text-zinc-400">Select from Closet</span>
+                    <button onClick={clearOutfit} className="text-[10px] bg-zinc-800 hover:bg-zinc-700 px-2 py-1 rounded text-zinc-300 transition-colors">Clear</button>
                   </div>
-                </LiquidGlassCard>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-                    {/* ---- UPLOAD MANUAL OUTFITS + CLOSET SIDEBAR ---- */}
-          <div className="flex flex-col lg:flex-row gap-6 w-full mb-8">
-            {/* Closet Sidebar */}
-            <div className="w-full lg:w-64 flex-shrink-0 bg-card rounded-2xl border border-border p-4 h-fit max-h-[500px] overflow-y-auto space-y-3">
-              <h3 className="text-sm font-semibold text-foreground">Closet Items</h3>
-              {catalogItems.length === 0 ? (
-                <p className="text-xs text-muted-foreground text-center py-4">No items in closet yet.</p>
-              ) : (
-                <div className="space-y-1.5">
-                  {catalogItems.map((item) => {
-                    const isActive = Object.values(selected).includes(item.id);
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => {
-                          const cat = item.category as Category;
-                          toggleClothing(cat, item.id);
-                        }}
-                        className={cn(
-                          "w-full flex items-center gap-2.5 p-2 rounded-xl transition-colors text-left",
-                          isActive
-                            ? "bg-primary/15 ring-1 ring-primary/40"
-                            : "hover:bg-secondary/60"
-                        )}
-                      >
-                        <div className="w-9 h-9 rounded-lg bg-secondary overflow-hidden flex-shrink-0">
-                          {(item.imageUrl || item.src) ? (
-                            <img
-                              src={item.imageUrl || item.src}
-                              alt={item.name}
-                              className="w-full h-full object-cover"
-                            />
+                  <div className="grid grid-cols-3 gap-2 overflow-y-auto flex-1 content-start pr-1 custom-scrollbar">
+                    {catalogItems.map((item) => {
+                      const isActive = selected[item.category as keyof typeof selected] === item.id;
+                      return (
+                        <div
+                          key={item.id}
+                          onClick={() => toggleClothing(item.category as Category, item.id)}
+                          className="relative aspect-square rounded-xl overflow-hidden cursor-pointer bg-zinc-800 hover:ring-2 hover:ring-zinc-500 transition-all"
+                        >
+                          {(item.imageUrl) ? (
+                            <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" draggable={false} />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
+                            <div className="w-full h-full flex items-center justify-center text-zinc-600 text-lg">
                               {item.category === "top" ? "👕" : item.category === "bottom" ? "👖" : "👟"}
                             </div>
                           )}
+                          {isActive && (
+                            <div className="absolute top-1 right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center border-2 border-zinc-900">
+                              <span className="text-[10px] text-white font-bold">✓</span>
+                            </div>
+                          )}
                         </div>
-                        <div className="flex flex-col overflow-hidden min-w-0">
-                          <span className="text-xs font-medium text-foreground truncate">{item.name || "Unnamed"}</span>
-                          <span className="text-[10px] text-muted-foreground capitalize">{item.category}</span>
-                        </div>
-                        {isActive && <Check className="w-3.5 h-3.5 text-primary flex-shrink-0 ml-auto" />}
-                      </button>
-                    );
-                  })}
+                      );
+                    })}
+                    {catalogItems.length === 0 && (
+                      <p className="col-span-3 text-[10px] text-zinc-600 text-center py-4">No items in closet</p>
+                    )}
+                  </div>
                 </div>
-              )}
-              {Object.values(selected).some(Boolean) && (
-                <button onClick={clearOutfit} className="w-full mt-2 text-xs text-destructive hover:text-destructive/80 font-medium text-center py-1.5">
-                  Clear Outfit
+              </div>
+            </div>
+
+            {/* FRAME 2: AI GENERATE OUTFIT */}
+            <div className="relative mx-auto w-full max-w-[320px] aspect-[9/19] rounded-[3rem] border-[6px] border-amber-200/80 bg-zinc-950 shadow-2xl p-2 overflow-hidden flex flex-col">
+              <div className="flex-1 flex flex-col rounded-[2.75rem] bg-zinc-900 overflow-hidden">
+                {isGenerating ? (
+                  <div className="flex-1 flex flex-col items-center justify-center">
+                    <div className="relative w-16 h-16 mb-3">
+                      <div className="absolute inset-0 rounded-full border-2 border-zinc-700" />
+                      <div className="absolute inset-0 rounded-full border-2 border-amber-200 border-t-transparent animate-spin" />
+                      <span className="absolute inset-0 flex items-center justify-center text-xs font-medium text-amber-200">{displayProgress}%</span>
+                    </div>
+                    <p className="text-xs text-zinc-400 text-center px-4">{progressStage}</p>
+                  </div>
+                ) : generatedImages.length > 0 ? (
+                  <FlipGallery
+                    outfits={generatedImages}
+                    onGenerate={handleGenerateClick}
+                    onDismiss={handleDismiss}
+                    onAddToCalendar={(outfit) => {
+                      if (outfit) {
+                        setCalendarDate(new Date().toISOString().split("T")[0]);
+                        setCalendarEventTitle("");
+                        setShowCalendarModal(true);
+                      }
+                    }}
+                    isLoading={isGenerating}
+                    onOutfitChange={setActiveOutfit}
+                  />
+                ) : (
+                  <div className="flex-1 flex items-center justify-center text-zinc-600 text-xs text-center px-4">
+                    Select items in the left frame, then generate.
+                  </div>
+                )}
+              </div>
+              {/* Generate Button — fixed at bottom */}
+              <div className="absolute bottom-6 left-0 right-0 flex justify-center px-4 z-10">
+                <button
+                  onClick={handleGenerateClick}
+                  className="w-full py-3.5 rounded-full bg-gradient-to-r from-[#E8C87A] to-[#E8C87A]/80 text-zinc-900 text-sm font-medium shadow-lg hover:shadow-xl transition-all"
+                >
+                  Generate Outfit
                 </button>
-              )}
-            </div>
-
-            {/* Main Area: Vertical Stack */}
-            <div className="flex-1 flex flex-col bg-card rounded-2xl border border-border p-6">
-              <h2 className="text-xl font-semibold text-foreground mb-1">Upload Manual Outfits</h2>
-              <p className="text-sm text-muted-foreground mb-4">Select items from the closet. Swipe vertically to browse your outfit.</p>
-              <div className="flex-1 flex items-center justify-center min-h-[400px]">
-                <VerticalImageStack images={currentStackImages} />
               </div>
             </div>
+
           </div>
-
-          {/* iPhone Mockup */}
-          {/* iPhone Mockup */}
-          <IPhoneMockup
-            model="15-pro"
-            color="golden-sands"
-            screenBg="#1D3937"
-            scale={0.85}
-            showHomeIndicator={true}
-            safeArea={true}
-            style={{ transformOrigin: "center" }}
-          >
-            {isGenerating ? (
-              <div style={{
-                position: 'absolute',
-                inset: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: 'rgba(0,0,0,0.7)',
-                zIndex: 50,
-              }}>
-                <div style={{
-                  position: 'relative',
-                  width: '96px',
-                  height: '96px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}>
-                  <div style={{
-                    position: 'absolute',
-                    width: '100%',
-                    height: '100%',
-                    borderRadius: '50%',
-                    border: '4px solid rgba(255,255,255,0.06)',
-                    borderTopColor: '#e5c785',
-                    borderRightColor: '#d4b06a',
-                  }}
-                    className="animate-spin"
-                  />
-                  <div style={{
-                    position: 'absolute',
-                    width: '64px',
-                    height: '64px',
-                    borderRadius: '50%',
-                    backgroundColor: 'rgba(229, 199, 133, 0.15)',
-                  }}
-                    className="animate-pulse"
-                  />
-                  <span style={{
-                    fontSize: '16px',
-                    fontWeight: 600,
-                    color: 'rgba(229, 199, 133, 0.9)',
-                    zIndex: 1,
-                  }}>
-                    {displayProgress}%
-                  </span>
-                </div>
-                <p style={{
-                  marginTop: '24px',
-                  fontSize: '13px',
-                  color: 'rgba(255,255,255,0.7)',
-                  fontWeight: 500,
-                  letterSpacing: '0.05em',
-                  textAlign: 'center',
-                  padding: '0 16px',
-                }}>
-                  {progressStage}
-                </p>
-              </div>
-            ) : (
-              <FlipGallery
-                outfits={generatedImages}
-                onGenerate={handleGenerateClick}
-                onDismiss={handleDismiss}
-                onAddToCalendar={(outfit) => {
-                  if (outfit) {
-                    setCalendarDate(new Date().toISOString().split("T")[0]);
-                    setCalendarEventTitle("");
-                    setShowCalendarModal(true);
-                  }
-                }}
-                isLoading={isGenerating}
-                onOutfitChange={setActiveOutfit}
-              />
-            )}
-          </IPhoneMockup>
+        </div>
 
           {/* Three Bottom Notifications — Stylist Reasoning (below iPhone) */}
           <AnimatePresence>
@@ -490,7 +382,7 @@ export default function DressingRoomPage() {
               </StaggerContainer>
             )}
           </AnimatePresence>
-        </div>        {/* ---- Occasion Modal ---- */}
+        {/* ---- Occasion Modal ---- */}
         <AnimatePresence>
           {showOccasionModal && (
             <motion.div
