@@ -1,9 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   useWardrobeStore,
-  useWardrobeHydrated,
-  persistClothingToIDB,
-  restoreClothingFromIDB,
   type Category,
 } from "@/store/useWardrobeStore";
 import { cn } from "@/lib/utils";
@@ -22,6 +19,8 @@ import { LiquidGlassCard } from "@/components/ui/liquid-notification";
 import { supabase } from "@/integrations/supabase/client";
 import { humanizeTextArray } from "@/lib/humanizer";
 import { generateDummyShirtGLB, generateDummyPantsGLB, generateDummyShoesGLB } from "@/lib/dummyGLBGenerator";
+import { VerticalImageStack } from "@/components/ui/vertical-image-stack";
+import { AIMultiModalGeneration } from "@/components/ui/ai-gen";
 import { restoreAssetMappings } from "@/lib/assetResolver";
 
 /* ------------------------------------------------------------------ */
@@ -41,98 +40,6 @@ const CATEGORIES: { key: Category; label: string }[] = [
   { key: "bottom", label: "Bottoms" },
   { key: "accessory", label: "Accessories" },
 ];
-
-function OutfitFromCloset() {
-  const selected = useWardrobeStore((s) => s.selected);
-  const catalogItems = useWardrobeStore((s) => s.catalogItems);
-  const toggleClothing = useWardrobeStore((s) => s.toggleClothing);
-  const clearOutfit = useWardrobeStore((s) => s.clearOutfit);
-  const addCustomClothing = useWardrobeStore((s) => s.addCustomClothing);
-  const hydrated = useWardrobeHydrated();
-
-  useEffect(() => {
-    if (hydrated) {
-      restoreAssetMappings();
-      restoreClothingFromIDB();
-    }
-  }, [hydrated]);
-
-  const handleUpload = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-      const ext = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
-      if (![".glb", ".gltf"].includes(ext)) {
-        toast.error(`Please upload a .glb 3D model file.`);
-        e.target.value = "";
-        return;
-      }
-      const blobUrl = URL.createObjectURL(file);
-      const itemId = crypto.randomUUID();
-      addCustomClothing({ id: itemId, name: file.name.replace(/\.(glb|gltf)$/i, ""), src: blobUrl, category: "top" });
-      persistClothingToIDB(itemId, file).catch(() => {});
-      toast.success(`Uploaded ${file.name.replace(".glb", "")}`);
-      e.target.value = "";
-    },
-    [addCustomClothing]
-  );
-
-  const categories: { key: Category; label: string; emoji: string }[] = [
-    { key: "top", label: "Tops", emoji: "\ud83d\udc55" },
-    { key: "bottom", label: "Bottoms", emoji: "\ud83d\udc56" },
-    { key: "accessory", label: "Accessories", emoji: "\ud83d\udc5c" },
-  ];
-  const selectedCount = Object.values(selected).filter(Boolean).length;
-
-  return (
-    <div className="rounded-2xl border border-border bg-card overflow-hidden">
-      <div className="p-4 border-b border-border">
-        <div className="flex items-center justify-between mb-1">
-          <h3 className="font-sans text-sm font-semibold text-foreground">Build Your Outfit</h3>
-          {selectedCount > 0 && (
-            <span className="text-[10px] font-sans font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">{selectedCount} selected</span>
-          )}
-        </div>
-        <p className="text-[10px] font-sans text-muted-foreground">Pick items from your closet to create an outfit.</p>
-      </div>
-      <div className="grid grid-cols-3 gap-0 divide-x divide-border">
-        {categories.map(({ key, label, emoji }) => {
-          const items = catalogItems.filter((i) => i.category === key);
-          const activeItem = items.find((i) => selected[key] === i.id);
-          return (
-            <div key={key} className="p-3">
-              <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-wider mb-2">{emoji} {label}</p>
-              {items.length === 0 ? (
-                <p className="text-[10px] text-muted-foreground/50 italic py-2">No items</p>
-              ) : (
-                <div className="space-y-1 max-h-[200px] overflow-y-auto scrollbar-none">
-                  {items.map((item) => (
-                    <button key={item.id} onClick={() => toggleClothing(key, item.id)}
-                      className={cn("w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-[11px] font-sans transition-all text-left",
-                        activeItem?.id === item.id ? "bg-primary/15 text-primary ring-1 ring-primary/40" : "bg-secondary/60 text-muted-foreground hover:text-foreground"
-                      )}>
-                      {activeItem?.id === item.id && <Check className="w-3 h-3 flex-shrink-0" />}
-                      <span className="truncate">{item.name || "Unnamed"}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-      <div className="p-3 border-t border-border flex items-center gap-2">
-        <label htmlFor="dr-glb-upload" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-dashed border-border text-[10px] font-sans text-muted-foreground hover:border-primary/40 transition-colors cursor-pointer">
-          Upload .glb
-          <input id="dr-glb-upload" type="file" accept=".glb" onChange={handleUpload} className="hidden" />
-        </label>
-        {selectedCount > 0 && (
-          <button onClick={clearOutfit} className="text-[10px] font-sans text-destructive hover:text-destructive/80 transition-colors">Clear</button>
-        )}
-      </div>
-    </div>
-  );
-}
 
 export default function DressingRoomPage() {
   const { user } = useAuth();
@@ -312,7 +219,7 @@ export default function DressingRoomPage() {
         </motion.div>
 
         {/* ---- OUTFIT FROM CLOSET ---- */}
-        <OutfitFromCloset />
+        <AIMultiModalGeneration />
 
         {/* ---- IPHONE MOCKUP + NOTIFICATIONS ---- */}
         <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto gap-1 overflow-visible">
@@ -420,7 +327,7 @@ export default function DressingRoomPage() {
                   {progressStage}
                 </p>
               </div>
-            ) : (
+            ) : generatedImages.length > 0 ? (
               <FlipGallery
                 outfits={generatedImages}
                 onGenerate={handleGenerateClick}
@@ -435,6 +342,20 @@ export default function DressingRoomPage() {
                 isLoading={isGenerating}
                 onOutfitChange={setActiveOutfit}
               />
+            ) : (
+              <div className="flex flex-col h-full w-full bg-zinc-950 rounded-[3rem] overflow-hidden p-4 relative">
+                <div className="flex-1 relative flex items-center justify-center overflow-hidden w-full">
+                  <VerticalImageStack />
+                </div>
+                <div className="mt-auto pt-4 pb-2 flex justify-center w-full z-10 relative">
+                  <button
+                    onClick={handleGenerateClick}
+                    className="w-[70%] py-3 rounded-full bg-gradient-to-r from-[#E8C87A] to-[#E8C87A]/80 text-zinc-900 text-sm font-medium shadow-lg hover:shadow-xl transition-all"
+                  >
+                    Generate Outfit
+                  </button>
+                </div>
+              </div>
             )}
           </IPhoneMockup>
 
