@@ -6,6 +6,50 @@
 
 const SENT_LOG_KEY = "luxor_notif_sent_log";
 
+/* ------------------------------------------------------------------ */
+/*  URL allowlist — only these destinations are valid redirect targets */
+/* ------------------------------------------------------------------ */
+const ALLOWED_ORIGINS = [
+  "https://luxor.ly",
+  "https://www.luxor.ly",
+  "https://luxor-hub.lovable.app",
+];
+
+/**
+ * Validate a URL to prevent open-redirect attacks.
+ * Only allows:
+ *   - Relative paths starting with / (same-origin)
+ *   - URLs whose origin is in the ALLOWED_ORIGINS list
+ * Returns null if the URL is invalid/unsafe.
+ */
+function validateRedirectUrl(url: string | undefined): string | null {
+  if (!url) return null;
+
+  // Allow relative paths (same-origin navigation)
+  if (url.startsWith("/") && !url.startsWith("//")) {
+    // Strip query/hash for safety — keep only the path
+    try {
+      const parsed = new URL(url, window.location.origin);
+      return parsed.pathname + parsed.search + parsed.hash;
+    } catch {
+      return null;
+    }
+  }
+
+  // Allow absolute URLs only if origin matches allowlist
+  try {
+    const parsed = new URL(url);
+    const origin = parsed.origin;
+    if (ALLOWED_ORIGINS.includes(origin)) {
+      return parsed.href;
+    }
+  } catch {
+    // Malformed URL — reject
+  }
+
+  return null;
+}
+
 interface NtfyPayload {
   topic: string;
   message: string;
@@ -67,10 +111,11 @@ export function sendBrowserNotification(
       requireInteraction: true,  // stay until dismissed
     });
 
-    if (options?.url) {
+    const safeUrl = validateRedirectUrl(options?.url);
+    if (safeUrl) {
       notif.onclick = () => {
         window.focus();
-        window.location.href = options.url!;
+        window.location.href = safeUrl;
       };
     }
 
@@ -96,7 +141,7 @@ export async function sendViaNtfy(payload: NtfyPayload): Promise<boolean> {
         title: payload.title || "LUXOR",
         priority: payload.priority || 3,
         tags: payload.tags || [],
-        click: payload.click || "https://luxor.ly",
+        click: validateRedirectUrl(payload.click) || "https://luxor.ly",
         icon: payload.icon || "https://luxor.ly/favicon.ico",
       }),
     });
