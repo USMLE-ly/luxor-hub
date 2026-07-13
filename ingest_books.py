@@ -16,6 +16,20 @@ PROJECT = os.path.dirname(os.path.abspath(__file__))
 VENV = os.path.join(PROJECT, ".venv")
 KBASE = os.path.join(PROJECT, "knowledge_base")
 
+def _validate_domain(domain: str) -> str:
+    """Sanitize domain name: only allow alphanumeric, hyphens, underscores."""
+    sanitized = re.sub(r'[^a-zA-Z0-9_-]', '', domain)
+    if not sanitized or sanitized != domain:
+        raise ValueError(f"Invalid domain name: {domain!r} (only alphanumeric, hyphens, underscores allowed)")
+    return sanitized
+
+def _assert_within_kbase(path: str):
+    """Ensure a resolved path is inside the knowledge base directory."""
+    real_path = os.path.realpath(path)
+    real_kbase = os.path.realpath(KBASE)
+    if not real_path.startswith(real_kbase + os.sep) and real_path != real_kbase:
+        raise ValueError(f"Path {real_path!r} is outside the knowledge base")
+
 # ─── Domain classifiers ───
 DOMAIN_RULES = {
     "coding": {
@@ -113,7 +127,9 @@ def chunk_text(text, max_chars=2000, overlap=200):
 
 def save_knowledge(domain, filename, chunks, metadata):
     """Save processed knowledge to knowledge_base/{domain}/."""
+    domain = _validate_domain(domain)
     domain_dir = os.path.join(KBASE, domain)
+    _assert_within_kbase(domain_dir)
     os.makedirs(domain_dir, exist_ok=True)
     
     file_id = hashlib.md5(filename.encode()).hexdigest()[:12]

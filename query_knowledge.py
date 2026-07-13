@@ -15,6 +15,20 @@ from datetime import datetime
 PROJECT = os.path.dirname(os.path.abspath(__file__))
 KBASE = os.path.join(PROJECT, "knowledge_base")
 
+def _validate_domain(domain: str) -> str:
+    """Sanitize domain name: only allow alphanumeric, hyphens, underscores."""
+    sanitized = re.sub(r'[^a-zA-Z0-9_-]', '', domain)
+    if not sanitized or sanitized != domain:
+        raise ValueError(f"Invalid domain name: {domain!r} (only alphanumeric, hyphens, underscores allowed)")
+    return sanitized
+
+def _assert_within_kbase(path: str):
+    """Ensure a resolved path is inside the knowledge base directory."""
+    real_path = os.path.realpath(path)
+    real_kbase = os.path.realpath(KBASE)
+    if not real_path.startswith(real_kbase + os.sep) and real_path != real_kbase:
+        raise ValueError(f"Path {real_path!r} is outside the knowledge base")
+
 def list_domains():
     """List all domains with content in the knowledge base."""
     domains = []
@@ -36,7 +50,10 @@ def search_knowledge(query, domain="all", top_k=5):
     if domain == "all":
         domains = [d for d in os.listdir(KBASE) if os.path.isdir(os.path.join(KBASE, d))]
     else:
-        domains = [domain] if os.path.isdir(os.path.join(KBASE, domain)) else []
+        _validate_domain(domain)
+        domain_path = os.path.join(KBASE, domain)
+        _assert_within_kbase(domain_path)
+        domains = [domain] if os.path.isdir(domain_path) else []
     
     for d in domains:
         chunks_dir = os.path.join(KBASE, d, "chunks")
