@@ -32,3 +32,4 @@ dist/
 luxor-hub/.env.local
 luxor-hub/src/generated/prisma/
 luxor-hub/supabase/.temp/
+.replit
