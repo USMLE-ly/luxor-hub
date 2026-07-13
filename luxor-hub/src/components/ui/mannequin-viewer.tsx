@@ -330,34 +330,27 @@ function ClothingInner({
                      itemKey.toLowerCase().includes("boot") ||
                      itemKey.toLowerCase().includes("footwear");
 
-      // Calculate clothing bounding box center for accurate positioning
-      const clothingBBox = new THREE.Box3().setFromObject(cloned);
-      const clothingCenter = new THREE.Vector3();
-      clothingBBox.getCenter(clothingCenter);
-      const clothingSize = new THREE.Vector3();
-      clothingBBox.getSize(clothingSize);
+      // Kimi's bounding-box centering: align clothing center to body landmarks
+      const box = new THREE.Box3().setFromObject(cloned);
+      const center = box.getCenter(new THREE.Vector3());
 
-      // Position based on mannequin anatomy:
-      // Tops sit on chest (upper 60% of mannequin)
-      // Bottoms sit on hips/thighs (middle-lower 40%)
-      // Shoes sit at ground level
-      // Accessories sit at mid-torso
+      let targetY: number;
+      let zOffset: number;
       if (category === "top") {
-        // Center the clothing at chest height, offset forward slightly
-        const chestY = mannequinHeight * 0.65;
-        cloned.position.set(0, chestY - clothingCenter.y, 0.05);
+        targetY = mannequinHeight * 0.67; // chest
+        zOffset = 0.05;
       } else if (category === "bottom") {
-        // Center the clothing at hip/thigh height
-        const hipY = mannequinHeight * 0.35;
-        cloned.position.set(0, hipY - clothingCenter.y, 0.03);
+        targetY = mannequinHeight * 0.50; // hips
+        zOffset = 0.03;
       } else if (isShoe) {
-        // Shoes at ground level
-        cloned.position.set(0, 0.02 - clothingBBox.min.y, 0.03);
+        targetY = 0.02; // ground
+        zOffset = 0.02;
       } else {
-        // Accessories at mid-torso
-        const midY = mannequinHeight * 0.55;
-        cloned.position.set(0, midY - clothingCenter.y, 0.04);
+        targetY = mannequinHeight * 0.58; // mid-torso
+        zOffset = 0.04;
       }
+
+      cloned.position.set(-center.x, targetY - center.y, -center.z + zOffset);
 
       cloned.traverse((child) => {
         if ((child as THREE.Mesh).isMesh) {
