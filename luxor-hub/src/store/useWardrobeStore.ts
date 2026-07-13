@@ -35,6 +35,7 @@ interface WardrobeState {
   setActiveOccasion: (occasion: OccasionId | null) => void;
   setOccasionResult: (result: OccasionResult | null) => void;
   setIsCalculatingOccasion: (loading: boolean) => void;
+  resetClosetData: () => void;
 }
 
 // ── Store ──────────────────────────────────────────────────
@@ -95,6 +96,14 @@ export const useWardrobeStore = create<WardrobeState>()(
       setActiveOccasion: (occasion) => set({ activeOccasion: occasion }),
       setOccasionResult: (result) => set({ occasionResult: result }),
       setIsCalculatingOccasion: (loading) => set({ isCalculatingOccasion: loading }),
+
+      resetClosetData: () => {
+        set({
+          catalogItems: [],
+          selected: { top: null, bottom: null, accessory: null },
+        });
+        localStorage.removeItem("luxor-wardrobe");
+      },
     }),
     {
       name: "luxor-wardrobe",

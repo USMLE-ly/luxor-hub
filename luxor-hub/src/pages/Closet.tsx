@@ -715,7 +715,10 @@ const Closet = () => {
       }
 
       // 2. Update local state
-      setItems([]);
+setItems([]);
+
+      // Also wipe the Zustand store so DressingRoom and Currently Wearing update
+      useWardrobeStore.getState().resetClosetData();
 
       toast.dismiss();
       if (!backendOk) {

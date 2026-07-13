@@ -253,7 +253,15 @@ export default function DressingRoomPage() {
                           className="relative aspect-square rounded-xl overflow-hidden cursor-pointer bg-zinc-800 hover:ring-2 hover:ring-zinc-500 transition-all"
                         >
                           {(item.imageUrl) ? (
-                            <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" draggable={false} />
+                            <img
+                                src={item.imageUrl}
+                                alt={item.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).style.display = "none";
+                                }}
+                                draggable={false}
+                              />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-zinc-600 text-lg">
                               {item.category === "top" ? "👕" : item.category === "bottom" ? "👖" : "👟"}
