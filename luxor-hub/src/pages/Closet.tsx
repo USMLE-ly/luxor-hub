@@ -714,11 +714,36 @@ const Closet = () => {
         console.warn("[CLOSET] Backend clear warning:", qe);
       }
 
-      // 2. Update local state
-setItems([]);
+      // 2. Clear mannequin_state in Supabase (prevents re-restore on next mount)
+      try {
+        await supabase.from('mannequin_state').delete().eq('user_id', user.id);
+        console.log('[CLOSET] Cleared mannequin_state from Supabase');
+      } catch (mnErr) {
+        console.warn('[CLOSET] Failed to clear mannequin_state:', mnErr);
+      }
 
-      // Also wipe the Zustand store so DressingRoom and Currently Wearing update
+      // 3. Clear IndexedDB clothing entries
+      try {
+        const { keys: idbKeys, del: idbDel } = await import('idb-keyval');
+        const allKeys = await idbKeys();
+        for (const k of allKeys) {
+          if (typeof k === 'string' && (k.startsWith('luxor-clothing-') || k.startsWith('luxor-clothing-mapping-'))) {
+            await idbDel(k);
+          }
+        }
+        console.log('[CLOSET] Cleared IndexedDB clothing entries');
+      } catch (idbErr) {
+        console.warn('[CLOSET] Failed to clear IndexedDB:', idbErr);
+      }
+
+      // 4. Update local state
+      setItems([]);
+
+      // 5. Wipe Zustand store + localStorage
       useWardrobeStore.getState().resetClosetData();
+
+      // 6. Reset mount flag so mannequin_state doesn't re-restore immediately
+      MANNEQUIN_STATE_LOADED.current = false;
 
       toast.dismiss();
       if (!backendOk) {
