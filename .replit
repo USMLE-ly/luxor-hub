@@ -1,11 +1,12 @@
-run = "npm --prefix luxor-hub run dev -- --host 0.0.0.0 --port 5173"
-modules = ["python-3.11"]
+run = "npm --prefix luxor-hub run dev --host 0.0.0.0 --port 5173"
+language = "nodejs"
 
 [agent]
 expertMode = true
 
 [nix]
-packages = ["wget"]
+channel = "stable-23_11"
+packages = ["nodejs_20"]
 
 [[ports]]
 localPort = 5173
@@ -13,5 +14,5 @@ externalPort = 80
 
 [deployment]
 deploymentTarget = "autoscale"
-run = "npm --prefix luxor-hub run dev -- --host 0.0.0.0 --port 5173"
+run = "npm --prefix luxor-hub run dev --host 0.0.0.0 --port 5173"
 build = ["npm", "--prefix", "luxor-hub", "install"]
