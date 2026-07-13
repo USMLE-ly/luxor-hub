@@ -255,6 +255,16 @@ export default function DressingRoomPage() {
             )}
           </AnimatePresence>
 
+                    {/* ---- UPLOAD MANUAL OUTFITS ---- */}
+          <div className="w-full mb-8">
+            <h2 className="text-xl font-semibold text-foreground mb-2">Upload Manual Outfits</h2>
+            <p className="text-sm text-muted-foreground mb-6">Swipe vertically through your closet to select your Top, Bottom, and Shoes.</p>
+            <div className="w-full h-[500px] rounded-2xl border border-border bg-card flex items-center justify-center overflow-hidden relative">
+              <VerticalImageStack />
+            </div>
+          </div>
+
+          {/* iPhone Mockup */}
           {/* iPhone Mockup */}
           <IPhoneMockup
             model="15-pro"
@@ -325,7 +335,7 @@ export default function DressingRoomPage() {
                   {progressStage}
                 </p>
               </div>
-            ) : generatedImages.length > 0 ? (
+            ) : (
               <FlipGallery
                 outfits={generatedImages}
                 onGenerate={handleGenerateClick}
@@ -340,20 +350,6 @@ export default function DressingRoomPage() {
                 isLoading={isGenerating}
                 onOutfitChange={setActiveOutfit}
               />
-            ) : (
-              <div className="flex flex-col h-full w-full bg-zinc-950 rounded-[3rem] overflow-hidden p-4 relative">
-                <div className="flex-1 relative flex items-center justify-center overflow-hidden w-full">
-                  <VerticalImageStack />
-                </div>
-                <div className="mt-auto pt-4 pb-2 flex justify-center w-full z-10 relative">
-                  <button
-                    onClick={handleGenerateClick}
-                    className="w-[70%] py-3 rounded-full bg-gradient-to-r from-[#E8C87A] to-[#E8C87A]/80 text-zinc-900 text-sm font-medium shadow-lg hover:shadow-xl transition-all"
-                  >
-                    Generate Outfit
-                  </button>
-                </div>
-              </div>
             )}
           </IPhoneMockup>
 
