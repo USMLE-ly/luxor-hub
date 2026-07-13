@@ -123,7 +123,7 @@ function OutfitFromCloset() {
       </div>
       <div className="p-3 border-t border-border flex items-center gap-2">
         <label htmlFor="dr-glb-upload" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-dashed border-border text-[10px] font-sans text-muted-foreground hover:border-primary/40 transition-colors cursor-pointer">
-          <UploadSimple className="w-3 h-3" /> Upload .glb
+          Upload .glb
           <input id="dr-glb-upload" type="file" accept=".glb" onChange={handleUpload} className="hidden" />
         </label>
         {selectedCount > 0 && (
