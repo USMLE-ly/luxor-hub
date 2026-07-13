@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import { MannequinViewer } from "@/components/ui/mannequin-viewer";
 import {
   useWardrobeStore,
   useWardrobeHydrated,
@@ -43,9 +42,7 @@ const CATEGORIES: { key: Category; label: string }[] = [
   { key: "accessory", label: "Accessories" },
 ];
 
-function MannequinWardrobeSection() {
-  const gender = useWardrobeStore((s) => s.gender);
-  const setGender = useWardrobeStore((s) => s.setGender);
+function OutfitFromCloset() {
   const selected = useWardrobeStore((s) => s.selected);
   const catalogItems = useWardrobeStore((s) => s.catalogItems);
   const toggleClothing = useWardrobeStore((s) => s.toggleClothing);
@@ -53,7 +50,6 @@ function MannequinWardrobeSection() {
   const addCustomClothing = useWardrobeStore((s) => s.addCustomClothing);
   const hydrated = useWardrobeHydrated();
 
-  // On mount, restore 3D asset mappings and blob URLs
   useEffect(() => {
     if (hydrated) {
       restoreAssetMappings();
@@ -65,166 +61,74 @@ function MannequinWardrobeSection() {
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) return;
-
-      // Validate: only accept .glb or .gltf files
-      const validExts = [".glb", ".gltf"];
       const ext = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
-      if (!validExts.includes(ext)) {
-        toast.error(`Invalid file type "${ext}". Please upload a .glb 3D model file.`);
+      if (![".glb", ".gltf"].includes(ext)) {
+        toast.error(`Please upload a .glb 3D model file.`);
         e.target.value = "";
         return;
       }
-
-      // Create blob URL for immediate rendering in this session
       const blobUrl = URL.createObjectURL(file);
       const itemId = crypto.randomUUID();
-
-      // Store metadata in Zustand (sync, immediate)
-      addCustomClothing({
-        id: itemId,
-        name: file.name.replace(/\.(glb|gltf)$/i, ""),
-        src: blobUrl,
-        category: "top",
-      });
-
-      // Persist binary to IndexedDB (async, for page reload)
-      persistClothingToIDB(itemId, file).catch((err) =>
-        console.error("[UPLOAD] Failed to persist to IndexedDB:", err)
-      );
-
+      addCustomClothing({ id: itemId, name: file.name.replace(/\.(glb|gltf)$/i, ""), src: blobUrl, category: "top" });
+      persistClothingToIDB(itemId, file).catch(() => {});
       toast.success(`Uploaded ${file.name.replace(".glb", "")}`);
       e.target.value = "";
     },
     [addCustomClothing]
   );
 
-  // ── Test Mode: Generate dummy 3D models ──
-  const generateDummy = async (
-    name: string,
-    category: Category,
-    generator: () => Promise<string>
-  ) => {
-    try {
-      toast.info(`Generating dummy 3D ${name}...`);
-      const blobUrl = await generator();
-      const itemId = `dummy-${category}-${Date.now()}`;
-      addCustomClothing({
-        id: itemId, name, src: blobUrl, category,
-      });
-      toggleClothing(category, itemId);
-      toast.success(`Dummy "${name}" created and added to mannequin!`);
-    } catch (err) {
-      console.error("[DUMMY] Generation failed:", err);
-      toast.error("Failed to generate dummy model");
-    }
-  };
+  const categories: { key: Category; label: string; emoji: string }[] = [
+    { key: "top", label: "Tops", emoji: "\ud83d\udc55" },
+    { key: "bottom", label: "Bottoms", emoji: "\ud83d\udc56" },
+    { key: "accessory", label: "Accessories", emoji: "\ud83d\udc5c" },
+  ];
+  const selectedCount = Object.values(selected).filter(Boolean).length;
 
   return (
     <div className="rounded-2xl border border-border bg-card overflow-hidden">
-      <div className="grid grid-cols-1 md:grid-cols-[200px_1fr_240px] min-h-[500px]">
-        {/* Left Rail: Gender */}
-        <div className="p-4 border-b md:border-b-0 md:border-r border-border flex flex-col gap-3">
-          <p className="text-xs font-sans font-semibold text-muted-foreground uppercase tracking-wider">Gender</p>
-          <div className="flex gap-1 bg-secondary rounded-xl p-1">
-            {(["male", "female"] as const).map((g) => (
-              <button
-                key={g}
-                onClick={() => hydrated && setGender(g)}
-                disabled={!hydrated}
-                className={cn(
-                  "flex-1 py-2 rounded-lg text-xs font-sans font-semibold transition-all",
-                  gender === g ? "bg-foreground text-background" : "text-muted-foreground"
-                )}
-              >
-                {g === "male" ? "♂ Male" : "♀ Female"}
-              </button>
-            ))}
-          </div>
-          <div className="mt-auto">
-            <button
-              onClick={clearOutfit}
-              className="w-full py-2 rounded-lg text-xs font-sans font-semibold text-destructive bg-destructive/10 hover:bg-destructive/20 transition-colors"
-            >
-              Clear Outfit
-            </button>
-          </div>
+      <div className="p-4 border-b border-border">
+        <div className="flex items-center justify-between mb-1">
+          <h3 className="font-sans text-sm font-semibold text-foreground">Build Your Outfit</h3>
+          {selectedCount > 0 && (
+            <span className="text-[10px] font-sans font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">{selectedCount} selected</span>
+          )}
         </div>
-
-        {/* Center: 3D Viewer */}
-        <div className="relative bg-gradient-to-b from-secondary/10 to-background min-h-[400px]">
-          <MannequinViewer className="w-full h-full" />
-        </div>
-
-        {/* Right Rail: Catalog */}
-        <div className="p-4 border-t md:border-t-0 md:border-l border-border overflow-y-auto max-h-[500px]">
-          <p className="text-xs font-sans font-semibold text-muted-foreground uppercase tracking-wider mb-3">Catalog</p>
-          {CATEGORIES.map(({ key, label }) => (
-            <div key={key} className="mb-4">
-              <p className="text-[10px] font-sans text-muted-foreground mb-1.5">{label}</p>
-              <div className="space-y-1">
-                {catalogItems
-                  .filter((i) => i.category === key)
-                  .map((item) => {
-                    const isActive = selected[key] === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => toggleClothing(key, item.id)}
-                        className={cn(
-                          "w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-sans transition-all text-left",
-                          isActive
-                            ? "bg-primary/15 text-primary ring-1 ring-primary/40"
-                            : "bg-secondary text-muted-foreground hover:text-foreground"
-                        )}
-                      >
-                        {isActive && <Check className="w-3 h-3 flex-shrink-0" />}
-                        <span className="truncate">{item.name}</span>
-                      </button>
-                    );
-                  })}
-                {catalogItems.filter((i) => i.category === key).length === 0 && (
-                  <p className="text-[10px] text-muted-foreground/50 italic">No items</p>
-                )}
-              </div>
+        <p className="text-[10px] font-sans text-muted-foreground">Pick items from your closet to create an outfit.</p>
+      </div>
+      <div className="grid grid-cols-3 gap-0 divide-x divide-border">
+        {categories.map(({ key, label, emoji }) => {
+          const items = catalogItems.filter((i) => i.category === key);
+          const activeItem = items.find((i) => selected[key] === i.id);
+          return (
+            <div key={key} className="p-3">
+              <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-wider mb-2">{emoji} {label}</p>
+              {items.length === 0 ? (
+                <p className="text-[10px] text-muted-foreground/50 italic py-2">No items</p>
+              ) : (
+                <div className="space-y-1 max-h-[200px] overflow-y-auto scrollbar-none">
+                  {items.map((item) => (
+                    <button key={item.id} onClick={() => toggleClothing(key, item.id)}
+                      className={cn("w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-[11px] font-sans transition-all text-left",
+                        activeItem?.id === item.id ? "bg-primary/15 text-primary ring-1 ring-primary/40" : "bg-secondary/60 text-muted-foreground hover:text-foreground"
+                      )}>
+                      {activeItem?.id === item.id && <Check className="w-3 h-3 flex-shrink-0" />}
+                      <span className="truncate">{item.name || "Unnamed"}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
-          ))}
-
-          {/* Upload Button */}
-          <div className="mt-4 pt-3 border-t border-border">
-            <label htmlFor="glbUpload" className="flex flex-col items-center justify-center w-full py-3 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/40 transition-colors">
-              <span className="text-xs font-sans text-muted-foreground">Upload .glb clothing</span>
-              <input id="glbUpload" type="file" accept=".glb" onChange={handleUpload} className="hidden" />
-            </label>
-            <p className="text-[9px] text-muted-foreground/40 mt-1.5 text-center">
-              Session-only. For permanent items, add to public/models/clothing/.
-            </p>
-
-            {/* Test Mode: Generate dummy models */}
-            <div className="mt-3 pt-2 border-t border-border">
-              <p className="text-[9px] text-muted-foreground/50 mb-1.5 text-center font-sans">Quick Test (no .glb files needed)</p>
-              <div className="grid grid-cols-3 gap-1">
-                <button
-                  onClick={() => generateDummy("Dummy Shirt", "top", generateDummyShirtGLB)}
-                  className="text-[10px] font-sans py-1.5 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors"
-                >
-                  👕 Shirt
-                </button>
-                <button
-                  onClick={() => generateDummy("Dummy Pants", "bottom", generateDummyPantsGLB)}
-                  className="text-[10px] font-sans py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors"
-                >
-                  👖 Pants
-                </button>
-                <button
-                  onClick={() => generateDummy("Dummy Shoes", "accessory", generateDummyShoesGLB)}
-                  className="text-[10px] font-sans py-1.5 rounded-lg bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 transition-colors"
-                >
-                  👟 Shoes
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+          );
+        })}
+      </div>
+      <div className="p-3 border-t border-border flex items-center gap-2">
+        <label htmlFor="dr-glb-upload" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-dashed border-border text-[10px] font-sans text-muted-foreground hover:border-primary/40 transition-colors cursor-pointer">
+          <UploadSimple className="w-3 h-3" /> Upload .glb
+          <input id="dr-glb-upload" type="file" accept=".glb" onChange={handleUpload} className="hidden" />
+        </label>
+        {selectedCount > 0 && (
+          <button onClick={clearOutfit} className="text-[10px] font-sans text-destructive hover:text-destructive/80 transition-colors">Clear</button>
+        )}
       </div>
     </div>
   );
@@ -407,8 +311,8 @@ export default function DressingRoomPage() {
           </p>
         </motion.div>
 
-        {/* ---- 3D MANNEQUIN WARDROBE ---- */}
-        <MannequinWardrobeSection />
+        {/* ---- OUTFIT FROM CLOSET ---- */}
+        <OutfitFromCloset />
 
         {/* ---- IPHONE MOCKUP + NOTIFICATIONS ---- */}
         <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto gap-1 overflow-visible">

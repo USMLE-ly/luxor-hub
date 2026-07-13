@@ -14,7 +14,6 @@ import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { haptic } from "@/lib/haptics";
 import {Plus, MagnifyingGlass, TShirt, SlidersHorizontal, TrashSimple, UploadSimple, X, Spinner, Sparkle, CheckCircle, Camera, CaretRight, Sliders, Pulse, Eye, User, StackSimple, CalendarDots, Image, FloppyDisk, FolderOpen, Heart, Receipt, File, Upload} from "@phosphor-icons/react";
-import { MannequinViewer } from "@/components/ui/mannequin-viewer";
 import { useWardrobeStore, useWardrobeHydrated, restoreClothingFromIDB, type Category, type ClothingItem as WardrobeClothingItem } from "@/store/useWardrobeStore";
 import { resolve3DAsset, uploadAndAssignGLB, restoreAssetMappings } from "@/lib/assetResolver";
 import { generateDummyShirtGLB, generateDummyPantsGLB, generateDummyShoesGLB } from "@/lib/dummyGLBGenerator";
@@ -110,7 +109,6 @@ const filterPills = ["All", "Upper Body", "Lower Body", "Shoes", "Accessories", 
 const uploadCategories = ["top", "bottom", "shoes", "accessory", "outerwear", "dress", "full_outfit", "other"];
 const seasons = ["spring", "summer", "fall", "winter", "all-season"];
 
-type ClosetTab = "inventory" | "mannequin";
 type MannequinPanel = "dna" | "pose" | "trace" | "measure" | null;
 
 const Closet = () => {
@@ -139,7 +137,6 @@ const Closet = () => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   // Mannequin state
-  const [activeTab, setActiveTab] = useState<ClosetTab>("inventory");
   const gender = useWardrobeStore((s) => s.gender);
   const setGender = useWardrobeStore((s) => s.setGender);
   const hydrated = useWardrobeHydrated();
@@ -795,7 +792,6 @@ const Closet = () => {
   // Add closet item to mannequin and switch to mannequin tab
   const addToMannequin = (item: ClothingItem) => {
     setPendingItem(item);
-    setActiveTab("mannequin");
   };
 
   // Quick try-on: resolve 3D asset or prompt upload
@@ -820,7 +816,6 @@ const Closet = () => {
       imageUrl: item.photo_url || undefined,
     });
     toggleClothing(zustandCat, itemId);
-    setActiveTab("mannequin");
 
     if (glbPath) {
       toast.success(`👗 ${item.name} added to mannequin with 3D model`);
@@ -863,7 +858,7 @@ const Closet = () => {
   };
 
   const removeFromMannequin = (item: WardrobeClothingItem) => {
-    // Deselect in Zustand — this triggers MannequinViewer cleanup
+    // Deselect in Zustand store
     const catMap: Record<string, Category> = {
       tops: "top", outerwear: "top", top: "top",
       bottoms: "bottom", skirts: "bottom", dress: "bottom",
@@ -978,29 +973,7 @@ const Closet = () => {
           </div>
         </motion.div>
 
-        {/* Tab Switch: Inventory / Mannequin */}
-        <div className="flex gap-1 bg-secondary rounded-xl p-1 mb-3">
-          {([
-            { key: "inventory" as ClosetTab, label: "👗 Inventory", icon: TShirt },
-            { key: "mannequin" as ClosetTab, label: "🧍 3D Mannequin", icon: User },
-          ]).map(({ key, label }) => (
-            <button
-              key={key}
-              onClick={() => setActiveTab(key)}
-              className={`flex-1 py-2.5 rounded-lg text-xs font-sans font-semibold transition-all ${
-                activeTab === key
-                  ? "bg-foreground text-background shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
         {/* ==================== INVENTORY TAB ==================== */}
-        {activeTab === "inventory" && (
-          <>
             {/* Upload progress */}
             <div className="mb-3 space-y-1.5">
               <div className="flex items-center gap-2">
@@ -1351,47 +1324,14 @@ const Closet = () => {
               <WardrobeGapAnalysis />
               <WardrobeIntelligence />
             </div>
-          </>
-        )}
 
-        {/* ==================== MANNEQUIN TAB ==================== */}
-        {activeTab === "mannequin" && (
-          <div className="-mx-4 sm:-mx-5 -mt-1">
-            {/* 3D Scene */}
-            <div className="relative bg-gradient-to-b from-secondary/10 to-background" style={{ height: "55vh", minHeight: "400px" }}>
-              <div className="w-full h-full" style={{ minHeight: "300px" }}>
-                <MannequinViewer className="w-full h-full" />
-              </div>
-
-              {/* Gender toggle */}
-              {hydrated && (
-                <div className="absolute top-3 left-3 flex gap-1 bg-background/80 backdrop-blur rounded-full p-1">
-                  {(["male", "female"] as const).map((g) => (
-                    <button key={g} onClick={() => setGender(g)}
-                      className={`px-3 py-1.5 rounded-full text-xs font-sans font-semibold transition-colors ${
-                        gender === g ? "bg-foreground text-background" : "text-muted-foreground"
-                      }`}>
-                      {g === "male" ? "♂ Male" : "♀ Female"}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* Item count badge */}
-              <div className="absolute top-3 right-3 bg-background/80 backdrop-blur rounded-full px-3 py-1.5">
-                <span className="text-xs font-sans font-semibold text-foreground">
-                  {currentlyWearing.length} item{currentlyWearing.length !== 1 ? "s" : ""}
-                </span>
-              </div>
-            </div>
-
-            {/* Currently Wearing — reads from Zustand store */}
+                    {/* Currently Wearing — reads from Zustand store */}
             <div className="px-4 py-3 border-t border-border">
               <h3 className="font-sans text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                 Currently Wearing
               </h3>
               {currentlyWearing.length === 0 ? (
-                <p className="text-xs text-muted-foreground font-sans py-2">No items on mannequin. Use "Try On" to add clothes.</p>
+                <p className="text-xs text-muted-foreground font-sans py-2">No items wearing. Use "Try On" to add clothes.</p>
               ) : (
                 <div className="space-y-1.5 mb-3">
                   {currentlyWearing.map((item) => {
@@ -1467,326 +1407,8 @@ const Closet = () => {
                   </Button>
                 </div>
               )}
-
-              {/* Save outfit dialog */}
-              <AnimatePresence>
-                {showSaveDialog && (
-                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
-                    className="mt-3 p-3 rounded-xl border border-primary/30 bg-primary/5">
-                    <p className="text-xs font-sans font-semibold text-foreground mb-2">Save this outfit</p>
-                    <Input
-                      placeholder="Outfit name, e.g. 'Friday Casual'"
-                      value={outfitName}
-                      onChange={(e) => setOutfitName(e.target.value)}
-                      className="bg-secondary border-border rounded-lg h-9 text-sm mb-2"
-                    />
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" className="flex-1 rounded-lg text-xs" onClick={() => { setShowSaveDialog(false); setOutfitName(""); }}>
-                        Cancel
-                      </Button>
-                      <Button size="sm" className="flex-1 rounded-lg text-xs" onClick={saveOutfit} disabled={savingOutfit || !outfitName.trim()}>
-                        {savingOutfit ? <Spinner className="w-3.5 h-3.5 animate-spin mr-1" /> : <FloppyDisk className="w-3.5 h-3.5 mr-1" />}
-                        Save
-                      </Button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
             </div>
-
-            <div className="px-4 py-3 border-t border-border">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-sans text-sm font-semibold text-foreground">
-                  <FolderOpen className="w-4 h-4 inline mr-1.5" />
-                  Saved Outfits
-                </h3>
-                {savedOutfits.length > 0 && (
-                  <button onClick={() => setShowFavoritesOnly(prev => !prev)}
-                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-sans font-semibold transition-all ${
-                      showFavoritesOnly ? "bg-primary/15 text-primary" : "bg-secondary text-muted-foreground"
-                    }`}>
-                    <Heart className={`w-3 h-3 ${showFavoritesOnly ? "fill-primary" : ""}`} />
-                    Favorites
-                  </button>
-                )}
-              </div>
-              {loadingSavedOutfits ? (
-                <div className="flex justify-center py-4"><Spinner className="w-5 h-5 animate-spin text-muted-foreground" /></div>
-              ) : savedOutfits.length === 0 ? (
-                <p className="text-xs text-muted-foreground font-sans text-center py-4">
-                  No saved outfits yet. Dress the mannequin and save your look!
-                </p>
-              ) : (() => {
-                const displayed = showFavoritesOnly
-                  ? [...savedOutfits].filter(o => o.is_favorite).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-                  : [...savedOutfits].sort((a, b) => (b.is_favorite ? 1 : 0) - (a.is_favorite ? 1 : 0) || new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-                return displayed.length === 0 ? (
-                  <p className="text-xs text-muted-foreground font-sans text-center py-4">No favorite outfits yet</p>
-                ) : (
-                  <div className="space-y-2">
-                    {displayed.map((outfit) => {
-                      const outfitItems = (outfit.mannequin_items || []) as any[];
-                      return (
-                        <motion.div key={outfit.id}
-                          initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                          className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:border-primary/30 transition-colors group">
-                          <div className="flex -space-x-1.5 flex-shrink-0">
-                            {outfitItems.slice(0, 4).map((item, i) => (
-                              <div key={i} className="w-6 h-6 rounded-full border-2 border-background"
-                                style={{ backgroundColor: item.color || "#6b7b8d" }} />
-                            ))}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-sans font-semibold text-foreground truncate">{outfit.name}</p>
-                            <p className="text-[10px] text-muted-foreground font-sans">
-                              {outfitItems.length} item{outfitItems.length !== 1 ? "s" : ""} • {new Date(outfit.created_at).toLocaleDateString()}
-                            </p>
-                          </div>
-                          <div className="flex gap-1">
-                            <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => toggleFavorite(outfit)}>
-                              <Heart className={`w-3.5 h-3.5 transition-colors ${outfit.is_favorite ? "fill-primary text-primary" : "text-muted-foreground"}`} />
-                            </Button>
-                            <Button size="sm" variant="ghost" className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => loadOutfit(outfit)}>
-                              <FolderOpen className="w-3.5 h-3.5 text-primary" />
-                            </Button>
-                            <Button size="sm" variant="ghost" className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => deleteSavedOutfit(outfit.id)}>
-                              <TrashSimple className="w-3.5 h-3.5 text-destructive" />
-                            </Button>
-                          </div>
-                        </motion.div>
-                      );
-                    })}
-                  </div>
-                );
-              })()}
-            </div>
-
-            {/* Add from closet - item grid */}
-            <div className="px-4 py-3 border-t border-border">
-              <h3 className="font-sans text-sm font-semibold text-foreground mb-3">
-                <StackSimple className="w-4 h-4 inline mr-1.5" />
-                Add from Closet
-              </h3>
-
-              {/* Pending item confirmation */}
-              <AnimatePresence>
-                {pendingItem && (
-                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
-                    className="mb-4 p-4 rounded-xl border border-primary/30 bg-primary/5">
-                    <div className="flex items-center gap-3 mb-3">
-                      {pendingItem.photo_url ? (
-                        <img src={pendingItem.photo_url} alt={pendingItem.name || ""} className="w-14 h-14 rounded-lg object-cover" />
-                      ) : (
-                        <div className="w-14 h-14 rounded-lg bg-muted flex items-center justify-center">
-                          <TShirt className="w-6 h-6 text-muted-foreground" />
-                        </div>
-                      )}
-                      <div>
-                        <p className="text-sm font-sans font-semibold text-foreground">{pendingItem.name || pendingItem.category}</p>
-                        <p className="text-xs text-muted-foreground font-sans capitalize">{pendingItem.category} • {pendingItem.color || "no color"}</p>
-                      </div>
-                    </div>
-
-                    <div className="mb-3">
-                      <p className="text-xs font-sans font-medium text-foreground mb-2">Garment Fit</p>
-                      <div className="grid grid-cols-3 gap-2">
-                        {(["slim", "regular", "oversized"] as GarmentFit[]).map((f) => (
-                          <button key={f} onClick={() => setSelectedFit(f)}
-                            className={`py-2 rounded-xl text-xs font-sans font-medium capitalize transition-all ${
-                              selectedFit === f ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
-                            }`}>
-                            {f}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="mb-3">
-                      <p className="text-xs font-sans font-medium text-foreground mb-2">Fabric Type</p>
-                      <div className="grid grid-cols-3 gap-2">
-                        {(["cotton", "denim", "leather", "wool", "silk", "synthetic", "canvas", "knit", "default"] as FabricType[]).map((f) => (
-                          <button key={f} onClick={() => setSelectedFabric(f)}
-                            className={`py-1.5 rounded-xl text-[11px] font-sans font-medium capitalize transition-all ${
-                              selectedFabric === f ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
-                            }`}>
-                            {f === "default" ? "Auto" : f}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="flex-1 rounded-xl" onClick={() => setPendingItem(null)}>Cancel</Button>
-                      <Button size="sm" className="flex-1 rounded-xl" onClick={confirmAddToMannequin}>
-                        <Plus className="w-3.5 h-3.5 mr-1" /> Add to Mannequin
-                      </Button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {items.length === 0 ? (
-                <div className="text-center py-8">
-                  <TShirt className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground font-sans">No items in closet yet</p>
-                  <Button size="sm" className="mt-3 rounded-full" onClick={() => setActiveTab("inventory")}>
-                    Go to Inventory
-                  </Button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-4 gap-2">
-                  {items.map((item) => (
-                    <button key={item.id} onClick={() => addToMannequin(item)}
-                      className="rounded-xl bg-secondary p-1.5 text-center hover:bg-primary/10 transition-colors">
-                      {item.photo_url ? (
-                        <img src={item.photo_url} alt={item.name || ""} className="w-full aspect-square rounded-lg object-cover mb-1" />
-                      ) : (
-                        <div className="w-full aspect-square rounded-lg bg-muted flex items-center justify-center mb-1">
-                          <TShirt className="w-5 h-5 text-muted-foreground" />
-                        </div>
-                      )}
-                      <p className="text-[9px] font-sans text-foreground truncate">{item.name || item.category}</p>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Bottom toolbar */}
-            <div className="flex items-center justify-around px-2 py-2 border-t border-border bg-background">
-              {[
-                { key: "dna" as MannequinPanel, icon: SlidersHorizontal, label: "Body DNA" },
-                { key: "pose" as MannequinPanel, icon: Pulse, label: "Pose" },
-                { key: "trace" as MannequinPanel, icon: Eye, label: "Trace" },
-                { key: "measure" as MannequinPanel, icon: User, label: "Measure" },
-              ].map(({ key, icon: Icon, label }) => (
-                <button key={key} onClick={() => togglePanel(key)}
-                  className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-colors ${
-                    activePanel === key ? "text-primary" : "text-muted-foreground"
-                  }`}>
-                  <Icon className="w-4 h-4" />
-                  <span className="text-[10px] font-sans font-medium">{label}</span>
-                </button>
-              ))}
-            </div>
-
-            {/* Panels */}
-            <AnimatePresence>
-              {activePanel && (
-                <motion.div key={activePanel} initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }} className="overflow-hidden border-t border-border bg-background">
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-                    <h3 className="font-display text-sm font-bold text-foreground">
-                      {activePanel === "dna" && <span>Body DNA</span>}
-                      {activePanel === "pose" && <span>Pose Presets</span>}
-                      {activePanel === "trace" && <span>Tracing Mode</span>}
-                      {activePanel === "measure" && <span>Measurements</span>}
-                    </h3>
-                    <button onClick={() => setActivePanel(null)}>
-                      <X className="w-4 h-4 text-muted-foreground" />
-                    </button>
-                  </div>
-
-                  {activePanel === "dna" && (
-                    <div className="p-4 space-y-5">
-                      {dnaSliders.map(({ key, label }) => (
-                        <div key={key}>
-                          <div className="flex justify-between mb-1.5">
-                            <span className="text-xs font-sans font-medium text-foreground">{label}</span>
-                            <span className="text-xs font-sans text-muted-foreground">{Math.round(dna[key] * 100)}%</span>
-                          </div>
-                          <Slider value={[dna[key]]} min={0} max={1} step={0.01}
-                            onValueChange={([v]) => setDna((prev) => ({ ...prev, [key]: v }))} />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {activePanel === "pose" && (
-                    <div className="p-4 grid grid-cols-3 gap-3">
-                      {poses.map(({ key, label }) => (
-                        <button key={key} onClick={() => setPose(key)}
-                          className={`py-4 rounded-xl font-sans text-sm font-medium transition-all ${
-                            pose === key ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
-                          }`}>
-                          {label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
-                  {activePanel === "trace" && (
-                    <div className="p-4 space-y-4">
-                      <input id="garmentTrace" ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleTraceUpload} />
-                      <Button variant="outline" className="w-full rounded-xl" onClick={() => fileInputRef.current?.click()}>
-                        <Image className="w-4 h-4 mr-2" />
-                        {tracingUrl ? "Change Reference Image" : "Upload Reference Image"}
-                      </Button>
-                      {tracingUrl && (
-                        <>
-                          <div>
-                            <div className="flex justify-between mb-1.5">
-                              <span className="text-xs font-sans font-medium text-foreground">Opacity</span>
-                              <span className="text-xs font-sans text-muted-foreground">{Math.round(tracingOpacity * 100)}%</span>
-                            </div>
-                            <Slider value={[tracingOpacity]} min={0.05} max={0.8} step={0.01}
-                              onValueChange={([v]) => setTracingOpacity(v)} />
-                          </div>
-                          <Button variant="ghost" size="sm" className="w-full text-destructive" onClick={() => setTracingUrl(undefined)}>
-                            Remove Overlay
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  )}
-
-                  {activePanel === "measure" && (
-                    <div className="p-4 space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-sans font-medium text-foreground">Show Measurement Lines</span>
-                        <button onClick={() => setShowMeasurements(!showMeasurements)}
-                          className={`w-12 h-6 rounded-full transition-colors ${showMeasurements ? "bg-primary" : "bg-secondary"}`}>
-                          <div className={`w-5 h-5 rounded-full bg-background shadow transition-transform ${showMeasurements ? "translate-x-6" : "translate-x-0.5"}`} />
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Calendar modal */}
-            <AnimatePresence>
-              {showCalendar && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                  className="fixed inset-0 z-50 bg-forest/50 flex items-end" onClick={() => setShowCalendar(false)}>
-                  <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
-                    transition={{ type: "spring", damping: 25 }}
-                    className="w-full bg-background rounded-t-2xl p-5" onClick={(e) => e.stopPropagation()}>
-                    <h3 className="font-display text-lg font-bold text-foreground mb-3">Schedule This Outfit</h3>
-                    <p className="text-sm text-muted-foreground font-sans mb-4">
-                      Pick a date to wear this look ({currentlyWearing.length} item{currentlyWearing.length !== 1 ? "s" : ""})
-                    </p>
-                    <div className="flex gap-2 overflow-x-auto pb-4">
-                      {Array.from({ length: 7 }, (_, i) => {
-                        const d = new Date(); d.setDate(d.getDate() + i);
-                        const dateStr = d.toISOString().split("T")[0];
-                        return (
-                          <button key={dateStr} onClick={() => saveToCalendar(dateStr)}
-                            className="flex-shrink-0 w-16 py-3 rounded-xl bg-secondary hover:bg-primary/20 transition-colors text-center">
-                            <p className="text-[10px] text-muted-foreground font-sans">{d.toLocaleDateString("en", { weekday: "short" })}</p>
-                            <p className="text-lg font-bold text-foreground">{d.getDate()}</p>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </motion.div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        )}
-      </div>
+        </div>
       </ScrollReveal>
     </AppLayout>
   );
