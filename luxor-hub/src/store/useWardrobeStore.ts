@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { useSyncExternalStore } from "react";
+import type { OccasionResult, OccasionId } from "@/lib/occasionEngine";
 
 // ── Types ──────────────────────────────────────────────────
 export type Category = "top" | "bottom" | "accessory";
@@ -21,12 +22,19 @@ interface WardrobeState {
   gender: "male" | "female";
   selected: Record<Category, string | null>;
   catalogItems: ClothingItem[];
+  // Occasion engine state
+  activeOccasion: OccasionId | null;
+  occasionResult: OccasionResult | null;
+  isCalculatingOccasion: boolean;
   setGender: (gender: "male" | "female") => void;
   toggleClothing: (category: Category, id: string) => void;
   clearOutfit: () => void;
   addCustomClothing: (item: ClothingItem) => void;
   removeClothing: (id: string) => void;
   updateClothingSrc: (id: string, src: string) => void;
+  setActiveOccasion: (occasion: OccasionId | null) => void;
+  setOccasionResult: (result: OccasionResult | null) => void;
+  setIsCalculatingOccasion: (loading: boolean) => void;
 }
 
 // ── Store ──────────────────────────────────────────────────
@@ -36,6 +44,9 @@ export const useWardrobeStore = create<WardrobeState>()(
       gender: "male",
       selected: { top: null, bottom: null, accessory: null },
       catalogItems: [],
+      activeOccasion: null,
+      occasionResult: null,
+      isCalculatingOccasion: false,
 
       setGender: (gender) => set({ gender }),
 
@@ -52,7 +63,6 @@ export const useWardrobeStore = create<WardrobeState>()(
 
       addCustomClothing: (item) =>
         set((state) => {
-          // Don't duplicate — if item with same id exists, update it
           const exists = state.catalogItems.some((c) => c.id === item.id);
           if (exists) {
             return {
@@ -81,6 +91,10 @@ export const useWardrobeStore = create<WardrobeState>()(
             item.id === id ? { ...item, src } : item
           ),
         })),
+
+      setActiveOccasion: (occasion) => set({ activeOccasion: occasion }),
+      setOccasionResult: (result) => set({ occasionResult: result }),
+      setIsCalculatingOccasion: (loading) => set({ isCalculatingOccasion: loading }),
     }),
     {
       name: "luxor-wardrobe",
@@ -97,7 +111,6 @@ export const useWardrobeStore = create<WardrobeState>()(
           ...currentState,
           ...(persistedState as Partial<WardrobeState>),
         };
-        // Ensure catalogItems have empty src — will be restored from IndexedDB
         if (merged.catalogItems) {
           merged.catalogItems = merged.catalogItems.map((item: any) => ({
             ...item,

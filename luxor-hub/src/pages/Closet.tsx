@@ -24,6 +24,7 @@ import { SLOT_MAP, DRESS_REPLACES, type GarmentFit } from "@/components/app/Garm
 import type { FabricType } from "@/components/app/FabricMaterials";
 import { WardrobeIntelligence } from "@/components/app/WardrobeIntelligence";
 import { WardrobeGapAnalysis } from "@/components/app/WardrobeGapAnalysis";
+import { OccasionPicker } from "@/components/app/OccasionPicker";
 
 /* Placeholder product images for empty closet sections */
 import imgCoatBelted from "@/assets/cal-f-coat-belted.jpg";
@@ -1124,6 +1125,8 @@ const Closet = () => {
               </StaggerItem>
             </StaggerContainer>
 
+            {/* Occasion Engine */}
+            <OccasionPicker />
             {/* Search */}
             <div className="relative mb-2">
               <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

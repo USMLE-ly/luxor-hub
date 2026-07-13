@@ -330,21 +330,43 @@ function ClothingInner({
                      itemKey.toLowerCase().includes("boot") ||
                      itemKey.toLowerCase().includes("footwear");
 
+      // Calculate clothing bounding box center for accurate positioning
+      const clothingBBox = new THREE.Box3().setFromObject(cloned);
+      const clothingCenter = new THREE.Vector3();
+      clothingBBox.getCenter(clothingCenter);
+      const clothingSize = new THREE.Vector3();
+      clothingBBox.getSize(clothingSize);
+
+      // Position based on mannequin anatomy:
+      // Tops sit on chest (upper 60% of mannequin)
+      // Bottoms sit on hips/thighs (middle-lower 40%)
+      // Shoes sit at ground level
+      // Accessories sit at mid-torso
       if (category === "top") {
-        cloned.position.set(0, mannequinHeight * 0.72, 0.06);
+        // Center the clothing at chest height, offset forward slightly
+        const chestY = mannequinHeight * 0.65;
+        cloned.position.set(0, chestY - clothingCenter.y, 0.05);
       } else if (category === "bottom") {
-        cloned.position.set(0, mannequinHeight * 0.32, 0.04);
+        // Center the clothing at hip/thigh height
+        const hipY = mannequinHeight * 0.35;
+        cloned.position.set(0, hipY - clothingCenter.y, 0.03);
       } else if (isShoe) {
-        cloned.position.set(0, 0.04, 0.04);
+        // Shoes at ground level
+        cloned.position.set(0, 0.02 - clothingBBox.min.y, 0.03);
       } else {
-        cloned.position.set(0, mannequinHeight * 0.50, 0.05);
+        // Accessories at mid-torso
+        const midY = mannequinHeight * 0.55;
+        cloned.position.set(0, midY - clothingCenter.y, 0.04);
       }
 
       cloned.traverse((child) => {
         if ((child as THREE.Mesh).isMesh) {
           const mesh = child as THREE.Mesh;
           const mat = mesh.material as any;
-          const hasTexture = mat?.map || mat?.normalMap || mat?.aoMap || mat?.emissiveMap || (mat?.image && mat?.image.width > 0);
+          // Check for texture: map, normalMap, aoMap, emissiveMap, or any image source
+          const hasTexture = !!(mat?.map || mat?.normalMap || mat?.aoMap || mat?.emissiveMap ||
+            (mat?.image) || (mat?.source?.data instanceof HTMLImageElement) ||
+            (mat?.map?.image instanceof HTMLImageElement));
 
           if (!hasTexture) {
             // No texture — replace with PBR fabric material (dummy GLBs)
@@ -362,12 +384,8 @@ function ClothingInner({
             mat.metalness = Math.min(mat.metalness || 0, 0.05);
           }
           mesh.renderOrder = 1;
-          const m = mesh.material as any;
-          if (Array.isArray(m)) {
-            m.forEach((x: any) => { x.depthWrite = false; });
-          } else {
-            m.depthWrite = false;
-          }
+          // Keep depthWrite true so clothing renders in front of mannequin
+          // Using renderOrder instead of depthWrite:false for proper sorting
         }
       });
 

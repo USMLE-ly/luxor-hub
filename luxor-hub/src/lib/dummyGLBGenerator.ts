@@ -58,7 +58,7 @@ export async function generateDummyShirtGLB(): Promise<string> {
 
   // Main torso — tapered cylinder (wider at shoulders, narrower at waist)
   const torso = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.17, 0.14, 0.42, 20, 1, true),
+    new THREE.CylinderGeometry(0.17, 0.14, 0.42, 24, 4, true),
     mat
   );
   torso.name = "torso";
@@ -67,7 +67,7 @@ export async function generateDummyShirtGLB(): Promise<string> {
   // Shoulders — slightly flared ring at the top
   const shoulderMat = mat.clone();
   const shoulderRing = new THREE.Mesh(
-    new THREE.TorusGeometry(0.17, 0.018, 8, 20),
+    new THREE.TorusGeometry(0.17, 0.018, 10, 24),
     shoulderMat
   );
   shoulderRing.position.y = 0.21;
@@ -78,7 +78,7 @@ export async function generateDummyShirtGLB(): Promise<string> {
   // Left sleeve — short cylinder angled outward
   const sleeveMat = mat.clone();
   const leftSleeve = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.055, 0.065, 0.14, 10),
+    new THREE.CylinderGeometry(0.055, 0.065, 0.14, 12),
     sleeveMat
   );
   leftSleeve.position.set(-0.22, 0.14, 0);
@@ -88,7 +88,7 @@ export async function generateDummyShirtGLB(): Promise<string> {
 
   // Right sleeve
   const rightSleeve = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.055, 0.065, 0.14, 10),
+    new THREE.CylinderGeometry(0.055, 0.065, 0.14, 12),
     sleeveMat.clone()
   );
   rightSleeve.position.set(0.22, 0.14, 0);
@@ -103,7 +103,7 @@ export async function generateDummyShirtGLB(): Promise<string> {
     metalness: 0.0,
   });
   const collar = new THREE.Mesh(
-    new THREE.TorusGeometry(0.07, 0.012, 8, 16),
+    new THREE.TorusGeometry(0.07, 0.012, 10, 20),
     collarMat
   );
   collar.position.y = 0.22;
@@ -114,7 +114,7 @@ export async function generateDummyShirtGLB(): Promise<string> {
   // Bottom hem ring
   const hemMat = mat.clone();
   const hem = new THREE.Mesh(
-    new THREE.TorusGeometry(0.14, 0.01, 8, 20),
+    new THREE.TorusGeometry(0.14, 0.01, 10, 24),
     hemMat
   );
   hem.position.y = -0.21;
@@ -151,7 +151,7 @@ export async function generateDummyPantsGLB(): Promise<string> {
 
   // Waistband — ring
   const waist = new THREE.Mesh(
-    new THREE.TorusGeometry(0.15, 0.018, 8, 20),
+    new THREE.TorusGeometry(0.15, 0.018, 10, 24),
     mat
   );
   waist.position.y = 0.26;
@@ -161,7 +161,7 @@ export async function generateDummyPantsGLB(): Promise<string> {
 
   // Left leg — tapered cylinder
   const leftLeg = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.055, 0.05, 0.46, 12),
+    new THREE.CylinderGeometry(0.055, 0.05, 0.46, 16, 4),
     mat.clone()
   );
   leftLeg.position.set(-0.08, -0.02, 0);
@@ -170,7 +170,7 @@ export async function generateDummyPantsGLB(): Promise<string> {
 
   // Right leg
   const rightLeg = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.055, 0.05, 0.46, 12),
+    new THREE.CylinderGeometry(0.055, 0.05, 0.46, 16, 4),
     mat.clone()
   );
   rightLeg.position.set(0.08, -0.02, 0);
@@ -252,7 +252,7 @@ export async function generateDummyShoesGLB(): Promise<string> {
 
   // Left toe cap (rounded front)
   const leftToe = new THREE.Mesh(
-    new THREE.SphereGeometry(0.04, 8, 6, 0, Math.PI * 2, 0, Math.PI / 2),
+    new THREE.SphereGeometry(0.04, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2),
     shoeMat.clone()
   );
   leftToe.position.set(-0.065, 0.01, 0.09);
@@ -278,7 +278,7 @@ export async function generateDummyShoesGLB(): Promise<string> {
   group.add(rightSole);
 
   const rightToe = new THREE.Mesh(
-    new THREE.SphereGeometry(0.04, 8, 6, 0, Math.PI * 2, 0, Math.PI / 2),
+    new THREE.SphereGeometry(0.04, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2),
     shoeMat.clone()
   );
   rightToe.position.set(0.065, 0.01, 0.09);
