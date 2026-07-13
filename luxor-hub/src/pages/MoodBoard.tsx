@@ -151,6 +151,7 @@ const MoodBoard = () => {
       // Sanitize extension: strip path separators and traversal chars
       const rawExt = file.name.split(".").pop() || "bin";
       const ext = rawExt.replace(/[^a-zA-Z0-9]/g, "").slice(0, 8) || "bin";
+      if (ext.includes('..')) throw new Error("Invalid file extension");
       const path = `${user.id}/moodboard/${crypto.randomUUID()}.${ext}`;
       const { error: uploadErr } = await supabase.storage.from("look-photos").upload(path, file);
       if (uploadErr) { toast.error("Upload failed"); return; }
