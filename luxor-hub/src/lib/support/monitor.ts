@@ -6,7 +6,7 @@
  */
 
 import { matchKnownIssue, createTriageReport, getAutomatedFix, type TriageReport } from "./playbook";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, isSupabaseConfigured } from "@/integrations/supabase/client";
 
 type ErrorCategory = "auth" | "payment" | "ai" | "wardrobe" | "weather" | "dns" | "ui" | "unknown";
 
@@ -104,6 +104,8 @@ const recentTicketCreation = new Map<string, number>();
 const TICKET_COOLDOWN_MS = 60_000;
 
 async function autoCreateTicket(event: ErrorEvent, originalError: Error): Promise<void> {
+  if (!isSupabaseConfigured) return;
+
   // Dedup check
   const dedupKey = `${event.category}-${event.message.slice(0, 100)}`;
   const lastCreated = recentTicketCreation.get(dedupKey) || 0;

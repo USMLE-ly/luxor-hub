@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, isSupabaseConfigured } from "@/integrations/supabase/client";
 
 interface AuthContextType {
   session: Session | null;
@@ -31,6 +31,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
+    // If Supabase is not configured, skip auth entirely and go to offline mode
+    if (!isSupabaseConfigured) {
+      console.warn("[AUTH] Supabase not configured — running in offline mode");
+      setLoading(false);
+      setIsReady(true);
+      return;
+    }
+
+    let resolved = false;
+
     // Timeout: if auth takes >6s, force-ready to prevent permanent spinner
     const timeout = setTimeout(() => {
       if (!resolved) {
@@ -41,49 +51,69 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     }, 6000);
 
-    let resolved = false;
+    let subscription: { unsubscribe: () => void } | null = null;
 
-    // Subscribe FIRST — handles ALL auth events (login, logout, token refresh, expiry)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!resolved) {
-        // First event — hydration complete
-        resolved = true;
-        clearTimeout(timeout);
-        setLoading(false);
-        setIsReady(true);
-      }
-      // Always update session/user on every auth event (including SIGNED_OUT, TOKEN_REFRESHED)
-      setSession(session);
-      setUser(session?.user ?? null);
-    });
-
-    // Then hydrate from the stored session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (resolved) return; // onAuthStateChange already fired
+    try {
+      // Subscribe FIRST — handles ALL auth events
+      const result = supabase.auth.onAuthStateChange((_event, session) => {
+        if (!resolved) {
+          resolved = true;
+          clearTimeout(timeout);
+          setLoading(false);
+          setIsReady(true);
+        }
+        setSession(session);
+        setUser(session?.user ?? null);
+      });
+      subscription = result.data?.subscription ?? null;
+    } catch (err) {
+      console.warn("[AUTH] onAuthStateChange failed:", err);
       resolved = true;
       clearTimeout(timeout);
-      setSession(session);
-      setUser(session?.user ?? null);
       setLoading(false);
       setIsReady(true);
-    });
+    }
+
+    // Hydrate from stored session
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => {
+        if (resolved) return;
+        resolved = true;
+        clearTimeout(timeout);
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+        setIsReady(true);
+      })
+      .catch((err) => {
+        console.warn("[AUTH] getSession failed:", err);
+        if (!resolved) {
+          resolved = true;
+          clearTimeout(timeout);
+          setLoading(false);
+          setIsReady(true);
+        }
+      });
 
     return () => {
       clearTimeout(timeout);
-      resolved = true; // prevent state updates after unmount
-      subscription.unsubscribe();
+      resolved = true;
+      subscription?.unsubscribe();
     };
   }, []);
 
   const signIn = async (email: string, password: string) => {
+    if (!isSupabaseConfigured) return { error: { message: "Database not connected" } };
     return await supabase.auth.signInWithPassword({ email, password });
   };
 
   const signUp = async (email: string, password: string, options?: any) => {
+    if (!isSupabaseConfigured) return { error: { message: "Database not connected" } };
     return await supabase.auth.signUp({ email, password, options });
   };
 
   const signOut = async () => {
+    if (!isSupabaseConfigured) return;
     await supabase.auth.signOut();
   };
 

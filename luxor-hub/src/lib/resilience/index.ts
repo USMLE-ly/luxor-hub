@@ -9,7 +9,7 @@
  * - Offline queue for failed mutations
  */
 
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, isSupabaseConfigured } from "@/integrations/supabase/client";
 
 // ─── AUTO-RETRY WITH EXPONENTIAL BACKOFF ─────────────────────────
 
@@ -164,6 +164,8 @@ export function queueMutation(
  * Process the offline queue when back online.
  */
 export async function processOfflineQueue(): Promise<{ processed: number; failed: number }> {
+  if (!isSupabaseConfigured) return { processed: 0, failed: 0 };
+
   const queue = getQueue();
   if (queue.length === 0) return { processed: 0, failed: 0 };
 
