@@ -1,8 +1,8 @@
 /**
- * OccasionPicker v2 — MiMo Vision + Permutation Calculator
+ * OccasionPicker — Dynamic outfit occasion engine UI
  *
- * Flow: User picks occasion → MiMo Vision analyzes closet →
- *       Permutation calculator runs as callback → Show N outfits
+ * Flow: User picks occasion → Match items by metadata →
+ *       Permutation calculator → Show N outfits
  */
 
 import { useState, useCallback } from "react";
@@ -18,7 +18,7 @@ import {
   type OccasionResult,
   type OutfitCombination,
   type ClosetItem,
-  type MiMoMatchResult,
+  type MatchResult,
 } from "@/lib/occasionEngine";
 import { useWardrobeStore } from "@/store/useWardrobeStore";
 import { isSupabaseConfigured } from "@/integrations/supabase/client";
@@ -44,7 +44,7 @@ function ConfidenceBadge({ confidence }: { confidence: number }) {
 }
 
 // ── Item Card ──────────────────────────────────────────────
-function ItemCard({ item, match }: { item: ClosetItem; match?: MiMoMatchResult }) {
+function ItemCard({ item, match }: { item: ClosetItem; match?: MatchResult }) {
   return (
     <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/50 border border-border">
       {item.photo_url ? (
@@ -100,22 +100,18 @@ export function OccasionPicker() {
   const { user } = useAuth();
   const [result, setResult] = useState<OccasionResult | null>(null);
   const [loading, setLoading] = useState(false);
-  const [analyzingStage, setAnalyzingStage] = useState("");
   const catalogItems = useWardrobeStore((s) => s.catalogItems);
 
   const handleOccasionSelect = useCallback(
     async (occasionId: OccasionId) => {
       setLoading(true);
       setResult(null);
-      setAnalyzingStage("MiMo Vision is analyzing your closet...");
 
       try {
         let occasionResult: OccasionResult;
 
         if (isSupabaseConfigured && user?.id) {
-          setAnalyzingStage("Sending images to MiMo Vision 2.5v...");
           occasionResult = await generateOccasionOutfits(user.id, occasionId);
-          setAnalyzingStage("Permutation calculator running...");
         } else if (catalogItems.length > 0) {
           occasionResult = calculateOccasionFromLocalItems(catalogItems, occasionId);
         } else {
@@ -123,7 +119,7 @@ export function OccasionPicker() {
             success: false, occasion: occasionId, maxOutfits: 0,
             tops: [], bottoms: [], shoes: [], accessories: [],
             outfits: [], message: "No clothing items found. Add items to your closet first!",
-            mimoAnalysis: [],
+            analysis: [],
           };
         }
 
@@ -139,14 +135,13 @@ export function OccasionPicker() {
         toast.error("Failed to calculate outfits");
       } finally {
         setLoading(false);
-        setAnalyzingStage("");
       }
     },
     [user, catalogItems]
   );
 
-  const matchedCount = result?.mimoAnalysis?.filter((r) => r.matches).length || 0;
-  const totalCount = result?.mimoAnalysis?.length || 0;
+  const matchedCount = result?.analysis?.filter((r) => r.matches).length || 0;
+  const totalCount = result?.analysis?.length || 0;
 
   return (
     <div className="mb-4">
@@ -185,22 +180,17 @@ export function OccasionPicker() {
         ))}
       </div>
 
-      {/* Loading / Analyzing State */}
+      {/* Loading State */}
       <AnimatePresence>
         {loading && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="mt-2 space-y-1"
+            className="mt-2 flex items-center gap-2 p-3 rounded-xl bg-primary/5 border border-primary/20"
           >
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-primary/5 border border-primary/20">
-              <Spinner className="w-4 h-4 animate-spin text-primary" />
-              <div>
-                <p className="text-xs font-sans font-semibold text-primary">MiMo Vision analyzing...</p>
-                <p className="text-[10px] font-sans text-muted-foreground">{analyzingStage}</p>
-              </div>
-            </div>
+            <Spinner className="w-4 h-4 animate-spin text-primary" />
+            <p className="text-xs font-sans text-primary">Calculating outfits...</p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -225,7 +215,7 @@ export function OccasionPicker() {
                   <p className="text-sm font-sans font-bold text-foreground">{result.message}</p>
                   {totalCount > 0 && (
                     <p className="text-[10px] font-sans text-muted-foreground mt-0.5">
-                      MiMo analyzed {totalCount} items · {matchedCount} matched "{result.occasion}"
+                      Analyzed {totalCount} items · {matchedCount} matched "{result.occasion}"
                     </p>
                   )}
                   <p className="text-[10px] font-sans text-muted-foreground mt-0.5">
@@ -241,15 +231,15 @@ export function OccasionPicker() {
               </div>
             </div>
 
-            {/* MiMo Analysis Details (collapsed by default) */}
-            {result.mimoAnalysis.length > 0 && (
+            {/* Analysis Details (collapsed) */}
+            {result.analysis.length > 0 && (
               <details className="mb-2 group">
                 <summary className="text-[10px] font-sans text-muted-foreground cursor-pointer hover:text-foreground transition-colors flex items-center gap-1">
                   <CaretRight className="w-3 h-3 group-open:rotate-90 transition-transform" />
-                  MiMo Vision Analysis ({matchedCount}/{totalCount} matched)
+                  Analysis ({matchedCount}/{totalCount} matched)
                 </summary>
                 <div className="mt-1 space-y-1 max-h-40 overflow-y-auto scrollbar-none">
-                  {result.mimoAnalysis.map((m) => (
+                  {result.analysis.map((m) => (
                     <div key={m.item.id} className={`flex items-center gap-2 p-1.5 rounded-lg text-[10px] ${
                       m.matches ? "bg-green-500/5 border border-green-500/20" : "bg-red-500/5 border border-red-500/10"
                     }`}>
@@ -279,7 +269,7 @@ export function OccasionPicker() {
                 <Sparkle className="w-6 h-6 text-muted-foreground mx-auto mb-2" />
                 <p className="text-xs font-sans font-semibold text-foreground">Nothing found for this occasion</p>
                 <p className="text-[10px] font-sans text-muted-foreground mt-1">
-                  MiMo Vision didn't find matching items. Add more clothes or create your own outfit!
+                  No matching items found. Add more clothes or create your own outfit!
                 </p>
               </div>
             )}

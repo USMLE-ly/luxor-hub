@@ -1,14 +1,11 @@
 /**
- * Outfit Occasion Engine v2
+ * Outfit Occasion Engine
  *
  * FLOW:
  * 1. User picks an occasion
- * 2. MiMo Vision 2.5v analyzes every clothing image in the closet
- * 3. MiMo returns which items match the occasion (with confidence scores)
- * 4. Permutation calculator runs as CALLBACK on MiMo's matched items
- * 5. Returns 0 to N outfits — never hardcoded
- *
- * If MiMo finds 0 matching items → "Nothing found. Make the outfit you want."
+ * 2. Match items from closet by metadata (occasion, style, season, name)
+ * 3. Permutation calculator runs on matched items
+ * 4. Returns 0 to N outfits — never hardcoded
  */
 
 import { supabase, isSupabaseConfigured } from "@/integrations/supabase/client";
@@ -29,7 +26,6 @@ export interface OccasionDef {
   id: OccasionId;
   label: string;
   emoji: string;
-  prompt: string; // The prompt sent to MiMo Vision
 }
 
 export interface ClosetItem {
@@ -44,10 +40,10 @@ export interface ClosetItem {
   photo_url: string | null;
 }
 
-export interface MiMoMatchResult {
+export interface MatchResult {
   item: ClosetItem;
   matches: boolean;
-  confidence: number; // 0-1
+  confidence: number;
   reason: string;
 }
 
@@ -69,60 +65,20 @@ export interface OccasionResult {
   accessories: ClosetItem[];
   outfits: OutfitCombination[];
   message: string;
-  mimoAnalysis: MiMoMatchResult[];
+  analysis: MatchResult[];
 }
 
 // ── Occasion Definitions ───────────────────────────────────
 
 export const OCCASIONS: OccasionDef[] = [
-  {
-    id: "casual",
-    label: "Casual",
-    emoji: "👕",
-    prompt: "Is this clothing item suitable for a casual everyday outfit? Consider comfort, relaxed fit, streetwear, loungewear.",
-  },
-  {
-    id: "formal",
-    label: "Formal",
-    emoji: "🤵",
-    prompt: "Is this clothing item suitable for a formal black-tie event, gala, or wedding? Consider elegance, sophistication, dress code.",
-  },
-  {
-    id: "business",
-    label: "Business",
-    emoji: "💼",
-    prompt: "Is this clothing item suitable for a business office, professional meeting, or corporate environment? Consider smart-casual to formal workwear.",
-  },
-  {
-    id: "sporty",
-    label: "Sporty",
-    emoji: "🏃",
-    prompt: "Is this clothing item suitable for sports, gym, running, or athletic activities? Consider performance fabric,运动性, activewear.",
-  },
-  {
-    id: "party",
-    label: "Party",
-    emoji: "🎉",
-    prompt: "Is this clothing item suitable for a party, nightclub, or festive celebration? Consider bold style, nightlife, going-out looks.",
-  },
-  {
-    id: "date-night",
-    label: "Date Night",
-    emoji: "🌹",
-    prompt: "Is this clothing item suitable for a romantic dinner date or evening out? Consider stylish, attractive, evening-appropriate.",
-  },
-  {
-    id: "winter",
-    label: "Winter",
-    emoji: "❄️",
-    prompt: "Is this clothing item suitable for cold winter weather? Consider warmth, layering, heavy fabrics, cold-weather wear.",
-  },
-  {
-    id: "summer",
-    label: "Summer",
-    emoji: "☀️",
-    prompt: "Is this clothing item suitable for hot summer weather? Consider lightweight, breathable, light colors, beach-appropriate.",
-  },
+  { id: "casual", label: "Casual", emoji: "👕" },
+  { id: "formal", label: "Formal", emoji: "🤵" },
+  { id: "business", label: "Business", emoji: "💼" },
+  { id: "sporty", label: "Sporty", emoji: "🏃" },
+  { id: "party", label: "Party", emoji: "🎉" },
+  { id: "date-night", label: "Date Night", emoji: "🌹" },
+  { id: "winter", label: "Winter", emoji: "❄️" },
+  { id: "summer", label: "Summer", emoji: "☀️" },
 ];
 
 // ── Category Normalization ─────────────────────────────────
@@ -135,131 +91,66 @@ function normalizeCategory(raw: string): "top" | "bottom" | "shoes" | "accessory
   return "accessory";
 }
 
-// ── MiMo Vision 2.5v Integration ──────────────────────────
+// ── Occasion Keywords ──────────────────────────────────────
 
-/**
- * Send a clothing item image to MiMo Vision for occasion matching.
- * Returns whether the item matches the occasion with a confidence score.
- */
-async function analyzeItemWithMiMo(
-  item: ClosetItem,
-  occasion: OccasionDef,
-  apiBase: string
-): Promise<MiMoMatchResult> {
-  // If no image, do text-based matching as fallback
-  if (!item.photo_url) {
-    const textMatch = textBasedMatch(item, occasion);
-    return {
-      item,
-      matches: textMatch.matches,
-      confidence: textMatch.confidence,
-      reason: textMatch.reason,
-    };
-  }
+const OCCASION_KEYWORDS: Record<string, string[]> = {
+  casual: ["casual", "everyday", "relaxed", "streetwear", "loungewear"],
+  formal: ["formal", "black-tie", "gala", "wedding", "elegant"],
+  business: ["business", "office", "professional", "work", "corporate", "smart-casual"],
+  sporty: ["sport", "sporty", "athletic", "gym", "activewear", "running"],
+  party: ["party", "nightlife", "club", "going-out", "festive"],
+  "date-night": ["date", "date-night", "romantic", "dinner", "evening"],
+  winter: ["winter", "cold", "layering", "warm"],
+  summer: ["summer", "hot", "beach", "light", "breathable"],
+};
 
-  try {
-    const response = await fetch(apiBase + "/api/v1/mimo-vision", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        image_url: item.photo_url,
-        prompt: occasion.prompt,
-        item_name: item.name,
-        item_category: item.category,
-        item_color: item.color,
-        item_brand: item.brand,
-      }),
-    });
+// ── Item Matching ──────────────────────────────────────────
 
-    if (!response.ok) {
-      // Fallback to text-based matching if MiMo is unavailable
-      const textMatch = textBasedMatch(item, occasion);
-      return { item, ...textMatch };
-    }
-
-    const data = await response.json();
-    return {
-      item,
-      matches: data.matches === true || data.matches === "yes",
-      confidence: typeof data.confidence === "number" ? data.confidence : 0.5,
-      reason: data.reason || "Analyzed by MiMo Vision",
-    };
-  } catch (err) {
-    console.warn(`[MIMO] Vision analysis failed for ${item.name}:`, err);
-    const textMatch = textBasedMatch(item, occasion);
-    return { item, ...textMatch };
-  }
-}
-
-/**
- * Text-based fallback when MiMo Vision is unavailable.
- * Matches based on item metadata keywords.
- */
-function textBasedMatch(
-  item: ClosetItem,
-  occasion: OccasionDef
-): { matches: boolean; confidence: number; reason: string } {
+function matchItem(item: ClosetItem, occasionId: OccasionId): MatchResult {
   const searchText = [item.occasion, item.style, item.season, item.name, item.color]
     .filter(Boolean)
     .join(" ")
     .toLowerCase();
 
-  // Items with no metadata are universal (match everything)
   const hasMetadata = !!(item.occasion || item.style || item.season);
   if (!hasMetadata) {
-    return { matches: true, confidence: 0.3, reason: "No metadata — treated as universal" };
+    return { item, matches: true, confidence: 0.3, reason: "No metadata — treated as universal" };
   }
 
-  const occasionKeywords: Record<string, string[]> = {
-    casual: ["casual", "everyday", "relaxed", "streetwear", "loungewear"],
-    formal: ["formal", "black-tie", "gala", "wedding", "elegant"],
-    business: ["business", "office", "professional", "work", "corporate", "smart-casual"],
-    sporty: ["sport", "sporty", "athletic", "gym", "activewear", "running"],
-    party: ["party", "nightlife", "club", "going-out", "festive"],
-    "date-night": ["date", "date-night", "romantic", "dinner", "evening"],
-    winter: ["winter", "cold", "layering", "warm"],
-    summer: ["summer", "hot", "beach", "light", "breathable"],
-  };
-
-  const keywords = occasionKeywords[occasion.id] || [];
+  const keywords = OCCASION_KEYWORDS[occasionId] || [];
   const matched = keywords.filter((kw) => searchText.includes(kw));
 
   if (matched.length > 0) {
     return {
+      item,
       matches: true,
       confidence: Math.min(0.5 + matched.length * 0.15, 0.9),
-      reason: `Text match: ${matched.join(", ")}`,
+      reason: `Matched: ${matched.join(", ")}`,
     };
   }
 
-  return { matches: false, confidence: 0.1, reason: "No matching keywords found" };
+  return { item, matches: false, confidence: 0.1, reason: "No matching keywords" };
 }
 
-// ── Permutation Calculator (runs as MiMo callback) ─────────
+// ── Permutation Calculator ─────────────────────────────────
 
-/**
- * Calculates ALL possible outfit combinations from MiMo-matched items.
- * This runs AFTER MiMo Vision returns its analysis.
- * Returns 0 to N outfits — unlimited, never hardcoded.
- */
-function calculatePermutationsFromMiMo(
-  mimoResults: MiMoMatchResult[],
-  occasion: OccasionDef
+function calculatePermutations(
+  results: MatchResult[],
+  occasionId: OccasionId
 ): {
   tops: ClosetItem[];
   bottoms: ClosetItem[];
   shoes: ClosetItem[];
-  accessories: CloViewItem[];
+  accessories: ClosetItem[];
   outfits: OutfitCombination[];
   maxOutfits: number;
 } {
-  // Filter to only items MiMo said match
-  const matched = mimoResults.filter((r) => r.matches);
+  const matched = results.filter((r) => r.matches);
 
   const tops: ClosetItem[] = [];
   const bottoms: ClosetItem[] = [];
-  const shoes: CloViewItem[] = [];
-  const accessories: CloViewItem[] = [];
+  const shoes: ClosetItem[] = [];
+  const accessories: ClosetItem[] = [];
 
   for (const result of matched) {
     const cat = normalizeCategory(result.item.category);
@@ -271,10 +162,8 @@ function calculatePermutationsFromMiMo(
     }
   }
 
-  // Max outfits = minimum across required categories
   const maxOutfits = Math.min(tops.length, bottoms.length);
 
-  // Generate all combinations via round-robin
   const outfits: OutfitCombination[] = [];
   for (let i = 0; i < maxOutfits; i++) {
     outfits.push({
@@ -291,14 +180,6 @@ function calculatePermutationsFromMiMo(
 
 // ── Main Engine ────────────────────────────────────────────
 
-/**
- * Full pipeline: MiMo Vision analyzes → Permutation calculator runs as callback.
- *
- * 1. Fetch all clothing items from Supabase
- * 2. Send each item to MiMo Vision for occasion matching
- * 3. Permutation calculator runs on MiMo's matched results
- * 4. Return the exact number of outfits possible
- */
 export async function generateOccasionOutfits(
   userId: string,
   occasionId: OccasionId
@@ -308,8 +189,7 @@ export async function generateOccasionOutfits(
     return {
       success: false, occasion: occasionId, maxOutfits: 0,
       tops: [], bottoms: [], shoes: [], accessories: [],
-      outfits: [], message: `Unknown occasion: ${occasionId}`,
-      mimoAnalysis: [],
+      outfits: [], message: `Unknown occasion: ${occasionId}`, analysis: [],
     };
   }
 
@@ -317,12 +197,10 @@ export async function generateOccasionOutfits(
     return {
       success: false, occasion: occasion.label, maxOutfits: 0,
       tops: [], bottoms: [], shoes: [], accessories: [],
-      outfits: [], message: "Database not connected. Please configure Supabase.",
-      mimoAnalysis: [],
+      outfits: [], message: "Database not connected.", analysis: [],
     };
   }
 
-  // 1. Fetch all items
   const { data: items, error } = await supabase
     .from("clothing_items")
     .select("id, name, category, color, brand, season, occasion, style, photo_url")
@@ -332,8 +210,7 @@ export async function generateOccasionOutfits(
     return {
       success: false, occasion: occasion.label, maxOutfits: 0,
       tops: [], bottoms: [], shoes: [], accessories: [],
-      outfits: [], message: `Failed to fetch closet: ${error.message}`,
-      mimoAnalysis: [],
+      outfits: [], message: `Failed to fetch closet: ${error.message}`, analysis: [],
     };
   }
 
@@ -341,66 +218,44 @@ export async function generateOccasionOutfits(
     return {
       success: true, occasion: occasion.label, maxOutfits: 0,
       tops: [], bottoms: [], shoes: [], accessories: [],
-      outfits: [], message: "Your closet is empty. Add some clothing items first!",
-      mimoAnalysis: [],
+      outfits: [], message: "Your closet is empty. Add some clothing items first!", analysis: [],
     };
   }
 
-  // 2. MiMo Vision analyzes each item
-  const apiBase = import.meta.env.VITE_API_URL || import.meta.env.VITE_PUBLIC_API_URL ||
-    (typeof window !== "undefined" && window.location.hostname === "localhost"
-      ? "http://localhost:5000" : "");
+  // Match each item against the occasion
+  const analysis = items.map((item) => matchItem(item as ClosetItem, occasionId));
 
-  const mimoResults: MiMoMatchResult[] = [];
-
-  // Analyze items in batches of 5 to avoid rate limits
-  for (let i = 0; i < items.length; i += 5) {
-    const batch = items.slice(i, i + 5);
-    const batchResults = await Promise.all(
-      batch.map((item) => analyzeItemWithMiMo(item as ClosetItem, occasion, apiBase))
-    );
-    mimoResults.push(...batchResults);
-  }
-
-  // 3. Permutation calculator runs as CALLBACK on MiMo results
-  const matched = mimoResults.filter((r) => r.matches);
+  // Run permutation calculator on matched items
   const { tops, bottoms, shoes, accessories, outfits, maxOutfits } =
-    calculatePermutationsFromMiMo(mimoResults, occasion);
+    calculatePermutations(analysis, occasionId);
 
-  // 4. Build message
+  const matched = analysis.filter((r) => r.matches);
+
   let message = "";
   if (maxOutfits === 0) {
     if (matched.length === 0) {
-      message = `MiMo Vision found 0 items that fit "${occasion.label}". Nothing found — make the outfit you want!`;
+      message = `No items match "${occasion.label}". Nothing found — make the outfit you want!`;
     } else {
       const missing: string[] = [];
       if (tops.length === 0) missing.push("tops");
       if (bottoms.length === 0) missing.push("bottoms");
-      message = `Found ${matched.length} matching items, but no complete outfits possible. You need ${missing.join(" and ")} for "${occasion.label}".`;
+      message = `Found ${matched.length} matching items, but no complete outfits. You need ${missing.join(" and ")}.`;
     }
   } else if (maxOutfits === 1) {
-    message = `MiMo Vision found 1 perfect "${occasion.label}" outfit for you!`;
+    message = `Found 1 perfect "${occasion.label}" outfit!`;
   } else if (maxOutfits < 5) {
-    message = `MiMo Vision created ${maxOutfits} "${occasion.label}" outfits from your closet.`;
+    message = `${maxOutfits} "${occasion.label}" outfits available.`;
   } else {
-    message = `Great news! MiMo Vision found ${maxOutfits} "${occasion.label}" outfits in your wardrobe!`;
+    message = `Great news! ${maxOutfits} "${occasion.label}" outfits in your wardrobe!`;
   }
 
   return {
-    success: true,
-    occasion: occasion.label,
-    maxOutfits,
-    tops,
-    bottoms,
-    shoes,
-    accessories,
-    outfits,
-    message,
-    mimoAnalysis: mimoResults,
+    success: true, occasion: occasion.label, maxOutfits,
+    tops, bottoms, shoes, accessories, outfits, message, analysis,
   };
 }
 
-// ── Local Fallback (no Supabase) ──────────────────────────
+// ── Local Fallback ─────────────────────────────────────────
 
 export function calculateOccasionFromLocalItems(
   localItems: Array<{ id: string; name: string; category: string; color?: string; fit?: string; fabric?: string }>,
@@ -411,8 +266,7 @@ export function calculateOccasionFromLocalItems(
     return {
       success: false, occasion: occasionId, maxOutfits: 0,
       tops: [], bottoms: [], shoes: [], accessories: [],
-      outfits: [], message: `Unknown occasion: ${occasionId}`,
-      mimoAnalysis: [],
+      outfits: [], message: `Unknown occasion: ${occasionId}`, analysis: [],
     };
   }
 
@@ -420,11 +274,6 @@ export function calculateOccasionFromLocalItems(
 
   for (const item of localItems) {
     const cat = normalizeCategory(item.category);
-    const searchText = [item.name, item.color, item.fit, item.fabric].filter(Boolean).join(" ").toLowerCase();
-    const hasMetadata = !!(item.color || item.fit || item.fabric);
-    // Without metadata, treat as universal match
-    const matches = !hasMetadata;
-
     categorized[cat].push({
       id: item.id, name: item.name, category: cat,
       color: item.color || null, brand: null, season: null,
@@ -451,7 +300,7 @@ export function calculateOccasionFromLocalItems(
 
   let message = "";
   if (maxOutfits === 0) {
-    message = `No "${occasion.label}" outfits possible from local items.`;
+    message = `No "${occasion.label}" outfits possible.`;
   } else if (maxOutfits === 1) {
     message = `Found 1 "${occasion.label}" outfit!`;
   } else {
@@ -460,7 +309,6 @@ export function calculateOccasionFromLocalItems(
 
   return {
     success: true, occasion: occasion.label, maxOutfits,
-    tops, bottoms, shoes, accessories, outfits, message,
-    mimoAnalysis: [],
+    tops, bottoms, shoes, accessories, outfits, message, analysis: [],
   };
 }
