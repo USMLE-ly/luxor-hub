@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   useWardrobeStore,
   type Category,
@@ -44,6 +44,27 @@ export default function DressingRoomPage() {
   const { user } = useAuth();
 
   const [generatedImages, setGeneratedImages] = useState<OutfitImages[]>([]);
+
+  // ── Dynamic outfit stack from Zustand ──
+  const catalogItems = useWardrobeStore((s) => s.catalogItems);
+  const selected = useWardrobeStore((s) => s.selected);
+  const toggleClothing = useWardrobeStore((s) => s.toggleClothing);
+  const clearOutfit = useWardrobeStore((s) => s.clearOutfit);
+
+  const currentStackImages = useMemo(() => {
+    return Object.values(selected)
+      .filter((id): id is string => id !== null)
+      .map((id) => {
+        const item = catalogItems.find((c) => c.id === id);
+        if (!item) return null;
+        return {
+          id: item.id,
+          src: item.imageUrl || item.src || "/placeholder.svg",
+          name: item.name || "Unnamed",
+        };
+      })
+      .filter(Boolean) as { id: string; src: string; name: string }[];
+  }, [selected, catalogItems]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeOutfit, setActiveOutfit] = useState<OutfitImages | null>(null);
   const [progressValue, setProgressValue] = useState(0);
@@ -255,12 +276,68 @@ export default function DressingRoomPage() {
             )}
           </AnimatePresence>
 
-                    {/* ---- UPLOAD MANUAL OUTFITS ---- */}
-          <div className="w-full mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-2">Upload Manual Outfits</h2>
-            <p className="text-sm text-muted-foreground mb-6">Swipe vertically through your closet to select your Top, Bottom, and Shoes.</p>
-            <div className="w-full h-[500px] rounded-2xl border border-border bg-card flex items-center justify-center overflow-hidden relative">
-              <VerticalImageStack />
+                    {/* ---- UPLOAD MANUAL OUTFITS + CLOSET SIDEBAR ---- */}
+          <div className="flex flex-col lg:flex-row gap-6 w-full mb-8">
+            {/* Closet Sidebar */}
+            <div className="w-full lg:w-64 flex-shrink-0 bg-card rounded-2xl border border-border p-4 h-fit max-h-[500px] overflow-y-auto space-y-3">
+              <h3 className="text-sm font-semibold text-foreground">Closet Items</h3>
+              {catalogItems.length === 0 ? (
+                <p className="text-xs text-muted-foreground text-center py-4">No items in closet yet.</p>
+              ) : (
+                <div className="space-y-1.5">
+                  {catalogItems.map((item) => {
+                    const isActive = Object.values(selected).includes(item.id);
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          const cat = item.category as Category;
+                          toggleClothing(cat, item.id);
+                        }}
+                        className={cn(
+                          "w-full flex items-center gap-2.5 p-2 rounded-xl transition-colors text-left",
+                          isActive
+                            ? "bg-primary/15 ring-1 ring-primary/40"
+                            : "hover:bg-secondary/60"
+                        )}
+                      >
+                        <div className="w-9 h-9 rounded-lg bg-secondary overflow-hidden flex-shrink-0">
+                          {(item.imageUrl || item.src) ? (
+                            <img
+                              src={item.imageUrl || item.src}
+                              alt={item.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
+                              {item.category === "top" ? "👕" : item.category === "bottom" ? "👖" : "👟"}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex flex-col overflow-hidden min-w-0">
+                          <span className="text-xs font-medium text-foreground truncate">{item.name || "Unnamed"}</span>
+                          <span className="text-[10px] text-muted-foreground capitalize">{item.category}</span>
+                        </div>
+                        {isActive && <Check className="w-3.5 h-3.5 text-primary flex-shrink-0 ml-auto" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              {Object.values(selected).some(Boolean) && (
+                <button onClick={clearOutfit} className="w-full mt-2 text-xs text-destructive hover:text-destructive/80 font-medium text-center py-1.5">
+                  Clear Outfit
+                </button>
+              )}
+            </div>
+
+            {/* Main Area: Vertical Stack */}
+            <div className="flex-1 flex flex-col bg-card rounded-2xl border border-border p-6">
+              <h2 className="text-xl font-semibold text-foreground mb-1">Upload Manual Outfits</h2>
+              <p className="text-sm text-muted-foreground mb-4">Select items from the closet. Swipe vertically to browse your outfit.</p>
+              <div className="flex-1 flex items-center justify-center min-h-[400px]">
+                <VerticalImageStack images={currentStackImages} />
+              </div>
             </div>
           </div>
 
