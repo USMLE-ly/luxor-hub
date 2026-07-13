@@ -20,7 +20,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { humanizeTextArray } from "@/lib/humanizer";
 import { generateDummyShirtGLB, generateDummyPantsGLB, generateDummyShoesGLB } from "@/lib/dummyGLBGenerator";
 import { VerticalImageStack } from "@/components/ui/vertical-image-stack";
-import { AIMultiModalGeneration } from "@/components/ui/ai-gen";
 import { restoreAssetMappings } from "@/lib/assetResolver";
 
 /* ------------------------------------------------------------------ */
@@ -219,7 +218,6 @@ export default function DressingRoomPage() {
         </motion.div>
 
         {/* ---- OUTFIT FROM CLOSET ---- */}
-        <AIMultiModalGeneration />
 
         {/* ---- IPHONE MOCKUP + NOTIFICATIONS ---- */}
         <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto gap-1 overflow-visible">
