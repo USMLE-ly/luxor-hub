@@ -1,3 +1,8 @@
 dist/
 
 /src/generated/prisma
+
+# Environment variables — never commit secrets
+.env
+.env.*
+!.env.example
