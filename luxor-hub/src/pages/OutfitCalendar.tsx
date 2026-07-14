@@ -128,18 +128,22 @@ const OutfitCalendarInner = () => {
     if (!user) return;
     fetchEvents();
     fetchOutfits();
-    fetchClosetMap();
     fetchRecentEvents();
   }, [user, currentMonth]);
 
-  // Build name→photo map from hook data
+  // Build name→photo map from hook data (stable — only rebuilds on actual data change)
   useEffect(() => {
-    const map = new Map<string, string>();
+    if (closetItems.length === 0) return;
+    const newMap = new Map<string, string>();
     closetItems.forEach((item: any) => {
-      if (item.name && (item.photo_url || item.image_url)) map.set(item.name.toLowerCase(), item.photo_url || item.image_url);
+      if (item.name && (item.photo_url || item.image_url)) newMap.set(item.name.toLowerCase(), item.photo_url || item.image_url);
     });
-    setClosetMap(map);
-  }, [closetItems]);
+    setClosetMap(prev => {
+      const prevKeys = Array.from(prev.keys()).sort().join(",");
+      const newKeys = Array.from(newMap.keys()).sort().join(",");
+      return prevKeys === newKeys ? prev : newMap;
+    });
+  }, [closetItems.length]);
 
   // Fetch weather when location resolves
   useEffect(() => {
