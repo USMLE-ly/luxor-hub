@@ -20,12 +20,12 @@ import { fetchSavedOutfits, insertOutfit, deleteOutfit, toggleOutfitFavorite } f
 import { insertCalendarEvent } from "@/lib/calendarService";
 import { useSearchFilter } from "@/hooks/useSearchFilter";
 import { useWardrobeStore, useWardrobeHydrated, restoreClothingFromIDB, type Category, type ClothingItem as WardrobeClothingItem } from "@/store/useWardrobeStore";
-import { resolve3DAsset, uploadAndAssignGLB, restoreAssetMappings } from "@/lib/assetResolver";
-import { generateDummyShirtGLB, generateDummyPantsGLB, generateDummyShoesGLB } from "@/lib/dummyGLBGenerator";
-import { generateClothingFromImage } from "@/lib/imageToGLBConverter";
+import { loadMannequinModules } from "@/lib/mannequinModules";
+
+
 import { type BodyDNA, type PosePreset } from "@/components/app/Mannequin3D";
-import { SLOT_MAP, DRESS_REPLACES, type GarmentFit } from "@/components/app/GarmentGeometry";
-import type { FabricType } from "@/components/app/FabricMaterials";
+
+
 import { WardrobeIntelligence } from "@/components/app/WardrobeIntelligence";
 import { WardrobeGapAnalysis } from "@/components/app/WardrobeGapAnalysis";
 import { OccasionPicker } from "@/components/app/OccasionPicker";
@@ -135,6 +135,8 @@ type MannequinPanel = "dna" | "pose" | "trace" | "measure" | null;
 
 const Closet = () => {
   const { user } = useAuth();
+  // Pre-load 3D modules in background on mount
+  useEffect(() => { loadMannequinModules().then(m => { modulesRef.current = m; }); }, []);
   const { handleError } = useErrorHandler();
   const { tier } = usePlanTier();
   const itemLimit = PLAN_LIMITS[tier].closetItems;
@@ -235,7 +237,7 @@ const Closet = () => {
     }
     const item = currentlyWearing.find((c) => c.id === assigningItemId);
     if (!item) return;
-    const glbUrl = await uploadAndAssignGLB(item.name, file);
+    const glbUrl = await modulesRef.current!.assetResolver.uploadAndAssignGLB(item.name, file);
     useWardrobeStore.getState().updateClothingSrc(assigningItemId, glbUrl);
 
     // Also persist with the item ID key so restoreClothingFromIDB can find it
@@ -254,11 +256,11 @@ const Closet = () => {
     try {
       let blobUrl: string;
       if (category === "bottom") {
-        blobUrl = await generateDummyPantsGLB();
+        blobUrl = await modulesRef.current!.dummyGLB.generateDummyPantsGLB();
       } else if (category === "accessory" || category === "shoes") {
-        blobUrl = await generateDummyShoesGLB();
+        blobUrl = await modulesRef.current!.dummyGLB.generateDummyShoesGLB();
       } else {
-        blobUrl = await generateDummyShirtGLB();
+        blobUrl = await modulesRef.current!.dummyGLB.generateDummyShirtGLB();
       }
       useWardrobeStore.getState().updateClothingSrc(itemId, blobUrl);
 
@@ -292,7 +294,7 @@ const Closet = () => {
       toast.info("Generating 3D model from image...");
       const item = currentlyWearing.find((c) => c.id === assigningItemId);
       const category = item?.category || "top";
-      const blobUrl = await generateClothingFromImage(file, category);
+      const blobUrl = await modulesRef.current!.imageToGLB.generateClothingFromImage(file, category);
       useWardrobeStore.getState().updateClothingSrc(assigningItemId, blobUrl);
 
       // Persist the generated GLB binary to IndexedDB so it survives page reload
@@ -406,7 +408,7 @@ const Closet = () => {
   // ── Restore 3D asset mappings and IndexedDB clothing on mount ──
   useEffect(() => {
     if (hydrated) {
-      restoreAssetMappings();
+      modulesRef.current?.assetResolver.restoreAssetMappings();
       restoreClothingFromIDB();
     }
   }, [hydrated]);
@@ -445,7 +447,7 @@ const Closet = () => {
                   : ["bottoms", "skirts", "dress"].includes(cat) ? "bottom"
                   : "accessory") as Category;
                 const id = `supabase-${zustandCat}-${(item.name || "").replace(/\s+/g, "-").toLowerCase()}`;
-                const resolvedSrc = resolve3DAsset(item.name || "", item.category || "top");
+                const resolvedSrc = modulesRef.current?.assetResolver.resolve3DAsset(item.name || "", item.category || "top");
                 addCustomClothing({
                   id, name: item.name || "Unknown",
                   src: resolvedSrc || "",
@@ -532,7 +534,7 @@ const Closet = () => {
         : ["bottoms", "skirts", "dress"].includes(cat) ? "bottom"
         : "accessory") as Category;
       const id = `outfit-${zustandCat}-${(item.name || "").replace(/\s+/g, "-").toLowerCase()}-${Date.now()}`;
-      const outfitSrc = resolve3DAsset(item.name || "", item.category || "top");
+      const outfitSrc = modulesRef.current?.assetResolver.resolve3DAsset(item.name || "", item.category || "top");
       addCustomClothing({
         id, name: item.name || "Unknown",
         src: outfitSrc || "",
@@ -852,7 +854,7 @@ const Closet = () => {
     const itemId = `closet-${zustandCat}-${item.name.replace(/\s+/g, "-").toLowerCase()}`;
 
     // Try to find a 3D GLB for this item
-    const glbPath = resolve3DAsset(item.name, item.category);
+    const glbPath = modulesRef.current?.assetResolver.resolve3DAsset(item.name, item.category);
 
     addCustomClothing({
       id: itemId,
@@ -882,7 +884,7 @@ const Closet = () => {
       : "accessory") as Category;
     const itemId = `closet-${zustandCat}-${pendingItem.name.replace(/\s+/g, "-").toLowerCase()}`;
 
-    const glbPath = resolve3DAsset(pendingItem.name, pendingItem.category);
+    const glbPath = modulesRef.current?.assetResolver.resolve3DAsset(pendingItem.name, pendingItem.category);
 
     addCustomClothing({
       id: itemId,
