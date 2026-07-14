@@ -1,11 +1,26 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
-import { fetchUserAnalysis, buildNextActions, type UserAnalysisData } from "@/lib/userAnalysis";
-import { ArrowLeft, Sparkle, Compass, Warning, Target, Heart, TrendUp, Palette, Clock, Lightbulb } from "@phosphor-icons/react";
+import {
+  fetchUserAnalysis,
+  buildNextActions,
+  savePreferences,
+  generateOutfitMatches,
+  type UserAnalysisData,
+} from "@/lib/userAnalysis";
+import {
+  ArrowLeft, Sparkle, Compass, Warning, Target, Heart, TrendUp,
+  Palette, Clock, Lightbulb, Pencil, Check, X, Download, ArrowClockwise, TShirt,
+} from "@phosphor-icons/react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+/* ------------------------------------------------------------------ */
+/*  Reusable sub-components                                            */
+/* ------------------------------------------------------------------ */
 
 const Section: React.FC<{ eyebrow: string; title: string; children: React.ReactNode }> = ({ eyebrow, title, children }) => (
   <motion.section
@@ -24,7 +39,9 @@ const Section: React.FC<{ eyebrow: string; title: string; children: React.ReactN
   </motion.section>
 );
 
-const Slider: React.FC<{ label: string; value: number }> = ({ label, value }) => {
+const Slider: React.FC<{ label: string; value: number; editable?: boolean; onChange?: (v: number) => void }> = ({
+  label, value, editable, onChange,
+}) => {
   const [left, right] = label.split("↔").map((s) => s.trim());
   const pct = ((value + 1) / 2) * 100;
   return (
@@ -35,8 +52,18 @@ const Slider: React.FC<{ label: string; value: number }> = ({ label, value }) =>
       </div>
       <div className="relative h-[2px] bg-border">
         <div className="absolute inset-y-0 left-0 bg-primary/40" style={{ width: `${pct}%` }} />
+        {editable && onChange ? (
+          <input
+            type="range"
+            min={-100}
+            max={100}
+            value={Math.round(value * 100)}
+            onChange={(e) => onChange(Number(e.target.value) / 100)}
+            className="absolute inset-0 w-full opacity-0 cursor-pointer"
+          />
+        ) : null}
         <div
-          className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-primary shadow-[0_0_0_3px_rgba(0,0,0,0.02)]"
+          className={`absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full ${editable ? "bg-primary cursor-grab" : "bg-primary"} shadow-[0_0_0_3px_rgba(0,0,0,0.02)]`}
           style={{ left: `calc(${pct}% - 6px)` }}
         />
       </div>
@@ -62,6 +89,10 @@ const LoadingView = () => (
   </div>
 );
 
+/* ------------------------------------------------------------------ */
+/*  Main Page                                                          */
+/* ------------------------------------------------------------------ */
+
 const UserAnalysis = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -69,30 +100,109 @@ const UserAnalysis = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const load = async () => {
+  // Editable preferences
+  const [editing, setEditing] = useState(false);
+  const [editPrefs, setEditPrefs] = useState<Record<string, any>>({});
+  const [saving, setSaving] = useState(false);
+
+  // Export PDF
+  const [exporting, setExporting] = useState(false);
+  const reportRef = useRef<HTMLDivElement>(null);
+
+  // Auto-refresh
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+
+  // Outfit matches
+  const [outfitMatches, setOutfitMatches] = useState<Array<{ id: string; title: string; reason: string; items: string[] }>>([]);
+  const [loadingMatches, setLoadingMatches] = useState(false);
+
+  /* ---------- Data fetching ---------- */
+  const load = useCallback(async () => {
     if (!user?.id) return;
     setLoading(true);
     setError(null);
     try {
       const d = await fetchUserAnalysis(user.id);
       setData(d);
+      setEditPrefs(d.styleProfile.preferences || {});
+      setLastRefresh(new Date());
     } catch (e: any) {
       setError(e?.message || "Could not load analysis");
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
+  useEffect(() => { load(); }, [load]);
+
+  /* ---------- Auto-refresh via Supabase Realtime ---------- */
+  useEffect(() => {
+    if (!user?.id) return;
+    const tables = ["clothing_items", "outfit_analyses", "user_looks", "calendar_events"];
+    const channel = supabase
+      .channel("user-analysis-refresh")
+      .on("postgres_changes", { event: "*", schema: "public", table: tables[0] }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: tables[1] }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: tables[2] }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: tables[3] }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user?.id, load]);
+
+  /* ---------- Outfit matches ---------- */
+  useEffect(() => {
+    if (!user?.id || !data) return;
+    setLoadingMatches(true);
+    generateOutfitMatches(user.id, data.personality, data.styleProfile.preferences)
+      .then(setOutfitMatches)
+      .finally(() => setLoadingMatches(false));
+  }, [user?.id, data]);
+
+  /* ---------- Save preferences ---------- */
+  const handleSave = async () => {
+    if (!user?.id) return;
+    setSaving(true);
+    const { error: saveErr } = await savePreferences(user.id, editPrefs);
+    setSaving(false);
+    if (saveErr) {
+      toast.error("Failed to save: " + saveErr);
+    } else {
+      toast.success("Preferences saved");
+      setEditing(false);
+      load(); // Refresh data
+    }
+  };
+
+  /* ---------- Export PDF ---------- */
+  const handleExportPDF = async () => {
+    if (!reportRef.current) return;
+    setExporting(true);
+    try {
+      const html2canvas = (await import("html2canvas")).default;
+      const { jsPDF } = await import("jspdf");
+      const canvas = await html2canvas(reportRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+      });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfW = pdf.internal.pageSize.getWidth();
+      const pdfH = (canvas.height * pdfW) / canvas.width;
+      pdf.addImage(imgData, "PNG", 0, 0, pdfW, pdfH);
+      pdf.save(`luxor-user-analysis-${new Date().toISOString().split("T")[0]}.pdf`);
+      toast.success("PDF exported!");
+    } catch (e: any) {
+      toast.error("PDF export failed: " + (e?.message || "Unknown error"));
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  /* ---------- Derived data ---------- */
   const nextActions = useMemo(() => (data ? buildNextActions(data) : []), [data]);
 
-  if (loading) {
-    return <AppLayout><LoadingView /></AppLayout>;
-  }
+  if (loading) return <AppLayout><LoadingView /></AppLayout>;
 
   if (error || !data) {
     return (
@@ -108,7 +218,7 @@ const UserAnalysis = () => {
     );
   }
 
-  const prefs = data.styleProfile.preferences;
+  const prefs = editing ? editPrefs : data.styleProfile.preferences;
   const name = data.profile.display_name || "Stylist";
   const memberSince = data.profile.created_at
     ? new Date(data.profile.created_at).toLocaleDateString(undefined, { month: "short", year: "numeric" })
@@ -139,15 +249,39 @@ const UserAnalysis = () => {
 
   return (
     <AppLayout>
-      <div className="max-w-3xl mx-auto px-5 py-6">
-        <button
-          onClick={() => navigate(-1)}
-          className="mb-6 flex items-center gap-2 text-xs uppercase tracking-widest font-sans text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="w-3 h-3" /> Back
-        </button>
+      <div className="max-w-3xl mx-auto px-5 py-6" ref={reportRef}>
+        {/* Header bar */}
+        <div className="flex items-center justify-between mb-6">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-xs uppercase tracking-widest font-sans text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="w-3 h-3" /> Back
+          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={load}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] uppercase tracking-widest font-sans border border-border/60 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+              title="Refresh data"
+            >
+              <ArrowClockwise className="w-3 h-3" /> Refresh
+            </button>
+            <button
+              onClick={handleExportPDF}
+              disabled={exporting}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] uppercase tracking-widest font-sans bg-primary text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50"
+              title="Export as PDF"
+            >
+              <Download className="w-3 h-3" /> {exporting ? "Exporting…" : "Export PDF"}
+            </button>
+          </div>
+        </div>
 
-        {/* PERSONA HERO */}
+        <p className="text-right text-[9px] text-muted-foreground font-sans mb-6">
+          Last refreshed: {lastRefresh.toLocaleTimeString()}
+        </p>
+
+        {/* ── PERSONA HERO ── */}
         <motion.section
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -159,26 +293,20 @@ const UserAnalysis = () => {
               {data.profile.avatar_url ? (
                 <img src={data.profile.avatar_url} alt={name} className="w-full h-full object-cover" />
               ) : (
-                <div className="font-display text-6xl text-primary/40">
-                  {name.charAt(0).toUpperCase()}
-                </div>
+                <div className="font-display text-6xl text-primary/40">{name.charAt(0).toUpperCase()}</div>
               )}
-              <div className="absolute bottom-3 left-3 text-[9px] uppercase tracking-[0.3em] text-muted-foreground font-sans">
-                Persona 01
-              </div>
+              <div className="absolute bottom-3 left-3 text-[9px] uppercase tracking-[0.3em] text-muted-foreground font-sans">Persona 01</div>
             </div>
             <div className="p-6 md:p-8">
               <p className="font-sans text-[10px] tracking-[0.3em] uppercase text-primary/70">Style archetype</p>
               <h1 className="font-display text-4xl md:text-5xl leading-tight mt-1">{name}</h1>
               <p className="font-sans text-sm text-muted-foreground mt-2">{archetype} · Member since {memberSince}</p>
-              <blockquote className="mt-5 pl-4 border-l border-primary/40 font-display italic text-lg text-foreground/90">
-                "{bio}"
-              </blockquote>
+              <blockquote className="mt-5 pl-4 border-l border-primary/40 font-display italic text-lg text-foreground/90">"{bio}"</blockquote>
             </div>
           </div>
         </motion.section>
 
-        {/* IDENTITY GRID */}
+        {/* ── IDENTITY GRID ── */}
         <Section eyebrow="Identity" title="At a glance">
           <div className="grid grid-cols-1 md:grid-cols-2">
             {identityRows.map(([k, v]) => (
@@ -190,7 +318,7 @@ const UserAnalysis = () => {
           </div>
         </Section>
 
-        {/* NEEDS / FRUSTRATIONS / GOALS */}
+        {/* ── NEEDS / FRUSTRATIONS / GOALS ── */}
         <Section eyebrow="Motivation" title="Needs, frustrations & goals">
           <div className="grid md:grid-cols-3 gap-5">
             <div className="border border-border/60 p-5 bg-card">
@@ -223,27 +351,56 @@ const UserAnalysis = () => {
           </div>
         </Section>
 
-        {/* PERSONALITY */}
+        {/* ── PERSONALITY (EDITABLE) ── */}
         <Section eyebrow="Personality" title="How you show up">
           <div className="border border-border/60 p-5 md:p-7 bg-card">
-            {Object.entries(data.personality).map(([label, val]) => (
-              <Slider key={label} label={label} value={val} />
-            ))}
+            <div className="flex items-center justify-between mb-4">
+              <p className="font-sans text-[10px] uppercase tracking-widest text-muted-foreground">Drag sliders to adjust your personality profile</p>
+              {editing ? (
+                <div className="flex gap-2">
+                  <button onClick={handleSave} disabled={saving} className="flex items-center gap-1 px-3 py-1 text-[10px] uppercase tracking-widest font-sans bg-primary text-primary-foreground rounded hover:opacity-90 disabled:opacity-50">
+                    <Check className="w-3 h-3" /> {saving ? "Saving…" : "Save"}
+                  </button>
+                  <button onClick={() => { setEditing(false); setEditPrefs(data.styleProfile.preferences); }} className="flex items-center gap-1 px-3 py-1 text-[10px] uppercase tracking-widest font-sans border border-border/60 text-muted-foreground rounded hover:text-foreground">
+                    <X className="w-3 h-3" /> Cancel
+                  </button>
+                </div>
+              ) : (
+                <button onClick={() => setEditing(true)} className="flex items-center gap-1 px-3 py-1 text-[10px] uppercase tracking-widest font-sans border border-border/60 text-muted-foreground rounded hover:text-foreground hover:border-primary/40 transition-colors">
+                  <Pencil className="w-3 h-3" /> Edit
+                </button>
+              )}
+            </div>
+            {Object.entries(data.personality).map(([label, val]) => {
+              const currentVal = editPrefs._personality?.[label] ?? val;
+              return (
+                <Slider
+                  key={label}
+                  label={label}
+                  value={currentVal}
+                  editable={editing}
+                  onChange={(v) => {
+                    setEditPrefs((prev) => ({
+                      ...prev,
+                      _personality: { ...(prev._personality || {}), [label]: v },
+                    }));
+                  }}
+                />
+              );
+            })}
           </div>
         </Section>
 
-        {/* FEELINGS */}
+        {/* ── FEELINGS ── */}
         <Section eyebrow="Current feelings" title="Words that describe you now">
           <div className="flex flex-wrap gap-2">
             {data.feelings.length ? data.feelings.map((f) => (
-              <span key={f} className="px-3 py-1 border border-primary/40 text-primary text-xs uppercase tracking-widest font-sans">
-                {f}
-              </span>
+              <span key={f} className="px-3 py-1 border border-primary/40 text-primary text-xs uppercase tracking-widest font-sans">{f}</span>
             )) : <p className="text-sm text-muted-foreground font-sans">Add mood answers in onboarding to fill this in.</p>}
           </div>
         </Section>
 
-        {/* STYLE DNA */}
+        {/* ── STYLE DNA ── */}
         <Section eyebrow="Style DNA" title="Your signature">
           <div className="border border-border/60 p-5 bg-card">
             <div className="flex items-center gap-2 mb-3">
@@ -268,7 +425,41 @@ const UserAnalysis = () => {
           </div>
         </Section>
 
-        {/* ACTIVITY KPIS */}
+        {/* ── OUTFIT MATCHES ── */}
+        <Section eyebrow="For you" title="Outfit matches">
+          {loadingMatches ? (
+            <div className="grid md:grid-cols-3 gap-4">
+              {[1, 2, 3].map((i) => <Skeleton key={i} className="h-40" />)}
+            </div>
+          ) : outfitMatches.length > 0 ? (
+            <div className="grid md:grid-cols-3 gap-4">
+              {outfitMatches.map((m) => (
+                <div key={m.id} className="border border-border/60 p-5 bg-card hover:border-primary/40 transition-colors">
+                  <div className="flex items-center gap-2 mb-3">
+                    <TShirt className="w-4 h-4 text-primary" />
+                    <h3 className="font-sans text-[11px] uppercase tracking-widest text-primary">{m.title}</h3>
+                  </div>
+                  <p className="font-sans text-sm text-foreground/80 mb-3">{m.reason}</p>
+                  <ul className="space-y-1">
+                    {m.items.map((item, i) => (
+                      <li key={i} className="font-sans text-xs text-muted-foreground flex items-center gap-1.5">
+                        <span className="w-1 h-1 rounded-full bg-primary/60" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="border border-border/60 p-6 bg-card text-center">
+              <TShirt className="w-6 h-6 text-muted-foreground mx-auto mb-2" />
+              <p className="font-sans text-sm text-muted-foreground">Upload more closet items to get personalized outfit matches.</p>
+            </div>
+          )}
+        </Section>
+
+        {/* ── ACTIVITY KPIS ── */}
         <Section eyebrow="Activity" title="What you've built">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <Kpi label="Closet items" value={data.counts.closetItems} />
@@ -306,7 +497,7 @@ const UserAnalysis = () => {
           )}
         </Section>
 
-        {/* JOURNEY */}
+        {/* ── JOURNEY ── */}
         <Section eyebrow="Customer journey" title="Your path so far">
           <div className="border border-border/60 bg-card">
             {data.journey.map((step, i) => (
@@ -330,7 +521,7 @@ const UserAnalysis = () => {
           </div>
         </Section>
 
-        {/* NEXT ACTIONS */}
+        {/* ── NEXT ACTIONS ── */}
         {nextActions.length > 0 && (
           <Section eyebrow="What's next" title="Three moves to try">
             <div className="space-y-3">

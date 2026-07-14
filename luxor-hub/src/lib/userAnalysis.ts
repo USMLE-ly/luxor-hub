@@ -272,3 +272,95 @@ export function buildNextActions(d: UserAnalysisData): string[] {
   if (d.counts.councilConversations === 0) out.push("Ask the Council for a second opinion on your next occasion outfit.");
   return out.slice(0, 3);
 }
+
+/** Save edited preferences back to Supabase style_profiles */
+export async function savePreferences(
+  userId: string,
+  preferences: Record<string, any>
+): Promise<{ error?: string }> {
+  try {
+    const { error } = await (supabase as any)
+      .from("style_profiles")
+      .upsert({ user_id: userId, preferences }, { onConflict: "user_id" });
+    if (error) return { error: error.message };
+    return {};
+  } catch (e: any) {
+    return { error: e?.message || "Failed to save" };
+  }
+}
+
+/** Generate outfit match suggestions based on personality + closet */
+export async function generateOutfitMatches(
+  userId: string,
+  personality: Record<string, number>,
+  prefs: Record<string, any>
+): Promise<Array<{ id: string; title: string; reason: string; items: string[] }>> {
+  try {
+    // Fetch closet items
+    const { data: items } = await (supabase as any)
+      .from("clothing_items")
+      .select("id, name, category, color, occasion, style")
+      .eq("user_id", userId)
+      .limit(50);
+
+    if (!items || items.length === 0) return [];
+
+    const isClassic = (personality["Classic ↔ Experimental"] ?? 0) < -0.2;
+    const isMinimal = (personality["Minimal ↔ Maximal"] ?? 0) < -0.2;
+    const isPractical = (personality["Practical ↔ Expressive"] ?? 0) < -0.2;
+    const isBold = (personality["Classic ↔ Experimental"] ?? 0) > 0.3;
+    const topMood = Array.isArray(prefs.styleMood) ? prefs.styleMood[0] : "";
+
+    const tops = items.filter((i: any) => i.category === "top" || i.category === "outerwear");
+    const bottoms = items.filter((i: any) => i.category === "bottom");
+    const shoes = items.filter((i: any) => i.category === "shoes");
+    const accs = items.filter((i: any) => i.category === "accessory");
+
+    const matches: Array<{ id: string; title: string; reason: string; items: string[] }> = [];
+
+    // Match 1: Based on personality
+    if (tops.length > 0 && bottoms.length > 0) {
+      const top = tops[0];
+      const bottom = bottoms[0];
+      const shoe = shoes[0];
+      matches.push({
+        id: "personality-match",
+        title: isClassic ? "Timeless Elegance" : isBold ? "Bold Statement" : isMinimal ? "Clean Minimal" : "Everyday Balance",
+        reason: isClassic
+          ? "Your classic inclination pairs naturally with structured pieces."
+          : isBold
+          ? "Your experimental side craves standout combinations."
+          : isMinimal
+          ? "Your minimal preference calls for streamlined silhouettes."
+          : `Your ${String(topMood).toLowerCase()} mood suggests effortless coordination.`,
+        items: [top.name, bottom.name, shoe?.name].filter(Boolean),
+      });
+    }
+
+    // Match 2: Color-coordinated
+    const colored = items.filter((i: any) => i.color && i.color !== "navy" && i.color !== "black");
+    if (colored.length >= 2) {
+      matches.push({
+        id: "color-match",
+        title: "Color Story",
+        reason: "Pieces that share a color family for a cohesive look.",
+        items: colored.slice(0, 3).map((i: any) => i.name),
+      });
+    }
+
+    // Match 3: Occasion-based
+    const casual = items.filter((i: any) => i.occasion === "casual" || i.style === "casual");
+    if (casual.length >= 2) {
+      matches.push({
+        id: "casual-match",
+        title: "Weekend Ready",
+        reason: "Relaxed pieces from your closet for off-duty days.",
+        items: casual.slice(0, 3).map((i: any) => i.name),
+      });
+    }
+
+    return matches.slice(0, 3);
+  } catch {
+    return [];
+  }
+}
