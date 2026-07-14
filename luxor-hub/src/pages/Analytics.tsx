@@ -4,6 +4,7 @@ import { PremiumSkeleton, PremiumCardSkeleton, PremiumTextSkeleton } from "@/com
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { useClosetItems } from "@/hooks/useClosetItems";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -47,23 +48,21 @@ const Analytics = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { items, loading: closetLoading } = useClosetItems();
+  const { styleProfile } = useUserProfile();
   const [wearLogs, setWearLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"overview" | "gaps" | "history" | "sustainability">("overview");
   const [gapAnalysis, setGapAnalysis] = useState<{ overallScore: number; gaps: GapItem[]; summary: string } | null>(null);
   const [gapLoading, setGapLoading] = useState(false);
-  const [styleProfile, setStyleProfile] = useState<any>(null);
+
 
   useEffect(() => {
     if (!user) return;
-    Promise.all([
-      supabase.from("wear_logs").select("*, clothing_items(name, category, price)").eq("user_id", user.id).order("worn_at", { ascending: false }),
-      supabase.from("style_profiles").select("*").eq("user_id", user.id).single(),
-    ]).then(([logsRes, styleRes]) => {
-      if (logsRes.data) setWearLogs(logsRes.data);
-      if (styleRes.data) setStyleProfile(styleRes.data);
-      setLoading(false);
-    });
+    supabase.from("wear_logs").select("*, clothing_items(name, category, price)").eq("user_id", user.id).order("worn_at", { ascending: false })
+      .then(({ data }) => {
+        if (data) setWearLogs(data);
+        setLoading(false);
+      });
   }, [user]);
 
   const runGapAnalysis = async () => {

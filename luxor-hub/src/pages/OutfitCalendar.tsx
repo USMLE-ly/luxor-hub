@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { useClosetItems } from "@/hooks/useClosetItems";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { notifyEvent } from "@/lib/notificationService";
@@ -107,6 +108,7 @@ const OutfitCalendarInner = () => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
   const [savedOutfits, setSavedOutfits] = useState<any[]>([]);
+  const { styleProfile } = useUserProfile();
   const { items: closetItems } = useClosetItems({ columns: "id, name, photo_url, category, color" });
   const [newEvent, setNewEvent] = useState({ title: "", occasion: "Casual", notes: "", outfitId: "", manualItems: [] as string[] });
   const [editEvent, setEditEvent] = useState({ title: "", occasion: "Casual", notes: "", outfitId: "", manualItems: [] as string[] });
@@ -429,10 +431,7 @@ const OutfitCalendarInner = () => {
     if (!user) return;
     setAutoFilling(true);
     try {
-      const [styleRes, existingEventsRes] = await Promise.all([
-        supabase.from("style_profiles").select("archetype, preferences").eq("user_id", user.id).single(),
-        supabase.from("calendar_events").select("event_date").eq("user_id", user.id),
-      ]);
+      const { data: existingEventsRes } = await supabase.from("calendar_events").select("event_date").eq("user_id", user.id);
       
       if (closetItems.length < 2) {
         toast.error("Add at least 2 items to your closet first");
@@ -467,7 +466,7 @@ const OutfitCalendarInner = () => {
           closetItems,
           occasion: "everyday",
           mood: "confident",
-          styleProfile: styleRes.data,
+          styleProfile: styleProfile,
           upcomingEvents: [],
           weatherForecast,
           count: daysToFill.length,

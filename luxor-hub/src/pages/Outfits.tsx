@@ -5,6 +5,7 @@ import { EmptyOutfits } from "@/components/ui/luxury-empty-state";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { useClosetItems } from "@/hooks/useClosetItems";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -33,8 +34,9 @@ const moods = ["confident", "relaxed", "bold", "elegant", "creative", "cozy"];
 
 const Outfits = () => {
   const { user } = useAuth();
+  const { styleProfile } = useUserProfile();
   const { items: closetItems } = useClosetItems();
-  const [styleProfile, setStyleProfile] = useState<any>(null);
+
   const [occasion, setOccasion] = useState("everyday");
   const [mood, setMood] = useState("confident");
   const [outfits, setOutfits] = useState<OutfitSuggestion[]>([]);
@@ -47,13 +49,10 @@ const Outfits = () => {
 
   useEffect(() => {
     if (!user) return;
-    Promise.all([
-      supabase.from("style_profiles").select("archetype, preferences").eq("user_id", user.id).single(),
-      supabase.from("outfits").select("*, outfit_items(clothing_item_id)").eq("user_id", user.id).order("created_at", { ascending: false }),
-    ]).then(([styleRes, outfitsRes]) => {
-      if (styleRes.data) setStyleProfile(styleRes.data);
-      if (outfitsRes.data) setSavedOutfits(outfitsRes.data);
-    });
+    supabase.from("outfits").select("*, outfit_items(clothing_item_id)").eq("user_id", user.id).order("created_at", { ascending: false })
+      .then(({ data }) => {
+        if (data) setSavedOutfits(data);
+      });
   }, [user]);
 
   const generate = async () => {

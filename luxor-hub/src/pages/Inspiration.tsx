@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { useClosetItems } from "@/hooks/useClosetItems";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import { supabase } from "@/integrations/supabase/client";
 import {Heart, ArrowSquareOut, ShoppingBag, Sparkle, CaretRight, Spinner, Camera, ArrowsDownUp, WarningCircle, ArrowRight} from "@phosphor-icons/react";
 
@@ -58,14 +59,14 @@ const Inspiration = () => {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("style_profiles").select("archetype, preferences").eq("user_id", user.id).single()
-      .then(({ data }) => {
-        const prefs = (data?.preferences as any) || {};
-        setColorSeason(prefs?.aiAnalysis?.colorSeason || "");
-        setBodyShape(prefs?.bodyShape || "");
-        setArchetype(data?.archetype || "");
-        setProfileLoaded(true);
-      });
+    // Sync from hook
+    if (styleProfile) {
+      const prefs = (styleProfile.preferences as any) || {};
+      setColorSeason(prefs?.aiAnalysis?.colorSeason || "");
+      setBodyShape(prefs?.bodyShape || "");
+      setArchetype(styleProfile.archetype || "");
+      setProfileLoaded(true);
+    }
     // Sync from hook
     if (closetItemsHook.length > 0) {
       setClosetCategories(closetItemsHook.map((i: any) => i.category));

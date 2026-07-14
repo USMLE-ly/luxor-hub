@@ -15,6 +15,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { useClosetItems } from "@/hooks/useClosetItems";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {Sparkle, TrashSimple, ArrowUp, Camera, X, Users} from "@phosphor-icons/react";
@@ -74,7 +75,7 @@ const Chat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [styleProfile, setStyleProfile] = useState<any>(null);
+
   const [closetSummary, setClosetSummary] = useState("");
   const [pendingImage, setPendingImage] = useState<string | null>(null);
   const [currentMood, setCurrentMood] = useState<string | null>(null);
@@ -88,13 +89,10 @@ const Chat = () => {
 
   useEffect(() => {
     if (!user) return;
-    Promise.all([
-      supabase.from("chat_messages").select("*").eq("user_id", user.id).order("created_at"),
-      supabase.from("style_profiles").select("archetype, preferences").eq("user_id", user.id).single(),
-    ]).then(([chatRes, styleRes]) => {
-      if (chatRes.data) setMessages(chatRes.data.map((m) => ({ id: m.id, role: m.role as "user" | "assistant", content: m.content })));
-      if (styleRes.data) setStyleProfile(styleRes.data);
-    });
+    supabase.from("chat_messages").select("*").eq("user_id", user.id).order("created_at")
+      .then(({ data }) => {
+        if (data) setMessages(data.map((m) => ({ id: m.id, role: m.role as "user" | "assistant", content: m.content })));
+      });
     // Sync closet summary from hook
     if (closetItemsRaw.length > 0) {
       setClosetSummary(closetItemsRaw.map((i: any) => `${i.name || "Unnamed"} (${i.category}, ${i.color || ""})`).join("; "));
