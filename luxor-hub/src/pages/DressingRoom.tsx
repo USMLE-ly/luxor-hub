@@ -217,6 +217,73 @@ export default function DressingRoomPage() {
     }
   };
 
+
+  // Send manually selected outfit to calendar
+  const [manualOutfitForCalendar, setManualOutfitForCalendar] = useState<OutfitImages | null>(null);
+
+  const handleSendManualToCalendar = () => {
+    if (selectedItems.length === 0) {
+      toast.error("Select at least one item first");
+      return;
+    }
+    const outfitItems = selectedItems
+      .map((id) => {
+        const item = catalogItems.find((c) => c.id === id);
+        if (!item) return null;
+        return { url: item.imageUrl || "/placeholder.svg", type: item.category, label: item.name || "Item" };
+      })
+      .filter(Boolean) as { url: string; type: string; label: string }[];
+
+    if (outfitItems.length === 0) {
+      toast.error("Selected items have no images");
+      return;
+    }
+
+    setManualOutfitForCalendar({
+      top: outfitItems[0]?.url || "",
+      mid: outfitItems[1]?.url || "",
+      bottom: outfitItems[2]?.url || outfitItems[0]?.url || "",
+      type: 'regular',
+      accessory_note: outfitItems.map((i) => i.label).join(", "),
+    });
+    setCalendarDate(new Date().toISOString().split("T")[0]);
+    setCalendarEventTitle("");
+    setShowCalendarModal(true);
+  };
+
+  const handlePostToCalendarFinal = async () => {
+    const outfit = manualOutfitForCalendar || activeOutfit;
+    if (!user || !outfit || !calendarDate) return;
+    setPostingToCalendar(true);
+    try {
+      const outfitItems = [
+        { url: outfit.top, type: "top", label: "Top" },
+        outfit.mid ? { url: outfit.mid, type: "mid", label: "Mid" } : null,
+        { url: outfit.bottom, type: "bottom", label: "Bottom" },
+      ].filter(Boolean) as { url: string; type: string; label: string }[];
+
+      const { error } = await supabase.from("calendar_events").insert({
+        user_id: user.id,
+        title: calendarEventTitle || "Dressing Room Outfit",
+        event_date: calendarDate,
+        occasion: "casual",
+        outfit_items: outfitItems,
+        notes: outfit.accessory_note || null,
+      });
+
+      if (error) throw error;
+      toast.success("Outfit added to calendar!");
+      setShowCalendarModal(false);
+      setCalendarDate("");
+      setCalendarEventTitle("");
+      setManualOutfitForCalendar(null);
+    } catch (e: any) {
+      toast.error(e.message || "Failed to add to calendar");
+    } finally {
+      setPostingToCalendar(false);
+    }
+  };
+
   return (
     <AppLayout>
       <ScrollReveal delay={0.1}>
@@ -243,7 +310,10 @@ export default function DressingRoomPage() {
                 <div className="h-[45%] bg-zinc-900 p-3 flex flex-col gap-2 overflow-hidden">
                   <div className="flex justify-between items-center shrink-0">
                     <span className="text-xs font-medium text-zinc-400">Select from Closet</span>
-                    <button onClick={() => { clearSelectedItems(); clearOutfit(); }} className="text-[10px] bg-zinc-800 hover:bg-zinc-700 px-2 py-1 rounded text-zinc-300 transition-colors">Clear</button>
+                    <div className="flex gap-1">
+                      <button onClick={handleSendManualToCalendar} disabled={selectedItems.length === 0} title="Send to Calendar" className="text-[10px] bg-amber-900/50 hover:bg-amber-800/50 px-2 py-1 rounded text-amber-300 transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1"><CalendarDots className="w-3 h-3" />Calendar</button>
+                      <button onClick={() => { clearSelectedItems(); clearOutfit(); }} className="text-[10px] bg-zinc-800 hover:bg-zinc-700 px-2 py-1 rounded text-zinc-300 transition-colors">Clear</button>
+                    </div>
                   </div>
                   <div className="grid grid-cols-3 gap-2 overflow-y-auto flex-1 content-start pr-1 custom-scrollbar">
                     {console.log('[DRESSING-ROOM] gallery catalogItems count:', catalogItems.length, catalogItems.map(i => i.id))}
@@ -496,7 +566,7 @@ export default function DressingRoomPage() {
                       Cancel
                     </button>
                     <button
-                      onClick={handlePostToCalendar}
+                      onClick={handlePostToCalendarFinal}
                       disabled={!calendarDate || postingToCalendar}
                       className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-900 font-semibold text-sm hover:scale-[1.02] transition-transform disabled:opacity-40 disabled:cursor-not-allowed"
                     >
