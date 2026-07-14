@@ -1,15 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
-import {
-  useWardrobeStore,
-  type Category,
-} from "@/store/useWardrobeStore";
+import { useWardrobeStore } from "@/store/useWardrobeStore";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import FlipGallery, { type OutfitImages } from "@/components/ui/flip-gallery";
 import { Perspective, Highlight } from "@/components/ui/perspective-highlight";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import {CalendarDots, Check} from "@phosphor-icons/react";
 import { notifyEvent } from "@/lib/notificationService";
@@ -37,8 +33,6 @@ export default function DressingRoomPage() {
 
   // ── Dynamic outfit stack from Zustand ──
   const catalogItems = useWardrobeStore((s) => s.catalogItems);
-  const selected = useWardrobeStore((s) => s.selected);
-  const toggleClothing = useWardrobeStore((s) => s.toggleClothing);
   const clearOutfit = useWardrobeStore((s) => s.clearOutfit);
   const toggleSelectedItem = useWardrobeStore((s) => s.toggleSelectedItem);
   const selectedItems = useWardrobeStore((s) => s.selectedItems);
@@ -59,7 +53,6 @@ export default function DressingRoomPage() {
   }, [selectedItems, catalogItems]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeOutfit, setActiveOutfit] = useState<OutfitImages | null>(null);
-  const [progressValue, setProgressValue] = useState(0);
   const [displayProgress, setDisplayProgress] = useState(0);
   const [progressStage, setProgressStage] = useState("");
   const [showOccasionModal, setShowOccasionModal] = useState(false);
@@ -68,6 +61,7 @@ export default function DressingRoomPage() {
   const [calendarEventTitle, setCalendarEventTitle] = useState("");
   const [postingToCalendar, setPostingToCalendar] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [lastOccasion, setLastOccasion] = useState("");
 
   /* ---------- Generate Outfit ---------- */
   const generateOutfits = async (occasion: string, count: number) => {
@@ -123,7 +117,6 @@ export default function DressingRoomPage() {
       toast.error(e.message || "Failed to generate outfits");
     } finally {
       setIsGenerating(false);
-      setProgressValue(100);
       setDisplayProgress(100);
     }
   };
@@ -134,6 +127,7 @@ export default function DressingRoomPage() {
 
   const handleOccasionSelect = (occasionId: string) => {
     setShowOccasionModal(false);
+    setLastOccasion(occasionId);
     // Directly generate up to 3 outfits — the API decides how many based on closet stock
     generateOutfits(occasionId, 3);
   };
@@ -148,7 +142,6 @@ export default function DressingRoomPage() {
   // ── Smooth auto-increment progress: 0 → 95% during generation, jumps to 100% on success ──
   useEffect(() => {
     if (!isGenerating) {
-      setDisplayProgress(progressValue);
       return;
     }
     // Reset to 0 when generation starts
@@ -309,6 +302,14 @@ export default function DressingRoomPage() {
             </div>
 
             {/* FRAME 2: AI GENERATE OUTFIT */}
+            <div className="flex flex-col items-center">
+              {/* Occasion Header Badge */}
+              {(isGenerating || generatedImages.length > 0) && (
+                <div className="px-4 py-1.5 rounded-full bg-zinc-800/50 backdrop-blur-md border border-zinc-700/30 text-[11px] text-zinc-400 shadow-lg flex items-center gap-2 mb-3">
+                  <span className={`w-2 h-2 rounded-full ${isGenerating ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`} />
+                  <span>{isGenerating ? 'Generating' : 'Wearing'}: <b className="text-white capitalize">{lastOccasion || "Casual"}</b></span>
+                </div>
+              )}
             <div className="relative mx-auto w-full max-w-[320px] aspect-[9/19] rounded-[3rem] border-[6px] border-amber-200/80 bg-zinc-950 shadow-2xl p-2 overflow-hidden flex flex-col">
               <div className="flex-1 flex flex-col rounded-[2.75rem] bg-zinc-900 overflow-hidden">
                 {isGenerating ? (
@@ -347,24 +348,18 @@ export default function DressingRoomPage() {
                   </div>
                 )}
               </div>
-              {/* Generate + Dismiss Buttons — fixed at bottom */}
-              <div className="absolute bottom-6 left-0 right-0 flex gap-2 px-4 z-10">
+              {/* Generate Button — fixed at bottom */}
+              <div className="absolute bottom-6 left-0 right-0 flex justify-center px-4 z-10">
                 <button
                   onClick={handleGenerateClick}
                   disabled={isGenerating}
-                  className="flex-1 py-3 rounded-full bg-gradient-to-r from-[#E8C87A] to-[#E8C87A]/80 text-zinc-900 text-xs font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-40"
+                  className="w-full py-3 rounded-full bg-gradient-to-r from-[#E8C87A] to-[#E8C87A]/80 text-zinc-900 text-xs font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-40"
                 >
                   Generate
                 </button>
-                {generatedImages.length > 0 && (
-                  <button
-                    onClick={handleDismiss}
-                    className="flex-1 py-3 rounded-full bg-zinc-800/60 backdrop-blur-sm text-zinc-400 text-xs font-medium border border-zinc-700/50 hover:bg-zinc-700/60 hover:text-zinc-300 transition-all"
-                  >
-                    Dismiss
-                  </button>
-                )}
+
               </div>
+            </div>
             </div>
 
           </div>
@@ -373,42 +368,43 @@ export default function DressingRoomPage() {
           {/* Three Bottom Notifications — Stylist Reasoning (below iPhone) */}
           <AnimatePresence>
             {showNotifications && activeOutfit && activeOutfit.stylist_reasoning && activeOutfit.stylist_reasoning.length > 0 && (
-              <StaggerContainer staggerDelay={0.12} className="flex flex-col items-center gap-2 w-full max-w-[320px] mx-auto">
-                {activeOutfit.stylist_reasoning.slice(0, 3).map((note: string, i: number) => (
-                  <StaggerItem key={i}>
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.7, y: [-20,-40,-60][i] }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.7 }}
-                    transition={{ type: "spring", stiffness: 100, damping: 25 }}
-                    className="w-full"
-                  >
-                    <div className="w-full p-4 rounded-2xl bg-zinc-800/40 backdrop-blur-md border border-zinc-700/30 shadow-lg relative transition-all hover:bg-zinc-800/60">
-                      <div className="absolute left-0 top-3 bottom-3 w-1 bg-gradient-to-b from-[#E8C87A] to-amber-600 rounded-full" />
-                      <p className="pl-3 text-sm text-zinc-300 leading-relaxed line-clamp-2">{note}</p>
-                    </div>
-                  </motion.div>
-                  </StaggerItem>
-                ))}
-
-                {/* Accessory Note (if present) */}
-                {activeOutfit.accessory_note && (
-                  <StaggerItem>
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.7, y: -60 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.7 }}
-                    transition={{ type: "spring", stiffness: 100, damping: 25 }}
-                    className="w-full"
-                  >
-                    <div className="w-full p-3 rounded-2xl bg-zinc-800/30 backdrop-blur-md border border-amber-800/30 shadow-md relative transition-all hover:bg-zinc-800/50">
-                      <div className="absolute left-0 top-2.5 bottom-2.5 w-1 bg-gradient-to-b from-amber-400 to-amber-600 rounded-full" />
-                      <p className="pl-3 text-xs text-amber-200/80 leading-relaxed">{activeOutfit.accessory_note}</p>
-                    </div>
-                  </motion.div>
-                  </StaggerItem>
-                )}
-              </StaggerContainer>
+              <div className="flex flex-col items-center w-full max-w-[320px] mx-auto mt-4">
+                <motion.div
+                  className="flex flex-col gap-3 max-h-[240px] overflow-y-auto w-full px-1 py-1 custom-scrollbar"
+                  drag="y"
+                  dragConstraints={{ top: 0, bottom: 0 }}
+                  dragElastic={0.15}
+                >
+                  <AnimatePresence>
+                    {activeOutfit.stylist_reasoning.slice(0, 3).map((note: string, i: number) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ delay: i * 0.1, type: "spring", stiffness: 120, damping: 20 }}
+                        className="w-full p-4 rounded-2xl bg-zinc-800/40 backdrop-blur-md border border-zinc-700/30 shadow-lg relative transition-all hover:bg-zinc-800/60 cursor-grab active:cursor-grabbing"
+                      >
+                        <div className="absolute left-0 top-3 bottom-3 w-1 bg-gradient-to-b from-[#E8C87A] to-amber-600 rounded-full" />
+                        <p className="pl-3 text-sm text-zinc-300 leading-relaxed line-clamp-2">{note}</p>
+                      </motion.div>
+                    ))}
+                    {activeOutfit.accessory_note && (
+                      <motion.div
+                        key="accessory"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ delay: 0.3, type: "spring", stiffness: 120, damping: 20 }}
+                        className="w-full p-3 rounded-2xl bg-zinc-800/30 backdrop-blur-md border border-amber-800/30 shadow-md relative transition-all hover:bg-zinc-800/50 cursor-grab active:cursor-grabbing"
+                      >
+                        <div className="absolute left-0 top-2.5 bottom-2.5 w-1 bg-gradient-to-b from-amber-400 to-amber-600 rounded-full" />
+                        <p className="pl-3 text-xs text-amber-200/80 leading-relaxed">{activeOutfit.accessory_note}</p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              </div>
             )}
           </AnimatePresence>
         {/* ---- Occasion Modal ---- */}
