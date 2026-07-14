@@ -179,10 +179,8 @@ const Closet = () => {
   useEffect(() => {
     const firstItem = currentlyWearing[0];
     if (!firstItem || (firstItem.src && firstItem.src.length > 5)) {
-      if (firstItem) console.log(`[AUTO-SPAWN] SKIP ${firstItem.name} — already has src: "${firstItem.src?.substring(0, 40)}"`);
       return;
     }
-    console.log(`[AUTO-SPAWN] Triggering for ${firstItem?.name} (id=${firstItem?.id})`);
     const timer = setTimeout(() => {
       handleGenerateDummy(firstItem.id, firstItem.category);
       toast.info("Auto-generated 3D placeholder. Use 📸 Image or + File to assign your own model.");
@@ -693,7 +691,6 @@ const Closet = () => {
   const handleClearAll = async () => {
     if (!user) return;
     try {
-      console.log("[CLOSET] Starting clear all for user:", user.id);
       toast.loading("Clearing closet...");
 
       // 0. Get the user's Supabase access_token for backend-proxied deletion
@@ -701,7 +698,6 @@ const Closet = () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         accessToken = session?.access_token || "";
-        console.log("[CLOSET] Got access_token:", accessToken ? "yes" : "no");
       } catch (tokErr) {
         console.warn("[CLOSET] Failed to get session token:", tokErr);
       }
@@ -718,7 +714,6 @@ const Closet = () => {
           }),
         });
         const backendResult = await backendResp.json();
-        console.log("[CLOSET] Backend clear-all result:", backendResult);
         if (backendResult.error) {
           console.warn("[CLOSET] Backend returned error:", backendResult.error);
         } else if (backendResult.success) {
@@ -726,7 +721,6 @@ const Closet = () => {
           if (backendResult.supabase_errors && backendResult.supabase_errors.length > 0) {
             console.warn("[CLOSET] Backend Supabase delete had errors:", backendResult.supabase_errors);
           }
-          console.log("[CLOSET] Backend clear-all succeeded");
         } else {
           console.warn("[CLOSET] Backend clear-all returned unexpected result:", backendResult);
         }
@@ -737,7 +731,6 @@ const Closet = () => {
       // 2. Clear mannequin_state in Supabase (prevents re-restore on next mount)
       try {
         await supabase.from('mannequin_state').delete().eq('user_id', user.id);
-        console.log('[CLOSET] Cleared mannequin_state from Supabase');
       } catch (mnErr) {
         console.warn('[CLOSET] Failed to clear mannequin_state:', mnErr);
       }
@@ -751,7 +744,6 @@ const Closet = () => {
             await idbDel(k);
           }
         }
-        console.log('[CLOSET] Cleared IndexedDB clothing entries');
       } catch (idbErr) {
         console.warn('[CLOSET] Failed to clear IndexedDB:', idbErr);
       }
@@ -766,7 +758,6 @@ const Closet = () => {
       } catch {}
       useWardrobeStore.getState().resetClosetData();
       syncCatalogItems([]);
-      console.log('[CLOSET] resetClosetData called. Store state:', useWardrobeStore.getState().catalogItems.length, 'items left');
 
       // 6. Reset mount flag so mannequin_state doesn't re-restore immediately
       MANNEQUIN_STATE_LOADED.current = false;

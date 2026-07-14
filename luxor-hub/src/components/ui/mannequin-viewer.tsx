@@ -83,7 +83,6 @@ function MannequinProvider({ children }: { children: React.ReactNode }) {
 
   const register = useCallback(
     (next: Partial<Omit<MannequinCtx, "register">>) => {
-      console.log("[PROVIDER] register called with:", {
         hasRootGroup: !!next.rootGroup,
         hasSkeleton: !!next.skeleton,
         hasHipsBone: !!next.hipsBone,
@@ -99,7 +98,6 @@ function MannequinProvider({ children }: { children: React.ReactNode }) {
     [data, register]
   );
 
-  console.log("[PROVIDER] render context:", {
     hasRootGroup: !!data.rootGroup,
     hasSkeleton: !!data.skeleton,
     hasHipsBone: !!data.hipsBone,
@@ -132,10 +130,8 @@ function MannequinModel() {
 
   useEffect(() => {
     if (!group.current) {
-      console.log("[MANNEQUIN] group ref not ready yet");
       return;
     }
-    console.log("[MANNEQUIN] Loading mannequin model:", gender);
 
     const cloned = scene.clone(true);
     applyMatteWhite(cloned);
@@ -184,7 +180,6 @@ function MannequinModel() {
     const hipsBone = skeleton ? resolveHipsBone(skeleton) : null;
     const mannequinHeight = size.y || 1.8;
 
-    console.log(
       `[MANNEQUIN] Loaded: height=${mannequinHeight.toFixed(2)}, bones=${
         skeleton?.bones?.length ?? 0
       }`
@@ -198,7 +193,6 @@ function MannequinModel() {
     });
 
     return () => {
-      console.log("[MANNEQUIN] cleanup");
       cloned.traverse((child) => {
         if ((child as THREE.Mesh).isMesh) {
           const mesh = child as THREE.Mesh;
@@ -227,13 +221,11 @@ function ClothingSlot({
     [catalogItems, itemId]
   );
 
-  console.log(
     `[CLOTHING] SLOT CHECK: category=${category} itemId=${itemId} item=${item?.name}`
   );
 
   // Strict validation: reject images, empty strings, and invalid paths
   if (!item?.src || !isValidModelSrc(item.src)) {
-    console.log(
       `[CLOTHING] SKIP ${item?.name ?? itemId} — src invalid: "${(
         item?.src || ""
       ).substring(0, 60)}"`
@@ -241,7 +233,6 @@ function ClothingSlot({
     return null;
   }
 
-  console.log(
     `[CLOTHING] SLOT OK: ${item.name} src=${item.src.substring(0, 60)}...`
   );
   return (
@@ -293,9 +284,7 @@ function ClothingInner({
     return null;
   }
 
-  console.log(`[CLOTHING] useLoader starting for ${itemKey}: ${src.substring(0, 60)}...`);
   const gltf = useLoader(GLTFLoader, src);
-  console.log(`[CLOTHING] useLoader resolved for ${itemKey}: scene=${!!gltf?.scene}`);
 
   useEffect(() => {
     let cancelled = false;
@@ -305,7 +294,6 @@ function ClothingInner({
     const MAX_ATTEMPTS = 50; // 10 seconds
 
     function cleanupCurrent() {
-      console.log(`[CLOTHING] ${itemKey} cleanupCurrent`);
       if (clonedRef.current) {
         disposeClonedObject(clonedRef.current);
         clonedRef.current.parent?.remove(clonedRef.current);
@@ -326,21 +314,17 @@ function ClothingInner({
 
     function attemptAttach() {
       if (cancelled) {
-        console.log(`[CLOTHING] ${itemKey} attach cancelled`);
         return;
       }
 
       attempts++;
-      console.log(`[CLOTHING] ${itemKey} attempt ${attempts}`);
 
       if (!gltf?.scene) {
-        console.log(`[CLOTHING] ${itemKey} waiting for GLTF scene...`);
         retryTimer = setTimeout(attemptAttach, 200);
         return;
       }
 
       if (!rootGroup) {
-        console.log(`[CLOTHING] ${itemKey} waiting for rootGroup...`);
         if (attempts < MAX_ATTEMPTS) {
           retryTimer = setTimeout(attemptAttach, 200);
         } else {
@@ -350,7 +334,6 @@ function ClothingInner({
       }
 
       if (!skeleton) {
-        console.log(`[CLOTHING] ${itemKey} waiting for skeleton...`);
         if (attempts < MAX_ATTEMPTS) {
           retryTimer = setTimeout(attemptAttach, 200);
         } else {
@@ -359,7 +342,6 @@ function ClothingInner({
         return;
       }
 
-      console.log(
         `[CLOTHING] PROCESSING ${itemKey}: ${gltf.scene.children.length} children, rootGroup children=${rootGroup.children.length}`
       );
 
@@ -398,7 +380,6 @@ function ClothingInner({
               }
               const ratio =
                 clothBoneNames.size > 0 ? overlap / clothBoneNames.size : 0;
-              console.log(
                 `[CLOTHING] ${itemKey} bone overlap ratio=${ratio.toFixed(2)}`
               );
               if (ratio >= 0.6) {
@@ -411,7 +392,6 @@ function ClothingInner({
         });
       }
 
-      console.log(`[CLOTHING] ${itemKey} isSkinned=${isSkinned}`);
 
       // Add to rootGroup (same space as the mannequin mesh) for predictable positioning
       rootGroup.add(cloned);
@@ -448,7 +428,6 @@ function ClothingInner({
             : isShoe2
             ? mannequinHeight * 0.06
             : mannequinHeight * 0.18;
-        console.log(
           `[CLOTHING] ${itemKey} localSize=${JSON.stringify(
             localSize.toArray()
           )} targetH=${targetH.toFixed(3)}`
@@ -457,7 +436,6 @@ function ClothingInner({
           const s = targetH / localSize.y;
           if (s > 0.1 && s < 15) {
             cloned.scale.setScalar(s);
-            console.log(`[CLOTHING] ${itemKey} scale set to ${s.toFixed(3)}`);
           }
         }
 
@@ -492,7 +470,6 @@ function ClothingInner({
           targetY - center.y,
           -center.z + zOffset
         );
-        console.log(
           `[CLOTHING] ${itemKey} positioned at ${JSON.stringify(
             cloned.position.toArray()
           )}`
@@ -532,14 +509,12 @@ function ClothingInner({
             });
             (newMat as any).userData = { ...(newMat as any).userData, luxorOwnMaterial: true };
             mesh.material = newMat;
-            console.log(`[CLOTHING] ${itemKey} applied fabric material`);
           } else {
             // Has texture — preserve it, enhance with PBR
             mat.side = THREE.DoubleSide;
             mat.roughness = Math.max(mat.roughness || 0, 0.55);
             mat.metalness = Math.min(mat.metalness || 0, 0.05);
             mat.depthWrite = true;
-            console.log(`[CLOTHING] ${itemKey} preserved textured material`);
           }
           mesh.renderOrder = 1;
         }
@@ -550,9 +525,7 @@ function ClothingInner({
         const helper = new THREE.BoxHelper(cloned, 0x00ff00);
         helperRef.current = helper;
         rootGroup.add(helper);
-        console.log(`[CLOTHING] ${itemKey} added green BoxHelper`);
         helperRemoveTimer = setTimeout(() => {
-          console.log(`[CLOTHING] ${itemKey} removing BoxHelper after timeout`);
           if (helperRef.current) {
             helperRef.current.geometry?.dispose();
             const mat = helperRef.current.material as THREE.LineBasicMaterial;
@@ -565,7 +538,6 @@ function ClothingInner({
         console.error(`[CLOTHING] ${itemKey} BoxHelper error:`, e);
       }
 
-      console.log(
         `[CLOTHING] ${itemKey} ADDED TO SCENE rootChildren=${rootGroup.children.length}`
       );
     }
@@ -573,7 +545,6 @@ function ClothingInner({
     attemptAttach();
 
     return () => {
-      console.log(`[CLOTHING] ${itemKey} effect unmount / deps changed`);
       cancelled = true;
       if (retryTimer) clearTimeout(retryTimer);
       cleanupCurrent();
@@ -598,7 +569,6 @@ function ClothingLayer() {
   const catalogItems = useWardrobeStore((s) => s.catalogItems);
 
   const activeSlots = useMemo(() => {
-    console.log("[CLOTHINGLAYER] recomputing activeSlots", selected);
     return Object.entries(selected)
       .filter(([, v]) => v !== null)
       .map(([cat, id]) => {
@@ -612,7 +582,6 @@ function ClothingLayer() {
       .filter((s) => s.src !== null && s.src.length > 5);
   }, [selected, catalogItems]);
 
-  console.log("[CLOTHINGLAYER] rendering slots:", activeSlots);
 
   return (
     <>

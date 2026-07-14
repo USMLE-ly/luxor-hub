@@ -90,7 +90,6 @@ export default function DressingRoomPage() {
       });
 
       const data = await res.json();
-      console.log("[DressingRoom] API RAW RESPONSE:", data);
       // Strip 'for' key from API response if present (causes ".for is not iterable" crash)
       if (data && typeof data === 'object') { delete (data as any).for; }
       if (!data.success) throw new Error(data.error || "Generation failed");
@@ -106,7 +105,6 @@ export default function DressingRoomPage() {
             top: url, mid: url, bottom: url,
             type: 'regular' as const, accessory_note: '', stylist_reasoning: [],
           }));
-          console.log("[DressingRoom] Normalized flat URLs to OutfitImages:", normalized);
         } else {
           normalized = images.map((item: any) => ({
             top: item.top || '',
