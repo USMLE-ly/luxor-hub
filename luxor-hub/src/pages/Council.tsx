@@ -6,7 +6,8 @@ import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { useClosetItems } from "@/hooks/useClosetItems";
 import { useUserProfile } from "@/hooks/useUserProfile";
-import { supabase } from "@/integrations/supabase/client";
+import { insertOutfit } from "@/lib/outfitService";
+import { insertCalendarEvent } from "@/lib/calendarService";
 import { toast } from "sonner";
 import {Users, TrashSimple, ArrowUp, Camera, X, Sparkle, CaretDown, CaretUp, Brain, CalendarPlus, Heart, ShareNetwork, TShirt} from "@phosphor-icons/react";
 import { haptic } from "@/lib/haptics";
@@ -329,23 +330,26 @@ const CouncilInner = () => {
     if (!user) return;
     if (action === "Save as Outfit") {
       const items = msg.mentionedItems || [];
-      const { error } = await supabase.from("outfits").insert({
+      const { error } = await insertOutfit({
         user_id: user.id,
         name: `Council: ${messages.find(m => m.role === "user")?.content?.slice(0, 40) || "Suggestion"}`,
         description: msg.synthesis?.slice(0, 100) || "",
-        ai_generated: true,
-        ai_explanation: msg.synthesis?.slice(0, 300),
+        mannequin_items: [],
+        is_favorite: false,
       });
       if (error) toast.error("Failed to save");
       else toast.success("Outfit saved from council synthesis!");
     } else if (action === "Add to Calendar") {
       const today = format(new Date(), "yyyy-MM-dd");
-      const { error } = await supabase.from("calendar_events").insert({
+      const { error } = await insertCalendarEvent({
         user_id: user.id,
         title: `Council: ${messages.find(m => m.role === "user")?.content?.slice(0, 40) || "Suggestion"}`,
         event_date: today,
+        event_time: null,
         occasion: "Casual",
         notes: msg.synthesis?.slice(0, 200),
+        outfit_items: [],
+        mannequin_image_url: null,
       });
       if (error) toast.error("Failed to add");
       else toast.success("Added to today's calendar!");

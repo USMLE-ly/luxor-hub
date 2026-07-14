@@ -625,10 +625,10 @@ export default function Analysis() {
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         className="absolute inset-0 bg-forest/70 backdrop-blur-sm flex flex-col items-center justify-center gap-6 z-10 px-6"
                       >
-                        <div style={{ position: 'relative', width: '96px', height: '96px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <div style={{ position: 'absolute', width: '100%', height: '100%', borderRadius: '50%', border: '4px solid rgba(255,255,255,0.06)', borderTopColor: '#e5c785', borderRightColor: '#d4b06a' }} className="animate-spin" />
-                          <div style={{ position: 'absolute', width: '64px', height: '64px', borderRadius: '50%', backgroundColor: 'rgba(229, 199, 133, 0.12)' }} className="animate-pulse" />
-                          <span style={{ fontSize: '16px', fontWeight: 600, color: 'rgba(229, 199, 133, 0.85)', zIndex: 1 }}>
+                        <div className="relative w-24 h-24 flex items-center justify-center">
+                          <div className="absolute w-full h-full rounded-full border-4 border-white/5 border-t-[#e5c785] border-r-[#d4b06a] animate-spin" />
+                          <div className="absolute w-16 h-16 rounded-full bg-amber-200/10 animate-pulse" />
+                          <span className="text-base font-semibold text-amber-200/85 z-10" >
                             {displayProgress}%
                           </span>
                         </div>

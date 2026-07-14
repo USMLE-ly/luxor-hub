@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { useClosetItems } from "@/hooks/useClosetItems";
-import { supabase } from "@/integrations/supabase/client";
+import { fetchEventsInRange } from "@/lib/calendarService";
 import {ChartBar, Palette, TrendUp, TShirt, CalendarDots, CaretLeft, CaretRight, Trophy, Flame, Star, Spinner, ChartPieSlice, CurrencyDollar, Snowflake, Sun, Leaf, CloudRain, ArrowUpRight, ArrowDownRight, } from "@phosphor-icons/react";
 import { format, startOfMonth, endOfMonth, addMonths, subMonths, eachDayOfInterval } from "date-fns";
 import { Progress } from "@/components/ui/progress";
@@ -72,8 +72,8 @@ const MonthlyReportInner = () => {
     setLoading(true);
     const start = format(startOfMonth(currentMonth), "yyyy-MM-dd");
     const end = format(endOfMonth(currentMonth), "yyyy-MM-dd");
-    const { data } = await supabase.from("calendar_events").select("*").eq("user_id", user.id).gte("event_date", start).lte("event_date", end);
-    if (data) setEvents(data);
+    const data = await fetchEventsInRange(user.id, start, end);
+    setEvents(data);
     setLoading(false);
   };
 
