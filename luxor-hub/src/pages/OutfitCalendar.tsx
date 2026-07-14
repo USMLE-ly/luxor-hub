@@ -1109,21 +1109,21 @@ const OutfitCalendarInner = () => {
                           const visible = allPhotos.slice(0, 3);
                           const extra = allPhotos.length - 3;
                           return (
-                            <div className="flex flex-col items-center justify-center flex-1 rounded-lg bg-white/95 dark:bg-white/90 p-0.5 w-full transition-transform duration-200 group-hover:scale-105 overflow-hidden">
+                            <div className="flex flex-col items-center justify-center gap-1 flex-1 rounded-lg bg-white/95 dark:bg-white/90 py-2 px-1 w-full transition-transform duration-200 group-hover:scale-105 overflow-hidden">
                               {visible.map((url, pi) => (
-                                <img
-                                  key={pi}
-                                  src={url}
-                                  alt=""
-                                  className="w-10 h-12 object-contain"
-                                  style={{
-                                    marginTop: pi > 0 ? "-2px" : "0",
-                                    mixBlendMode: "multiply",
-                                  }}
-                                />
+                                <div key={pi} className="w-8 h-8 rounded-full shadow-sm border border-zinc-200 dark:border-zinc-700 flex items-center justify-center overflow-hidden flex-shrink-0 bg-white dark:bg-zinc-800">
+                                  <img
+                                    src={url}
+                                    alt=""
+                                    className="w-full h-full object-cover pointer-events-none"
+                                    style={{ mixBlendMode: "multiply" }}
+                                  />
+                                </div>
                               ))}
                               {extra > 0 && (
-                                <span className="text-[7px] font-sans font-semibold text-muted-foreground/70 mt-0.5">+{extra}</span>
+                                <div className="w-6 h-6 rounded-full bg-zinc-700 text-white flex items-center justify-center text-[7px] font-bold border border-zinc-600 flex-shrink-0">
+                                  +{extra}
+                                </div>
                               )}
                             </div>
                           );
