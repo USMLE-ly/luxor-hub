@@ -392,8 +392,17 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
         </div>
       )}
       {sections.map((url, idx) => {
+        const hasValidImage = url && url.startsWith('http');
+        const labels = ['Top', 'Mid', 'Bottom'];
         return (
-        <div key={idx} style={getSectionStyle(idx)} />
+        <div key={idx} style={getSectionStyle(idx)}>
+          {!hasValidImage && (
+            <div className="flex flex-col items-center justify-center gap-1 opacity-40">
+              <span className="text-2xl">{idx === 0 ? '👕' : idx === 1 ? '👗' : '👟'}</span>
+              <span className="text-[10px] text-white/60 font-sans">{labels[idx] || 'Item'}</span>
+            </div>
+          )}
+        </div>
         );
       })}
 

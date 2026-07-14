@@ -51,6 +51,35 @@ export default function DressingRoomPage() {
       })
       .filter(Boolean) as { id: string; src: string; name: string }[];
   }, [selectedItems, catalogItems]);
+
+  // ── Sync catalog items on mount if store is empty (race condition fix) ──
+  const syncCatalogItems = useWardrobeStore((s) => s.syncCatalogItems);
+  useEffect(() => {
+    if (catalogItems.length > 0 || !user?.id) return;
+    const syncOnMount = async () => {
+      try {
+        const { data } = await supabase
+          .from("clothing_items")
+          .select("id, name, category, color, image_url")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false });
+        if (data && data.length > 0) {
+          syncCatalogItems(data.map((item: any) => ({
+            id: item.id,
+            name: item.name || "Unnamed",
+            src: item.image_url || "/placeholder.svg",
+            category: (item.category || "top") as any,
+            imageUrl: item.image_url || undefined,
+            color: item.color || undefined,
+          })));
+        }
+      } catch (e) {
+        console.warn("[DressingRoom] Failed to sync catalog on mount:", e);
+      }
+    };
+    syncOnMount();
+  }, [user?.id, catalogItems.length, syncCatalogItems]);
+
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeOutfit, setActiveOutfit] = useState<OutfitImages | null>(null);
   const [displayProgress, setDisplayProgress] = useState(0);
@@ -212,7 +241,7 @@ export default function DressingRoomPage() {
         user_id: user.id,
         title: calendarEventTitle || "Dressing Room Outfit",
         event_date: calendarDate,
-        occasion: "casual",
+        occasion: lastOccasion || "casual",
         outfit_items: outfitItems,
         notes: manualOutfitItems.map((i) => i.label).join(", "),
       });
