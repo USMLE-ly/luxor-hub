@@ -93,7 +93,7 @@ export async function fetchUserAnalysis(userId: string): Promise<UserAnalysisDat
     await Promise.all([
       countRows("clothing_items", userId),
       countRows("outfit_analyses", userId),
-      countRows("dressing_room_looks", userId),
+      countRows("user_looks", userId),
       countRows("calendar_events", userId),
       countRows("chat_messages", userId),
       countRows("council_conversations", userId),
