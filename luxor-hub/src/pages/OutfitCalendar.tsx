@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
+import { useClosetItems } from "@/hooks/useClosetItems";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { notifyEvent } from "@/lib/notificationService";
@@ -106,7 +107,7 @@ const OutfitCalendarInner = () => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
   const [savedOutfits, setSavedOutfits] = useState<any[]>([]);
-  const [closetItems, setClosetItems] = useState<ClosetItem[]>([]);
+  const { items: closetItems } = useClosetItems({ columns: "id, name, photo_url, category, color" });
   const [newEvent, setNewEvent] = useState({ title: "", occasion: "Casual", notes: "", outfitId: "", manualItems: [] as string[] });
   const [editEvent, setEditEvent] = useState({ title: "", occasion: "Casual", notes: "", outfitId: "", manualItems: [] as string[] });
   const [autoFilling, setAutoFilling] = useState(false);
@@ -128,23 +129,14 @@ const OutfitCalendarInner = () => {
     fetchRecentEvents();
   }, [user, currentMonth]);
 
-  const fetchClosetMap = async () => {
-    if (!user) return;
-    const { data } = await supabase
-      .from("clothing_items")
-      .select("id, name, photo_url, category, color")
-      .eq("user_id", user.id);
-    if (data) {
-      const map = new Map<string, string>();
-      const items: ClosetItem[] = [];
-      data.forEach(item => {
-        if (item.name && item.photo_url) map.set(item.name.toLowerCase(), item.photo_url);
-        items.push(item as ClosetItem);
-      });
-      setClosetMap(map);
-      setClosetItems(items);
-    }
-  };
+  // Build name→photo map from hook data
+  useEffect(() => {
+    const map = new Map<string, string>();
+    closetItems.forEach((item: any) => {
+      if (item.name && (item.photo_url || item.image_url)) map.set(item.name.toLowerCase(), item.photo_url || item.image_url);
+    });
+    setClosetMap(map);
+  }, [closetItems]);
 
   // Fetch weather when location resolves
   useEffect(() => {
@@ -437,12 +429,11 @@ const OutfitCalendarInner = () => {
     if (!user) return;
     setAutoFilling(true);
     try {
-      const [itemsRes, styleRes, existingEventsRes] = await Promise.all([
-        supabase.from("clothing_items").select("*").eq("user_id", user.id),
+      const [styleRes, existingEventsRes] = await Promise.all([
         supabase.from("style_profiles").select("archetype, preferences").eq("user_id", user.id).single(),
         supabase.from("calendar_events").select("event_date").eq("user_id", user.id),
       ]);
-      const closetItems = itemsRes.data || [];
+      
       if (closetItems.length < 2) {
         toast.error("Add at least 2 items to your closet first");
         setAutoFilling(false);

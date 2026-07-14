@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
+import { useClosetItems } from "@/hooks/useClosetItems";
 import { supabase } from "@/integrations/supabase/client";
 import {ChartBar, Palette, TrendUp, TShirt, CalendarDots, CaretLeft, CaretRight, Trophy, Flame, Star, Spinner, ChartPieSlice, CurrencyDollar, Snowflake, Sun, Leaf, CloudRain, ArrowUpRight, ArrowDownRight, } from "@phosphor-icons/react";
 import { format, startOfMonth, endOfMonth, addMonths, subMonths, eachDayOfInterval } from "date-fns";
@@ -58,7 +59,7 @@ const MonthlyReportInner = () => {
   const { user } = useAuth();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [events, setEvents] = useState<CalendarEvent[]>([]);
-  const [closetItems, setClosetItems] = useState<ClothingItem[]>([]);
+  const { items: closetItems } = useClosetItems();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -71,12 +72,8 @@ const MonthlyReportInner = () => {
     setLoading(true);
     const start = format(startOfMonth(currentMonth), "yyyy-MM-dd");
     const end = format(endOfMonth(currentMonth), "yyyy-MM-dd");
-    const [evRes, itemsRes] = await Promise.all([
-      supabase.from("calendar_events").select("*").eq("user_id", user.id).gte("event_date", start).lte("event_date", end),
-      supabase.from("clothing_items").select("*").eq("user_id", user.id),
-    ]);
-    if (evRes.data) setEvents(evRes.data);
-    if (itemsRes.data) setClosetItems(itemsRes.data as ClothingItem[]);
+    const { data } = await supabase.from("calendar_events").select("*").eq("user_id", user.id).gte("event_date", start).lte("event_date", end);
+    if (data) setEvents(data);
     setLoading(false);
   };
 

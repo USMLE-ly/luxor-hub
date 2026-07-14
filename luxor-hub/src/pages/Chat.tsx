@@ -14,6 +14,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
+import { useClosetItems } from "@/hooks/useClosetItems";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {Sparkle, TrashSimple, ArrowUp, Camera, X, Users} from "@phosphor-icons/react";
@@ -64,6 +65,7 @@ function AnimatedAssistantMessage({ content, isStreaming }: { content: string; i
 
 const Chat = () => {
   const { user } = useAuth();
+  const { items: closetItemsRaw } = useClosetItems({ columns: "name, category, color, style" });
   const navigate = useNavigate();
   const { tier } = usePlanTier();
   const dailyLimit = PLAN_LIMITS[tier].aiSuggestionsPerDay;
@@ -89,12 +91,14 @@ const Chat = () => {
     Promise.all([
       supabase.from("chat_messages").select("*").eq("user_id", user.id).order("created_at"),
       supabase.from("style_profiles").select("archetype, preferences").eq("user_id", user.id).single(),
-      supabase.from("clothing_items").select("name, category, color, style").eq("user_id", user.id),
-    ]).then(([chatRes, styleRes, closetRes]) => {
+    ]).then(([chatRes, styleRes]) => {
       if (chatRes.data) setMessages(chatRes.data.map((m) => ({ id: m.id, role: m.role as "user" | "assistant", content: m.content })));
       if (styleRes.data) setStyleProfile(styleRes.data);
-      if (closetRes.data) setClosetSummary(closetRes.data.map((i) => `${i.name || "Unnamed"} (${i.category}, ${i.color || ""})`).join("; "));
     });
+    // Sync closet summary from hook
+    if (closetItemsRaw.length > 0) {
+      setClosetSummary(closetItemsRaw.map((i: any) => `${i.name || "Unnamed"} (${i.category}, ${i.color || ""})`).join("; "));
+    }
   }, [user]);
 
   useEffect(() => {

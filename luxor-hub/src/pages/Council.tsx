@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
+import { useClosetItems } from "@/hooks/useClosetItems";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {Users, TrashSimple, ArrowUp, Camera, X, Sparkle, CaretDown, CaretUp, Brain, CalendarPlus, Heart, ShareNetwork, TShirt} from "@phosphor-icons/react";
@@ -66,6 +67,7 @@ const Council = () => {
 
 const CouncilInner = () => {
   const { user } = useAuth();
+  const { items: closetItemsHook } = useClosetItems({ columns: "id, name, category, color, style, photo_url" });
   const navigate = useNavigate();
   const [messages, setMessages] = useState<CouncilMessage[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -91,16 +93,16 @@ const CouncilInner = () => {
     if (!user) return;
     Promise.all([
       supabase.from("style_profiles").select("archetype, preferences").eq("user_id", user.id).single(),
-      supabase.from("clothing_items").select("id, name, category, color, style, photo_url").eq("user_id", user.id),
       supabase.from("outfit_analyses").select("id").eq("user_id", user.id),
-    ]).then(([styleRes, closetRes, analysesRes]) => {
+    ]).then(([styleRes, analysesRes]) => {
       if (styleRes.data) setStyleProfile(styleRes.data);
-      if (closetRes.data) {
-        setClosetItems(closetRes.data);
-        setClosetSummary(closetRes.data.map(i => `${i.name || "Unnamed"} (${i.category}, ${i.color || ""})`).join("; "));
-      }
       if (analysesRes.data) setMemoryCount(analysesRes.data.length);
     });
+    // Sync from hook
+    if (closetItemsHook.length > 0) {
+      setClosetItems(closetItemsHook);
+      setClosetSummary(closetItemsHook.map((i: any) => `${i.name || "Unnamed"} (${i.category}, ${i.color || ""})`).join("; "));
+    }
   }, [user]);
 
   useEffect(() => {

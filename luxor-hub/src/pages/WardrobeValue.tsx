@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
+import { useClosetItems } from "@/hooks/useClosetItems";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -52,21 +53,8 @@ export default function WardrobeValue() {
 
 function WardrobeValueContent() {
   const { user } = useAuth();
-  const [items, setItems] = useState<ClothingItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { items, loading } = useClosetItems({ columns: "id, name, category, price, wear_count, last_worn_at, photo_url" });
   const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
-
-  useEffect(() => {
-    if (!user) return;
-    (async () => {
-      const { data } = await supabase
-        .from("clothing_items")
-        .select("id, name, category, price, wear_count, last_worn_at, photo_url")
-        .eq("user_id", user.id);
-      if (data) setItems(data);
-      setLoading(false);
-    })();
-  }, [user]);
 
   const stats = useMemo(() => {
     const priced = items.filter((i) => i.price && i.price > 0);

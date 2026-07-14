@@ -2,19 +2,13 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
+import { useClosetItems } from "@/hooks/useClosetItems";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import {TShirt, FloppyDisk, TrashSimple, ArrowCounterClockwise, DotsSixVertical, X, MagnifyingGlassPlus, MagnifyingGlassMinus, ArrowsOut} from "@phosphor-icons/react";
 
-interface ClosetItem {
-  id: string;
-  name: string | null;
-  category: string;
-  color: string | null;
-  photo_url: string | null;
-}
 
 interface CanvasItem {
   itemId: string;
@@ -30,8 +24,8 @@ const CANVAS_HEIGHT = 600;
 
 const OutfitBuilder = () => {
   const { user } = useAuth();
+  const { items: closetItems } = useClosetItems({ columns: "id, name, category, color, photo_url" });
   const canvasRef = useRef<HTMLDivElement>(null);
-  const [closetItems, setClosetItems] = useState<ClosetItem[]>([]);
   const [canvasItems, setCanvasItems] = useState<CanvasItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const [outfitName, setOutfitName] = useState("");
@@ -40,12 +34,6 @@ const OutfitBuilder = () => {
   const [saving, setSaving] = useState(false);
   const nextZIndex = useRef(1);
   const [categoryFilter, setCategoryFilter] = useState("All");
-
-  useEffect(() => {
-    if (!user) return;
-    supabase.from("clothing_items").select("id, name, category, color, photo_url").eq("user_id", user.id)
-      .then(({ data }) => { if (data) setClosetItems(data); });
-  }, [user]);
 
   const categories = ["All", ...Array.from(new Set(closetItems.map((i) => i.category)))];
   const filteredItems = categoryFilter === "All" ? closetItems : closetItems.filter((i) => i.category === categoryFilter);

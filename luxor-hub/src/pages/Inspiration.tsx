@@ -4,6 +4,7 @@ import { PremiumSkeleton, PremiumCardSkeleton } from "@/components/ui/premium-sk
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
+import { useClosetItems } from "@/hooks/useClosetItems";
 import { supabase } from "@/integrations/supabase/client";
 import {Heart, ArrowSquareOut, ShoppingBag, Sparkle, CaretRight, Spinner, Camera, ArrowsDownUp, WarningCircle, ArrowRight} from "@phosphor-icons/react";
 
@@ -57,20 +58,19 @@ const Inspiration = () => {
 
   useEffect(() => {
     if (!user) return;
-    Promise.all([
-      supabase.from("style_profiles").select("archetype, preferences").eq("user_id", user.id).single(),
-      supabase.from("clothing_items").select("category, color").eq("user_id", user.id),
-    ]).then(([styleRes, closetRes]) => {
-      const prefs = (styleRes.data?.preferences as any) || {};
-      setColorSeason(prefs?.aiAnalysis?.colorSeason || "");
-      setBodyShape(prefs?.bodyShape || "");
-      setArchetype(styleRes.data?.archetype || "");
-      if (closetRes.data) {
-        setClosetCategories(closetRes.data.map(i => i.category));
-        setClosetColors(closetRes.data.map(i => i.color).filter(Boolean) as string[]);
-      }
-      setProfileLoaded(true);
-    });
+    supabase.from("style_profiles").select("archetype, preferences").eq("user_id", user.id).single()
+      .then(({ data }) => {
+        const prefs = (data?.preferences as any) || {};
+        setColorSeason(prefs?.aiAnalysis?.colorSeason || "");
+        setBodyShape(prefs?.bodyShape || "");
+        setArchetype(data?.archetype || "");
+        setProfileLoaded(true);
+      });
+    // Sync from hook
+    if (closetItemsHook.length > 0) {
+      setClosetCategories(closetItemsHook.map((i: any) => i.category));
+      setClosetColors(closetItemsHook.map((i: any) => i.color).filter(Boolean) as string[]);
+    }
   }, [user]);
 
   // Compute wardrobe gaps

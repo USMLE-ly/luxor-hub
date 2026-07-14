@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { PremiumSkeleton, PremiumCardSkeleton, PremiumTextSkeleton } from "@/components/ui/premium-skeleton";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
+import { useClosetItems } from "@/hooks/useClosetItems";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -45,7 +46,7 @@ const CO2_PER_CATEGORY: Record<string, number> = {
 const Analytics = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [items, setItems] = useState<any[]>([]);
+  const { items, loading: closetLoading } = useClosetItems();
   const [wearLogs, setWearLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"overview" | "gaps" | "history" | "sustainability">("overview");
@@ -56,11 +57,9 @@ const Analytics = () => {
   useEffect(() => {
     if (!user) return;
     Promise.all([
-      supabase.from("clothing_items").select("*").eq("user_id", user.id),
       supabase.from("wear_logs").select("*, clothing_items(name, category, price)").eq("user_id", user.id).order("worn_at", { ascending: false }),
       supabase.from("style_profiles").select("*").eq("user_id", user.id).single(),
-    ]).then(([itemsRes, logsRes, styleRes]) => {
-      if (itemsRes.data) setItems(itemsRes.data);
+    ]).then(([logsRes, styleRes]) => {
       if (logsRes.data) setWearLogs(logsRes.data);
       if (styleRes.data) setStyleProfile(styleRes.data);
       setLoading(false);
