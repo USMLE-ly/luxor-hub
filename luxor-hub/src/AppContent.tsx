@@ -97,46 +97,46 @@ const AppContent = () => {
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             >
           <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/" element={<ErrorBoundary><Index /></ErrorBoundary>} />
+            <Route path="/auth" element={<ErrorBoundary><Auth /></ErrorBoundary>} />
+            <Route path="/forgot-password" element={<ErrorBoundary><ForgotPassword /></ErrorBoundary>} />
+            <Route path="/reset-password" element={<ErrorBoundary><ResetPassword /></ErrorBoundary>} />
             <Route path="/dashboard" element={<Navigate to="/closet" replace />} />
-            <Route path="/onboarding" element={<PaywallGate><Onboarding /></PaywallGate>} />
+            <Route path="/onboarding" element={<PaywallGate><ErrorBoundary><Onboarding /></ErrorBoundary></PaywallGate>} />
             <Route path="/closet" element={<PaywallGate><ErrorBoundary fallbackMessage="Closet hit an error. Try refreshing."><Closet /></ErrorBoundary></PaywallGate>} />
             <Route path="/chat" element={<PaywallGate><ErrorBoundary fallbackMessage="Chat hit an error. Try refreshing."><Chat /></ErrorBoundary></PaywallGate>} />
-            <Route path="/outfits" element={<PaywallGate><Outfits /></PaywallGate>} />
-            <Route path="/analytics" element={<PaywallGate><Analytics /></PaywallGate>} />
-            <Route path="/settings" element={<PaywallGate><Settings /></PaywallGate>} />
-            <Route path="/inspiration" element={<PaywallGate><Inspiration /></PaywallGate>} />
-            <Route path="/outfit-builder" element={<PaywallGate><OutfitBuilder /></PaywallGate>} />
-            <Route path="/profile/:userId" element={<PaywallGate><Profile /></PaywallGate>} />
+            <Route path="/outfits" element={<PaywallGate><ErrorBoundary><Outfits /></ErrorBoundary></PaywallGate>} />
+            <Route path="/analytics" element={<PaywallGate><ErrorBoundary><Analytics /></ErrorBoundary></PaywallGate>} />
+            <Route path="/settings" element={<PaywallGate><ErrorBoundary><Settings /></ErrorBoundary></PaywallGate>} />
+            <Route path="/inspiration" element={<PaywallGate><ErrorBoundary><Inspiration /></ErrorBoundary></PaywallGate>} />
+            <Route path="/outfit-builder" element={<PaywallGate><ErrorBoundary><OutfitBuilder /></ErrorBoundary></PaywallGate>} />
+            <Route path="/profile/:userId" element={<PaywallGate><ErrorBoundary><Profile /></ErrorBoundary></PaywallGate>} />
             <Route path="/outfit-analysis" element={<PaywallGate><ErrorBoundary fallbackMessage="Analysis hit an error. Try refreshing."><Analysis /></ErrorBoundary></PaywallGate>} />
-            <Route path="/leaderboard" element={<PaywallGate><Leaderboard /></PaywallGate>} />
-            <Route path="/weekly-challenge" element={<PaywallGate><WeeklyChallenge /></PaywallGate>} />
-            <Route path="/badges" element={<PaywallGate><Badges /></PaywallGate>} />
-            <Route path="/notifications" element={<PaywallGate><NotificationCenter /></PaywallGate>} />
+            <Route path="/leaderboard" element={<PaywallGate><ErrorBoundary><Leaderboard /></ErrorBoundary></PaywallGate>} />
+            <Route path="/weekly-challenge" element={<PaywallGate><ErrorBoundary><WeeklyChallenge /></ErrorBoundary></PaywallGate>} />
+            <Route path="/badges" element={<PaywallGate><ErrorBoundary><Badges /></ErrorBoundary></PaywallGate>} />
+            <Route path="/notifications" element={<PaywallGate><ErrorBoundary><NotificationCenter /></ErrorBoundary></PaywallGate>} />
 
-            <Route path="/calibration" element={<PaywallGate><Calibration /></PaywallGate>} />
+            <Route path="/calibration" element={<PaywallGate><ErrorBoundary><Calibration /></ErrorBoundary></PaywallGate>} />
 
-            <Route path="/paywall" element={<Paywall />} />
+            <Route path="/paywall" element={<ErrorBoundary><Paywall /></ErrorBoundary>} />
             <Route path="/outfit-calendar" element={<PaywallGate><ErrorBoundary fallbackMessage="Calendar hit an error. Try refreshing."><OutfitCalendar /></ErrorBoundary></PaywallGate>} />
-            <Route path="/mood-board" element={<PaywallGate><MoodBoard /></PaywallGate>} />
-            <Route path="/video-analysis" element={<PaywallGate><VideoAnalysis /></PaywallGate>} />
-            <Route path="/fashion-designer" element={<PaywallGate><FashionDesigner /></PaywallGate>} />
-            <Route path="/virtual-tryon" element={<PaywallGate><VirtualTryOn /></PaywallGate>} />
-            <Route path="/community-gallery" element={<PaywallGate><CommunityGallery /></PaywallGate>} />
-            <Route path="/install" element={<Install />} />
-            <Route path="/council" element={<PaywallGate><Council /></PaywallGate>} />
-            <Route path="/monthly-report" element={<PaywallGate><MonthlyReport /></PaywallGate>} />
-            <Route path="/wardrobe-value" element={<PaywallGate><WardrobeValue /></PaywallGate>} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:slug" element={<BlogArticle />} />
-            <Route path="/deep-dive" element={<DeepDive />} />
-            <Route path="/dressing-room" element={<PaywallGate><DressingRoom /></PaywallGate>} />
+            <Route path="/mood-board" element={<PaywallGate><ErrorBoundary><MoodBoard /></ErrorBoundary></PaywallGate>} />
+            <Route path="/video-analysis" element={<PaywallGate><ErrorBoundary><VideoAnalysis /></ErrorBoundary></PaywallGate>} />
+            <Route path="/fashion-designer" element={<PaywallGate><ErrorBoundary><FashionDesigner /></ErrorBoundary></PaywallGate>} />
+            <Route path="/virtual-tryon" element={<PaywallGate><ErrorBoundary><VirtualTryOn /></ErrorBoundary></PaywallGate>} />
+            <Route path="/community-gallery" element={<PaywallGate><ErrorBoundary><CommunityGallery /></ErrorBoundary></PaywallGate>} />
+            <Route path="/install" element={<ErrorBoundary><Install /></ErrorBoundary>} />
+            <Route path="/council" element={<PaywallGate><ErrorBoundary><Council /></ErrorBoundary></PaywallGate>} />
+            <Route path="/monthly-report" element={<PaywallGate><ErrorBoundary><MonthlyReport /></ErrorBoundary></PaywallGate>} />
+            <Route path="/wardrobe-value" element={<PaywallGate><ErrorBoundary><WardrobeValue /></ErrorBoundary></PaywallGate>} />
+            <Route path="/blog" element={<ErrorBoundary><Blog /></ErrorBoundary>} />
+            <Route path="/blog/:slug" element={<ErrorBoundary><BlogArticle /></ErrorBoundary>} />
+            <Route path="/deep-dive" element={<ErrorBoundary><DeepDive /></ErrorBoundary>} />
+            <Route path="/dressing-room" element={<PaywallGate><ErrorBoundary><DressingRoom /></ErrorBoundary></PaywallGate>} />
             <Route path="/style-recommendations" element={<PaywallGate><ErrorBoundary fallbackMessage="Recommendations hit an error. Try refreshing."><StyleRecommendations /></ErrorBoundary></PaywallGate>} />
-            <Route path="/user-analysis" element={<PaywallGate><UserAnalysis /></PaywallGate>} />
-            <Route path="*" element={<NotFound />} />
+            <Route path="/user-analysis" element={<PaywallGate><ErrorBoundary><UserAnalysis /></ErrorBoundary></PaywallGate>} />
+            <Route path="*" element={<ErrorBoundary><NotFound /></ErrorBoundary>} />
           </Routes>
             </motion.div>
           </AnimatePresence>

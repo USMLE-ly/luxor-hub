@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import {CaretLeft, CaretRight, CalendarDots} from "@phosphor-icons/react";
+import { getSections, SECTION_BASE, DIVIDER_STYLE, FLIP_SPEED, DOMINO_DELAY, preloadImage } from "./flip-gallery-helpers";
 import { MarketingBadges } from '@/components/ui/marketing-badges';
 
 export interface OutfitImages {
@@ -23,15 +24,7 @@ interface FlipGalleryProps {
 /* ------------------------------------------------------------------ */
 /*  Helper – resolves sections array + count from an OutfitImages obj  */
 /* ------------------------------------------------------------------ */
-function getSections(o: OutfitImages): { sections: string[]; count: number } {
-  if (o.type === 'full_outfit') {
-    return { sections: [o.top], count: 1 };
-  }
-  if (o.type === 'dress') {
-    return { sections: [o.top, o.bottom], count: 2 };
-  }
-  return { sections: [o.top, o.mid, o.bottom], count: 3 };
-}
+
 
 /* ------------------------------------------------------------------ */
 /*  Style constants                                                    */
