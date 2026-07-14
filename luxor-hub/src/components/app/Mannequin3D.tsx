@@ -632,17 +632,14 @@ export default function Mannequin3D({
   const [sceneError, setSceneError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log("[MANNEQUIN3D] Component mounted");
     // Check WebGL support
     try {
       const testCanvas = document.createElement("canvas");
       const gl = testCanvas.getContext("webgl2") || testCanvas.getContext("webgl");
       const supported = !!gl;
-      console.log("[MANNEQUIN3D] WebGL supported:", supported);
       if (gl && "getExtension" in gl) {
         const ext = gl.getExtension("WEBGL_debug_renderer_info");
         if (ext) {
-          console.log("[MANNEQUIN3D] GPU:", gl.getParameter(ext.UNMASKED_RENDERER_WEBGL));
         }
       }
       setWebglOk(supported);
@@ -650,7 +647,6 @@ export default function Mannequin3D({
       console.error("[MANNEQUIN3D] WebGL check failed:", e);
       setWebglOk(false);
     }
-    return () => console.log("[MANNEQUIN3D] Component unmounted");
   }, []);
 
   const isMale = gender === "male";
@@ -723,9 +719,6 @@ export default function Mannequin3D({
         shadows
         style={{ background: "transparent" }}
         onCreated={(state) => {
-          console.log("[MANNEQUIN3D] Canvas created successfully");
-          console.log("[MANNEQUIN3D] Renderer:", state.gl.renderer);
-          console.log("[MANNEQUIN3D] Capabilities:", state.gl.capabilities);
           setCanvasMounted(true);
         }}
         onError={(e) => {

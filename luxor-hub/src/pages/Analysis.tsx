@@ -1,3 +1,4 @@
+import { getApiUrl } from "@/lib/api";
 import React from "react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { AppLayout } from "@/components/app/AppLayout";
@@ -223,7 +224,7 @@ export default function Analysis() {
     try {
       // Compress first — phone photos are 3-12 MB, this shrinks them to ~100-200 KB
       const b64 = await compressImage(file);
-      const apiUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_PUBLIC_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:5000' : window.location.origin);
+      const apiUrl = getApiUrl() || window.location.origin;
 
       // Retry loop — Cipher Vision can be slow; retry with backoff instead of giving up
       let fnData: any = null;

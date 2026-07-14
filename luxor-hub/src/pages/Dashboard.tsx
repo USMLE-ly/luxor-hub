@@ -162,7 +162,6 @@ const Dashboard = () => {
       try {
         setPageLoading(true);
         setHasError(null);
-        console.log("[DASHBOARD] Fetching dashboard data for user:", user.id);
         
         const [
           itemsRes, outfitsRes, profileRes, styleRes, closetRes, outfitsListRes, allItemsRes
@@ -176,11 +175,6 @@ const Dashboard = () => {
           supabase.from("clothing_items").select("category, color").eq("user_id", user.id),
         ]);
         
-        console.log("[DASHBOARD] Data fetched:", { 
-          items: itemsRes.count, outfits: outfitsRes.count, 
-          profile: profileRes.data?.display_name, 
-          closetItems: closetRes.data?.length 
-        });
       setStats({
         items: itemsRes.count || 0,
         outfits: outfitsRes.count || 0,
@@ -237,7 +231,6 @@ const Dashboard = () => {
     // Only redirect to onboarding if style_profile was loaded and 
     // explicitly says onboarding is NOT complete
     if (user && styleProfile && styleProfile.onboarding_completed === false) {
-      console.log("[DASHBOARD] style_profile loaded, onboarding_completed=false, redirecting to /onboarding");
       navigate("/onboarding");
     }
   }, [styleProfile?.onboarding_completed, user, navigate]);

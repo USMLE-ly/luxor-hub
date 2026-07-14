@@ -24,7 +24,6 @@ function loadPayPalSDK(): Promise<void> {
     script.dataset.sdkIntegrationSource = "button-factory";
     script.async = true;
     script.onload = () => {
-      console.log("PayPal SDK loaded successfully");
       resolve();
     };
     script.onerror = () => {

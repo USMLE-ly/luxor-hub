@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { canProceed } from "@/lib/rateLimiter";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import { PLAN_LIMITS } from "@/lib/planRestrictions";

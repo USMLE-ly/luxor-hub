@@ -103,15 +103,15 @@ const AppContent = () => {
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/dashboard" element={<Navigate to="/closet" replace />} />
             <Route path="/onboarding" element={<PaywallGate><Onboarding /></PaywallGate>} />
-            <Route path="/closet" element={<PaywallGate><Closet /></PaywallGate>} />
-            <Route path="/chat" element={<PaywallGate><Chat /></PaywallGate>} />
+            <Route path="/closet" element={<PaywallGate><ErrorBoundary fallbackMessage="Closet hit an error. Try refreshing."><Closet /></ErrorBoundary></PaywallGate>} />
+            <Route path="/chat" element={<PaywallGate><ErrorBoundary fallbackMessage="Chat hit an error. Try refreshing."><Chat /></ErrorBoundary></PaywallGate>} />
             <Route path="/outfits" element={<PaywallGate><Outfits /></PaywallGate>} />
             <Route path="/analytics" element={<PaywallGate><Analytics /></PaywallGate>} />
             <Route path="/settings" element={<PaywallGate><Settings /></PaywallGate>} />
             <Route path="/inspiration" element={<PaywallGate><Inspiration /></PaywallGate>} />
             <Route path="/outfit-builder" element={<PaywallGate><OutfitBuilder /></PaywallGate>} />
             <Route path="/profile/:userId" element={<PaywallGate><Profile /></PaywallGate>} />
-            <Route path="/outfit-analysis" element={<PaywallGate><Analysis /></PaywallGate>} />
+            <Route path="/outfit-analysis" element={<PaywallGate><ErrorBoundary fallbackMessage="Analysis hit an error. Try refreshing."><Analysis /></ErrorBoundary></PaywallGate>} />
             <Route path="/leaderboard" element={<PaywallGate><Leaderboard /></PaywallGate>} />
             <Route path="/weekly-challenge" element={<PaywallGate><WeeklyChallenge /></PaywallGate>} />
             <Route path="/badges" element={<PaywallGate><Badges /></PaywallGate>} />
@@ -120,7 +120,7 @@ const AppContent = () => {
             <Route path="/calibration" element={<PaywallGate><Calibration /></PaywallGate>} />
 
             <Route path="/paywall" element={<Paywall />} />
-            <Route path="/outfit-calendar" element={<PaywallGate><OutfitCalendar /></PaywallGate>} />
+            <Route path="/outfit-calendar" element={<PaywallGate><ErrorBoundary fallbackMessage="Calendar hit an error. Try refreshing."><OutfitCalendar /></ErrorBoundary></PaywallGate>} />
             <Route path="/mood-board" element={<PaywallGate><MoodBoard /></PaywallGate>} />
             <Route path="/video-analysis" element={<PaywallGate><VideoAnalysis /></PaywallGate>} />
             <Route path="/fashion-designer" element={<PaywallGate><FashionDesigner /></PaywallGate>} />
@@ -134,7 +134,7 @@ const AppContent = () => {
             <Route path="/blog/:slug" element={<BlogArticle />} />
             <Route path="/deep-dive" element={<DeepDive />} />
             <Route path="/dressing-room" element={<PaywallGate><DressingRoom /></PaywallGate>} />
-            <Route path="/style-recommendations" element={<PaywallGate><StyleRecommendations /></PaywallGate>} />
+            <Route path="/style-recommendations" element={<PaywallGate><ErrorBoundary fallbackMessage="Recommendations hit an error. Try refreshing."><StyleRecommendations /></ErrorBoundary></PaywallGate>} />
             <Route path="/user-analysis" element={<PaywallGate><UserAnalysis /></PaywallGate>} />
             <Route path="*" element={<NotFound />} />
           </Routes>

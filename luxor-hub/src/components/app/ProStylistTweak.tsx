@@ -1,3 +1,4 @@
+import { getApiUrl } from "@/lib/api";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,7 +54,7 @@ export function ProStylistTweak({ imagePreview, imageUrl }: ProStylistTweakProps
         base64Image = imageSrc;
       }
 
-            const apiUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_PUBLIC_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:5000' : '');
+            const apiUrl = getApiUrl();
       const resp = await fetch(`${apiUrl}/api/v1/pro-tweak/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

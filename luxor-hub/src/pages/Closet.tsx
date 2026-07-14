@@ -1,3 +1,4 @@
+import { getApiUrl } from "@/lib/api";
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import { PLAN_LIMITS } from "@/lib/planRestrictions";
@@ -134,12 +135,7 @@ const Closet = () => {
   const itemLimit = PLAN_LIMITS[tier].closetItems;
   const [flatLayView, setFlatLayView] = useState(false);
   const [items, setItems] = useState<ClothingItem[]>([]);
-  // Get backend API base URL
-  const apiBase = useMemo(() => {
-    return import.meta.env.VITE_API_URL || import.meta.env.VITE_PUBLIC_API_URL || 
-      (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-        ? "http://localhost:5000" : "");
-  }, []);
+  const apiBase = getApiUrl();
 
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -583,7 +579,7 @@ const Closet = () => {
           reader.readAsDataURL(selectedFile);
         });
       }
-      const apiBase = import.meta.env.VITE_API_URL || import.meta.env.VITE_PUBLIC_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:5000' : '');
+      const apiBase = getApiUrl();
       const resp = await fetch(apiBase + '/api/v1/closet/analyze-item', {
         method: "POST",
         headers: { "Content-Type": "application/json" },

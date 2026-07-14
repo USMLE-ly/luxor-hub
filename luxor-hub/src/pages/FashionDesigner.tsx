@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { PrivacyNotice } from "@/components/app/PrivacyNotice";
 import { AppLayout } from "@/components/app/AppLayout";
 import { Button } from "@/components/ui/button";

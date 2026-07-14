@@ -32,7 +32,6 @@ export function WeatherOutfitCard() {
           body: { lat, lon },
         });
         if (data) setWeather(data);
-        console.log("[WEATHER] Fetching weather for lat:", lat, "lon:", lon);
       } catch (e) {
         console.error("[WEATHER] Fetch error:", e);
       } finally {

@@ -23,7 +23,7 @@ function loadMappings(): Record<string, string> {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return JSON.parse(raw);
-  } catch {}
+  } catch { /* localStorage unavailable */ }
   return {};
 }
 
@@ -123,7 +123,6 @@ export async function restoreAssetMappings(): Promise<void> {
 
   if (restored > 0) {
     saveMappings(mappings);
-    console.log(`[ASSET] Restored ${restored} 3D asset mappings from IndexedDB`);
   }
 }
 

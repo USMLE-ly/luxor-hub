@@ -1,3 +1,4 @@
+import { getApiUrl } from "@/lib/api";
 import { useState, useRef, useEffect } from "react";
 import { AppLayout } from "@/components/app/AppLayout";
 import { toast } from "sonner";
@@ -91,7 +92,7 @@ interface OutfitReview {
 const apiBase = import.meta.env.VITE_API_URL || import.meta.env.VITE_PUBLIC_API_URL || "";
 
 function getApiUrl(): string {
-  return apiBase || (window.location.hostname === "localhost" ? "http://localhost:5000" : "");
+  return getApiUrl();
 }
 
 export default function StyleRecommendationsPage() {
@@ -217,7 +218,6 @@ export default function StyleRecommendationsPage() {
       const styleData = await styleResp.json();
       // Strip 'for' key
       if (styleData && typeof styleData === 'object') delete (styleData as any).for;
-      console.log("[STYLE-ANALYZE RAW RESPONSE]", styleData);
       if (!styleData.success || !styleData.analysis) {
         throw new Error(styleData.error || "Face/body analysis failed");
       }
@@ -234,9 +234,7 @@ export default function StyleRecommendationsPage() {
       const recData = await recResp.json();
       // Strip 'for' key
       if (recData && typeof recData === 'object') delete (recData as any).for;
-      console.log("[RECOMMENDATIONS API RAW RESPONSE]", recData);
       if (recData.success && recData.recommendations) {
-        console.log("[RECOMMENDATIONS] Data received:", Object.keys(recData.recommendations));
         setRecommendations(recData.recommendations);
       } else {
         console.warn("[RECOMMENDATIONS] API returned no data, setting fallback");
@@ -261,7 +259,6 @@ export default function StyleRecommendationsPage() {
       const reviewData = await reviewResp.json();
       // Strip 'for' key
       if (reviewData && typeof reviewData === 'object') delete (reviewData as any).for;
-      console.log("[OUTFIT-REVIEW RAW RESPONSE]", reviewData);
       if (reviewData.success && reviewData.review) {
         setOutfitReview(reviewData.review);
       } else {

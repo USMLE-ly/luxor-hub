@@ -1,3 +1,4 @@
+import { getApiUrl } from "@/lib/api";
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useWardrobeStore } from "@/store/useWardrobeStore";
@@ -100,8 +101,7 @@ export default function DressingRoomPage() {
     try {
       setProgressStage(`Generating ${count} ${occasion} outfits...`);
 
-      const api = import.meta.env.VITE_API_URL || import.meta.env.VITE_PUBLIC_API_URL || 
-        (window.location.hostname === "localhost" ? "http://localhost:5000" : "");
+      const api = getApiUrl();
 
       const res = await fetch(api + "/api/v1/generate-outfits", {
         method: "POST",
@@ -242,21 +242,21 @@ export default function DressingRoomPage() {
                           onClick={() => toggleSelectedItem(item.id)}
                           className="relative aspect-square rounded-xl overflow-hidden cursor-pointer bg-zinc-800 hover:ring-2 hover:ring-zinc-500 transition-all"
                         >
-                          {(item.imageUrl) ? (
-                            <img
-                                src={item.imageUrl}
-                                alt={item.name}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).style.display = "none";
-                                }}
-                                draggable={false}
-                              />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-zinc-600 text-lg">
-                              {item.category === "top" ? "👕" : item.category === "bottom" ? "👖" : "👟"}
-                            </div>
-                          )}
+                          <img
+                            src={item.imageUrl || ""}
+                            alt={item.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              const img = e.target as HTMLImageElement;
+                              img.style.display = "none";
+                              const fallback = img.nextElementSibling as HTMLElement;
+                              if (fallback) fallback.style.display = "flex";
+                            }}
+                            draggable={false}
+                          />
+                          <div className="w-full h-full items-center justify-center text-zinc-600 text-lg hidden">
+                            {item.category === "top" ? "👕" : item.category === "bottom" ? "👖" : "👟"}
+                          </div>
                           {selectedItems.includes(item.id) && (
                             <div className="absolute top-1 right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center border-2 border-zinc-900">
                               <span className="text-[10px] text-white font-bold">✓</span>
