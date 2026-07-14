@@ -6,7 +6,8 @@ import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { useClosetItems } from "@/hooks/useClosetItems";
 import { useUserProfile } from "@/hooks/useUserProfile";
-import { supabase } from "@/integrations/supabase/client";
+import { fetchOutfits, insertOutfit } from "@/lib/outfitService";
+import { insertCalendarEvent } from "@/lib/calendarService";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
@@ -49,10 +50,7 @@ const Outfits = () => {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("outfits").select("*, outfit_items(clothing_item_id)").eq("user_id", user.id).order("created_at", { ascending: false })
-      .then(({ data }) => {
-        if (data) setSavedOutfits(data);
-      });
+    fetchOutfits(user.id).then(setSavedOutfits);
   }, [user]);
 
   const generate = async () => {

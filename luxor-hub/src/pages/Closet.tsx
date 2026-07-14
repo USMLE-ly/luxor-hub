@@ -16,6 +16,8 @@ import { toast } from "sonner";
 import { haptic } from "@/lib/haptics";
 import {Plus, MagnifyingGlass, TShirt, SlidersHorizontal, TrashSimple, UploadSimple, X, Spinner, Sparkle, CheckCircle, Camera, CaretRight, Sliders, Pulse, Eye, User, StackSimple, CalendarDots, Image, FloppyDisk, FolderOpen, Heart, Receipt, File, Upload} from "@phosphor-icons/react";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
+import { fetchSavedOutfits, insertOutfit, deleteOutfit, toggleOutfitFavorite } from "@/lib/outfitService";
+import { insertCalendarEvent } from "@/lib/calendarService";
 import { useSearchFilter } from "@/hooks/useSearchFilter";
 import { useWardrobeStore, useWardrobeHydrated, restoreClothingFromIDB, type Category, type ClothingItem as WardrobeClothingItem } from "@/store/useWardrobeStore";
 import { resolve3DAsset, uploadAndAssignGLB, restoreAssetMappings } from "@/lib/assetResolver";
@@ -487,13 +489,8 @@ const Closet = () => {
   const fetchSavedOutfits = useCallback(async () => {
     if (!user) return;
     setLoadingSavedOutfits(true);
-    const { data, error } = await supabase
-      .from("outfits")
-      .select("*")
-      .eq("user_id", user.id)
-      .not("mannequin_items", "eq", "[]")
-      .order("created_at", { ascending: false });
-    if (!error) setSavedOutfits(data || []);
+    const data = await fetchSavedOutfits(user.id);
+    setSavedOutfits(data);
     setLoadingSavedOutfits(false);
   }, [user]);
 
@@ -503,7 +500,7 @@ const Closet = () => {
     if (!user || !outfitName.trim() || currentlyWearing.length === 0) return;
     setSavingOutfit(true);
     try {
-      const { error } = await supabase.from("outfits").insert({
+      const { error } = await insertOutfit({
         user_id: user.id,
         name: outfitName.trim(),
         description: `${currentlyWearing.length} items`,
@@ -550,7 +547,7 @@ const Closet = () => {
 
   const deleteSavedOutfit = async (id: string) => {
     try {
-      const { error } = await supabase.from("outfits").delete().eq("id", id);
+      const { error } = await deleteOutfit(id);
       if (error) toast.error("Failed to delete outfit");
       else {
         setSavedOutfits(prev => prev.filter(o => o.id !== id));
@@ -565,7 +562,7 @@ const Closet = () => {
   const toggleFavorite = async (outfit: any) => {
     try {
       const newVal = !outfit.is_favorite;
-      const { error } = await supabase.from("outfits").update({ is_favorite: newVal }).eq("id", outfit.id);
+      const { error } = await toggleOutfitFavorite(outfit.id, newVal);
       if (error) toast.error("Failed to update");
       else setSavedOutfits(prev => prev.map(o => o.id === outfit.id ? { ...o, is_favorite: newVal } : o));
     } catch (e) {
@@ -925,13 +922,15 @@ const Closet = () => {
   const saveToCalendar = async (date: string) => {
     if (!user) return;
     try {
-      const { error } = await supabase.from("calendar_events").insert({
+      const { error } = await insertCalendarEvent({
         user_id: user.id,
         title: `Outfit: ${currentlyWearing.map((c) => c.name).join(", ")}`,
         event_date: date,
+        event_time: null,
         occasion: "Planned Outfit",
         notes: `Mannequin outfit with ${currentlyWearing.length} items`,
         outfit_items: currentlyWearing as any,
+        mannequin_image_url: null,
       });
       if (error) toast.error("Failed to save to calendar");
       else { toast.success("Outfit saved to calendar!"); setShowCalendar(false); }
