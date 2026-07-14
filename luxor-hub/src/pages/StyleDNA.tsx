@@ -41,8 +41,8 @@ const colorNameToHsl: Record<string, string> = {
   "Orange": "hsl(25, 80%, 55%)", "Yellow": "hsl(50, 80%, 55%)", "Purple": "hsl(270, 50%, 45%)",
 };
 
-function getColorHsl(name: string): string {
-  return colorNameToHsl[name] || `hsl(${Math.abs(name.split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % 360}, 50%, 50%)`;
+function getColorHsl(name: string | null | undefined): string {
+  return colorNameToHsl[name || ""] || `hsl(${Math.abs((name || "").split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % 360}, 50%, 50%)`;
 }
 
 function getFaceShapeTips(shape: string): string[] {

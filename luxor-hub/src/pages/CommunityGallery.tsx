@@ -248,8 +248,8 @@ export default function CommunityGallery() {
 
   const filteredDesigns = searchQuery
     ? designs.filter(d =>
-        d.prompt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        d.garment_type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (d.prompt || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (d.garment_type || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
         d.profile?.display_name?.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : designs;

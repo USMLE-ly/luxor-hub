@@ -267,7 +267,7 @@ const OutfitCalendarInner = () => {
     });
     return closetItems
       .filter(ci => {
-        if (!usedCats.has(ci.category.toLowerCase())) return false;
+        if (!usedCats.has((ci.category || "").toLowerCase())) return false;
         const alreadyInOutfit = items.some((i: any) => {
           const n = (typeof i === "string" ? i : i?.name || "").toLowerCase();
           return n === (ci.name || "").toLowerCase();
@@ -562,7 +562,7 @@ const OutfitCalendarInner = () => {
     let score = 0;
     
     // Category coverage (max 40): tops+bottoms+shoes = perfect base
-    const cats = new Set(items.map(i => i.category.toLowerCase()));
+    const cats = new Set(items.map(i => (i.category || "").toLowerCase()));
     const hasTop = cats.has("top") || cats.has("outerwear") || cats.has("dress");
     const hasBottom = cats.has("bottom") || cats.has("dress");
     const hasShoes = cats.has("shoes");

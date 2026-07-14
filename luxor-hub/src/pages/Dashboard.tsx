@@ -312,7 +312,7 @@ const Dashboard = () => {
     const catCounts = new Map<string, number>();
     const colorSet = new Set<string>();
     wardrobeItems.forEach((i) => {
-      catCounts.set(i.category, (catCounts.get(i.category) || 0) + 1);
+      if (i.category) catCounts.set(i.category, (catCounts.get(i.category) || 0) + 1);
       if (i.color) colorSet.add(i.color.toLowerCase().trim());
     });
     const coveredCats = ESSENTIAL_CATS.filter((c) => (catCounts.get(c) || 0) >= 3).length;
@@ -339,7 +339,7 @@ const Dashboard = () => {
   ];
 
   const filteredOutfits = activeOccasion
-    ? outfitsList.filter((o) => o.occasion?.toLowerCase() === activeOccasion)
+    ? outfitsList.filter((o) => (o.occasion || '').toLowerCase() === (activeOccasion || ''))
     : outfitsList;
 
   const chatPrompts = [

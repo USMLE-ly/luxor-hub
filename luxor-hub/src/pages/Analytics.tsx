@@ -89,7 +89,7 @@ const Analytics = () => {
       if (result.gaps) {
         const seen = new Set<string>();
         result.gaps = result.gaps.filter((gap: any) => {
-          const key = gap.item.toLowerCase().trim();
+          const key = (gap.item || "").toLowerCase().trim();
           if (seen.has(key)) return false;
           seen.add(key);
           return true;
@@ -167,7 +167,7 @@ const Analytics = () => {
   const co2ByCategory = Object.entries(
     items.reduce((acc: Record<string, number>, item) => {
       const cat = item.category || "other";
-      acc[cat] = (acc[cat] || 0) + (CO2_PER_CATEGORY[cat.toLowerCase()] || CO2_PER_CATEGORY.other);
+      acc[cat] = (acc[cat] || 0) + (CO2_PER_CATEGORY[(cat || "").toLowerCase()] || CO2_PER_CATEGORY.other);
       return acc;
     }, {})
   ).map(([name, value]) => ({ name, value: Math.round(Number(value) * 10) / 10 }))

@@ -226,8 +226,8 @@ const UserAnalysis = () => {
   const archetype = data.styleProfile.archetype || "Emerging Signature";
   const topMood = (Array.isArray(prefs.styleMood) && prefs.styleMood[0]) || "Refined";
   const bio = [
-    prefs.profession ? `${prefs.profession.split(" /")[0]} professional` : "A curator of their own signature",
-    prefs.lifestyle ? `living a ${prefs.lifestyle.toLowerCase().split(" /")[0]} rhythm` : null,
+    prefs.profession ? `${String(prefs.profession).split(" /")[0]} professional` : "A curator of their own signature",
+    prefs.lifestyle ? `living a ${String(prefs.lifestyle).toLowerCase().split(" /")[0]} rhythm` : null,
     `chasing a ${String(topMood).toLowerCase()} presence.`,
   ].filter(Boolean).join(", ");
 

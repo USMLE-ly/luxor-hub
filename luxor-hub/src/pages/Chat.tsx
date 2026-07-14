@@ -201,7 +201,7 @@ const Chat = () => {
         }
       }
 
-      if (textBuffer.trim()) {
+      if (textBuffer && textBuffer.trim()) {
         for (let raw of textBuffer.split("\n")) {
           if (!raw || raw.startsWith(":") || !raw.startsWith("data: ")) continue;
           const jsonStr = raw.slice(6).trim();

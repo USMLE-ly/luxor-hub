@@ -1172,7 +1172,7 @@ const Closet = () => {
                   { label: "Work", icon: "💼" },
                   { label: "Party", icon: "🎉" },
                 ].map((tab) => {
-                  const count = items.filter(i => i.occasion?.toLowerCase() === tab.label.toLowerCase()).length;
+                  const count = items.filter(i => (i.occasion || "").toLowerCase() === (tab.label || "").toLowerCase()).length;
                   return (
                     <StaggerItem key={tab.label} className="contents">
                     <button key={tab.label}
