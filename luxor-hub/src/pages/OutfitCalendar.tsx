@@ -1034,7 +1034,7 @@ const OutfitCalendarInner = () => {
                 <button
                   key={i}
                   onClick={() => setSelectedDate(d)}
-                  className={`min-h-[110px] p-1.5 border-b border-r border-border/30 text-left transition-all relative group flex flex-col
+                  className={`min-h-[160px] p-1.5 border-b border-r border-border/30 text-left transition-all relative group flex flex-col
                     ${!inMonth ? "opacity-20" : ""}
                     ${selected ? "ring-1 ring-primary/30 ring-inset" : "hover:bg-secondary/40"}
                     ${todayFlag && !dayEvents.length ? "bg-primary/5" : ""}
@@ -1109,19 +1109,18 @@ const OutfitCalendarInner = () => {
                           const visible = allPhotos.slice(0, 3);
                           const extra = allPhotos.length - 3;
                           return (
-                            <div className="flex flex-col items-center justify-center gap-1 flex-1 rounded-lg bg-white/95 dark:bg-white/90 py-2 px-1 w-full transition-transform duration-200 group-hover:scale-105 overflow-hidden">
+                            <div className="flex flex-col items-center justify-center gap-2 flex-1 rounded-lg bg-white/95 dark:bg-white/90 py-2 px-1 w-full transition-transform duration-200 group-hover:scale-105 overflow-hidden">
                               {visible.map((url, pi) => (
-                                <div key={pi} className="w-8 h-8 rounded-full shadow-sm border border-zinc-200 dark:border-zinc-700 flex items-center justify-center overflow-hidden flex-shrink-0 bg-white dark:bg-zinc-800">
+                                <div key={pi} className="w-12 h-12 rounded-full shadow-md border border-zinc-200 dark:border-zinc-700 flex items-center justify-center overflow-hidden flex-shrink-0">
                                   <img
                                     src={url}
                                     alt=""
                                     className="w-full h-full object-cover pointer-events-none"
-                                    style={{ mixBlendMode: "multiply" }}
                                   />
                                 </div>
                               ))}
                               {extra > 0 && (
-                                <div className="w-6 h-6 rounded-full bg-zinc-700 text-white flex items-center justify-center text-[7px] font-bold border border-zinc-600 flex-shrink-0">
+                                <div className="w-12 h-12 rounded-full bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 flex items-center justify-center text-xs font-bold border border-zinc-200 dark:border-zinc-600 flex-shrink-0">
                                   +{extra}
                                 </div>
                               )}
