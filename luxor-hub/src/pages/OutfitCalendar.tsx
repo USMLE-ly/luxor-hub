@@ -1269,36 +1269,68 @@ const OutfitCalendarInner = () => {
                             setEvents(updatedEvents);
                             await supabase.from("calendar_events").update({ outfit_items: newItems as any }).eq("id", ev.id);
                           };
-                          // Flat-lay grid: 2-col for ≥4 items, else row
-                          const useGrid = photos.length >= 4;
+                          // Compact 3-row layout: Top / Bottom+Accessory / Shoes
                           return (
                             <div className="p-3 pb-1">
-                              <div className={useGrid
-                                ? "grid grid-cols-2 gap-1.5 rounded-xl bg-white/95 dark:bg-white/90 p-2 overflow-hidden"
-                                : "flex gap-2 overflow-x-auto"
-                              }>
-                                {photos.map((url, pi) => (
+                              <div className="flex flex-col items-center gap-1 py-2 rounded-xl bg-white/95 dark:bg-white/90 px-3">
+                                {/* Row 1: Top (Index 0) - Centered */}
+                                {photos[0] && (
                                   <div
-                                    key={pi}
                                     draggable
-                                    onDragStart={() => handleDragStart(pi)}
+                                    onDragStart={() => handleDragStart(0)}
                                     onDragOver={handleDragOver}
-                                    onDrop={() => handleDrop(pi)}
-                                    className={`${useGrid ? "aspect-square" : "w-16 h-16 flex-shrink-0"} rounded-lg ${!useGrid ? "bg-white/95 dark:bg-white/90" : ""} flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing transition-all ${
-                                      dragIdx === pi ? "opacity-50 scale-95" : "hover:ring-2 hover:ring-primary/30"
-                                    }`}
+                                    onDrop={() => handleDrop(0)}
+                                    className="w-10 h-10 rounded-full shadow-sm border border-zinc-200 dark:border-zinc-700 flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing transition-all hover:ring-2 hover:ring-primary/30"
                                   >
-                                    <img
-                                      src={url}
-                                      alt={`Item ${pi + 1}`}
-                                      className="w-full h-full object-contain pointer-events-none"
-                                      style={{ mixBlendMode: "multiply" }}
-                                    />
+                                    <img src={photos[0]} alt="Top" className="w-full h-full object-cover pointer-events-none" style={{ mixBlendMode: "multiply" }} />
                                   </div>
-                                ))}
-                                {items.length > 5 && (
-                                  <div className={`${useGrid ? "aspect-square" : "w-16 h-16 flex-shrink-0"} rounded-lg flex items-center justify-center bg-secondary/60 text-[10px] font-sans font-semibold text-muted-foreground`}>
-                                    +{items.length - 5}
+                                )}
+
+                                {/* Row 2: Bottom (Index 1) + Accessory (Index 3) - Side by Side */}
+                                {(photos[1] || photos[3]) && (
+                                  <div className="flex gap-1 items-center justify-center">
+                                    {photos[1] && (
+                                      <div
+                                        draggable
+                                        onDragStart={() => handleDragStart(1)}
+                                        onDragOver={handleDragOver}
+                                        onDrop={() => handleDrop(1)}
+                                        className="w-10 h-10 rounded-full shadow-sm border border-zinc-200 dark:border-zinc-700 flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing transition-all hover:ring-2 hover:ring-primary/30"
+                                      >
+                                        <img src={photos[1]} alt="Bottom" className="w-full h-full object-cover pointer-events-none" style={{ mixBlendMode: "multiply" }} />
+                                      </div>
+                                    )}
+                                    {photos[3] && (
+                                      <div
+                                        draggable
+                                        onDragStart={() => handleDragStart(3)}
+                                        onDragOver={handleDragOver}
+                                        onDrop={() => handleDrop(3)}
+                                        className="w-10 h-10 rounded-full shadow-sm border border-zinc-200 dark:border-zinc-700 flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing transition-all hover:ring-2 hover:ring-primary/30"
+                                      >
+                                        <img src={photos[3]} alt="Accessory" className="w-full h-full object-cover pointer-events-none" style={{ mixBlendMode: "multiply" }} />
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+
+                                {/* Row 3: Shoes (Index 2) - Centered below */}
+                                {photos[2] && (
+                                  <div
+                                    draggable
+                                    onDragStart={() => handleDragStart(2)}
+                                    onDragOver={handleDragOver}
+                                    onDrop={() => handleDrop(2)}
+                                    className="w-10 h-10 rounded-full shadow-sm border border-zinc-200 dark:border-zinc-700 flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing transition-all hover:ring-2 hover:ring-primary/30"
+                                  >
+                                    <img src={photos[2]} alt="Shoes" className="w-full h-full object-cover pointer-events-none" style={{ mixBlendMode: "multiply" }} />
+                                  </div>
+                                )}
+
+                                {/* Overflow badge for 5+ items */}
+                                {photos.length > 4 && (
+                                  <div className="w-8 h-8 rounded-full bg-zinc-700 text-white flex items-center justify-center text-[10px] border border-zinc-600">
+                                    +{photos.length - 4}
                                   </div>
                                 )}
                               </div>

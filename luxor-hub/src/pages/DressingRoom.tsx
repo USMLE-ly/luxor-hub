@@ -185,7 +185,7 @@ export default function DressingRoomPage() {
 
   
   // Send manually selected outfit to calendar
-  const [manualOutfitForCalendar, setManualOutfitForCalendar] = useState<OutfitImages | null>(null);
+  const [manualOutfitItems, setManualOutfitItems] = useState<{ url: string; type: string; label: string; name?: string }[]>([]);
 
   const handleSendManualToCalendar = () => {
     if (selectedItems.length === 0) {
@@ -196,37 +196,31 @@ export default function DressingRoomPage() {
       .map((id) => {
         const item = catalogItems.find((c) => c.id === id);
         if (!item) return null;
-        return { url: item.imageUrl || "/placeholder.svg", type: item.category, label: item.name || "Item" };
+        return { url: item.imageUrl || "/placeholder.svg", type: item.category, label: item.name || "Item", name: item.name };
       })
-      .filter(Boolean) as { url: string; type: string; label: string }[];
+      .filter(Boolean) as { url: string; type: string; label: string; name?: string }[];
 
     if (outfitItems.length === 0) {
       toast.error("Selected items have no images");
       return;
     }
 
-    setManualOutfitForCalendar({
-      top: outfitItems[0]?.url || "",
-      mid: outfitItems[1]?.url || "",
-      bottom: outfitItems[2]?.url || outfitItems[0]?.url || "",
-      type: 'regular',
-      accessory_note: outfitItems.map((i) => i.label).join(", "),
-    });
+    setManualOutfitItems(outfitItems);
     setCalendarDate(new Date().toISOString().split("T")[0]);
     setCalendarEventTitle("");
     setShowCalendarModal(true);
   };
 
   const handlePostToCalendarFinal = async () => {
-    const outfit = manualOutfitForCalendar || activeOutfit;
-    if (!user || !outfit || !calendarDate) return;
+    if (!user || manualOutfitItems.length === 0 || !calendarDate) return;
     setPostingToCalendar(true);
     try {
-      const outfitItems = [
-        { url: outfit.top, type: "top", label: "Top" },
-        outfit.mid ? { url: outfit.mid, type: "mid", label: "Mid" } : null,
-        { url: outfit.bottom, type: "bottom", label: "Bottom" },
-      ].filter(Boolean) as { url: string; type: string; label: string }[];
+      // Store ALL items as { photo_url, name, category } so the Calendar can resolve them
+      const outfitItems = manualOutfitItems.map((item) => ({
+        photo_url: item.url,
+        name: item.name || item.label,
+        category: item.type,
+      }));
 
       const { error } = await supabase.from("calendar_events").insert({
         user_id: user.id,
@@ -234,7 +228,7 @@ export default function DressingRoomPage() {
         event_date: calendarDate,
         occasion: "casual",
         outfit_items: outfitItems,
-        notes: outfit.accessory_note || null,
+        notes: manualOutfitItems.map((i) => i.label).join(", "),
       });
 
       if (error) throw error;
@@ -242,7 +236,7 @@ export default function DressingRoomPage() {
       setShowCalendarModal(false);
       setCalendarDate("");
       setCalendarEventTitle("");
-      setManualOutfitForCalendar(null);
+      setManualOutfitItems([]);
     } catch (e: any) {
       toast.error(e.message || "Failed to add to calendar");
     } finally {
@@ -283,7 +277,6 @@ export default function DressingRoomPage() {
                     </div>
                   </div>
                   <div className="grid grid-cols-3 gap-2 overflow-y-auto flex-1 content-start pr-1 custom-scrollbar">
-                    {console.log('[DRESSING-ROOM] gallery catalogItems count:', catalogItems.length, catalogItems.map(i => i.id))}
                     {catalogItems.map((item) => {
                       return (
                         <div
