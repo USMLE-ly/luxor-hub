@@ -2,13 +2,11 @@
 # Start Flask backend via gunicorn in background (port 5000)
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
-if [ -d ".venv" ]; then
-  .venv/bin/gunicorn main:app --bind 0.0.0.0:5000 --workers 2 --timeout 120 &
-else
-  gunicorn main:app --bind 0.0.0.0:5000 --workers 2 --timeout 120 &
-fi
+
+echo "[STARTUP] Starting Flask backend on port 5000..."
+gunicorn main:app --bind 0.0.0.0:5000 --workers 2 --timeout 120 &
 FLASK_PID=$!
-echo "[STARTUP] Flask backend started (PID=$FLASK_PID) on port 5000"
+echo "[STARTUP] Flask backend started (PID=$FLASK_PID)"
 
 # Start Vite dev server in foreground
 cd "$SCRIPT_DIR/luxor-hub" && npm run dev -- --host 0.0.0.0 --port 5173
