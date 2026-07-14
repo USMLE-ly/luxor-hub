@@ -68,11 +68,11 @@ export default function DressingRoomPage() {
           .eq("user_id", user.id)
           .order("created_at", { ascending: false });
         if (data && data.length > 0) {
-          syncCatalogItems(data.map((item: any) => ({
+          syncCatalogItems(data.map((item: { id: string; name: string | null; category: string | null; color: string | null; image_url: string | null }) => ({
             id: item.id,
             name: item.name || "Unnamed",
             src: item.image_url || "/placeholder.svg",
-            category: (item.category || "top") as any,
+            category: (["top","bottom","accessory"].includes(item.category || "") ? item.category : "top") as "top" | "bottom" | "accessory",
             imageUrl: item.image_url || undefined,
             color: item.color || undefined,
           })));
@@ -111,7 +111,7 @@ export default function DressingRoomPage() {
 
       const data = await res.json();
       // Strip 'for' key from API response if present (causes ".for is not iterable" crash)
-      if (data && typeof data === 'object') { delete (data as any).for; }
+      if (data && typeof data === "object" && "for" in data) { delete data.for; }
       if (!data.success) throw new Error(data.error || "Generation failed");
 
       setDisplayProgress(95);
