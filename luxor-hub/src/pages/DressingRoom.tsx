@@ -89,6 +89,8 @@ export default function DressingRoomPage() {
   const [displayProgress, setDisplayProgress] = useState(0);
   const [progressStage, setProgressStage] = useState("");
   const [showOccasionModal, setShowOccasionModal] = useState(false);
+  const [availableOutfitCount, setAvailableOutfitCount] = useState<number | null>(null);
+  const [isLoadingAvailability, setIsLoadingAvailability] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [lastOccasion, setLastOccasion] = useState("");
   const cal = useCalendarActions();
@@ -154,11 +156,31 @@ export default function DressingRoomPage() {
     setShowOccasionModal(true);
   };
 
-  const handleOccasionSelect = (occasionId: string) => {
+  const handleOccasionSelect = async (occasionId: string) => {
     setShowOccasionModal(false);
     setLastOccasion(occasionId);
-    // Directly generate up to 3 outfits — the API decides how many based on closet stock
-    generateOutfits(occasionId, 3);
+    // Check how many outfits are available before generating
+    setIsLoadingAvailability(true);
+    try {
+      const api = getApiUrl();
+      const res = await fetch(api + "/api/v1/check-availability", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ occasion: occasionId, user_id: user?.id }),
+      });
+      const data = await res.json();
+      const count = data.maxOutfits || data.available || 0;
+      if (count > 0) {
+        setAvailableOutfitCount(Math.min(count, 5));
+      } else {
+        toast.error("No outfits available for this occasion. Try adding more clothes.");
+      }
+    } catch {
+      // Fallback: if the endpoint doesn't exist, default to 3
+      setAvailableOutfitCount(3);
+    } finally {
+      setIsLoadingAvailability(false);
+    }
   };
 
 
@@ -332,16 +354,22 @@ export default function DressingRoomPage() {
                   </div>
                 )}
               </div>
-              {/* Generate Button — fixed at bottom */}
-              <div className="absolute bottom-6 left-0 right-0 flex justify-center px-4 z-10">
+              {/* Buttons — fixed at bottom, side by side */}
+              <div className="absolute bottom-4 left-4 right-4 z-50 flex flex-row gap-2">
                 <button
                   onClick={handleGenerateClick}
                   disabled={isGenerating}
-                  className="w-full py-3 rounded-full bg-gradient-to-r from-[#E8C87A] to-[#E8C87A]/80 text-zinc-900 text-xs font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-40"
+                  className="flex-1 py-3 rounded-full bg-gradient-to-r from-[#E8C87A] to-[#E8C87A]/80 text-zinc-900 text-xs font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-40"
                 >
                   Generate
                 </button>
-
+                <button
+                  onClick={handleDismiss}
+                  disabled={isGenerating}
+                  className="flex-1 py-3 rounded-full bg-zinc-700/80 text-zinc-300 text-xs font-medium shadow-lg border border-zinc-600/50 hover:bg-zinc-600/80 transition-colors disabled:opacity-40"
+                >
+                  Dismiss
+                </button>
               </div>
             </div>
             </div>
@@ -435,6 +463,74 @@ export default function DressingRoomPage() {
                 >
                   Cancel
                 </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ---- Availability Chooser Modal ---- */}
+        <AnimatePresence>
+          {availableOutfitCount !== null && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+              onClick={() => setAvailableOutfitCount(null)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-zinc-800 border border-zinc-700/50 rounded-2xl p-6 max-w-[300px] w-full mx-4 shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h3 className="text-white text-center font-medium mb-1">Available Outfits</h3>
+                <p className="text-zinc-400 text-center text-sm mb-4">
+                  We found <span className="text-amber-400 font-semibold">{availableOutfitCount}</span> outfit{availableOutfitCount !== 1 ? "s" : ""} for this occasion. How many do you want?
+                </p>
+                <div className="flex justify-center gap-3">
+                  {Array.from({ length: availableOutfitCount }, (_, i) => i + 1).map((count) => (
+                    <button
+                      key={count}
+                      onClick={() => {
+                        generateOutfits(lastOccasion, count);
+                        setAvailableOutfitCount(null);
+                      }}
+                      className="w-12 h-12 rounded-full bg-gradient-to-r from-[#E8C87A]/20 to-amber-500/20 border border-amber-400/30 hover:border-amber-400/60 hover:bg-amber-400/20 text-amber-300 text-sm font-medium transition-all"
+                    >
+                      {count}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setAvailableOutfitCount(null)}
+                  className="w-full mt-4 py-2 text-zinc-500 text-xs hover:text-zinc-300 transition-colors"
+                >
+                  Cancel
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ---- Loading Availability Indicator ---- */}
+        <AnimatePresence>
+          {isLoadingAvailability && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-zinc-800 border border-zinc-700/50 rounded-2xl p-6 max-w-[260px] w-full mx-4 shadow-2xl text-center"
+              >
+                <div className="w-10 h-10 mx-auto mb-3 rounded-full border-2 border-amber-400/30 border-t-amber-400 animate-spin" />
+                <p className="text-zinc-300 text-sm">Analyzing your closet...</p>
               </motion.div>
             </motion.div>
           )}
