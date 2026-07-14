@@ -36,6 +36,7 @@ interface WardrobeState {
   setOccasionResult: (result: OccasionResult | null) => void;
   setIsCalculatingOccasion: (loading: boolean) => void;
   resetClosetData: () => void;
+  syncCatalogItems: (items: ClothingItem[]) => void;
 }
 
 // ── Store ──────────────────────────────────────────────────
@@ -96,6 +97,8 @@ export const useWardrobeStore = create<WardrobeState>()(
       setActiveOccasion: (occasion) => set({ activeOccasion: occasion }),
       setOccasionResult: (result) => set({ occasionResult: result }),
       setIsCalculatingOccasion: (loading) => set({ isCalculatingOccasion: loading }),
+
+      syncCatalogItems: (items) => set({ catalogItems: items }),
 
       resetClosetData: () => {
         // NUCLEAR: Remove persisted state FIRST so persist middleware can't re-save stale data

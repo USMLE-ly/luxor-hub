@@ -84,6 +84,21 @@ const categoryMap: Record<string, { label: string; categories: string[] }> = {
   "Full Outfits": { label: "Full Outfits", categories: ["full_outfit"] },
 };
 
+/** Map a Closet page item to a Zustand ClothingItem for the DressingRoom gallery */
+function toWardrobeItem(item: ClothingItem) {
+  const cat = item.category?.toLowerCase() || "top";
+  const zustandCat: Category = (["top", "outerwear"].includes(cat) ? "top"
+    : ["bottom", "shoes"].includes(cat) ? "bottom"
+    : "accessory") as Category;
+  return {
+    id: item.id,
+    name: item.name || "Unnamed",
+    category: zustandCat,
+    src: "",
+    imageUrl: item.photo_url || undefined,
+  };
+}
+
 // Map closet categories to mannequin categories
 const closetToMannequinCategory: Record<string, string> = {
   top: "tops",
@@ -146,6 +161,7 @@ const Closet = () => {
   const addCustomClothing = useWardrobeStore((s) => s.addCustomClothing);
   const removeClothing = useWardrobeStore((s) => s.removeClothing);
   const clearOutfit = useWardrobeStore((s) => s.clearOutfit);
+  const syncCatalogItems = useWardrobeStore((s) => s.syncCatalogItems);
   const wardrobeSelected = useWardrobeStore((s) => s.selected);
   const catalogItems = useWardrobeStore((s) => s.catalogItems);
 
@@ -332,6 +348,8 @@ const Closet = () => {
         const mapped = await fetchItems();
         if (mounted) {
           setItems(mapped);
+          // Bridge: push fetched items into Zustand so DressingRoom sees them
+          syncCatalogItems(mapped.map(toWardrobeItem));
           clearTimeout(forceTimeout);
           setLoading(false);
         }
@@ -745,6 +763,7 @@ const Closet = () => {
         localStorage.removeItem('luxor-wardrobe');
       } catch {}
       useWardrobeStore.getState().resetClosetData();
+      syncCatalogItems([]);
       console.log('[CLOSET] resetClosetData called. Store state:', useWardrobeStore.getState().catalogItems.length, 'items left');
 
       // 6. Reset mount flag so mannequin_state doesn't re-restore immediately
