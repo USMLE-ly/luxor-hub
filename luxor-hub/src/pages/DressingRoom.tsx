@@ -114,14 +114,17 @@ export default function DressingRoomPage() {
       setProgressStage(`Generating ${count} ${occasion} outfits...`);
 
       const api = getApiUrl();
-
-      const res = await fetch(api + "/api/v1/generate-outfits", {
+      const genUrl = api + "/api/v1/generate-outfits";
+      console.log("[DR] Generating outfits:", genUrl, { occasion, count, user_id: user.id });
+      const res = await fetch(genUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ occasion, count, user_id: user.id }),
       });
 
+      console.log("[DR] Generate response status:", res.status);
       const data = await res.json();
+      console.log("[DR] Generate response:", data?.success, "images:", data?.images?.length);
       // Strip 'for' key from API response if present (causes ".for is not iterable" crash)
       if (data && typeof data === "object" && "for" in data) { delete data.for; }
       if (!data.success) throw new Error(data.error || "Generation failed");
@@ -179,7 +182,9 @@ export default function DressingRoomPage() {
         ...item,
         category: item.rawCategory || item.category,
       }));
-      const res = await fetch(api + "/api/v1/check-availability", {
+      const fetchUrl = api + "/api/v1/check-availability";
+      console.log("[DR] Fetching availability:", fetchUrl, "items:", itemsForBackend.length);
+      const res = await fetch(fetchUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -190,6 +195,7 @@ export default function DressingRoomPage() {
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
+      console.log("[DR] Availability response:", data);
       const count = data.maxOutfits || 0;
       if (count > 0) {
         setAvailableOutfitCount(Math.min(count, 5));
