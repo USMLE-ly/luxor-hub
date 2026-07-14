@@ -15,6 +15,7 @@ import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, addM
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { getOutfitFingerprint, getStyleTip } from "@/lib/calendarHelpers";
+import { insertCalendarEvent, insertCalendarEvents, deleteCalendarEvent, updateEventOutfit } from "@/lib/calendarService";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -422,7 +423,7 @@ const OutfitCalendarInner = () => {
   };
 
   const deleteEvent = async (id: string) => {
-    const { error } = await supabase.from("calendar_events").delete().eq("id", id);
+    const { error } = await deleteCalendarEvent(id);
     if (error) toast.error("Failed to delete");
     else { toast.success("Event removed"); fetchEvents(); }
   };
@@ -1209,7 +1210,7 @@ const OutfitCalendarInner = () => {
                             setDragIdx(null);
                             const updatedEvents = events.map(e => e.id === ev.id ? { ...e, outfit_items: newItems } : e);
                             setEvents(updatedEvents);
-                            await supabase.from("calendar_events").update({ outfit_items: newItems as any }).eq("id", ev.id);
+                            await updateEventOutfit(ev.id, newItems);
                           };
                           // Compact 3-row layout: Top / Bottom+Accessory / Shoes
                           return (

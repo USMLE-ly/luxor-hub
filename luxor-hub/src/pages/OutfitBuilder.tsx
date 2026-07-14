@@ -4,6 +4,7 @@ import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { useClosetItems } from "@/hooks/useClosetItems";
 import { supabase } from "@/integrations/supabase/client";
+import { insertOutfit } from "@/lib/outfitService";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -135,12 +136,15 @@ const OutfitBuilder = () => {
     }
     setSaving(true);
     try {
-      const { data, error } = await supabase.from("outfits").insert({
+      const { data, error } = await insertOutfit({
         user_id: user.id,
         name: outfitName || `My Outfit ${new Date().toLocaleDateString()}`,
         description: `Custom outfit with ${canvasItems.length} items`,
-        ai_generated: false,
-      }).select().single();
+        mannequin_items: canvasItems,
+        is_favorite: false,
+      });
+
+      if (error) throw new Error(error);
 
       if (error) throw error;
 

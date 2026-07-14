@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { countOutfits, fetchRecentOutfits } from "@/lib/outfitService";
 import {TShirt, MagicWand, ArrowRight, Heart, Palette, Scissors, Eye, ShoppingBag, ArrowSquareOut, Check, Gift, Calendar, Briefcase, Confetti, Sun, CaretRight, TrendUp, Snowflake, Barbell, WarningCircle, } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { GradientButton } from "@/components/ui/gradient-button";
@@ -167,11 +167,11 @@ const Dashboard = () => {
           itemsRes, outfitsRes, profileRes, styleRes, closetRes, outfitsListRes, allItemsRes
         ] = await Promise.all([
           supabase.from("clothing_items").select("id", { count: "exact", head: true }).eq("user_id", user.id),
-          supabase.from("outfits").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+          countOutfits(user.id),
           supabase.from("profiles").select("display_name").eq("user_id", user.id).single(),
           supabase.from("style_profiles").select("onboarding_completed, archetype, style_score, preferences").eq("user_id", user.id).single(),
           supabase.from("clothing_items").select("id, photo_url, name, category, color").eq("user_id", user.id).order("created_at", { ascending: false }).limit(12),
-          supabase.from("outfits").select("id, name, occasion").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
+          fetchRecentOutfits(user.id, 6),
           supabase.from("clothing_items").select("category, color").eq("user_id", user.id),
         ]);
         
@@ -242,7 +242,7 @@ const Dashboard = () => {
       const colorSeason = styleProfile.preferences?.aiAnalysis?.colorSeason || "Autumn";
       const [shopRes, outfitsRes] = await Promise.all([
         supabase.functions.invoke("shop-products", { body: { colorSeason, category: "all" } }),
-        supabase.from("outfits").select("id, name, occasion").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
+        fetchRecentOutfits(user.id, 6),
       ]);
       if (shopRes.data?.products) setShopProducts(shopRes.data.products.slice(0, 6));
       if (outfitsRes.data) {
