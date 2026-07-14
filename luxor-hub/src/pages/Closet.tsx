@@ -739,8 +739,13 @@ const Closet = () => {
       // 4. Update local state
       setItems([]);
 
-      // 5. Wipe Zustand store + localStorage
+      // 5. Nuclear: kill localStorage BEFORE Zustand to prevent persist rehydration
+      try {
+        localStorage.removeItem('luxor-wardrobe');
+        localStorage.removeItem('luxor-wardrobe');
+      } catch {}
       useWardrobeStore.getState().resetClosetData();
+      console.log('[CLOSET] resetClosetData called. Store state:', useWardrobeStore.getState().catalogItems.length, 'items left');
 
       // 6. Reset mount flag so mannequin_state doesn't re-restore immediately
       MANNEQUIN_STATE_LOADED.current = false;

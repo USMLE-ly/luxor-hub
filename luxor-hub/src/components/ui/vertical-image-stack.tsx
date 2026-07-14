@@ -7,6 +7,20 @@ interface StackImage {
   name: string;
 }
 
+function ImageWithFallback({ src, alt }: { src: string; alt: string }) {
+  const [errored, setErrored] = useState(false);
+  const finalSrc = errored || !src ? "/placeholder.svg" : src;
+  return (
+    <img
+      src={finalSrc}
+      alt={alt}
+      className="absolute inset-0 w-full h-full object-contain p-2"
+      draggable={false}
+      onError={() => { if (!errored) setErrored(true); }}
+    />
+  );
+}
+
 export function VerticalImageStack({ images = [] }: { images: StackImage[] }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const lastNavTime = useRef(0);
@@ -59,12 +73,7 @@ export function VerticalImageStack({ images = [] }: { images: StackImage[] }) {
             onDragEnd={handleDragEnd}
           >
             <div className="relative w-[180px] aspect-[3/4] overflow-hidden rounded-xl bg-zinc-800 shadow-2xl ring-1 ring-white/10">
-              <img
-                src={image.src || "/placeholder.svg"}
-                alt={image.name || "Clothing item"}
-                className="absolute inset-0 w-full h-full object-contain p-2"
-                draggable={false}
-              />
+              <ImageWithFallback src={image.src} alt={image.name || "Clothing item"} />
               <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/70 to-transparent">
                 <p className="text-white text-[10px] font-medium truncate">{image.name}</p>
               </div>

@@ -244,6 +244,7 @@ export default function DressingRoomPage() {
                     <button onClick={clearOutfit} className="text-[10px] bg-zinc-800 hover:bg-zinc-700 px-2 py-1 rounded text-zinc-300 transition-colors">Clear</button>
                   </div>
                   <div className="grid grid-cols-3 gap-2 overflow-y-auto flex-1 content-start pr-1 custom-scrollbar">
+                    {console.log('[DRESSING-ROOM] gallery catalogItems count:', catalogItems.length, catalogItems.map(i => i.id))}
                     {catalogItems.map((item) => {
                       const isActive = selected[item.category as keyof typeof selected] === item.id;
                       return (

@@ -98,11 +98,18 @@ export const useWardrobeStore = create<WardrobeState>()(
       setIsCalculatingOccasion: (loading) => set({ isCalculatingOccasion: loading }),
 
       resetClosetData: () => {
+        // NUCLEAR: Remove persisted state FIRST so persist middleware can't re-save stale data
+        try {
+          localStorage.removeItem("luxor-wardrobe");
+          localStorage.removeItem("luxor-wardrobe");
+        } catch {}
+        // Now clear in-memory state
         set({
           catalogItems: [],
           selected: { top: null, bottom: null, accessory: null },
+          activeOccasion: null,
+          occasionResult: null,
         });
-        localStorage.removeItem("luxor-wardrobe");
       },
     }),
     {
