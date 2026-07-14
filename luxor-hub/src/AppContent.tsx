@@ -53,6 +53,7 @@ const DeepDive = React.lazy(() => import("./pages/DeepDive"));
 import { ClassicLoader } from "@/components/ui/loader";
 const DressingRoom = React.lazy(() => import("./pages/DressingRoom"));
 const StyleRecommendations = React.lazy(() => import("./pages/StyleRecommendations"));
+const UserAnalysis = React.lazy(() => import("./pages/UserAnalysis"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
 
 const RouteTracker = () => {
@@ -134,6 +135,7 @@ const AppContent = () => {
             <Route path="/deep-dive" element={<DeepDive />} />
             <Route path="/dressing-room" element={<PaywallGate><DressingRoom /></PaywallGate>} />
             <Route path="/style-recommendations" element={<PaywallGate><StyleRecommendations /></PaywallGate>} />
+            <Route path="/user-analysis" element={<PaywallGate><UserAnalysis /></PaywallGate>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
             </motion.div>
