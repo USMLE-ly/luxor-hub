@@ -13,7 +13,6 @@ import { StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import {CalendarDots, Check} from "@phosphor-icons/react";
 import { notifyEvent } from "@/lib/notificationService";
-import { LiquidGlassCard } from "@/components/ui/liquid-notification";
 import { supabase } from "@/integrations/supabase/client";
 import { humanizeTextArray } from "@/lib/humanizer";
 import { VerticalImageStack } from "@/components/ui/vertical-image-stack";
@@ -348,14 +347,23 @@ export default function DressingRoomPage() {
                   </div>
                 )}
               </div>
-              {/* Generate Button — fixed at bottom */}
-              <div className="absolute bottom-6 left-0 right-0 flex justify-center px-4 z-10">
+              {/* Generate + Dismiss Buttons — fixed at bottom */}
+              <div className="absolute bottom-6 left-0 right-0 flex gap-2 px-4 z-10">
                 <button
                   onClick={handleGenerateClick}
-                  className="w-full py-3.5 rounded-full bg-gradient-to-r from-[#E8C87A] to-[#E8C87A]/80 text-zinc-900 text-sm font-medium shadow-lg hover:shadow-xl transition-all"
+                  disabled={isGenerating}
+                  className="flex-1 py-3 rounded-full bg-gradient-to-r from-[#E8C87A] to-[#E8C87A]/80 text-zinc-900 text-xs font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-40"
                 >
-                  Generate Outfit
+                  Generate
                 </button>
+                {generatedImages.length > 0 && (
+                  <button
+                    onClick={handleDismiss}
+                    className="flex-1 py-3 rounded-full bg-zinc-800/60 backdrop-blur-sm text-zinc-400 text-xs font-medium border border-zinc-700/50 hover:bg-zinc-700/60 hover:text-zinc-300 transition-all"
+                  >
+                    Dismiss
+                  </button>
+                )}
               </div>
             </div>
 
@@ -365,30 +373,20 @@ export default function DressingRoomPage() {
           {/* Three Bottom Notifications — Stylist Reasoning (below iPhone) */}
           <AnimatePresence>
             {showNotifications && activeOutfit && activeOutfit.stylist_reasoning && activeOutfit.stylist_reasoning.length > 0 && (
-              <StaggerContainer staggerDelay={0.12} className="flex flex-col gap-2 w-full max-w-[340px]">
+              <StaggerContainer staggerDelay={0.12} className="flex flex-col items-center gap-2 w-full max-w-[320px] mx-auto">
                 {activeOutfit.stylist_reasoning.slice(0, 3).map((note: string, i: number) => (
                   <StaggerItem key={i}>
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.7, y: [-30,-50,-70][i] }}
+                    initial={{ opacity: 0, scale: 0.7, y: [-20,-40,-60][i] }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.7 }}
                     transition={{ type: "spring", stiffness: 100, damping: 25 }}
-                    className="flex justify-center origin-center"
+                    className="w-full"
                   >
-                    <LiquidGlassCard
-                      width="320px"
-                      height="80px"
-                      borderRadius="20px"
-                      blurIntensity="xl"
-                      glowIntensity="sm"
-                      shadowIntensity="md"
-                      draggable={true}
-                      expandable={true}
-                    >
-                      <div className="flex flex-col justify-center px-5 py-3 h-full">
-                        <p className="text-sm text-foreground/90 leading-relaxed line-clamp-2">{note}</p>
-                      </div>
-                    </LiquidGlassCard>
+                    <div className="w-full p-4 rounded-2xl bg-zinc-800/40 backdrop-blur-md border border-zinc-700/30 shadow-lg relative transition-all hover:bg-zinc-800/60">
+                      <div className="absolute left-0 top-3 bottom-3 w-1 bg-gradient-to-b from-[#E8C87A] to-amber-600 rounded-full" />
+                      <p className="pl-3 text-sm text-zinc-300 leading-relaxed line-clamp-2">{note}</p>
+                    </div>
                   </motion.div>
                   </StaggerItem>
                 ))}
@@ -397,25 +395,16 @@ export default function DressingRoomPage() {
                 {activeOutfit.accessory_note && (
                   <StaggerItem>
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.7, y: -90 }}
+                    initial={{ opacity: 0, scale: 0.7, y: -60 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.7 }}
                     transition={{ type: "spring", stiffness: 100, damping: 25 }}
-                    className="flex justify-center origin-center"
+                    className="w-full"
                   >
-                    <LiquidGlassCard
-                      width="320px"
-                      height="56px"
-                      borderRadius="20px"
-                      blurIntensity="xl"
-                      glowIntensity="xs"
-                      shadowIntensity="sm"
-                      draggable={false}
-                    >
-                      <div className="flex items-center px-5 py-3 h-full">
-                        <p className="text-xs text-amber-200/80 leading-relaxed">{activeOutfit.accessory_note}</p>
-                      </div>
-                    </LiquidGlassCard>
+                    <div className="w-full p-3 rounded-2xl bg-zinc-800/30 backdrop-blur-md border border-amber-800/30 shadow-md relative transition-all hover:bg-zinc-800/50">
+                      <div className="absolute left-0 top-2.5 bottom-2.5 w-1 bg-gradient-to-b from-amber-400 to-amber-600 rounded-full" />
+                      <p className="pl-3 text-xs text-amber-200/80 leading-relaxed">{activeOutfit.accessory_note}</p>
+                    </div>
                   </motion.div>
                   </StaggerItem>
                 )}
