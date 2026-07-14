@@ -751,7 +751,6 @@ const Closet = () => {
       // 5. Nuclear: kill localStorage BEFORE Zustand to prevent persist rehydration
       try {
         localStorage.removeItem('luxor-wardrobe');
-        localStorage.removeItem('luxor-wardrobe');
       } catch {}
       useWardrobeStore.getState().resetClosetData();
       syncCatalogItems([]);

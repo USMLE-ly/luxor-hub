@@ -66,7 +66,7 @@ export const useWardrobeStore = create<WardrobeState>()(
         })),
 
       clearOutfit: () =>
-        set({ selected: { top: null, bottom: null, accessory: null } }),
+        set({ selected: { top: null, bottom: null, accessory: null }, selectedItems: [] }),
 
       addCustomClothing: (item) =>
         set((state) => {
@@ -90,6 +90,7 @@ export const useWardrobeStore = create<WardrobeState>()(
             bottom: state.selected.bottom === id ? null : state.selected.bottom,
             accessory: state.selected.accessory === id ? null : state.selected.accessory,
           },
+          selectedItems: state.selectedItems.filter((i) => i !== id)
         })),
 
       updateClothingSrc: (id, src) =>
@@ -117,7 +118,6 @@ export const useWardrobeStore = create<WardrobeState>()(
       resetClosetData: () => {
         // NUCLEAR: Remove persisted state FIRST so persist middleware can't re-save stale data
         try {
-          localStorage.removeItem("luxor-wardrobe");
           localStorage.removeItem("luxor-wardrobe");
         } catch {}
         // Now clear in-memory state
