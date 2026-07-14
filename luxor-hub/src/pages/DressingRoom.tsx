@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { useWardrobeStore } from "@/store/useWardrobeStore";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,6 +13,7 @@ import { notifyEvent } from "@/lib/notificationService";
 import { supabase } from "@/integrations/supabase/client";
 import { humanizeTextArray } from "@/lib/humanizer";
 import { VerticalImageStack } from "@/components/ui/vertical-image-stack";
+import { useCalendarActions } from "@/hooks/useCalendarActions";
 import { ErrorBoundary } from "@/components/app/ErrorBoundary";
 
 /* ------------------------------------------------------------------ */
@@ -28,6 +30,7 @@ const OCCASIONS = [
 
 export default function DressingRoomPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const [generatedImages, setGeneratedImages] = useState<OutfitImages[]>([]);
 
@@ -85,12 +88,9 @@ export default function DressingRoomPage() {
   const [displayProgress, setDisplayProgress] = useState(0);
   const [progressStage, setProgressStage] = useState("");
   const [showOccasionModal, setShowOccasionModal] = useState(false);
-  const [showCalendarModal, setShowCalendarModal] = useState(false);
-  const [calendarDate, setCalendarDate] = useState("");
-  const [calendarEventTitle, setCalendarEventTitle] = useState("");
-  const [postingToCalendar, setPostingToCalendar] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [lastOccasion, setLastOccasion] = useState("");
+  const cal = useCalendarActions();
 
   /* ---------- Generate Outfit ---------- */
   const generateOutfits = async (occasion: string, count: number) => {
@@ -199,65 +199,8 @@ export default function DressingRoomPage() {
   }, [isGenerating, activeOutfit]);
 
   
-  // Send manually selected outfit to calendar
-  const [manualOutfitItems, setManualOutfitItems] = useState<{ url: string; type: string; label: string; name?: string }[]>([]);
 
-  const handleSendManualToCalendar = () => {
-    if (selectedItems.length === 0) {
-      toast.error("Select at least one item first");
-      return;
-    }
-    const outfitItems = selectedItems
-      .map((id) => {
-        const item = catalogItems.find((c) => c.id === id);
-        if (!item) return null;
-        return { url: item.imageUrl || "/placeholder.svg", type: item.category, label: item.name || "Item", name: item.name };
-      })
-      .filter(Boolean) as { url: string; type: string; label: string; name?: string }[];
 
-    if (outfitItems.length === 0) {
-      toast.error("Selected items have no images");
-      return;
-    }
-
-    setManualOutfitItems(outfitItems);
-    setCalendarDate(new Date().toISOString().split("T")[0]);
-    setCalendarEventTitle("");
-    setShowCalendarModal(true);
-  };
-
-  const handlePostToCalendarFinal = async () => {
-    if (!user || manualOutfitItems.length === 0 || !calendarDate) return;
-    setPostingToCalendar(true);
-    try {
-      // Store ALL items as { photo_url, name, category } so the Calendar can resolve them
-      const outfitItems = manualOutfitItems.map((item) => ({
-        photo_url: item.url,
-        name: item.name || item.label,
-        category: item.type,
-      }));
-
-      const { error } = await supabase.from("calendar_events").insert({
-        user_id: user.id,
-        title: calendarEventTitle || "Dressing Room Outfit",
-        event_date: calendarDate,
-        occasion: lastOccasion || "casual",
-        outfit_items: outfitItems,
-        notes: manualOutfitItems.map((i) => i.label).join(", "),
-      });
-
-      if (error) throw error;
-      toast.success("Outfit added to calendar!");
-      setShowCalendarModal(false);
-      setCalendarDate("");
-      setCalendarEventTitle("");
-      setManualOutfitItems([]);
-    } catch (e: any) {
-      toast.error(e.message || "Failed to add to calendar");
-    } finally {
-      setPostingToCalendar(false);
-    }
-  };
 
   return (
     <ErrorBoundary fallbackMessage="The Dressing Room hit an error. Try refreshing the page.">
@@ -287,7 +230,7 @@ export default function DressingRoomPage() {
                   <div className="flex justify-between items-center shrink-0">
                     <span className="text-xs font-medium text-zinc-400">Select from Closet</span>
                     <div className="flex gap-1">
-                      <button onClick={handleSendManualToCalendar} disabled={selectedItems.length === 0} title="Send to Calendar" className="text-[10px] bg-amber-900/50 hover:bg-amber-800/50 px-2 py-1 rounded text-amber-300 transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1"><CalendarDots className="w-3 h-3" />Calendar</button>
+                      <button onClick={() => cal.openForManualSelection(lastOccasion)} disabled={selectedItems.length === 0} title="Send to Calendar" className="text-[10px] bg-amber-900/50 hover:bg-amber-800/50 px-2 py-1 rounded text-amber-300 transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1"><CalendarDots className="w-3 h-3" />Calendar</button>
                       <button onClick={() => { clearSelectedItems(); clearOutfit(); }} className="text-[10px] bg-zinc-800 hover:bg-zinc-700 px-2 py-1 rounded text-zinc-300 transition-colors">Clear</button>
                     </div>
                   </div>
@@ -322,8 +265,20 @@ export default function DressingRoomPage() {
                         </div>
                       );
                     })}
-                    {catalogItems.length === 0 && (
-                      <p className="col-span-3 text-[10px] text-zinc-600 text-center py-4">No items in closet</p>
+                    {catalogItems.length === 0 && user && (
+                      <>
+                        {Array.from({ length: 6 }).map((_, i) => (
+                          <div key={i} className="aspect-square rounded-xl bg-zinc-800/50 animate-pulse" />
+                        ))}
+                      </>
+                    )}
+                    {catalogItems.length === 0 && !user && (
+                      <div className="col-span-3 flex flex-col items-center gap-2 py-4">
+                        <p className="text-[10px] text-zinc-600 text-center">Sign in to see your closet</p>
+                        <button onClick={() => navigate("/auth")} className="text-[10px] px-3 py-1 rounded-full bg-amber-900/50 text-amber-300 hover:bg-amber-800/50 transition-colors">
+                          Sign In
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -343,10 +298,20 @@ export default function DressingRoomPage() {
               <div className="flex-1 flex flex-col rounded-[2.75rem] bg-zinc-900 overflow-hidden">
                 {isGenerating ? (
                   <div className="flex-1 flex flex-col items-center justify-center">
-                    <div className="relative w-16 h-16 mb-3">
-                      <div className="absolute inset-0 rounded-full border-2 border-zinc-700" />
-                      <div className="absolute inset-0 rounded-full border-2 border-amber-200 border-t-transparent animate-spin" />
-                      <span className="absolute inset-0 flex items-center justify-center text-xs font-medium text-amber-200">{displayProgress}%</span>
+                    <div className="relative w-20 h-20 mb-3">
+                      <svg className="w-20 h-20 -rotate-90" viewBox="0 0 80 80">
+                        <circle cx="40" cy="40" r="34" fill="none" stroke="rgb(63,63,70)" strokeWidth="4" />
+                        <circle
+                          cx="40" cy="40" r="34" fill="none"
+                          stroke="rgb(232,200,122)"
+                          strokeWidth="4"
+                          strokeLinecap="round"
+                          strokeDasharray={`${2 * Math.PI * 34}`}
+                          strokeDashoffset={`${2 * Math.PI * 34 * (1 - displayProgress / 100)}`}
+                          style={{ transition: "stroke-dashoffset 0.3s ease" }}
+                        />
+                      </svg>
+                      <span className="absolute inset-0 flex items-center justify-center text-sm font-semibold text-amber-200">{displayProgress}%</span>
                     </div>
                     <p className="text-xs text-zinc-400 text-center px-4">{progressStage}</p>
                   </div>
@@ -356,17 +321,7 @@ export default function DressingRoomPage() {
                     onGenerate={handleGenerateClick}
                     onDismiss={handleDismiss}
                     onAddToCalendar={(outfit) => {
-                      if (outfit) {
-                        // Convert OutfitImages to manualOutfitItems so handlePostToCalendarFinal can save them
-                        const items: { url: string; type: string; label: string; name?: string }[] = [];
-                        if (outfit.top) items.push({ url: outfit.top, type: "top", label: "Top", name: "Top" });
-                        if (outfit.mid) items.push({ url: outfit.mid, type: "mid", label: "Mid", name: "Mid" });
-                        if (outfit.bottom) items.push({ url: outfit.bottom, type: "bottom", label: "Bottom", name: "Bottom" });
-                        setManualOutfitItems(items);
-                        setCalendarDate(new Date().toISOString().split("T")[0]);
-                        setCalendarEventTitle("");
-                        setShowCalendarModal(true);
-                      }
+                      if (outfit) cal.openForAiOutfit(outfit, lastOccasion);
                     }}
                     isLoading={isGenerating}
                     onOutfitChange={setActiveOutfit}
@@ -487,13 +442,13 @@ export default function DressingRoomPage() {
 
         {/* ---- Calendar Date Picker Modal ---- */}
         <AnimatePresence>
-          {showCalendarModal && (
+          {cal.showCalendarModal && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-50 flex items-center justify-center bg-forest/60 backdrop-blur-sm"
-              onClick={() => setShowCalendarModal(false)}
+              onClick={() => cal.closeModal()}
             >
               <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
@@ -513,8 +468,8 @@ export default function DressingRoomPage() {
                       type="text"
                       id="calendarEventTitle"
                       name="calendarEventTitle"
-                      value={calendarEventTitle}
-                      onChange={(e) => setCalendarEventTitle(e.target.value)}
+                      value={cal.calendarEventTitle}
+                      onChange={(e) => cal.setCalendarEventTitle(e.target.value)}
                       placeholder="e.g., Casual Friday Outfit"
                       autoComplete="off"
                       className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-amber-400/50 placeholder:text-white/30"
@@ -526,30 +481,30 @@ export default function DressingRoomPage() {
                       type="date"
                       id="calendarDate"
                       name="calendarDate"
-                      value={calendarDate}
-                      onChange={(e) => setCalendarDate(e.target.value)}
+                      value={cal.calendarDate}
+                      onChange={(e) => cal.setCalendarDate(e.target.value)}
                       autoComplete="date"
                       className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-amber-400/50"
                     />
                   </div>
                   <div className="flex gap-3 pt-2">
                     <button
-                      onClick={() => setShowCalendarModal(false)}
+                      onClick={() => cal.closeModal()}
                       className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-white/60 hover:text-white hover:bg-white/5 transition-all text-sm"
                     >
                       Cancel
                     </button>
                     <button
-                      onClick={handlePostToCalendarFinal}
-                      disabled={!calendarDate || postingToCalendar}
+                      onClick={() => cal.saveToCalendar(lastOccasion)}
+                      disabled={!cal.calendarDate || cal.postingToCalendar}
                       className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-900 font-semibold text-sm hover:scale-[1.02] transition-transform disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                      {postingToCalendar ? (
+                      {cal.postingToCalendar ? (
                         <span className="inline-block w-4 h-4 border-2 border-slate-900/30 border-t-slate-900 rounded-full animate-spin" />
                       ) : (
                         <Check className="w-4 h-4" />
                       )}
-                      {postingToCalendar ? "Adding..." : "Add to Calendar"}
+                      {cal.postingToCalendar ? "Adding..." : "Add to Calendar"}
                     </button>
                   </div>
                 </div>

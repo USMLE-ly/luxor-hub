@@ -65,11 +65,12 @@ const DOMINO_DELAY = 150;
 /* ------------------------------------------------------------------ */
 /*  Preload a single image URL into browser cache                      */
 /* ------------------------------------------------------------------ */
-const preloadImage = (url: string): Promise<void> => {
+const preloadImage = (url: string | undefined | null): Promise<void> => {
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => resolve();
     img.onerror = () => resolve(); // Don't hang UI on broken image
+    if (!url) { resolve(); return; }
     img.src = url;
   });
 };
@@ -181,6 +182,7 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
         setSectionBgColors(prev => ({ ...prev, [sectionKey]: bgColor }));
       };
       img.onerror = () => {}; // ignore
+    if (!url) { resolve(); return; }
       img.src = url;
     });
 
