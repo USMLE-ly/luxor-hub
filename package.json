@@ -3,10 +3,10 @@
   "private": true,
   "scripts": {
     "build": "sh build.sh",
-    "dev": "cd luxor-hub && npm install && npm run dev",
+    "dev": "cd luxor-hub && npm run dev",
     "preview": "cd luxor-hub && npm run preview",
-    "build:dev": "npm --prefix luxor-hub install --no-audit --no-fund && npm --prefix luxor-hub exec -- vite build --mode development",
-    "dev2": "npm --prefix luxor-hub run dev"
+    "build:dev": "cd luxor-hub && npm install --no-audit --no-fund && npx vite build --mode development",
+    "dev2": "cd luxor-hub && npm run dev"
   },
   "dependencies": {}
 }
