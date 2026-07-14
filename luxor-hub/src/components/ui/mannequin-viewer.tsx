@@ -274,7 +274,6 @@ function ClothingInner({
   const { rootGroup, skeleton, hipsBone, mannequinHeight } =
     useContext(MannequinContext);
   const clonedRef = useRef<THREE.Object3D | null>(null);
-  const helperRef = useRef<THREE.BoxHelper | null>(null);
 
   // Last-resort guard: if src somehow passed validation but is still an image, bail
   if (src.startsWith("data:image")) {
@@ -289,7 +288,6 @@ function ClothingInner({
   useEffect(() => {
     let cancelled = false;
     let retryTimer: ReturnType<typeof setTimeout> | null = null;
-    let helperRemoveTimer: ReturnType<typeof setTimeout> | null = null;
     let attempts = 0;
     const MAX_ATTEMPTS = 50; // 10 seconds
 
@@ -298,17 +296,6 @@ function ClothingInner({
         disposeClonedObject(clonedRef.current);
         clonedRef.current.parent?.remove(clonedRef.current);
         clonedRef.current = null;
-      }
-      if (helperRef.current) {
-        helperRef.current.geometry?.dispose();
-        const mat = (helperRef.current.material as THREE.LineBasicMaterial);
-        if (mat && typeof mat.dispose === "function") mat.dispose();
-        helperRef.current.parent?.remove(helperRef.current);
-        helperRef.current = null;
-      }
-      if (helperRemoveTimer) {
-        clearTimeout(helperRemoveTimer);
-        helperRemoveTimer = null;
       }
     }
 
@@ -520,23 +507,6 @@ function ClothingInner({
         }
       });
 
-      // Green debug wireframe (BoxHelper) with 10s timeout
-      try {
-        const helper = new THREE.BoxHelper(cloned, 0x00ff00);
-        helperRef.current = helper;
-        rootGroup.add(helper);
-        helperRemoveTimer = setTimeout(() => {
-          if (helperRef.current) {
-            helperRef.current.geometry?.dispose();
-            const mat = helperRef.current.material as THREE.LineBasicMaterial;
-            if (mat && typeof mat.dispose === "function") mat.dispose();
-            helperRef.current.parent?.remove(helperRef.current);
-            helperRef.current = null;
-          }
-        }, 10000);
-      } catch (e) {
-        console.error(`[CLOTHING] ${itemKey} BoxHelper error:`, e);
-      }
 
         `[CLOTHING] ${itemKey} ADDED TO SCENE rootChildren=${rootGroup.children.length}`
       );

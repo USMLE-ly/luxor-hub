@@ -17,6 +17,7 @@ import { LiquidGlassCard } from "@/components/ui/liquid-notification";
 import { supabase } from "@/integrations/supabase/client";
 import { humanizeTextArray } from "@/lib/humanizer";
 import { VerticalImageStack } from "@/components/ui/vertical-image-stack";
+import { ErrorBoundary } from "@/components/app/ErrorBoundary";
 
 /* ------------------------------------------------------------------ */
 /*  Constants                                                          */
@@ -183,39 +184,6 @@ export default function DressingRoomPage() {
   }, [isGenerating, activeOutfit]);
 
   
-  const handlePostToCalendar = async () => {
-    if (!user || !activeOutfit || !calendarDate) return;
-    setPostingToCalendar(true);
-    try {
-      const outfitType = activeOutfit.type || 'regular';
-      const outfitItems = [
-        { url: activeOutfit.top, type: "top", label: "Top" },
-        { url: activeOutfit.mid, type: "mid", label: "Mid" },
-        { url: activeOutfit.bottom, type: "bottom", label: "Bottom" },
-      ].filter(item => item.url);
-      
-      const { error } = await supabase.from("calendar_events").insert({
-        user_id: user.id,
-        title: calendarEventTitle || "Dressing Room Outfit",
-        event_date: calendarDate,
-        occasion: "casual",
-        outfit_items: outfitItems,
-        notes: activeOutfit.accessory_note || null,
-      });
-      
-      if (error) throw error;
-      toast.success("Outfit added to calendar!");
-      setShowCalendarModal(false);
-      setCalendarDate("");
-      setCalendarEventTitle("");
-    } catch (e: any) {
-      toast.error(e.message || "Failed to add to calendar");
-    } finally {
-      setPostingToCalendar(false);
-    }
-  };
-
-
   // Send manually selected outfit to calendar
   const [manualOutfitForCalendar, setManualOutfitForCalendar] = useState<OutfitImages | null>(null);
 
@@ -283,6 +251,7 @@ export default function DressingRoomPage() {
   };
 
   return (
+    <ErrorBoundary fallbackMessage="The Dressing Room hit an error. Try refreshing the page.">
     <AppLayout>
       <ScrollReveal delay={0.1}>
       <div className="p-4 md:p-8 mx-auto max-w-5xl space-y-4 overflow-x-hidden pb-32">
@@ -635,5 +604,6 @@ export default function DressingRoomPage() {
       </div>
       </ScrollReveal>
     </AppLayout>
+    </ErrorBoundary>
   );
 }

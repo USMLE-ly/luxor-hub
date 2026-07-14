@@ -175,15 +175,15 @@ const Closet = () => {
       .filter(Boolean);
   }, [wardrobeSelected, catalogItems]);
 
-  // ── Auto-spawn: generate dummy 3D if item has no src ──
+  // ── Auto-spawn: generate dummy 3D for any wearing item missing src ──
   useEffect(() => {
-    const firstItem = currentlyWearing[0];
-    if (!firstItem || (firstItem.src && firstItem.src.length > 5)) {
-      return;
-    }
+    const itemsNeedingSrc = currentlyWearing.filter((item) => !item.src || item.src.length <= 5);
+    if (itemsNeedingSrc.length === 0) return;
     const timer = setTimeout(() => {
-      handleGenerateDummy(firstItem.id, firstItem.category);
-      toast.info("Auto-generated 3D placeholder. Use 📸 Image or + File to assign your own model.");
+      itemsNeedingSrc.forEach((item) => {
+        handleGenerateDummy(item.id, item.category);
+      });
+      toast.info(`Auto-generated 3D placeholder${itemsNeedingSrc.length > 1 ? "s" : ""} for ${itemsNeedingSrc.length} item(s).`);
     }, 1200);
     return () => clearTimeout(timer);
   }, [currentlyWearing]);
@@ -690,8 +690,9 @@ const Closet = () => {
   };
   const handleClearAll = async () => {
     if (!user) return;
+    let loadingToast: string | number | undefined;
     try {
-      toast.loading("Clearing closet...");
+      loadingToast = toast.loading("Clearing closet...");
 
       // 0. Get the user's Supabase access_token for backend-proxied deletion
       let accessToken = "";
@@ -762,7 +763,7 @@ const Closet = () => {
       // 6. Reset mount flag so mannequin_state doesn't re-restore immediately
       MANNEQUIN_STATE_LOADED.current = false;
 
-      toast.dismiss();
+      if (loadingToast) toast.dismiss(loadingToast);
       if (!backendOk) {
         toast.success("Items cleared from this view. They will reappear on refresh if the server couldn't clear them. Use the 'Force Clear' option if needed.");
       } else {
@@ -773,7 +774,7 @@ const Closet = () => {
       // No page reload needed — state already updated above
     } catch (err: any) {
       console.error("[CLOSET] Clear all error:", err);
-      toast.dismiss();
+      if (loadingToast) toast.dismiss(loadingToast);
       toast.error(err.message || "Failed to clear items");
     }
   };
