@@ -1,11 +1,8 @@
 run = "bash start.sh"
 language = "python3"
 
-[agent]
-expertMode = true
-
 [nix]
-channel = "stable-23_11"
+channel = "stable-24_11"
 packages = ["nodejs_20", "python311", "python311Packages.pip"]
 
 [[ports]]
