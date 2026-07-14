@@ -1,15 +1,8 @@
-import { useEffect, useState, useMemo } from "react";
+import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+import { useClosetItems } from "@/hooks/useClosetItems";
 import {WarningCircle, TShirt, Palette, ShoppingBag, Check} from "@phosphor-icons/react";
 
-interface ClothingItem {
-  id: string;
-  name: string | null;
-  category: string;
-  color: string | null;
-}
 
 const ESSENTIAL_CATEGORIES = [
   { key: "top", label: "Tops", icon: "👕" },
@@ -24,21 +17,7 @@ const CORE_COLORS = ["black", "white", "navy", "gray", "grey", "beige", "brown",
 const ACCENT_COLORS = ["red", "green", "yellow", "pink", "orange", "purple", "burgundy"];
 
 export function WardrobeGapAnalysis() {
-  const { user } = useAuth();
-  const [items, setItems] = useState<ClothingItem[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!user) return;
-    (async () => {
-      const { data } = await supabase
-        .from("clothing_items")
-        .select("id, name, category, color")
-        .eq("user_id", user.id);
-      setItems(data || []);
-      setLoading(false);
-    })();
-  }, [user]);
+  const { items, loading } = useClosetItems({ columns: "id, name, category, color" });
 
   const analysis = useMemo(() => {
     const catCounts = new Map<string, number>();
