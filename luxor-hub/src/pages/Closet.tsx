@@ -133,8 +133,12 @@ const seasons = ["spring", "summer", "fall", "winter", "all-season"];
 
 type MannequinPanel = "dna" | "pose" | "trace" | "measure" | null;
 
+type GarmentFit = "regular" | "slim" | "relaxed";
+type FabricType = "default" | "cotton" | "silk" | "denim" | "wool" | "leather";
+
 const Closet = () => {
   const { user } = useAuth();
+  const modulesRef = useRef<Awaited<ReturnType<typeof loadMannequinModules>> | null>(null);
   // Pre-load 3D modules in background on mount
   useEffect(() => { loadMannequinModules().then(m => { modulesRef.current = m; }); }, []);
   const { handleError } = useErrorHandler();
