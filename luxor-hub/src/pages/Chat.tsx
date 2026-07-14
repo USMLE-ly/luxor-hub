@@ -1,5 +1,13 @@
 import { useState, useEffect, useRef } from "react";
-import { canProceed } from "@/lib/rateLimiter";
+// Simple cooldown — replaces deleted rateLimiter.ts
+const lastCalls: Record<string, number> = {};
+function canProceed(key: string, cooldownMs: number = 3000): boolean {
+  const now = Date.now();
+  const last = lastCalls[key];
+  if (last && now - last < cooldownMs) return false;
+  lastCalls[key] = now;
+  return true;
+}
 import { usePlanTier } from "@/hooks/usePlanTier";
 import { PLAN_LIMITS } from "@/lib/planRestrictions";
 import { motion, AnimatePresence } from "framer-motion";

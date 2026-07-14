@@ -89,11 +89,7 @@ interface OutfitReview {
   honest_summary: string;
 }
 
-const apiBase = import.meta.env.VITE_API_URL || import.meta.env.VITE_PUBLIC_API_URL || "";
-
-function getApiUrl(): string {
-  return getApiUrl();
-}
+import { getApiUrl } from "@/lib/api";
 
 export default function StyleRecommendationsPage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
