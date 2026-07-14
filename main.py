@@ -2728,6 +2728,96 @@ def outfit_review():
         _log.error("[STYLE] Error: %s", exc, exc_info=True)
         return jsonify({"success": False, "error": f"Review failed: {str(exc)[:100]}"}), 500
 
+
+@app.route("/api/v1/check-availability", methods=["POST", "OPTIONS"], strict_slashes=False)
+def check_availability():
+    if request.method == "OPTIONS":
+        return "", 204
+    try:
+        data = request.get_json(silent=True) or {}
+        occasion = data.get("occasion", "casual")
+        user_id = data.get("user_id", "")
+        closet_items = data.get("closetItems", [])
+        _log.info("[AVAIL] Checking availability for %s (user=%s)", occasion, user_id or "anon")
+        
+        # Load items from Qdrant (or local JSON fallback)
+        if not closet_items:
+            try:
+                closet_items = qdrant_get_all_items(user_id=user_id)
+            except Exception:
+                pass
+        if not closet_items:
+            try:
+                with open(_LOCAL_CLOSET_FILE, "r") as f:
+                    closet_items = json.load(f)
+                    if not isinstance(closet_items, list):
+                        closet_items = []
+                    if user_id:
+                        closet_items = [i for i in closet_items if i.get("user_id") == user_id]
+            except (FileNotFoundError, json.JSONDecodeError):
+                pass
+        
+        if not closet_items:
+            return jsonify({"success": True, "maxOutfits": 0, "categories": {}}), 200
+        
+        # Categorize items
+        def _cat(item):
+            t = (item.get("type") or item.get("category") or "").lower().strip()
+            tops_kw = ("top","shirt","blouse","t-shirt","tshirt","camisole","tank","sweater","hoodie","cardigan","blazer","vest","bodysuit","crop top","tube top","halter","jacket","coat","outerwear")
+            bottoms_kw = ("bottom","pants","jeans","trousers","shorts","skirt","leggings","chinos","cargo","culottes","palazzo")
+            shoes_kw = ("shoes","footwear","sneakers","boots","sandals","heels","flats","loafers","oxfords","mules","wedges","slides")
+            dress_kw = ("dress","gown","jumpsuit","romper","sundress","maxi dress","mini dress","midi dress")
+            acc_kw = ("accessory","bag","purse","belt","hat","scarf","jewelry","watch","sunglasses","earrings","necklace","bracelet","ring","wallet","backpack","tote","clutch","headband","gloves")
+            if t in tops_kw or t == "top" or t == "outerwear": return "top"
+            if t in bottoms_kw or t == "bottom": return "bottom"
+            if t in shoes_kw or t == "shoes": return "shoes"
+            if t in dress_kw or t == "dress": return "dress"
+            if t in acc_kw or t == "accessory": return "accessory"
+            label = (item.get("label","")+" "+item.get("name","")+" "+t).lower()
+            for kws,res in [
+                (("jacket","coat","blazer","hoodie","cardigan","vest"),"top"),
+                (("shirt","blouse","t-shirt","tee","tank","sweater","polo","top"),"top"),
+                (("pants","jeans","trousers","shorts","skirt","leggings","bottom"),"bottom"),
+                (("shoes","sneakers","boots","sandals","heels","flats","shoe"),"shoes"),
+                (("dress","gown","jumpsuit","romper","sundress"),"dress"),
+                (("bag","purse","belt","hat","scarf","jewelry","watch"),"accessory"),
+            ]:
+                if any(kw in label for kw in kws): return res
+            return "other"
+        
+        tops = [i for i in closet_items if _cat(i) == "top"]
+        bottoms = [i for i in closet_items if _cat(i) == "bottom"]
+        shoes = [i for i in closet_items if _cat(i) == "shoes"]
+        dresses = [i for i in closet_items if _cat(i) == "dress"]
+        accessories = [i for i in closet_items if _cat(i) == "accessory"]
+        other = [i for i in closet_items if _cat(i) == "other"]
+        
+        # Max outfits = min of essential categories (top + bottom + shoes)
+        # Dresses count as both top AND bottom
+        total_tops = len(tops) + len(dresses)
+        total_bottoms = len(bottoms) + len(dresses)
+        max_outfits = min(total_tops, total_bottoms, len(shoes)) if len(shoes) > 0 else min(total_tops, total_bottoms)
+        # Clamp to reasonable max
+        max_outfits = min(max_outfits, 10)
+        
+        _log.info("[AVAIL] Items: %d tops, %d bottoms, %d shoes, %d dresses, %d acc — max=%d",
+                  len(tops), len(bottoms), len(shoes), len(dresses), len(accessories), max_outfits)
+        
+        return jsonify({
+            "success": True,
+            "maxOutfits": max_outfits,
+            "categories": {
+                "tops": len(tops),
+                "bottoms": len(bottoms),
+                "shoes": len(shoes),
+                "dresses": len(dresses),
+                "accessories": len(accessories),
+            }
+        }), 200
+    except Exception as exc:
+        _log.error("[AVAIL] Error: %s", exc, exc_info=True)
+        return jsonify({"success": False, "maxOutfits": 0, "error": str(exc)[:200]}), 500
+
 @app.route("/api/v1/generate-outfits", methods=["POST", "OPTIONS"], strict_slashes=False)
 def generate_outfits():
     if request.method == "OPTIONS":

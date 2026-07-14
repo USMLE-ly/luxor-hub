@@ -159,25 +159,30 @@ export default function DressingRoomPage() {
   const handleOccasionSelect = async (occasionId: string) => {
     setShowOccasionModal(false);
     setLastOccasion(occasionId);
-    // Check how many outfits are available before generating
     setIsLoadingAvailability(true);
     try {
       const api = getApiUrl();
+      const currentCloset = useWardrobeStore.getState().catalogItems;
       const res = await fetch(api + "/api/v1/check-availability", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ occasion: occasionId, user_id: user?.id }),
+        body: JSON.stringify({
+          occasion: occasionId,
+          user_id: user?.id,
+          closetItems: currentCloset,
+        }),
       });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      const count = data.maxOutfits || data.available || 0;
+      const count = data.maxOutfits || 0;
       if (count > 0) {
         setAvailableOutfitCount(Math.min(count, 5));
       } else {
-        toast.error("No outfits available for this occasion. Try adding more clothes.");
+        toast.info("No outfits available for this occasion. Try adding more clothes.");
       }
-    } catch {
-      // Fallback: if the endpoint doesn't exist, default to 3
-      setAvailableOutfitCount(3);
+    } catch (e) {
+      console.error("[DR] Availability check failed:", e);
+      toast.error("Could not check availability. Try again.");
     } finally {
       setIsLoadingAvailability(false);
     }
