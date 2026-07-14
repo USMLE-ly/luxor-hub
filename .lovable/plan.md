@@ -1,95 +1,84 @@
 
-# Luxor stabilization plan
+# User Analysis Profile page
 
-## What we are (and aren't) doing
+The uploaded zips are Figma/Sketch UX-Research templates (the `.sketch` extracts to a Persona card + Customer Journey framework). I'll port that framework into a new **User Analysis** page inside LUXOR, styled in our B&W + gold system, populated from the user's real data across onboarding, style DNA, closet, dressing room, analyses, chat, and calendar.
 
-- **NOT** replacing Supabase with Qdrant. Qdrant is a vector DB with no auth/RLS/storage. Supabase stays as the source of truth for users, closet, outfits, calendar, storage, subscriptions.
-- **Qdrant is added alongside** for semantic similarity only (dedupe closet uploads, "find similar", style matching).
-- Wiping is scoped to **your user account's rows + photos** — everything else is untouched.
-- GitHub sync is automatic once your repo is connected via (+) → GitHub. No manual push step.
+## Entry point
+- Add an icon button (User + magnifying glass) in the Closet header/actions row, next to the mannequin controls.
+- Route: `/user-analysis`. Gated by `PaywallGate` and `isReady`.
 
----
+## Page structure (mirrors the sketch template)
 
-## Step 0 — Fix the failing build (blocking)
+**1. Persona hero card**
+- Left: avatar (profile photo or generated silhouette), display name, age range, gender, location, plan tier, "member since".
+- Right pull-quote: their strongest style statement (derived from Style DNA archetype + top mood).
+- ABOUT block: 3-sentence auto-written bio from onboarding + activity.
 
-`package.json` at project root is missing the `build:dev` script Lovable's CI expects. Add:
+**2. Identity grid** (data table, right column of the persona)
+- Age range, height, body shape, face shape, size range/build, budget band, profession, lifestyle, brand tier preference.
 
-```json
-"build:dev": "vite build --mode development"
-```
+**3. Needs / Frustrations / Goals / Product-fit**
+- NEEDS: from `styleGoal` + `elevateStyle`.
+- FRUSTRATIONS: from `styleChallenge` + `shoppingExperience`.
+- GOALS: from `styleMood` + goal answers.
+- HOW LUXOR HELPS: mapped to features they've used most.
 
-No other package changes.
+**4. Personality sliders** (Introvert↔Extrovert, Sensing↔Intuition, Thinking↔Feeling, Judging↔Perceiving, plus a fashion axis: Classic↔Experimental, Minimal↔Maximal, Practical↔Expressive)
+- Values derived deterministically from onboarding choices + council/chat tone + analysis history.
 
----
+**5. Current feelings tag cloud**
+- Chips like Confident / Curious / Playful / Refined — pulled from `styleMood` and recent chat sentiment.
 
-## Step 1 — Diagnose closet-disappears + new-tab-logout (evidence first)
+**6. Style DNA panel**
+- Primary archetype, secondary archetype, color season, dominant palette swatches (from `style_profiles` / `outfit_analyses.colors`), signature silhouettes.
 
-Run Playwright against the preview to get facts before changing code:
+**7. Activity KPIs** (skeleton loaders + empty states)
+- Outfits analyzed count, avg style score, best score, favorite category mix (Elegant / Casual / Streetwear / Formal / Athleisure — computed from `outfit_analyses.category` and `outfits.occasion`), items in closet, looks generated in Dressing Room, calendar plans, chat sessions, council deliberations, weekly-challenge entries, badges earned, streak.
 
-1. Log in, upload one clothing photo, wait for "saved" state.
-2. Query `clothing_items` for my `user_id` — did the row actually land? Check `clothing-photos` bucket for the file.
-3. Read `localStorage` keys (`sb-*-auth-token`, `luxor_paid`, any closet caches) and `document.cookie`.
-4. Open a second tab to `luxor.ly`, screenshot: am I logged out? Is the `sb-*-auth-token` key present?
-5. Wait / re-visit after refresh, compare state.
+**8. Customer Journey timeline** (the sketch's core artifact, adapted to a style journey)
+- Steps: Signed up → Onboarding → First closet upload → First analysis → First dressing-room look → First planned outfit → Council session → Today.
+- Rows per step: Action, Thinking (auto-summary), Feeling (mini bar), Opportunity (what LUXOR should suggest next).
 
-Expected root causes (to be confirmed by the run):
+**9. Recommendations for you**
+- 3 concrete next actions computed from gaps (e.g., "Log wears — you plan but rarely check in", "Try Council on your Friday looks").
 
-- **A. localStorage-only writes:** closet upload path may set state + localStorage but not insert into `clothing_items`. When Brave clears localStorage, items vanish.
-- **B. Auth race:** `AppLayout` reads `user` before `getSession()` resolves, RLS returns nothing, UI shows empty and redirects to `/auth` on new tab.
-- **C. Storage partitioning:** `preview--*.lovable.app` and `luxor.ly` are different origins, so a session on one doesn't exist on the other. Expected behavior — will explain, not "fix".
+## Data sources (read-only aggregation)
+- `profiles`, `style_profiles`
+- `clothing_items` (counts by category/color)
+- `outfit_analyses` (score, category, colors, occasion)
+- `outfits` + `outfit_items` + `wear_logs`
+- `dressing_room_looks`
+- `calendar_events`
+- `chat_messages`, `council_conversations`
+- `user_badges`, `style_points`, `challenge_entries`
+- Onboarding answers already persisted on `style_profiles` / localStorage.
 
-## Step 2 — Fix persistence + auth-race
+All queries scoped to `auth.uid()`; no schema changes needed (RLS already in place).
 
-Based on Step 1 findings, apply the minimum set of these:
+## Files to add
+- `luxor-hub/src/pages/UserAnalysis.tsx` — the page.
+- `luxor-hub/src/components/analysis/PersonaHero.tsx`
+- `luxor-hub/src/components/analysis/IdentityGrid.tsx`
+- `luxor-hub/src/components/analysis/NeedsFrustrations.tsx`
+- `luxor-hub/src/components/analysis/PersonalitySliders.tsx`
+- `luxor-hub/src/components/analysis/FeelingsCloud.tsx`
+- `luxor-hub/src/components/analysis/StyleDnaPanel.tsx`
+- `luxor-hub/src/components/analysis/ActivityKpis.tsx`
+- `luxor-hub/src/components/analysis/JourneyTimeline.tsx`
+- `luxor-hub/src/components/analysis/NextActions.tsx`
+- `luxor-hub/src/lib/userAnalysis.ts` — pure aggregation + personality-slider math (deterministic).
 
-- Add `useAuthReady` hook (uses `getSession()` + `onAuthStateChange`, exposes `isReady`).
-- Gate `AppLayout` redirect and all data queries on `isReady`, not just `!loading`.
-- Audit every closet upload / outfit / calendar write path and ensure it inserts into Supabase before setting local state. Remove localStorage as a source of truth for closet items (keep it only as a warm cache keyed by `user.id`).
-- On mount after auth is ready, run a background reconciliation: pull `clothing_items` for the user and overwrite local cache.
-- `usePlanTier`: stop reading arbitrary strings from localStorage as tier; only trust the `subscriptions` table (localStorage kept as read-through cache only).
+## Files to edit
+- `luxor-hub/src/AppContent.tsx` — register `/user-analysis` route inside `PaywallGate`.
+- `luxor-hub/src/pages/Closet.tsx` — add the new icon button linking to `/user-analysis`.
 
-## Step 3 — Wipe your test data (scoped, reversible-in-schema)
+## Design
+- B&W surfaces, Cormorant Garamond headings, Josefin Sans body, gold hairline dividers and slider dots.
+- Framer Motion `fadeUp` + `staggerChildren`; respects `prefers-reduced-motion`.
+- `LoadingState` skeletons per section, `EmptyState` for users with no activity, `ErrorState` with retry per query.
 
-I will show you the exact SQL before running, targeting only `auth.uid() = <your user id>`:
+## Out of scope
+- No new tables, no new edge functions, no writes.
+- No sharing/export in v1 (can follow up).
 
-- Delete rows in `clothing_items`, `outfits`, `outfit_items`, `user_looks`, `saved_looks`, `dressing_room_looks`, `calendar_events`, `wear_logs`, `outfit_analyses`, `outfit_feedback`, `mood_board_items`, `mood_boards`, `chat_messages`, `council_conversations`, `fashion_designs`, `challenge_entries` — filtered to your `user_id`.
-- Delete storage objects in `clothing-photos/` and `look-photos/` under your user folder.
-- Leave `profiles`, `style_profiles`, `subscriptions`, auth intact so you don't have to re-onboard.
-
-## Step 4 — Add Qdrant alongside Supabase
-
-Store `QDRANT_URL` and `QDRANT_API_KEY` as Lovable Cloud secrets (backend-only, never in client bundle).
-
-New edge functions (thin wrappers around Qdrant REST API):
-- `qdrant-upsert-item` — called after a clothing_item insert; embeds the item's image/description and upserts a point tagged with `user_id` + `item_id`.
-- `qdrant-find-similar` — returns nearest-neighbor item ids for an input item; used by "find similar" and to warn on duplicate uploads.
-
-Collection: `luxor_closet_items`, cosine, filtered by `user_id` on every query. No PII stored in payload — only ids.
-
-## Step 5 — Calendar full-outfit view (layered composition, no AI cost)
-
-- Extract the dressing-room's layered composition renderer into a shared `<OutfitComposition items={...} />` component. Preserves current dressing-room look 1:1.
-- On the calendar cell + event detail, render `<OutfitComposition />` using items from `outfit_items` for the linked look, at appropriate sizes (thumbnail vs full).
-- No schema changes required; the calendar already links to outfits/looks.
-
-## Step 6 — Polish flip effects on the dressing room
-
-- Replace the current flip with a spring-based 3D transform (Framer Motion), correct `perspective`, `backface-visibility: hidden` on both faces, GPU-friendly `transform-gpu` + `will-change`.
-- Add subtle scale + shadow curve during flip. No layout changes; only motion feels better.
-
-## Step 7 — GitHub
-
-Lovable syncs to GitHub automatically once the repo is connected. If it isn't connected yet: (+) menu → GitHub → Connect project. Nothing for me to run.
-
----
-
-## Technical notes
-
-- Frontend files touched: `src/contexts/AuthContext.tsx` (add `isReady`), `src/hooks/useAuthReady.ts` (new), `src/components/app/AppLayout.tsx`, `src/hooks/usePlanTier.ts`, closet upload hook, dressing-room + calendar components, new `<OutfitComposition />`, `package.json`.
-- Backend: new edge functions `qdrant-upsert-item`, `qdrant-find-similar`; new secrets `QDRANT_URL`, `QDRANT_API_KEY`.
-- No migrations; no destructive schema change. Data wipe runs as a scoped `DELETE` after your approval.
-- After Step 1 diagnosis, Step 2's exact edits may narrow — I'll only change what the evidence shows is broken.
-
-## Execution order
-
-Step 0 → Step 1 (diagnose) → Step 2 (fix) → verify with Playwright → Step 3 (wipe, on your approval) → Step 4 (Qdrant) → Step 5 (calendar view) → Step 6 (flip polish).
+Confirm and I'll build it.
