@@ -40,10 +40,12 @@ export default function DressingRoomPage() {
   const selected = useWardrobeStore((s) => s.selected);
   const toggleClothing = useWardrobeStore((s) => s.toggleClothing);
   const clearOutfit = useWardrobeStore((s) => s.clearOutfit);
+  const toggleSelectedItem = useWardrobeStore((s) => s.toggleSelectedItem);
+  const selectedItems = useWardrobeStore((s) => s.selectedItems);
+  const clearSelectedItems = useWardrobeStore((s) => s.clearSelectedItems);
 
   const currentStackImages = useMemo(() => {
-    return Object.values(selected)
-      .filter((id): id is string => id !== null)
+    return selectedItems
       .map((id) => {
         const item = catalogItems.find((c) => c.id === id);
         if (!item) return null;
@@ -54,7 +56,7 @@ export default function DressingRoomPage() {
         };
       })
       .filter(Boolean) as { id: string; src: string; name: string }[];
-  }, [selected, catalogItems]);
+  }, [selectedItems, catalogItems]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeOutfit, setActiveOutfit] = useState<OutfitImages | null>(null);
   const [progressValue, setProgressValue] = useState(0);
@@ -241,16 +243,15 @@ export default function DressingRoomPage() {
                 <div className="h-[45%] bg-zinc-900 p-3 flex flex-col gap-2 overflow-hidden">
                   <div className="flex justify-between items-center shrink-0">
                     <span className="text-xs font-medium text-zinc-400">Select from Closet</span>
-                    <button onClick={clearOutfit} className="text-[10px] bg-zinc-800 hover:bg-zinc-700 px-2 py-1 rounded text-zinc-300 transition-colors">Clear</button>
+                    <button onClick={() => { clearSelectedItems(); clearOutfit(); }} className="text-[10px] bg-zinc-800 hover:bg-zinc-700 px-2 py-1 rounded text-zinc-300 transition-colors">Clear</button>
                   </div>
                   <div className="grid grid-cols-3 gap-2 overflow-y-auto flex-1 content-start pr-1 custom-scrollbar">
                     {console.log('[DRESSING-ROOM] gallery catalogItems count:', catalogItems.length, catalogItems.map(i => i.id))}
                     {catalogItems.map((item) => {
-                      const isActive = selected[item.category as keyof typeof selected] === item.id;
                       return (
                         <div
                           key={item.id}
-                          onClick={() => toggleClothing(item.category as Category, item.id)}
+                          onClick={() => toggleSelectedItem(item.id)}
                           className="relative aspect-square rounded-xl overflow-hidden cursor-pointer bg-zinc-800 hover:ring-2 hover:ring-zinc-500 transition-all"
                         >
                           {(item.imageUrl) ? (
@@ -268,7 +269,7 @@ export default function DressingRoomPage() {
                               {item.category === "top" ? "👕" : item.category === "bottom" ? "👖" : "👟"}
                             </div>
                           )}
-                          {isActive && (
+                          {selectedItems.includes(item.id) && (
                             <div className="absolute top-1 right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center border-2 border-zinc-900">
                               <span className="text-[10px] text-white font-bold">✓</span>
                             </div>

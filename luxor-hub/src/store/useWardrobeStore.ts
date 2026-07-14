@@ -37,6 +37,10 @@ interface WardrobeState {
   setIsCalculatingOccasion: (loading: boolean) => void;
   resetClosetData: () => void;
   syncCatalogItems: (items: ClothingItem[]) => void;
+  // Unlimited multi-select for DressingRoom
+  selectedItems: string[];
+  toggleSelectedItem: (id: string) => void;
+  clearSelectedItems: () => void;
 }
 
 // ── Store ──────────────────────────────────────────────────
@@ -49,6 +53,7 @@ export const useWardrobeStore = create<WardrobeState>()(
       activeOccasion: null,
       occasionResult: null,
       isCalculatingOccasion: false,
+      selectedItems: [],
 
       setGender: (gender) => set({ gender }),
 
@@ -100,6 +105,15 @@ export const useWardrobeStore = create<WardrobeState>()(
 
       syncCatalogItems: (items) => set({ catalogItems: items }),
 
+      toggleSelectedItem: (id) =>
+        set((state) => ({
+          selectedItems: state.selectedItems.includes(id)
+            ? state.selectedItems.filter((i) => i !== id)
+            : [...state.selectedItems, id],
+        })),
+
+      clearSelectedItems: () => set({ selectedItems: [] }),
+
       resetClosetData: () => {
         // NUCLEAR: Remove persisted state FIRST so persist middleware can't re-save stale data
         try {
@@ -110,6 +124,7 @@ export const useWardrobeStore = create<WardrobeState>()(
         set({
           catalogItems: [],
           selected: { top: null, bottom: null, accessory: null },
+          selectedItems: [],
           activeOccasion: null,
           occasionResult: null,
         });
@@ -121,6 +136,7 @@ export const useWardrobeStore = create<WardrobeState>()(
       partialize: (state) => ({
         gender: state.gender,
         selected: state.selected,
+        selectedItems: state.selectedItems,
         catalogItems: state.catalogItems.map(({ id, name, category, color, fit, fabric, imageUrl }) => ({
           id, name, category, color, fit, fabric, imageUrl,
         })),
