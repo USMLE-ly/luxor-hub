@@ -24,6 +24,8 @@ import type { FabricType } from "@/components/app/FabricMaterials";
 import { WardrobeIntelligence } from "@/components/app/WardrobeIntelligence";
 import { WardrobeGapAnalysis } from "@/components/app/WardrobeGapAnalysis";
 import { OccasionPicker } from "@/components/app/OccasionPicker";
+import { Link } from "react-router-dom";
+import { UserFocus } from "@phosphor-icons/react";
 
 /* Placeholder product images for empty closet sections */
 import imgCoatBelted from "@/assets/cal-f-coat-belted.jpg";
@@ -997,6 +999,15 @@ const Closet = () => {
               <span className="text-xs font-sans font-semibold text-muted-foreground bg-secondary px-3 py-1 rounded-full">
                 {items.length} ITEMS
               </span>
+              <Link
+                to="/user-analysis"
+                aria-label="User analysis"
+                title="User analysis"
+                className="text-xs font-sans font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full hover:bg-primary/20 transition-colors flex items-center gap-1"
+              >
+                <UserFocus className="w-3 h-3" />
+                Analysis
+              </Link>
               {items.length > 0 && (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
