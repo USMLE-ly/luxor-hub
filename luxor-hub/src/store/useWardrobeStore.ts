@@ -11,6 +11,8 @@ export interface ClothingItem {
   name: string;
   src: string; // blob: URL, file path (/models/...), or data URL
   category: Category;
+  /** Original Supabase category ("shoes", "dress", "full_outfit", etc.) preserved for backend API calls */
+  rawCategory?: string;
   // Extended fields for richer UI (Closet page)
   color?: string;
   fit?: string;
@@ -137,8 +139,8 @@ export const useWardrobeStore = create<WardrobeState>()(
         gender: state.gender,
         selected: state.selected,
         selectedItems: state.selectedItems,
-        catalogItems: state.catalogItems.map(({ id, name, category, color, fit, fabric, imageUrl }) => ({
-          id, name, category, color, fit, fabric, imageUrl,
+        catalogItems: state.catalogItems.map(({ id, name, category, rawCategory, color, fit, fabric, imageUrl }) => ({
+          id, name, category, rawCategory, color, fit, fabric, imageUrl,
         })),
       }),
       merge: (persistedState, currentState) => {

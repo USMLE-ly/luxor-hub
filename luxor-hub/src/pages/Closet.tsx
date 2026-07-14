@@ -93,7 +93,7 @@ const categoryMap: Record<string, { label: string; categories: string[] }> = {
 
 /** Map a Closet page item to a Zustand ClothingItem for the DressingRoom gallery */
 function toWardrobeItem(item: ClothingItem) {
-  const cat = item.category?.toLowerCase() || "top";
+  const cat = (item.category || "").toLowerCase();
   const zustandCat: Category = (["top", "outerwear"].includes(cat) ? "top"
     : ["bottom", "shoes"].includes(cat) ? "bottom"
     : "accessory") as Category;
@@ -101,6 +101,7 @@ function toWardrobeItem(item: ClothingItem) {
     id: item.id,
     name: item.name || "Unnamed",
     category: zustandCat,
+    rawCategory: item.category || undefined,
     src: "",
     imageUrl: item.photo_url || undefined,
   };

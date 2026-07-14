@@ -18,6 +18,12 @@ export default defineConfig(() => ({
     host: "0.0.0.0",
     port: parseInt(process.env.PORT || "8080", 10),
     hmr: { overlay: false },
+    proxy: {
+      "/api": {
+        target: process.env.VITE_API_URL || "http://localhost:5000",
+        changeOrigin: true,
+      },
+    },
   },
   plugins: [react()],
   resolve: {

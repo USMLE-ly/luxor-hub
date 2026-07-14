@@ -1,5 +1,5 @@
 import { getApiUrl } from "@/lib/api";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useWardrobeStore } from "@/store/useWardrobeStore";
 import { AppLayout } from "@/components/app/AppLayout";
@@ -58,8 +58,11 @@ export default function DressingRoomPage() {
 
   // ── Sync catalog items on mount if store is empty (race condition fix) ──
   const syncCatalogItems = useWardrobeStore((s) => s.syncCatalogItems);
+  const syncAttempted = useRef(false);
   useEffect(() => {
+    if (syncAttempted.current) return;
     if (catalogItems.length > 0 || !user?.id) return;
+    syncAttempted.current = true;
     const syncOnMount = async () => {
       try {
         const { data } = await supabase
@@ -68,14 +71,21 @@ export default function DressingRoomPage() {
           .eq("user_id", user.id)
           .order("created_at", { ascending: false });
         if (data && data.length > 0) {
-          syncCatalogItems(data.map((item: { id: string; name: string | null; category: string | null; color: string | null; image_url: string | null }) => ({
-            id: item.id,
-            name: item.name || "Unnamed",
-            src: item.image_url || "/placeholder.svg",
-            category: (["top","bottom","accessory"].includes(item.category || "") ? item.category : "top") as "top" | "bottom" | "accessory",
-            imageUrl: item.image_url || undefined,
-            color: item.color || undefined,
-          })));
+          syncCatalogItems(data.map((item: { id: string; name: string | null; category: string | null; color: string | null; image_url: string | null }) => {
+            const cat = (item.category || "").toLowerCase();
+            const zustandCat = (["top","outerwear"].includes(cat) ? "top"
+              : ["bottom","shoes"].includes(cat) ? "bottom"
+              : "accessory") as "top" | "bottom" | "accessory";
+            return {
+              id: item.id,
+              name: item.name || "Unnamed",
+              src: item.image_url || "/placeholder.svg",
+              category: zustandCat,
+              rawCategory: item.category || undefined,
+              imageUrl: item.image_url || undefined,
+              color: item.color || undefined,
+            };
+          }));
         }
       } catch (e) {
         console.warn("[DressingRoom] Failed to sync catalog on mount:", e);
@@ -163,13 +173,19 @@ export default function DressingRoomPage() {
     try {
       const api = getApiUrl();
       const currentCloset = useWardrobeStore.getState().catalogItems;
+      // Send items with rawCategory as the backend "category" field so
+      // the Python _cat() classifier can correctly detect shoes, dresses, etc.
+      const itemsForBackend = currentCloset.map((item) => ({
+        ...item,
+        category: item.rawCategory || item.category,
+      }));
       const res = await fetch(api + "/api/v1/check-availability", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           occasion: occasionId,
           user_id: user?.id,
-          closetItems: currentCloset,
+          closetItems: itemsForBackend,
         }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -282,7 +298,15 @@ export default function DressingRoomPage() {
                             draggable={false}
                           />
                           <div className="w-full h-full items-center justify-center text-zinc-600 text-lg hidden">
-                            {item.category === "top" ? "👕" : item.category === "bottom" ? "👖" : "👟"}
+                            {(() => {
+                                const rc = (item.rawCategory || item.category || "").toLowerCase();
+                                if (["shoes","sneakers","boots","sandals","heels","flats","footwear"].some(k => rc.includes(k))) return "👟";
+                                if (["dress","gown","jumpsuit","romper"].some(k => rc.includes(k))) return "👗";
+                                if (["bag","purse","belt","hat","scarf","jewelry","watch","sunglasses","accessory"].some(k => rc.includes(k))) return "👜";
+                                if (item.category === "top") return "👕";
+                                if (item.category === "bottom") return "👖";
+                                return "👕";
+                              })()}
                           </div>
                           {selectedItems.includes(item.id) && (
                             <div className="absolute top-1 right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center border-2 border-zinc-900">
