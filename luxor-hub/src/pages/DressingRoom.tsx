@@ -68,15 +68,12 @@ export default function DressingRoomPage() {
   const [calendarDate, setCalendarDate] = useState("");
   const [calendarEventTitle, setCalendarEventTitle] = useState("");
   const [postingToCalendar, setPostingToCalendar] = useState(false);
-  const [showCountModal, setShowCountModal] = useState(false);
-  const [selectedOccasion, setSelectedOccasion] = useState("");
   const [showNotifications, setShowNotifications] = useState(false);
 
   /* ---------- Generate Outfit ---------- */
   const generateOutfits = async (occasion: string, count: number) => {
     if (!user) return;
     setIsGenerating(true);
-    setDisplayProgress(0);
     setProgressStage("Consulting MiMo...");
     try {
       setProgressStage(`Generating ${count} ${occasion} outfits...`);
@@ -137,15 +134,12 @@ export default function DressingRoomPage() {
   };
 
   const handleOccasionSelect = (occasionId: string) => {
-    setSelectedOccasion(occasionId);
     setShowOccasionModal(false);
-    setShowCountModal(true);
+    // Directly generate up to 3 outfits — the API decides how many based on closet stock
+    generateOutfits(occasionId, 3);
   };
 
-  const handleCountSelect = (count: number) => {
-    setShowCountModal(false);
-    generateOutfits(selectedOccasion, count);
-  };
+
 
   const handleDismiss = () => {
     setGeneratedImages([] as OutfitImages[]);
@@ -334,6 +328,12 @@ export default function DressingRoomPage() {
                     onDismiss={handleDismiss}
                     onAddToCalendar={(outfit) => {
                       if (outfit) {
+                        // Convert OutfitImages to manualOutfitItems so handlePostToCalendarFinal can save them
+                        const items: { url: string; type: string; label: string; name?: string }[] = [];
+                        if (outfit.top) items.push({ url: outfit.top, type: "top", label: "Top", name: "Top" });
+                        if (outfit.mid) items.push({ url: outfit.mid, type: "mid", label: "Mid", name: "Mid" });
+                        if (outfit.bottom) items.push({ url: outfit.bottom, type: "bottom", label: "Bottom", name: "Bottom" });
+                        setManualOutfitItems(items);
                         setCalendarDate(new Date().toISOString().split("T")[0]);
                         setCalendarEventTitle("");
                         setShowCalendarModal(true);
@@ -544,57 +544,7 @@ export default function DressingRoomPage() {
           )}
         </AnimatePresence>
 
-        {/* ---- Count Modal ---- */}
-        
-        <AnimatePresence>
-          {showCountModal && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-forest/60 backdrop-blur-sm"
-              onClick={() => setShowCountModal(false)}
-            >
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-emerald/95 border border-white/10 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <h3 className="text-lg font-semibold text-white mb-4">How many outfits?</h3>
-                <p className="text-sm text-white/50 mb-4">Choose how many combinations to generate.</p>
-                <Perspective maxRotateX={8} maxRotateY={16} smoothing={0.08}>
-                  <div className="grid grid-cols-3 gap-3">
-                    {[1, 2, 3].map((num, idx) => {
-                      const countColors: Array<'red' | 'purple' | 'green'> = ['green', 'purple', 'red'];
-                      
-                      return (
-                        <button
-                          key={num}
-                          onClick={() => handleCountSelect(num)}
-                          className="flex flex-col items-center gap-2 p-4 rounded-xl border border-white/10 hover:border-amber-400/50 hover:bg-amber-400/10 transition-all"
-                        >
-                          <span className="text-2xl font-bold">
-                            <Highlight color={countColors[idx]}>{num}</Highlight>
-                          </span>
-                          <span className="text-xs text-white/60">Outfit{num > 1 ? 's' : ''}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </Perspective>
-                <button
-                  onClick={() => setShowCountModal(false)}
-                  className="w-full mt-4 py-2 text-sm text-white/50 hover:text-white transition-colors"
-                >
-                  Cancel
-                </button>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+        </div>
       </ScrollReveal>
     </AppLayout>
     </ErrorBoundary>
