@@ -15,6 +15,8 @@ import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { haptic } from "@/lib/haptics";
 import {Plus, MagnifyingGlass, TShirt, SlidersHorizontal, TrashSimple, UploadSimple, X, Spinner, Sparkle, CheckCircle, Camera, CaretRight, Sliders, Pulse, Eye, User, StackSimple, CalendarDots, Image, FloppyDisk, FolderOpen, Heart, Receipt, File, Upload} from "@phosphor-icons/react";
+import { useErrorHandler } from "@/hooks/useErrorHandler";
+import { useSearchFilter } from "@/hooks/useSearchFilter";
 import { useWardrobeStore, useWardrobeHydrated, restoreClothingFromIDB, type Category, type ClothingItem as WardrobeClothingItem } from "@/store/useWardrobeStore";
 import { resolve3DAsset, uploadAndAssignGLB, restoreAssetMappings } from "@/lib/assetResolver";
 import { generateDummyShirtGLB, generateDummyPantsGLB, generateDummyShoesGLB } from "@/lib/dummyGLBGenerator";
@@ -131,6 +133,7 @@ type MannequinPanel = "dna" | "pose" | "trace" | "measure" | null;
 
 const Closet = () => {
   const { user } = useAuth();
+  const { handleError } = useErrorHandler();
   const { tier } = usePlanTier();
   const itemLimit = PLAN_LIMITS[tier].closetItems;
   const [flatLayView, setFlatLayView] = useState(false);
@@ -138,8 +141,7 @@ const Closet = () => {
   const apiBase = getApiUrl();
 
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilter, setActiveFilter] = useState("All");
+
   const [uploadOpen, setUploadOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
@@ -162,6 +164,16 @@ const Closet = () => {
   const syncCatalogItems = useWardrobeStore((s) => s.syncCatalogItems);
   const wardrobeSelected = useWardrobeStore((s) => s.selected);
   const catalogItems = useWardrobeStore((s) => s.catalogItems);
+
+  const { query: searchQuery, setQuery: setSearchQuery, activeFilter, setActiveFilter, results: filtered } = useSearchFilter({
+    items,
+    searchFields: ["name", "brand", "color"],
+    filterFn: (item, tab) => {
+      if (tab === "All") return true;
+      const cats = categoryMap[tab]?.categories || [];
+      return cats.includes(item.category);
+    },
+  });
 
   // Derived: currently wearing (items where selected[category] matches)
   const currentlyWearing = useMemo(() => {
@@ -659,7 +671,7 @@ const Closet = () => {
       setSelectedFile(null); setPreviewUrl(null);
       const refreshed = await fetchItems();
       setItems(refreshed);
-    } catch (err: any) { console.error("[CLOSET-UPLOAD] Error:", err); toast.error(err.message); }
+    } catch (err) { handleError(err, "Upload failed"); }
     finally { setUploading(false); }
   };
 
@@ -767,10 +779,9 @@ const Closet = () => {
 
       // 4. Items have been cleared from Supabase + Qdrant + JSON
       // No page reload needed — state already updated above
-    } catch (err: any) {
-      console.error("[CLOSET] Clear all error:", err);
+    } catch (err) {
       if (loadingToast) toast.dismiss(loadingToast);
-      toast.error(err.message || "Failed to clear items");
+      handleError(err, "Failed to clear items");
     }
   };
 
@@ -940,16 +951,7 @@ const Closet = () => {
 
   const togglePanel = (p: MannequinPanel) => setActivePanel((prev) => (prev === p ? null : p));
 
-  // Filter items
-  const filtered = items.filter((item) => {
-    const matchesSearch = !searchQuery ||
-      item.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.brand?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.color?.toLowerCase().includes(searchQuery.toLowerCase());
-    if (activeFilter === "All") return matchesSearch;
-    const cats = categoryMap[activeFilter]?.categories || [];
-    return matchesSearch && cats.includes(item.category);
-  });
+
 
   const dnaSliders: { key: keyof BodyDNA; label: string }[] = [
     { key: "height", label: "Height" },
