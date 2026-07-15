@@ -1,5 +1,5 @@
 {
-  "name": "luxor-hub",
+  "name": "luxor-hub-root",
   "private": true,
   "scripts": {
     "dev": "cd luxor-hub && npm run dev",
