@@ -2,7 +2,6 @@
   "name": "luxor-hub",
   "private": true,
   "scripts": {
-    "build": "sh build.sh",
     "dev": "cd luxor-hub && npm run dev",
     "preview": "cd luxor-hub && npm run preview",
     "build:dev": "cd luxor-hub && npm install --no-audit --no-fund && npx vite build --mode development",
