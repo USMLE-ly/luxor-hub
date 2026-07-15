@@ -1,13 +1,9 @@
 /**
  * Returns the backend API base URL.
  *
- * - Local dev:   Vite proxy forwards /api → localhost:5000
- * - Production:  vite preview does NOT proxy, so we must hit Flask
- *                directly on port 5000 (Flask runs alongside Vite
- *                via start.sh → gunicorn).
- *
- * VITE_PUBLIC_API_URL is intentionally IGNORED in production because it
- * points to port 80 (Vite) which has no /api routes.
+ * - Local dev:     Vite proxy forwards /api → localhost:5000
+ * - Vercel (luxor.ly): empty string → relative /api paths → Vercel rewrites → Replit
+ * - Replit preview: direct to Flask on port 5000
  */
 export function getApiUrl(): string {
   // Explicit dev override
@@ -18,6 +14,12 @@ export function getApiUrl(): string {
     return "http://localhost:5000";
   }
 
-  // Production: talk directly to Flask on port 5000
-  return `${window.location.protocol}//${window.location.hostname}:5000`;
+  // Vercel (luxor.ly): use relative paths so Vercel rewrites proxy to Replit
+  // Replit: use direct port 5000
+  if (window.location.hostname.includes("replit.app")) {
+    return `${window.location.protocol}//${window.location.hostname}:5000`;
+  }
+
+  // Vercel / production: relative paths (empty string)
+  return "";
 }
