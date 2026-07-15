@@ -83,11 +83,6 @@ function MannequinProvider({ children }: { children: React.ReactNode }) {
 
   const register = useCallback(
     (next: Partial<Omit<MannequinCtx, "register">>) => {
-        hasRootGroup: !!next.rootGroup,
-        hasSkeleton: !!next.skeleton,
-        hasHipsBone: !!next.hipsBone,
-        mannequinHeight: next.mannequinHeight,
-      });
       setData((prev) => ({ ...prev, ...next }));
     },
     []
@@ -97,12 +92,6 @@ function MannequinProvider({ children }: { children: React.ReactNode }) {
     () => ({ ...data, register }),
     [data, register]
   );
-
-    hasRootGroup: !!data.rootGroup,
-    hasSkeleton: !!data.skeleton,
-    hasHipsBone: !!data.hipsBone,
-    mannequinHeight: data.mannequinHeight,
-  });
 
   return (
     <MannequinContext.Provider value={value}>
@@ -180,7 +169,8 @@ function MannequinModel() {
     const hipsBone = skeleton ? resolveHipsBone(skeleton) : null;
     const mannequinHeight = size.y || 1.8;
 
-      `[MANNEQUIN] Loaded: height=${mannequinHeight.toFixed(2)}, bones=${
+      console.log(`[MANNEQUIN] Loaded: height=${mannequinHeight.toFixed(2)}, bones=${
+
         skeleton?.bones?.length ?? 0
       }`
     );
@@ -221,19 +211,22 @@ function ClothingSlot({
     [catalogItems, itemId]
   );
 
-    `[CLOTHING] SLOT CHECK: category=${category} itemId=${itemId} item=${item?.name}`
+    console.log(`[CLOTHING] SLOT CHECK: category=${category} itemId=${itemId} item=${item?.name}`
+
   );
 
   // Strict validation: reject images, empty strings, and invalid paths
   if (!item?.src || !isValidModelSrc(item.src)) {
-      `[CLOTHING] SKIP ${item?.name ?? itemId} — src invalid: "${(
+      console.log(`[CLOTHING] SKIP ${item?.name ?? itemId} — src invalid: "${(
+
         item?.src || ""
       ).substring(0, 60)}"`
     );
     return null;
   }
 
-    `[CLOTHING] SLOT OK: ${item.name} src=${item.src.substring(0, 60)}...`
+    console.log(`[CLOTHING] SLOT OK: ${item.name} src=${item.src.substring(0, 60)}...`
+
   );
   return (
     <ClothingInner
@@ -329,7 +322,8 @@ function ClothingInner({
         return;
       }
 
-        `[CLOTHING] PROCESSING ${itemKey}: ${gltf.scene.children.length} children, rootGroup children=${rootGroup.children.length}`
+        console.log(`[CLOTHING] PROCESSING ${itemKey}: ${gltf.scene.children.length} children, rootGroup children=${rootGroup.children.length}`
+
       );
 
       // Cleanup previous instance before attaching a new one
@@ -367,7 +361,8 @@ function ClothingInner({
               }
               const ratio =
                 clothBoneNames.size > 0 ? overlap / clothBoneNames.size : 0;
-                `[CLOTHING] ${itemKey} bone overlap ratio=${ratio.toFixed(2)}`
+                console.log(`[CLOTHING] ${itemKey} bone overlap ratio=${ratio.toFixed(2)}`
+
               );
               if (ratio >= 0.6) {
                 mesh.skeleton = skeleton;
@@ -415,7 +410,8 @@ function ClothingInner({
             : isShoe2
             ? mannequinHeight * 0.06
             : mannequinHeight * 0.18;
-          `[CLOTHING] ${itemKey} localSize=${JSON.stringify(
+          console.log(`[CLOTHING] ${itemKey} localSize=${JSON.stringify(
+
             localSize.toArray()
           )} targetH=${targetH.toFixed(3)}`
         );
@@ -457,7 +453,7 @@ function ClothingInner({
           targetY - center.y,
           -center.z + zOffset
         );
-          `[CLOTHING] ${itemKey} positioned at ${JSON.stringify(
+          console.log(`[CLOTHING] ${itemKey} positioned at ${JSON.stringify(
             cloned.position.toArray()
           )}`
         );
@@ -508,7 +504,8 @@ function ClothingInner({
       });
 
 
-        `[CLOTHING] ${itemKey} ADDED TO SCENE rootChildren=${rootGroup.children.length}`
+        console.log(`[CLOTHING] ${itemKey} ADDED TO SCENE rootChildren=${rootGroup.children.length}`
+
       );
     }
 
