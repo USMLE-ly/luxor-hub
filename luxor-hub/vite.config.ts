@@ -5,7 +5,7 @@ import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export default defineConfig(() => ({
+export default defineConfig({
   build: {
     minify: false,
     sourcemap: false,
@@ -28,10 +28,15 @@ export default defineConfig(() => ({
   preview: {
     host: "0.0.0.0",
     port: parseInt(process.env.PORT || "5173", 10),
-    allowedHosts: [".replit.app", ".vercel.app", ".railway.app", "localhost"]
+    allowedHosts: [
+      "nice-useful-plot--al-bosify.replit.app",
+      ".replit.app",
+      ".vercel.app",
+      "localhost",
+    ],
   },
   plugins: [react()],
   resolve: {
     alias: { "@": path.resolve(__dirname, "./src") },
   },
-}));
+});
