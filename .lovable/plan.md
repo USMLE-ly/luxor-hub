@@ -1,84 +1,45 @@
+# Do Not Execute The "Purge Protocol" As Written
 
-# User Analysis Profile page
+I searched the repo. The claims in the prompt do not match reality, and executing it literally would break things.
 
-The uploaded zips are Figma/Sketch UX-Research templates (the `.sketch` extracts to a Persona card + Customer Journey framework). I'll port that framework into a new **User Analysis** page inside LUXOR, styled in our B&W + gold system, populated from the user's real data across onboarding, style DNA, closet, dressing room, analyses, chat, and calendar.
+## What the prompt claims vs. what's actually in the code
 
-## Entry point
-- Add an icon button (User + magnifying glass) in the Closet header/actions row, next to the mannequin controls.
-- Route: `/user-analysis`. Gated by `PaywallGate` and `isReady`.
+**Claim 1: "The frontend is still hitting `nice-useful-plot--al-bosify.replit.app` directly."**
 
-## Page structure (mirrors the sketch template)
+Reality — that string appears in exactly one place:
 
-**1. Persona hero card**
-- Left: avatar (profile photo or generated silhouette), display name, age range, gender, location, plan tier, "member since".
-- Right pull-quote: their strongest style statement (derived from Style DNA archetype + top mood).
-- ABOUT block: 3-sentence auto-written bio from onboarding + activity.
+```
+luxor-hub/vercel.json:28  "destination": "https://nice-useful-plot--al-bosify.replit.app:5000/api/:path*"
+luxor-hub/vercel.json:32  ...images/:path*
+luxor-hub/vercel.json:36  ...media/:path*
+```
 
-**2. Identity grid** (data table, right column of the persona)
-- Age range, height, body shape, face shape, size range/build, budget band, profession, lifestyle, brand tier preference.
+That's the **Vercel rewrite target** — it's exactly how the proxy is supposed to work. It is never sent to the browser. Zero occurrences in `luxor-hub/src/`. "Search and destroy every occurrence" would delete the proxy destination and break every `/api/*` call on luxor.ly.
 
-**3. Needs / Frustrations / Goals / Product-fit**
-- NEEDS: from `styleGoal` + `elevateStyle`.
-- FRUSTRATIONS: from `styleChallenge` + `shoppingExperience`.
-- GOALS: from `styleMood` + goal answers.
-- HOW LUXOR HELPS: mapped to features they've used most.
+**Claim 2: "`api.ts` still returns a hardcoded URL; overwrite it to always return `''`."**
 
-**4. Personality sliders** (Introvert↔Extrovert, Sensing↔Intuition, Thinking↔Feeling, Judging↔Perceiving, plus a fashion axis: Classic↔Experimental, Minimal↔Maximal, Practical↔Expressive)
-- Values derived deterministically from onboarding choices + council/chat tone + analysis history.
+Reality — `luxor-hub/src/lib/api.ts` (the actual path; there is no `src/api/api.ts`) already returns `""` on Vercel/production. It only returns a non-empty URL for `localhost` (Vite dev) and for `*.replit.app` previews (so the Replit-hosted preview can reach Flask). Forcing `return ""` unconditionally would break local development and the Replit preview.
 
-**5. Current feelings tag cloud**
-- Chips like Confident / Curious / Playful / Refined — pulled from `styleMood` and recent chat sentiment.
+**Claim 3: "`RangeError: Maximum call stack size exceeded` proves `useEffect` loops in Closet.tsx / DressingRoom.tsx."**
 
-**6. Style DNA panel**
-- Primary archetype, secondary archetype, color season, dominant palette swatches (from `style_profiles` / `outfit_analyses.colors`), signature silhouettes.
+A `RangeError` from an effect loop would say "Maximum update depth exceeded", not "call stack size". "Call stack size exceeded" is recursion inside a single synchronous call — usually a recursive render, an unbounded reducer, or infinite JSON/tree traversal. Blindly emptying dependency arrays and adding `useRef` guards on the 10+ effects in `Closet.tsx` will silently break real reactive behavior (mannequin sync, outfit refetch on user change, occasion recompute) without touching the actual bug.
 
-**7. Activity KPIs** (skeleton loaders + empty states)
-- Outfits analyzed count, avg style score, best score, favorite category mix (Elegant / Casual / Streetwear / Formal / Athleisure — computed from `outfit_analyses.category` and `outfits.occasion`), items in closet, looks generated in Dressing Room, calendar plans, chat sessions, council deliberations, weekly-challenge entries, badges earned, streak.
+## What I need before writing any code
 
-**8. Customer Journey timeline** (the sketch's core artifact, adapted to a style journey)
-- Steps: Signed up → Onboarding → First closet upload → First analysis → First dressing-room look → First planned outfit → Council session → Today.
-- Rows per step: Action, Thinking (auto-summary), Feeling (mini bar), Opportunity (what LUXOR should suggest next).
+1. **The exact error text and stack trace** from DevTools Console for the `RangeError`, plus the file:line at the top of the stack. That will tell us the real recursion source.
+2. **A screenshot of the DevTools Network tab** showing a failing request. If the request URL is `https://luxor.ly/api/...` and returns 503, the bug is in `vercel.json` or Replit uptime — not in frontend code. If it's `https://nice-useful-plot--al-bosify.replit.app/...`, then and only then is there a hardcoded URL to hunt (and it isn't in `src/` today, so it would be somewhere new).
+3. **Confirmation of which env you're testing on** — luxor.ly (Vercel), luxor-hub.lovable.app, or the Replit preview. The correct `getApiUrl` branch differs per host.
 
-**9. Recommendations for you**
-- 3 concrete next actions computed from gaps (e.g., "Log wears — you plan but rarely check in", "Try Council on your Friday looks").
+## What I will do once you provide those
 
-## Data sources (read-only aggregation)
-- `profiles`, `style_profiles`
-- `clothing_items` (counts by category/color)
-- `outfit_analyses` (score, category, colors, occasion)
-- `outfits` + `outfit_items` + `wear_logs`
-- `dressing_room_looks`
-- `calendar_events`
-- `chat_messages`, `council_conversations`
-- `user_badges`, `style_points`, `challenge_entries`
-- Onboarding answers already persisted on `style_profiles` / localStorage.
+- If the Network tab shows the request going to `replit.app` from luxor.ly: grep the built bundle, find the true source, remove it. (It is not in `src/` right now.)
+- If the request goes to `luxor.ly/api/...` and 503s: the fix is in `vercel.json` / Replit, not the React code.
+- For the `RangeError`: open the file at the top of the stack trace, fix the actual recursion. I will not carpet-bomb `useEffect` dependency arrays.
 
-All queries scoped to `auth.uid()`; no schema changes needed (RLS already in place).
+## What I will not do
 
-## Files to add
-- `luxor-hub/src/pages/UserAnalysis.tsx` — the page.
-- `luxor-hub/src/components/analysis/PersonaHero.tsx`
-- `luxor-hub/src/components/analysis/IdentityGrid.tsx`
-- `luxor-hub/src/components/analysis/NeedsFrustrations.tsx`
-- `luxor-hub/src/components/analysis/PersonalitySliders.tsx`
-- `luxor-hub/src/components/analysis/FeelingsCloud.tsx`
-- `luxor-hub/src/components/analysis/StyleDnaPanel.tsx`
-- `luxor-hub/src/components/analysis/ActivityKpis.tsx`
-- `luxor-hub/src/components/analysis/JourneyTimeline.tsx`
-- `luxor-hub/src/components/analysis/NextActions.tsx`
-- `luxor-hub/src/lib/userAnalysis.ts` — pure aggregation + personality-slider math (deterministic).
+- Delete the Vercel proxy destination.
+- Rewrite `api.ts` to break localhost/Replit dev.
+- Empty dependency arrays across `Closet.tsx` / `DressingRoom.tsx` on suspicion.
 
-## Files to edit
-- `luxor-hub/src/AppContent.tsx` — register `/user-analysis` route inside `PaywallGate`.
-- `luxor-hub/src/pages/Closet.tsx` — add the new icon button linking to `/user-analysis`.
-
-## Design
-- B&W surfaces, Cormorant Garamond headings, Josefin Sans body, gold hairline dividers and slider dots.
-- Framer Motion `fadeUp` + `staggerChildren`; respects `prefers-reduced-motion`.
-- `LoadingState` skeletons per section, `EmptyState` for users with no activity, `ErrorState` with retry per query.
-
-## Out of scope
-- No new tables, no new edge functions, no writes.
-- No sharing/export in v1 (can follow up).
-
-Confirm and I'll build it.
+Please paste the console stack trace and a Network-tab screenshot of the failing request, and I'll fix the real bug in one focused pass.
