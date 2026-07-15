@@ -2,11 +2,8 @@ import { motion } from "framer-motion";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import Pressable from "@/components/ui/pressable";
 import {Check} from "@phosphor-icons/react";
-import { motion } from "framer-motion";
-import { ScrollReveal } from "@/components/ui/scroll-reveal";
-import Pressable from "@/components/ui/pressable";
-import { ContainerScroll } from "@/components/ui/container-scroll-animation";
 import featureOutfitGen from "@/assets/feature-outfit-gen.jpg";
+import { ContainerScroll } from "@/components/ui/container-scroll-animation";
 
 const bullets = [
   "A complete outfit waiting when you wake up",
