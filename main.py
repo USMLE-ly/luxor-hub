@@ -75,6 +75,11 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 # CRITICAL: Handle OPTIONS preflight BEFORE any routing/redirects
 # Replit proxy adds trailing slashes, Flask redirects with 308 on mismatched routes
 # Browsers BLOCK redirects on preflight requests — this bypasses the redirect entirely
+# Health check for uptime monitoring
+@app.route("/api/health", methods=["GET"])
+def health_check():
+    return jsonify({"status": "ok", "service": "luxor-backend"}), 200
+
 @app.before_request
 def handle_preflight():
     if request.method == "OPTIONS":

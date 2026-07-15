@@ -92,7 +92,7 @@ export default function DressingRoomPage() {
       }
     };
     syncOnMount();
-  }, [user?.id, catalogItems.length, syncCatalogItems]);
+  }, [user?.id, catalogItems.length, syncCatalogItems]); // eslint-disable-line
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeOutfit, setActiveOutfit] = useState<OutfitImages | null>(null);
@@ -169,7 +169,12 @@ export default function DressingRoomPage() {
     setShowOccasionModal(true);
   };
 
-  const handleOccasionSelect = async (occasionId: string) => {
+  const handleOccasionSelect = async (occasionId: string, event?: React.MouseEvent) => {
+    // Prevent double-click / rapid re-trigger
+    const btn = event?.currentTarget as HTMLElement;
+    if (btn?.dataset?.clicked === "true") return;
+    if (btn) btn.dataset.clicked = "true";
+    
     setShowOccasionModal(false);
     setLastOccasion(occasionId);
     setIsLoadingAvailability(true);
@@ -480,7 +485,7 @@ export default function DressingRoomPage() {
                       return (
                         <button
                           key={occ.id}
-                          onClick={() => handleOccasionSelect(occ.id)}
+                          onClick={(e) => handleOccasionSelect(occ.id, e)}
                           className="flex flex-col items-center gap-2 p-4 rounded-xl border border-white/10 hover:border-amber-400/50 hover:bg-amber-400/10 transition-all"
                         >
                           <span className="text-2xl">{occ.emoji}</span>
