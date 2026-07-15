@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "noEmit": true,
+    "skipLibCheck": true,
+    "strict": false
+  },
+  "include": ["luxor-hub/vite.config.ts"],
+  "exclude": ["node_modules"]
+}
