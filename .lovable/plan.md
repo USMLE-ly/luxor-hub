@@ -1,45 +1,39 @@
-# Do Not Execute The "Purge Protocol" As Written
+# Fix Publish (dist-check) — Minimal Root Build Wiring
 
-I searched the repo. The claims in the prompt do not match reality, and executing it literally would break things.
+## Diagnosis
 
-## What the prompt claims vs. what's actually in the code
+- **Dev server** is already fixed. Earlier "vite: command not found" happened because `luxor-hub/node_modules` was empty; deps are now installed and the daemon auto-restarted successfully. No script changes required.
+- **Publishing fails on `dist-check`** because Lovable's builder runs `npm run build` at the repo root and expects a `dist/` folder at the root. This repo builds the React app inside `luxor-hub/`, so its output lands at `luxor-hub/dist/` and the root check finds nothing.
+- The root `package.json` has `build:dev` and `vercel-build` but **no `build` script**, so `npm run build` at the root exits non-zero before anything is produced.
 
-**Claim 1: "The frontend is still hitting `nice-useful-plot--al-bosify.replit.app` directly."**
+## Changes
 
-Reality — that string appears in exactly one place:
+**1. `package.json` (root) — add a `build` script that produces `dist/` at the root.**
 
+```json
+{
+  "scripts": {
+    "dev": "cd luxor-hub && npm run dev",
+    "preview": "cd luxor-hub && npm run preview",
+    "build": "npm --prefix luxor-hub install --no-audit --no-fund && npm --prefix luxor-hub run build && rm -rf dist && cp -r luxor-hub/dist dist",
+    "build:dev": "npm --prefix luxor-hub install --no-audit --no-fund && npm --prefix luxor-hub run build -- --mode development && rm -rf dist && cp -r luxor-hub/dist dist",
+    "vercel-build": "npm --prefix luxor-hub install && npm --prefix luxor-hub run build"
+  }
+}
 ```
-luxor-hub/vercel.json:28  "destination": "https://nice-useful-plot--al-bosify.replit.app:5000/api/:path*"
-luxor-hub/vercel.json:32  ...images/:path*
-luxor-hub/vercel.json:36  ...media/:path*
-```
 
-That's the **Vercel rewrite target** — it's exactly how the proxy is supposed to work. It is never sent to the browser. Zero occurrences in `luxor-hub/src/`. "Search and destroy every occurrence" would delete the proxy destination and break every `/api/*` call on luxor.ly.
+That's the whole fix for publishing.
 
-**Claim 2: "`api.ts` still returns a hardcoded URL; overwrite it to always return `''`."**
+## What I'm intentionally not doing
 
-Reality — `luxor-hub/src/lib/api.ts` (the actual path; there is no `src/api/api.ts`) already returns `""` on Vercel/production. It only returns a non-empty URL for `localhost` (Vite dev) and for `*.replit.app` previews (so the Replit-hosted preview can reach Flask). Forcing `return ""` unconditionally would break local development and the Replit preview.
+You listed several extras (preflight vite check, health-check script, `npx vite` fallback, adding vite to root devDependencies). None of them address the actual failure and each has a downside:
 
-**Claim 3: "`RangeError: Maximum call stack size exceeded` proves `useEffect` loops in Closet.tsx / DressingRoom.tsx."**
+- **`npx vite --port 8080` in root dev script** — would download vite from the registry every time the dev daemon restarts, adding latency and a network dependency. Current `cd luxor-hub && npm run dev` already works.
+- **Adding vite to root `devDependencies`** — creates two copies of vite in the repo, drifting versions between root and `luxor-hub/`.
+- **Custom preflight / health-check scripts** — Lovable already reports "dev server did not become healthy" with logs; a homemade script duplicates that with no new signal.
 
-A `RangeError` from an effect loop would say "Maximum update depth exceeded", not "call stack size". "Call stack size exceeded" is recursion inside a single synchronous call — usually a recursive render, an unbounded reducer, or infinite JSON/tree traversal. Blindly emptying dependency arrays and adding `useRef` guards on the 10+ effects in `Closet.tsx` will silently break real reactive behavior (mannequin sync, outfit refetch on user change, occasion recompute) without touching the actual bug.
+I'll skip those unless you specifically want them after publish is green.
 
-## What I need before writing any code
+## Verification
 
-1. **The exact error text and stack trace** from DevTools Console for the `RangeError`, plus the file:line at the top of the stack. That will tell us the real recursion source.
-2. **A screenshot of the DevTools Network tab** showing a failing request. If the request URL is `https://luxor.ly/api/...` and returns 503, the bug is in `vercel.json` or Replit uptime — not in frontend code. If it's `https://nice-useful-plot--al-bosify.replit.app/...`, then and only then is there a hardcoded URL to hunt (and it isn't in `src/` today, so it would be somewhere new).
-3. **Confirmation of which env you're testing on** — luxor.ly (Vercel), luxor-hub.lovable.app, or the Replit preview. The correct `getApiUrl` branch differs per host.
-
-## What I will do once you provide those
-
-- If the Network tab shows the request going to `replit.app` from luxor.ly: grep the built bundle, find the true source, remove it. (It is not in `src/` right now.)
-- If the request goes to `luxor.ly/api/...` and 503s: the fix is in `vercel.json` / Replit, not the React code.
-- For the `RangeError`: open the file at the top of the stack trace, fix the actual recursion. I will not carpet-bomb `useEffect` dependency arrays.
-
-## What I will not do
-
-- Delete the Vercel proxy destination.
-- Rewrite `api.ts` to break localhost/Replit dev.
-- Empty dependency arrays across `Closet.tsx` / `DressingRoom.tsx` on suspicion.
-
-Please paste the console stack trace and a Network-tab screenshot of the failing request, and I'll fix the real bug in one focused pass.
+After the edit I'll run `npm run build` at the repo root and confirm a `dist/index.html` exists there, which is exactly what `dist-check` looks for. Then Publish should succeed.
