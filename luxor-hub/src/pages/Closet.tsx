@@ -595,14 +595,19 @@ const Closet = () => {
           reader.readAsDataURL(selectedFile);
         });
       }
+      // Strip data URL header to reduce payload size (saves ~23 bytes + avoids Vercel body limit issues)
+      const rawB64 = imageData && imageData.includes(",") ? imageData.split(",")[1] : imageData;
       const apiBase = getApiUrl();
+      console.log("[CLOSET-AI] Calling analyze-item:", apiBase + '/api/v1/closet/analyze-item', "b64 length:", rawB64?.length || 0);
       const resp = await fetch(apiBase + '/api/v1/closet/analyze-item', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image_b64: imageData, item_name: newItem.name }),
+        body: JSON.stringify({ image_b64: rawB64, item_name: newItem.name }),
       });
-      if (!resp.ok) throw new Error("Analysis failed");
+      console.log("[CLOSET-AI] Response status:", resp.status);
+      if (!resp.ok) throw new Error(`Analysis failed (HTTP ${resp.status})`);
       const analysis = await resp.json();
+      if (analysis.success === false) throw new Error(analysis.error || "AI analysis returned no results");
       setNewItem((prev) => {
         // Normalize category to match dropdown options ["top","bottom","shoes","accessory","outerwear","dress","other"]
         const _cats = ["top","bottom","shoes","accessory","outerwear","dress","other"];

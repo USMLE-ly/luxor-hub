@@ -78,7 +78,16 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 # Health check for uptime monitoring
 @app.route("/api/health", methods=["GET"])
 def health_check():
-    return jsonify({"status": "ok", "service": "luxor-backend"}), 200
+    """Health check with MiMo API connectivity test."""
+    health = {"status": "ok", "service": "luxor-backend", "mimo_api": "unknown"}
+    try:
+        import requests as _req
+        from backend.config import MIMO_API_URL as _mimo_url
+        h = _req.options(_mimo_url, timeout=5)
+        health["mimo_api"] = "reachable" if h.status_code < 500 else f"error_{h.status_code}"
+    except Exception as e:
+        health["mimo_api"] = f"unreachable: {str(e)[:100]}"
+    return jsonify(health), 200
 
 @app.before_request
 def handle_preflight():
@@ -1989,11 +1998,13 @@ RULES:
                 "occasion": occasion,
             })
     except Exception as exc:
-        _log.error("[CLOSET-AI] Vision error: %s", exc)
+        _log.error("[CLOSET-AI] Vision error: %s", exc, exc_info=True)
 
-    # Fallback
+    # MiMo failed — return 500 so frontend shows proper error toast
+    _log.error("[CLOSET-AI] MiMo Vision returned None or raised — returning 500")
     return jsonify({
         "success": False,
+        "error": "AI vision analysis failed. The MiMo API may be temporarily unavailable.",
         "category": "Other",
         "color": "",
         "style": "Casual",
@@ -2005,7 +2016,7 @@ RULES:
         "item_style": "Casual",
         "season": "All-Season",
         "occasion": "Casual",
-    })
+    }), 500
 
 @app.route("/api/v1/closet/clear-all", methods=["POST", "OPTIONS"], strict_slashes=False)
 def closet_clear_all():
@@ -3427,3 +3438,53 @@ def _humanize_stylist_note(note: str) -> str:
         if result and not result.endswith('.'):
             result += '.'
         return result
+
+# ---------------------------------------------------------------------------
+# Pro Stylist Tweak — POST /api/v1/pro-tweak/generate
+# ---------------------------------------------------------------------------
+@app.route("/api/v1/pro-tweak/generate", methods=["POST", "OPTIONS"], strict_slashes=False)
+def pro_tweak_generate():
+    """Generate an AI-enhanced outfit tweak from an uploaded image."""
+    if request.method == "OPTIONS":
+        return "", 204
+    try:
+        data = request.get_json(silent=True) or {}
+        image_b64 = data.get("image_b64")
+        if not image_b64:
+            return jsonify({"error": "Missing image_b64"}), 400
+
+        # Use MiMo Vision to analyze and suggest a tweak
+        try:
+            from backend.ai.mimo_client import call_mimo_vision, _extract_first_json
+            from backend.ai.prompts import SACRED_PROMPT
+
+            analysis = call_mimo_vision(image_b64, SACRED_PROMPT)
+            tweak_data = _extract_first_json(analysis) if isinstance(analysis, str) else analysis
+
+            suggestion = ""
+            if isinstance(tweak_data, dict):
+                suggestion = tweak_data.get("tweak_plan", tweak_data.get("suggestion", ""))
+                if not suggestion:
+                    improvements = tweak_data.get("improvements", tweak_data.get("improvement_areas", []))
+                    if isinstance(improvements, list) and improvements:
+                        suggestion = improvements[0] if isinstance(improvements[0], str) else str(improvements[0])
+
+            return jsonify({
+                "success": True,
+                "tweaked_image_url": "",  # No image generation yet — return analysis only
+                "suggestion": suggestion or "Consider swapping one piece for a contrasting texture or color to elevate the look.",
+                "source": "cipher_vision",
+                "generation_prompt": "",
+            }), 200
+        except Exception as ai_err:
+            _log.warning("[PRO-TWEAK] AI analysis failed: %s — returning fallback", ai_err)
+            return jsonify({
+                "success": True,
+                "tweaked_image_url": "",
+                "suggestion": "Try pairing this with a structured blazer or statement accessory to elevate the outfit.",
+                "source": "fallback_stylist",
+                "generation_prompt": "",
+            }), 200
+    except Exception as exc:
+        _log.error("[PRO-TWEAK] Error: %s", exc, exc_info=True)
+        return jsonify({"error": str(exc)[:200]}), 500

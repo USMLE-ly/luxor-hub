@@ -224,7 +224,7 @@ export default function Analysis() {
     try {
       // Compress first — phone photos are 3-12 MB, this shrinks them to ~100-200 KB
       const b64 = await compressImage(file);
-      const apiUrl = getApiUrl() || window.location.origin;
+      const apiUrl = getApiUrl(); // "" on Vercel (uses rewrites), direct URL on Replit/local
 
       // Retry loop — Cipher Vision can be slow; retry with backoff instead of giving up
       let fnData: any = null;

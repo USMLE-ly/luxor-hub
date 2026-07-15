@@ -16,15 +16,15 @@
     },
     {
       "source": "/api/(.*)",
-      "destination": "https://nice-useful-plot--al-bosify.replit.app/api/$1"
+      "destination": "https://nice-useful-plot--al-bosify.replit.app:5000/api/$1"
     },
     {
       "source": "/images/(.*)",
-      "destination": "https://nice-useful-plot--al-bosify.replit.app/images/$1"
+      "destination": "https://nice-useful-plot--al-bosify.replit.app:5000/images/$1"
     },
     {
       "source": "/media/(.*)",
-      "destination": "https://nice-useful-plot--al-bosify.replit.app/media/$1"
+      "destination": "https://nice-useful-plot--al-bosify.replit.app:5000/media/$1"
     },
     {
       "source": "/(.*)",
