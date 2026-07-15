@@ -7,3 +7,4 @@ dist/
 .env.*
 !.env.example
 .replit
+dist_built/
