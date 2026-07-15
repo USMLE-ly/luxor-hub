@@ -25,6 +25,11 @@ export default defineConfig(() => ({
       },
     },
   },
+  preview: {
+    host: "0.0.0.0",
+    port: parseInt(process.env.PORT || "5173", 10),
+    allowedHosts: true,  // Allow all hosts (Replit, Vercel, custom domains)
+  },
   plugins: [react()],
   resolve: {
     alias: { "@": path.resolve(__dirname, "./src") },
