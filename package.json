@@ -5,7 +5,8 @@
     "dev": "cd luxor-hub && npm run dev",
     "preview": "cd luxor-hub && npm run preview",
     "build:dev": "cd luxor-hub && npm install --no-audit --no-fund && npx vite build --mode development",
-    "dev2": "cd luxor-hub && npm run dev"
+    "dev2": "cd luxor-hub && npm run dev",
+    "vercel-build": "npm run build --prefix luxor-hub"
   },
   "dependencies": {}
 }
