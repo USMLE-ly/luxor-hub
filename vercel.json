@@ -75,15 +75,5 @@
         }
       ]
     }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "https://nice-useful-plot--al-bosify.replit.app/api/:path*"
-    },
-    {
-      "source": "/images/:path*",
-      "destination": "https://nice-useful-plot--al-bosify.replit.app/images/:path*"
-    }
   ]
 }
