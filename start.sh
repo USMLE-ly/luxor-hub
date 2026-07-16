@@ -1,23 +1,26 @@
 #!/bin/bash
 set -e
 
-# Single-process architecture: Gunicorn serves everything
-# - GET / → luxor-hub/dist/index.html (frontend)
-# - GET /assets/* → luxor-hub/dist/assets/*
-# - /api/* → Flask API routes
-
+# Single-process: Gunicorn serves frontend + API
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
 echo "Working directory: $(pwd)"
 
-# Python path: pyvendor from build step + nix libs
-export PYTHONPATH="/home/runner/workspace/pyvendor:$PYTHONPATH"
+# Find pyvendor relative to script location
+export PYTHONPATH="$SCRIPT_DIR/pyvendor:$PYTHONPATH"
 export LD_LIBRARY_PATH="/home/runner/.pythonlibs/lib:$LD_LIBRARY_PATH"
 
-# PORT: 5000 in dev, 5173 in production (mapped to external :80)
 PORT="${PORT:-5000}"
 
 echo "=== Starting Gunicorn on port $PORT ==="
 export FLASK_APP=main.py
-# Use gunicorn binary directly from pyvendor/bin/ (--target installs don't have __main__.py)
-exec /home/runner/workspace/pyvendor/bin/gunicorn main:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+
+# Try gunicorn from pyvendor first, fall back to flask run
+if [ -f "$SCRIPT_DIR/pyvendor/bin/gunicorn" ]; then
+  exec "$SCRIPT_DIR/pyvendor/bin/gunicorn" main:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+elif python3 -c "import gunicorn" 2>/dev/null; then
+  exec python3 -m gunicorn main:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+else
+  echo "⚠️ gunicorn not found, falling back to flask run"
+  exec flask run --host=0.0.0.0 --port=$PORT
+fi
