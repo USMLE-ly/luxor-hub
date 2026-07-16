@@ -1,12 +1,14 @@
 #!/bin/bash
 set -e
 
-# CRITICAL: cd to repo root so FLASK_APP=main.py resolves
+# Replit = Backend Only (Flask API on port 5000)
+# Frontend lives on Vercel (luxor.ly)
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
 echo "Working directory: $(pwd)"
 
-# Python path fix for Nix-native packages (numpy, grpcio, Pillow need libstdc++/libz)
+# Python path fix for Nix-native packages
 export PYTHONPATH="/home/runner/.pythonlibs/lib/python3.11/site-packages:$PYTHONPATH"
 export PATH="/home/runner/.pythonlibs/bin:$PATH"
 export LD_LIBRARY_PATH="/home/runner/.pythonlibs/lib:$LD_LIBRARY_PATH"
@@ -24,10 +26,5 @@ if curl -s --max-time 5 -o /dev/null -w "%{http_code}" http://localhost:5000/api
   echo "✓ Gunicorn is running on port 5000"
 else
   echo "✗ Gunicorn health check failed. Trying flask run fallback..."
-  flask run --host=0.0.0.0 --port=5000 &
-  sleep 3
+  flask run --host=0.0.0.0 --port=5000
 fi
-
-echo "=== Starting Frontend (Vite Preview) on port 5173 ==="
-cd "$SCRIPT_DIR/luxor-hub"
-npm run preview -- --host 0.0.0.0 --port 5173
