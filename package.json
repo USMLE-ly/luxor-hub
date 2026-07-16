@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "cd luxor-hub && npm run dev",
     "preview": "cd luxor-hub && npm run preview",
-    "build": "npm --prefix luxor-hub install --no-audit --no-fund && npm --prefix luxor-hub run build && rm -rf dist && cp -r luxor-hub/dist dist",
+    "build": "cd luxor-hub && npm install --no-audit --no-fund && npm run build && cd .. && cp -r luxor-hub/dist dist",
     "build:dev": "npm --prefix luxor-hub install --no-audit --no-fund && (cd luxor-hub && npx vite build --mode development) && rm -rf dist && cp -r luxor-hub/dist dist",
     "dev2": "cd luxor-hub && npm run dev",
     "vercel-build": "npm --prefix luxor-hub install && npm --prefix luxor-hub run build"
