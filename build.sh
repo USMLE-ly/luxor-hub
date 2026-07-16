@@ -10,8 +10,7 @@ rm -rf dist
 cp -r luxor-hub/dist dist
 
 echo "=== Installing Backend Python Packages ==="
-# --user: writes to ~/.local (writable), not /nix/store (read-only)
-# --break-system-packages: bypasses PEP 668 externally-managed check
+export PYTHONPATH="$HOME/.local/lib/python3.11/site-packages:$PYTHONPATH"
 python3 -m pip install --user --break-system-packages -r requirements.txt
 
 echo "=== Build complete ==="
