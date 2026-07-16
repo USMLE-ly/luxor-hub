@@ -12,6 +12,10 @@ echo "=== Installing Backend Python Packages ==="
 source venv/bin/activate
 pip install -r requirements.txt
 
+echo "=== Cleaning up old Gunicorn processes ==="
+pkill -f gunicorn || true
+sleep 1
+
 echo "=== Starting Gunicorn on port $PORT ==="
 export FLASK_APP=main.py
 exec gunicorn main:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
