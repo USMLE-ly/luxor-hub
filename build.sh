@@ -9,8 +9,13 @@ echo "=== Copying dist to root ==="
 rm -rf dist
 cp -r luxor-hub/dist dist
 
+echo "=== Setting up Python Virtual Environment ==="
+if [ ! -d "venv" ]; then
+  python3 -m venv venv
+fi
+
 echo "=== Installing Backend Python Packages ==="
-export PYTHONPATH="$HOME/.local/lib/python3.11/site-packages:$PYTHONPATH"
-python3 -m pip install --user --break-system-packages -r requirements.txt
+source venv/bin/activate
+pip install -r requirements.txt
 
 echo "=== Build complete ==="
