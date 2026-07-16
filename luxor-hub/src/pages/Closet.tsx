@@ -195,9 +195,12 @@ const Closet = () => {
   }, [wardrobeSelected, catalogItems]);
 
   // ── Auto-spawn: generate dummy 3D for any wearing item missing src ──
+  const autoSpawnRan = useRef(false);
   useEffect(() => {
+    if (autoSpawnRan.current) return;
     const itemsNeedingSrc = currentlyWearing.filter((item) => !item.src || item.src.length <= 5);
     if (itemsNeedingSrc.length === 0) return;
+    autoSpawnRan.current = true;
     const timer = setTimeout(() => {
       itemsNeedingSrc.forEach((item) => {
         handleGenerateDummy(item.id, item.category);
@@ -591,7 +594,7 @@ const Closet = () => {
   };
 
   // ── Image compression: reduce base64 payload by ~80% before sending to backend ──
-  const compressImage = (base64: string, maxWidth = 600): Promise<string> => {
+  const compressImage = useCallback((base64: string, maxWidth = 600): Promise<string> => {
     return new Promise((resolve) => {
       const img = new Image();
       img.src = base64;
@@ -606,13 +609,16 @@ const Closet = () => {
       };
       img.onerror = () => resolve(base64);
     });
-  };
+  }, []);
 
   // ── Guard against infinite re-triggering (fixes Maximum call stack size exceeded) ──
   const isAnalyzingRef = useRef(false);
 
-  const analyzeWithAI = async () => {
-    if (isAnalyzingRef.current) return;
+  const analyzeWithAI = useCallback(async () => {
+    if (isAnalyzingRef.current) {
+      console.log("[CRASH GUARD] Analysis already in progress. Blocking retrigger.");
+      return;
+    }
     isAnalyzingRef.current = true;
     setAnalyzing(true);
     try {
@@ -674,7 +680,7 @@ const Closet = () => {
     } finally {
       setTimeout(() => { isAnalyzingRef.current = false; setAnalyzing(false); }, 2000);
     }
-  };
+  }, [previewUrl, selectedFile, newItem.name]);
 
 
   const handleUpload = async () => {
@@ -1155,8 +1161,8 @@ const Closet = () => {
                     </Button>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <Label className="font-sans text-sm text-muted-foreground">Name</Label>
-                        <Input value={newItem.name} onChange={(e) => setNewItem({ ...newItem, name: e.target.value })} placeholder="Blue Oxford Shirt" className="bg-secondary border-border mt-1" />
+                        <Label htmlFor="newPieceName" className="font-sans text-sm text-muted-foreground">Name</Label>
+                        <Input id="newPieceName" name="newPieceName" autoComplete="off" value={newItem.name} onChange={(e) => setNewItem({ ...newItem, name: e.target.value })} placeholder="Blue Oxford Shirt" className="bg-secondary border-border mt-1" />
                       </div>
                       <div>
                         <Label className="font-sans text-sm text-muted-foreground">Category</Label>
@@ -1168,12 +1174,12 @@ const Closet = () => {
                         </Select>
                       </div>
                       <div>
-                        <Label className="font-sans text-sm text-muted-foreground">Color</Label>
-                        <Input value={newItem.color} onChange={(e) => setNewItem({ ...newItem, color: e.target.value })} placeholder="Navy" className="bg-secondary border-border mt-1" />
+                        <Label htmlFor="newPieceColor" className="font-sans text-sm text-muted-foreground">Color</Label>
+                        <Input id="newPieceColor" name="newPieceColor" autoComplete="off" value={newItem.color} onChange={(e) => setNewItem({ ...newItem, color: e.target.value })} placeholder="Navy" className="bg-secondary border-border mt-1" />
                       </div>
                       <div>
-                        <Label className="font-sans text-sm text-muted-foreground">Brand</Label>
-                        <Input value={newItem.brand} onChange={(e) => setNewItem({ ...newItem, brand: e.target.value })} placeholder="Zara" className="bg-secondary border-border mt-1" />
+                        <Label htmlFor="newPieceBrand" className="font-sans text-sm text-muted-foreground">Brand</Label>
+                        <Input id="newPieceBrand" name="newPieceBrand" autoComplete="off" value={newItem.brand} onChange={(e) => setNewItem({ ...newItem, brand: e.target.value })} placeholder="Zara" className="bg-secondary border-border mt-1" />
                       </div>
                       <div>
                         <Label className="font-sans text-sm text-muted-foreground">Season</Label>
@@ -1183,8 +1189,8 @@ const Closet = () => {
                         </Select>
                       </div>
                       <div>
-                        <Label className="font-sans text-sm text-muted-foreground">Price</Label>
-                        <Input type="number" value={newItem.price} onChange={(e) => setNewItem({ ...newItem, price: e.target.value })} placeholder="49.99" className="bg-secondary border-border mt-1" />
+                        <Label htmlFor="newPiecePrice" className="font-sans text-sm text-muted-foreground">Price</Label>
+                        <Input id="newPiecePrice" name="newPiecePrice" autoComplete="off" type="number" value={newItem.price} onChange={(e) => setNewItem({ ...newItem, price: e.target.value })} placeholder="49.99" className="bg-secondary border-border mt-1" />
                       </div>
                     </div>
                     <Button onClick={handleUpload} disabled={uploading} className="w-full gold-gradient text-primary-foreground font-sans">
