@@ -19,4 +19,5 @@ PORT="${PORT:-5000}"
 
 echo "=== Starting Gunicorn on port $PORT ==="
 export FLASK_APP=main.py
-exec python3 -m gunicorn main:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+# Use gunicorn binary directly from pyvendor/bin/ (--target installs don't have __main__.py)
+exec /home/runner/workspace/pyvendor/bin/gunicorn main:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
