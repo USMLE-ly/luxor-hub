@@ -376,7 +376,7 @@ const OutfitBuilder = () => {
                         <div className="w-full h-full flex flex-col items-center justify-center p-1">
                           <TShirt className="h-6 w-6 text-muted-foreground" />
                           <span className="text-[8px] text-muted-foreground font-sans text-center mt-1 truncate w-full px-1">
-                            {item.name || item.category}
+                            {item.name || item.rawCategory || item.category}
                           </span>
                         </div>
                       )}

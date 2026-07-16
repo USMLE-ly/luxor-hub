@@ -1330,7 +1330,7 @@ const Closet = () => {
                               </div>
                             </div>
                             <div className="px-3 pb-3">
-                              <p className="text-xs font-sans font-semibold text-foreground truncate">{item.name || item.category}</p>
+                              <p className="text-xs font-sans font-semibold text-foreground truncate">{item.name || item.rawCategory || item.category}</p>
                               <div className="flex items-center gap-1.5 mt-0.5">
                                 {item.color && (
                                   <div className="w-2.5 h-2.5 rounded-full border border-border/60" style={{ backgroundColor: item.color || "#6b7b8d" }} />

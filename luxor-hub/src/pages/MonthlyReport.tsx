@@ -346,7 +346,7 @@ const MonthlyReportInner = () => {
                     <div className="flex flex-wrap gap-1.5">
                       {cpwAnalytics.neverWorn.map((item, i) => (
                         <span key={i} className="text-[10px] font-sans px-2 py-0.5 rounded-full bg-secondary text-muted-foreground capitalize">
-                          {item.name || item.category} · ${item.priceNum}
+                          {item.name || item.rawCategory || item.category} · ${item.priceNum}
                         </span>
                       ))}
                     </div>

@@ -103,7 +103,7 @@ export const ClosetMatchDialog = ({ open, onOpenChange, lookTitle, lookItems }: 
                       <p className="text-sm font-sans text-foreground">{m.lookItem}</p>
                       {m.matched && m.closetItem && (
                         <p className="text-xs text-primary font-sans mt-0.5 truncate">
-                          → {m.closetItem.name || m.closetItem.category}
+                          → {m.closetItem.name || m.closetItem.rawCategory || m.closetItem.category}
                           {m.closetItem.color && ` (${m.closetItem.color})`}
                         </p>
                       )}

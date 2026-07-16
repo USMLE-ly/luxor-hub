@@ -57,7 +57,7 @@ function ItemCard({ item, match }: { item: ClosetItem; match?: MatchResult }) {
       <div className="flex-1 min-w-0">
         <p className="text-xs font-sans font-semibold text-foreground truncate">{item.name || "Unnamed"}</p>
         <div className="flex items-center gap-1">
-          <p className="text-[10px] font-sans text-muted-foreground capitalize">{item.category}</p>
+          <p className="text-[10px] font-sans text-muted-foreground capitalize">{item.rawCategory || item.category}</p>
           {match && (
             <>
               <span className="text-[9px] text-muted-foreground">·</span>

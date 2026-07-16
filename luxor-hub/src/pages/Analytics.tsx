@@ -103,7 +103,7 @@ const Analytics = () => {
   const categoryData = items.reduce((acc: any[], item) => {
     const existing = acc.find((a) => a.name === item.category);
     if (existing) existing.value++;
-    else acc.push({ name: item.category, value: 1 });
+    else acc.push({ name: item.rawCategory || item.category, value: 1 });
     return acc;
   }, []);
 
@@ -319,7 +319,7 @@ const Analytics = () => {
                 <div className="flex flex-wrap gap-2">
                   {underused.slice(0, 12).map((item) => (
                     <span key={item.id} className="px-3 py-1.5 rounded-full text-xs font-sans bg-secondary text-muted-foreground">
-                      {item.name || "Unnamed"} ({item.category})
+                      {item.name || "Unnamed"} ({item.rawCategory || item.category})
                     </span>
                   ))}
                   {underused.length > 12 && (
