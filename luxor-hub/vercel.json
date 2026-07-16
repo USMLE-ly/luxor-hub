@@ -25,15 +25,15 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://nice-useful-plot--al-bosify.replit.app:5000/api/:path*"
+      "destination": "https://nice-useful-plot--al-bosify.replit.app/api/:path*"
     },
     {
       "source": "/images/:path*",
-      "destination": "https://nice-useful-plot--al-bosify.replit.app:5000/images/:path*"
+      "destination": "https://nice-useful-plot--al-bosify.replit.app/images/:path*"
     },
     {
       "source": "/media/:path*",
-      "destination": "https://nice-useful-plot--al-bosify.replit.app:5000/media/:path*"
+      "destination": "https://nice-useful-plot--al-bosify.replit.app/media/:path*"
     }
   ]
 }
