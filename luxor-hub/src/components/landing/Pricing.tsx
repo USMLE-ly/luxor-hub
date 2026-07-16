@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, Fragment } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
@@ -288,7 +288,7 @@ const Pricing = () => {
                   </thead>
                   <tbody>
                     {comparisonCategories.map((cat) => (
-                      <>
+                      <Fragment key={cat.name}>
                         <tr key={cat.name}>
                           <td colSpan={5} className="pt-5 pb-2 px-2 text-xs font-semibold text-muted-foreground uppercase tracking-widest">
                             {cat.name}
@@ -303,7 +303,7 @@ const Pricing = () => {
                             <td className="py-2.5 px-2 text-center"><CellValue value={f.elite} /></td>
                           </tr>
                         ))}
-                      </>
+                      </Fragment>
                     ))}
                   </tbody>
                 </table>

@@ -8,7 +8,12 @@
     "build:dev": "npm --prefix luxor-hub install --no-audit --no-fund && (cd luxor-hub && npx vite build --mode development) && rm -rf dist && cp -r luxor-hub/dist dist",
     "dev2": "cd luxor-hub && npm run dev",
     "vercel-build": "npm --prefix luxor-hub install && npm --prefix luxor-hub run build",
-    "start": "cd luxor-hub && npm run preview -- --host 0.0.0.0"
+    "start": "cd luxor-hub && npm run preview -- --host 0.0.0.0",
+    "smoke:health": "bash scripts/check-dev-health.sh 8080 30 2",
+    "smoke:playwright": "cd luxor-hub && npx tsx ../scripts/playwright-smoke.ts http://localhost:8080/",
+    "smoke:urls": "bash scripts/guard-no-replit-urls.sh luxor-hub/dist",
+    "smoke:all": "npm run build && npm run smoke:urls && npm run smoke:health",
+    "test:ci": "npm run smoke:all"
   },
   "devDependencies": {
     "typescript": "^7.0.2"
