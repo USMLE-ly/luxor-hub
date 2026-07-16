@@ -14,11 +14,11 @@ export PATH="/home/runner/.pythonlibs/bin:$PATH"
 export LD_LIBRARY_PATH="/home/runner/.pythonlibs/lib:$LD_LIBRARY_PATH"
 
 echo "=== Installing Backend Python Packages ==="
-pip install -r requirements.txt --quiet 2>/dev/null || true
+pip install -r requirements.txt --break-system-packages --quiet 2>/dev/null || true
 
 echo "=== Starting Backend (Gunicorn) on port 5000 ==="
 export FLASK_APP=main.py
-python3 -m gunicorn main:app --bind 0.0.0.0:5000 --daemon
+/home/runner/workspace/.pythonlibs/bin/gunicorn main:app --bind 0.0.0.0:5000 --daemon
 sleep 2
 
 # Verify Flask is alive

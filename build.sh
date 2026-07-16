@@ -19,9 +19,7 @@ echo "=== Frontend build complete ==="
 # Backend deps only needed on Replit — skip gracefully on Lovable CI
 if command -v python3 &>/dev/null; then
   echo "=== Installing Backend Python Packages ==="
-  python3 -m venv venv
-  . venv/bin/activate
-  pip install -r requirements.txt
+  pip install -r requirements.txt --break-system-packages --quiet 2>/dev/null || true
 else
   echo "=== Skipping Python packages (not available) ==="
 fi
