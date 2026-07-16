@@ -6,3 +6,6 @@ Pillow
 qdrant-client>=1.12
 gunicorn
 numpy
+
+# Transitive dependencies needed by Replit's Nix environment
+httpx

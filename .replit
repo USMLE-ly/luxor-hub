@@ -9,10 +9,6 @@ packages = ["nodejs_22", "python311", "python311Packages.pip", "gcc-unwrapped", 
 localPort = 5173
 externalPort = 80
 
-[[ports]]
-localPort = 5000
-externalPort = 5000
-
 [env]
 PORT = "5173"
 

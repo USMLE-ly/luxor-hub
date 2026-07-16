@@ -75,19 +75,7 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 # CRITICAL: Handle OPTIONS preflight BEFORE any routing/redirects
 # Replit proxy adds trailing slashes, Flask redirects with 308 on mismatched routes
 # Browsers BLOCK redirects on preflight requests — this bypasses the redirect entirely
-# Health check for uptime monitoring
-@app.route("/api/health", methods=["GET"])
-def health_check():
-    """Health check with MiMo API connectivity test."""
-    health = {"status": "ok", "service": "luxor-backend", "mimo_api": "unknown"}
-    try:
-        import requests as _req
-        from backend.config import MIMO_API_URL as _mimo_url
-        h = _req.options(_mimo_url, timeout=5)
-        health["mimo_api"] = "reachable" if h.status_code < 500 else f"error_{h.status_code}"
-    except Exception as e:
-        health["mimo_api"] = f"unreachable: {str(e)[:100]}"
-    return jsonify(health), 200
+# /api/health is registered by backend/routes/health.py via init_health_routes(app)
 
 @app.before_request
 def handle_preflight():
@@ -3391,6 +3379,12 @@ def serve_media_file(filename):
 
 # Global CORS-safe error handlers — return JSON instead of HTML to prevent CORB
 
+# ── Root health endpoint (Replit deployment healthcheck) ──
+@app.route("/health", methods=["GET"])
+def root_health():
+    """Simple health check that always returns 200."""
+    return jsonify({"status": "ok", "service": "luxor-backend"}), 200
+
 # ── Catch-all: serve Vite frontend from luxor-hub/dist/ ──
 import os as _os
 _DIST_DIR = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "luxor-hub", "dist")
@@ -3401,7 +3395,11 @@ def serve_frontend(path):
     """Serve the Vite SPA. API routes are handled above; everything else serves the frontend."""
     if path and _os.path.exists(_os.path.join(_DIST_DIR, path)):
         return send_from_directory(_DIST_DIR, path)
-    return send_from_directory(_DIST_DIR, "index.html")
+    index_path = _os.path.join(_DIST_DIR, "index.html")
+    if _os.path.exists(index_path):
+        return send_from_directory(_DIST_DIR, "index.html")
+    # Fallback: return JSON health response if frontend not built yet
+    return jsonify({"status": "ok", "service": "luxor-backend", "note": "frontend not built"}), 200
 @app.errorhandler(404)
 def not_found(e):
     """Return JSON 404 with CORS headers instead of HTML (which would trigger CORB)."""

@@ -1,27 +1,52 @@
 #!/bin/bash
 set -e
 
-# ALWAYS use port 5173 for Replit production (mapped to external :80)
-# The .replit [env] section sets PORT=5173, but hardcode as safety net
-PORT=5173
+# ============================================================
+# Luxor Pro Stylist — Replit Production Start Script
+# ============================================================
+# PORT 5173 is mapped to external :80 via .replit [[ports]]
+# Do NOT change this port — the deployment healthcheck expects it.
+# ============================================================
 
-# Kill any old processes
-pkill -f gunicorn || true
-pkill -f flask || true
+PORT=5173
+export PORT
+
+# Kill any lingering processes from previous deploys
+pkill -f gunicorn 2>/dev/null || true
+pkill -f flask 2>/dev/null || true
 sleep 1
 
-# Clean up broken old installations
+# Remove stale broken installations
 rm -rf pyvendor 2>/dev/null || true
 
-echo "=== Setting up Python Virtual Environment ==="
-if [ ! -d "venv" ]; then
+# ── Python Virtual Environment ──────────────────────────────
+echo "=== [1/4] Setting up Python Virtual Environment ==="
+if [ ! -d "venv" ] || [ ! -f "venv/bin/activate" ]; then
+  rm -rf venv
   python3 -m venv venv
 fi
 
-echo "=== Installing Backend Python Packages ==="
+echo "=== [2/4] Installing Backend Python Packages ==="
+# shellcheck disable=SC1091
 source venv/bin/activate
-pip install -r requirements.txt
+pip install --quiet -r requirements.txt
 
-echo "=== Starting Gunicorn on port $PORT ==="
+# ── Ensure frontend dist exists ─────────────────────────────
+echo "=== [3/4] Checking Frontend Build ==="
+if [ ! -f "luxor-hub/dist/index.html" ]; then
+  echo "Frontend not built — building now..."
+  npm --prefix luxor-hub install --ignore-engines --no-audit --no-fund
+  npm --prefix luxor-hub run build
+fi
+
+# ── Start Gunicorn ──────────────────────────────────────────
+echo "=== [4/4] Starting Gunicorn on port $PORT ==="
 export FLASK_APP=main.py
-exec gunicorn main:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+exec gunicorn main:app \
+  --bind "0.0.0.0:${PORT}" \
+  --workers 2 \
+  --threads 2 \
+  --timeout 120 \
+  --graceful-timeout 30 \
+  --access-logfile - \
+  --error-logfile -
