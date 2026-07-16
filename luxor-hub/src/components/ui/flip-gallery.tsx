@@ -497,30 +497,7 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
 
         {/* Dismiss + Calendar — right edge */}
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center', pointerEvents: 'auto' }}>
-          {onAddToCalendar && (
-            <button
-              onClick={() => onAddToCalendar(outfits[currentIndex])}
-              style={{
-                background: 'linear-gradient(135deg, hsl(var(--emerald)), hsl(var(--forest)))',
-                color: 'white',
-                border: 'none',
-                borderRadius: '50%',
-                width: '40px',
-                height: '40px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                transition: 'transform 0.2s ease',
-              }}
-              title="Add to Calendar"
-              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-            >
-              <CalendarDots size={18} />
-            </button>
-          )}
+
           <button
             onClick={onDismiss}
             style={{

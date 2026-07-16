@@ -395,7 +395,7 @@ export default function DressingRoomPage() {
                 )}
               </div>
               {/* Buttons — fixed at bottom, side by side */}
-              <div className="absolute bottom-4 left-4 right-4 z-50 flex flex-row gap-2">
+              <div className="absolute bottom-4 left-4 right-4 z-[100] relative flex flex-row gap-2">
                 <button
                   onClick={handleGenerateClick}
                   disabled={isGenerating}
@@ -403,6 +403,15 @@ export default function DressingRoomPage() {
                 >
                   Generate
                 </button>
+                {activeOutfit && (
+                  <button
+                    onClick={() => cal.openForAiOutfit(activeOutfit, lastOccasion)}
+                    className="py-3 px-3 rounded-full bg-emerald-600/80 text-white text-xs font-medium shadow-lg border border-emerald-500/50 hover:bg-emerald-500/80 transition-colors"
+                    title="Add to Calendar"
+                  >
+                    <CalendarDots className="w-4 h-4" />
+                  </button>
+                )}
                 <button
                   onClick={handleDismiss}
                   disabled={isGenerating}
@@ -422,39 +431,45 @@ export default function DressingRoomPage() {
             {showNotifications && activeOutfit && activeOutfit.stylist_reasoning && activeOutfit.stylist_reasoning.length > 0 && (
               <div className="flex flex-col items-center w-full max-w-[320px] mx-auto mt-4">
                 <motion.div
-                  className="flex flex-col gap-3 max-h-[240px] overflow-y-auto w-full px-1 py-1 custom-scrollbar"
-                  drag="y"
-                  dragConstraints={{ top: 0, bottom: 0 }}
-                  dragElastic={0.15}
+                  className="flex flex-col gap-3 max-h-[220px] overflow-y-auto w-full px-1 py-1 custom-scrollbar"
+                  initial="hidden"
+                  animate="visible"
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: {
+                      opacity: 1,
+                      transition: { staggerChildren: 0.1 }
+                    }
+                  }}
                 >
-                  <AnimatePresence>
-                    {activeOutfit.stylist_reasoning.slice(0, 3).map((note: string, i: number) => (
-                      <motion.div
-                        key={i}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ delay: i * 0.1, type: "spring", stiffness: 120, damping: 20 }}
-                        className="w-full p-4 rounded-2xl bg-zinc-800/40 backdrop-blur-md border border-zinc-700/30 shadow-lg relative transition-all hover:bg-zinc-800/60 cursor-grab active:cursor-grabbing"
-                      >
-                        <div className="absolute left-0 top-3 bottom-3 w-1 bg-gradient-to-b from-[#E8C87A] to-amber-600 rounded-full" />
-                        <p className="pl-3 text-sm text-zinc-300 leading-relaxed line-clamp-2">{note}</p>
-                      </motion.div>
-                    ))}
-                    {activeOutfit.accessory_note && (
-                      <motion.div
-                        key="accessory"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ delay: 0.3, type: "spring", stiffness: 120, damping: 20 }}
-                        className="w-full p-3 rounded-2xl bg-zinc-800/30 backdrop-blur-md border border-amber-800/30 shadow-md relative transition-all hover:bg-zinc-800/50 cursor-grab active:cursor-grabbing"
-                      >
-                        <div className="absolute left-0 top-2.5 bottom-2.5 w-1 bg-gradient-to-b from-amber-400 to-amber-600 rounded-full" />
-                        <p className="pl-3 text-xs text-amber-200/80 leading-relaxed">{activeOutfit.accessory_note}</p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  {activeOutfit.stylist_reasoning.slice(0, 3).map((note: string, i: number) => (
+                    <motion.div
+                      key={i}
+                      variants={{
+                        hidden: { opacity: 0, y: 20 },
+                        visible: { opacity: 1, y: 0 }
+                      }}
+                      transition={{ type: "spring", stiffness: 300, damping: 24 }}
+                      className="w-full p-4 rounded-2xl bg-zinc-800/40 backdrop-blur-md border border-zinc-700/30 shadow-lg text-zinc-300 text-sm relative transition-all"
+                    >
+                      <div className="absolute left-0 top-3 bottom-3 w-1 bg-gradient-to-b from-[#E8C87A] to-amber-600 rounded-full" />
+                      <p className="pl-2">{note}</p>
+                    </motion.div>
+                  ))}
+                  {activeOutfit.accessory_note && (
+                    <motion.div
+                      key="accessory"
+                      variants={{
+                        hidden: { opacity: 0, y: 20 },
+                        visible: { opacity: 1, y: 0 }
+                      }}
+                      transition={{ type: "spring", stiffness: 300, damping: 24 }}
+                      className="w-full p-3 rounded-2xl bg-zinc-800/30 backdrop-blur-md border border-amber-800/30 shadow-md relative transition-all"
+                    >
+                      <div className="absolute left-0 top-2.5 bottom-2.5 w-1 bg-gradient-to-b from-amber-400 to-amber-600 rounded-full" />
+                      <p className="pl-2 text-xs text-amber-200/80 leading-relaxed">{activeOutfit.accessory_note}</p>
+                    </motion.div>
+                  )}
                 </motion.div>
               </div>
             )}
