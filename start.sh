@@ -1,7 +1,11 @@
 #!/bin/bash
 set -e
 
+# Replit = Backend Only
 PORT="${PORT:-5000}"
+
+echo "=== Installing Backend Python Packages ==="
+python3 -m pip install --break-system-packages -r requirements.txt
 
 echo "=== Starting Gunicorn on port $PORT ==="
 export FLASK_APP=main.py
