@@ -1,7 +1,14 @@
 #!/bin/bash
 set -e
+
+echo "=== Preflight Checks ==="
+bash scripts/preflight-build.sh || {
+  echo "❌ Preflight failed. Fix issues above before building."
+  exit 1
+}
+
 echo "=== Building Frontend ==="
-npm --prefix luxor-hub install --ignore-engines
+bash scripts/install-with-fallback.sh luxor-hub
 npm --prefix luxor-hub run build
 
 echo "=== Copying dist to root for Lovable dist-check ==="
@@ -18,3 +25,6 @@ if command -v python3 &>/dev/null; then
 else
   echo "=== Skipping Python packages (not available) ==="
 fi
+
+# Collect artifacts on success
+bash scripts/ci-artifacts.sh || true
