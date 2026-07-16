@@ -72,6 +72,7 @@ interface ClothingItem {
   id: string;
   name: string | null;
   category: string;
+  rawCategory?: string;
   color: string | null;
   brand: string | null;
   season: string | null;
@@ -339,6 +340,7 @@ const Closet = () => {
           id: item.id || '',
           name: item.label || item.name || null,
           category: item.category || item.type || 'other',
+          rawCategory: item.category || item.type || undefined,
           color: item.color || null,
           brand: item.brand || null,
           season: item.season || null,
@@ -460,6 +462,7 @@ const Closet = () => {
                   id, name: item.name || "Unknown",
                   src: resolvedSrc || "",
                   category: zustandCat,
+                  rawCategory: item.category || undefined,
                   color: item.color, fit: item.fit, fabric: item.fabric,
                   imageUrl: item.imageUrl,
                 });
@@ -547,6 +550,7 @@ const Closet = () => {
         id, name: item.name || "Unknown",
         src: outfitSrc || "",
         category: zustandCat,
+        rawCategory: item.category || undefined,
         color: item.color, fit: item.fit, fabric: item.fabric,
         imageUrl: item.imageUrl,
       });
@@ -683,6 +687,8 @@ const Closet = () => {
       setSelectedFile(null); setPreviewUrl(null);
       const refreshed = await fetchItems();
       setItems(refreshed);
+      // Push to Zustand so DressingRoom and other pages see the new item immediately
+      syncCatalogItems(refreshed.map(toWardrobeItem));
     } catch (err) { handleError(err, "Upload failed"); }
     finally { setUploading(false); }
   };
@@ -860,9 +866,10 @@ const Closet = () => {
 
   // Quick try-on: resolve 3D asset or prompt upload
   const quickTryOn = (item: ClothingItem) => {
-    const mappedCat = getMannequinCategory(item.category, item.name);
-    const zustandCat: Category = (["tops", "outerwear", "top"].includes(mappedCat) ? "top"
-      : ["bottoms", "skirts", "dress"].includes(mappedCat) ? "bottom"
+    // Use raw category for Zustand mapping (preserves full_outfit, dress, etc.)
+    const rawCat = (item.rawCategory || item.category || "").toLowerCase();
+    const zustandCat: Category = (["top", "outerwear"].includes(rawCat) ? "top"
+      : ["bottom", "shoes"].includes(rawCat) ? "bottom"
       : "accessory") as Category;
     const itemId = `closet-${zustandCat}-${item.name.replace(/\s+/g, "-").toLowerCase()}`;
 
@@ -874,6 +881,7 @@ const Closet = () => {
       name: item.name || item.category,
       src: glbPath || "",
       category: zustandCat,
+      rawCategory: item.category || undefined,
       color: item.color || "navy",
       fit: "regular",
       fabric: "default",
@@ -891,9 +899,10 @@ const Closet = () => {
 
   const confirmAddToMannequin = () => {
     if (!pendingItem) return;
-    const mappedCat = getMannequinCategory(pendingItem.category, pendingItem.name);
-    const zustandCat: Category = (["tops", "outerwear", "top"].includes(mappedCat) ? "top"
-      : ["bottoms", "skirts", "dress"].includes(mappedCat) ? "bottom"
+    // Use raw category for Zustand mapping (preserves full_outfit, dress, etc.)
+    const rawCat = (pendingItem.rawCategory || pendingItem.category || "").toLowerCase();
+    const zustandCat: Category = (["top", "outerwear"].includes(rawCat) ? "top"
+      : ["bottom", "shoes"].includes(rawCat) ? "bottom"
       : "accessory") as Category;
     const itemId = `closet-${zustandCat}-${pendingItem.name.replace(/\s+/g, "-").toLowerCase()}`;
 
@@ -904,6 +913,7 @@ const Closet = () => {
       name: pendingItem.name || pendingItem.category,
       src: glbPath || "",
       category: zustandCat,
+      rawCategory: pendingItem.category || undefined,
       color: pendingItem.color || "navy",
       fit: selectedFit,
       fabric: selectedFabric,
