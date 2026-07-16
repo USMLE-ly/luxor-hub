@@ -3,6 +3,7 @@ import { BrowserRouter } from "react-router-dom";
 import { initAudio } from "@/lib/audio-system";
 import { initMonitor } from "@/lib/support";
 import { initResilience } from "@/lib/resilience";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 import { ClassicLoader } from "@/components/ui/loader";
 const AppContent = lazy(() => import("./AppContent"));
@@ -112,6 +113,7 @@ const App = () => (
   <AppErrorBoundary>
     <BrowserRouter>
       <AudioInit />
+      <SpeedInsights />
       <Suspense fallback={<Loading />}>
         <AppContent />
       </Suspense>
