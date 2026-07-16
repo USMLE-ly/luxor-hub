@@ -176,14 +176,16 @@ const Closet = () => {
   const wardrobeSelected = useWardrobeStore((s) => s.selected);
   const catalogItems = useWardrobeStore((s) => s.catalogItems);
 
+  const closetFilterFn = useCallback((item: ClothingItem, tab: string) => {
+    if (tab === "All") return true;
+    const cats = categoryMap[tab]?.categories || [];
+    return cats.includes(item.category);
+  }, []);
+
   const { query: searchQuery, setQuery: setSearchQuery, activeFilter, setActiveFilter, results: filtered } = useSearchFilter({
     items,
     searchFields: ["name", "brand", "color"],
-    filterFn: (item, tab) => {
-      if (tab === "All") return true;
-      const cats = categoryMap[tab]?.categories || [];
-      return cats.includes(item.category);
-    },
+    filterFn: closetFilterFn,
   });
 
   // Derived: currently wearing (items where selected[category] matches)
@@ -195,12 +197,14 @@ const Closet = () => {
   }, [wardrobeSelected, catalogItems]);
 
   // ── Auto-spawn: generate dummy 3D for any wearing item missing src ──
-  const autoSpawnRan = useRef(false);
+  const autoSpawnedIds = useRef<Set<string>>(new Set());
   useEffect(() => {
-    if (autoSpawnRan.current) return;
-    const itemsNeedingSrc = currentlyWearing.filter((item) => !item.src || item.src.length <= 5);
+    const itemsNeedingSrc = currentlyWearing.filter(
+      (item) => (!item.src || item.src.length <= 5) && !autoSpawnedIds.current.has(item.id)
+    );
     if (itemsNeedingSrc.length === 0) return;
-    autoSpawnRan.current = true;
+    // Mark items as processed BEFORE the async work to prevent re-entry
+    itemsNeedingSrc.forEach((item) => autoSpawnedIds.current.add(item.id));
     const timer = setTimeout(() => {
       itemsNeedingSrc.forEach((item) => {
         handleGenerateDummy(item.id, item.category);
@@ -208,7 +212,7 @@ const Closet = () => {
       toast.info(`Auto-generated 3D placeholder${itemsNeedingSrc.length > 1 ? "s" : ""} for ${itemsNeedingSrc.length} item(s).`);
     }, 1200);
     return () => clearTimeout(timer);
-  }, [currentlyWearing]);
+  }, [currentlyWearing, handleGenerateDummy]);
 
   const [dna, setDna] = useState<BodyDNA>({ height: 0.5, shoulder: 0.5, waist: 0.5, hips: 0.5, legLength: 0.5 });
   const [pose, setPose] = useState<PosePreset>("neutral");
@@ -262,7 +266,7 @@ const Closet = () => {
     e.target.value = "";
   };
 
-  const handleGenerateDummy = async (itemId: string, category: string) => {
+  const handleGenerateDummy = useCallback(async (itemId: string, category: string) => {
     try {
       let blobUrl: string;
       if (category === "bottom") {
@@ -288,7 +292,7 @@ const Closet = () => {
       console.error("[CLOSET] Dummy generation failed:", err);
       toast.error("Failed to generate 3D model");
     }
-  };
+  }, []);
 
   const handleImageTo3D = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -478,6 +482,12 @@ const Closet = () => {
   }, [user]);
 
   // Debounced save to Supabase (3s after last change)
+  // Use a serialized string of selected item IDs + src checksums to avoid
+  // triggering on every catalogItems reference change (which creates new
+  // currentlyWearing arrays even when the actual content is identical).
+  const mannequinSaveKey = useMemo(() => {
+    return currentlyWearing.map((c) => `${c.id}:${c.src?.length || 0}`).join("|");
+  }, [currentlyWearing]);
   useEffect(() => {
     if (!user || !MANNEQUIN_STATE_LOADED.current) return;
     const timer = setTimeout(() => {
@@ -499,7 +509,7 @@ const Closet = () => {
         });
     }, 3000);
     return () => clearTimeout(timer);
-  }, [user, gender, dna, pose, tracingUrl, tracingOpacity, showMeasurements, currentlyWearing]);
+  }, [user, gender, dna, pose, tracingUrl, tracingOpacity, showMeasurements, mannequinSaveKey]);
 
   // Fetch saved mannequin outfits
   const fetchSavedOutfits = useCallback(async () => {
@@ -736,7 +746,7 @@ const Closet = () => {
     finally { setUploading(false); }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
     try {
       const resp = await fetch(apiBase + "/api/v1/closet/delete-item", {
         method: "POST",
@@ -756,7 +766,7 @@ const Closet = () => {
       if (error) toast.error("Failed to delete item");
       else { setItems((prev) => prev.filter((item) => item.id !== id)); toast.success("Item removed"); }
     }
-  };
+  }, [apiBase, user]);
   const handleClearAll = async () => {
     if (!user) return;
     let loadingToast: string | number | undefined;
@@ -846,7 +856,7 @@ const Closet = () => {
     }
   };
 
-  const handleWornToday = async (itemId: string) => {
+  const handleWornToday = useCallback(async (itemId: string) => {
     if (!user) return;
     try {
       const { error } = await supabase.from("wear_logs").insert({ user_id: user.id, clothing_item_id: itemId });
@@ -864,7 +874,7 @@ const Closet = () => {
       console.warn('[CLOSET] handleWornToday error:', e);
       toast.error('Failed to log wear');
     }
-  };
+  }, [user]);
 
   const handleReceiptScan = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -903,12 +913,12 @@ const Closet = () => {
   };
 
   // Add closet item to mannequin and switch to mannequin tab
-  const addToMannequin = (item: ClothingItem) => {
+  const addToMannequin = useCallback((item: ClothingItem) => {
     setPendingItem(item);
-  };
+  }, []);
 
   // Quick try-on: resolve 3D asset or prompt upload
-  const quickTryOn = (item: ClothingItem) => {
+  const quickTryOn = useCallback((item: ClothingItem) => {
     // Use raw category for Zustand mapping (preserves full_outfit, dress, etc.)
     const rawCat = (item.rawCategory || item.category || "").toLowerCase();
     const zustandCat: Category = (["top", "outerwear"].includes(rawCat) ? "top"
@@ -937,7 +947,7 @@ const Closet = () => {
     } else {
       toast.info(`👗 ${item.name} added — assign a .glb file for 3D view`);
     }
-  };
+  }, [addCustomClothing, toggleClothing, modulesRef]);
 
 
   const confirmAddToMannequin = () => {
