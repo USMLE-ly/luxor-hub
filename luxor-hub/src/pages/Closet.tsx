@@ -169,6 +169,34 @@ const Closet = () => {
 
   // ── Zustand store hooks (single source of truth) ──
   const toggleClothing = useWardrobeStore((s) => s.toggleClothing);
+
+  const handleGenerateDummy = useCallback(async (itemId: string, category: string) => {
+    try {
+      let blobUrl: string;
+      if (category === "bottom") {
+        blobUrl = await modulesRef.current!.dummyGLB.generateDummyPantsGLB();
+      } else if (category === "accessory" || category === "shoes") {
+        blobUrl = await modulesRef.current!.dummyGLB.generateDummyShoesGLB();
+      } else {
+        blobUrl = await modulesRef.current!.dummyGLB.generateDummyShirtGLB();
+      }
+      useWardrobeStore.getState().updateClothingSrc(itemId, blobUrl);
+
+      // Persist to IndexedDB so the model survives page reload
+      try {
+        const response = await fetch(blobUrl);
+        const glbBlob = await response.blob();
+        const buffer = await glbBlob.arrayBuffer();
+        const { set: idbSet } = await import("idb-keyval");
+        await idbSet(`luxor-clothing-${itemId}`, buffer);
+      } catch {}
+
+      toast.success("3D model generated! View it on the mannequin.");
+    } catch (err) {
+      console.error("[CLOSET] Dummy generation failed:", err);
+      toast.error("Failed to generate 3D model");
+    }
+  }, []);
   const addCustomClothing = useWardrobeStore((s) => s.addCustomClothing);
   const removeClothing = useWardrobeStore((s) => s.removeClothing);
   const clearOutfit = useWardrobeStore((s) => s.clearOutfit);
@@ -266,33 +294,6 @@ const Closet = () => {
     e.target.value = "";
   };
 
-  const handleGenerateDummy = useCallback(async (itemId: string, category: string) => {
-    try {
-      let blobUrl: string;
-      if (category === "bottom") {
-        blobUrl = await modulesRef.current!.dummyGLB.generateDummyPantsGLB();
-      } else if (category === "accessory" || category === "shoes") {
-        blobUrl = await modulesRef.current!.dummyGLB.generateDummyShoesGLB();
-      } else {
-        blobUrl = await modulesRef.current!.dummyGLB.generateDummyShirtGLB();
-      }
-      useWardrobeStore.getState().updateClothingSrc(itemId, blobUrl);
-
-      // Persist to IndexedDB so the model survives page reload
-      try {
-        const response = await fetch(blobUrl);
-        const glbBlob = await response.blob();
-        const buffer = await glbBlob.arrayBuffer();
-        const { set: idbSet } = await import("idb-keyval");
-        await idbSet(`luxor-clothing-${itemId}`, buffer);
-      } catch {}
-
-      toast.success("3D model generated! View it on the mannequin.");
-    } catch (err) {
-      console.error("[CLOSET] Dummy generation failed:", err);
-      toast.error("Failed to generate 3D model");
-    }
-  }, []);
 
   const handleImageTo3D = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
