@@ -604,20 +604,30 @@ const Closet = () => {
   };
 
   // ── Image compression: reduce base64 payload by ~80% before sending to backend ──
-  const compressImage = useCallback((base64: string, maxWidth = 600): Promise<string> => {
-    return new Promise((resolve) => {
+  const compressImage = useCallback((dataUrl: string, maxWidth = 600): Promise<string> => {
+    return new Promise((resolve, reject) => {
       const img = new Image();
-      img.src = base64;
+      // CRITICAL: register callbacks BEFORE setting src to avoid race with cached images
       img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d')!;
-        const ratio = Math.min(maxWidth / img.width, 1);
-        canvas.width = img.width * ratio;
-        canvas.height = img.height * ratio;
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL('image/jpeg', 0.7));
+        try {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          if (!ctx) { resolve(dataUrl); return; } // canvas not available, return original
+          const ratio = Math.min(maxWidth / img.width, 1);
+          canvas.width = img.width * ratio;
+          canvas.height = img.height * ratio;
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL('image/jpeg', 0.7));
+        } catch (e) {
+          console.warn("[COMPRESS] Canvas error, using original:", e);
+          resolve(dataUrl);
+        }
       };
-      img.onerror = () => resolve(base64);
+      img.onerror = () => {
+        console.warn("[COMPRESS] Image load failed, using original");
+        resolve(dataUrl);
+      };
+      img.src = dataUrl;
     });
   }, []);
 
@@ -643,13 +653,19 @@ const Closet = () => {
       }
       if (!imageData) { toast.error("No image to analyze."); return; }
 
-      // Compress image client-side (124KB → ~15KB)
+      // Compress image client-side (~80% reduction)
       const compressed = await compressImage(imageData);
       const rawB64 = compressed.includes(",") ? compressed.split(",")[1] : compressed;
+      console.log("[CLOSET-AI] Image compressed:", {
+        originalLen: imageData.length,
+        compressedLen: compressed.length,
+        rawB64Len: rawB64.length,
+        hasDataPrefix: imageData.startsWith("data:"),
+      });
 
       // 15-second timeout via AbortController
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000);
+      const timeoutId = setTimeout(() => controller.abort(), 45000);
 
       const apiBase = getApiUrl();
       const resp = await fetch(apiBase + '/api/v1/closet/analyze-item', {
@@ -682,10 +698,11 @@ const Closet = () => {
       });
       toast.success("Details filled. Check and save.");
     } catch (err: any) {
+      console.error("[CLOSET-AI] Analysis error:", err?.name, err?.message, err);
       if (err?.name === 'AbortError') {
-        toast.error("AI analysis timed out. Please try again.");
+        toast.error("AI analysis timed out (45s). The image may be too large — try a smaller photo.");
       } else {
-        toast.error("AI analysis failed. Fill in details manually.");
+        toast.error("AI analysis failed. Fill in details manually. " + (err?.message || ""));
       }
     } finally {
       setTimeout(() => { isAnalyzingRef.current = false; setAnalyzing(false); }, 2000);
