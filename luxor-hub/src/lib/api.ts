@@ -1,25 +1,22 @@
 /**
- * Returns the backend API base URL.
+ * API base URL — single source of truth.
  *
  * - Local dev:     Vite proxy forwards /api → localhost:5000
- * - Vercel (luxor.ly): empty string → relative /api paths → Vercel rewrites → Replit
- * - Replit preview: direct to Flask on port 5000
+ * - Vercel (luxor.ly): empty string → relative /api paths → vercel.json rewrites → Replit
+ * - Replit preview: empty string → relative paths work because Vercel proxy is in play
+ *
+ * All fetch calls MUST use this function. Never hardcode a domain.
  */
 export function getApiUrl(): string {
-  // Explicit dev override
+  // Explicit dev override via .env
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
 
-  // Local dev: Vite proxy handles /api
+  // Local dev: Vite proxy handles /api → localhost:5000
   if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-    return "http://localhost:5000";
+    return "";
   }
 
-  // Vercel (luxor.ly): use relative paths so Vercel rewrites proxy to Replit
-  // Replit: use direct port 5000
-  if (window.location.hostname.includes("replit.app")) {
-    return `${window.location.protocol}//${window.location.hostname}:5000`;
-  }
-
-  // Vercel / production: relative paths (empty string)
+  // All other environments (Vercel, Replit preview, production): use relative paths.
+  // Vercel's rewrites in vercel.json proxy /api/* to the Flask backend.
   return "";
 }

@@ -140,6 +140,7 @@ type FabricType = "default" | "cotton" | "silk" | "denim" | "wool" | "leather";
 const Closet = () => {
   const { user } = useAuth();
   const modulesRef = useRef<Awaited<ReturnType<typeof loadMannequinModules>> | null>(null);
+  const hasLoadedCloset = useRef(false);
   // Pre-load 3D modules in background on mount
   useEffect(() => { loadMannequinModules().then(m => { modulesRef.current = m; }); }, []);
   const { handleError } = useErrorHandler();
@@ -357,6 +358,8 @@ const Closet = () => {
   // Fetch closet items — re-runs when user auth resolves, with 3s brute-force timeout
   useEffect(() => {
     let mounted = true;
+    if (hasLoadedCloset.current) return;
+    hasLoadedCloset.current = true;
     const forceTimeout = setTimeout(() => {
     }, 8000);
     const load = async () => {
@@ -378,7 +381,7 @@ const Closet = () => {
       }
     };
     load();
-  }, [fetchItems]);  // Re-fetch when fetchItems changes (e.g. user auth resolves)
+  }, []); // one-time mount fetch  // Re-fetch when fetchItems changes (e.g. user auth resolves)
 
   // Auto-remove backgrounds when flat-lay view is active
   useEffect(() => {

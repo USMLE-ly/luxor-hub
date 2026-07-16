@@ -92,7 +92,7 @@ export default function DressingRoomPage() {
       }
     };
     syncOnMount();
-  }, [user?.id, catalogItems.length, syncCatalogItems]); // eslint-disable-line
+  }, []); // one-time sync
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeOutfit, setActiveOutfit] = useState<OutfitImages | null>(null);
