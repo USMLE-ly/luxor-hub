@@ -1,9 +1,10 @@
 #!/bin/bash
 set -e
 
-# Production: PORT=5173 (mapped to external :80)
-# Dev: PORT=5000
 PORT="${PORT:-5173}"
+
+# Kill any lingering pyvendor references from old builds
+rm -rf pyvendor 2>/dev/null || true
 
 echo "=== Setting up Python Virtual Environment ==="
 if [ ! -d "venv" ]; then
