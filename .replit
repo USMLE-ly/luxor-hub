@@ -3,7 +3,7 @@ language = "python3"
 
 [nix]
 channel = "stable-24_11"
-packages = ["nodejs_22", "python311", "python311Packages.pip"]
+packages = ["nodejs_22", "python311", "python311Packages.pip", "gcc-unwrapped", "zlib"]
 
 [[ports]]
 localPort = 5173

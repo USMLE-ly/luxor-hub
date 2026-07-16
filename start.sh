@@ -6,29 +6,26 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
 echo "Working directory: $(pwd)"
 
-echo "=== Setting up Python Backend Environment ==="
-if [ ! -d "venv" ]; then
-  echo "Creating Python virtual environment..."
-  python3 -m venv venv
-fi
-source venv/bin/activate
+# Python path fix for Nix-native packages (numpy, grpcio, Pillow need libstdc++/libz)
+export PYTHONPATH="/home/runner/.pythonlibs/lib/python3.11/site-packages:$PYTHONPATH"
+export PATH="/home/runner/.pythonlibs/bin:$PATH"
+export LD_LIBRARY_PATH="/home/runner/.pythonlibs/lib:$LD_LIBRARY_PATH"
+
+echo "=== Installing Backend Python Packages ==="
 pip install -r requirements.txt --quiet 2>/dev/null || true
 
-echo "=== Starting Backend (Flask) on port 5000 ==="
+echo "=== Starting Backend (Gunicorn) on port 5000 ==="
 export FLASK_APP=main.py
-flask run --host=0.0.0.0 --port=5000 &
-FLASK_PID=$!
-
-# Wait for Flask to bind
-sleep 3
+python3 -m gunicorn main:app --bind 0.0.0.0:5000 --daemon
+sleep 2
 
 # Verify Flask is alive
-if kill -0 $FLASK_PID 2>/dev/null; then
-  echo "✓ Flask is running on port 5000 (PID=$FLASK_PID)"
+if curl -s --max-time 5 -o /dev/null -w "%{http_code}" http://localhost:5000/api/health | grep -q "200"; then
+  echo "✓ Gunicorn is running on port 5000"
 else
-  echo "✗ Flask crashed. Trying gunicorn fallback..."
-  python3 -m gunicorn main:app --bind 0.0.0.0:5000 --daemon 2>/dev/null || true
-  sleep 2
+  echo "✗ Gunicorn health check failed. Trying flask run fallback..."
+  flask run --host=0.0.0.0 --port=5000 &
+  sleep 3
 fi
 
 echo "=== Starting Frontend (Vite Preview) on port 5173 ==="
