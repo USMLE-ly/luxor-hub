@@ -495,29 +495,7 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
           )}
         </div>
 
-        {/* Dismiss + Calendar — right edge */}
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', pointerEvents: 'auto' }}>
-
-          <button
-            onClick={onDismiss}
-            style={{
-              background: 'linear-gradient(135deg, hsl(var(--gold)), hsl(var(--gold) / 0.6))',
-              color: 'hsl(var(--forest))',
-              border: 'none',
-              borderRadius: '9999px',
-              padding: '10px 24px',
-              fontWeight: 600,
-              fontSize: '14px',
-              cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-              transition: 'transform 0.2s ease',
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-          >
-            Dismiss
-          </button>
-        </div>
+        {/* Right edge — empty, DressingRoom handles Generate/Dismiss */}
       </div>
     </div>
   );

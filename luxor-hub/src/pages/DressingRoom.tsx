@@ -395,27 +395,18 @@ export default function DressingRoomPage() {
                 )}
               </div>
               {/* Buttons — fixed at bottom, side by side */}
-              <div className="absolute bottom-4 left-4 right-4 z-[100] relative flex flex-row gap-2">
+              <div className="absolute bottom-6 left-4 right-4 z-50 flex flex-row gap-3">
                 <button
                   onClick={handleGenerateClick}
                   disabled={isGenerating}
-                  className="flex-1 py-3 rounded-full bg-gradient-to-r from-[#E8C87A] to-[#E8C87A]/80 text-zinc-900 text-xs font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-40"
+                  className="flex-1 py-3.5 rounded-full bg-gradient-to-r from-[#E8C87A] to-[#E8C87A]/80 text-zinc-900 text-sm font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-40"
                 >
                   Generate
                 </button>
-                {activeOutfit && (
-                  <button
-                    onClick={() => cal.openForAiOutfit(activeOutfit, lastOccasion)}
-                    className="py-3 px-3 rounded-full bg-emerald-600/80 text-white text-xs font-medium shadow-lg border border-emerald-500/50 hover:bg-emerald-500/80 transition-colors"
-                    title="Add to Calendar"
-                  >
-                    <CalendarDots className="w-4 h-4" />
-                  </button>
-                )}
                 <button
                   onClick={handleDismiss}
                   disabled={isGenerating}
-                  className="flex-1 py-3 rounded-full bg-zinc-700/80 text-zinc-300 text-xs font-medium shadow-lg border border-zinc-600/50 hover:bg-zinc-600/80 transition-colors disabled:opacity-40"
+                  className="flex-1 py-3.5 rounded-full bg-zinc-700/80 backdrop-blur-sm text-zinc-300 text-sm font-medium border border-zinc-600/50 hover:bg-zinc-600/80 transition-all disabled:opacity-40"
                 >
                   Dismiss
                 </button>
