@@ -1,7 +1,9 @@
 #!/bin/bash
 set -e
 
-PORT="${PORT:-5000}"
+# Production: PORT=5173 (mapped to external :80)
+# Dev: PORT=5000
+PORT="${PORT:-5173}"
 
 echo "=== Setting up Python Virtual Environment ==="
 if [ ! -d "venv" ]; then
@@ -12,7 +14,7 @@ echo "=== Installing Backend Python Packages ==="
 source venv/bin/activate
 pip install -r requirements.txt
 
-echo "=== Cleaning up old Gunicorn processes ==="
+echo "=== Cleaning up old processes ==="
 pkill -f gunicorn || true
 sleep 1
 
