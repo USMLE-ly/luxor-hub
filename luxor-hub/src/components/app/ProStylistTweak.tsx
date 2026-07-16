@@ -54,12 +54,35 @@ export function ProStylistTweak({ imagePreview, imageUrl }: ProStylistTweakProps
         base64Image = imageSrc;
       }
 
-            const apiUrl = getApiUrl();
+            // Compress image client-side before sending (reduces payload ~80%)
+      const compressBase64 = (b64: string, maxWidth = 600): Promise<string> =>
+        new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d')!;
+            const ratio = Math.min(maxWidth / img.width, 1);
+            canvas.width = img.width * ratio;
+            canvas.height = img.height * ratio;
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL('image/jpeg', 0.7).split(',')[1]);
+          };
+          img.onerror = () => resolve(b64);
+          img.src = 'data:image/jpeg;base64,' + b64;
+        });
+      const compressed = await compressBase64(base64Image);
+
+      // 30-second timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      const apiUrl = getApiUrl();
       const resp = await fetch(`${apiUrl}/api/v1/pro-tweak/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image_b64: base64Image }),
+        body: JSON.stringify({ image_b64: compressed }),
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
 
       if (!resp.ok) {
         const errData = await resp.json().catch(() => ({}));

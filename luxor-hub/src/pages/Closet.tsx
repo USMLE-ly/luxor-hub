@@ -689,14 +689,14 @@ const Closet = () => {
       let image_b64 = "";
       if (selectedFile) {
         const reader = new FileReader();
-        image_b64 = await new Promise((resolve, reject) => {
-          reader.onload = () => {
-            const result = reader.result as string;
-            resolve(result.split(",")[1] || result);
-          };
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+          reader.onload = () => resolve(reader.result as string);
           reader.onerror = reject;
           reader.readAsDataURL(selectedFile as Blob);
         });
+        // Compress client-side to reduce payload by ~80%
+        const compressed = await compressImage(dataUrl);
+        image_b64 = compressed.includes(",") ? compressed.split(",")[1] : compressed;
       }
       const resp = await fetch(apiBase + "/api/v1/closet/add-item", {
         method: "POST",

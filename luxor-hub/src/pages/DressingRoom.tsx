@@ -116,11 +116,15 @@ export default function DressingRoomPage() {
       const api = getApiUrl();
       const genUrl = api + "/api/v1/generate-outfits";
       console.log("[DR] Generating outfits:", genUrl, { occasion, count, user_id: user.id });
+      const genController = new AbortController();
+      const genTimeout = setTimeout(() => genController.abort(), 120000);
       const res = await fetch(genUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ occasion, count, user_id: user.id }),
+        signal: genController.signal,
       });
+      clearTimeout(genTimeout);
 
       console.log("[DR] Generate response status:", res.status);
       const data = await res.json();

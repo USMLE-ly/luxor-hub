@@ -150,6 +150,8 @@ const Chat = () => {
     const allMessages = [...messages, userMsg].map((m) => ({ role: m.role, content: m.content }));
 
     try {
+      const chatController = new AbortController();
+      const chatTimeout = setTimeout(() => chatController.abort(), 60000);
       const resp = await fetch(CHAT_URL, {
         method: "POST",
         headers: {
@@ -164,7 +166,9 @@ const Chat = () => {
           mood: currentMood || undefined,
           ...(imageToSend ? { image: imageToSend } : {}),
         }),
+        signal: chatController.signal,
       });
+      clearTimeout(chatTimeout);
 
       if (!resp.ok) {
         const err = await resp.json().catch(() => ({}));

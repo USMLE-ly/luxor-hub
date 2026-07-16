@@ -571,6 +571,9 @@ def qdrant_get_all_items(timeout: float = 8.0, user_id: str = "") -> List[Dict[s
             if offset is None:
                 break
         payload_results = [dict(p.payload) for p in all_points if p.payload]
+        # Strip image_data_b64 from list responses — it's 100KB+ per item and bloats the response
+        for pr in payload_results:
+            pr.pop("image_data_b64", None)
         print(f"[QDRANT-DEBUG] Scrolled {pages} page(s), {len(payload_results)} total items (user_id={user_id or 'all'})", flush=True)
         return payload_results
 

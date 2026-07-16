@@ -174,6 +174,8 @@ const CouncilInner = () => {
     let rankingsData: Ranking[] = [];
 
     try {
+      const councilController = new AbortController();
+      const councilTimeout = setTimeout(() => councilController.abort(), 90000);
       const resp = await fetch(COUNCIL_URL, {
         method: "POST",
         headers: {
@@ -188,7 +190,9 @@ const CouncilInner = () => {
           mood: currentMood || undefined,
           ...(imageToSend ? { image: imageToSend } : {}),
         }),
+        signal: councilController.signal,
       });
+      clearTimeout(councilTimeout);
 
       if (!resp.ok) {
         const err = await resp.json().catch(() => ({}));
