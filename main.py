@@ -3390,6 +3390,18 @@ def serve_media_file(filename):
     return resp
 
 # Global CORS-safe error handlers — return JSON instead of HTML to prevent CORB
+
+# ── Catch-all: serve Vite frontend from luxor-hub/dist/ ──
+import os as _os
+_DIST_DIR = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "luxor-hub", "dist")
+
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+def serve_frontend(path):
+    """Serve the Vite SPA. API routes are handled above; everything else serves the frontend."""
+    if path and _os.path.exists(_os.path.join(_DIST_DIR, path)):
+        return send_from_directory(_DIST_DIR, path)
+    return send_from_directory(_DIST_DIR, "index.html")
 @app.errorhandler(404)
 def not_found(e):
     """Return JSON 404 with CORS headers instead of HTML (which would trigger CORB)."""

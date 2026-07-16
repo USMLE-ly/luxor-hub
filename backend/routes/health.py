@@ -19,7 +19,7 @@ from backend.config import (
 
 
 def init_routes(app, get_closet_count: Optional[Callable[[], int]] = None):
-    @app.route("/", methods=["GET"])
+# Root "/" removed — catch-all in main.py serves the frontend
     @app.route("/api/health", methods=["GET"])
     @app.route("/health", methods=["GET"])
     def health():

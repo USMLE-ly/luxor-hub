@@ -1,30 +1,22 @@
 #!/bin/bash
 set -e
 
-# Replit = Backend Only (Flask API on port 5000)
-# Frontend lives on Vercel (luxor.ly)
+# Single-process architecture: Gunicorn serves everything
+# - GET / → luxor-hub/dist/index.html (frontend)
+# - GET /assets/* → luxor-hub/dist/assets/*
+# - /api/* → Flask API routes
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
 echo "Working directory: $(pwd)"
 
-# Python path fix for Nix-native packages
-export PYTHONPATH="/home/runner/.pythonlibs/lib/python3.11/site-packages:$PYTHONPATH"
-export PATH="/home/runner/.pythonlibs/bin:$PATH"
+# Python path: pyvendor from build step + nix libs
+export PYTHONPATH="/home/runner/workspace/pyvendor:$PYTHONPATH"
 export LD_LIBRARY_PATH="/home/runner/.pythonlibs/lib:$LD_LIBRARY_PATH"
 
-echo "=== Installing Backend Python Packages ==="
-pip install -r requirements.txt --break-system-packages --quiet 2>/dev/null || true
+# PORT: 5000 in dev, 5173 in production (mapped to external :80)
+PORT="${PORT:-5000}"
 
-echo "=== Starting Backend (Gunicorn) on port 5000 ==="
+echo "=== Starting Gunicorn on port $PORT ==="
 export FLASK_APP=main.py
-/home/runner/workspace/.pythonlibs/bin/gunicorn main:app --bind 0.0.0.0:5000 --daemon
-sleep 2
-
-# Verify Flask is alive
-if curl -s --max-time 5 -o /dev/null -w "%{http_code}" http://localhost:5000/api/health | grep -q "200"; then
-  echo "✓ Gunicorn is running on port 5000"
-else
-  echo "✗ Gunicorn health check failed. Trying flask run fallback..."
-  flask run --host=0.0.0.0 --port=5000
-fi
+exec python3 -m gunicorn main:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
