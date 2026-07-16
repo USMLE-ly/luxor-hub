@@ -1,9 +1,16 @@
 #!/bin/bash
 set -e
 
-PORT="${PORT:-5173}"
+# ALWAYS use port 5173 for Replit production (mapped to external :80)
+# The .replit [env] section sets PORT=5173, but hardcode as safety net
+PORT=5173
 
-# Kill any lingering pyvendor references from old builds
+# Kill any old processes
+pkill -f gunicorn || true
+pkill -f flask || true
+sleep 1
+
+# Clean up broken old installations
 rm -rf pyvendor 2>/dev/null || true
 
 echo "=== Setting up Python Virtual Environment ==="
@@ -14,10 +21,6 @@ fi
 echo "=== Installing Backend Python Packages ==="
 source venv/bin/activate
 pip install -r requirements.txt
-
-echo "=== Cleaning up old processes ==="
-pkill -f gunicorn || true
-sleep 1
 
 echo "=== Starting Gunicorn on port $PORT ==="
 export FLASK_APP=main.py
