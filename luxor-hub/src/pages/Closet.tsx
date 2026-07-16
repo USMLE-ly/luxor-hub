@@ -590,7 +590,30 @@ const Closet = () => {
     if (file) { setSelectedFile(file); setPreviewUrl(URL.createObjectURL(file)); }
   };
 
+  // ── Image compression: reduce base64 payload by ~80% before sending to backend ──
+  const compressImage = (base64: string, maxWidth = 600): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = base64;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d')!;
+        const ratio = Math.min(maxWidth / img.width, 1);
+        canvas.width = img.width * ratio;
+        canvas.height = img.height * ratio;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', 0.7));
+      };
+      img.onerror = () => resolve(base64);
+    });
+  };
+
+  // ── Guard against infinite re-triggering (fixes Maximum call stack size exceeded) ──
+  const isAnalyzingRef = useRef(false);
+
   const analyzeWithAI = async () => {
+    if (isAnalyzingRef.current) return;
+    isAnalyzingRef.current = true;
     setAnalyzing(true);
     try {
       let imageData = previewUrl;
@@ -602,25 +625,32 @@ const Closet = () => {
           reader.readAsDataURL(selectedFile);
         });
       }
-      // Strip data URL header to reduce payload size (saves ~23 bytes + avoids Vercel body limit issues)
-      const rawB64 = imageData && imageData.includes(",") ? imageData.split(",")[1] : imageData;
+      if (!imageData) { toast.error("No image to analyze."); return; }
+
+      // Compress image client-side (124KB → ~15KB)
+      const compressed = await compressImage(imageData);
+      const rawB64 = compressed.includes(",") ? compressed.split(",")[1] : compressed;
+
+      // 15-second timeout via AbortController
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+
       const apiBase = getApiUrl();
-      console.log("[CLOSET-AI] Calling analyze-item:", apiBase + '/api/v1/closet/analyze-item', "b64 length:", rawB64?.length || 0);
       const resp = await fetch(apiBase + '/api/v1/closet/analyze-item', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ image_b64: rawB64, item_name: newItem.name }),
+        signal: controller.signal,
       });
-      console.log("[CLOSET-AI] Response status:", resp.status);
+      clearTimeout(timeoutId);
+
       if (!resp.ok) throw new Error(`Analysis failed (HTTP ${resp.status})`);
       const analysis = await resp.json();
       if (analysis.success === false) throw new Error(analysis.error || "AI analysis returned no results");
       setNewItem((prev) => {
-        // Normalize category to match dropdown options ["top","bottom","shoes","accessory","outerwear","dress","other"]
         const _cats = ["top","bottom","shoes","accessory","outerwear","dress","other"];
         const _rawCat = (analysis.category || analysis.item_category || "").toLowerCase().replace(/[^a-z]/g, "");
         const _normCat = _cats.includes(_rawCat) ? _rawCat : prev.category;
-        // Normalize season to match dropdown options ["spring","summer","fall","winter","all-season"]
         const _seasons = ["spring","summer","fall","winter","all-season"];
         const _rawSeason = (analysis.season || "").toLowerCase().replace(/[^a-z]/g, "").replace(/^allseason$/,"all-season");
         const _normSeason = _seasons.includes(_rawSeason) ? _rawSeason : prev.season;
@@ -635,8 +665,15 @@ const Closet = () => {
         };
       });
       toast.success("Details filled. Check and save.");
-    } catch { toast.error("AI analysis failed. Fill in details manually."); }
-    finally { setAnalyzing(false); }
+    } catch (err: any) {
+      if (err?.name === 'AbortError') {
+        toast.error("AI analysis timed out. Please try again.");
+      } else {
+        toast.error("AI analysis failed. Fill in details manually.");
+      }
+    } finally {
+      setTimeout(() => { isAnalyzingRef.current = false; setAnalyzing(false); }, 2000);
+    }
   };
 
 
