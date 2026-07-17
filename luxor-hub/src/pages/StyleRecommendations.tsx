@@ -741,12 +741,46 @@ function highlightFashionTerms(text: string) {
   );
 }
 
+/* Color name → hex mapping for swatches */
+const colorSwatchMap: Record<string, string> = {
+  'black': '#1a1a1a', 'white': '#f5f5f5', 'navy': '#1a2744', 'blue': '#4a90d9',
+  'red': '#d94a4a', 'green': '#4ad97a', 'grey': '#8a8a8a', 'gray': '#8a8a8a',
+  'brown': '#8b6914', 'yellow': '#e5c07b', 'pink': '#e8a0b8', 'purple': '#9b59b6',
+  'orange': '#f4a460', 'gold': '#d4af37', 'silver': '#c0c0c0', 'teal': '#2e8b8b',
+  'burgundy': '#7a1f3d', 'maroon': '#7a1f3d', 'beige': '#d4c5a0', 'cream': '#f5f0e0',
+  'olive': '#8a9a5b', 'coral': '#ff7f50', 'peach': '#ffdab9', 'ivory': '#fffff0',
+  'lavender': '#c8b8e0', 'mint': '#a0d0c0', 'charcoal': '#4a5054', 'taupe': '#8a7d6b',
+  'camel': '#c19a6b', 'mauve': '#c09090', 'blush': '#e8b4b8', 'indigo': '#4a0080',
+  'terracotta': '#c06030', 'rust': '#b7410e', 'sage': '#9cad8c', 'plum': '#6a0064',
+  'wine': '#722f37', 'stone': '#8a8578', 'khaki': '#c3b091', 'tan': '#d2b48c',
+  'auburn': '#a52a2a', 'chestnut': '#954535', 'mahogany': '#c04000',
+};
+
+function getColorSwatch(colorName: string): string {
+  const lower = colorName.toLowerCase().trim();
+  if (colorSwatchMap[lower]) return colorSwatchMap[lower];
+  // Try partial match
+  for (const [key, hex] of Object.entries(colorSwatchMap)) {
+    if (lower.includes(key) || key.includes(lower)) return hex;
+  }
+  return '#888888';
+}
+
+function ColorPill({ name, className }: { name: string; className?: string }) {
+  return (
+    <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-800/50 border border-zinc-700/30 ${className || ''}`}>
+      <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 border border-white/10" style={{ backgroundColor: getColorSwatch(name) }} />
+      <span className="text-[11px] text-zinc-300">{name}</span>
+    </span>
+  );
+}
+
 function InfoRow({ label, value }: { label: string; value: string | number }) {
   const displayValue = String(value).replace(/_/g, " ");
   return (
-    <div className="flex items-start gap-4 py-2.5 border-b border-white/5 last:border-0">
-      <span className="w-[120px] shrink-0 text-[11px] text-white/40 uppercase tracking-wider pt-px">{label}</span>
-      <span className="flex-1 text-xs text-foreground/70 leading-relaxed">{highlightFashionTerms(displayValue)}</span>
+    <div className="flex justify-between items-center py-2.5 border-b border-white/5 last:border-0">
+      <span className="text-[11px] text-white/40 uppercase tracking-wider font-medium">{label}</span>
+      <span className="text-xs text-foreground/70 leading-relaxed text-right max-w-[60%]">{highlightFashionTerms(displayValue)}</span>
     </div>
   );
 }
