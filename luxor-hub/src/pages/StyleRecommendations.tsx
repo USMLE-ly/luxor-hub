@@ -108,22 +108,43 @@ export default function StyleRecommendationsPage() {
     { id: "review", label: "Review" },
   ];
 
-  // ── Smooth auto-increment progress: 0 → 95% during loading, jumps to 100% on success ──
+  // ── Real-time ETA + linked progress for 3-step style pipeline ──
   useEffect(() => {
-    if (!analyzing) {
-      setDisplayProgress(progressValue);
-      return;
-    }
+    if (!analysisStartTime || !analyzing) return;
     setDisplayProgress(0);
+
+    const prev = styleLastTimingRef.current;
+    // 3 steps: style-analyze (~25s) + style-recommendations (~20s) + outfit-review (~25s) = ~70s total
+    const estimatedTotal = prev?.total || 70;
+
     const timer = setInterval(() => {
-      setDisplayProgress(prev => {
-        if (prev >= 95) return 95;
-        const inc = prev < 30 ? 3 : prev < 60 ? 2 : prev < 80 ? 1.5 : 1;
-        return Math.min(prev + inc, 95);
-      });
+      const elapsedMs = Date.now() - analysisStartTime;
+      const elapsedSeconds = elapsedMs / 1000;
+
+      // Update stage labels based on elapsed time
+      if (elapsedSeconds < 8) {
+        setProgressStage("Analyzing face & body...");
+      } else if (elapsedSeconds < 30) {
+        setProgressStage("Generating style recommendations...");
+      } else if (elapsedSeconds < 55) {
+        setProgressStage("Reviewing outfit...");
+      } else {
+        setProgressStage("Finalizing...");
+      }
+
+      if (elapsedSeconds < 3) {
+        setEstimatedRemainingSeconds(null);
+        return;
+      }
+
+      const remaining = Math.max(0, Math.round(estimatedTotal - elapsedSeconds));
+      setEstimatedRemainingSeconds(remaining);
+      const realProgress = Math.min(99, Math.round((elapsedSeconds / estimatedTotal) * 100));
+      setDisplayProgress(realProgress);
     }, 200);
+
     return () => clearInterval(timer);
-  }, [analyzing, progressValue]);
+  }, [analysisStartTime, analyzing]);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -215,6 +236,7 @@ export default function StyleRecommendationsPage() {
         body: JSON.stringify({ image_b64: imagePreview }),
       });
       const styleData = await styleResp.json();
+      if (styleData?.timing) styleLastTimingRef.current = { ...styleLastTimingRef.current, ...styleData.timing };
       // Strip 'for' key
       if (styleData && typeof styleData === 'object') delete (styleData as any).for;
       if (!styleData.success || !styleData.analysis) {
@@ -231,6 +253,7 @@ export default function StyleRecommendationsPage() {
         body: JSON.stringify({ analysis: styleData.analysis }),
       });
       const recData = await recResp.json();
+      if (recData?.timing) styleLastTimingRef.current = { ...styleLastTimingRef.current, ...recData.timing };
       // Strip 'for' key
       if (recData && typeof recData === 'object') delete (recData as any).for;
       if (recData.success && recData.recommendations) {
@@ -256,6 +279,7 @@ export default function StyleRecommendationsPage() {
         body: JSON.stringify({ image_b64: imagePreview, occasion: "casual" }),
       });
       const reviewData = await reviewResp.json();
+      if (reviewData?.timing) styleLastTimingRef.current = { ...styleLastTimingRef.current, total: reviewData.timing.total };
       // Strip 'for' key
       if (reviewData && typeof reviewData === 'object') delete (reviewData as any).for;
       if (reviewData.success && reviewData.review) {
@@ -347,6 +371,13 @@ export default function StyleRecommendationsPage() {
                 </span>
               </div>
               <p className="text-sm text-white/70 font-medium tracking-wide">{progressStage}</p>
+              {estimatedRemainingSeconds !== null && estimatedRemainingSeconds > 0 && (
+                <p className="text-xs text-white/40 animate-pulse mt-1">
+                  {estimatedRemainingSeconds > 60
+                    ? `About ${Math.round(estimatedRemainingSeconds / 60)} min remaining`
+                    : `About ${estimatedRemainingSeconds}s remaining`}
+                </p>
+              )}
             </motion.div>
           )}
           {analyzing && !imagePreview && (
@@ -364,6 +395,13 @@ export default function StyleRecommendationsPage() {
                 </span>
               </div>
               <p className="text-sm text-white/70 font-medium tracking-wide">{progressStage}</p>
+              {estimatedRemainingSeconds !== null && estimatedRemainingSeconds > 0 && (
+                <p className="text-xs text-white/40 animate-pulse mt-1">
+                  {estimatedRemainingSeconds > 60
+                    ? `About ${Math.round(estimatedRemainingSeconds / 60)} min remaining`
+                    : `About ${estimatedRemainingSeconds}s remaining`}
+                </p>
+              )}
             </motion.div>
           )}
           {error && (
