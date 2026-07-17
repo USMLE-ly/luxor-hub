@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 
 import { getSections, SECTION_BASE, DIVIDER_STYLE, FLIP_SPEED, DOMINO_DELAY, preloadImage } from "./flip-gallery-helpers";
 import { MarketingBadges } from '@/components/ui/marketing-badges';
+import { getSplashClipPath, SplashMaskDefs } from './image-masking';
 
 export interface OutfitImages {
   top: string;
@@ -369,7 +370,7 @@ export default function FlipGallery({ outfits, isLoading, onOutfitChange, onInde
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
-      borderRadius: '1rem',
+      clipPath: getSplashClipPath(idx),
       zIndex: 2,
       // Glassmorphism — dark translucent so bleed blur shows through
       backdropFilter: 'blur(12px)',
@@ -389,6 +390,9 @@ export default function FlipGallery({ outfits, isLoading, onOutfitChange, onInde
       perspective: '800px',
       overflow: 'hidden',
     }}>
+
+      {/* SVG splash mask definitions */}
+      <SplashMaskDefs />
 
       {/* Spinner overlay — shown only on initial load, does NOT unmount gallery */}
       {!imagesReady && outfits.length > 0 && (
@@ -458,40 +462,31 @@ export default function FlipGallery({ outfits, isLoading, onOutfitChange, onInde
             }} />
           )}
 
-          {/* SVG clip-path focus glow */}
+          {/* Splash clip-path golden edge glow */}
           {hasValidImage && (
             <div style={{
               position: 'absolute',
               inset: 0,
-              borderRadius: '1rem',
-              boxShadow: 'inset 0 0 30px rgba(229,199,133,0.12)',
+              clipPath: getSplashClipPath(idx),
+              boxShadow: 'inset 0 0 25px rgba(229,199,133,0.10)',
               pointerEvents: 'none',
               zIndex: 3,
             }} />
           )}
-          {/* Perfect circle image inside clip-path */}
+          {/* Clothing image — fills the splash-clipped section */}
           {hasValidImage && (
-            <div style={{
-              position: 'relative',
-              zIndex: 1,
-              width: '78%',
-              aspectRatio: '1',
-              borderRadius: '50%',
-              overflow: 'hidden',
-              border: '3px solid rgba(255,255,255,0.08)',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-            }}>
-              <img
-                src={url}
-                alt={labels[idx] || 'Outfit item'}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  objectPosition: 'center',
-                }}
-              />
-            </div>
+            <img
+              src={url}
+              alt={labels[idx] || 'Outfit item'}
+              style={{
+                position: 'relative',
+                zIndex: 1,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center',
+              }}
+            />
           )}
           {!hasValidImage && (
             <div className="flex flex-col items-center justify-center gap-1 opacity-40">
