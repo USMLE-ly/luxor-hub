@@ -398,7 +398,8 @@ export default function DressingRoomPage() {
                   </div>
                 )}
               </div>
-              {/* Buttons — fixed at bottom, side by side */}
+              {/* Buttons — fixed at bottom, side by side (hidden when modal is open) */}
+              {!showOccasionModal && availableOutfitCount === null && (
               <div className="absolute bottom-6 left-4 right-4 z-50 flex flex-row gap-3">
                 <button
                   onClick={handleGenerateClick}
@@ -415,6 +416,7 @@ export default function DressingRoomPage() {
                   Dismiss
                 </button>
               </div>
+              )}
               {/* ---- Occasion Modal ---- */}
               <AnimatePresence>
                 {showOccasionModal && (
@@ -434,7 +436,7 @@ export default function DressingRoomPage() {
                     >
                       <h3 className="text-sm font-semibold text-white mb-2 text-center">Pick an Occasion</h3>
                       <Perspective maxRotateX={8} maxRotateY={16} smoothing={0.08}>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-2 gap-4 w-full">
                           {OCCASIONS.map((occ, idx) => {
                             const occColors: Array<'red' | 'purple' | 'green'> = ['red', 'green', 'purple', 'red', 'green'];
 
@@ -442,12 +444,10 @@ export default function DressingRoomPage() {
                               <button
                                 key={occ.id}
                                 onClick={(e) => handleOccasionSelect(occ.id, e)}
-                                className="flex flex-col items-center gap-2 p-4 rounded-xl border border-white/10 hover:border-amber-400/50 hover:bg-amber-400/10 transition-all"
+                                className="aspect-square rounded-2xl bg-white/10 backdrop-blur-lg border border-white/20 shadow-lg flex flex-col items-center justify-center gap-1.5 transition-all duration-300 hover:bg-white/20 hover:scale-105"
                               >
                                 <span className="text-2xl">{occ.emoji}</span>
-                                <span className="text-sm">
-                                  <Highlight color={occColors[idx % occColors.length]}>{occ.label}</Highlight>
-                                </span>
+                                <span className="text-[10px] font-medium text-zinc-200">{occ.label}</span>
                               </button>
                             );
                           })}
@@ -485,7 +485,7 @@ export default function DressingRoomPage() {
                       <p className="text-zinc-400 text-center text-sm mb-4">
                         We found <span className="text-amber-400 font-semibold">{availableOutfitCount}</span> outfit{availableOutfitCount !== 1 ? "s" : ""} for this occasion. How many do you want?
                       </p>
-                      <div className="flex justify-center gap-3">
+                      <div className="flex justify-center gap-4">
                         {Array.from({ length: availableOutfitCount }, (_, i) => i + 1).map((count) => (
                           <button
                             key={count}
@@ -493,7 +493,7 @@ export default function DressingRoomPage() {
                               generateOutfits(lastOccasion, count);
                               setAvailableOutfitCount(null);
                             }}
-                            className="w-12 h-12 rounded-full bg-gradient-to-r from-[#E8C87A]/20 to-amber-500/20 border border-amber-400/30 hover:border-amber-400/60 hover:bg-amber-400/20 text-amber-300 text-sm font-medium transition-all"
+                            className="w-11 h-11 rounded-full bg-white/10 backdrop-blur-lg border border-white/20 text-amber-300 text-sm font-medium transition-all duration-300 hover:bg-white/20 hover:scale-110"
                           >
                             {count}
                           </button>
