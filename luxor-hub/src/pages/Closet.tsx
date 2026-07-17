@@ -1,4 +1,5 @@
 import { getApiUrl } from "@/lib/api";
+import React from "react";
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import { PLAN_LIMITS } from "@/lib/planRestrictions";
@@ -157,8 +158,6 @@ const Closet = () => {
   const [uploading, setUploading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisStartTime, setAnalysisStartTime] = useState<number | null>(null);
-  const [analysisEta, setAnalysisEta] = useState<number | null>(null);
-  const closetLastTimingRef = useRef<{ mimo_vision?: number; total?: number } | null>(null);
   const [newItem, setNewItem] = useState({
     name: "", category: "top", color: "", brand: "", season: "all-season", occasion: "", style: "", notes: "", price: "",
   });
@@ -717,7 +716,7 @@ const Closet = () => {
         toast.error("AI analysis failed. Fill in details manually. " + (err?.message || ""));
       }
     } finally {
-      setTimeout(() => { isAnalyzingRef.current = false; setAnalyzing(false); setAnalysisStartTime(null); setAnalysisEta(null); }, 2000);
+      setTimeout(() => { isAnalyzingRef.current = false; setAnalyzing(false); setAnalysisStartTime(null); }, 2000);
     }
   }, [previewUrl, selectedFile, newItem.name]);
 
