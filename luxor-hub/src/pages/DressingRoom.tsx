@@ -143,7 +143,6 @@ export default function DressingRoomPage() {
       if (data && typeof data === "object" && "for" in data) { delete data.for; }
       if (!data.success) throw new Error(data.error || "Generation failed");
 
-      setDisplayProgress(95);
       setProgressStage("Ready!");
 
       if (data.images?.length > 0) {
@@ -247,43 +246,33 @@ export default function DressingRoomPage() {
     setShowNotifications(false);
   };
 
-  // ── Smooth auto-increment progress: 0 → 95% during generation, jumps to 100% on success ──
-  useEffect(() => {
-    if (!isGenerating) {
-      return;
-    }
-    // Reset to 0 when generation starts
-    setDisplayProgress(0);
-    const timer = setInterval(() => {
-      setDisplayProgress(prev => {
-        // Slow down as we approach 95% — never reach it via timer alone
-        if (prev >= 95) return 95;
-        // Speed: fast at start, slow near cap
-        const increment = prev < 30 ? 3 : prev < 60 ? 2 : prev < 80 ? 1.5 : 1;
-        return Math.min(prev + increment, 95);
-      });
-    }, 200);
-    
-    return () => clearInterval(timer);
-  }, [isGenerating]);
 
-  // ── ETA calculator: updates every 200ms while generation is active ──
+
+  // ── Real-time ETA + linked progress: drives both percentage and countdown ──
   useEffect(() => {
     if (!generationStartTime || !isGenerating) return;
+
+    // Reset progress to 0 when generation starts
+    setDisplayProgress(0);
 
     const timer = setInterval(() => {
       const elapsedMs = Date.now() - generationStartTime;
       const elapsedSeconds = elapsedMs / 1000;
 
-      // After 5 seconds of running, start estimating based on elapsed time
-      // Assume ~60s total for a typical MiMo generation
-      if (elapsedSeconds > 5) {
-        const estimatedTotal = 65; // rough average for MiMo Vision 2.5v
-        const remaining = Math.max(0, Math.round(estimatedTotal - elapsedSeconds));
-        setEstimatedRemainingSeconds(remaining);
-      } else {
+      // After 3 seconds, start showing ETA and driving progress from real time
+      if (elapsedSeconds < 3) {
         setEstimatedRemainingSeconds(null);
+        return;
       }
+
+      // Assume ~65s total for a typical MiMo Vision 2.5v call
+      const estimatedTotal = 65;
+      const remaining = Math.max(0, Math.round(estimatedTotal - elapsedSeconds));
+      setEstimatedRemainingSeconds(remaining);
+
+      // Drive progress from real elapsed time — never above 99% until API responds
+      const realProgress = Math.min(99, Math.round((elapsedSeconds / estimatedTotal) * 100));
+      setDisplayProgress(realProgress);
     }, 200);
 
     return () => clearInterval(timer);
