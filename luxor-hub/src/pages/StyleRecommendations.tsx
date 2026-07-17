@@ -686,8 +686,12 @@ export default function StyleRecommendationsPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="w-full"
+              className="flex flex-col gap-6 w-full px-4 py-6"
             >
+              <div className="relative p-1.5 rounded-[1.75rem] bg-white/[0.03] border border-white/10 shadow-lg shadow-forest/40">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/[0.07] via-transparent to-transparent pointer-events-none rounded-[1.75rem]" />
+                <div className="relative overflow-hidden rounded-[1.25rem] shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent pointer-events-none" />
               <FashionReviewCard
                 overallScore={outfitReview.overall_score}
                 scoreBreakdown={outfitReview.scores}
@@ -695,6 +699,8 @@ export default function StyleRecommendationsPage() {
                 improvements={outfitReview.improvements}
                 honestSummary={outfitReview.honest_summary}
               />
+                </div>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -739,7 +745,7 @@ function InfoRow({ label, value }: { label: string; value: string | number }) {
   const displayValue = String(value).replace(/_/g, " ");
   return (
     <div className="flex items-start gap-4 py-2.5 border-b border-white/5 last:border-0">
-      <span className="w-[90px] shrink-0 text-[11px] text-white/40 uppercase tracking-wider pt-px">{label}</span>
+      <span className="w-[120px] shrink-0 text-[11px] text-white/40 uppercase tracking-wider pt-px">{label}</span>
       <span className="flex-1 text-xs text-foreground/70 leading-relaxed">{highlightFashionTerms(displayValue)}</span>
     </div>
   );
