@@ -664,11 +664,40 @@ export default function StyleRecommendationsPage() {
   );
 }
 
+/* Fashion terms to bold-highlight in recommendation text */
+const FASHION_KEYWORDS = [
+  "V-Neck", "Boat Neck", "Crew Neck", "Polo", "Mandarin",
+  "Rimless", "Round", "Cat-Eye", "Aviator", "Wayfarer",
+  "Single-Breasted", "Double-Breasted", "Tailored", "Slim-Fit", "Relaxed-Fit",
+  "Straight-Leg", "Boot-Cut", "Skinny", "Slim", "Tapered", "Wide-Leg",
+  "Mid-Length", "Oversized", "Structured", "Unstructured",
+  "Lightweight", "Wool", "Linen", "Cotton", "Denim", "Leather", "Suede",
+  "Statement", "Delicate", "Layered", "Minimalist",
+  "High-Waisted", "Low-Rise", "Ankle-Length", "Cropped",
+  "Lace-Up", "Slip-On", "Platform", "Block Heel",
+  "Wide-Brimmed", "Fedora", "Beanie", "Snapback",
+  "Textured", "Patterned", "Solid", "Pastel", "Neutral",
+  "Fitted", "Boxy", "Pleated", "Flat-Front",
+];
+
+function highlightFashionTerms(text: string) {
+  if (!text) return text;
+  // Build a single regex that matches any keyword (case-insensitive)
+  const pattern = new RegExp(`(${FASHION_KEYWORDS.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join("|")})`, "gi");
+  const parts = text.split(pattern);
+  return parts.map((part, i) =>
+    pattern.test(part)
+      ? React.createElement("span", { key: i, className: "text-zinc-100 font-medium" }, part)
+      : React.createElement("span", { key: i }, part)
+  );
+}
+
 function InfoRow({ label, value }: { label: string; value: string | number }) {
+  const displayValue = String(value).replace(/_/g, " ");
   return (
-    <div className="flex justify-between py-1.5 border-b border-white/5 last:border-0">
-      <span className="text-xs text-white/50">{label}</span>
-      <span className="text-xs text-foreground/80 font-medium capitalize">{String(value).replace(/_/g, " ")}</span>
+    <div className="flex items-start gap-4 py-2.5 border-b border-white/5 last:border-0">
+      <span className="w-[90px] shrink-0 text-[11px] text-white/40 uppercase tracking-wider pt-px">{label}</span>
+      <span className="flex-1 text-xs text-foreground/70 leading-relaxed">{highlightFashionTerms(displayValue)}</span>
     </div>
   );
 }
