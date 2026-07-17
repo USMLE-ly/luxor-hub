@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
 import { getSections, SECTION_BASE, DIVIDER_STYLE, FLIP_SPEED, DOMINO_DELAY, preloadImage } from "./flip-gallery-helpers";
+import { getClipPath } from "./clip-path-defs";
 import { MarketingBadges } from '@/components/ui/marketing-badges';
 
 export interface OutfitImages {
@@ -369,7 +370,7 @@ export default function FlipGallery({ outfits, isLoading, onOutfitChange, onInde
       backgroundSize: 'contain',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
-      borderRadius: '12px',
+      clipPath: getClipPath(idx),
       zIndex: 1,
       // Glass overlay shine effect
       boxShadow: isAnimating && flipState === 'in'

@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { humanizeTextArray } from "@/lib/humanizer";
 import { VerticalImageStack } from "@/components/ui/vertical-image-stack";
 import { useCalendarActions } from "@/hooks/useCalendarActions";
+import { ClipPathDefs } from "@/components/ui/clip-path-defs";
 import { ErrorBoundary } from "@/components/app/ErrorBoundary";
 
 /* ------------------------------------------------------------------ */
@@ -316,6 +317,7 @@ export default function DressingRoomPage() {
   return (
     <ErrorBoundary fallbackMessage="The Dressing Room hit an error. Try refreshing the page.">
     <AppLayout>
+      <ClipPathDefs />
       <ScrollReveal delay={0.1}>
       <div className="p-4 md:p-8 mx-auto max-w-5xl space-y-4 overflow-x-hidden pb-32">
 
