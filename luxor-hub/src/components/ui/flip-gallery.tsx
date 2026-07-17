@@ -366,15 +366,15 @@ export default function FlipGallery({ outfits, isLoading, onOutfitChange, onInde
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: bgColor,
-      backgroundImage: url?.startsWith('http') ? `url('${url}')` : 'none',
+      backgroundImage: 'none',
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
       clipPath: getClipPath(idx),
-      zIndex: 1,
-      // Glassmorphism + blur
-      backdropFilter: 'blur(2px)',
-      WebkitBackdropFilter: 'blur(2px)',
+      zIndex: 2,
+      // Glassmorphism
+      backdropFilter: 'none',
+      WebkitBackdropFilter: 'none',
       boxShadow: isAnimating && flipState === 'in'
         ? 'inset 0 0 40px rgba(255,255,255,0.06), 0 0 20px rgba(229,199,133,0.08)'
         : 'inset 0 0 0px rgba(255,255,255,0)',
@@ -390,6 +390,7 @@ export default function FlipGallery({ outfits, isLoading, onOutfitChange, onInde
       perspective: '800px',
       overflow: 'hidden',
     }}>
+
       {/* Spinner overlay — shown only on initial load, does NOT unmount gallery */}
       {!imagesReady && outfits.length > 0 && (
         <div style={{
@@ -407,6 +408,28 @@ export default function FlipGallery({ outfits, isLoading, onOutfitChange, onInde
           }} />
         </div>
       )}
+      {/* Per-section bleed blur — blurred image that extends OUTSIDE the clip-path */}
+      {sections.map((url, idx) => {
+        if (!url || !url.startsWith('http')) return null;
+        const bleedHeight = `${(1 / sectionCount) * 100}%`;
+        const bleedTop = `${(idx / sectionCount) * 100}%`;
+        return (
+          <div key={`bleed-${idx}`} style={{
+            position: 'absolute',
+            left: '-30%',
+            width: '160%',
+            top: `calc(${bleedTop} - 15%)`,
+            height: `calc(${bleedHeight} + 30%)`,
+            backgroundImage: `url('${url}')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            filter: 'blur(25px) brightness(0.35) saturate(1.3)',
+            zIndex: 0,
+            opacity: 0.8,
+          }} />
+        );
+      })}
+
       {sections.map((url, idx) => {
         const hasValidImage = url && url.startsWith('http');
         const labels = ['Top', 'Mid', 'Bottom'];
@@ -422,19 +445,7 @@ export default function FlipGallery({ outfits, isLoading, onOutfitChange, onInde
               zIndex: 2,
             }} />
           )}
-          {/* Blurred background layer — depth behind the focused clip-path */}
-          {hasValidImage && (
-            <div style={{
-              position: 'absolute',
-              inset: '-20%',
-              backgroundImage: `url('${url}')`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              filter: 'blur(20px) brightness(0.4)',
-              transform: 'scale(1.2)',
-              zIndex: 0,
-            }} />
-          )}
+
           {/* SVG clip-path focus glow */}
           {hasValidImage && (
             <div style={{
@@ -446,32 +457,29 @@ export default function FlipGallery({ outfits, isLoading, onOutfitChange, onInde
               zIndex: 3,
             }} />
           )}
+          {/* Sharp image inside clip-path — crisp and focused */}
+          {hasValidImage && (
+            <img
+              src={url}
+              alt={labels[idx] || 'Outfit item'}
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center',
+                zIndex: 1,
+              }}
+            />
+          )}
           {!hasValidImage && (
             <div className="flex flex-col items-center justify-center gap-1 opacity-40">
               <span className="text-2xl">{idx === 0 ? '👕' : idx === 1 ? '👗' : '👟'}</span>
               <span className="text-[10px] text-white/60 font-sans">{labels[idx] || 'Item'}</span>
             </div>
           )}
-          {/* Item type label — glass pill at the top of each section */}
-          {hasValidImage && (
-            <div style={{
-              position: 'absolute',
-              top: '8px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              padding: '2px 10px',
-              borderRadius: '12px',
-              background: 'rgba(255,255,255,0.1)',
-              backdropFilter: 'blur(8px)',
-              WebkitBackdropFilter: 'blur(8px)',
-              border: '1px solid rgba(255,255,255,0.15)',
-              zIndex: 4,
-            }}>
-              <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.7)', fontWeight: 500, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-                {labels[idx] || 'Item'}
-              </span>
-            </div>
-          )}
+
         </div>
         );
       })}
