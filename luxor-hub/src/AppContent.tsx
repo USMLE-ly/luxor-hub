@@ -50,7 +50,7 @@ const WardrobeValue = React.lazy(() => import("./pages/WardrobeValue"));
 const Blog = React.lazy(() => import("./pages/Blog"));
 const BlogArticle = React.lazy(() => import("./pages/BlogArticle"));
 const DeepDive = React.lazy(() => import("./pages/DeepDive"));
-import { ClassicLoader } from "@/components/ui/loader";
+import AnimatedLoader from "@/components/ui/animated-loader-1";
 const DressingRoom = React.lazy(() => import("./pages/DressingRoom"));
 const StyleRecommendations = React.lazy(() => import("./pages/StyleRecommendations"));
 const UserAnalysis = React.lazy(() => import("./pages/UserAnalysis"));
@@ -64,7 +64,7 @@ const RouteTracker = () => {
   return null;
 };
 
-const Loading = () => <div className="flex items-center justify-center min-h-screen bg-background"><ClassicLoader /></div>;
+const Loading = () => <AnimatedLoader />;
 
 const AppContent = () => {
   const location = useLocation();

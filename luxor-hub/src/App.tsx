@@ -5,10 +5,10 @@ import { initMonitor } from "@/lib/support";
 import { initResilience } from "@/lib/resilience";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 
-import { ClassicLoader } from "@/components/ui/loader";
+import AnimatedLoader from "@/components/ui/animated-loader-1";
 const AppContent = lazy(() => import("./AppContent"));
 
-const Loading = () => <div className="flex items-center justify-center min-h-screen bg-background"><ClassicLoader /></div>;
+const Loading = () => <AnimatedLoader />;
 
 function isChunkLoadError(error: any): boolean {
   return (

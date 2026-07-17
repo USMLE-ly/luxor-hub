@@ -1,7 +1,7 @@
 import { ReactNode, useEffect } from "react";
 import { motion } from "framer-motion";
 import { scheduleEngagementNudges, clearEngagementNudges } from "@/lib/notificationService";
-import { ClassicLoader } from "@/components/ui/loader";
+import AnimatedLoader from "@/components/ui/animated-loader-1";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
@@ -32,7 +32,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   if (!isReady || loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <ClassicLoader />
+        <AnimatedLoader />
       </div>
     );
   }
@@ -41,7 +41,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   if (!user) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <ClassicLoader />
+        <AnimatedLoader />
       </div>
     );
   }
