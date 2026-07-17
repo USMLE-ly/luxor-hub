@@ -372,9 +372,11 @@ export default function FlipGallery({ outfits, isLoading, onOutfitChange, onInde
       backgroundRepeat: 'no-repeat',
       clipPath: getClipPath(idx),
       zIndex: 1,
-      // Glass overlay shine effect
+      // Glassmorphism + blur
+      backdropFilter: 'blur(2px)',
+      WebkitBackdropFilter: 'blur(2px)',
       boxShadow: isAnimating && flipState === 'in'
-        ? 'inset 0 0 30px rgba(255,255,255,0.03)'
+        ? 'inset 0 0 40px rgba(255,255,255,0.06), 0 0 20px rgba(229,199,133,0.08)'
         : 'inset 0 0 0px rgba(255,255,255,0)',
     };
   };
@@ -410,10 +412,64 @@ export default function FlipGallery({ outfits, isLoading, onOutfitChange, onInde
         const labels = ['Top', 'Mid', 'Bottom'];
         return (
         <div key={idx} style={getSectionStyle(idx)}>
+          {/* Glassmorphism overlay — frosted glass on top of the image */}
+          {hasValidImage && (
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 40%, rgba(0,0,0,0.15) 100%)',
+              pointerEvents: 'none',
+              zIndex: 2,
+            }} />
+          )}
+          {/* Blurred background layer — depth behind the focused clip-path */}
+          {hasValidImage && (
+            <div style={{
+              position: 'absolute',
+              inset: '-20%',
+              backgroundImage: `url('${url}')`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              filter: 'blur(20px) brightness(0.4)',
+              transform: 'scale(1.2)',
+              zIndex: 0,
+            }} />
+          )}
+          {/* SVG clip-path focus glow */}
+          {hasValidImage && (
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              clipPath: getClipPath(idx),
+              boxShadow: 'inset 0 0 30px rgba(229,199,133,0.12)',
+              pointerEvents: 'none',
+              zIndex: 3,
+            }} />
+          )}
           {!hasValidImage && (
             <div className="flex flex-col items-center justify-center gap-1 opacity-40">
               <span className="text-2xl">{idx === 0 ? '👕' : idx === 1 ? '👗' : '👟'}</span>
               <span className="text-[10px] text-white/60 font-sans">{labels[idx] || 'Item'}</span>
+            </div>
+          )}
+          {/* Item type label — glass pill at the top of each section */}
+          {hasValidImage && (
+            <div style={{
+              position: 'absolute',
+              top: '8px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              padding: '2px 10px',
+              borderRadius: '12px',
+              background: 'rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+              border: '1px solid rgba(255,255,255,0.15)',
+              zIndex: 4,
+            }}>
+              <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.7)', fontWeight: 500, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                {labels[idx] || 'Item'}
+              </span>
             </div>
           )}
         </div>
