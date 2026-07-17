@@ -777,13 +777,18 @@ function ColorPill({ name, className }: { name: string; className?: string }) {
 
 function InfoRow({ label, value, align = "right" }: { label: string; value: string | number; align?: "right" | "left" }) {
   const displayValue = String(value).replace(/_/g, " ");
-  const valueClass = align === "left"
-    ? "text-xs text-foreground/70 leading-relaxed"
-    : "text-xs text-foreground/70 leading-relaxed text-right max-w-[60%]";
+  if (align === "left") {
+    return (
+      <div className="flex items-center gap-3 py-2.5 border-b border-white/5 last:border-0">
+        <span className="text-[11px] text-white/40 uppercase tracking-wider font-medium shrink-0">{label}</span>
+        <span className="text-xs text-foreground/70 leading-relaxed"><span className="text-amber-400 mr-1.5">✓</span>{highlightFashionTerms(displayValue)}</span>
+      </div>
+    );
+  }
   return (
-    <div className="flex items-center gap-3 py-2.5 border-b border-white/5 last:border-0">
-      <span className="text-[11px] text-white/40 uppercase tracking-wider font-medium shrink-0">{label}</span>
-      <span className={valueClass}>{align === "left" && <span className="text-amber-400 mr-1.5">✓</span>}{highlightFashionTerms(displayValue)}</span>
+    <div className="flex justify-between items-center py-2.5 border-b border-white/5 last:border-0">
+      <span className="text-[11px] text-white/40 uppercase tracking-wider font-medium">{label}</span>
+      <span className="text-xs text-foreground/70 leading-relaxed text-right max-w-[60%]">{highlightFashionTerms(displayValue)}</span>
     </div>
   );
 }
