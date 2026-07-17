@@ -464,10 +464,10 @@ export default function FlipGallery({ outfits, isLoading, onOutfitChange, onInde
               alt={labels[idx] || 'Outfit item'}
               style={{
                 position: 'absolute',
-                inset: 0,
+                inset: '8%',
                 width: '100%',
                 height: '100%',
-                objectFit: 'cover',
+                objectFit: 'contain',
                 objectPosition: 'center',
                 zIndex: 1,
               }}
