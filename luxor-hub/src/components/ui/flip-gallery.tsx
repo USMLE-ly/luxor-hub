@@ -365,16 +365,16 @@ export default function FlipGallery({ outfits, isLoading, onOutfitChange, onInde
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: bgColor,
+      backgroundColor: 'rgba(15,20,25,0.55)',
       backgroundImage: 'none',
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
       clipPath: getClipPath(idx),
       zIndex: 2,
-      // Glassmorphism
-      backdropFilter: 'none',
-      WebkitBackdropFilter: 'none',
+      // Glassmorphism — dark translucent so bleed blur shows through
+      backdropFilter: 'blur(12px)',
+      WebkitBackdropFilter: 'blur(12px)',
       boxShadow: isAnimating && flipState === 'in'
         ? 'inset 0 0 40px rgba(255,255,255,0.06), 0 0 20px rgba(229,199,133,0.08)'
         : 'inset 0 0 0px rgba(255,255,255,0)',
