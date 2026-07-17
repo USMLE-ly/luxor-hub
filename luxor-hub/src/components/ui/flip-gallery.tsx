@@ -156,18 +156,6 @@ export default function FlipGallery({ outfits, isLoading, onOutfitChange, onInde
     };
   }, []);
 
-  // Listen for external navigation events from parent (DressingRoom arrows)
-  useEffect(() => {
-    const handleExternalPrev = () => handlePrev();
-    const handleExternalNext = () => handleNext();
-    window.addEventListener('flip-gallery-prev', handleExternalPrev);
-    window.addEventListener('flip-gallery-next', handleExternalNext);
-    return () => {
-      window.removeEventListener('flip-gallery-prev', handleExternalPrev);
-      window.removeEventListener('flip-gallery-next', handleExternalNext);
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [handlePrev, handleNext]);
 
   // ── Extract edge colors from outfit images (background expansion) ──
   const extractColorsRef = useRef<AbortController | null>(null);
@@ -306,6 +294,20 @@ export default function FlipGallery({ outfits, isLoading, onOutfitChange, onInde
       });
     });
   };
+
+
+  // Listen for external navigation events from parent (DressingRoom arrows)
+  useEffect(() => {
+    const handleExternalPrev = () => handlePrev();
+    const handleExternalNext = () => handleNext();
+    window.addEventListener('flip-gallery-prev', handleExternalPrev);
+    window.addEventListener('flip-gallery-next', handleExternalNext);
+    return () => {
+      window.removeEventListener('flip-gallery-prev', handleExternalPrev);
+      window.removeEventListener('flip-gallery-next', handleExternalNext);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [handlePrev, handleNext]);
 
   /* ======================= EMPTY STATE ======================= */
   if (outfits.length === 0) {
