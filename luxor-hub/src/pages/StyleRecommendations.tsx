@@ -546,19 +546,19 @@ export default function StyleRecommendationsPage() {
                   <div className="flex items-center gap-2 mb-4"><span className="text-primary"><FaceMask className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-foreground/80">Face Recommendations</h3></div>
                   <div className="flex flex-col gap-2">
                     {recommendations.face_recommendations.best_collar_types?.length > 0 && (
-                      <InfoRow label="Collars" value={recommendations.face_recommendations.best_collar_types.join(", ")} />
+                      <InfoRow label="Collars" align="center" value={recommendations.face_recommendations.best_collar_types.join(", ")} />
                     )}
                     {recommendations.face_recommendations.best_neckline_styles?.length > 0 && (
-                      <InfoRow label="Necklines" value={recommendations.face_recommendations.best_neckline_styles.join(", ")} />
+                      <InfoRow label="Necklines" align="center" value={recommendations.face_recommendations.best_neckline_styles.join(", ")} />
                     )}
                     {recommendations.face_recommendations.glasses_recommendation && (
-                      <InfoRow label="Glasses" value={recommendations.face_recommendations.glasses_recommendation} />
+                      <InfoRow label="Glasses" align="center" value={recommendations.face_recommendations.glasses_recommendation} />
                     )}
                     {recommendations.face_recommendations.hat_recommendation && (
-                      <InfoRow label="Hats" value={recommendations.face_recommendations.hat_recommendation} />
+                      <InfoRow label="Hats" align="center" value={recommendations.face_recommendations.hat_recommendation} />
                     )}
                     {recommendations.face_recommendations.hairstyle_advice && (
-                      <InfoRow label="Hair" value={recommendations.face_recommendations.hairstyle_advice} />
+                      <InfoRow label="Hair" align="center" value={recommendations.face_recommendations.hairstyle_advice} />
                     )}
                     {recommendations.face_recommendations.explanation && (
                       <p className="text-[11px] text-white/35 italic mt-1">{recommendations.face_recommendations.explanation}</p>
@@ -577,22 +577,22 @@ export default function StyleRecommendationsPage() {
                   <div className="flex items-center gap-2 mb-4"><span className="text-primary"><User className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-foreground/80">Body Recommendations</h3></div>
                   <div className="flex flex-col gap-2">
                     {recommendations.body_recommendations.shirt_fit && (
-                      <InfoRow label="Shirt" value={recommendations.body_recommendations.shirt_fit} />
+                      <InfoRow label="Shirt" align="center" value={recommendations.body_recommendations.shirt_fit} />
                     )}
                     {recommendations.body_recommendations.jacket_fit && (
-                      <InfoRow label="Jacket" value={recommendations.body_recommendations.jacket_fit} />
+                      <InfoRow label="Jacket" align="center" value={recommendations.body_recommendations.jacket_fit} />
                     )}
                     {recommendations.body_recommendations.pants_fit && (
-                      <InfoRow label="Pants" value={recommendations.body_recommendations.pants_fit} />
+                      <InfoRow label="Pants" align="center" value={recommendations.body_recommendations.pants_fit} />
                     )}
                     {recommendations.body_recommendations.shorts_length && (
-                      <InfoRow label="Shorts" value={recommendations.body_recommendations.shorts_length} />
+                      <InfoRow label="Shorts" align="center" value={recommendations.body_recommendations.shorts_length} />
                     )}
                     {recommendations.body_recommendations.coat_style && (
-                      <InfoRow label="Coat" value={recommendations.body_recommendations.coat_style} />
+                      <InfoRow label="Coat" align="center" value={recommendations.body_recommendations.coat_style} />
                     )}
                     {recommendations.body_recommendations.suit_cut && (
-                      <InfoRow label="Suit" value={recommendations.body_recommendations.suit_cut} />
+                      <InfoRow label="Suit" align="center" value={recommendations.body_recommendations.suit_cut} />
                     )}
                     {recommendations.body_recommendations.explanation && (
                       <p className="text-[11px] text-white/35 italic mt-1">{recommendations.body_recommendations.explanation}</p>
@@ -775,12 +775,15 @@ function ColorPill({ name, className }: { name: string; className?: string }) {
   );
 }
 
-function InfoRow({ label, value }: { label: string; value: string | number }) {
+function InfoRow({ label, value, align = "right" }: { label: string; value: string | number; align?: "right" | "center" }) {
   const displayValue = String(value).replace(/_/g, " ");
+  const valueClass = align === "center"
+    ? "text-xs text-foreground/70 leading-relaxed text-center flex-1"
+    : "text-xs text-foreground/70 leading-relaxed text-right max-w-[60%]";
   return (
     <div className="flex justify-between items-center py-2.5 border-b border-white/5 last:border-0">
       <span className="text-[11px] text-white/40 uppercase tracking-wider font-medium">{label}</span>
-      <span className="text-xs text-foreground/70 leading-relaxed text-center flex-1">{highlightFashionTerms(displayValue)}</span>
+      <span className={valueClass}>{highlightFashionTerms(displayValue)}</span>
     </div>
   );
 }
