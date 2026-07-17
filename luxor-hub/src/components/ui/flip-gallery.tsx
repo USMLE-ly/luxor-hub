@@ -468,7 +468,7 @@ export default function FlipGallery({ outfits, isLoading, onOutfitChange, onInde
                 width: '100%',
                 height: '100%',
                 objectFit: 'contain',
-                objectPosition: 'center',
+                objectPosition: '35% 30%',
                 zIndex: 1,
               }}
             />
