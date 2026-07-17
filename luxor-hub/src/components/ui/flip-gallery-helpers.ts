@@ -1,9 +1,13 @@
 import type { OutfitImages } from "./flip-gallery";
 
 export function getSections(o: OutfitImages): { sections: string[]; count: number } {
-  if (o.type === 'full_outfit') return { sections: [o.top], count: 1 };
-  if (o.type === 'dress') return { sections: [o.top, o.bottom], count: 2 };
-  return { sections: [o.top, o.mid, o.bottom], count: 3 };
+  let raw: string[];
+  if (o.type === 'full_outfit') raw = [o.top];
+  else if (o.type === 'dress') raw = [o.top, o.bottom];
+  else raw = [o.top, o.mid, o.bottom];
+  // Only include sections with valid image URLs — skip empty slots
+  const sections = raw.filter((url) => url && url.startsWith('http'));
+  return { sections, count: Math.max(sections.length, 1) };
 }
 
 export const SECTION_BASE: React.CSSProperties = {

@@ -95,6 +95,7 @@ export default function DressingRoomPage() {
   }, []); // one-time sync
 
   const [isGenerating, setIsGenerating] = useState(false);
+  const isGeneratingRef = useRef(false);
   const [activeOutfit, setActiveOutfit] = useState<OutfitImages | null>(null);
   const [displayProgress, setDisplayProgress] = useState(0);
   const [progressStage, setProgressStage] = useState("");
@@ -109,6 +110,8 @@ export default function DressingRoomPage() {
   /* ---------- Generate Outfit ---------- */
   const generateOutfits = async (occasion: string, count: number) => {
     if (!user) return;
+    if (isGeneratingRef.current) return;
+    isGeneratingRef.current = true;
     setIsGenerating(true);
     setProgressStage("Consulting MiMo...");
     try {
@@ -167,6 +170,7 @@ export default function DressingRoomPage() {
       toast.error(e.message || "Failed to generate outfits");
     } finally {
       setIsGenerating(false);
+      isGeneratingRef.current = false;
       setDisplayProgress(100);
     }
   };

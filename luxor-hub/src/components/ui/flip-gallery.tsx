@@ -175,7 +175,6 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
         setSectionBgColors(prev => ({ ...prev, [sectionKey]: bgColor }));
       };
       img.onerror = () => {}; // ignore
-    if (!url) { resolve(); return; }
       img.src = url;
     });
 
