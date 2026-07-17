@@ -9,7 +9,7 @@ import { Perspective, Highlight } from "@/components/ui/perspective-highlight";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
-import {CalendarDots, Check} from "@phosphor-icons/react";
+import {CalendarDots, Check, CaretLeft, CaretRight} from "@phosphor-icons/react";
 import { notifyEvent } from "@/lib/notificationService";
 import { supabase } from "@/integrations/supabase/client";
 import { humanizeTextArray } from "@/lib/humanizer";
@@ -104,6 +104,9 @@ export default function DressingRoomPage() {
   const [isLoadingAvailability, setIsLoadingAvailability] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [lastOccasion, setLastOccasion] = useState("");
+  const [hasGeneratedOutfit, setHasGeneratedOutfit] = useState(false);
+  const [galleryIndex, setGalleryIndex] = useState(0);
+  const [galleryTotal, setGalleryTotal] = useState(0);
   const cal = useCalendarActions();
 
   /* ---------- Generate Outfit ---------- */
@@ -158,6 +161,7 @@ export default function DressingRoomPage() {
           }));
         }
         setGeneratedImages(normalized);
+        setHasGeneratedOutfit(true);
         setDisplayProgress(100);
         toast.success(`${data.images.length} outfits generated!`);
         notifyEvent("outfit-generated");
@@ -171,6 +175,11 @@ export default function DressingRoomPage() {
       isGeneratingRef.current = false;
       setDisplayProgress(100);
     }
+  };
+
+  const handleIndexChange = (index: number, total: number) => {
+    setGalleryIndex(index);
+    setGalleryTotal(total);
   };
 
   const handleGenerateClick = () => {
@@ -228,6 +237,7 @@ export default function DressingRoomPage() {
   const handleDismiss = () => {
     setGeneratedImages([] as OutfitImages[]);
     setActiveOutfit(null);
+    setHasGeneratedOutfit(false);
     setShowNotifications(false);
   };
 
@@ -389,13 +399,9 @@ export default function DressingRoomPage() {
                 ) : generatedImages.length > 0 ? (
                   <FlipGallery
                     outfits={generatedImages}
-                    onGenerate={handleGenerateClick}
-                    onDismiss={handleDismiss}
-                    onAddToCalendar={(outfit) => {
-                      if (outfit) cal.openForAiOutfit(outfit, lastOccasion);
-                    }}
                     isLoading={isGenerating}
                     onOutfitChange={setActiveOutfit}
+                    onIndexChange={handleIndexChange}
                   />
                 ) : (
                   <div className="flex-1 flex items-center justify-center text-zinc-600 text-xs text-center px-4">
@@ -403,23 +409,66 @@ export default function DressingRoomPage() {
                   </div>
                 )}
               </div>
-              {/* Buttons — fixed at bottom, side by side (hidden when modal is open) */}
+              {/* Bottom action row */}
               {!showOccasionModal && availableOutfitCount === null && (
-              <div className="flex flex-row gap-3 px-2 pb-4 mt-auto">
-                <button
-                  onClick={handleGenerateClick}
-                  disabled={isGenerating}
-                  className="flex-1 py-3.5 rounded-full bg-gradient-to-r from-[#E8C87A] to-[#E8C87A]/80 text-zinc-900 text-sm font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-40"
-                >
-                  Generate
-                </button>
-                <button
-                  onClick={handleDismiss}
-                  disabled={isGenerating}
-                  className="flex-1 py-3.5 rounded-full bg-zinc-700/80 backdrop-blur-sm text-zinc-300 text-sm font-medium border border-zinc-600/50 hover:bg-zinc-600/80 transition-all disabled:opacity-40"
-                >
-                  Dismiss
-                </button>
+              <div className="flex flex-row items-center gap-2 px-2 pb-4 mt-auto">
+                {hasGeneratedOutfit ? (
+                  <>
+                    {/* Left: FlipGallery navigation arrows + counter */}
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => {
+                          // Trigger FlipGallery's internal prev via a ref or re-render trick
+                          // We use a workaround: dispatch a custom event that FlipGallery listens to
+                          window.dispatchEvent(new CustomEvent('flip-gallery-prev'));
+                        }}
+                        className="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-all shrink-0"
+                      >
+                        <CaretLeft size={18} />
+                      </button>
+                      <span className="text-[10px] text-zinc-400 font-medium min-w-[28px] text-center">{galleryIndex + 1}/{galleryTotal}</span>
+                      <button
+                        onClick={() => {
+                          window.dispatchEvent(new CustomEvent('flip-gallery-next'));
+                        }}
+                        className="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-all shrink-0"
+                      >
+                        <CaretRight size={18} />
+                      </button>
+                    </div>
+                    {/* Right: Calendar + Dismiss */}
+                    <button
+                      onClick={() => { if (activeOutfit) cal.openForAiOutfit(activeOutfit, lastOccasion); }}
+                      className="w-11 h-11 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 text-zinc-900 flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 transition-all shrink-0"
+                    >
+                      <CalendarDots className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={handleDismiss}
+                      disabled={isGenerating}
+                      className="flex-1 py-3.5 rounded-full bg-zinc-700/80 backdrop-blur-sm text-zinc-300 text-sm font-medium border border-zinc-600/50 hover:bg-zinc-600/80 transition-all disabled:opacity-40"
+                    >
+                      Dismiss
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={handleGenerateClick}
+                      disabled={isGenerating}
+                      className="flex-1 py-3.5 rounded-full bg-gradient-to-r from-[#E8C87A] to-[#E8C87A]/80 text-zinc-900 text-sm font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-40"
+                    >
+                      Generate
+                    </button>
+                    <button
+                      onClick={handleDismiss}
+                      disabled={isGenerating}
+                      className="flex-1 py-3.5 rounded-full bg-zinc-700/80 backdrop-blur-sm text-zinc-300 text-sm font-medium border border-zinc-600/50 hover:bg-zinc-600/80 transition-all disabled:opacity-40"
+                    >
+                      Dismiss
+                    </button>
+                  </>
+                )}
               </div>
               )}
               {/* ---- Occasion Modal ---- */}

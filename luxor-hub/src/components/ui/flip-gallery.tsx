@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import {CaretLeft, CaretRight, CalendarDots} from "@phosphor-icons/react";
+
 import { getSections, SECTION_BASE, DIVIDER_STYLE, FLIP_SPEED, DOMINO_DELAY, preloadImage } from "./flip-gallery-helpers";
 import { MarketingBadges } from '@/components/ui/marketing-badges';
 
@@ -14,11 +14,9 @@ export interface OutfitImages {
 
 interface FlipGalleryProps {
   outfits: OutfitImages[];
-  onGenerate: () => void;
-  onDismiss: () => void;
-  onAddToCalendar?: (outfit: OutfitImages) => void;
   isLoading: boolean;
   onOutfitChange?: (outfit: OutfitImages) => void;
+  onIndexChange?: (index: number, total: number) => void;
 }
 
 /* ------------------------------------------------------------------ */
@@ -71,7 +69,7 @@ const preloadImage = (url: string | undefined | null): Promise<void> => {
 /* ------------------------------------------------------------------ */
 /*  Component                                                         */
 /* ------------------------------------------------------------------ */
-export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCalendar, isLoading, onOutfitChange }: FlipGalleryProps) {
+export default function FlipGallery({ outfits, isLoading, onOutfitChange, onIndexChange }: FlipGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flipState, setFlipState] = useState<'idle' | 'out' | 'in'>('idle');
   const [preloadingDir, setPreloadingDir] = useState<'next' | 'prev' | null>(null);
@@ -147,10 +145,29 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
   }, [currentIndex, outfits, onOutfitChange]);
 
   useEffect(() => {
+    if (outfits.length > 0 && onIndexChange) {
+      onIndexChange(currentIndex, outfits.length);
+    }
+  }, [currentIndex, outfits.length, onIndexChange]);
+
+  useEffect(() => {
     return () => {
       if (flipTimeoutRef.current) clearTimeout(flipTimeoutRef.current);
     };
   }, []);
+
+  // Listen for external navigation events from parent (DressingRoom arrows)
+  useEffect(() => {
+    const handleExternalPrev = () => handlePrev();
+    const handleExternalNext = () => handleNext();
+    window.addEventListener('flip-gallery-prev', handleExternalPrev);
+    window.addEventListener('flip-gallery-next', handleExternalNext);
+    return () => {
+      window.removeEventListener('flip-gallery-prev', handleExternalPrev);
+      window.removeEventListener('flip-gallery-next', handleExternalNext);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [handlePrev, handleNext]);
 
   // ── Extract edge colors from outfit images (background expansion) ──
   const extractColorsRef = useRef<AbortController | null>(null);
@@ -410,92 +427,7 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
         />
       ))}
 
-      {/* Custom Bottom Controls — Dismiss right, arrows left, no overlap */}
-      <div style={{
-        position: 'absolute',
-        bottom: '16px',
-        left: '8px',
-        right: '8px',
-        zIndex: 20,
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        pointerEvents: 'none',
-      }}>
-        {/* Arrows — left edge */}
-        <div style={{ display: 'flex', gap: '12px', pointerEvents: 'auto' }}>
-          {outfits.length > 1 && (
-            <>
-              <button
-                onClick={handlePrev}
-                style={{
-                  backgroundColor: preloadingDir === 'prev' ? '#3b82f6' : '#60a5fa',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: '40px',
-                  height: '40px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: preloadingDir === 'prev' ? 'default' : 'pointer',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                  transition: 'transform 0.2s ease',
-                  position: 'relative',
-                }}
-                onMouseEnter={(e) => { if (preloadingDir !== 'prev') e.currentTarget.style.transform = 'scale(1.1)'; }}
-                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-              >
-                {preloadingDir === 'prev' ? (
-                  <div style={{
-                    width: '20px', height: '20px',
-                    borderRadius: '50%',
-                    border: '2px solid rgba(255,255,255,0.2)',
-                    borderTopColor: '#ffffff',
-                    animation: 'spin 0.8s linear infinite',
-                  }} />
-                ) : (
-                  <CaretLeft size={20} />
-                )}
-              </button>
-              <button
-                onClick={handleNext}
-                style={{
-                  backgroundColor: preloadingDir === 'next' ? '#3b82f6' : '#60a5fa',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: '40px',
-                  height: '40px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: preloadingDir === 'next' ? 'default' : 'pointer',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                  transition: 'transform 0.2s ease',
-                  position: 'relative',
-                }}
-                onMouseEnter={(e) => { if (preloadingDir !== 'next') e.currentTarget.style.transform = 'scale(1.1)'; }}
-                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-              >
-                {preloadingDir === 'next' ? (
-                  <div style={{
-                    width: '20px', height: '20px',
-                    borderRadius: '50%',
-                    border: '2px solid rgba(255,255,255,0.2)',
-                    borderTopColor: '#ffffff',
-                    animation: 'spin 0.8s linear infinite',
-                  }} />
-                ) : (
-                  <CaretRight size={20} />
-                )}
-              </button>
-            </>
-          )}
-        </div>
 
-        {/* Right edge — empty, DressingRoom handles Generate/Dismiss */}
-      </div>
     </div>
   );
 }
