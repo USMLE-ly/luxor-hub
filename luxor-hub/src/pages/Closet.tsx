@@ -156,6 +156,9 @@ const Closet = () => {
   const [uploadOpen, setUploadOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
+  const [analysisStartTime, setAnalysisStartTime] = useState<number | null>(null);
+  const [analysisEta, setAnalysisEta] = useState<number | null>(null);
+  const closetLastTimingRef = useRef<{ mimo_vision?: number; total?: number } | null>(null);
   const [newItem, setNewItem] = useState({
     name: "", category: "top", color: "", brand: "", season: "all-season", occasion: "", style: "", notes: "", price: "",
   });
@@ -648,6 +651,8 @@ const Closet = () => {
     }
     isAnalyzingRef.current = true;
     setAnalyzing(true);
+    setAnalysisStartTime(Date.now());
+    setAnalysisEta(null);
     try {
       let imageData = previewUrl;
       if (selectedFile) {
@@ -712,7 +717,7 @@ const Closet = () => {
         toast.error("AI analysis failed. Fill in details manually. " + (err?.message || ""));
       }
     } finally {
-      setTimeout(() => { isAnalyzingRef.current = false; setAnalyzing(false); }, 2000);
+      setTimeout(() => { isAnalyzingRef.current = false; setAnalyzing(false); setAnalysisStartTime(null); setAnalysisEta(null); }, 2000);
     }
   }, [previewUrl, selectedFile, newItem.name]);
 

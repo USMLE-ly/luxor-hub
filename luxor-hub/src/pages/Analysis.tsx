@@ -117,6 +117,9 @@ export default function Analysis() {
   const [progressValue, setProgressValue] = useState(0);
   const [displayProgress, setDisplayProgress] = useState(0);
   const [progressStage, setProgressStage] = useState("");
+  const [generationStartTime, setGenerationStartTime] = useState<number | null>(null);
+  const [estimatedRemainingSeconds, setEstimatedRemainingSeconds] = useState<number | null>(null);
+  const lastTimingRef = useRef<{ mimo_vision?: number; total?: number } | null>(null);
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
@@ -219,6 +222,8 @@ export default function Analysis() {
   const analyzeOutfit = async (file: File) => {
     setAnalysisFailed(false);
     setLoading(true);
+    setGenerationStartTime(Date.now());
+    setEstimatedRemainingSeconds(null);
     setProgressValue(10);
     setProgressStage("Compressing image...");
     try {
@@ -250,6 +255,7 @@ export default function Analysis() {
             throw new Error(errMsg);
           }
           fnData = await response.json();
+          if (fnData?.timing) lastTimingRef.current = fnData.timing;
           if (!fnData || !fnData.success) {
             const errDetail = fnData?.error ? 'Backend: ' + fnData.error : 'Analysis failed - empty response';
             console.error('[ANALYZE-ERROR] Backend response:', JSON.stringify(fnData));
@@ -361,6 +367,8 @@ export default function Analysis() {
       }
     } finally {
       setLoading(false);
+      setGenerationStartTime(null);
+      setEstimatedRemainingSeconds(null);
     }
   };
 
@@ -510,22 +518,31 @@ export default function Analysis() {
   /* ---------- Pre-computed lists ---------- */
 
 
-  // ── Smooth auto-increment progress: 0 → 95% during loading, jumps to 100% on success ──
+  // ── Real-time ETA + linked progress for Analysis ──
   useEffect(() => {
-    if (!loading) {
-      setDisplayProgress(progressValue);
-      return;
-    }
+    if (!generationStartTime || !loading) return;
     setDisplayProgress(0);
+
+    const prev = lastTimingRef.current;
+    const estimatedTotal = prev?.total || 45; // Analysis is typically faster than generation
+
     const timer = setInterval(() => {
-      setDisplayProgress(prev => {
-        if (prev >= 95) return 95;
-        const increment = prev < 30 ? 3 : prev < 60 ? 2 : prev < 80 ? 1.5 : 1;
-        return Math.min(prev + increment, 95);
-      });
+      const elapsedMs = Date.now() - generationStartTime;
+      const elapsedSeconds = elapsedMs / 1000;
+
+      if (elapsedSeconds < 3) {
+        setEstimatedRemainingSeconds(null);
+        return;
+      }
+
+      const remaining = Math.max(0, Math.round(estimatedTotal - elapsedSeconds));
+      setEstimatedRemainingSeconds(remaining);
+      const realProgress = Math.min(99, Math.round((elapsedSeconds / estimatedTotal) * 100));
+      setDisplayProgress(realProgress);
     }, 200);
+
     return () => clearInterval(timer);
-  }, [loading, progressValue]);
+  }, [generationStartTime, loading]);
 
 
   // ── Early return guard: prevent ".for is not iterable" crash ──
@@ -633,6 +650,13 @@ export default function Analysis() {
                           </span>
                         </div>
                         <p className="text-sm text-white/70 font-medium tracking-wide">{progressStage}</p>
+                        {estimatedRemainingSeconds !== null && estimatedRemainingSeconds > 0 && (
+                          <p className="text-xs text-white/40 animate-pulse">
+                            {estimatedRemainingSeconds > 60
+                              ? `About ${Math.round(estimatedRemainingSeconds / 60)} min remaining`
+                              : `About ${estimatedRemainingSeconds}s remaining`}
+                          </p>
+                        )}
                       </motion.div>
                     )}
                   </AnimatePresence>

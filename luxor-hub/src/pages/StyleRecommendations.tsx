@@ -94,6 +94,9 @@ import { getApiUrl } from "@/lib/api";
 export default function StyleRecommendationsPage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [analysisStartTime, setAnalysisStartTime] = useState<number | null>(null);
+  const [analysisEta, setAnalysisEta] = useState<number | null>(null);
+  const styleLastTimingRef = useRef<{ mimo_vision?: number; mimo_text?: number; total?: number } | null>(null);
   const [progressValue, setProgressValue] = useState(0);
   const [displayProgress, setDisplayProgress] = useState(0);
   const [progressStage, setProgressStage] = useState("");
@@ -199,6 +202,8 @@ export default function StyleRecommendationsPage() {
   const handleFullAnalysis = async () => {
     if (!imagePreview) return;
     setAnalyzing(true);
+    setAnalysisStartTime(Date.now());
+    setAnalysisEta(null);
     setError(null);
     const api = getApiUrl();
 
@@ -272,6 +277,8 @@ export default function StyleRecommendationsPage() {
       toast.error(e.message || "Analysis failed. Please try again.");
     } finally {
       setAnalyzing(false);
+      setAnalysisStartTime(null);
+      setAnalysisEta(null);
     }
   };
 

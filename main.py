@@ -1940,6 +1940,7 @@ RULES:
 - suggested_name should be 2-5 words.
 """
 
+    _t0 = time.time()
     try:
         result = call_mimo_vision(image_b64, analyze_prompt, 0.2)
         if result:
@@ -1974,6 +1975,7 @@ RULES:
             occasion = result.get("occasion", "Casual")
 
             _log.info("[CLOSET-AI] Analysis: category=%s color=%s type=%s", category, color, item_type)
+            timing = {"mimo_vision": round(time.time() - _t0, 2), "total": round(time.time() - _t0, 2)}
             return jsonify({
                 "success": True,
                 "category": category,
@@ -1987,6 +1989,7 @@ RULES:
                 "item_style": style,
                 "season": season,
                 "occasion": occasion,
+                "timing": timing,
             })
     except Exception as exc:
         _log.error("[CLOSET-AI] Vision error: %s", exc, exc_info=True)
@@ -2598,7 +2601,9 @@ def style_analyze():
 
         _log.info("[STYLE] Analyzing photo for body/face")
 
+        _t_style = time.time()
         result = call_mimo_vision(image_b64, STYLE_ANALYSIS_PROMPT, temperature=0.3)
+        _style_time = round(time.time() - _t_style, 2)
         if not result:
             return jsonify({"success": False, "error": "Analysis failed. MiMo Vision could not process the image."})
 
@@ -2633,7 +2638,7 @@ def style_analyze():
         }
 
         _log.info("[STYLE] Analysis complete: face=%s body=%s skin=%s", analysis["face_shape"], analysis["body_type"], analysis["skin_tone"])
-        return jsonify({"success": True, "analysis": analysis})
+        return jsonify({"success": True, "analysis": analysis, "timing": {"mimo_vision": _style_time, "total": round(time.time() - _t_style, 2)}})
     except Exception as exc:
         _log.error("[STYLE] Error: %s", exc, exc_info=True)
         return jsonify({"success": False, "error": f"Analysis failed: {str(exc)[:100]}"}), 500
@@ -2661,7 +2666,9 @@ def style_recommendations():
             {"role": "user", "content": prompt},
         ]
 
+        _t_rec = time.time()
         result = call_mimo_text(messages, temperature=0.4, timeout=90, max_tokens=4096, model=MIMO_VISION_MODEL)
+        _rec_time = round(time.time() - _t_rec, 2)
         if not result:
             return jsonify({"success": False, "error": "Failed to generate recommendations."})
 
@@ -2691,7 +2698,7 @@ def style_recommendations():
         }
 
         _log.info("[STYLE] Recommendations generated: %d tips", len(recommendations["honest_tips"]))
-        return jsonify({"success": True, "recommendations": recommendations})
+        return jsonify({"success": True, "recommendations": recommendations, "timing": {"mimo_text": _rec_time, "total": round(time.time() - _t_rec, 2)}})
     except Exception as exc:
         _log.error("[STYLE] Error: %s", exc, exc_info=True)
         import traceback, sys
@@ -2717,7 +2724,9 @@ def outfit_review():
         _log.info("[STYLE] Reviewing outfit for occasion=%s", occasion)
 
         review_prompt = OUTFIT_REVIEW_PROMPT + f"\n\nOccasion: {occasion}"
+        _t_rev = time.time()
         result = call_mimo_vision(image_b64, review_prompt, temperature=0.3)
+        _rev_time = round(time.time() - _t_rev, 2)
         if not result:
             return jsonify({"success": False, "error": "Outfit review failed."})
 
@@ -2730,7 +2739,7 @@ def outfit_review():
         }
 
         _log.info("[STYLE] Outfit reviewed: score=%d, %d improvements", review["overall_score"], len(review["improvements"]))
-        return jsonify({"success": True, "review": review})
+        return jsonify({"success": True, "review": review, "timing": {"mimo_vision": _rev_time, "total": round(time.time() - _t_rev, 2)}})
     except Exception as exc:
         _log.error("[STYLE] Error: %s", exc, exc_info=True)
         return jsonify({"success": False, "error": f"Review failed: {str(exc)[:100]}"}), 500

@@ -1,6 +1,7 @@
 """Outfit analysis endpoint — POST /api/v1/analyze-outfit."""
 
 import logging
+import time
 
 from flask import request, jsonify
 
@@ -26,9 +27,13 @@ def init_routes(app):
         if not image_b64:
             return jsonify({"error": "Missing image_b64"}), 400
         _image_b64_cache = image_b64
+        _t0 = time.time()
         try:
             result = get_fashion_decision(image_b64)
-            return jsonify(map_analysis(result))
+            timing = {"mimo_vision": round(time.time() - _t0, 2), "total": round(time.time() - _t0, 2)}
+            response = map_analysis(result)
+            response["timing"] = timing
+            return jsonify(response)
         except Exception as exc:
             _log.error("[ANALYZE] ERROR: %s", exc)
             return jsonify({
