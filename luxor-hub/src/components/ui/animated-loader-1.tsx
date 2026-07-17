@@ -1,35 +1,43 @@
 import React from 'react';
 
-const AnimatedLoader: React.FC = () => {
-  const squares = Array.from({ length: 9 });
-
+const Loader = () => {
   return (
-    <div className="w-full min-h-screen flex items-center justify-center relative overflow-hidden bg-[#10352a]">
-      {squares.map((_, i) => (
-        <div
-          key={i}
-          className="absolute top-0 left-0 w-7 h-7 m-0.5 animate-square bg-[#E8C87A]"
-          style={{ animationDelay: `${i * 0.1}s` }}
-        />
-      ))}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#10352a] overflow-hidden">
+      <div className="relative w-24 h-24 rotate-45 z-10">
+        {[...Array(7)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute top-0 left-0 w-7 h-7 m-0.5 animate-square bg-[#E8C87A]"
+            style={{ animationDelay: `${-1.4285714286 * i}s` }}
+          />
+        ))}
+      </div>
       <style>{`
         @keyframes square-animation {
-          0% { top: 0; left: 0; }
-          12.5% { top: 0; left: calc(100% - 2.75rem); }
-          25% { top: calc(100% - 2.75rem); left: calc(100% - 2.75rem); }
-          37.5% { top: calc(100% - 2.75rem); left: 0; }
-          50% { top: calc(50% - 1.375rem); left: calc(50% - 1.375rem); }
-          62.5% { top: 0; left: calc(50% - 1.375rem); }
-          75% { top: calc(100% - 2.75rem); left: calc(50% - 1.375rem); }
-          87.5% { top: calc(50% - 1.375rem); left: 0; }
-          100% { top: calc(50% - 1.375rem); left: calc(100% - 2.75rem); }
+          0% { left: 0; top: 0; }
+          10.5% { left: 0; top: 0; }
+          12.5% { left: 32px; top: 0; }
+          23% { left: 32px; top: 0; }
+          25% { left: 64px; top: 0; }
+          35.5% { left: 64px; top: 0; }
+          37.5% { left: 64px; top: 32px; }
+          48% { left: 64px; top: 32px; }
+          50% { left: 32px; top: 32px; }
+          60.5% { left: 32px; top: 32px; }
+          62.5% { left: 32px; top: 64px; }
+          73% { left: 32px; top: 64px; }
+          75% { left: 0; top: 64px; }
+          85.5% { left: 0; top: 64px; }
+          87.5% { left: 0; top: 32px; }
+          98% { left: 0; top: 32px; }
+          100% { left: 0; top: 0; }
         }
         .animate-square {
-          animation: square-animation 3s ease-in-out infinite;
+          animation: square-animation 10s ease-in-out infinite both;
         }
       `}</style>
     </div>
   );
 };
 
-export default AnimatedLoader;
+export default Loader;
