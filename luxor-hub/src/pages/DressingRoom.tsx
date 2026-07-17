@@ -109,6 +109,7 @@ export default function DressingRoomPage() {
   const [hasGeneratedOutfit, setHasGeneratedOutfit] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [galleryTotal, setGalleryTotal] = useState(0);
+  const lastTimingRef = useRef<{ load_closet?: number; collage?: number; mimo_vision?: number; total?: number } | null>(null);
   const cal = useCalendarActions();
 
   /* ---------- Generate Outfit ---------- */
@@ -119,7 +120,7 @@ export default function DressingRoomPage() {
     setIsGenerating(true);
     setGenerationStartTime(Date.now());
     setEstimatedRemainingSeconds(null);
-    setProgressStage("Consulting MiMo...");
+    setProgressStage("Loading your closet...");
     try {
       setProgressStage(`Generating ${count} ${occasion} outfits...`);
 
@@ -138,12 +139,13 @@ export default function DressingRoomPage() {
 
       console.log("[DR] Generate response status:", res.status);
       const data = await res.json();
-      console.log("[DR] Generate response:", data?.success, "images:", data?.images?.length);
+      console.log("[DR] Generate response:", data?.success, "images:", data?.images?.length, "timing:", data?.timing);
+      if (data?.timing) lastTimingRef.current = data.timing;
       // Strip 'for' key from API response if present (causes ".for is not iterable" crash)
       if (data && typeof data === "object" && "for" in data) { delete data.for; }
       if (!data.success) throw new Error(data.error || "Generation failed");
 
-      setProgressStage("Ready!");
+      setProgressStage("Finalizing outfits...");
 
       if (data.images?.length > 0) {
         const images = data.images || [];
@@ -248,16 +250,37 @@ export default function DressingRoomPage() {
 
 
 
-  // ── Real-time ETA + linked progress: drives both percentage and countdown ──
+  // ── Real-time ETA + linked progress: uses backend timing for smart predictions ──
   useEffect(() => {
     if (!generationStartTime || !isGenerating) return;
 
     // Reset progress to 0 when generation starts
     setDisplayProgress(0);
 
+    // Use previous call timing if available, otherwise use conservative defaults
+    const prev = lastTimingRef.current;
+    const estimatedTotal = prev?.total || 65; // default 65s if no history
+
     const timer = setInterval(() => {
       const elapsedMs = Date.now() - generationStartTime;
       const elapsedSeconds = elapsedMs / 1000;
+
+      // Update progress stage label based on predicted phases
+      if (prev) {
+        const closetDone = elapsedSeconds > (prev.load_closet || 3);
+        const collageDone = elapsedSeconds > (prev.collage || 8);
+        if (!closetDone) {
+          setProgressStage("Loading your closet...");
+        } else if (!collageDone) {
+          setProgressStage("Building outfit preview...");
+        } else {
+          setProgressStage("Asking MiMo Vision...");
+        }
+      } else {
+        if (elapsedSeconds < 5) setProgressStage("Loading your closet...");
+        else if (elapsedSeconds < 15) setProgressStage("Building outfit preview...");
+        else setProgressStage("Asking MiMo Vision...");
+      }
 
       // After 3 seconds, start showing ETA and driving progress from real time
       if (elapsedSeconds < 3) {
@@ -265,8 +288,6 @@ export default function DressingRoomPage() {
         return;
       }
 
-      // Assume ~65s total for a typical MiMo Vision 2.5v call
-      const estimatedTotal = 65;
       const remaining = Math.max(0, Math.round(estimatedTotal - elapsedSeconds));
       setEstimatedRemainingSeconds(remaining);
 

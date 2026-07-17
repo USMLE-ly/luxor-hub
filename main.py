@@ -2835,6 +2835,8 @@ def generate_outfits():
         occasion = data.get("occasion", "casual")
         count = max(1, min(int(data.get("count", 3)), 7))
         _log.info("[DRESSING] Generating %d outfits for %s", count, occasion)
+        _t_start = time.time()
+        timing = {}
 
         # Load items from Qdrant (or local JSON fallback)
         gen_uid = data.get("user_id", "")
@@ -2858,6 +2860,7 @@ def generate_outfits():
                     closet_items = [i for i in closet_items if i.get("user_id") == gen_uid]
             except (FileNotFoundError, json.JSONDecodeError):
                 pass
+        timing["load_closet"] = round(time.time() - _t_start, 2)
         if not closet_items:
             return jsonify({"success": False, "images": [], "error": "Your closet is empty! Add items first."}), 200
 
@@ -3001,6 +3004,7 @@ def generate_outfits():
             canvas.save(buf, format="JPEG", quality=88)
             collage_b64 = base64.b64encode(buf.getvalue()).decode()
             _log.info("[DRESSING] Collage: %dx%d %dKB", cw2,ch2,len(collage_b64)//1024)
+            timing["collage"] = round(time.time() - _t_start, 2)
         except Exception as exc:
             _log.warning("[DRESSING] Collage failed: %s", exc)
 
@@ -3058,6 +3062,7 @@ def generate_outfits():
                 _log.info("[DRESSING] Sending to MiMo Vision")
                 mimo_result = call_mimo_vision(collage_b64, vision_prompt, temperature=0.2)
                 _log.info("[DRESSING] MiMo Vision: %s", str(mimo_result)[:300])
+                timing["mimo_vision"] = round(time.time() - _t_start, 2)
                 print("[DRESSING-DEBUG] MIMO_SELECTED:", json.dumps(mimo_result, indent=2)[:500], file=sys.stderr)
             except Exception as exc:
                 _log.warning("[DRESSING] MiMo Vision error: %s", exc)
@@ -3207,13 +3212,16 @@ def generate_outfits():
                 "error": "MiMo Vision could not build any valid outfits for this occasion",
             }), 200
 
-        print(f"[DEBUG] Requested: {count}, Returned: {len(outfits)}")
+        timing["total"] = round(time.time() - _t_start, 2)
+        print(f"[DEBUG] Requested: {count}, Returned: {len(outfits)} | Timing: {timing}")
+        _log.info("[DRESSING] Timing breakdown: %s", timing)
         return jsonify({
             "success": True,
             "images": outfits,
             "occasion": occasion,
             "count": len(outfits),
             "source": debug_source,
+            "timing": timing,
         })
     except Exception as exc:
         _log.error("[DRESSING] Error: %s", exc, exc_info=True)
