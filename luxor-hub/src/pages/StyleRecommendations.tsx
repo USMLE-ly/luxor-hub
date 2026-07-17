@@ -779,8 +779,8 @@ function InfoRow({ label, value }: { label: string; value: string | number }) {
   const displayValue = String(value).replace(/_/g, " ");
   return (
     <div className="flex justify-between items-center py-2.5 border-b border-white/5 last:border-0">
-      <span className="text-xs text-foreground/70 leading-relaxed">{highlightFashionTerms(displayValue)}</span>
-      <span className="text-[11px] text-white/40 uppercase tracking-wider font-medium text-right">{label}</span>
+      <span className="text-[11px] text-white/40 uppercase tracking-wider font-medium">{label}</span>
+      <span className="text-xs text-foreground/70 leading-relaxed text-right max-w-[60%]">{highlightFashionTerms(displayValue)}</span>
     </div>
   );
 }
