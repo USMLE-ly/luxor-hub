@@ -783,6 +783,7 @@ function InfoRow({ label, value, align = "right" }: { label: string; value: stri
   return (
     <div className="flex items-center gap-3 py-2.5 border-b border-white/5 last:border-0">
       <span className="text-[11px] text-white/40 uppercase tracking-wider font-medium shrink-0">{label}</span>
+      {align === "left" && <span className="text-amber-400 text-xs shrink-0">✓</span>}
       <span className={valueClass}>{highlightFashionTerms(displayValue)}</span>
     </div>
   );
