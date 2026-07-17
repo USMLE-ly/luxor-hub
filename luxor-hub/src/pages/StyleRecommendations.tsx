@@ -494,7 +494,7 @@ export default function StyleRecommendationsPage() {
                         <span className="text-[11px] text-white/40 w-16 shrink-0">Best:</span>
                         <div className="flex flex-wrap gap-1.5">
                           {recommendations.color_analysis.best_colors.map((c, i) => (
-                            <span key={i} className="px-2 py-0.5 rounded-full bg-blue-400/15 text-blue-200 text-[11px]">{c}</span>
+                            <ColorPill key={i} name={c} />
                           ))}
                         </div>
                       </div>
@@ -504,7 +504,7 @@ export default function StyleRecommendationsPage() {
                         <span className="text-[11px] text-white/40 w-16 shrink-0">Avoid:</span>
                         <div className="flex flex-wrap gap-1.5">
                           {recommendations.color_analysis.colors_to_avoid.map((c, i) => (
-                            <span key={i} className="px-2 py-0.5 rounded-full bg-red-400/15 text-red-200 text-[11px]">{c}</span>
+                            <ColorPill key={i} name={c} />
                           ))}
                         </div>
                       </div>
@@ -514,7 +514,7 @@ export default function StyleRecommendationsPage() {
                         <span className="text-[11px] text-white/40 w-16 shrink-0">Accents:</span>
                         <div className="flex flex-wrap gap-1.5">
                           {recommendations.color_analysis.best_accessory_colors.map((c, i) => (
-                            <span key={i} className="px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-200 text-[11px]">{c}</span>
+                            <ColorPill key={i} name={c} />
                           ))}
                         </div>
                       </div>
@@ -524,7 +524,7 @@ export default function StyleRecommendationsPage() {
                         <span className="text-[11px] text-white/40 w-16 shrink-0">Metals:</span>
                         <div className="flex flex-wrap gap-1.5">
                           {recommendations.color_analysis.best_jewelry_metals.map((m, i) => (
-                            <span key={i} className="px-2 py-0.5 rounded-full bg-yellow-400/15 text-yellow-200 text-[11px]">{m}</span>
+                            <ColorPill key={i} name={m} />
                           ))}
                         </div>
                       </div>
@@ -780,7 +780,7 @@ function InfoRow({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="flex justify-between items-center py-2.5 border-b border-white/5 last:border-0">
       <span className="text-[11px] text-white/40 uppercase tracking-wider font-medium">{label}</span>
-      <span className="text-xs text-foreground/70 leading-relaxed text-right max-w-[60%]">{highlightFashionTerms(displayValue)}</span>
+      <span className="text-xs text-foreground/70 leading-relaxed text-center flex-1">{highlightFashionTerms(displayValue)}</span>
     </div>
   );
 }
