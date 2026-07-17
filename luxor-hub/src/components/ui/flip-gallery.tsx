@@ -371,6 +371,7 @@ export default function FlipGallery({ outfits, isLoading, onOutfitChange, onInde
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
       clipPath: getSplashClipPath(idx),
+      borderRadius: '1.5rem',
       zIndex: 2,
       // Glassmorphism — dark translucent so bleed blur shows through
       backdropFilter: 'blur(12px)',
