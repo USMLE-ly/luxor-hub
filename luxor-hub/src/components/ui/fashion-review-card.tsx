@@ -1,19 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  BarChart,
-  BarSeries,
-  Bar,
-  GridlineSeries,
-  Gridline,
-  LinearYAxis,
-  LinearYAxisTickSeries,
-  LinearYAxisTickLabel,
-  LinearXAxis,
-  LinearXAxisTickSeries,
-  LinearXAxisTickLabel,
-} from "reaviz";
+
 import { motion } from "framer-motion";
 import {Check, Warning, Sparkle, Star} from "@phosphor-icons/react";
 
@@ -115,56 +103,29 @@ export default function FashionReviewCard({
         </div>
       </div>
 
-      {/* ── CHART: Score Breakdown ── */}
+      {/* ── SCORE BREAKDOWN: CSS horizontal bars ── */}
       {chartData.length > 0 && (
         <div className="px-4 pb-4">
           <div className="flex items-center gap-2 mb-3 px-2">
             <Sparkle className="w-4 h-4 text-primary" />
             <h3 className="text-sm font-semibold text-foreground/80">Score Breakdown</h3>
           </div>
-          <div className="h-[220px] w-full">
-            <ChartBarHorizontal
-              data={chartData}
-              height={220}
-              series={
-                <BarSeries
-                  bar={<Bar gradient={null} cornerRadius={4} />}
-                  colorScheme="cybertron"
-                  layout="vertical"
-                  padding={0.2}
-                  groupPadding={8}
-                />
-              }
-              gridlines={
-                <GridlineSeries line={<Gridline strokeColor="rgba(255,255,255,0.05)" />} />
-              }
-              xAxis={
-                <LinearXAxis
-                  type="category"
-                  tickSeries={
-                    <LinearXAxisTickSeries
-                      tickLabel={
-                        <LinearXAxisTickLabel fill="rgba(255,255,255,0.5)" fontSize={10} rotation={-30} />
-                      }
-                    />
-                  }
-                />
-              }
-              yAxis={
-                <LinearYAxis
-                  type="value"
-                  domain={[0, 100]}
-                  tickSeries={
-                    <LinearYAxisTickSeries
-                      tickValues={[0, 20, 40, 60, 80, 100]}
-                      tickLabel={
-                        <LinearYAxisTickLabel fill="rgba(255,255,255,0.3)" fontSize={10} />
-                      }
-                    />
-                  }
-                />
-              }
-            />
+          <div className="flex flex-col gap-2.5 px-2">
+            {chartData.map((item, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <span className="text-[11px] text-white/50 w-28 text-right shrink-0 truncate">{item.key}</span>
+                <div className="flex-1 h-3 rounded-full bg-white/5 overflow-hidden">
+                  <motion.div
+                    className="h-full rounded-full"
+                    style={{ backgroundColor: scoreBarColor(item.data) }}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${item.data}%` }}
+                    transition={{ duration: 0.8, delay: i * 0.1, ease: [0.23, 1, 0.32, 1] }}
+                  />
+                </div>
+                <span className={`text-xs font-medium w-8 text-right ${scoreTextColor(item.data)}`}>{item.data}</span>
+              </div>
+            ))}
           </div>
         </div>
       )}

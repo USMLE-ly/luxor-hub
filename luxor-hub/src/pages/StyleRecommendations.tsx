@@ -6,7 +6,7 @@ import { notifyEvent } from "@/lib/notificationService";
 import { motion, AnimatePresence } from "framer-motion";
 import {Spinner, UploadSimple, Camera, Palette, FaceMask, User, Star, Lightbulb, Warning} from "@phosphor-icons/react";
 import { humanizeText } from "@/lib/humanizer";
-import InfoCardsTable, { type RowData, type CellData } from "@/components/ui/info-cards-table";
+
 import FashionReviewCard from "@/components/ui/fashion-review-card";
 import GlassTabs, { type GlassTab } from "@/components/ui/glass-tabs";
 
@@ -88,8 +88,6 @@ interface OutfitReview {
   improvements: { issue: string; suggestion: string; priority: string }[];
   honest_summary: string;
 }
-
-import { getApiUrl } from "@/lib/api";
 
 export default function StyleRecommendationsPage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -442,9 +440,152 @@ export default function StyleRecommendationsPage() {
 
           {/* ── TAB: Recommendations ── */}
           {activeTab === "recommendations" && recommendations && (
-            <motion.div key="recommendations" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
-              {/* Unified Recommendations Table */}
-              <InfoCardsTable rows={buildTableData(recommendations)} />
+            <motion.div key="recommendations" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col gap-6 w-full">
+              
+              {/* ── Color Analysis Card ── */}
+              {recommendations.color_analysis && (
+                <div className="relative p-1.5 rounded-[1.75rem] bg-white/[0.03] border border-white/10 shadow-lg shadow-forest/40">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/[0.07] via-transparent to-transparent pointer-events-none rounded-[1.75rem]" />
+                  <div className="relative overflow-hidden rounded-[1.25rem] bg-white/5 backdrop-blur-md p-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent pointer-events-none" />
+                  <div className="flex items-center gap-2 mb-4"><span className="text-primary"><Palette className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-foreground/80">Color Analysis</h3></div>
+                  <div className="flex flex-col gap-3">
+                    {recommendations.color_analysis.best_colors?.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[11px] text-white/40 w-16 shrink-0">Best:</span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {recommendations.color_analysis.best_colors.map((c, i) => (
+                            <span key={i} className="px-2 py-0.5 rounded-full bg-blue-400/15 text-blue-200 text-[11px]">{c}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {recommendations.color_analysis.colors_to_avoid?.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[11px] text-white/40 w-16 shrink-0">Avoid:</span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {recommendations.color_analysis.colors_to_avoid.map((c, i) => (
+                            <span key={i} className="px-2 py-0.5 rounded-full bg-red-400/15 text-red-200 text-[11px]">{c}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {recommendations.color_analysis.best_accessory_colors?.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[11px] text-white/40 w-16 shrink-0">Accents:</span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {recommendations.color_analysis.best_accessory_colors.map((c, i) => (
+                            <span key={i} className="px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-200 text-[11px]">{c}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {recommendations.color_analysis.best_jewelry_metals?.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[11px] text-white/40 w-16 shrink-0">Metals:</span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {recommendations.color_analysis.best_jewelry_metals.map((m, i) => (
+                            <span key={i} className="px-2 py-0.5 rounded-full bg-yellow-400/15 text-yellow-200 text-[11px]">{m}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {recommendations.color_analysis.explanation && (
+                      <p className="text-[11px] text-white/35 italic mt-1">{recommendations.color_analysis.explanation}</p>
+                    )}
+                  </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Face Recommendations Card ── */}
+              {recommendations.face_recommendations && (
+                <div className="relative p-1.5 rounded-[1.75rem] bg-white/[0.03] border border-white/10 shadow-lg shadow-forest/40">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/[0.07] via-transparent to-transparent pointer-events-none rounded-[1.75rem]" />
+                  <div className="relative overflow-hidden rounded-[1.25rem] bg-white/5 backdrop-blur-md p-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent pointer-events-none" />
+                  <div className="flex items-center gap-2 mb-4"><span className="text-primary"><FaceMask className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-foreground/80">Face Recommendations</h3></div>
+                  <div className="flex flex-col gap-2">
+                    {recommendations.face_recommendations.best_collar_types?.length > 0 && (
+                      <InfoRow label="Collars" value={recommendations.face_recommendations.best_collar_types.join(", ")} />
+                    )}
+                    {recommendations.face_recommendations.best_neckline_styles?.length > 0 && (
+                      <InfoRow label="Necklines" value={recommendations.face_recommendations.best_neckline_styles.join(", ")} />
+                    )}
+                    {recommendations.face_recommendations.glasses_recommendation && (
+                      <InfoRow label="Glasses" value={recommendations.face_recommendations.glasses_recommendation} />
+                    )}
+                    {recommendations.face_recommendations.hat_recommendation && (
+                      <InfoRow label="Hats" value={recommendations.face_recommendations.hat_recommendation} />
+                    )}
+                    {recommendations.face_recommendations.hairstyle_advice && (
+                      <InfoRow label="Hair" value={recommendations.face_recommendations.hairstyle_advice} />
+                    )}
+                    {recommendations.face_recommendations.explanation && (
+                      <p className="text-[11px] text-white/35 italic mt-1">{recommendations.face_recommendations.explanation}</p>
+                    )}
+                  </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Body Recommendations Card ── */}
+              {recommendations.body_recommendations && (
+                <div className="relative p-1.5 rounded-[1.75rem] bg-white/[0.03] border border-white/10 shadow-lg shadow-forest/40">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/[0.07] via-transparent to-transparent pointer-events-none rounded-[1.75rem]" />
+                  <div className="relative overflow-hidden rounded-[1.25rem] bg-white/5 backdrop-blur-md p-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent pointer-events-none" />
+                  <div className="flex items-center gap-2 mb-4"><span className="text-primary"><User className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-foreground/80">Body Recommendations</h3></div>
+                  <div className="flex flex-col gap-2">
+                    {recommendations.body_recommendations.shirt_fit && (
+                      <InfoRow label="Shirt" value={recommendations.body_recommendations.shirt_fit} />
+                    )}
+                    {recommendations.body_recommendations.jacket_fit && (
+                      <InfoRow label="Jacket" value={recommendations.body_recommendations.jacket_fit} />
+                    )}
+                    {recommendations.body_recommendations.pants_fit && (
+                      <InfoRow label="Pants" value={recommendations.body_recommendations.pants_fit} />
+                    )}
+                    {recommendations.body_recommendations.shorts_length && (
+                      <InfoRow label="Shorts" value={recommendations.body_recommendations.shorts_length} />
+                    )}
+                    {recommendations.body_recommendations.coat_style && (
+                      <InfoRow label="Coat" value={recommendations.body_recommendations.coat_style} />
+                    )}
+                    {recommendations.body_recommendations.suit_cut && (
+                      <InfoRow label="Suit" value={recommendations.body_recommendations.suit_cut} />
+                    )}
+                    {recommendations.body_recommendations.explanation && (
+                      <p className="text-[11px] text-white/35 italic mt-1">{recommendations.body_recommendations.explanation}</p>
+                    )}
+                  </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Honest Tips Card ── */}
+              {recommendations.honest_tips?.length > 0 && (
+                <div className="relative p-1.5 rounded-[1.75rem] bg-white/[0.03] border border-white/10 shadow-lg shadow-forest/40">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/[0.07] via-transparent to-transparent pointer-events-none rounded-[1.75rem]" />
+                  <div className="relative overflow-hidden rounded-[1.25rem] bg-white/5 backdrop-blur-md p-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent pointer-events-none" />
+                  <div className="flex items-center gap-2 mb-4"><span className="text-primary"><Lightbulb className="w-4 h-4" /></span><h3 className="text-sm font-semibold text-foreground/80">Honest Tips</h3></div>
+                  <div className="flex flex-col gap-2.5">
+                    {recommendations.honest_tips.map((tip, i) => (
+                      <div key={i} className="flex items-start gap-2">
+                        <span className="text-amber-400 mt-0.5 shrink-0">💡</span>
+                        <div className="flex-1">
+                          <p className="text-xs text-white/70 leading-relaxed">{tip.tip}</p>
+                          {tip.confidence > 0 && (
+                            <span className="text-[10px] text-white/30">Confidence: {tip.confidence}%</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  </div>
+                </div>
+              )}
               {/* No data fallback — when API returned nothing */}
               {recommendations && !recommendations.color_analysis?.best_colors?.length && 
                !recommendations.face_recommendations?.best_collar_types?.length &&
