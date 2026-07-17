@@ -422,17 +422,17 @@ export default function DressingRoomPage() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="absolute inset-0 z-40 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+                    className="absolute inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm"
                     onClick={() => setShowOccasionModal(false)}
                   >
                     <motion.div
                       initial={{ scale: 0.9, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0.9, opacity: 0 }}
-                      className="bg-emerald/95 border border-white/10 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl"
+                      className="bg-zinc-900 rounded-2xl p-6 shadow-2xl border border-zinc-700/40 flex flex-col gap-3 w-full max-w-[260px] pb-6"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <h3 className="text-lg font-semibold text-white mb-4">Pick an Occasion</h3>
+                      <h3 className="text-sm font-semibold text-white mb-2 text-center">Pick an Occasion</h3>
                       <Perspective maxRotateX={8} maxRotateY={16} smoothing={0.08}>
                         <div className="grid grid-cols-2 gap-3">
                           {OCCASIONS.map((occ, idx) => {
@@ -455,7 +455,7 @@ export default function DressingRoomPage() {
                       </Perspective>
                       <button
                         onClick={() => setShowOccasionModal(false)}
-                        className="w-full mt-4 py-2 text-sm text-white/50 hover:text-white transition-colors"
+                        className="w-full mt-3 py-2 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
                       >
                         Cancel
                       </button>
@@ -471,14 +471,14 @@ export default function DressingRoomPage() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="absolute inset-0 z-40 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+                    className="absolute inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm"
                     onClick={() => setAvailableOutfitCount(null)}
                   >
                     <motion.div
                       initial={{ scale: 0.9, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0.9, opacity: 0 }}
-                      className="bg-zinc-800 border border-zinc-700/50 rounded-2xl p-6 max-w-[300px] w-full mx-4 shadow-2xl"
+                      className="bg-zinc-900 rounded-2xl p-6 shadow-2xl border border-zinc-700/40 flex flex-col items-center gap-3 w-full max-w-[260px] pb-6"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <h3 className="text-white text-center font-medium mb-1">Available Outfits</h3>
@@ -501,7 +501,7 @@ export default function DressingRoomPage() {
                       </div>
                       <button
                         onClick={() => setAvailableOutfitCount(null)}
-                        className="w-full mt-4 py-2 text-zinc-500 text-xs hover:text-zinc-300 transition-colors"
+                        className="w-full mt-3 py-2 text-zinc-400 text-sm hover:text-zinc-200 transition-colors"
                       >
                         Cancel
                       </button>
@@ -600,7 +600,7 @@ export default function DressingRoomPage() {
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-emerald/95 border border-white/10 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl"
+                className="bg-zinc-900 rounded-2xl p-6 shadow-2xl border border-zinc-700/40 flex flex-col gap-3 w-full max-w-[260px] pb-6"
                 onClick={(e) => e.stopPropagation()}
               >
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
