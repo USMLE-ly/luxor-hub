@@ -720,13 +720,17 @@ const FASHION_KEYWORDS = [
 
 function highlightFashionTerms(text: string) {
   if (!text) return text;
-  // Build a single regex that matches any keyword (case-insensitive)
-  const pattern = new RegExp(`(${FASHION_KEYWORDS.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join("|")})`, "gi");
+  const escaped = FASHION_KEYWORDS.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const pattern = new RegExp(`(${escaped.join("|")})`, "gi");
   const parts = text.split(pattern);
-  return parts.map((part, i) =>
-    pattern.test(part)
-      ? React.createElement("span", { key: i, className: "text-zinc-100 font-medium" }, part)
-      : React.createElement("span", { key: i }, part)
+  return (
+    <>
+      {parts.map((part, i) =>
+        pattern.test(part)
+          ? <span key={i} className="text-zinc-100 font-medium">{part}</span>
+          : <span key={i}>{part}</span>
+      )}
+    </>
   );
 }
 
