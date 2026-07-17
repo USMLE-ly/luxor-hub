@@ -524,7 +524,7 @@ const Analytics = () => {
                           <div className="min-w-0">
                             <p className="font-sans text-sm text-foreground truncate">{item.name || "Unnamed"}</p>
                             <p className="text-[10px] text-muted-foreground font-sans">
-                              {item.category} · {itemWears} wear{itemWears !== 1 ? "s" : ""} · {daysSince}d unused
+                              {item.rawCategory || item.category} · {itemWears} wear{itemWears !== 1 ? "s" : ""} · {daysSince}d unused
                             </p>
                           </div>
                         </div>

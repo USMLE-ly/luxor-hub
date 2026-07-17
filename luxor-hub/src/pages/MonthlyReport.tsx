@@ -302,7 +302,7 @@ const MonthlyReportInner = () => {
                             </div>
                           )}
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs font-sans text-foreground truncate capitalize">{item.name || item.category}</p>
+                            <p className="text-xs font-sans text-foreground truncate capitalize">{item.name || item.rawCategory || item.category}</p>
                             <p className="text-[9px] text-muted-foreground font-sans">{item.wears} wears · ${item.priceNum}</p>
                           </div>
                           <div className="flex items-center gap-1">
@@ -328,7 +328,7 @@ const MonthlyReportInner = () => {
                             <TShirt className="w-3.5 h-3.5 text-muted-foreground/40" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs font-sans text-foreground truncate capitalize">{item.name || item.category}</p>
+                            <p className="text-xs font-sans text-foreground truncate capitalize">{item.name || item.rawCategory || item.category}</p>
                             <p className="text-[9px] text-muted-foreground font-sans">{item.wears} wears · ${item.priceNum}</p>
                           </div>
                           <span className="text-xs font-sans font-bold text-red-400">${item.cpw}<span className="text-[8px] text-muted-foreground">/wear</span></span>
@@ -382,7 +382,7 @@ const MonthlyReportInner = () => {
                           ) : (
                             <TShirt className="w-3.5 h-3.5 text-emerald-500/60" />
                           )}
-                          <span className="text-[10px] font-sans text-foreground capitalize">{item.name || item.category}</span>
+                          <span className="text-[10px] font-sans text-foreground capitalize">{item.name || item.rawCategory || item.category}</span>
                         </div>
                       ))}
                     </div>
@@ -404,7 +404,7 @@ const MonthlyReportInner = () => {
                           ) : (
                             <TShirt className="w-3.5 h-3.5 text-orange-400/60" />
                           )}
-                          <span className="text-[10px] font-sans text-foreground capitalize">{item.name || item.category}</span>
+                          <span className="text-[10px] font-sans text-foreground capitalize">{item.name || item.rawCategory || item.category}</span>
                         </div>
                       ))}
                     </div>

@@ -230,7 +230,7 @@ const OutfitBuilder = () => {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-xs font-sans text-foreground truncate">{item.name || "Unnamed"}</p>
-                        <p className="text-[10px] text-muted-foreground font-sans capitalize">{item.category}</p>
+                        <p className="text-[10px] text-muted-foreground font-sans capitalize">{item.rawCategory || item.category}</p>
                       </div>
                       {onCanvas && <span className="text-[9px] text-primary font-sans">✓</span>}
                     </div>

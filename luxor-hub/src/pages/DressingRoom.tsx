@@ -415,6 +415,99 @@ export default function DressingRoomPage() {
                   Dismiss
                 </button>
               </div>
+              {/* ---- Occasion Modal ---- */}
+              <AnimatePresence>
+                {showOccasionModal && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 z-40 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+                    onClick={() => setShowOccasionModal(false)}
+                  >
+                    <motion.div
+                      initial={{ scale: 0.9, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.9, opacity: 0 }}
+                      className="bg-emerald/95 border border-white/10 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <h3 className="text-lg font-semibold text-white mb-4">Pick an Occasion</h3>
+                      <Perspective maxRotateX={8} maxRotateY={16} smoothing={0.08}>
+                        <div className="grid grid-cols-2 gap-3">
+                          {OCCASIONS.map((occ, idx) => {
+                            const occColors: Array<'red' | 'purple' | 'green'> = ['red', 'green', 'purple', 'red', 'green'];
+
+                            return (
+                              <button
+                                key={occ.id}
+                                onClick={(e) => handleOccasionSelect(occ.id, e)}
+                                className="flex flex-col items-center gap-2 p-4 rounded-xl border border-white/10 hover:border-amber-400/50 hover:bg-amber-400/10 transition-all"
+                              >
+                                <span className="text-2xl">{occ.emoji}</span>
+                                <span className="text-sm">
+                                  <Highlight color={occColors[idx % occColors.length]}>{occ.label}</Highlight>
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </Perspective>
+                      <button
+                        onClick={() => setShowOccasionModal(false)}
+                        className="w-full mt-4 py-2 text-sm text-white/50 hover:text-white transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* ---- Availability Chooser Modal ---- */}
+              <AnimatePresence>
+                {availableOutfitCount !== null && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 z-40 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+                    onClick={() => setAvailableOutfitCount(null)}
+                  >
+                    <motion.div
+                      initial={{ scale: 0.9, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.9, opacity: 0 }}
+                      className="bg-zinc-800 border border-zinc-700/50 rounded-2xl p-6 max-w-[300px] w-full mx-4 shadow-2xl"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <h3 className="text-white text-center font-medium mb-1">Available Outfits</h3>
+                      <p className="text-zinc-400 text-center text-sm mb-4">
+                        We found <span className="text-amber-400 font-semibold">{availableOutfitCount}</span> outfit{availableOutfitCount !== 1 ? "s" : ""} for this occasion. How many do you want?
+                      </p>
+                      <div className="flex justify-center gap-3">
+                        {Array.from({ length: availableOutfitCount }, (_, i) => i + 1).map((count) => (
+                          <button
+                            key={count}
+                            onClick={() => {
+                              generateOutfits(lastOccasion, count);
+                              setAvailableOutfitCount(null);
+                            }}
+                            className="w-12 h-12 rounded-full bg-gradient-to-r from-[#E8C87A]/20 to-amber-500/20 border border-amber-400/30 hover:border-amber-400/60 hover:bg-amber-400/20 text-amber-300 text-sm font-medium transition-all"
+                          >
+                            {count}
+                          </button>
+                        ))}
+                      </div>
+                      <button
+                        onClick={() => setAvailableOutfitCount(null)}
+                        className="w-full mt-4 py-2 text-zinc-500 text-xs hover:text-zinc-300 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </motion.div>
+                  </motion.div>
+                )}
             </div>
             </div>
 
@@ -469,99 +562,6 @@ export default function DressingRoomPage() {
               </div>
             )}
           </AnimatePresence>
-        {/* ---- Occasion Modal ---- */}
-        <AnimatePresence>
-          {showOccasionModal && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-forest/60 backdrop-blur-sm"
-              onClick={() => setShowOccasionModal(false)}
-            >
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-emerald/95 border border-white/10 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <h3 className="text-lg font-semibold text-white mb-4">Pick an Occasion</h3>
-                <Perspective maxRotateX={8} maxRotateY={16} smoothing={0.08}>
-                  <div className="grid grid-cols-2 gap-3">
-                    {OCCASIONS.map((occ, idx) => {
-                      const occColors: Array<'red' | 'purple' | 'green'> = ['red', 'green', 'purple', 'red', 'green'];
-                      
-                      return (
-                        <button
-                          key={occ.id}
-                          onClick={(e) => handleOccasionSelect(occ.id, e)}
-                          className="flex flex-col items-center gap-2 p-4 rounded-xl border border-white/10 hover:border-amber-400/50 hover:bg-amber-400/10 transition-all"
-                        >
-                          <span className="text-2xl">{occ.emoji}</span>
-                          <span className="text-sm">
-                            <Highlight color={occColors[idx % occColors.length]}>{occ.label}</Highlight>
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </Perspective>
-                <button
-                  onClick={() => setShowOccasionModal(false)}
-                  className="w-full mt-4 py-2 text-sm text-white/50 hover:text-white transition-colors"
-                >
-                  Cancel
-                </button>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* ---- Availability Chooser Modal ---- */}
-        <AnimatePresence>
-          {availableOutfitCount !== null && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-              onClick={() => setAvailableOutfitCount(null)}
-            >
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-zinc-800 border border-zinc-700/50 rounded-2xl p-6 max-w-[300px] w-full mx-4 shadow-2xl"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <h3 className="text-white text-center font-medium mb-1">Available Outfits</h3>
-                <p className="text-zinc-400 text-center text-sm mb-4">
-                  We found <span className="text-amber-400 font-semibold">{availableOutfitCount}</span> outfit{availableOutfitCount !== 1 ? "s" : ""} for this occasion. How many do you want?
-                </p>
-                <div className="flex justify-center gap-3">
-                  {Array.from({ length: availableOutfitCount }, (_, i) => i + 1).map((count) => (
-                    <button
-                      key={count}
-                      onClick={() => {
-                        generateOutfits(lastOccasion, count);
-                        setAvailableOutfitCount(null);
-                      }}
-                      className="w-12 h-12 rounded-full bg-gradient-to-r from-[#E8C87A]/20 to-amber-500/20 border border-amber-400/30 hover:border-amber-400/60 hover:bg-amber-400/20 text-amber-300 text-sm font-medium transition-all"
-                    >
-                      {count}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  onClick={() => setAvailableOutfitCount(null)}
-                  className="w-full mt-4 py-2 text-zinc-500 text-xs hover:text-zinc-300 transition-colors"
-                >
-                  Cancel
-                </button>
-              </motion.div>
-            </motion.div>
-          )}
         </AnimatePresence>
 
         {/* ---- Loading Availability Indicator ---- */}
@@ -571,7 +571,7 @@ export default function DressingRoomPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
             >
               <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
@@ -593,7 +593,7 @@ export default function DressingRoomPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-forest/60 backdrop-blur-sm"
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
               onClick={() => cal.closeModal()}
             >
               <motion.div
