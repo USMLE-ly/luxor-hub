@@ -362,6 +362,7 @@ export default function FlipGallery({ outfits, isLoading, onOutfitChange, onInde
       transition: isAnimating ? `transform ${FLIP_SPEED}ms cubic-bezier(0.65, 0, 0.35, 1)` : 'none',
       transitionDelay: isAnimating ? `${idx * DOMINO_DELAY}ms` : '0ms',
       overflow: 'hidden',
+      borderRadius: '1rem',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
