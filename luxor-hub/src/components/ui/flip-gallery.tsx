@@ -362,11 +362,10 @@ export default function FlipGallery({ outfits, isLoading, onOutfitChange, onInde
       transition: isAnimating ? `transform ${FLIP_SPEED}ms cubic-bezier(0.65, 0, 0.35, 1)` : 'none',
       transitionDelay: isAnimating ? `${idx * DOMINO_DELAY}ms` : '0ms',
       overflow: 'hidden',
-      borderRadius: '1rem',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: 'rgba(15,20,25,0.55)',
+      backgroundColor: 'transparent',
       backgroundImage: 'none',
       backgroundSize: 'cover',
       backgroundPosition: 'center',
@@ -436,6 +435,19 @@ export default function FlipGallery({ outfits, isLoading, onOutfitChange, onInde
         const labels = ['Top', 'Mid', 'Bottom'];
         return (
         <div key={idx} style={getSectionStyle(idx)}>
+          {/* Inner rounded glass background - survives the clip-path cut */}
+          {hasValidImage && (
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              borderRadius: '1rem',
+              backgroundColor: 'rgba(15,20,25,0.55)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255,255,255,0.06)',
+              zIndex: 0,
+            }} />
+          )}
           {/* Glassmorphism overlay — frosted glass on top of the image */}
           {hasValidImage && (
             <div style={{
