@@ -400,7 +400,7 @@ export default function DressingRoomPage() {
               </div>
               {/* Buttons — fixed at bottom, side by side (hidden when modal is open) */}
               {!showOccasionModal && availableOutfitCount === null && (
-              <div className="absolute bottom-6 left-4 right-4 z-50 flex flex-row gap-3">
+              <div className="flex flex-row gap-3 px-2 pb-4 mt-auto">
                 <button
                   onClick={handleGenerateClick}
                   disabled={isGenerating}
