@@ -470,21 +470,29 @@ export default function FlipGallery({ outfits, isLoading, onOutfitChange, onInde
               zIndex: 3,
             }} />
           )}
-          {/* Sharp image inside clip-path — crisp and focused */}
+          {/* Perfect circle image inside clip-path */}
           {hasValidImage && (
-            <img
-              src={url}
-              alt={labels[idx] || 'Outfit item'}
-              style={{
-                position: 'absolute',
-                inset: '8%',
-                width: '100%',
-                height: '100%',
-                objectFit: 'contain',
-                objectPosition: '35% 30%',
-                zIndex: 1,
-              }}
-            />
+            <div style={{
+              position: 'relative',
+              zIndex: 1,
+              width: '78%',
+              aspectRatio: '1',
+              borderRadius: '50%',
+              overflow: 'hidden',
+              border: '3px solid rgba(255,255,255,0.08)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+            }}>
+              <img
+                src={url}
+                alt={labels[idx] || 'Outfit item'}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  objectPosition: 'center',
+                }}
+              />
+            </div>
           )}
           {!hasValidImage && (
             <div className="flex flex-col items-center justify-center gap-1 opacity-40">
