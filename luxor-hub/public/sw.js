@@ -8,14 +8,12 @@
  * - Stale-while-revalidate for pages
  */
 
-const CACHE_NAME = "luxor-v1";
-const STATIC_CACHE = "luxor-static-v1";
-const DYNAMIC_CACHE = "luxor-dynamic-v1";
+const CACHE_NAME = "luxor-v2";
+const STATIC_CACHE = "luxor-static-v2";
+const DYNAMIC_CACHE = "luxor-dynamic-v2";
 
 // Assets to pre-cache on install
 const PRECACHE_ASSETS = [
-  "/",
-  "/index.html",
   "/favicon.ico",
   "/favicon.png",
   "/manifest.webmanifest",
@@ -63,13 +61,33 @@ self.addEventListener("fetch", (event) => {
   // Skip edge function calls
   if (url.pathname.includes("/functions/v1/")) return;
 
-  // Static assets: cache-first
+  // JS/CSS: network-first (prevents stale chunk hashes)
   if (
-    request.destination === "style" ||
     request.destination === "script" ||
+    request.destination === "style" ||
+    url.pathname.match(/\.(js|css)$/)
+  ) {
+    event.respondWith(
+      fetch(request).then((response) => {
+        if (response.status === 200) {
+          const clone = response.clone();
+          caches.open(STATIC_CACHE).then((cache) => cache.put(request, clone));
+        }
+        return response;
+      }).catch(() => {
+        return caches.match(request).then((cached) => {
+          return cached || new Response("Offline", { status: 503 });
+        });
+      })
+    );
+    return;
+  }
+
+  // Other static assets: cache-first (fonts, images - these don't change)
+  if (
     request.destination === "font" ||
     request.destination === "image" ||
-    url.pathname.match(/\.(woff2?|ttf|eot|css|js|png|jpg|jpeg|gif|svg|ico|mp4)$/)
+    url.pathname.match(/\.(woff2?|ttf|eot|png|jpg|jpeg|gif|svg|ico|mp4)$/)
   ) {
     event.respondWith(
       caches.match(request).then((cached) => {
@@ -81,7 +99,6 @@ self.addEventListener("fetch", (event) => {
           }
           return response;
         }).catch(() => {
-          // Return offline placeholder for images
           if (request.destination === "image") {
             return new Response(
               '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect fill="#1a2e2a" width="200" height="200"/><text fill="#c9a84c" font-family="sans-serif" font-size="14" x="50%" y="50%" text-anchor="middle" dy=".3em">LUXOR®</text></svg>',
