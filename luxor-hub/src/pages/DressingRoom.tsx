@@ -103,7 +103,6 @@ export default function DressingRoomPage() {
   const [availableOutfitCount, setAvailableOutfitCount] = useState<number | null>(null);
   const [isLoadingAvailability, setIsLoadingAvailability] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [hasGeneratedOutfit, setHasGeneratedOutfit] = useState(false);
   const [lastOccasion, setLastOccasion] = useState("");
   const cal = useCalendarActions();
 
@@ -159,7 +158,6 @@ export default function DressingRoomPage() {
           }));
         }
         setGeneratedImages(normalized);
-        setHasGeneratedOutfit(true);
         setDisplayProgress(100);
         toast.success(`${data.images.length} outfits generated!`);
         notifyEvent("outfit-generated");
@@ -230,7 +228,6 @@ export default function DressingRoomPage() {
   const handleDismiss = () => {
     setGeneratedImages([] as OutfitImages[]);
     setActiveOutfit(null);
-    setHasGeneratedOutfit(false);
     setShowNotifications(false);
   };
 
@@ -409,43 +406,13 @@ export default function DressingRoomPage() {
               {/* Buttons — fixed at bottom, side by side (hidden when modal is open) */}
               {!showOccasionModal && availableOutfitCount === null && (
               <div className="flex flex-row gap-3 px-2 pb-4 mt-auto">
-                {hasGeneratedOutfit ? (
-                  <div className="flex-1 flex items-center justify-center gap-4">
-                    <button
-                      onClick={() => {
-                        const idx = generatedImages.indexOf(activeOutfit!);
-                        const prev = idx > 0 ? generatedImages[idx - 1] : generatedImages[generatedImages.length - 1];
-                        setActiveOutfit(prev);
-                      }}
-                      disabled={!activeOutfit || generatedImages.length <= 1}
-                      className="w-11 h-11 rounded-full bg-white/10 backdrop-blur-lg border border-white/20 text-white flex items-center justify-center shadow-lg hover:bg-white/20 transition-all disabled:opacity-30"
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-                    </button>
-                    <span className="text-[10px] text-zinc-500 font-medium min-w-[40px] text-center">
-                      {generatedImages.indexOf(activeOutfit!) + 1}/{generatedImages.length}
-                    </span>
-                    <button
-                      onClick={() => {
-                        const idx = generatedImages.indexOf(activeOutfit!);
-                        const next = idx < generatedImages.length - 1 ? generatedImages[idx + 1] : generatedImages[0];
-                        setActiveOutfit(next);
-                      }}
-                      disabled={!activeOutfit || generatedImages.length <= 1}
-                      className="w-11 h-11 rounded-full bg-white/10 backdrop-blur-lg border border-white/20 text-white flex items-center justify-center shadow-lg hover:bg-white/20 transition-all disabled:opacity-30"
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={handleGenerateClick}
-                    disabled={isGenerating}
-                    className="flex-1 py-3.5 rounded-full bg-gradient-to-r from-[#E8C87A] to-[#E8C87A]/80 text-zinc-900 text-sm font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-40"
-                  >
-                    Generate
-                  </button>
-                )}
+                <button
+                  onClick={handleGenerateClick}
+                  disabled={isGenerating}
+                  className="flex-1 py-3.5 rounded-full bg-gradient-to-r from-[#E8C87A] to-[#E8C87A]/80 text-zinc-900 text-sm font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-40"
+                >
+                  Generate
+                </button>
                 <button
                   onClick={handleDismiss}
                   disabled={isGenerating}
