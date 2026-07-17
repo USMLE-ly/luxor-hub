@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
 import { getSections, SECTION_BASE, DIVIDER_STYLE, FLIP_SPEED, DOMINO_DELAY, preloadImage } from "./flip-gallery-helpers";
-import { getClipPath } from "./clip-path-defs";
 import { MarketingBadges } from '@/components/ui/marketing-badges';
 
 export interface OutfitImages {
@@ -370,7 +369,7 @@ export default function FlipGallery({ outfits, isLoading, onOutfitChange, onInde
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
-      clipPath: getClipPath(idx),
+      borderRadius: '1rem',
       zIndex: 2,
       // Glassmorphism — dark translucent so bleed blur shows through
       backdropFilter: 'blur(12px)',
@@ -464,7 +463,7 @@ export default function FlipGallery({ outfits, isLoading, onOutfitChange, onInde
             <div style={{
               position: 'absolute',
               inset: 0,
-              clipPath: getClipPath(idx),
+              borderRadius: '1rem',
               boxShadow: 'inset 0 0 30px rgba(229,199,133,0.12)',
               pointerEvents: 'none',
               zIndex: 3,
