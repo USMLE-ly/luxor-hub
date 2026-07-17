@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { haptic } from "@/lib/haptics";
-import {Plus, MagnifyingGlass, TShirt, SlidersHorizontal, TrashSimple, UploadSimple, X, Spinner, Sparkle, CheckCircle, Camera, CaretRight, Sliders, Pulse, Eye, User, StackSimple, CalendarDots, Image, FloppyDisk, FolderOpen, Heart, Receipt, File, Upload} from "@phosphor-icons/react";
+import {Plus, MagnifyingGlass, TShirt, SlidersHorizontal, TrashSimple, UploadSimple, X, Spinner, Sparkle, CheckCircle, Camera, CaretRight, Sliders, Pulse, Eye, User, StackSimple, CalendarDots, FloppyDisk, FolderOpen, Heart, Receipt, File, Upload} from "@phosphor-icons/react";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 import { fetchSavedOutfits, insertOutfit, deleteOutfit, toggleOutfitFavorite } from "@/lib/outfitService";
 import { insertCalendarEvent } from "@/lib/calendarService";
@@ -224,23 +224,29 @@ const Closet = () => {
       .filter(Boolean);
   }, [wardrobeSelected, catalogItems]);
 
-  // ── Auto-spawn: generate dummy 3D for any wearing item missing src ──
+  // ── Auto-spawn: generate dummy 3D for first wearing item missing src ──
+  // Uses empty deps [] to run ONCE on mount — prevents infinite re-render loop.
   const autoSpawnedIds = useRef<Set<string>>(new Set());
   useEffect(() => {
-    const itemsNeedingSrc = currentlyWearing.filter(
-      (item) => (!item.src || item.src.length <= 5) && !autoSpawnedIds.current.has(item.id)
+    // Snapshot current store state directly (bypasses stale closures)
+    const storeState = useWardrobeStore.getState();
+    const { selected, catalogItems } = storeState;
+    const wearing = (Object.entries(selected) as [Category, string | null][])
+      .filter(([, id]) => id !== null)
+      .map(([cat, id]) => catalogItems.find((c) => c.id === id))
+      .filter(Boolean);
+
+    const item = wearing.find(
+      (i) => (!i.src || i.src.length <= 5) && !autoSpawnedIds.current.has(i.id)
     );
-    if (itemsNeedingSrc.length === 0) return;
-    // Mark items as processed BEFORE the async work to prevent re-entry
-    itemsNeedingSrc.forEach((item) => autoSpawnedIds.current.add(item.id));
+    if (!item) return;
+    autoSpawnedIds.current.add(item.id);
     const timer = setTimeout(() => {
-      itemsNeedingSrc.forEach((item) => {
-        handleGenerateDummy(item.id, item.category);
-      });
-      toast.info(`Auto-generated 3D placeholder${itemsNeedingSrc.length > 1 ? "s" : ""} for ${itemsNeedingSrc.length} item(s).`);
+      handleGenerateDummy(item.id, item.category);
+      toast.info(`Auto-generated 3D placeholder for "${item.name}".`);
     }, 1200);
     return () => clearTimeout(timer);
-  }, [currentlyWearing, handleGenerateDummy]);
+  }, []);
 
   const [dna, setDna] = useState<BodyDNA>({ height: 0.5, shoulder: 0.5, waist: 0.5, hips: 0.5, legLength: 0.5 });
   const [pose, setPose] = useState<PosePreset>("neutral");
