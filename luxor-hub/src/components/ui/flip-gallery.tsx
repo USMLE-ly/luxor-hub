@@ -367,7 +367,7 @@ export default function FlipGallery({ outfits, isLoading, onOutfitChange, onInde
       justifyContent: 'center',
       backgroundColor: bgColor,
       backgroundImage: url?.startsWith('http') ? `url('${url}')` : 'none',
-      backgroundSize: 'contain',
+      backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
       clipPath: getClipPath(idx),
