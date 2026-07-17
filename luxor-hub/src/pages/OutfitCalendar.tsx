@@ -711,7 +711,7 @@ const OutfitCalendarInner = () => {
       ctx.fill();
 
       const loadImg = (src: string): Promise<HTMLImageElement> => new Promise((resolve, reject) => {
-        const img = new Image();
+        const img = new window.Image();
         img.crossOrigin = "anonymous";
         img.onload = () => resolve(img);
         img.onerror = reject;

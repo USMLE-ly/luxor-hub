@@ -22,7 +22,7 @@ export const DOMINO_DELAY = 150;
 
 export const preloadImage = (url: string | undefined | null): Promise<void> => {
   return new Promise((resolve) => {
-    const img = new Image();
+    const img = new window.Image();
     img.onload = () => resolve();
     img.onerror = () => resolve();
     if (!url) { resolve(); return; }

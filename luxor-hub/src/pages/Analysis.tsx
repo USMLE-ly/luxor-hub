@@ -193,7 +193,7 @@ export default function Analysis() {
   // Compress image on the client before sending — eliminates network + backend timeout
   const compressImage = (file: File, maxDim = 1024, quality = 0.7): Promise<string> =>
     new Promise((resolve, reject) => {
-      const img = new Image();
+      const img = new window.Image();
       img.onload = () => {
         let { width, height } = img;
         if (width > maxDim || height > maxDim) {

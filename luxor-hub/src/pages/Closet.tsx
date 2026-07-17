@@ -613,7 +613,7 @@ const Closet = () => {
   // ── Image compression: reduce base64 payload by ~80% before sending to backend ──
   const compressImage = useCallback((dataUrl: string, maxWidth = 600): Promise<string> => {
     return new Promise((resolve, reject) => {
-      const img = new Image();
+      const img = new window.Image();
       // CRITICAL: register callbacks BEFORE setting src to avoid race with cached images
       img.onload = () => {
         try {

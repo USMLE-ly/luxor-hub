@@ -60,7 +60,7 @@ const DOMINO_DELAY = 150;
 /* ------------------------------------------------------------------ */
 const preloadImage = (url: string | undefined | null): Promise<void> => {
   return new Promise((resolve) => {
-    const img = new Image();
+    const img = new window.Image();
     img.onload = () => resolve();
     img.onerror = () => resolve(); // Don't hang UI on broken image
     if (!url) { resolve(); return; }
@@ -166,7 +166,7 @@ export default function FlipGallery({ outfits, onGenerate, onDismiss, onAddToCal
 
     sections.forEach((url, idx) => {
       if (!url?.startsWith('http')) return;
-      const img = new Image();
+      const img = new window.Image();
       img.crossOrigin = 'anonymous';
       img.onload = () => {
         if (ctrl.signal.aborted) return;

@@ -57,7 +57,7 @@ export function ProStylistTweak({ imagePreview, imageUrl }: ProStylistTweakProps
             // Compress image client-side before sending (reduces payload ~80%)
       const compressBase64 = (b64: string, maxWidth = 600): Promise<string> =>
         new Promise((resolve) => {
-          const img = new Image();
+          const img = new window.Image();
           img.onload = () => {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d')!;
