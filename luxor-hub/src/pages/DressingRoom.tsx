@@ -99,6 +99,8 @@ export default function DressingRoomPage() {
   const [activeOutfit, setActiveOutfit] = useState<OutfitImages | null>(null);
   const [displayProgress, setDisplayProgress] = useState(0);
   const [progressStage, setProgressStage] = useState("");
+  const [generationStartTime, setGenerationStartTime] = useState<number | null>(null);
+  const [estimatedRemainingSeconds, setEstimatedRemainingSeconds] = useState<number | null>(null);
   const [showOccasionModal, setShowOccasionModal] = useState(false);
   const [availableOutfitCount, setAvailableOutfitCount] = useState<number | null>(null);
   const [isLoadingAvailability, setIsLoadingAvailability] = useState(false);
@@ -115,6 +117,8 @@ export default function DressingRoomPage() {
     if (isGeneratingRef.current) return;
     isGeneratingRef.current = true;
     setIsGenerating(true);
+    setGenerationStartTime(Date.now());
+    setEstimatedRemainingSeconds(null);
     setProgressStage("Consulting MiMo...");
     try {
       setProgressStage(`Generating ${count} ${occasion} outfits...`);
@@ -174,6 +178,8 @@ export default function DressingRoomPage() {
       setIsGenerating(false);
       isGeneratingRef.current = false;
       setDisplayProgress(100);
+      setGenerationStartTime(null);
+      setEstimatedRemainingSeconds(null);
     }
   };
 
@@ -260,6 +266,28 @@ export default function DressingRoomPage() {
     
     return () => clearInterval(timer);
   }, [isGenerating]);
+
+  // ── ETA calculator: updates every 200ms while generation is active ──
+  useEffect(() => {
+    if (!generationStartTime || !isGenerating) return;
+
+    const timer = setInterval(() => {
+      const elapsedMs = Date.now() - generationStartTime;
+      const elapsedSeconds = elapsedMs / 1000;
+
+      // After 5 seconds of running, start estimating based on elapsed time
+      // Assume ~60s total for a typical MiMo generation
+      if (elapsedSeconds > 5) {
+        const estimatedTotal = 65; // rough average for MiMo Vision 2.5v
+        const remaining = Math.max(0, Math.round(estimatedTotal - elapsedSeconds));
+        setEstimatedRemainingSeconds(remaining);
+      } else {
+        setEstimatedRemainingSeconds(null);
+      }
+    }, 200);
+
+    return () => clearInterval(timer);
+  }, [generationStartTime, isGenerating]);
 
   // Show notifications when outfit generation completes
   useEffect(() => {
@@ -395,6 +423,13 @@ export default function DressingRoomPage() {
                       <span className="absolute inset-0 flex items-center justify-center text-sm font-semibold text-amber-200">{displayProgress}%</span>
                     </div>
                     <p className="text-xs text-zinc-400 text-center px-4">{progressStage}</p>
+                    {estimatedRemainingSeconds !== null && estimatedRemainingSeconds > 0 && (
+                      <p className="text-[10px] text-zinc-500 animate-pulse mt-1">
+                        {estimatedRemainingSeconds > 60
+                          ? `About ${Math.round(estimatedRemainingSeconds / 60)} min remaining`
+                          : `About ${estimatedRemainingSeconds}s remaining`}
+                      </p>
+                    )}
                   </div>
                 ) : generatedImages.length > 0 ? (
                   <FlipGallery
