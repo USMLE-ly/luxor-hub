@@ -508,6 +508,7 @@ export default function DressingRoomPage() {
                     </motion.div>
                   </motion.div>
                 )}
+            </AnimatePresence>
             </div>
             </div>
 
@@ -562,7 +563,6 @@ export default function DressingRoomPage() {
               </div>
             )}
           </AnimatePresence>
-        </AnimatePresence>
 
         {/* ---- Loading Availability Indicator ---- */}
         <AnimatePresence>
