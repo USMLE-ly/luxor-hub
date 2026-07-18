@@ -6,6 +6,7 @@ import featureDemo from "@/assets/feature-demo.mp4";
 import closetDemo from "@/assets/closet-demo.mp4";
 import recommendationDemo from "@/assets/recommendation-demo.mp4";
 import autoCalendarDemo from "@/assets/auto-calendar-demo.mp4";
+import analysisDemo from "@/assets/analysis-demo.mp4";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const shimmerParticles = Array.from({ length: 12 }, (_, i) => ({
@@ -22,6 +23,7 @@ const phones = [
   { video: closetDemo, label: "Smart Closet" },
   { video: recommendationDemo, label: "AI Recommendations" },
   { video: autoCalendarDemo, label: "Auto Calendar" },
+  { video: analysisDemo, label: "Style Analysis", landscape: true },
 ];
 
 const featureNames = [
@@ -170,6 +172,7 @@ const Features = () => {
                   model="15-pro"
                   color="space-black"
                   scale={phoneScale}
+                  orientation={phone.landscape ? 'landscape' : 'portrait'}
                 >
                   <video
                     src={phone.video}
