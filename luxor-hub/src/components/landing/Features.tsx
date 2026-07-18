@@ -171,6 +171,7 @@ const Features = () => {
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.6, delay: 0.15 + i * 0.12, ease: [0.23, 1, 0.32, 1] }}
                 className={`flex flex-col items-center ${isMobile ? 'snap-center flex-shrink-0' : ''}`}
+                style={{ width: isLandscape ? 482 : 229 }}
               >
                 {/* Label above phone */}
                 <span className="font-sans text-[10px] font-medium tracking-wider uppercase text-primary/70 text-center w-full mb-1.5">
