@@ -61,7 +61,7 @@ const Features = () => {
   const mockupY = useTransform(scrollYProgress, [0, 1], [40, -40]);
   const glowOpacity = useTransform(scrollYProgress, [0.2, 0.5, 0.8], [0.2, 0.6, 0.3]);
 
-  const phoneScale = isMobile ? 0.38 : 0.55;
+  const phoneScale = isMobile ? 0.38 : 0.5;
 
   return (
     <section id="features" className="pt-16 md:pt-24 pb-0 bg-muted/20" ref={sectionRef}>

@@ -323,19 +323,21 @@ export const IPhoneMockup: React.FC<IPhoneMockupProps> = ({
                 zIndex: 2,
                 boxShadow: '0 1px 2px rgba(0,0,0,0.7)',
                 ...(isLandscape ? {
-                  right: 0,
+                  // Landscape: island on LEFT side, centered vertically, wider
+                  left: 0,
                   top: '50%',
                   transform: 'translateY(-50%)',
-                  width: finalIslandH * scale * 0.7,
-                  height: finalIslandW * scale * 0.45,
-                  borderRadius: finalIslandR * scale * 0.7,
+                  width: finalIslandH * scale * 0.85,
+                  height: finalIslandW * scale * 0.35,
+                  borderRadius: finalIslandR * scale * 0.6,
                 } : {
+                  // Portrait: island at top center, wider (~5mm each side)
                   left: '50%',
                   transform: 'translateX(-50%)',
                   top: 10,
-                  width: finalIslandW * scale * 0.65,
-                  height: finalIslandH * scale * 0.65,
-                  borderRadius: finalIslandR * scale * 0.65,
+                  width: finalIslandW * scale * 0.8,
+                  height: finalIslandH * scale * 0.55,
+                  borderRadius: finalIslandR * scale * 0.55,
                 })
               }}
             />
