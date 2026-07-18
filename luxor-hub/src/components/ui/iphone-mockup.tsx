@@ -350,12 +350,13 @@ export const IPhoneMockup: React.FC<IPhoneMockupProps> = ({
             zIndex: 10,
             boxShadow: '0 1px 2px rgba(0,0,0,0.7)',
             ...(isLandscape ? {
-              left: -(finalIslandH * scale * 0.15),
+              // Landscape: same pill shape, just on left side
+              left: -(finalIslandW * scale * 0.1),
               top: '50%',
               transform: 'translateY(-50%)',
-              width: finalIslandH * scale * 0.85,
-              height: finalIslandW * scale * 0.35,
-              borderRadius: finalIslandR * scale * 0.6,
+              width: finalIslandW * scale * 0.8,
+              height: finalIslandH * scale * 0.55,
+              borderRadius: finalIslandR * scale * 0.55,
             } : {
               left: '50%',
               transform: 'translateX(-50%)',
