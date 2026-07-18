@@ -7,6 +7,11 @@ import closetDemo from "@/assets/closet-demo.mp4";
 import recommendationDemo from "@/assets/recommendation-demo.mp4";
 import autoCalendarDemo from "@/assets/auto-calendar-demo.mp4";
 import analysisDemo from "@/assets/analysis-demo.mp4";
+import featureDemoPoster from "@/assets/feature-demo-poster.jpg";
+import closetDemoPoster from "@/assets/closet-demo-poster.jpg";
+import recommendationDemoPoster from "@/assets/recommendation-demo-poster.jpg";
+import autoCalendarDemoPoster from "@/assets/auto-calendar-demo-poster.jpg";
+import analysisDemoPoster from "@/assets/analysis-demo-poster.jpg";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const shimmerParticles = Array.from({ length: 12 }, (_, i) => ({
@@ -19,11 +24,11 @@ const shimmerParticles = Array.from({ length: 12 }, (_, i) => ({
 }));
 
 const phones = [
-  { video: featureDemo, label: "Manual Upload" },
-  { video: closetDemo, label: "Smart Closet" },
-  { video: recommendationDemo, label: "AI Recommendations" },
-  { video: autoCalendarDemo, label: "Auto Calendar" },
-  { video: analysisDemo, label: "Style Analysis", landscape: true },
+  { video: featureDemo, poster: featureDemoPoster, label: "Manual Upload" },
+  { video: closetDemo, poster: closetDemoPoster, label: "Smart Closet" },
+  { video: recommendationDemo, poster: recommendationDemoPoster, label: "AI Recommendations" },
+  { video: autoCalendarDemo, poster: autoCalendarDemoPoster, label: "Auto Calendar" },
+  { video: analysisDemo, poster: analysisDemoPoster, label: "Style Analysis", landscape: true },
 ];
 
 const featureNames = [
@@ -183,6 +188,7 @@ const Features = () => {
                   >
                     <video
                       src={phone.video}
+                      poster={phone.poster}
                       preload="metadata"
                       autoPlay
                       loop

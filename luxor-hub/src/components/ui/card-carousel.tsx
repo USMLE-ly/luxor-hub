@@ -123,7 +123,7 @@ export const CardCarousel: React.FC = () => {
         centeredSlides
         spaceBetween={16}
         grabCursor
-        loop
+        loop={false}
         autoplay={{ delay: 6000, disableOnInteraction: false }}
         pagination={{ clickable: true }}
         navigation
