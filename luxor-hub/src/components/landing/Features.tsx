@@ -154,42 +154,44 @@ const Features = () => {
           ))}
 
           {/* Phone row */}
-          <div className={`flex ${isMobile ? 'overflow-x-auto gap-3 pb-4 snap-x snap-mandatory px-4' : 'justify-center gap-1 md:gap-2 items-center'} relative z-[1] overflow-visible`}>
+          <div className={`flex ${isMobile ? 'overflow-x-auto gap-4 pb-4 snap-x snap-mandatory px-4' : 'flex-row justify-center gap-1 sm:gap-1.5 md:gap-2 items-center'} relative z-[1]`}
+            style={{ transform: 'translateY(0)' }}
+          >
             {phones.map((phone, i) => {
-              // Landscape phone is ~193px shorter than portrait. Center it with top margin.
-              const landscapeOffset = phone.landscape ? 'mt-[96px]' : '';
+              const isLandscape = phone.landscape;
               return (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 30 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.6, delay: 0.15 + i * 0.12, ease: [0.23, 1, 0.32, 1] }}
-                className={`flex flex-col items-center overflow-visible ${isMobile ? 'snap-center flex-shrink-0' : ''} ${landscapeOffset}`}
+                className={`flex flex-col items-center ${isMobile ? 'snap-center flex-shrink-0' : ''}`}
               >
                 {/* Label above phone */}
-                <span className="font-sans text-[10px] font-medium tracking-wider uppercase text-primary/70 text-center w-full mb-1">
+                <span className="font-sans text-[10px] font-medium tracking-wider uppercase text-primary/70 text-center w-full mb-1.5">
                   {phone.label}
                 </span>
 
-                <IPhoneMockup
-                  model="15-pro"
-                  color="space-black"
-                  scale={phoneScale}
-                  orientation={phone.landscape ? 'landscape' : 'portrait'}
-                >
-                  <video
-                    src={phone.video}
-                    preload="metadata"
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                </IPhoneMockup>
+                <div className={isLandscape ? 'flex items-center' : ''}>
+                  <IPhoneMockup
+                    model="15-pro"
+                    color="space-black"
+                    scale={phoneScale}
+                    orientation={isLandscape ? 'landscape' : 'portrait'}
+                  >
+                    <video
+                      src={phone.video}
+                      preload="metadata"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  </IPhoneMockup>
+                </div>
               </motion.div>
-            );
-            })}
+            )})}
           </div>
 
           {/* Luxury glow reflection */}
