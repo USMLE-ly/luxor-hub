@@ -154,7 +154,7 @@ const Features = () => {
           ))}
 
           {/* Phone row */}
-          <div className={`flex ${isMobile ? 'overflow-x-auto gap-4 pb-4 snap-x snap-mandatory px-4' : 'justify-center gap-6 md:gap-8'} relative z-[1]`}>
+          <div className={`flex ${isMobile ? 'overflow-x-auto gap-4 pb-4 snap-x snap-mandatory px-4' : 'justify-center gap-2 md:gap-4 items-end'} relative z-[1]`}>
             {phones.map((phone, i) => (
               <motion.div
                 key={i}
@@ -164,7 +164,7 @@ const Features = () => {
                 className={`flex flex-col items-center gap-3 ${isMobile ? 'snap-center flex-shrink-0' : ''}`}
               >
                 {/* Label above phone */}
-                <span className="font-sans text-xs font-medium tracking-wider uppercase text-primary/70">
+                <span className="font-sans text-xs font-medium tracking-wider uppercase text-primary/70 text-center w-full">
                   {phone.label}
                 </span>
 
