@@ -221,7 +221,6 @@ export const IPhoneMockup: React.FC<IPhoneMockupProps> = ({
     width: displayWidth,
     height: displayHeight,
     position: 'relative',
-    overflow: 'hidden',
     ...style
   };
 
@@ -313,35 +312,6 @@ export const IPhoneMockup: React.FC<IPhoneMockupProps> = ({
         <div style={screenBoxStyle}>
           {wallpaper && <div aria-hidden style={wallpaperStyle} />}
 
-          {/* Dynamic Island */}
-          {useIsland && finalIslandW > 0 && finalIslandH > 0 && (
-            <div
-              aria-hidden
-              style={{
-                position: 'absolute',
-                background: 'hsl(var(--forest))',
-                zIndex: 2,
-                boxShadow: '0 1px 2px rgba(0,0,0,0.7)',
-                ...(isLandscape ? {
-                  // Landscape: island on LEFT side, centered vertically, wider
-                  left: 0,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  width: finalIslandH * scale * 0.85,
-                  height: finalIslandW * scale * 0.35,
-                  borderRadius: finalIslandR * scale * 0.6,
-                } : {
-                  // Portrait: island at top center, wider (~5mm each side)
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  top: 10,
-                  width: finalIslandW * scale * 0.8,
-                  height: finalIslandH * scale * 0.55,
-                  borderRadius: finalIslandR * scale * 0.55,
-                })
-              }}
-            />
-          )}
 
           {/* Notch */}
           {!useIsland && useNotch && finalNotchW > 0 && finalNotchH > 0 && (
@@ -367,7 +337,38 @@ export const IPhoneMockup: React.FC<IPhoneMockupProps> = ({
             <div aria-hidden style={homeIndicatorStyle} />
           )}
         </div>
+
       </div>
+
+      {/* Dynamic Island — OUTSIDE frame so it can escape overflow:hidden */}
+      {useIsland && finalIslandW > 0 && finalIslandH > 0 && (
+        <div
+          aria-hidden
+          style={{
+            position: 'absolute',
+            background: 'hsl(var(--forest))',
+            zIndex: 10,
+            boxShadow: '0 1px 2px rgba(0,0,0,0.7)',
+            ...(isLandscape ? {
+              // Landscape: island escapes frame on LEFT side
+              left: -(finalIslandH * scale * 0.15),
+              top: '50%',
+              transform: 'translateY(-50%)',
+              width: finalIslandH * scale * 0.85,
+              height: finalIslandW * scale * 0.35,
+              borderRadius: finalIslandR * scale * 0.6,
+            } : {
+              // Portrait: island at top center, wider (~5mm each side)
+              left: '50%',
+              transform: 'translateX(-50%)',
+              top: 10,
+              width: finalIslandW * scale * 0.8,
+              height: finalIslandH * scale * 0.55,
+              borderRadius: finalIslandR * scale * 0.55,
+            })
+          }}
+        />
+      )}
     </div>
   );
 };
