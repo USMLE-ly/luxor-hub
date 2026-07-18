@@ -188,7 +188,8 @@ const Features = () => {
                   />
                 </IPhoneMockup>
               </motion.div>
-            )}
+            );
+            })}
           </div>
 
           {/* Luxury glow reflection */}
