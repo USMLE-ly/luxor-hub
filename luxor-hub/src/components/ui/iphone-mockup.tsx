@@ -214,8 +214,7 @@ export const IPhoneMockup: React.FC<IPhoneMockupProps> = ({
   const wrapperStyle: CSSProperties = {
     boxSizing: 'border-box',
     display: 'inline-block',
-    transform: `scale(${scale})`,
-    transformOrigin: 'top left',
+    zoom: scale,
     ...style
   };
 

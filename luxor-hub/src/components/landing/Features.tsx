@@ -154,8 +154,7 @@ const Features = () => {
           ))}
 
           {/* Phone row */}
-          <div className={`flex ${isMobile ? 'overflow-x-auto gap-4 pb-4 snap-x snap-mandatory px-4' : 'flex-row justify-center gap-1 sm:gap-1.5 md:gap-2 items-center'} relative z-[1]`}
-            style={{ transform: 'translateY(0)' }}
+          <div className={`flex ${isMobile ? 'overflow-x-auto gap-4 pb-4 snap-x snap-mandatory px-4' : 'flex-row justify-center gap-0.5 sm:gap-1 md:gap-1.5 items-center'} relative z-[1]`}
           >
             {phones.map((phone, i) => {
               const isLandscape = phone.landscape;
