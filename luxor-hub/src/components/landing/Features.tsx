@@ -155,16 +155,20 @@ const Features = () => {
 
           {/* Phone row */}
           <div className={`flex ${isMobile ? 'overflow-x-auto gap-4 pb-4 snap-x snap-mandatory px-4' : 'justify-center gap-2 md:gap-4 items-end'} relative z-[1]`}>
-            {phones.map((phone, i) => (
+            {phones.map((phone, i) => {
+              // Portrait: 876px * 0.42 = ~368px, Landscape: 417px * 0.42 = ~175px
+              const phoneHeight = phone.landscape ? 185 : 380;
+              return (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 30 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.6, delay: 0.15 + i * 0.12, ease: [0.23, 1, 0.32, 1] }}
-                className={`flex flex-col items-center gap-3 ${isMobile ? 'snap-center flex-shrink-0' : ''}`}
+                className={`flex flex-col items-center ${isMobile ? 'snap-center flex-shrink-0' : ''}`}
+                style={{ height: `${phoneHeight + 24}px` }}
               >
                 {/* Label above phone */}
-                <span className="font-sans text-xs font-medium tracking-wider uppercase text-primary/70 text-center w-full">
+                <span className="font-sans text-xs font-medium tracking-wider uppercase text-primary/70 text-center w-full mb-1">
                   {phone.label}
                 </span>
 
@@ -185,7 +189,8 @@ const Features = () => {
                   />
                 </IPhoneMockup>
               </motion.div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Luxury glow reflection */}
