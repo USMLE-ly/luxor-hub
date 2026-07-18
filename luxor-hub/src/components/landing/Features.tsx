@@ -61,7 +61,7 @@ const Features = () => {
   const mockupY = useTransform(scrollYProgress, [0, 1], [40, -40]);
   const glowOpacity = useTransform(scrollYProgress, [0.2, 0.5, 0.8], [0.2, 0.6, 0.3]);
 
-  const phoneScale = isMobile ? 0.38 : 0.5;
+  const phoneScale = isMobile ? 0.55 : 0.72;
 
   return (
     <section id="features" className="pt-16 md:pt-24 pb-0 bg-muted/20" ref={sectionRef}>
@@ -158,19 +158,20 @@ const Features = () => {
             />
           ))}
 
-          {/* Phone row */}
-          <div className={`flex ${isMobile ? 'overflow-x-auto gap-4 pb-4 snap-x snap-mandatory px-4' : 'flex-row justify-center gap-0.5 sm:gap-1 md:gap-1.5 items-start'} relative z-[1]`}
+          {/* Phone row — horizontal scroll like Gallery4 */}
+          <div className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory px-4 relative z-[1] scrollbar-hide"
+            style={{ scrollSnapType: 'x mandatory' }}
           >
             {phones.map((phone, i) => {
               const isLandscape = phone.landscape;
-              const landscapeMt = isLandscape ? 'mt-[115px]' : '';
+              const landscapeMt = isLandscape ? 'mt-[165px]' : '';
               return (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 30 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.6, delay: 0.15 + i * 0.12, ease: [0.23, 1, 0.32, 1] }}
-                className={`flex flex-col items-center ${isMobile ? 'snap-center flex-shrink-0' : ''}`}
+                className={`flex flex-col items-center snap-center flex-shrink-0`}
                 
               >
                 {/* Label above phone */}
