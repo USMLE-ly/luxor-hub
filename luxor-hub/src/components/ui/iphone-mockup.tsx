@@ -318,11 +318,25 @@ export const IPhoneMockup: React.FC<IPhoneMockupProps> = ({
             <div
               aria-hidden
               style={{
-                ...cutoutCommon,
-                top: 12,
-                width: finalIslandW,
-                height: finalIslandH,
-                borderRadius: finalIslandR
+                position: 'absolute',
+                background: 'hsl(var(--forest))',
+                zIndex: 2,
+                boxShadow: '0 1px 2px rgba(0,0,0,0.7)',
+                ...(isLandscape ? {
+                  right: 0,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  width: finalIslandH * scale * 0.7,
+                  height: finalIslandW * scale * 0.45,
+                  borderRadius: finalIslandR * scale * 0.7,
+                } : {
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  top: 10,
+                  width: finalIslandW * scale * 0.65,
+                  height: finalIslandH * scale * 0.65,
+                  borderRadius: finalIslandR * scale * 0.65,
+                })
               }}
             />
           )}
