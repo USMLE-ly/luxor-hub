@@ -56,7 +56,7 @@ const Features = () => {
   const mockupY = useTransform(scrollYProgress, [0, 1], [40, -40]);
   const glowOpacity = useTransform(scrollYProgress, [0.2, 0.5, 0.8], [0.2, 0.6, 0.3]);
 
-  const phoneScale = isMobile ? 0.38 : 0.42;
+  const phoneScale = isMobile ? 0.38 : 0.55;
 
   return (
     <section id="features" className="pt-16 md:pt-24 pb-0 bg-muted/20" ref={sectionRef}>
@@ -103,7 +103,7 @@ const Features = () => {
           animate={isInView ? { opacity: 1, scale: 1 } : {}}
           transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1], delay: 0.2 }}
           style={{ y: mockupY }}
-          className="relative mb-[-340px] md:mb-[-140px]"
+          className="relative mb-8 md:mb-12"
         >
           {/* Pulsing halo rings */}
           <motion.div
@@ -158,7 +158,7 @@ const Features = () => {
           >
             {phones.map((phone, i) => {
               const isLandscape = phone.landscape;
-              const landscapeMt = isLandscape ? 'mt-[96px]' : '';
+              const landscapeMt = isLandscape ? 'mt-[126px]' : '';
               return (
               <motion.div
                 key={i}
