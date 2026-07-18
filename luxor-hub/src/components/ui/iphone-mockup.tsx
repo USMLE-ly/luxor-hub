@@ -349,12 +349,21 @@ export const IPhoneMockup: React.FC<IPhoneMockupProps> = ({
             background: 'hsl(var(--forest))',
             zIndex: 10,
             boxShadow: '0 1px 2px rgba(0,0,0,0.7)',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            top: 10,
-            width: finalIslandW * scale * 0.8,
-            height: finalIslandH * scale * 0.55,
-            borderRadius: finalIslandR * scale * 0.55,
+            ...(isLandscape ? {
+              left: -(finalIslandH * scale * 0.15),
+              top: '50%',
+              transform: 'translateY(-50%)',
+              width: finalIslandH * scale * 0.85,
+              height: finalIslandW * scale * 0.35,
+              borderRadius: finalIslandR * scale * 0.6,
+            } : {
+              left: '50%',
+              transform: 'translateX(-50%)',
+              top: 10,
+              width: finalIslandW * scale * 0.8,
+              height: finalIslandH * scale * 0.55,
+              borderRadius: finalIslandR * scale * 0.55,
+            }),
           }}
         />
       )}
