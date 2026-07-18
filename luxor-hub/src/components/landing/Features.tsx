@@ -59,7 +59,7 @@ const Features = () => {
   const phoneScale = isMobile ? 0.38 : 0.42;
 
   return (
-    <section id="features" className="pt-16 md:pt-24 pb-0 bg-muted/20 overflow-hidden" ref={sectionRef}>
+    <section id="features" className="pt-16 md:pt-24 pb-0 bg-muted/20" ref={sectionRef}>
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
         <StaggerContainer>
@@ -154,10 +154,11 @@ const Features = () => {
           ))}
 
           {/* Phone row */}
-          <div className={`flex ${isMobile ? 'overflow-x-auto gap-4 pb-4 snap-x snap-mandatory px-4' : 'flex-row justify-center gap-0.5 sm:gap-1 md:gap-1.5 items-center'} relative z-[1]`}
+          <div className={`flex ${isMobile ? 'overflow-x-auto gap-4 pb-4 snap-x snap-mandatory px-4' : 'flex-row justify-center gap-0.5 sm:gap-1 md:gap-1.5 items-start'} relative z-[1]`}
           >
             {phones.map((phone, i) => {
               const isLandscape = phone.landscape;
+              const landscapeMt = isLandscape ? 'mt-[96px]' : '';
               return (
               <motion.div
                 key={i}
@@ -171,7 +172,7 @@ const Features = () => {
                   {phone.label}
                 </span>
 
-                <div className={isLandscape ? 'flex items-center' : ''}>
+                <div className={isLandscape ? `flex items-center ${landscapeMt}` : ''}>
                   <IPhoneMockup
                     model="15-pro"
                     color="space-black"
