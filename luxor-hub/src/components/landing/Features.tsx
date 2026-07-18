@@ -3,6 +3,9 @@ import { motion, useInView, useScroll, useTransform, AnimatePresence } from "fra
 import { StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import { IPhoneMockup } from "@/components/ui/iphone-mockup";
 import featureDemo from "@/assets/feature-demo.mp4";
+import closetDemo from "@/assets/closet-demo.mp4";
+import recommendationDemo from "@/assets/recommendation-demo.mp4";
+import autoCalendarDemo from "@/assets/auto-calendar-demo.mp4";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const shimmerParticles = Array.from({ length: 12 }, (_, i) => ({
@@ -13,6 +16,13 @@ const shimmerParticles = Array.from({ length: 12 }, (_, i) => ({
   delay: Math.random() * 4,
   duration: 3 + Math.random() * 3,
 }));
+
+const phones = [
+  { video: featureDemo, label: "Manual Upload" },
+  { video: closetDemo, label: "Smart Closet" },
+  { video: recommendationDemo, label: "AI Recommendations" },
+  { video: autoCalendarDemo, label: "Auto Calendar" },
+];
 
 const featureNames = [
   "AI Outfit Analysis",
@@ -43,6 +53,8 @@ const Features = () => {
 
   const mockupY = useTransform(scrollYProgress, [0, 1], [40, -40]);
   const glowOpacity = useTransform(scrollYProgress, [0.2, 0.5, 0.8], [0.2, 0.6, 0.3]);
+
+  const phoneScale = isMobile ? 0.38 : 0.42;
 
   return (
     <section id="features" className="pt-16 md:pt-24 pb-0 bg-muted/20 overflow-hidden" ref={sectionRef}>
@@ -83,15 +95,15 @@ const Features = () => {
           </StaggerItem>
         </StaggerContainer>
 
-        {/* iPhone Mockup with Video + Parallax + Shimmer */}
+        {/* iPhone Mockups Row + Parallax + Shimmer */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={isInView ? { opacity: 1, scale: 1 } : {}}
           transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1], delay: 0.2 }}
           style={{ y: mockupY }}
-          className="flex justify-center relative mb-[-340px] md:mb-[-140px]"
+          className="relative mb-[-340px] md:mb-[-140px]"
         >
-          {/* Pulsing halo rings — sized relative to phone */}
+          {/* Pulsing halo rings */}
           <motion.div
             initial={{ opacity: 0, scale: 0.7 }}
             animate={isInView ? {
@@ -126,7 +138,6 @@ const Features = () => {
               transition={{
                 duration: p.duration,
                 delay: p.delay,
-                
                 ease: [0.77, 0, 0.175, 1],
               }}
               className="absolute rounded-full bg-primary pointer-events-none"
@@ -140,29 +151,47 @@ const Features = () => {
             />
           ))}
 
-          <IPhoneMockup
-            model="15-pro"
-            color="space-black"
-            scale={isMobile ? 0.55 : 0.75}
-          >
-            <video
-              src={featureDemo}
-              preload="metadata"
-              autoPlay
-              loop
-              muted
-              playsInline
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
-          </IPhoneMockup>
+          {/* Phone row */}
+          <div className={`flex ${isMobile ? 'overflow-x-auto gap-4 pb-4 snap-x snap-mandatory px-4' : 'justify-center gap-6 md:gap-8'} relative z-[1]`}>
+            {phones.map((phone, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 30 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: 0.15 + i * 0.12, ease: [0.23, 1, 0.32, 1] }}
+                className={`flex flex-col items-center gap-3 ${isMobile ? 'snap-center flex-shrink-0' : ''}`}
+              >
+                {/* Label above phone */}
+                <span className="font-sans text-xs font-medium tracking-wider uppercase text-primary/70">
+                  {phone.label}
+                </span>
 
-          {/* Luxury glow reflection — tighter */}
+                <IPhoneMockup
+                  model="15-pro"
+                  color="space-black"
+                  scale={phoneScale}
+                >
+                  <video
+                    src={phone.video}
+                    preload="metadata"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                </IPhoneMockup>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Luxury glow reflection */}
           <motion.div
             style={{ opacity: glowOpacity }}
             className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-1/2 h-12 rounded-full bg-primary/15 blur-2xl pointer-events-none"
           />
 
-          {/* Bottom fade gradient for smooth section transition */}
+          {/* Bottom fade gradient */}
           <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background via-background/60 to-transparent pointer-events-none z-10" />
         </motion.div>
       </div>
