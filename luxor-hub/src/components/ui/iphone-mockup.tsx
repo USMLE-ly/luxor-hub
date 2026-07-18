@@ -205,26 +205,32 @@ export const IPhoneMockup: React.FC<IPhoneMockupProps> = ({
   const finalIslandR = islandRadius ?? islandSpec?.r ?? 0;
 
   const insets = {
-    top: safeAreaOverrides?.top ?? spec.topSafe,
-    bottom: safeAreaOverrides?.bottom ?? spec.bottomSafe,
-    left: safeAreaOverrides?.left ?? 0,
-    right: safeAreaOverrides?.right ?? 0
+    top: (safeAreaOverrides?.top ?? spec.topSafe) * scale,
+    bottom: (safeAreaOverrides?.bottom ?? spec.bottomSafe) * scale,
+    left: (safeAreaOverrides?.left ?? 0) * scale,
+    right: (safeAreaOverrides?.right ?? 0) * scale
   };
+
+  // Render at actual display size — no transform needed
+  const displayWidth = outerWidth * scale;
+  const displayHeight = outerHeight * scale;
 
   const wrapperStyle: CSSProperties = {
     boxSizing: 'border-box',
     display: 'inline-block',
-    transform: `scale(${scale})`,
-    transformOrigin: 'top left',
+    width: displayWidth,
+    height: displayHeight,
+    position: 'relative',
+    overflow: 'hidden',
     ...style
   };
 
   const frameBoxStyle: CSSProperties = {
-    width: outerWidth,
-    height: outerHeight,
-    borderRadius: outerRadius,
+    width: '100%',
+    height: '100%',
+    borderRadius: outerRadius * scale,
     background: frameGradient,
-    padding: resolvedBezel,
+    padding: resolvedBezel * scale,
     boxSizing: 'border-box',
     boxShadow: outerShadow,
     position: 'relative',
@@ -235,7 +241,7 @@ export const IPhoneMockup: React.FC<IPhoneMockupProps> = ({
   const screenBoxStyle: CSSProperties = {
     width: '100%',
     height: '100%',
-    borderRadius: resolvedRadius,
+    borderRadius: resolvedRadius * scale,
     position: 'relative',
     overflow: 'hidden',
     background: screenBg,
@@ -269,9 +275,9 @@ export const IPhoneMockup: React.FC<IPhoneMockupProps> = ({
     bottom: 8,
     left: '50%',
     transform: 'translateX(-50%)',
-    width: Math.round(screenWidth * 0.34),
-    maxWidth: 140,
-    height: 5,
+    width: Math.round(screenWidth * 0.34 * scale),
+    maxWidth: 140 * scale,
+    height: 5 * scale,
     borderRadius: 3,
     background:
       'linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0.35))',
