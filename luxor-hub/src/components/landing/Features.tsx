@@ -186,16 +186,23 @@ const Features = () => {
                     scale={phoneScale}
                     orientation={isLandscape ? 'landscape' : 'portrait'}
                   >
-                    <video
-                      src={phone.video}
-                      poster={phone.poster}
-                      preload="metadata"
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    />
+                    <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+                      <video
+                        ref={(el) => {
+                          if (el && el.paused) {
+                            el.play().catch(() => {});
+                          }
+                        }}
+                        src={phone.video}
+                        poster={phone.poster}
+                        preload="metadata"
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    </div>
                   </IPhoneMockup>
                 </div>
               </motion.div>

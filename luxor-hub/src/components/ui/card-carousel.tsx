@@ -165,7 +165,8 @@ export const CardCarousel: React.FC = () => {
               <video
                 ref={(el) => { videoRefs.current[i] = el; }}
                 src={v.src}
-                className="w-full aspect-[9/16] object-cover"
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                autoPlay
                 muted={isMuted}
                 loop
                 playsInline
