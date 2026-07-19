@@ -13,13 +13,18 @@ import SwipeParticles from "@/components/onboarding/SwipeParticles";
 import { useGyroTilt } from "@/hooks/useGyroTilt";
 import { trackEvent } from "@/lib/fbPixel";
 
-// Haptic feedback utility
+// Haptic feedback utility — reuses single AudioContext
+let _hapticCtx: AudioContext | null = null;
 const triggerHaptic = () => {
   if (navigator.vibrate) {
     navigator.vibrate(12);
   }
   try {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    if (!_hapticCtx || _hapticCtx.state === 'closed') {
+      _hapticCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    if (_hapticCtx.state === 'suspended') _hapticCtx.resume();
+    const ctx = _hapticCtx;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.connect(gain);
@@ -30,7 +35,6 @@ const triggerHaptic = () => {
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.06);
-    setTimeout(() => ctx.close(), 100);
   } catch {}
 };
 

@@ -3,11 +3,22 @@ import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import {Check, Camera, DeviceMobile, Video, User, FlipHorizontal, TShirt, Eyeglasses, Watch, Diamond, Scissors, Bell, MapPin} from "@phosphor-icons/react";
 import { useAppPermissions } from "@/hooks/useAppPermissions";
 
-// Haptic + audio tick for card selection
+// Haptic + audio tick for card selection — reuses single AudioContext
+let _stepCtx: AudioContext | null = null;
+function getStepAudioCtx(): AudioContext | null {
+  try {
+    if (!_stepCtx || _stepCtx.state === 'closed') {
+      _stepCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    if (_stepCtx.state === 'suspended') _stepCtx.resume();
+    return _stepCtx;
+  } catch { return null; }
+}
 const selectionHaptic = () => {
   if (navigator.vibrate) navigator.vibrate(8);
   try {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const ctx = getStepAudioCtx();
+    if (!ctx) return;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.connect(gain).connect(ctx.destination);
@@ -17,7 +28,6 @@ const selectionHaptic = () => {
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.04);
-    setTimeout(() => ctx.close(), 80);
   } catch {}
 };
 
@@ -669,7 +679,7 @@ const CameraCaptureStep = ({ step, answers, onSelect }: { step: OnboardingStep; 
     
     // DSLR shutter sound — two-curtain mechanical simulation
     try {
-      const actx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const actx = getStepAudioCtx(); if (!actx) return;
       // First curtain click (sharp attack)
       const osc1 = actx.createOscillator();
       const gain1 = actx.createGain();
@@ -1092,7 +1102,7 @@ const GeneratingStep = ({ step, gender }: { step: OnboardingStep; gender?: "fema
 
     // Dramatic completion chime via Web Audio API
     try {
-      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const audioCtx = getStepAudioCtx(); if (!audioCtx) return;
       const playNote = (freq: number, start: number, dur: number, vol: number, type: OscillatorType = "sine") => {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
@@ -1378,7 +1388,7 @@ const DetectionResultStep = ({ step, answers, gender, aiResults }: { step: Onboa
         if (navigator.vibrate) navigator.vibrate([15, 50, 25]);
         // Subtle chime via Web Audio API
         try {
-          const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+          const ctx = getStepAudioCtx(); if (!ctx) return;
           const playTone = (freq: number, start: number, dur: number) => {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();

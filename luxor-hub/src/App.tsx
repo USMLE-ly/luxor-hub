@@ -95,15 +95,25 @@ const AudioInit = () => {
     initResilience(); // Start resilience layer (service worker, offline queue, auto-retry)
 
     const handleInteraction = () => {
+      // Initialize audio system
       initAudio();
+      // Force-play ALL videos that may have been blocked by autoplay policy
+      document.querySelectorAll('video').forEach((video) => {
+        if (video.paused) {
+          video.play().catch(() => {});
+        }
+      });
       window.removeEventListener("click", handleInteraction);
       window.removeEventListener("touchstart", handleInteraction);
+      window.removeEventListener("keydown", handleInteraction);
     };
     window.addEventListener("click", handleInteraction);
     window.addEventListener("touchstart", handleInteraction);
+    window.addEventListener("keydown", handleInteraction);
     return () => {
       window.removeEventListener("click", handleInteraction);
       window.removeEventListener("touchstart", handleInteraction);
+      window.removeEventListener("keydown", handleInteraction);
     };
   }, []);
   return null;
