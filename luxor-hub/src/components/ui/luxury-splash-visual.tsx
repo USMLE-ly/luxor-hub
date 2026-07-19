@@ -115,9 +115,9 @@ export function LuxurySplashScreen({
                   initial={{ y: 30, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                  className="font-display text-5xl sm:text-6xl md:text-7xl font-bold tracking-[0.25em] text-foreground mt-8"
+                  className="font-display text-5xl sm:text-6xl md:text-7xl font-bold tracking-[0.25em] text-foreground mt-8 flex items-start justify-center"
                 >
-                  LUXOR
+                  LUXOR<span className="text-gold/60 text-[0.3em] font-sans font-normal mt-[0.15em] ml-[0.05em]">®</span>
                 </motion.h1>
               )}
             </AnimatePresence>
@@ -131,7 +131,7 @@ export function LuxurySplashScreen({
                   animate={{ y: 0, opacity: 1 }}
                   exit={{ y: -15, opacity: 0 }}
                   transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                  className="font-sans text-xs sm:text-sm uppercase tracking-[0.35em] text-gold/50 mt-5"
+                  className="font-sans text-[10px] sm:text-xs uppercase tracking-[0.4em] text-gold/40 mt-5 font-light"
                 >
                   {tagline}
                 </motion.p>
@@ -139,7 +139,7 @@ export function LuxurySplashScreen({
             </AnimatePresence>
 
             {/* Gold loading bar */}
-            <div className="w-32 h-[2px] rounded-full bg-emerald/40 overflow-hidden mt-10">
+            <div className="w-40 h-[1px] rounded-full bg-gold/10 overflow-hidden mt-10">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: "100%" }}
