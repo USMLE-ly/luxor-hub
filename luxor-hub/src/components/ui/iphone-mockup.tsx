@@ -294,16 +294,12 @@ export const IPhoneMockup: React.FC<IPhoneMockupProps> = ({
         left: insets.left,
         overflow: 'hidden',
         zIndex: 1,
-        display: 'flex',
-        flexDirection: 'column'
       }
     : {
         position: 'absolute',
         inset: 0,
         overflow: 'hidden',
         zIndex: 1,
-        display: 'flex',
-        flexDirection: 'column'
       };
 
   return (
