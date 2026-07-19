@@ -1,6 +1,6 @@
 {
   "installCommand": "cd luxor-hub && npm install --ignore-engines --no-audit --no-fund",
-  "buildCommand": "cd luxor-hub && rm -rf dist && rm -rf node_modules/.vite && node_modules/.bin/vite build --force",
+  "buildCommand": "cd luxor-hub && rm -rf dist && rm -rf node_modules/.vite && npm run build",
   "outputDirectory": "luxor-hub/dist",
   "rewrites": [
     { "source": "/api/:path*", "destination": "https://nice-useful-plot--al-bosify.replit.app/api/:path*" },
