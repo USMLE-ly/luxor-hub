@@ -4,7 +4,6 @@ import { useScroll, useTransform, motion } from "framer-motion";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { GoldParticles } from "@/components/app/GoldParticles";
 import NumberTicker from "@/components/ui/number-ticker";
-import { useEffect, useState } from "react";
 
 const LiveCounter = ({ base = 2400, range = 120, intervalMs = 3000 }: { base?: number; range?: number; intervalMs?: number }) => {
   const [count, setCount] = useState(base);

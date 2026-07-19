@@ -78,9 +78,9 @@ export function LuxurySplashScreen({
   const [exit, setExit] = useState(false);
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase("wordmark"), 600);
-    const t2 = setTimeout(() => setPhase("tagline"), 1500);
-    const t3 = setTimeout(() => setPhase("complete"), 2600);
+    const t1 = setTimeout(() => setPhase("wordmark"), 300);
+    const t2 = setTimeout(() => setPhase("tagline"), 700);
+    const t3 = setTimeout(() => setPhase("complete"), 1200);
     const t4 = setTimeout(() => {
       setExit(true);
       onComplete?.();
@@ -143,7 +143,7 @@ export function LuxurySplashScreen({
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: "100%" }}
-                transition={{ duration: 2.6, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                 className="h-full rounded-full" style={{ background: "linear-gradient(90deg, rgba(232,200,122,0.2), rgba(232,200,122,0.7), rgba(232,200,122,0.2))" }}
               />
             </div>

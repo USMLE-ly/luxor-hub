@@ -3,6 +3,7 @@ import { motion, useInView, useScroll, useTransform, AnimatePresence } from "fra
 import { StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import { IPhoneMockup } from "@/components/ui/iphone-mockup";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { SpeakerHigh, SpeakerSlash } from "@phosphor-icons/react";
 
 const shimmerParticles = Array.from({ length: 12 }, (_, i) => ({
   id: i,
@@ -38,6 +39,7 @@ const Features = () => {
   const isMobile = useIsMobile();
   const [activeFeature, setActiveFeature] = useState(0);
   const [videoReady, setVideoReady] = useState<Record<number, boolean>>({});
+  const [isMuted, setIsMuted] = useState(true);
 
   useEffect(() => {
     const interval = setInterval(() => {

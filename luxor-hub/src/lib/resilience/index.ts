@@ -300,12 +300,5 @@ export function initResilience(): void {
     console.log("[LUXOR RESILIENCE] Gone offline — mutations will be queued");
   });
 
-  // Register service worker
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("/sw.js").then((reg) => {
-      console.log("[LUXOR RESILIENCE] Service worker registered:", reg.scope);
-    }).catch((err) => {
-      console.warn("[LUXOR RESILIENCE] Service worker registration failed:", err);
-    });
-  }
+  // Service worker disabled — half-baked caching was interfering with video playback
 }
