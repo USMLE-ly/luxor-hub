@@ -7,7 +7,7 @@
     "build": "npm --prefix luxor-hub install --no-audit --no-fund && npm --prefix luxor-hub run build && rm -rf dist && cp -r luxor-hub/dist dist",
     "build:dev": "npm --prefix luxor-hub install --no-audit --no-fund && (cd luxor-hub && npx vite build --mode development) && rm -rf dist && cp -r luxor-hub/dist dist",
     "dev2": "cd luxor-hub && npm run dev",
-    "vercel-build": "npm --prefix luxor-hub install && npm --prefix luxor-hub run build",
+    "vercel-build": "npm --prefix luxor-hub install && rm -rf luxor-hub/dist && npm --prefix luxor-hub run build",
     "start": "cd luxor-hub && npm run preview -- --host 0.0.0.0",
 
     "preflight": "bash scripts/preflight-build.sh",
