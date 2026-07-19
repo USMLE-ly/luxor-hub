@@ -17,7 +17,6 @@ export const CardCarousel: React.FC = () => {
   const [activeIdx, setActiveIdx] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
   const [playingIdx, setPlayingIdx] = useState<number | null>(0);
-  const [videoReady, setVideoReady] = useState<Record<number, boolean>>({});
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const swiperRef = useRef<any>(null);
 
@@ -75,6 +74,7 @@ export const CardCarousel: React.FC = () => {
     .card-swiper .swiper-pagination-bullet-active { background: hsl(43 74% 49%) !important; opacity: 1 !important; }
     .card-swiper .swiper-button-next,
     .card-swiper .swiper-button-prev { color: hsl(43 74% 49%) !important; }
+    .card-swiper .swiper-slide > div { aspect-ratio: 9/16; }
   `;
 
   return (
@@ -88,11 +88,7 @@ export const CardCarousel: React.FC = () => {
         className="absolute top-3 right-3 z-30 w-10 h-10 rounded-full bg-background/70 backdrop-blur-sm flex items-center justify-center border border-border/30 hover:bg-background/90 transition"
         aria-label={isMuted ? "Unmute all" : "Mute all"}
       >
-        {isMuted ? (
-          <SpeakerSlash className="w-4 h-4 text-foreground" />
-        ) : (
-          <SpeakerHigh className="w-4 h-4 text-foreground" />
-        )}
+        {isMuted ? <SpeakerSlash className="w-4 h-4 text-foreground" /> : <SpeakerHigh className="w-4 h-4 text-foreground" />}
       </motion.button>
 
       <Swiper
@@ -110,10 +106,7 @@ export const CardCarousel: React.FC = () => {
           swiper.update();
           setTimeout(() => {
             const v = videoRefs.current[0];
-            if (v) {
-              v.play().catch(() => {});
-              setPlayingIdx(0);
-            }
+            if (v) { v.play().catch(() => {}); setPlayingIdx(0); }
           }, 300);
         }}
         modules={[Autoplay, Pagination, Navigation]}
@@ -121,11 +114,9 @@ export const CardCarousel: React.FC = () => {
       >
         {videos.map((v, i) => (
           <SwiperSlide key={i}>
-            <div className="relative rounded-2xl overflow-hidden border border-border/30 bg-card/40 backdrop-blur-sm shadow-xl group aspect-[9/16]">
-              {/* Dark background so there's no black flash */}
+            <div className="relative rounded-2xl overflow-hidden border border-border/30 bg-card/40 backdrop-blur-sm shadow-xl group" style={{ aspectRatio: '9/16' }}>
               <div className="absolute inset-0 bg-background/80 z-0" />
 
-              {/* Video */}
               <video
                 ref={(el) => { videoRefs.current[i] = el; }}
                 src={v.src}
@@ -133,22 +124,11 @@ export const CardCarousel: React.FC = () => {
                 muted={isMuted}
                 loop
                 playsInline
-                preload="metadata"
-                onCanPlay={() => setVideoReady((prev) => ({ ...prev, [i]: true }))}
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  opacity: videoReady[i] ? 1 : 0,
-                  transition: 'opacity 0.5s ease-in-out',
-                  zIndex: 1,
-                }}
+                preload="auto"
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 1 }}
               />
 
-              {/* Play/Pause overlay */}
-              <div className="absolute inset-0 flex items-center justify-center bg-background/20 opacity-100 group-hover:opacity-100 transition-opacity" style={{ zIndex: 2 }}>
+              <div className="absolute inset-0 flex items-center justify-center bg-background/20 transition-opacity" style={{ zIndex: 2 }}>
                 <motion.button
                   whileHover={{ scale: 1.15 }}
                   whileTap={{ scale: 0.9 }}
@@ -163,7 +143,6 @@ export const CardCarousel: React.FC = () => {
                 </motion.button>
               </div>
 
-              {/* Title */}
               <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-background/90 to-transparent p-4 pt-12" style={{ zIndex: 2 }}>
                 <p className="font-sans text-sm font-semibold text-foreground">{v.title}</p>
               </div>

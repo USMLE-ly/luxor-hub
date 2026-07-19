@@ -204,12 +204,19 @@ export const IPhoneMockup: React.FC<IPhoneMockupProps> = ({
   const finalIslandH = islandHeight ?? islandSpec?.h ?? 0;
   const finalIslandR = islandRadius ?? islandSpec?.r ?? 0;
 
-  const insets = {
-    top: (safeAreaOverrides?.top ?? spec.topSafe) * scale,
-    bottom: (safeAreaOverrides?.bottom ?? spec.bottomSafe) * scale,
-    left: (safeAreaOverrides?.left ?? 0) * scale,
-    right: (safeAreaOverrides?.right ?? 0) * scale
-  };
+  const insets = isLandscape
+    ? {
+        top: (safeAreaOverrides?.top ?? 0) * scale,
+        bottom: (safeAreaOverrides?.bottom ?? 0) * scale,
+        left: (safeAreaOverrides?.left ?? spec.topSafe) * scale,
+        right: (safeAreaOverrides?.right ?? spec.bottomSafe) * scale
+      }
+    : {
+        top: (safeAreaOverrides?.top ?? spec.topSafe) * scale,
+        bottom: (safeAreaOverrides?.bottom ?? spec.bottomSafe) * scale,
+        left: (safeAreaOverrides?.left ?? 0) * scale,
+        right: (safeAreaOverrides?.right ?? 0) * scale
+      };
 
   // Render at actual display size — no transform needed
   const displayWidth = outerWidth * scale;
