@@ -5,19 +5,19 @@ import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
 import { motion } from "framer-motion";
-import { Play, Pause, SpeakerHigh, SpeakerSlash, Spinner } from "@phosphor-icons/react";
+import { Play, Pause, SpeakerHigh, SpeakerSlash } from "@phosphor-icons/react";
 
 const videos = [
-  { src: "/videos/howto-1.mp4", title: "How to Refinish — Step 1", alt: "Refinishing tutorial part 1" },
-  { src: "/videos/howto-2.mp4", title: "How to Refinish — Step 2", alt: "Refinishing tutorial part 2" },
-  { src: "/videos/howto-3.mp4", title: "How to Refinish — Step 3", alt: "Refinishing tutorial part 3" },
+  { src: "/videos/howto-1.mp4", title: "How to Upload — Step 1", alt: "Upload tutorial part 1" },
+  { src: "/videos/howto-2.mp4", title: "How to Upload — Step 2", alt: "Upload tutorial part 2" },
+  { src: "/videos/howto-3.mp4", title: "How to Upload — Step 3", alt: "Upload tutorial part 3" },
 ];
 
 export const CardCarousel: React.FC = () => {
   const [activeIdx, setActiveIdx] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
   const [playingIdx, setPlayingIdx] = useState<number | null>(0);
-  const [loadingMap, setLoadingMap] = useState<Record<number, boolean>>({});
+  const [videoReady, setVideoReady] = useState<Record<number, boolean>>({});
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const swiperRef = useRef<any>(null);
 
@@ -122,26 +122,33 @@ export const CardCarousel: React.FC = () => {
         {videos.map((v, i) => (
           <SwiperSlide key={i}>
             <div className="relative rounded-2xl overflow-hidden border border-border/30 bg-card/40 backdrop-blur-sm shadow-xl group aspect-[9/16]">
-              {loadingMap[i] && (
-                <div className="absolute inset-0 flex items-center justify-center bg-background/60 z-20">
-                  <Spinner className="w-10 h-10 text-primary animate-spin" />
-                </div>
-              )}
+              {/* Dark background so there's no black flash */}
+              <div className="absolute inset-0 bg-background/80 z-0" />
 
+              {/* Video */}
               <video
                 ref={(el) => { videoRefs.current[i] = el; }}
                 src={v.src}
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 autoPlay
                 muted={isMuted}
                 loop
                 playsInline
                 preload="metadata"
-                onLoadStart={() => setLoadingMap((prev) => ({ ...prev, [i]: true }))}
-                onLoadedData={() => setLoadingMap((prev) => ({ ...prev, [i]: false }))}
+                onCanPlay={() => setVideoReady((prev) => ({ ...prev, [i]: true }))}
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  opacity: videoReady[i] ? 1 : 0,
+                  transition: 'opacity 0.5s ease-in-out',
+                  zIndex: 1,
+                }}
               />
 
-              <div className="absolute inset-0 flex items-center justify-center bg-background/20 opacity-100 group-hover:opacity-100 transition-opacity z-15">
+              {/* Play/Pause overlay */}
+              <div className="absolute inset-0 flex items-center justify-center bg-background/20 opacity-100 group-hover:opacity-100 transition-opacity" style={{ zIndex: 2 }}>
                 <motion.button
                   whileHover={{ scale: 1.15 }}
                   whileTap={{ scale: 0.9 }}
@@ -156,7 +163,8 @@ export const CardCarousel: React.FC = () => {
                 </motion.button>
               </div>
 
-              <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-background/90 to-transparent p-4 pt-12 z-10">
+              {/* Title */}
+              <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-background/90 to-transparent p-4 pt-12" style={{ zIndex: 2 }}>
                 <p className="font-sans text-sm font-semibold text-foreground">{v.title}</p>
               </div>
             </div>

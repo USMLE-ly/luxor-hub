@@ -14,11 +14,11 @@ const shimmerParticles = Array.from({ length: 12 }, (_, i) => ({
 }));
 
 const phones = [
-  { video: "/videos/feature-demo.mp4", label: "Manual Upload" },
-  { video: "/videos/closet-demo.mp4", label: "Smart Closet" },
-  { video: "/videos/recommendation-demo.mp4", label: "AI Recommendations" },
-  { video: "/videos/auto-calendar-demo.mp4", label: "Auto Calendar" },
-  { video: "/videos/analysis-demo.mp4", label: "Style Analysis", landscape: true },
+  { video: "/videos/feature-demo.mp4", image: "/images/feature-demo.jpg", label: "Manual Upload" },
+  { video: "/videos/closet-demo.mp4", image: "/images/closet-demo.jpg", label: "Smart Closet" },
+  { video: "/videos/recommendation-demo.mp4", image: "/images/recommendation-demo.jpg", label: "AI Recommendations" },
+  { video: "/videos/auto-calendar-demo.mp4", image: "/images/auto-calendar-demo.jpg", label: "Auto Calendar" },
+  { video: "/videos/analysis-demo.mp4", image: "/images/analysis-demo.jpg", label: "Style Analysis", landscape: true },
 ];
 
 const featureNames = [
@@ -37,6 +37,7 @@ const Features = () => {
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
   const isMobile = useIsMobile();
   const [activeFeature, setActiveFeature] = useState(0);
+  const [videoReady, setVideoReady] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -66,18 +67,14 @@ const Features = () => {
   useEffect(() => {
     const row = phoneRowRef.current;
     if (!row) return;
-
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            playVideosInView();
-          }
+          if (entry.isIntersecting) playVideosInView();
         });
       },
       { threshold: 0.3 }
     );
-
     observer.observe(row);
     return () => observer.disconnect();
   }, [playVideosInView]);
@@ -100,7 +97,6 @@ const Features = () => {
               AI outfit analysis, trend forecasting, wardrobe management, and virtual try-on — all in one app.
             </p>
           </StaggerItem>
-
           <StaggerItem>
             <div className="mt-4 h-7 flex items-center justify-center overflow-hidden">
               <AnimatePresence mode="wait">
@@ -128,20 +124,14 @@ const Features = () => {
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.7 }}
-            animate={isInView ? {
-              opacity: [0, 0.25, 0.08, 0.25, 0],
-              scale: [0.7, 1.05, 1.1, 1.05, 0.7],
-            } : {}}
+            animate={isInView ? { opacity: [0, 0.25, 0.08, 0.25, 0], scale: [0.7, 1.05, 1.1, 1.05, 0.7] } : {}}
             transition={{ duration: 1.5, ease: [0.77, 0, 0.175, 1] }}
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/20 pointer-events-none"
             style={{ width: isMobile ? 200 : 320, height: isMobile ? 200 : 320 }}
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.6 }}
-            animate={isInView ? {
-              opacity: [0, 0.15, 0.05, 0.15, 0],
-              scale: [0.6, 1.15, 1.2, 1.15, 0.6],
-            } : {}}
+            animate={isInView ? { opacity: [0, 0.15, 0.05, 0.15, 0], scale: [0.6, 1.15, 1.2, 1.15, 0.6] } : {}}
             transition={{ duration: 1.5, delay: 0.5, ease: [0.77, 0, 0.175, 1] }}
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/10 pointer-events-none"
             style={{ width: isMobile ? 260 : 400, height: isMobile ? 260 : 400 }}
@@ -151,24 +141,10 @@ const Features = () => {
             <motion.span
               key={p.id}
               initial={{ opacity: 0, y: 0 }}
-              animate={{
-                opacity: [0, 0.7, 0],
-                y: [0, -20 - Math.random() * 30, -50],
-                x: [0, (Math.random() - 0.5) * 24],
-              }}
-              transition={{
-                duration: p.duration,
-                delay: p.delay,
-                ease: [0.77, 0, 0.175, 1],
-              }}
+              animate={{ opacity: [0, 0.7, 0], y: [0, -20 - Math.random() * 30, -50], x: [0, (Math.random() - 0.5) * 24] }}
+              transition={{ duration: p.duration, delay: p.delay, ease: [0.77, 0, 0.175, 1] }}
               className="absolute rounded-full bg-primary pointer-events-none"
-              style={{
-                left: `${p.x}%`,
-                top: `${p.y}%`,
-                width: p.size,
-                height: p.size,
-                filter: `blur(${p.size > 3.5 ? 1 : 0}px)`,
-              }}
+              style={{ left: `${p.x}%`, top: `${p.y}%`, width: p.size, height: p.size, filter: `blur(${p.size > 3.5 ? 1 : 0}px)` }}
             />
           ))}
 
@@ -199,6 +175,13 @@ const Features = () => {
                     scale={phoneScale}
                     orientation={isLandscape ? 'landscape' : 'portrait'}
                   >
+                    {/* Static image fallback — always rendered behind video */}
+                    <img
+                      src={phone.image}
+                      alt={phone.label}
+                      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                    {/* Video overlay — plays on top of image when ready */}
                     <video
                       ref={(el) => { if (el) videoRefs.current[i] = el; }}
                       src={phone.video}
@@ -207,7 +190,16 @@ const Features = () => {
                       loop
                       muted
                       playsInline
-                      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                      onCanPlay={() => setVideoReady((prev) => ({ ...prev, [i]: true }))}
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        opacity: videoReady[i] ? 1 : 0,
+                        transition: 'opacity 0.5s ease-in-out',
+                      }}
                     />
                   </IPhoneMockup>
                 </div>
@@ -219,7 +211,6 @@ const Features = () => {
             style={{ opacity: glowOpacity }}
             className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-1/2 h-12 rounded-full bg-primary/15 blur-2xl pointer-events-none"
           />
-
           <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background via-background/60 to-transparent pointer-events-none z-10" />
         </motion.div>
       </div>
