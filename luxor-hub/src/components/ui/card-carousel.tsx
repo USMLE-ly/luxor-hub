@@ -121,7 +121,7 @@ export const CardCarousel: React.FC = () => {
       >
         {videos.map((v, i) => (
           <SwiperSlide key={i}>
-            <div className="relative rounded-2xl overflow-hidden border border-border/30 bg-card/40 backdrop-blur-sm shadow-xl group">
+            <div className="relative rounded-2xl overflow-hidden border border-border/30 bg-card/40 backdrop-blur-sm shadow-xl group aspect-[9/16]">
               {loadingMap[i] && (
                 <div className="absolute inset-0 flex items-center justify-center bg-background/60 z-20">
                   <Spinner className="w-10 h-10 text-primary animate-spin" />

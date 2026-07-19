@@ -64,7 +64,7 @@ const RouteTracker = () => {
   return null;
 };
 
-const Loading = () => <AnimatedLoader />;
+const Loading = () => <AnimatedLoader estimatedSeconds={6} />;
 
 const AppContent = () => {
   const location = useLocation();

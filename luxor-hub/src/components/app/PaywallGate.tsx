@@ -49,7 +49,7 @@ const PaywallGate = ({ children }: { children: React.ReactNode }) => {
   if (!isReady || loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <AnimatedLoader />
+        <AnimatedLoader estimatedSeconds={4} />
       </div>
     );
   }
@@ -60,7 +60,7 @@ const PaywallGate = ({ children }: { children: React.ReactNode }) => {
   if (subLoading && optimisticAccess === null) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <AnimatedLoader />
+        <AnimatedLoader estimatedSeconds={4} />
       </div>
     );
   }
