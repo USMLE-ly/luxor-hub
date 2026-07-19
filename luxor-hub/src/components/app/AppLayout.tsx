@@ -32,7 +32,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   if (!isReady || loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <AnimatedLoader estimatedSeconds={4} />
+        <AnimatedLoader />
       </div>
     );
   }
@@ -41,7 +41,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   if (!user) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <AnimatedLoader estimatedSeconds={4} />
+        <AnimatedLoader />
       </div>
     );
   }

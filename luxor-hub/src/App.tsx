@@ -8,7 +8,7 @@ import { SpeedInsights } from "@vercel/speed-insights/react";
 import AnimatedLoader from "@/components/ui/animated-loader-1";
 const AppContent = lazy(() => import("./AppContent"));
 
-const Loading = () => <AnimatedLoader estimatedSeconds={10} />;
+const Loading = () => <AnimatedLoader />;
 
 function isChunkLoadError(error: any): boolean {
   return (
