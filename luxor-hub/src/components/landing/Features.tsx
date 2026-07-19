@@ -13,6 +13,40 @@ import recommendationDemoPoster from "@/assets/recommendation-demo-poster.jpg";
 import autoCalendarDemoPoster from "@/assets/auto-calendar-demo-poster.jpg";
 import analysisDemoPoster from "@/assets/analysis-demo-poster.jpg";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useState, useCallback } from "react";
+
+const VideoWithFallback = ({ src, poster, label }: { src: string; poster: string; label: string }) => {
+  const [failed, setFailed] = useState(false);
+  const handleError = useCallback(() => {
+    console.warn('[LUXOR] Video failed, showing poster:', label, src);
+    setFailed(true);
+  }, [label, src]);
+
+  if (failed || !src) {
+    return (
+      <img
+        src={poster}
+        alt={label}
+        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+      />
+    );
+  }
+
+  return (
+    <video
+      ref={(el) => { if (el && el.paused) el.play().catch(() => {}); }}
+      src={src}
+      poster={poster}
+      preload="metadata"
+      autoPlay
+      loop
+      muted
+      playsInline
+      onError={handleError}
+      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+    />
+  );
+};
 
 const shimmerParticles = Array.from({ length: 12 }, (_, i) => ({
   id: i,
@@ -194,23 +228,7 @@ const Features = () => {
                     orientation={isLandscape ? 'landscape' : 'portrait'}
                   >
                     <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
-                      <video
-                        ref={(el) => {
-                          if (el && el.paused) {
-                            el.play().catch(() => {});
-                          }
-                        }}
-                        src={phone.video}
-                        poster={phone.poster}
-                        preload="metadata"
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        onError={(e) => console.error('[LUXOR VIDEO ERROR]', phone.label, phone.video, e)}
-                        onLoadedData={(e) => console.log('[LUXOR VIDEO OK]', phone.label, (e.target as HTMLVideoElement).videoWidth + 'x' + (e.target as HTMLVideoElement).videoHeight)}
-                        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-                      />
+                      <VideoWithFallback src={phone.video} poster={phone.poster} label={phone.label} />
                     </div>
                   </IPhoneMockup>
                 </div>

@@ -173,6 +173,14 @@ export const CardCarousel: React.FC = () => {
                 preload="metadata"
                 onLoadStart={() => setLoadingMap((prev) => ({ ...prev, [i]: true }))}
                 onLoadedMetadata={() => handleLoadedMetadata(i)}
+                onError={(e) => {
+                  console.warn('[LUXOR] Tutorial video failed:', v.title);
+                  const target = e.target as HTMLVideoElement;
+                  const fallback = document.createElement('img');
+                  fallback.src = '/placeholder.svg';
+                  fallback.style.cssText = 'width:100%;height:100%;object-fit:cover';
+                  target.parentNode?.replaceChild(fallback, target);
+                }}
               />
 
               {/* Play/Pause overlay */}
