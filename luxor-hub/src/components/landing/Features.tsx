@@ -2,51 +2,9 @@ import { useRef, useState, useEffect } from "react";
 import { motion, useInView, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import { IPhoneMockup } from "@/components/ui/iphone-mockup";
-import featureDemo from "@/assets/feature-demo.mp4";
-import closetDemo from "@/assets/closet-demo.mp4";
-import recommendationDemo from "@/assets/recommendation-demo.mp4";
-import autoCalendarDemo from "@/assets/auto-calendar-demo.mp4";
-import analysisDemo from "@/assets/analysis-demo.mp4";
-import featureDemoPoster from "@/assets/feature-demo-poster.jpg";
-import closetDemoPoster from "@/assets/closet-demo-poster.jpg";
-import recommendationDemoPoster from "@/assets/recommendation-demo-poster.jpg";
-import autoCalendarDemoPoster from "@/assets/auto-calendar-demo-poster.jpg";
-import analysisDemoPoster from "@/assets/analysis-demo-poster.jpg";
+// Videos and posters served from public/ folder (bypasses Vercel SPA rewrites)
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useState, useCallback } from "react";
-
-const VideoWithFallback = ({ src, poster, label }: { src: string; poster: string; label: string }) => {
-  const [failed, setFailed] = useState(false);
-  const handleError = useCallback(() => {
-    console.warn('[LUXOR] Video failed, showing poster:', label, src);
-    setFailed(true);
-  }, [label, src]);
-
-  if (failed || !src) {
-    return (
-      <img
-        src={poster}
-        alt={label}
-        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-      />
-    );
-  }
-
-  return (
-    <video
-      ref={(el) => { if (el && el.paused) el.play().catch(() => {}); }}
-      src={src}
-      poster={poster}
-      preload="metadata"
-      autoPlay
-      loop
-      muted
-      playsInline
-      onError={handleError}
-      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-    />
-  );
-};
+// Clean video component — public/ files serve with correct MIME types
 
 const shimmerParticles = Array.from({ length: 12 }, (_, i) => ({
   id: i,
@@ -58,19 +16,14 @@ const shimmerParticles = Array.from({ length: 12 }, (_, i) => ({
 }));
 
 const phones = [
-  { video: featureDemo, poster: featureDemoPoster, label: "Manual Upload" },
-  { video: closetDemo, poster: closetDemoPoster, label: "Smart Closet" },
-  { video: recommendationDemo, poster: recommendationDemoPoster, label: "AI Recommendations" },
-  { video: autoCalendarDemo, poster: autoCalendarDemoPoster, label: "Auto Calendar" },
-  { video: analysisDemo, poster: analysisDemoPoster, label: "Style Analysis", landscape: true },
+  { video: "/videos/feature-demo.mp4", poster: "/images/feature-demo-poster.jpg", label: "Manual Upload" },
+  { video: "/videos/closet-demo.mp4", poster: "/images/closet-demo-poster.jpg", label: "Smart Closet" },
+  { video: "/videos/recommendation-demo.mp4", poster: "/images/recommendation-demo-poster.jpg", label: "AI Recommendations" },
+  { video: "/videos/auto-calendar-demo.mp4", poster: "/images/auto-calendar-demo-poster.jpg", label: "Auto Calendar" },
+  { video: "/videos/analysis-demo.mp4", poster: "/images/analysis-demo-poster.jpg", label: "Style Analysis", landscape: true },
 ];
 
-// TEMPORARY DIAGNOSTIC: Log video URLs to console on mount
-if (typeof window !== 'undefined') {
-  console.log('[LUXOR VIDEO DEBUG] Video URLs:', phones.map(p => p.video));
-  console.log('[LUXOR VIDEO DEBUG] Poster URLs:', phones.map(p => p.poster));
-  console.log('[LUXOR VIDEO DEBUG] All videos are', phones.every(p => !!p.video) ? '✅ RESOLVED' : '❌ UNDEFINED');
-}
+
 
 const featureNames = [
   "AI Outfit Analysis",
@@ -227,9 +180,16 @@ const Features = () => {
                     scale={phoneScale}
                     orientation={isLandscape ? 'landscape' : 'portrait'}
                   >
-                    <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
-                      <VideoWithFallback src={phone.video} poster={phone.poster} label={phone.label} />
-                    </div>
+                    <video
+                      src={phone.video}
+                      poster={phone.poster}
+                      preload="metadata"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
                   </IPhoneMockup>
                 </div>
               </motion.div>

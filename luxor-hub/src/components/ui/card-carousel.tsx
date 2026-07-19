@@ -7,14 +7,12 @@ import "swiper/css/navigation";
 import { motion } from "framer-motion";
 import { Play, Pause, SpeakerHigh, SpeakerSlash, Spinner } from "@phosphor-icons/react";
 
-import howto1 from "@/assets/videos/howto-1.mp4";
-import howto2 from "@/assets/videos/howto-2.mp4";
-import howto3 from "@/assets/videos/howto-3.mp4";
+// Tutorial videos served from public/ folder (bypasses Vercel SPA rewrites)
 
 const videos = [
-  { src: howto1, title: "How to Refinish — Step 1", alt: "Refinishing tutorial part 1" },
-  { src: howto2, title: "How to Refinish — Step 2", alt: "Refinishing tutorial part 2" },
-  { src: howto3, title: "How to Refinish — Step 3", alt: "Refinishing tutorial part 3" },
+  { src: "/videos/howto-1.mp4", title: "How to Refinish — Step 1", alt: "Refinishing tutorial part 1" },
+  { src: "/videos/howto-2.mp4", title: "How to Refinish — Step 2", alt: "Refinishing tutorial part 2" },
+  { src: "/videos/howto-3.mp4", title: "How to Refinish — Step 3", alt: "Refinishing tutorial part 3" },
 ];
 
 export const CardCarousel: React.FC = () => {
@@ -173,7 +171,7 @@ export const CardCarousel: React.FC = () => {
                 preload="metadata"
                 onLoadStart={() => setLoadingMap((prev) => ({ ...prev, [i]: true }))}
                 onLoadedMetadata={() => handleLoadedMetadata(i)}
-                onError={() => console.warn('[LUXOR] Tutorial video failed:', v.title)}
+
               />
 
               {/* Play/Pause overlay */}

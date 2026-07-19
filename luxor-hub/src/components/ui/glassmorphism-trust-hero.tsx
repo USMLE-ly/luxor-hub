@@ -10,7 +10,7 @@ import CursorSpotlight from "@/components/ui/cursor-spotlight";
 import { ProgressiveImage } from "@/components/ui/progressive-image";
 // ThreeGarmentShowcase removed — heavy Three.js freezes mobile devices
 import {ArrowRight, Play, Target, Crown, Star, Hexagon, Triangle, Command, Ghost, Diamond, Cpu, CaretDown, } from "@phosphor-icons/react";
-import heroVideo from "@/assets/hero-video.mp4";
+// Hero video served from public/ folder
 
 const FloatingCircle = ({
   size,
@@ -87,7 +87,7 @@ export default function GlassmorphismTrustHero() {
       {/* Background video with parallax + scale */}
       <motion.div className="absolute inset-0 z-0" style={{ y: videoY, scale: videoScale }}>
         <video
-          src={heroVideo}
+          src="/videos/hero-video.mp4"
           preload="metadata"
           autoPlay
           loop
