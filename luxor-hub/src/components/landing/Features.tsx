@@ -1,10 +1,8 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { motion, useInView, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import { IPhoneMockup } from "@/components/ui/iphone-mockup";
-// Videos and posters served from public/ folder (bypasses Vercel SPA rewrites)
 import { useIsMobile } from "@/hooks/use-mobile";
-// Clean video component — public/ files serve with correct MIME types
 
 const shimmerParticles = Array.from({ length: 12 }, (_, i) => ({
   id: i,
@@ -23,8 +21,6 @@ const phones = [
   { video: "/videos/analysis-demo.mp4", poster: "/images/analysis-demo-poster.jpg", label: "Style Analysis", landscape: true },
 ];
 
-
-
 const featureNames = [
   "AI Outfit Analysis",
   "Virtual Try-On",
@@ -36,6 +32,8 @@ const featureNames = [
 
 const Features = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const phoneRowRef = useRef<HTMLDivElement>(null);
+  const videoRefs = useRef<HTMLVideoElement[]>([]);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
   const isMobile = useIsMobile();
   const [activeFeature, setActiveFeature] = useState(0);
@@ -57,10 +55,37 @@ const Features = () => {
 
   const phoneScale = isMobile ? 0.55 : 0.72;
 
+  // Play all phone videos when the phone row scrolls into view
+  const playVideosInView = useCallback(() => {
+    videoRefs.current.forEach((video) => {
+      if (video && video.paused) {
+        video.play().catch(() => {});
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    const row = phoneRowRef.current;
+    if (!row) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            playVideosInView();
+          }
+        });
+      },
+      { threshold: 0.3 }
+    );
+
+    observer.observe(row);
+    return () => observer.disconnect();
+  }, [playVideosInView]);
+
   return (
     <section id="features" className="pt-16 md:pt-24 pb-0 bg-muted/20" ref={sectionRef}>
       <div className="max-w-6xl mx-auto px-4">
-        {/* Header */}
         <StaggerContainer>
           <StaggerItem>
             <p className="font-sans text-sm font-semibold text-primary tracking-widest uppercase mb-3 text-center">Features</p>
@@ -77,7 +102,6 @@ const Features = () => {
             </p>
           </StaggerItem>
 
-          {/* Rotating feature text */}
           <StaggerItem>
             <div className="mt-4 h-7 flex items-center justify-center overflow-hidden">
               <AnimatePresence mode="wait">
@@ -96,7 +120,6 @@ const Features = () => {
           </StaggerItem>
         </StaggerContainer>
 
-        {/* iPhone Mockups Row + Parallax + Shimmer */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={isInView ? { opacity: 1, scale: 1 } : {}}
@@ -104,7 +127,6 @@ const Features = () => {
           style={{ y: mockupY }}
           className="relative mb-8 md:mb-12"
         >
-          {/* Pulsing halo rings */}
           <motion.div
             initial={{ opacity: 0, scale: 0.7 }}
             animate={isInView ? {
@@ -126,7 +148,6 @@ const Features = () => {
             style={{ width: isMobile ? 260 : 400, height: isMobile ? 260 : 400 }}
           />
 
-          {/* Floating shimmer particles */}
           {isInView && shimmerParticles.map((p) => (
             <motion.span
               key={p.id}
@@ -152,8 +173,9 @@ const Features = () => {
             />
           ))}
 
-          {/* Phone row — horizontal scroll like Gallery4 */}
-          <div className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory px-4 relative z-[1] scrollbar-hide"
+          <div
+            ref={phoneRowRef}
+            className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory px-4 relative z-[1] scrollbar-hide"
             style={{ scrollSnapType: 'x mandatory' }}
           >
             {phones.map((phone, i) => {
@@ -165,10 +187,8 @@ const Features = () => {
                 initial={{ opacity: 0, y: 30 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.6, delay: 0.15 + i * 0.12, ease: [0.23, 1, 0.32, 1] }}
-                className={`flex flex-col items-center snap-center flex-shrink-0`}
-                
+                className="flex flex-col items-center snap-center flex-shrink-0"
               >
-                {/* Label above phone */}
                 <span className="font-sans text-[10px] font-medium tracking-wider uppercase text-primary/70 text-center w-full mb-1.5">
                   {phone.label}
                 </span>
@@ -181,6 +201,7 @@ const Features = () => {
                     orientation={isLandscape ? 'landscape' : 'portrait'}
                   >
                     <video
+                      ref={(el) => { if (el) videoRefs.current[i] = el; }}
                       src={phone.video}
                       poster={phone.poster}
                       preload="metadata"
@@ -196,13 +217,11 @@ const Features = () => {
             )})}
           </div>
 
-          {/* Luxury glow reflection */}
           <motion.div
             style={{ opacity: glowOpacity }}
             className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-1/2 h-12 rounded-full bg-primary/15 blur-2xl pointer-events-none"
           />
 
-          {/* Bottom fade gradient */}
           <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background via-background/60 to-transparent pointer-events-none z-10" />
         </motion.div>
       </div>

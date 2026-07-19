@@ -1,39 +1,30 @@
 /**
  * LUXOR® Service Worker
  * 
- * Layer 10 (Caching/CDN) + Layer 13 (Availability/Recovery)
- * 
- * - Cache-first for static assets (fonts, images, CSS, JS)
- * - Network-first for API calls with offline fallback
+ * - Network-first for media (videos, images) to avoid caching bad responses
+ * - Stale-while-revalidate for static assets (fonts, images that don't change)
+ * - Network-first for JS/CSS to prevent stale chunk hashes
  * - Stale-while-revalidate for pages
  */
 
-const CACHE_NAME = "luxor-v2";
-const STATIC_CACHE = "luxor-static-v2";
-const DYNAMIC_CACHE = "luxor-dynamic-v2";
+const CACHE_NAME = "luxor-v3";
+const STATIC_CACHE = "luxor-static-v3";
+const DYNAMIC_CACHE = "luxor-dynamic-v3";
 
-// Assets to pre-cache on install
-const PRECACHE_ASSETS = [
-  "/favicon.ico",
-  "/favicon.png",
-  "/manifest.webmanifest",
-  "/og-image.png",
-];
-
-// Install: pre-cache critical assets
+// Install: clear ALL old caches and activate immediately
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(STATIC_CACHE).then((cache) => {
-      return cache.addAll(PRECACHE_ASSETS).catch(() => {
-        // Non-critical if some fail
-        console.log("[SW] Some precache assets unavailable");
-      });
-    })
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys
+          .filter((key) => key !== STATIC_CACHE && key !== DYNAMIC_CACHE)
+          .map((key) => caches.delete(key))
+      );
+    }).then(() => self.skipWaiting())
   );
-  self.skipWaiting();
 });
 
-// Activate: clean old caches
+// Activate: claim all clients immediately
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -42,9 +33,8 @@ self.addEventListener("activate", (event) => {
           .filter((key) => key !== STATIC_CACHE && key !== DYNAMIC_CACHE)
           .map((key) => caches.delete(key))
       );
-    })
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 // Fetch strategies
@@ -55,7 +45,7 @@ self.addEventListener("fetch", (event) => {
   // Skip non-GET requests
   if (request.method !== "GET") return;
 
-  // Skip Supabase API calls (let them go to network)
+  // Skip Supabase API calls
   if (url.hostname.includes("supabase")) return;
 
   // Skip edge function calls
@@ -83,11 +73,55 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Other static assets: cache-first (fonts, images - these don't change)
+  // Videos: ALWAYS network-first (never cache — videos are large and may change)
+  if (url.pathname.match(/\.mp4$/)) {
+    event.respondWith(
+      fetch(request).then((response) => {
+        return response;
+      }).catch(() => {
+        return new Response("Video unavailable offline", { status: 503 });
+      })
+    );
+    return;
+  }
+
+  // Poster images / static images: stale-while-revalidate
+  if (
+    request.destination === "image" ||
+    url.pathname.match(/\.(jpg|jpeg|png|gif|svg|ico|webp)$/)
+  ) {
+    event.respondWith(
+      caches.open(STATIC_CACHE).then((cache) => {
+        return cache.match(request).then((cached) => {
+          const networkFetch = fetch(request).then((response) => {
+            if (response.status === 200) {
+              cache.put(request, response.clone());
+            }
+            return response;
+          }).catch(() => {
+            // If network fails, return cached version if available
+            if (cached) return cached;
+            // Return a branded fallback for images
+            if (request.destination === "image") {
+              return new Response(
+                '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="600"><rect fill="#10352a" width="400" height="600"/><text fill="#E8C87A" font-family="sans-serif" font-size="18" x="50%" y="50%" text-anchor="middle" dy=".3em">LUXOR®</text></svg>',
+                { headers: { "Content-Type": "image/svg+xml" } }
+              );
+            }
+            return new Response("Offline", { status: 503 });
+          });
+          // Return cached immediately if available, update in background
+          return cached || networkFetch;
+        });
+      })
+    );
+    return;
+  }
+
+  // Fonts: cache-first (fonts never change)
   if (
     request.destination === "font" ||
-    request.destination === "image" ||
-    url.pathname.match(/\.(woff2?|ttf|eot|png|jpg|jpeg|gif|svg|ico|mp4)$/)
+    url.pathname.match(/\.(woff2?|ttf|eot)$/)
   ) {
     event.respondWith(
       caches.match(request).then((cached) => {
@@ -98,14 +132,6 @@ self.addEventListener("fetch", (event) => {
             caches.open(STATIC_CACHE).then((cache) => cache.put(request, clone));
           }
           return response;
-        }).catch(() => {
-          if (request.destination === "image") {
-            return new Response(
-              '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect fill="#1a2e2a" width="200" height="200"/><text fill="#c9a84c" font-family="sans-serif" font-size="14" x="50%" y="50%" text-anchor="middle" dy=".3em">LUXOR®</text></svg>',
-              { headers: { "Content-Type": "image/svg+xml" } }
-            );
-          }
-          return new Response("Offline", { status: 503 });
         });
       })
     );
@@ -115,17 +141,18 @@ self.addEventListener("fetch", (event) => {
   // Pages: stale-while-revalidate
   if (request.mode === "navigate") {
     event.respondWith(
-      caches.match(request).then((cached) => {
-        const networkFetch = fetch(request).then((response) => {
-          if (response.status === 200) {
-            const clone = response.clone();
-            caches.open(DYNAMIC_CACHE).then((cache) => cache.put(request, clone));
-          }
-          return response;
-        }).catch(() => {
-          return cached || new Response("Offline", { status: 503 });
+      caches.open(DYNAMIC_CACHE).then((cache) => {
+        return cache.match(request).then((cached) => {
+          const networkFetch = fetch(request).then((response) => {
+            if (response.status === 200) {
+              cache.put(request, response.clone());
+            }
+            return response;
+          }).catch(() => {
+            return cached || new Response("Offline", { status: 503 });
+          });
+          return cached || networkFetch;
         });
-        return cached || networkFetch;
       })
     );
     return;
