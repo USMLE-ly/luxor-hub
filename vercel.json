@@ -5,7 +5,7 @@
       "use": "@vercel/static-build",
       "config": {
         "installCommand": "cd luxor-hub && npm install --ignore-engines",
-        "buildCommand": "cd luxor-hub && npm run build",
+        "buildCommand": "cd luxor-hub && rm -rf dist node_modules/.vite && npm run build",
         "outputDirectory": "luxor-hub/dist"
       }
     }
