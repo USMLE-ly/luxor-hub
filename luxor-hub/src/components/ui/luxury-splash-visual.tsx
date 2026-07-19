@@ -12,7 +12,7 @@ export function LuxurySplashVisual({
   className?: string;
 }) {
   return (
-    <div className={`relative w-full min-h-screen bg-forest overflow-hidden ${className}`}>
+    <div className={`relative w-full min-h-screen overflow-hidden ${className}`} style={{ background: "linear-gradient(180deg, #060f0d 0%, #0c2420 35%, #10352a 55%, #0a1f1a 80%, #060f0d 100%)" }}>
       <div className="absolute inset-0 bg-gradient-to-b from-forest via-emerald/20 to-forest/90" />
       <div
         className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full pointer-events-none"
@@ -115,9 +115,9 @@ export function LuxurySplashScreen({
                   initial={{ y: 30, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                  className="font-display text-5xl sm:text-6xl md:text-7xl font-bold tracking-[0.25em] text-foreground mt-8 flex items-start justify-center"
+                  className="font-display text-6xl sm:text-7xl md:text-8xl font-light tracking-[0.3em] text-white/90 mt-8 flex items-start justify-center" style={{ textShadow: "0 0 40px rgba(232,200,122,0.08)" }}
                 >
-                  LUXOR<span className="text-gold/60 text-[0.3em] font-sans font-normal mt-[0.15em] ml-[0.05em]">®</span>
+                  LUXOR<span style={{ fontSize: "0.28em", position: "relative", top: "-0.6em", marginLeft: "1px", opacity: 0.55 }} className="font-sans font-normal text-gold">®</span>
                 </motion.h1>
               )}
             </AnimatePresence>
@@ -131,7 +131,7 @@ export function LuxurySplashScreen({
                   animate={{ y: 0, opacity: 1 }}
                   exit={{ y: -15, opacity: 0 }}
                   transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                  className="font-sans text-[10px] sm:text-xs uppercase tracking-[0.4em] text-gold/40 mt-5 font-light"
+                  className="font-sans text-[10px] sm:text-[11px] uppercase tracking-[0.45em] mt-5 font-light" style={{ color: "rgba(232,200,122,0.3)" }}
                 >
                   {tagline}
                 </motion.p>
@@ -139,12 +139,12 @@ export function LuxurySplashScreen({
             </AnimatePresence>
 
             {/* Gold loading bar */}
-            <div className="w-40 h-[1px] rounded-full bg-gold/10 overflow-hidden mt-10">
+            <div className="w-48 h-[1px] rounded-full overflow-hidden mt-12" style={{ background: "rgba(232,200,122,0.08)" }}>
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: "100%" }}
                 transition={{ duration: 2.6, ease: [0.16, 1, 0.3, 1] }}
-                className="h-full rounded-full bg-gradient-to-r from-gold/40 via-gold to-gold/40"
+                className="h-full rounded-full" style={{ background: "linear-gradient(90deg, rgba(232,200,122,0.2), rgba(232,200,122,0.7), rgba(232,200,122,0.2))" }}
               />
             </div>
 
@@ -154,7 +154,7 @@ export function LuxurySplashScreen({
               animate={{ scaleX: 1 }}
               transition={{ duration: 1, delay: 1, ease: [0.16, 1, 0.3, 1] }}
               className="absolute bottom-12 left-1/2 -translate-x-1/2 w-24 h-px origin-center"
-              style={{ background: "linear-gradient(90deg, transparent, hsl(var(--gold) / 0.2), transparent)" }}
+              style={{ background: "linear-gradient(90deg, transparent, rgba(232,200,122,0.15), transparent)" }}
             />
           </LuxurySplashVisual>
         </motion.div>
