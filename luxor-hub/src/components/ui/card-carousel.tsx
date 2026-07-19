@@ -7,8 +7,6 @@ import "swiper/css/navigation";
 import { motion } from "framer-motion";
 import { Play, Pause, SpeakerHigh, SpeakerSlash, Spinner } from "@phosphor-icons/react";
 
-// Tutorial videos served from public/ folder (bypasses Vercel SPA rewrites)
-
 const videos = [
   { src: "/videos/howto-1.mp4", title: "How to Refinish — Step 1", alt: "Refinishing tutorial part 1" },
   { src: "/videos/howto-2.mp4", title: "How to Refinish — Step 2", alt: "Refinishing tutorial part 2" },
@@ -20,26 +18,8 @@ export const CardCarousel: React.FC = () => {
   const [isMuted, setIsMuted] = useState(true);
   const [playingIdx, setPlayingIdx] = useState<number | null>(0);
   const [loadingMap, setLoadingMap] = useState<Record<number, boolean>>({});
-  const [posters, setPosters] = useState<Record<number, string>>({});
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const swiperRef = useRef<any>(null);
-
-  const handleLoadedMetadata = useCallback((idx: number) => {
-    setLoadingMap((prev) => ({ ...prev, [idx]: false }));
-    const video = videoRefs.current[idx];
-    if (!video) return;
-    try {
-      const canvas = document.createElement("canvas");
-      canvas.width = video.videoWidth || 300;
-      canvas.height = video.videoHeight || 533;
-      const ctx = canvas.getContext("2d");
-      if (ctx) {
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const dataUrl = canvas.toDataURL("image/jpeg", 0.6);
-        setPosters((prev) => ({ ...prev, [idx]: dataUrl }));
-      }
-    } catch { /* ignore CORS */ }
-  }, []);
 
   const togglePlay = useCallback((idx: number) => {
     const video = videoRefs.current[idx];
@@ -101,7 +81,6 @@ export const CardCarousel: React.FC = () => {
     <div className="relative w-full">
       <style>{swiperCSS}</style>
 
-      {/* Global mute toggle */}
       <motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
@@ -128,7 +107,6 @@ export const CardCarousel: React.FC = () => {
         onSlideChange={handleSlideChange}
         onSwiper={(swiper) => {
           swiperRef.current = swiper;
-          // Force loop initialization and start first video
           swiper.update();
           setTimeout(() => {
             const v = videoRefs.current[0];
@@ -144,20 +122,10 @@ export const CardCarousel: React.FC = () => {
         {videos.map((v, i) => (
           <SwiperSlide key={i}>
             <div className="relative rounded-2xl overflow-hidden border border-border/30 bg-card/40 backdrop-blur-sm shadow-xl group">
-              {/* Loading spinner */}
               {loadingMap[i] && (
                 <div className="absolute inset-0 flex items-center justify-center bg-background/60 z-20">
                   <Spinner className="w-10 h-10 text-primary animate-spin" />
                 </div>
-              )}
-
-              {/* Poster overlay */}
-              {posters[i] && playingIdx !== i && (
-                <img
-                  src={posters[i]}
-                  alt={v.alt}
-                  className="w-full aspect-[9/16] object-cover absolute inset-0 z-10"
-                />
               )}
 
               <video
@@ -170,11 +138,9 @@ export const CardCarousel: React.FC = () => {
                 playsInline
                 preload="metadata"
                 onLoadStart={() => setLoadingMap((prev) => ({ ...prev, [i]: true }))}
-                onLoadedMetadata={() => handleLoadedMetadata(i)}
-
+                onLoadedData={() => setLoadingMap((prev) => ({ ...prev, [i]: false }))}
               />
 
-              {/* Play/Pause overlay */}
               <div className="absolute inset-0 flex items-center justify-center bg-background/20 opacity-100 group-hover:opacity-100 transition-opacity z-15">
                 <motion.button
                   whileHover={{ scale: 1.15 }}
@@ -190,7 +156,6 @@ export const CardCarousel: React.FC = () => {
                 </motion.button>
               </div>
 
-              {/* Title */}
               <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-background/90 to-transparent p-4 pt-12 z-10">
                 <p className="font-sans text-sm font-semibold text-foreground">{v.title}</p>
               </div>

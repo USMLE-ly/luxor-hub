@@ -14,11 +14,11 @@ const shimmerParticles = Array.from({ length: 12 }, (_, i) => ({
 }));
 
 const phones = [
-  { video: "/videos/feature-demo.mp4", poster: "/images/feature-demo-poster.jpg", label: "Manual Upload" },
-  { video: "/videos/closet-demo.mp4", poster: "/images/closet-demo-poster.jpg", label: "Smart Closet" },
-  { video: "/videos/recommendation-demo.mp4", poster: "/images/recommendation-demo-poster.jpg", label: "AI Recommendations" },
-  { video: "/videos/auto-calendar-demo.mp4", poster: "/images/auto-calendar-demo-poster.jpg", label: "Auto Calendar" },
-  { video: "/videos/analysis-demo.mp4", poster: "/images/analysis-demo-poster.jpg", label: "Style Analysis", landscape: true },
+  { video: "/videos/feature-demo.mp4", label: "Manual Upload" },
+  { video: "/videos/closet-demo.mp4", label: "Smart Closet" },
+  { video: "/videos/recommendation-demo.mp4", label: "AI Recommendations" },
+  { video: "/videos/auto-calendar-demo.mp4", label: "Auto Calendar" },
+  { video: "/videos/analysis-demo.mp4", label: "Style Analysis", landscape: true },
 ];
 
 const featureNames = [
@@ -55,7 +55,6 @@ const Features = () => {
 
   const phoneScale = isMobile ? 0.55 : 0.72;
 
-  // Play all phone videos when the phone row scrolls into view
   const playVideosInView = useCallback(() => {
     videoRefs.current.forEach((video) => {
       if (video && video.paused) {
@@ -203,7 +202,6 @@ const Features = () => {
                     <video
                       ref={(el) => { if (el) videoRefs.current[i] = el; }}
                       src={phone.video}
-                      poster={phone.poster}
                       preload="metadata"
                       autoPlay
                       loop
