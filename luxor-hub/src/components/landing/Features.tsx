@@ -31,6 +31,13 @@ const phones = [
   { video: analysisDemo, poster: analysisDemoPoster, label: "Style Analysis", landscape: true },
 ];
 
+// TEMPORARY DIAGNOSTIC: Log video URLs to console on mount
+if (typeof window !== 'undefined') {
+  console.log('[LUXOR VIDEO DEBUG] Video URLs:', phones.map(p => p.video));
+  console.log('[LUXOR VIDEO DEBUG] Poster URLs:', phones.map(p => p.poster));
+  console.log('[LUXOR VIDEO DEBUG] All videos are', phones.every(p => !!p.video) ? '✅ RESOLVED' : '❌ UNDEFINED');
+}
+
 const featureNames = [
   "AI Outfit Analysis",
   "Virtual Try-On",
@@ -200,6 +207,8 @@ const Features = () => {
                         loop
                         muted
                         playsInline
+                        onError={(e) => console.error('[LUXOR VIDEO ERROR]', phone.label, phone.video, e)}
+                        onLoadedData={(e) => console.log('[LUXOR VIDEO OK]', phone.label, (e.target as HTMLVideoElement).videoWidth + 'x' + (e.target as HTMLVideoElement).videoHeight)}
                         style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
                       />
                     </div>
