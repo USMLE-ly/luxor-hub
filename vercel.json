@@ -1,8 +1,7 @@
 {
-  "framework": "vite",
-  "buildCommand": "npm --prefix luxor-hub install && rm -rf luxor-hub/dist luxor-hub/node_modules/.vite && npm --prefix luxor-hub run build",
-  "outputDirectory": "luxor-hub/dist",
   "installCommand": "npm --prefix luxor-hub install --ignore-engines",
+  "buildCommand": "npm --prefix luxor-hub run build",
+  "outputDirectory": "luxor-hub/dist",
   "rewrites": [
     {
       "source": "/api/:path*",
