@@ -89,3 +89,4 @@ This project uses a **two-tier deployment**:
 1. Connect your repo to Vercel
 2. In `vercel.json`, replace `YOUR_REPLIT_URL` with your actual Replit app URL
 3. Deploy — Vercel builds the frontend and proxies `/api/*` to your Replit backend
+
