@@ -69,8 +69,8 @@ const Footer = () => {
             <a href="#faq" onClick={(e) => scrollTo(e, "faq")} className="hover:text-foreground transition-colors w-fit">FAQ</a>
             <button onClick={() => navigate("/blog")} className="hover:text-foreground transition-colors w-fit text-left">Blog</button>
             <button onClick={() => navigate("/deep-dive")} className="hover:text-foreground transition-colors w-fit text-left">Deep Dive</button>
-            <a href="#" className="hover:text-foreground transition-colors w-fit">Privacy Policy</a>
-            <a href="#" className="hover:text-foreground transition-colors w-fit">Terms of Service</a>
+            <button onClick={() => navigate("/privacy")} className="hover:text-foreground transition-colors w-fit text-left">Privacy Policy</button>
+            <button onClick={() => navigate("/terms")} className="hover:text-foreground transition-colors w-fit text-left">Terms of Service</button>
           </div>
 
           <div>
@@ -123,7 +123,7 @@ const Footer = () => {
         </div>
 
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-8 border-t border-border">
-          <p className="text-xs text-muted-foreground font-sans">© 2020 LUXOR®. All rights reserved.</p>
+          <p className="text-xs text-muted-foreground font-sans">© 2020–2026 LUXOR®. All rights reserved.</p>
           <div className="flex items-center gap-2 text-xs text-muted-foreground font-sans">
             <span>AI-powered personal styling</span>
           </div>

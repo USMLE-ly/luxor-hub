@@ -14,10 +14,17 @@ const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [cooldownUntil, setCooldownUntil] = useState(0);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const now = Date.now();
+    if (now < cooldownUntil) {
+      const remaining = Math.ceil((cooldownUntil - now) / 1000);
+      toast.error(`Please wait ${remaining}s before trying again.`);
+      return;
+    }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim())) {
       toast.error("Please enter a valid email address.");
@@ -30,6 +37,7 @@ const ForgotPassword = () => {
       });
       if (error) throw error;
       setSent(true);
+      setCooldownUntil(Date.now() + 30000);
       toast.success("Check your email for a reset link!");
     } catch (error: any) {
       toast.error(error.message);

@@ -182,7 +182,7 @@ const Pricing = () => {
           status: "active",
         });
         if (error) throw error;
-        localStorage.setItem("luxor_paid", "true");
+        // Subscription recorded in DB — no client-side bypass
         grantAccess();
         toast.success("Welcome to Lexor! Your style journey begins now.");
         navigate("/closet");

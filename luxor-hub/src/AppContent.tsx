@@ -130,6 +130,8 @@ const AppContent = () => {
             <Route path="/council" element={<PaywallGate><ErrorBoundary><Council /></ErrorBoundary></PaywallGate>} />
             <Route path="/monthly-report" element={<PaywallGate><ErrorBoundary><MonthlyReport /></ErrorBoundary></PaywallGate>} />
             <Route path="/wardrobe-value" element={<PaywallGate><ErrorBoundary><WardrobeValue /></ErrorBoundary></PaywallGate>} />
+            <Route path="/privacy" element={<ErrorBoundary><Privacy /></ErrorBoundary>} />
+            <Route path="/terms" element={<ErrorBoundary><Terms /></ErrorBoundary>} />
             <Route path="/blog" element={<ErrorBoundary><Blog /></ErrorBoundary>} />
             <Route path="/blog/:slug" element={<ErrorBoundary><BlogArticle /></ErrorBoundary>} />
             <Route path="/deep-dive" element={<ErrorBoundary><DeepDive /></ErrorBoundary>} />

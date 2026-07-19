@@ -27,6 +27,8 @@ const Auth = () => {
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
+  const [lockoutUntil, setLockoutUntil] = useState(0);
+  const [failedAttempts, setFailedAttempts] = useState(0);
   const navigate = useNavigate();
 
   const emailRef = useRef<HTMLInputElement>(null);
@@ -65,6 +67,14 @@ const Auth = () => {
     e.preventDefault();
     if (!validate()) return;
     if (loading) return;
+
+    // Client-side rate limiting: exponential backoff after failed attempts
+    const now = Date.now();
+    if (now < lockoutUntil) {
+      const remaining = Math.ceil((lockoutUntil - now) / 1000);
+      toast.error(`Too many attempts. Please wait ${remaining}s.`);
+      return;
+    }
 
     if (!navigator.onLine) {
       toast.error("You appear to be offline. Please check your connection and try again.");

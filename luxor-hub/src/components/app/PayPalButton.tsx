@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import {Spinner, Lock} from "@phosphor-icons/react";
 
-const PAYPAL_CLIENT_ID =
-  "ARa9CFxEtURh2bL23KEBSHEjQ7JJA39Dxl-Jn4JCR7fsRx6AaUEe7IXKl97AaApUq0pwXDUMe97sgco-";
+const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID || "";
 
+// TODO: Create a distinct PayPal plan for each tier in the PayPal Dashboard
+// The elite plan ID below is a PLACEHOLDER — replace with the real plan ID
 const PLAN_IDS: Record<string, string> = {
-  starter: "P-6KB46929KR388530GNG6YDAA",
-  pro: "P-3TT76167R1560735XNG6X7TQ",
-  elite: "P-6KB46929KR388530GNG6YDAA",
+  starter: import.meta.env.VITE_PAYPAL_STARTER_PLAN_ID || "P-6KB46929KR388530GNG6YDAA",
+  pro: import.meta.env.VITE_PAYPAL_PRO_PLAN_ID || "P-3TT76167R1560735XNG6X7TQ",
+  elite: import.meta.env.VITE_PAYPAL_ELITE_PLAN_ID || "P-ELITE-REPLACE-ME",
 };
 
 let sdkPromise: Promise<void> | null = null;

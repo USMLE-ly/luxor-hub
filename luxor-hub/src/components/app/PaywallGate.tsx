@@ -11,20 +11,11 @@ import AnimatedLoader from "@/components/ui/animated-loader-1";
 const PaywallGate = ({ children }: { children: React.ReactNode }) => {
   const { user, loading, isReady } = useAuth();
 
-  // Read from localStorage cache immediately to avoid flash of null
-  const cachedAccess = user ? localStorage.getItem("luxor_sub_" + user.id) : null;
-  const optimisticAccess = cachedAccess === "true" ? true : cachedAccess === "false" ? false : null;
-
+  // Always query the DB for subscription status — no localStorage bypass
   const { data: hasAccess, isLoading: subLoading } = useQuery({
     queryKey: ["subscription-check", user?.id],
     queryFn: async () => {
       if (!user) return false;
-
-      // Per-user cache — never leaks across accounts
-      const cacheKey = "luxor_sub_" + user.id;
-      const cached = localStorage.getItem(cacheKey);
-      if (cached === "true") return true;
-      if (cached === "false") return false;
 
       const { data } = await supabase
         .from("subscriptions")
@@ -34,12 +25,7 @@ const PaywallGate = ({ children }: { children: React.ReactNode }) => {
         .limit(1)
         .maybeSingle();
 
-      if (data) {
-        localStorage.setItem(cacheKey, "true");
-        return true;
-      }
-      localStorage.setItem(cacheKey, "false");
-      return false;
+      return !!data;
     },
     enabled: !!user && isReady,
     staleTime: 5 * 60 * 1000,
@@ -57,7 +43,7 @@ const PaywallGate = ({ children }: { children: React.ReactNode }) => {
   if (!user) return <Navigate to="/auth" replace />;
 
   // Show loading state while subscription check runs (unless we already have cached data)
-  if (subLoading && optimisticAccess === null) {
+  if (subLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <AnimatedLoader />

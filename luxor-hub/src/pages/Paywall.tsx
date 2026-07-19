@@ -138,7 +138,7 @@ const Paywall = () => {
         const eventParams = { value: tier === "starter" ? 9.00 : tier === "pro" ? 29.00 : 99.00, currency: "USD", content_name: `LUXOR® ${tier}`, content_ids: [`lexor_${tier}`], content_type: "product", num_items: 1 };
         trackEvent("Subscribe", eventParams);
         trackEvent("Purchase", eventParams);
-        localStorage.setItem("luxor_paid", tier);
+        // Subscription recorded in DB — no client-side bypass
         grantAccess(tier);
         toast.success("Welcome to Lexor! Your style journey begins now.");
         navigate("/closet");
@@ -172,7 +172,7 @@ const Paywall = () => {
           .limit(1)
           .maybeSingle();
         const restoredTier = subData?.plan_tier || "starter";
-        localStorage.setItem("luxor_paid", restoredTier);
+        // Subscription restored from DB — no client-side bypass
         grantAccess(restoredTier);
         toast.success("Purchase restored! Welcome back to Lexor.");
         navigate("/closet");
@@ -231,7 +231,7 @@ const Paywall = () => {
                     t.isFree ? (
                       <button
                         onClick={() => {
-                          try { localStorage.setItem("luxor_paid", "free"); } catch {}
+                          // Free tier — no localStorage bypass
                           grantAccess("free");
                           navigate("/closet");
                         }}
