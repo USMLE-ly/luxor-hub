@@ -4,6 +4,25 @@ import { useScroll, useTransform, motion } from "framer-motion";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { GoldParticles } from "@/components/app/GoldParticles";
 import NumberTicker from "@/components/ui/number-ticker";
+import { useEffect, useState } from "react";
+
+const LiveCounter = ({ base = 2400, range = 120, intervalMs = 3000 }: { base?: number; range?: number; intervalMs?: number }) => {
+  const [count, setCount] = useState(base);
+  useEffect(() => {
+    const tick = () => {
+      setCount((prev) => {
+        const delta = Math.floor(Math.random() * 7) - 3; // -3 to +3
+        const next = prev + delta;
+        const min = base - range / 2;
+        const max = base + range / 2;
+        return Math.max(min, Math.min(max, next));
+      });
+    };
+    const id = setInterval(tick, intervalMs);
+    return () => clearInterval(id);
+  }, [base, range, intervalMs]);
+  return <span>{count.toLocaleString()}+</span>;
+};
 import Pressable from "@/components/ui/pressable";
 import { DoubleBezel, DoubleBezelCard } from "@/components/ui/double-bezel";
 import CursorSpotlight from "@/components/ui/cursor-spotlight";
@@ -205,7 +224,7 @@ export default function GlassmorphismTrustHero() {
 
               <div className="relative z-10">
               <div className="mb-8">
-                  <div className="text-3xl font-bold tracking-tight text-foreground"><NumberTicker value={2400} suffix="+" /></div>
+                  <div className="text-3xl font-bold tracking-tight text-foreground"><LiveCounter base={2400} range={140} intervalMs={2800} /></div>
                   <div className="text-sm text-muted-foreground">Active Members</div>
               </div>
 
