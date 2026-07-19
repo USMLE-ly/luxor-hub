@@ -1,20 +1,11 @@
 {
-  "installCommand": "npm --prefix luxor-hub install --ignore-engines",
-  "buildCommand": "npm --prefix luxor-hub run build",
+  "installCommand": "npm --prefix luxor-hub install --ignore-engines --no-audit --no-fund",
+  "buildCommand": "cd luxor-hub && rm -rf dist node_modules/.vite && npx vite build",
   "outputDirectory": "luxor-hub/dist",
   "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "https://nice-useful-plot--al-bosify.replit.app/api/:path*"
-    },
-    {
-      "source": "/images/:path*",
-      "destination": "https://nice-useful-plot--al-bosify.replit.app/images/:path*"
-    },
-    {
-      "source": "/media/:path*",
-      "destination": "https://nice-useful-plot--al-bosify.replit.app/media/:path*"
-    }
+    { "source": "/api/:path*", "destination": "https://nice-useful-plot--al-bosify.replit.app/api/:path*" },
+    { "source": "/images/:path*", "destination": "https://nice-useful-plot--al-bosify.replit.app/images/:path*" },
+    { "source": "/media/:path*", "destination": "https://nice-useful-plot--al-bosify.replit.app/media/:path*" }
   ],
   "headers": [
     {
