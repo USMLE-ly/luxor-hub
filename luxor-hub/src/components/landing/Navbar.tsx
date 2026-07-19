@@ -108,36 +108,7 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <motion.div
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            transition={{ type: "spring", stiffness: 400, damping: 17 }}
-            className="hidden md:inline-flex"
-          >
-            <Button
-              variant="ghost"
-              size="sm"
-              className="font-sans"
-              onClick={() => navigate("/auth")}
-            >
-              Log In
-            </Button>
-          </motion.div>
-          <motion.div
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            transition={{ type: "spring", stiffness: 400, damping: 17 }}
-            className="hidden md:inline-flex"
-          >
-            <Button
-              variant="outline"
-              size="sm"
-              className="font-sans border-foreground/20 hover:bg-foreground/5"
-              onClick={() => navigate("/auth")}
-            >
-              Try LUXOR®
-            </Button>
-          </motion.div>
+
 
           {/* Mobile hamburger */}
           <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
@@ -172,29 +143,7 @@ const Navbar = () => {
 
                 <div className="h-px w-full bg-border my-6" />
 
-                <div className="flex flex-col gap-3">
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={sheetOpen ? { opacity: 1, y: 0 } : { opacity: 0 }}
-                    transition={{ delay: sheetOpen ? 0.35 : 0, duration: 0.4 }}
-                  >
-                    <Button variant="outline" className="w-full font-sans border-white/10 hover:bg-white/5" onClick={() => { setSheetOpen(false); navigate("/auth"); }}>
-                      Log In
-                    </Button>
-                  </motion.div>
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={sheetOpen ? { opacity: 1, y: 0 } : { opacity: 0 }}
-                    transition={{ delay: sheetOpen ? 0.4 : 0, duration: 0.4 }}
-                  >
-                    <Button
-                      onClick={() => { setSheetOpen(false); navigate("/auth"); }}
-                      className="w-full h-10 text-sm font-semibold gold-gradient text-primary-foreground"
-                    >
-                      Try LUXOR®
-                    </Button>
-                  </motion.div>
-                </div>
+
               </div>
             </SheetContent>
           </Sheet>
