@@ -28,9 +28,7 @@ const Loader = () => {
         <span className="text-white/90 font-display text-xl md:text-2xl tracking-[0.35em] uppercase font-light" style={{ textShadow: '0 0 30px rgba(232,200,122,0.06)' }}>
           LUXOR
         </span>
-        <span style={{ fontSize: '0.22em', position: 'relative', top: '-0.65em', marginLeft: '1px', opacity: 0.45 }} className="font-sans font-normal text-[#E8C87A]">
-          ®
-        </span>
+        <span className="inline-block align-super text-[0.45em] leading-none -ml-[0.1em] text-[#E8C87A]/60">®</span>
       </div>
 
       {/* Thin separator */}

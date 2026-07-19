@@ -117,7 +117,7 @@ export function LuxurySplashScreen({
                   transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
                   className="font-display text-6xl sm:text-7xl md:text-8xl font-light tracking-[0.3em] text-white/90 mt-8 flex items-start justify-center" style={{ textShadow: "0 0 40px rgba(232,200,122,0.08)" }}
                 >
-                  LUXOR<span style={{ fontSize: "0.28em", position: "relative", top: "-0.6em", marginLeft: "1px", opacity: 0.55 }} className="font-sans font-normal text-gold">®</span>
+                  LUXOR<span className="inline-block align-super text-[0.45em] leading-none -ml-[0.1em] text-gold/60">®</span>
                 </motion.h1>
               )}
             </AnimatePresence>
