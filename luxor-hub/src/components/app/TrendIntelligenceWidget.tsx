@@ -126,9 +126,9 @@ export const TrendIntelligenceWidget = () => {
                   <AnimatePresence>
                     {isExpanded && (
                       <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
+                        initial={{ scaleY: 0, opacity: 0 }}
+                        animate={{ scaleY: 1, opacity: 1 }} style={{ transformOrigin: "top" }}
+                        exit={{ scaleY: 0, opacity: 0 }}
                         className="overflow-hidden"
                       >
                         <div className="pt-3 mt-3 border-t border-border/50 space-y-2">

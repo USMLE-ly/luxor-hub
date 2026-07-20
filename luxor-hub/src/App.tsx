@@ -4,6 +4,7 @@ import { initAudio } from "@/lib/audio-system";
 import { initMonitor } from "@/lib/support";
 import { initResilience } from "@/lib/resilience";
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import { MotionConfig } from "framer-motion";
 
 import AnimatedLoader from "@/components/ui/animated-loader-1";
 const AppContent = lazy(() => import("./AppContent"));
@@ -121,13 +122,15 @@ const AudioInit = () => {
 
 const App = () => (
   <AppErrorBoundary>
-    <BrowserRouter>
-      <AudioInit />
-      <SpeedInsights />
-      <Suspense fallback={<Loading />}>
-        <AppContent />
-      </Suspense>
-    </BrowserRouter>
+    <MotionConfig reducedMotion="user">
+      <BrowserRouter>
+        <AudioInit />
+        <SpeedInsights />
+        <Suspense fallback={<Loading />}>
+          <AppContent />
+        </Suspense>
+      </BrowserRouter>
+    </MotionConfig>
   </AppErrorBoundary>
 );
 

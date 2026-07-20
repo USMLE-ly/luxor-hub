@@ -28,7 +28,7 @@ const AppPreview = () => {
             </p>
             <GradientButton onClick={() => navigate("/auth")} className="mt-2">
               <Diamond className="w-4 h-4 mr-2" />
-              Try It Free
+              Try Free — No Card Needed
             </GradientButton>
           </div>
         }

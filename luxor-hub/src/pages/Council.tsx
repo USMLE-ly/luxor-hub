@@ -421,9 +421,9 @@ const CouncilInner = () => {
         <AnimatePresence>
           {showWardrobePanel && (
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
+              initial={{ scaleY: 0, opacity: 0 }}
+              animate={{ scaleY: 1, opacity: 1 }} style={{ transformOrigin: "top" }}
+              exit={{ scaleY: 0, opacity: 0 }}
               className="overflow-hidden border-b border-border/50"
             >
               <div className="px-5 py-3">
@@ -652,7 +652,7 @@ const CouncilInner = () => {
           <div className="px-4 pt-2">
             <div className="relative inline-block">
               <img loading="lazy" src={pendingImage} alt="To upload" className="h-20 w-20 object-cover rounded-xl border border-border" />
-              <button onClick={() => setPendingImage(null)} className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center">
+              <button onClick={() => setPendingImage(null)} className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center" aria-label="Remove image">
                 <X className="w-3 h-3" />
               </button>
             </div>

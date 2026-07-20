@@ -10,7 +10,7 @@ const brands = [
 const BrandMarquee = () => (
   <section className="py-16 border-y border-border overflow-hidden">
     <p className="text-center text-xs font-sans text-muted-foreground tracking-widest uppercase mb-8">
-      Trusted By Leading Brands
+      Integrates With Your Favorite Platforms
     </p>
     <div
       className="relative flex overflow-hidden marquee-fade-mask"

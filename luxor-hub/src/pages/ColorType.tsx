@@ -227,9 +227,9 @@ const ColorTypeInner = () => {
         <AnimatePresence>
           {isExpanded && (
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
+              initial={{ scaleY: 0, opacity: 0 }}
+              animate={{ scaleY: 1, opacity: 1 }} style={{ transformOrigin: "top" }}
+              exit={{ scaleY: 0, opacity: 0 }}
               className="overflow-hidden"
             >
               <div className="grid grid-cols-2 gap-2 pt-2">

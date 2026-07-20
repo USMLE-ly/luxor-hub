@@ -126,6 +126,15 @@ const Index = () => {
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
+        transition={{ duration: 0.8, delay: 0.15 }}
+      >
+        <AppPreview />
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
         transition={{ duration: 0.8, delay: 0.3 }}
       >
         <Pricing />
@@ -133,15 +142,6 @@ const Index = () => {
       
       <FAQ />
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8, delay: 0.15 }}
-      >
-        <AppPreview />
-      </motion.div>
-      
       <CTABanner />
       <Footer />
       <StickyPricingBar />

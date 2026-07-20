@@ -1101,9 +1101,9 @@ const OutfitCalendarInner = () => {
           {selectedDate && (
             <motion.div
               key={format(selectedDate, "yyyy-MM-dd")}
-              initial={{ opacity: 0, height: 0, scale: 0.97 }}
-              animate={{ opacity: 1, height: "auto", scale: 1 }}
-              exit={{ opacity: 0, height: 0, scale: 0.97 }}
+              initial={{ opacity: 0, scaleY: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scaleY: 1, scale: 1 }} style={{ transformOrigin: "top" }}
+              exit={{ opacity: 0, scaleY: 0, scale: 0.97 }}
               transition={{ type: "spring", stiffness: 300, damping: 30, mass: 0.8 }}
               className="rounded-2xl mb-5 border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-forest/40 relative overflow-hidden"
               style={{

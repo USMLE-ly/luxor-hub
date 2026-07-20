@@ -64,7 +64,7 @@ export default function StickyPricingBar() {
                 onClick={handleCTA}
                 className="rounded-full px-5 py-2 text-xs font-sans font-bold flex items-center gap-1.5 bg-foreground text-background hover:bg-foreground/90 transition-colors"
               >
-                <span>Get Started</span>
+                <span>Try Free</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
               <button

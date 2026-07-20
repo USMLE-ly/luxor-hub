@@ -392,9 +392,9 @@ export default function CommunityGallery() {
                     <AnimatePresence>
                       {recommendations[design.id] && (
                         <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
+                          initial={{ opacity: 0, scaleY: 0 }}
+                          animate={{ opacity: 1, scaleY: 1 }} style={{ transformOrigin: "top" }}
+                          exit={{ opacity: 0, scaleY: 0 }}
                           className="rounded-lg bg-primary/5 border border-primary/20 p-3"
                         >
                           <div className="flex items-center gap-1.5 mb-2">
@@ -412,9 +412,9 @@ export default function CommunityGallery() {
                     <AnimatePresence>
                       {expandedComments === design.id && (
                         <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
+                          initial={{ opacity: 0, scaleY: 0 }}
+                          animate={{ opacity: 1, scaleY: 1 }} style={{ transformOrigin: "top" }}
+                          exit={{ opacity: 0, scaleY: 0 }}
                           className="space-y-2 pt-2 border-t border-border"
                         >
                           {loadingComments ? (

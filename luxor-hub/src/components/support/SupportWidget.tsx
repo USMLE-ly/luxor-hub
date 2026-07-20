@@ -137,7 +137,7 @@ export default function SupportWidget() {
       <motion.button
         initial={{ scale: 0 }} animate={{ scale: 1 }} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-20 right-4 z-[9998] w-12 h-12 rounded-full bg-gradient-to-br from-gold to-gold/80 text-background shadow-lg shadow-gold/20 flex items-center justify-center"
+        className="fixed bottom-20 right-4 z-[9998] w-12 h-12 rounded-full bg-gradient-to-br from-gold to-gold/80 text-background shadow-lg shadow-gold/20 flex items-center justify-center" aria-label="Open support chat"
       >
         {isOpen ? <X className="w-5 h-5" /> : <ChatCircle className="w-5 h-5" />}
       </motion.button>

@@ -55,8 +55,8 @@ export function CouncilResponseCard({ model, response, ranking, rank }: CouncilR
 
       {expanded && (
         <motion.div
-          initial={{ height: 0, opacity: 0 }}
-          animate={{ height: "auto", opacity: 1 }}
+          initial={{ scaleY: 0, opacity: 0 }}
+          animate={{ scaleY: 1, opacity: 1 }} style={{ transformOrigin: "top" }}
           className="px-3 pb-3 border-t border-border"
         >
           <div className="pt-2 prose prose-sm prose-invert max-w-none [&>p]:my-1 [&>ul]:my-1 text-xs">

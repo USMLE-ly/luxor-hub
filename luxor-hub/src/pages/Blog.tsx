@@ -202,7 +202,7 @@ const Blog = () => {
                     to="/auth"
                     className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    Try LUXOR® Free
+                    Try Free — No Card Needed
                   </Link>
                 </div>
               </div>
