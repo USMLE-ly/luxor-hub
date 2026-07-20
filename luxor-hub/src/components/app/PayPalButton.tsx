@@ -7,7 +7,7 @@ const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID || "";
 // The elite plan ID below is a PLACEHOLDER — replace with the real plan ID
 const PLAN_IDS: Record<string, string> = {
   starter: import.meta.env.VITE_PAYPAL_STARTER_PLAN_ID || "P-6KB46929KR388530GNG6YDAA",
-  pro: import.meta.env.VITE_PAYPAL_PRO_PLAN_ID || "P-3TT76167R1560735XNG6X7TQ",
+  pro: import.meta.env.VITE_PAYPAL_PRO_PLAN_ID || "P-09P20081V5924494JNG6X4QY",
   elite: import.meta.env.VITE_PAYPAL_ELITE_PLAN_ID || "P-9L480741CF494730DNJPG2JI",
 };
 
