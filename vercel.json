@@ -14,6 +14,10 @@
     {
       "source": "/media/:path*",
       "destination": "https://nice-useful-plot--al-bosify.replit.app/media/:path*"
+    },
+    {
+      "source": "/((?!api/|images/|media/|videos/|fonts/).*)",
+      "destination": "/index.html"
     }
   ],
   "headers": [
