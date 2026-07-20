@@ -180,6 +180,68 @@ def estimate_tokens(text: str) -> int:
     return len(text) // 4
 
 
+# ── User Tier Resolution ────────────────────────────────────────────────
+
+_tier_cache: Dict[str, tuple] = {}  # user_id → (tier, timestamp)
+_TIER_CACHE_TTL = 300  # 5 minutes
+
+
+def resolve_user_tier(user_id: str) -> str:
+    """Resolve user's subscription tier from Supabase.
+    
+    Caches result for 5 minutes to avoid repeated DB queries.
+    Returns: "free", "starter", "pro", or "elite"
+    """
+    if not user_id:
+        return "free"
+    
+    # Check cache first
+    if user_id in _tier_cache:
+        tier, ts = _tier_cache[user_id]
+        if time.time() - ts < _TIER_CACHE_TTL:
+            return tier
+    
+    # Query Supabase subscriptions table
+    try:
+        import requests as req
+        supabase_url = os.environ.get("VITE_SUPABASE_URL", "")
+        supabase_key = os.environ.get("VITE_SUPABASE_PUBLISHABLE_KEY", "")
+        
+        if not supabase_url or not supabase_key:
+            return "free"
+        
+        resp = req.get(
+            f"{supabase_url}/rest/v1/subscriptions",
+            params={
+                "select": "plan_tier",
+                "user_id": f"eq.{user_id}",
+                "status": f"eq.active",
+                "limit": "1",
+            },
+            headers={
+                "apikey": supabase_key,
+                "Authorization": f"Bearer {supabase_key}",
+            },
+            timeout=3,
+        )
+        
+        if resp.status_code == 200:
+            rows = resp.json()
+            if rows and rows[0].get("plan_tier"):
+                tier = rows[0]["plan_tier"].lower()
+                if tier in TIER_DAILY_CAPS:
+                    _tier_cache[user_id] = (tier, time.time())
+                    return tier
+        
+        # No active subscription = free tier
+        _tier_cache[user_id] = ("free", time.time())
+        return "free"
+        
+    except Exception as exc:
+        _log.warning("[GATEWAY] Tier resolution failed for %s: %s", user_id[:8], exc)
+        return "free"
+
+
 # ── Layer 1+2+3: Combined Gateway Decorator ─────────────────────────────
 
 def ai_endpoint(f):
@@ -206,9 +268,8 @@ def ai_endpoint(f):
         user_id = user.get("sub", "")
         g.current_user = user
         
-        # ── Determine user tier ──
-        # Default to free if tier not set (will be overridden by caller if needed)
-        tier = getattr(g, "user_tier", "free")
+        # ── Resolve user tier from Supabase ──
+        tier = resolve_user_tier(user_id)
         g.user_tier = tier
         
         # ── Layer 2: Request Validation ──

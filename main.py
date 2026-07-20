@@ -134,6 +134,28 @@ from backend.routes.analyze import init_routes as init_analyze_routes
 from backend.routes.health import init_routes as init_health_routes
 
 init_analyze_routes(app)
+# ── Spend Tracking Summary ──────────────────────────────────────────────
+@app.route("/api/v1/spend/usage", methods=["GET"], strict_slashes=False)
+def spend_usage():
+    """Return current user's daily API usage and tier info."""
+    from backend.auth import get_current_user
+    from backend.gateway import get_spend_tracker, TIER_DAILY_CAPS, resolve_user_tier
+    user = get_current_user()
+    if not user or user.get("role") != "authenticated":
+        return jsonify({"error": "Authentication required"}), 401
+    user_id = user.get("sub", "")
+    tier = resolve_user_tier(user_id)
+    tracker = get_spend_tracker()
+    usage = tracker.get_usage(user_id)
+    cap = TIER_DAILY_CAPS.get(tier, TIER_DAILY_CAPS["free"])
+    return jsonify({
+        "tier": tier,
+        "used": usage["count"],
+        "limit": cap,
+        "remaining": max(0, cap - usage["count"]),
+        "tokens_used": usage["tokens"],
+    })
+
 
 from backend.auth import require_auth, optional_auth
 from backend.gateway import ai_endpoint, get_spend_tracker, TIER_DAILY_CAPS, TIER_REQUEST_LIMITS

@@ -40,7 +40,7 @@ def init_routes(app):
             _log.error("[ANALYZE] ERROR: %s", exc)
             return jsonify({
                 "success": False,
-                "error": f"MiMo Vision 2.5 failed: {str(exc)[:200]}",
+                "error": "Analysis failed — please try again",
                 "items_detected": [],
                 "strengths": [],
                 "improvements": [],
