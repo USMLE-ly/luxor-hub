@@ -2,12 +2,8 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import {List} from "@phosphor-icons/react";
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { List } from "@phosphor-icons/react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -54,115 +50,111 @@ const Navbar = () => {
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
       className={`fixed top-0 left-0 right-0 z-50 flex justify-center transition-all duration-500 ${
-        scrolled ? "py-2" : "py-5"
+        scrolled ? "py-1.5" : "py-4"
       }`}
     >
       <div
-        className={`transition-all duration-500 ${
+        className={`transition-all duration-500 relative ${
           scrolled
             ? "w-[95%] max-w-4xl bg-emerald/70 backdrop-blur-2xl border border-white/[0.06] shadow-2xl shadow-forest/30 rounded-full px-4"
             : "w-full max-w-6xl bg-transparent px-4"
         }`}
       >
-        <div className="flex items-center justify-between h-12 md:h-14">
-        <motion.h1
-          className="font-display text-2xl font-bold text-foreground cursor-pointer relative"
-          onClick={() => navigate("/")}
-          whileHover={{ letterSpacing: "0.08em" }}
-          transition={{ type: "spring", stiffness: 200, damping: 15 }}
-        >
-          <motion.span
-            animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
-            transition={{ duration: 1, ease: "easeOut" }}
-            className="bg-gradient-to-r from-foreground via-gold to-foreground bg-[length:200%_100%] bg-clip-text text-transparent"
-          >
-            LUXOR®
-          </motion.span>
-        </motion.h1>
+        <div className="flex items-center justify-between h-10 md:h-11">
+          {/* Desktop: Nav links on the left */}
+          <div className="hidden md:flex items-center gap-6 text-[13px] font-sans">
+            {navLinks.slice(0, 4).map((link) => (
+              <motion.button
+                key={link.id}
+                onClick={() => scrollTo(link.id)}
+                aria-current={activeSection === link.id ? "page" : undefined}
+                whileHover={{ y: -1 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                className="relative py-1 transition-colors hover:text-foreground"
+              >
+                <span className={activeSection === link.id ? "text-foreground font-medium" : "text-muted-foreground"}>
+                  {link.label}
+                </span>
+                {activeSection === link.id && (
+                  <motion.div
+                    layoutId="nav-underline"
+                    className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-gold/80 to-gold rounded-full will-change-transform"
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
+              </motion.button>
+            ))}
+          </div>
 
-        <div className="hidden md:flex items-center gap-8 text-sm font-sans">
-          {navLinks.map((link) => (
-            <motion.button
-              key={link.id}
-              onClick={() => (link as any).isRoute ? navigate(`/${link.id}`) : scrollTo(link.id)}
-              aria-current={activeSection === link.id ? "page" : undefined}
-              whileHover={{ y: -1 }}
-              whileTap={{ scale: 0.97 }}
-              transition={{ type: "spring", stiffness: 400, damping: 17 }}
-              className="relative py-1 transition-colors hover:text-foreground"
+          {/* Center: Logo */}
+          <motion.h1
+            className="font-display text-xl md:text-2xl font-bold text-foreground cursor-pointer absolute left-1/2 -translate-x-1/2"
+            onClick={() => navigate("/")}
+            whileHover={{ letterSpacing: "0.08em" }}
+            transition={{ type: "spring", stiffness: 200, damping: 15 }}
+          >
+            <motion.span
+              animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+              transition={{ duration: 1, ease: "easeOut" }}
+              className="bg-gradient-to-r from-foreground via-gold to-foreground bg-[length:200%_100%] bg-clip-text text-transparent"
             >
-              <span className={activeSection === link.id ? "text-foreground font-medium" : "text-muted-foreground"}>
-                {link.label}
-              </span>
-              {activeSection === link.id && (
-                <motion.div
-                  layoutId="nav-underline"
-                  className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-gold/80 to-gold rounded-full will-change-transform"
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                />
-              )}
+              LUXOR®
+            </motion.span>
+          </motion.h1>
+
+          {/* Right: CTA + hamburger */}
+          <div className="flex items-center gap-3">
+            <motion.button
+              onClick={() => navigate("/auth")}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              className="hidden md:flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-gradient-to-r from-[hsl(43,80%,50%)] to-[hsl(43,70%,45%)] text-white shadow-[0_0_20px_hsl(43,80%,50%,0.2)] hover:shadow-[0_0_30px_hsl(43,80%,50%,0.35)] transition-shadow"
+            >
+              Try Free
             </motion.button>
-          ))}
-        </div>
 
-        </div>
-
-        <div className="flex items-center gap-3">
-          {/* Desktop CTA */}
-          <motion.button
-            onClick={() => navigate("/auth")}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="hidden md:flex items-center gap-1.5 px-4 py-2 rounded-full text-[11px] font-sans font-semibold uppercase tracking-wider bg-gradient-to-r from-[hsl(43,80%,50%)] to-[hsl(43,70%,45%)] text-white shadow-[0_0_20px_hsl(43,80%,50%,0.2)] hover:shadow-[0_0_30px_hsl(43,80%,50%,0.35)] transition-shadow"
-          >
-            Try Free
-          </motion.button>
-
-          {/* Mobile hamburger */}
-          <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden h-9 w-9" aria-expanded={sheetOpen}>
-                <List className="h-5 w-5" />
-                <span className="sr-only">Open menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-80 glass border-l border-border/10 p-0 backdrop-blur-3xl bg-forest/95">
-              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
-              <div className="flex flex-col h-full pt-20 px-6">
-                <div className="flex flex-col gap-1">
-                  {navLinks.map((link, idx) => (
-                    <motion.div
-                      key={link.id}
-                      initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
-                      animate={sheetOpen ? { opacity: 1, y: 0, filter: "blur(0px)" } : { opacity: 0, y: 10, filter: "blur(2px)" }}
-                      transition={{ delay: sheetOpen ? 0.1 + idx * 0.04 : 0, duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-                    >
-                      <button
-                        onClick={() => (link as any).isRoute ? (() => { setSheetOpen(false); navigate(`/${link.id}`); })() : scrollTo(link.id)}
-                        className={`text-left py-3 text-base font-sans transition-colors border-b border-border w-full ${
-                          activeSection === link.id ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
-                        }`}
+            <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="md:hidden h-9 w-9" aria-expanded={sheetOpen}>
+                  <List className="h-5 w-5" />
+                  <span className="sr-only">Open menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-80 glass border-l border-border/10 p-0 backdrop-blur-3xl bg-forest/95">
+                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
+                <div className="flex flex-col h-full pt-20 px-6">
+                  <div className="flex flex-col gap-1">
+                    {navLinks.map((link, idx) => (
+                      <motion.div
+                        key={link.id}
+                        initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
+                        animate={sheetOpen ? { opacity: 1, y: 0, filter: "blur(0px)" } : { opacity: 0, y: 10, filter: "blur(2px)" }}
+                        transition={{ delay: sheetOpen ? 0.1 + idx * 0.04 : 0, duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
                       >
-                        {link.label}
-                      </button>
-                    </motion.div>
-                  ))}
+                        <button
+                          onClick={() => (link as any).isRoute ? (() => { setSheetOpen(false); navigate(`/${link.id}`); })() : scrollTo(link.id)}
+                          className={`text-left py-3 text-base font-sans transition-colors border-b border-border w-full ${
+                            activeSection === link.id ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
+                          }`}
+                        >
+                          {link.label}
+                        </button>
+                      </motion.div>
+                    ))}
+                  </div>
+                  <div className="h-px w-full bg-border my-6" />
+                  <motion.button
+                    onClick={() => { setSheetOpen(false); navigate("/auth"); }}
+                    whileTap={{ scale: 0.97 }}
+                    className="w-full py-3 rounded-xl text-sm font-sans font-semibold uppercase tracking-wider bg-gradient-to-r from-[hsl(43,80%,50%)] to-[hsl(43,70%,45%)] text-white shadow-[0_0_20px_hsl(43,80%,50%,0.2)]"
+                  >
+                    Try Free
+                  </motion.button>
                 </div>
-
-                <div className="h-px w-full bg-border my-6" />
-
-                {/* Mobile CTA */}
-                <motion.button
-                  onClick={() => { setSheetOpen(false); navigate("/auth"); }}
-                  whileTap={{ scale: 0.97 }}
-                  className="w-full py-3 rounded-xl text-sm font-sans font-semibold uppercase tracking-wider bg-gradient-to-r from-[hsl(43,80%,50%)] to-[hsl(43,70%,45%)] text-white shadow-[0_0_20px_hsl(43,80%,50%,0.2)]"
-                >
-                  Try Free
-                </motion.button>
-
-              </div>
-            </SheetContent>
-          </Sheet>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </div>
     </motion.nav>
