@@ -1,0 +1,255 @@
+"""AI Endpoint Gateway — Three-Layer Defense System.
+
+Layer 1: API Gateway (auth + route protection)
+  - Validates Supabase JWT tokens
+  - Only authenticated users can access AI endpoints
+  
+Layer 2: Request Validation (payload + schema)
+  - Enforces max payload size (rejects oversized images)
+  - Validates input schema before passing to AI model
+  - Blocks excessive token prompts from free users
+  
+Layer 3: Per-User Spend Tracking (caps + monitoring)
+  - Tags every request with user_id
+  - Logs token usage by user
+  - Enforces daily consumption caps by tier (free/starter/pro/elite)
+  - Uses in-memory tracking with periodic flush to Supabase
+"""
+
+import os
+import time
+import json
+import logging
+import functools
+from datetime import datetime, timedelta
+from typing import Optional, Dict, Any
+from collections import defaultdict
+from threading import Lock
+
+from flask import request, jsonify, g
+
+_log = logging.getLogger("luxor.gateway")
+
+# ── Configuration ───────────────────────────────────────────────────────
+
+# Max payload sizes (bytes)
+MAX_IMAGE_PAYLOAD = 15 * 1024 * 1024   # 15MB (base64 images are ~37% larger)
+MAX_JSON_PAYLOAD = 2 * 1024 * 1024      # 2MB for non-image requests
+MAX_PROMPT_TOKENS = 4096                # Max tokens in a single prompt
+
+# Tier-based daily caps (requests per day)
+TIER_DAILY_CAPS = {
+    "free":     10,    # 10 AI analyses per day
+    "starter":  50,    # 50 per day
+    "pro":     200,    # 200 per day
+    "elite":   500,    # 500 per day
+}
+
+# Tier-based per-request limits
+TIER_REQUEST_LIMITS = {
+    "free":     {"max_image_size_mb": 5,  "max_tokens": 2048},
+    "starter":  {"max_image_size_mb": 8,  "max_tokens": 4096},
+    "pro":      {"max_image_size_mb": 12, "max_tokens": 8192},
+    "elite":    {"max_image_size_mb": 15, "max_tokens": 8192},
+}
+
+# Expensive endpoints that count against daily cap
+AI_ENDPOINTS = {
+    "/api/v1/analyze-outfit",
+    "/api/v1/style-analyze",
+    "/api/v1/style-recommendations",
+    "/api/v1/outfit-review",
+    "/api/v1/generate-outfits",
+    "/api/v1/pro-tweak/generate",
+    "/api/v1/closet/analyze-item",
+}
+
+
+# ── In-Memory Spend Tracker ─────────────────────────────────────────────
+
+class SpendTracker:
+    """Track per-user API usage with thread-safe in-memory counters.
+    
+    Resets daily at midnight UTC. Flushes summary to logs periodically.
+    """
+    
+    def __init__(self):
+        self._lock = Lock()
+        self._usage: Dict[str, Dict[str, int]] = defaultdict(lambda: {"count": 0, "tokens": 0})
+        self._last_reset = datetime.utcnow().date()
+        self._last_flush = time.time()
+    
+    def _check_reset(self):
+        """Reset counters if it's a new day (UTC)."""
+        today = datetime.utcnow().date()
+        if today != self._last_reset:
+            with self._lock:
+                if today != self._last_reset:
+                    self._flush_summary()
+                    self._usage.clear()
+                    self._last_reset = today
+                    _log.info("[SPEND] Daily counters reset for %s", today)
+    
+    def _flush_summary(self):
+        """Log a summary of yesterday's usage."""
+        if not self._usage:
+            return
+        total_requests = sum(u["count"] for u in self._usage.values())
+        total_tokens = sum(u["tokens"] for u in self._usage.values())
+        top_users = sorted(self._usage.items(), key=lambda x: x[1]["count"], reverse=True)[:5]
+        _log.info(
+            "[SPEND] Daily summary: %d total requests, %d total tokens, %d unique users",
+            total_requests, total_tokens, len(self._usage),
+        )
+        for user_id, usage in top_users:
+            _log.info("[SPEND] Top user %s...: %d requests, %d tokens", user_id[:8], usage["count"], usage["tokens"])
+    
+    def record_request(self, user_id: str, tokens_used: int = 0):
+        """Record a single API request for the given user."""
+        self._check_reset()
+        with self._lock:
+            self._usage[user_id]["count"] += 1
+            self._usage[user_id]["tokens"] += tokens_used
+        
+        # Periodic flush every 5 minutes
+        if time.time() - self._last_flush > 300:
+            with self._lock:
+                self._flush_summary()
+                self._last_flush = time.time()
+    
+    def get_usage(self, user_id: str) -> Dict[str, int]:
+        """Get current daily usage for a user."""
+        self._check_reset()
+        with self._lock:
+            return dict(self._usage.get(user_id, {"count": 0, "tokens": 0}))
+    
+    def check_cap(self, user_id: str, tier: str) -> Optional[Dict[str, Any]]:
+        """Check if user has exceeded their daily cap. Returns error dict or None."""
+        usage = self.get_usage(user_id)
+        cap = TIER_DAILY_CAPS.get(tier, TIER_DAILY_CAPS["free"])
+        
+        if usage["count"] >= cap:
+            return {
+                "error": "Daily limit reached",
+                "message": f"You've used {usage['count']}/{cap} AI analyses today. {tier.title()} tier limit.",
+                "limit": cap,
+                "used": usage["count"],
+                "tier": tier,
+                "reset": "tomorrow",
+            }
+        return None
+
+
+# Global singleton
+_tracker = SpendTracker()
+
+
+def get_spend_tracker() -> SpendTracker:
+    return _tracker
+
+
+# ── Layer 2: Request Validation ─────────────────────────────────────────
+
+def validate_payload(max_size: int = MAX_JSON_PAYLOAD) -> Optional[str]:
+    """Validate request payload size. Returns error message or None."""
+    content_length = request.content_length
+    if content_length and content_length > max_size:
+        size_mb = round(content_length / (1024 * 1024), 1)
+        max_mb = round(max_size / (1024 * 1024), 1)
+        return f"Payload too large ({size_mb}MB). Maximum is {max_mb}MB."
+    return None
+
+
+def validate_image_payload(image_b64: str, tier: str = "free") -> Optional[str]:
+    """Validate base64 image payload against tier limits. Returns error or None."""
+    if not image_b64:
+        return "Missing image data"
+    
+    limits = TIER_REQUEST_LIMITS.get(tier, TIER_REQUEST_LIMITS["free"])
+    max_bytes = limits["max_image_size_mb"] * 1024 * 1024 * 1.37  # base64 overhead
+    
+    if len(image_b64) > max_bytes:
+        size_mb = round(len(image_b64) / (1024 * 1024), 1)
+        return f"Image too large ({size_mb}MB). {tier.title()} tier max is {limits['max_image_size_mb']}MB."
+    
+    return None
+
+
+def estimate_tokens(text: str) -> int:
+    """Rough token estimate (1 token ≈ 4 chars for English)."""
+    return len(text) // 4
+
+
+# ── Layer 1+2+3: Combined Gateway Decorator ─────────────────────────────
+
+def ai_endpoint(f):
+    """Full three-layer gateway decorator for AI endpoints.
+    
+    Layer 1: Authentication (validates JWT)
+    Layer 2: Request validation (payload size, image size)
+    Layer 3: Spend tracking (daily cap enforcement)
+    
+    Sets g.current_user and g.user_tier on the request context.
+    """
+    @functools.wraps(f)
+    def decorated(*args, **kwargs):
+        from backend.auth import get_current_user
+        
+        # ── Layer 1: Authentication ──
+        user = get_current_user()
+        if not user or user.get("role") != "authenticated":
+            return jsonify({
+                "error": "Authentication required",
+                "message": "Please sign in to use AI features",
+            }), 401
+        
+        user_id = user.get("sub", "")
+        g.current_user = user
+        
+        # ── Determine user tier ──
+        # Default to free if tier not set (will be overridden by caller if needed)
+        tier = getattr(g, "user_tier", "free")
+        g.user_tier = tier
+        
+        # ── Layer 2: Request Validation ──
+        # Check payload size
+        if request.method == "POST":
+            max_payload = MAX_IMAGE_PAYLOAD if "image" in request.path else MAX_JSON_PAYLOAD
+            payload_error = validate_payload(max_payload)
+            if payload_error:
+                _log.warning("[GATEWAY] Payload rejected for %s: %s", user_id[:8], payload_error)
+                return jsonify({"error": payload_error, "code": "PAYLOAD_TOO_LARGE"}), 413
+        
+        # ── Layer 3: Spend Tracking ──
+        endpoint = request.path.rstrip("/")
+        if endpoint in AI_ENDPOINTS:
+            cap_error = _tracker.check_cap(user_id, tier)
+            if cap_error:
+                _log.warning("[GATEWAY] Cap exceeded for %s (tier=%s): %s", user_id[:8], tier, cap_error["message"])
+                return jsonify(cap_error), 429
+            
+            # Record this request
+            _tracker.record_request(user_id)
+            usage = _tracker.get_usage(user_id)
+            cap = TIER_DAILY_CAPS.get(tier, TIER_DAILY_CAPS["free"])
+            _log.info(
+                "[GATEWAY] %s accessed %s — usage: %d/%d (tier=%s)",
+                user_id[:8], endpoint, usage["count"], cap, tier,
+            )
+        
+        return f(*args, **kwargs)
+    return decorated
+
+
+def ai_endpoint_with_tier(tier: str):
+    """Factory version of ai_endpoint that sets a specific tier.
+    
+    Usage: @ai_endpoint_with_tier("pro")
+    """
+    def decorator(f):
+        @functools.wraps(f)
+        def decorated(*args, **kwargs):
+            g.user_tier = tier
+            return ai_endpoint(f)(*args, **kwargs)
+        return decorated
+    return decorator

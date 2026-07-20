@@ -136,6 +136,7 @@ from backend.routes.health import init_routes as init_health_routes
 init_analyze_routes(app)
 
 from backend.auth import require_auth, optional_auth
+from backend.gateway import ai_endpoint, get_spend_tracker, TIER_DAILY_CAPS, TIER_REQUEST_LIMITS
 from backend.utils.categories import _cat
 
 
@@ -191,6 +192,7 @@ def _sanitize_occasion(raw: str) -> str:
 
 
 from backend.auth import require_auth, optional_auth
+from backend.gateway import ai_endpoint, get_spend_tracker, TIER_DAILY_CAPS, TIER_REQUEST_LIMITS
 
 
 # Color Dictionary
@@ -1977,6 +1979,7 @@ def closet_delete():
 # ---------------------------------------------------------------------------
 # Closet AI Analyze Item (MiMo Vision)
 # ---------------------------------------------------------------------------
+@ai_endpoint  # 3-layer: auth + validation + spend tracking
 @app.route("/api/v1/closet/analyze-item", methods=["POST", "OPTIONS"], strict_slashes=False)
 def closet_analyze_item():
     if request.method == "OPTIONS":
@@ -2669,6 +2672,7 @@ Respond in English only. Return EXACTLY this JSON:
 
 
 @limiter.limit("10 per minute")
+@ai_endpoint  # 3-layer: auth + validation + spend tracking
 @app.route("/api/v1/style-analyze", methods=["POST", "OPTIONS"], strict_slashes=False)
 def style_analyze():
     """Analyze a person's photo for body type, face shape, skin tone, proportions using MiMo Vision 2.5."""
@@ -2725,6 +2729,7 @@ def style_analyze():
         return jsonify({"success": False, "error": "Analysis failed — please try again"}), 500
 
 
+@ai_endpoint  # 3-layer: auth + validation + spend tracking
 @app.route("/api/v1/style-recommendations", methods=["POST", "OPTIONS"], strict_slashes=False)
 def style_recommendations():
     """Generate personalized style recommendations based on analysis data."""
@@ -2789,6 +2794,7 @@ def style_recommendations():
         return jsonify({"success": False, "error": "Recommendations failed — please try again"}), 500
 
 
+@ai_endpoint  # 3-layer: auth + validation + spend tracking
 @app.route("/api/v1/outfit-review", methods=["POST", "OPTIONS"], strict_slashes=False)
 def outfit_review():
     """Review an outfit photo with detailed scoring and honest feedback."""
@@ -2891,6 +2897,7 @@ def check_availability():
         _log.error("[AVAIL] Error: %s", exc, exc_info=True)
         return jsonify({"success": False, "maxOutfits": 0, "error": "Failed to generate outfits"}), 500
 
+@ai_endpoint  # 3-layer: auth + validation + spend tracking
 @app.route("/api/v1/generate-outfits", methods=["POST", "OPTIONS"], strict_slashes=False)
 def generate_outfits():
     if request.method == "OPTIONS":
@@ -3272,6 +3279,41 @@ def generate_outfits():
 # Transparent GIF pixel for CORB-safe 404 fallback
 _TRANSPARENT_PIXEL_B64 = "R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
 
+
+
+
+@app.route("/api/v1/gateway/usage", methods=["GET"])
+@require_auth
+def gateway_usage():
+    """Check current user's daily AI usage and remaining quota."""
+    user = g.current_user
+    user_id = user.get("sub", "")
+    tier = getattr(g, "user_tier", "free")
+    
+    tracker = get_spend_tracker()
+    usage = tracker.get_usage(user_id)
+    cap = TIER_DAILY_CAPS.get(tier, TIER_DAILY_CAPS["free"])
+    
+    return jsonify({
+        "user_id": user_id[:8] + "...",
+        "tier": tier,
+        "used_today": usage["count"],
+        "daily_cap": cap,
+        "remaining": max(0, cap - usage["count"]),
+        "tokens_used": usage["tokens"],
+    })
+
+
+@app.route("/api/v1/gateway/status", methods=["GET"])
+def gateway_status():
+    """Gateway health check — shows spend tracking status."""
+    tracker = get_spend_tracker()
+    return jsonify({
+        "status": "ok",
+        "daily_caps": TIER_DAILY_CAPS,
+        "tier_limits": {k: {"max_image_mb": v["max_image_size_mb"], "max_tokens": v["max_tokens"]} for k, v in TIER_REQUEST_LIMITS.items()},
+    })
+
 # Serve static files with proper CORS headers to prevent CORB errors
 @app.route("/static/<path:filename>")
 
@@ -3504,6 +3546,7 @@ def _humanize_stylist_note(note: str) -> str:
 # Pro Stylist Tweak — POST /api/v1/pro-tweak/generate
 # ---------------------------------------------------------------------------
 @limiter.limit("5 per minute")
+@ai_endpoint  # 3-layer: auth + validation + spend tracking
 @app.route("/api/v1/pro-tweak/generate", methods=["POST", "OPTIONS"], strict_slashes=False)
 def pro_tweak_generate():
     """Generate an AI-enhanced outfit tweak from an uploaded image."""

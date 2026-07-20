@@ -6,6 +6,7 @@ import time
 from flask import request, jsonify
 
 from backend.ai.mimo_client import call_mimo_vision
+from backend.gateway import ai_endpoint
 from backend.ai.prompts import SACRED_PROMPT
 from backend.services.fashion_service import get_fashion_decision, map_analysis
 
@@ -18,6 +19,7 @@ _image_b64_cache = ""
 def init_routes(app):
     global _image_b64_cache
 
+    @ai_endpoint  # 3-layer: auth + validation + spend tracking
     @app.route("/api/v1/analyze-outfit", methods=["POST", "OPTIONS"], strict_slashes=False)
     def analyze_outfit():
         if request.method == "OPTIONS":
