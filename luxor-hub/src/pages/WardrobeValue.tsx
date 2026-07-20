@@ -158,7 +158,7 @@ function WardrobeValueContent() {
                 <div key={item.id} className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-0">
                   <div className="flex items-center gap-2 min-w-0">
                     {item.photo_url ? (
-                      <img src={item.photo_url} alt="" className="w-8 h-8 rounded-lg object-cover" />
+                      <img loading="lazy" src={item.photo_url} alt="" className="w-8 h-8 rounded-lg object-cover" />
                     ) : (
                       <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
                         {CATEGORY_ICONS[item.category] || <ShoppingBag className="w-4 h-4 text-muted-foreground" />}
@@ -188,7 +188,7 @@ function WardrobeValueContent() {
                 <div key={item.id} className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-0">
                   <div className="flex items-center gap-2 min-w-0">
                     {item.photo_url ? (
-                      <img src={item.photo_url} alt="" className="w-8 h-8 rounded-lg object-cover" />
+                      <img loading="lazy" src={item.photo_url} alt="" className="w-8 h-8 rounded-lg object-cover" />
                     ) : (
                       <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
                         {CATEGORY_ICONS[item.category] || <ShoppingBag className="w-4 h-4 text-muted-foreground" />}
@@ -219,7 +219,7 @@ function WardrobeValueContent() {
                 <div key={item.id} className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-0">
                   <div className="flex items-center gap-2 min-w-0">
                     {item.photo_url ? (
-                      <img src={item.photo_url} alt="" className="w-8 h-8 rounded-lg object-cover" />
+                      <img loading="lazy" src={item.photo_url} alt="" className="w-8 h-8 rounded-lg object-cover" />
                     ) : (
                       <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
                         <ShoppingBag className="w-4 h-4 text-muted-foreground" />

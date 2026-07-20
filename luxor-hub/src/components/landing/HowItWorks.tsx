@@ -54,7 +54,7 @@ const howItWorksItems = [
 
 const HowItWorks = () => (
   <div id="how-it-works" className="relative overflow-hidden">
-    <img src={transparencyBg} alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover opacity-[0.03] pointer-events-none select-none z-0" />
+    <img loading="lazy" src={transparencyBg} alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover opacity-[0.03] pointer-events-none select-none z-0" />
     <Gallery4
       title="Three Steps. That's It."
       description="Scan your closet. Let AI learn you. Wake up to your outfit."

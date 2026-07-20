@@ -294,7 +294,7 @@ const MonthlyReportInner = () => {
                         <div key={i} className="flex items-center gap-2.5">
                           {item.photo_url ? (
                             <div className="w-8 h-8 rounded-lg bg-white/90 dark:bg-white/80 overflow-hidden flex-shrink-0">
-                              <img src={item.photo_url} alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "multiply" }} />
+                              <img loading="lazy" src={item.photo_url} alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "multiply" }} />
                             </div>
                           ) : (
                             <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
@@ -377,7 +377,7 @@ const MonthlyReportInner = () => {
                         <div key={i} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
                           {item.photo_url ? (
                             <div className="w-6 h-6 rounded bg-white/90 dark:bg-white/80 overflow-hidden flex-shrink-0">
-                              <img src={item.photo_url} alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "multiply" }} />
+                              <img loading="lazy" src={item.photo_url} alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "multiply" }} />
                             </div>
                           ) : (
                             <TShirt className="w-3.5 h-3.5 text-emerald-500/60" />
@@ -399,7 +399,7 @@ const MonthlyReportInner = () => {
                         <div key={i} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-orange-500/10 border border-orange-500/20">
                           {item.photo_url ? (
                             <div className="w-6 h-6 rounded bg-white/90 dark:bg-white/80 overflow-hidden flex-shrink-0">
-                              <img src={item.photo_url} alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "multiply" }} />
+                              <img loading="lazy" src={item.photo_url} alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "multiply" }} />
                             </div>
                           ) : (
                             <TShirt className="w-3.5 h-3.5 text-orange-400/60" />
@@ -431,7 +431,7 @@ const MonthlyReportInner = () => {
                       <span className="text-[10px] font-sans font-bold text-muted-foreground w-4">#{i + 1}</span>
                       {item.photo_url ? (
                         <div className="w-9 h-9 rounded-lg bg-white/95 dark:bg-white/90 overflow-hidden flex items-center justify-center flex-shrink-0">
-                          <img src={item.photo_url} alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "multiply" }} />
+                          <img loading="lazy" src={item.photo_url} alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "multiply" }} />
                         </div>
                       ) : (
                         <div className="w-9 h-9 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">

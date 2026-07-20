@@ -515,7 +515,7 @@ const Analytics = () => {
                       <div key={item.id} className="flex items-center justify-between p-3 rounded-xl bg-secondary/50 border border-border">
                         <div className="flex items-center gap-3 min-w-0">
                           {item.photo_url ? (
-                            <img src={item.photo_url} alt="" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
+                            <img loading="lazy" src={item.photo_url} alt="" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
                           ) : (
                             <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
                               <Package className="w-4 h-4 text-muted-foreground" />

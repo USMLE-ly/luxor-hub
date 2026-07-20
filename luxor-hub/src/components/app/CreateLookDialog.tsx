@@ -130,7 +130,7 @@ export const CreateLookDialog = ({ open, onOpenChange, onCreated }: CreateLookDi
             <Label className="font-sans text-sm text-muted-foreground">Outfit Photo</Label>
             {photoPreview ? (
               <div className="relative mt-1 rounded-xl overflow-hidden border border-glass-border">
-                <img src={photoPreview} alt="Look preview" className="w-full h-48 object-cover" />
+                <img loading="lazy" src={photoPreview} alt="Look preview" className="w-full h-48 object-cover" />
                 <button
                   onClick={removePhoto}
                   className="absolute top-2 right-2 p-1.5 rounded-full bg-background/80 backdrop-blur-sm text-foreground hover:text-destructive transition-colors"

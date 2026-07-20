@@ -1180,7 +1180,7 @@ const Closet = () => {
                       <Label className="font-sans text-sm text-muted-foreground">Photo</Label>
                       {previewUrl ? (
                         <div className="relative mt-2">
-                          <img src={previewUrl} alt="Preview" className="w-full h-48 object-cover rounded-xl" />
+                          <img loading="lazy" src={previewUrl} alt="Preview" className="w-full h-48 object-cover rounded-xl" />
                           <button onClick={() => { setSelectedFile(null); setPreviewUrl(null); }} className="absolute top-2 right-2 p-1 bg-background/80 rounded-full">
                             <X className="h-4 w-4" />
                           </button>
@@ -1463,7 +1463,7 @@ const Closet = () => {
                         ))}
                         {sectionItems.length < 2 && placeholders.slice(0, 2 - sectionItems.length).map((src, i) => (
                           <div key={`ph-${i}`} className="aspect-square rounded-xl overflow-hidden border border-border bg-card relative group cursor-pointer" onClick={() => setUploadOpen(true)}>
-                            <img src={src} alt="Example item" className="w-full h-full object-cover opacity-50" />
+                            <img loading="lazy" src={src} alt="Example item" className="w-full h-full object-cover opacity-50" />
                             <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/30">
                               <TShirt className="w-6 h-6 text-muted-foreground mb-1" />
                               <span className="text-[9px] font-sans text-muted-foreground text-center px-2">Upload your own items</span>
@@ -1587,7 +1587,7 @@ function ItemCard({
     >
       <div className="aspect-square bg-secondary relative">
         {item.photo_url ? (
-          <img src={item.photo_url} alt={item.name || "Item"} className="w-full h-full object-cover" />
+          <img loading="lazy" src={item.photo_url} alt={item.name || "Item"} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <TShirt className="h-8 w-8 text-muted-foreground" />

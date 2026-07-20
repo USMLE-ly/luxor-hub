@@ -7,7 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   build: {
-    minify: false,
+    minify: "esbuild",
     sourcemap: false,
     chunkSizeWarningLimit: 2000,
     rollupOptions: {

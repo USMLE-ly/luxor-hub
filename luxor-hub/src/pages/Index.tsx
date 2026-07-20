@@ -15,9 +15,11 @@ import AnnouncementBanner from "@/components/landing/AnnouncementBanner";
 import StickyPricingBar from "@/components/landing/StickyPricingBar";
 import ScrollToTop from "@/components/landing/ScrollToTop";
 import BrandMarquee from "@/components/landing/BrandMarquee";
+import SocialProofStrip from "@/components/landing/SocialProofStrip";
 import AIFashionEditorial from "@/components/landing/AIFashionEditorial";
 import VideoTestimonials from "@/components/landing/VideoTestimonials";
 import AppPreview from "@/components/landing/AppPreview";
+import ExitIntentPopup from "@/components/landing/ExitIntentPopup";
 
 const Index = () => {
   const { scrollYProgress } = useScroll();
@@ -49,6 +51,15 @@ const Index = () => {
         viewport={{ once: true }}
         transition={{ duration: 0.8 }}
       >
+        <SocialProofStrip />
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+      >
         <BrandMarquee />
       </motion.div>
       
@@ -61,6 +72,12 @@ const Index = () => {
         <TabbedFeatures />
       </motion.div>
 
+
+      <div className="py-8 text-center">
+        <a href="/auth" className="inline-flex items-center gap-2 px-8 py-3 rounded-full text-sm font-sans font-semibold bg-gradient-to-r from-[hsl(43,80%,50%)] to-[hsl(43,70%,45%)] text-white shadow-[0_0_30px_hsl(43,80%,50%,0.25)] hover:shadow-[0_0_40px_hsl(43,80%,50%,0.4)] transition-shadow">
+          Try LUXOR® Free — No Card Needed
+        </a>
+      </div>
       <motion.div
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
@@ -129,6 +146,7 @@ const Index = () => {
       <Footer />
       <StickyPricingBar />
       <ScrollToTop />
+      <ExitIntentPopup />
     </div>
   );
 };

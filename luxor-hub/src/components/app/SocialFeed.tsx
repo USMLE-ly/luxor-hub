@@ -193,7 +193,7 @@ export const SocialFeed = () => {
                   <span className="text-[10px] font-sans text-orange-400 font-medium">#{i + 1}</span>
                 </div>
                 {look.photo_url && (
-                  <img src={look.photo_url} alt={look.title} className="w-full h-24 object-cover rounded-lg mb-2" />
+                  <img loading="lazy" src={look.photo_url} alt={look.title} className="w-full h-24 object-cover rounded-lg mb-2" />
                 )}
                 <p className="text-sm font-display font-bold text-foreground truncate">{look.title}</p>
                 <p className="text-[10px] text-muted-foreground font-sans mt-0.5">{look.author_name} · {look.likeCount} ❤️</p>
@@ -253,7 +253,7 @@ export const SocialFeed = () => {
                 {/* Photo */}
                 {look.photo_url && (
                   <div className="rounded-xl overflow-hidden mb-3 border border-glass-border">
-                    <img src={look.photo_url} alt={look.title} className="w-full h-56 object-cover" />
+                    <img loading="lazy" src={look.photo_url} alt={look.title} className="w-full h-56 object-cover" />
                   </div>
                 )}
 

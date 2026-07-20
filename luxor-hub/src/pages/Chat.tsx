@@ -378,7 +378,7 @@ const Chat = () => {
                   )}
                   {msg.imagePreview && (
                     <div className="mb-2 rounded-lg overflow-hidden">
-                      <img src={msg.imagePreview} alt="Uploaded item" className="w-full max-h-48 object-cover rounded-lg" />
+                      <img loading="lazy" src={msg.imagePreview} alt="Uploaded item" className="w-full max-h-48 object-cover rounded-lg" />
                     </div>
                   )}
                   {msg.role === "assistant" ? (
@@ -421,7 +421,7 @@ const Chat = () => {
         {pendingImage && (
           <div className="px-4 pt-2">
             <div className="relative inline-block">
-              <img src={pendingImage} alt="To upload" className="h-20 w-20 object-cover rounded-xl border border-border" />
+              <img loading="lazy" src={pendingImage} alt="To upload" className="h-20 w-20 object-cover rounded-xl border border-border" />
               <button onClick={() => setPendingImage(null)} className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center">
                 <X className="w-3 h-3" />
               </button>

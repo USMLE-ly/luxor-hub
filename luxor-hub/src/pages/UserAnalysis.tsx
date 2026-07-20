@@ -291,7 +291,7 @@ const UserAnalysis = () => {
           <div className="grid md:grid-cols-[220px_1fr] gap-0">
             <div className="aspect-square md:aspect-auto md:h-full bg-gradient-to-br from-foreground/5 via-primary/5 to-transparent flex items-center justify-center relative overflow-hidden">
               {data.profile.avatar_url ? (
-                <img src={data.profile.avatar_url} alt={name} className="w-full h-full object-cover" />
+                <img loading="lazy" src={data.profile.avatar_url} alt={name} className="w-full h-full object-cover" />
               ) : (
                 <div className="font-display text-6xl text-primary/40">{name.charAt(0).toUpperCase()}</div>
               )}

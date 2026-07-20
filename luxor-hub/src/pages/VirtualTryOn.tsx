@@ -143,7 +143,7 @@ function VirtualTryOnInner() {
                 <CardContent className="p-0">
                   {userPhoto ? (
                     <div className="relative">
-                      <img src={userPhoto} alt="Your photo" className="w-full aspect-[3/4] object-cover rounded-lg" />
+                      <img loading="lazy" src={userPhoto} alt="Your photo" className="w-full aspect-[3/4] object-cover rounded-lg" />
                       <button
                         onClick={() => { setUserPhoto(null); setUserPhotoFile(null); setResultImage(null); }}
                         className="absolute top-2 right-2 w-8 h-8 rounded-full bg-forest/50 flex items-center justify-center hover:bg-forest/70"
@@ -191,7 +191,7 @@ function VirtualTryOnInner() {
                     }`}
                     onClick={() => setSelectedDesign(design)}
                   >
-                    <img src={design.image_url} alt={design.prompt} className="w-full aspect-square object-cover" />
+                    <img loading="lazy" src={design.image_url} alt={design.prompt} className="w-full aspect-square object-cover" />
                     <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-forest/70 to-transparent p-2">
                       <p className="text-[10px] text-white line-clamp-1">{design.garment_type}</p>
                     </div>
@@ -230,7 +230,7 @@ function VirtualTryOnInner() {
                   </div>
                 ) : resultImage ? (
                   <div className="relative">
-                    <img src={resultImage} alt="Try-on result" className="w-full aspect-[3/4] object-cover rounded-lg" />
+                    <img loading="lazy" src={resultImage} alt="Try-on result" className="w-full aspect-[3/4] object-cover rounded-lg" />
                     <div className="absolute bottom-3 right-3 flex gap-2">
                       <Button variant="secondary" size="sm" onClick={() => handleShare(resultImage)}>
                         {shareLink === resultImage ? <Check className="w-3 h-3 mr-1" /> : <ShareNetwork className="w-3 h-3 mr-1" />}
@@ -265,7 +265,7 @@ function VirtualTryOnInner() {
                   className="relative rounded-lg overflow-hidden border border-border group cursor-pointer"
                   onClick={() => setResultImage(r.imageUrl)}
                 >
-                  <img src={r.imageUrl} alt="Try-on" className="w-full aspect-[3/4] object-cover" />
+                  <img loading="lazy" src={r.imageUrl} alt="Try-on" className="w-full aspect-[3/4] object-cover" />
                   <div className="absolute inset-0 bg-forest/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <Button variant="secondary" size="sm" onClick={(e) => { e.stopPropagation(); handleDownload(r.imageUrl); }}>
                       <Download className="w-3 h-3" />

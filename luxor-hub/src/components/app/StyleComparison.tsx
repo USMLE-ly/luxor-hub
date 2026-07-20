@@ -86,7 +86,7 @@ export function StyleComparison({ history }: StyleComparisonProps) {
             {[left, right].map((item, idx) => (
               <Card key={item.id} className={`glass-card overflow-hidden ${left && right && item.style_score >= (idx === 0 ? right.style_score : left.style_score) ? "ring-1 ring-primary/40" : ""}`}>
                 <CardContent className="p-4 space-y-3">
-                  <img src={item.image_url} alt={item.overall_style} className="w-full h-40 object-cover rounded-lg" />
+                  <img loading="lazy" src={item.image_url} alt={item.overall_style} className="w-full h-40 object-cover rounded-lg" />
                   <div className="text-center">
                     <p className="font-display font-bold text-foreground">{item.overall_style}</p>
                     <div className="flex items-center justify-center gap-2 mt-1">

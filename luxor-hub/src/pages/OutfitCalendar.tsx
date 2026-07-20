@@ -1048,7 +1048,7 @@ const OutfitCalendarInner = () => {
                         if (hasMannequin) {
                           return (
                             <div className="flex-1 flex items-center justify-center w-full rounded-lg bg-white/95 dark:bg-white/90 p-0.5 overflow-hidden">
-                              <img src={mannequinUrl} alt="" className="max-h-[80px] w-auto object-contain transition-transform duration-200 group-hover:scale-105" style={{ mixBlendMode: "multiply" }} />
+                              <img loading="lazy" src={mannequinUrl} alt="" className="max-h-[80px] w-auto object-contain transition-transform duration-200 group-hover:scale-105" style={{ mixBlendMode: "multiply" }} />
                             </div>
                           );
                         }
@@ -1229,7 +1229,7 @@ const OutfitCalendarInner = () => {
                                     onDrop={() => handleDrop(0)}
                                     className="w-10 h-10 rounded-full shadow-sm border border-zinc-200 dark:border-zinc-700 flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing transition-all hover:ring-2 hover:ring-primary/30"
                                   >
-                                    <img src={photos[0]} alt="Top" className="w-full h-full object-cover pointer-events-none" style={{ mixBlendMode: "multiply" }} />
+                                    <img loading="lazy" src={photos[0]} alt="Top" className="w-full h-full object-cover pointer-events-none" style={{ mixBlendMode: "multiply" }} />
                                   </div>
                                 )}
 
@@ -1244,7 +1244,7 @@ const OutfitCalendarInner = () => {
                                         onDrop={() => handleDrop(1)}
                                         className="w-10 h-10 rounded-full shadow-sm border border-zinc-200 dark:border-zinc-700 flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing transition-all hover:ring-2 hover:ring-primary/30"
                                       >
-                                        <img src={photos[1]} alt="Bottom" className="w-full h-full object-cover pointer-events-none" style={{ mixBlendMode: "multiply" }} />
+                                        <img loading="lazy" src={photos[1]} alt="Bottom" className="w-full h-full object-cover pointer-events-none" style={{ mixBlendMode: "multiply" }} />
                                       </div>
                                     )}
                                     {photos[3] && (
@@ -1255,7 +1255,7 @@ const OutfitCalendarInner = () => {
                                         onDrop={() => handleDrop(3)}
                                         className="w-10 h-10 rounded-full shadow-sm border border-zinc-200 dark:border-zinc-700 flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing transition-all hover:ring-2 hover:ring-primary/30"
                                       >
-                                        <img src={photos[3]} alt="Accessory" className="w-full h-full object-cover pointer-events-none" style={{ mixBlendMode: "multiply" }} />
+                                        <img loading="lazy" src={photos[3]} alt="Accessory" className="w-full h-full object-cover pointer-events-none" style={{ mixBlendMode: "multiply" }} />
                                       </div>
                                     )}
                                   </div>
@@ -1270,7 +1270,7 @@ const OutfitCalendarInner = () => {
                                     onDrop={() => handleDrop(2)}
                                     className="w-10 h-10 rounded-full shadow-sm border border-zinc-200 dark:border-zinc-700 flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing transition-all hover:ring-2 hover:ring-primary/30"
                                   >
-                                    <img src={photos[2]} alt="Shoes" className="w-full h-full object-cover pointer-events-none" style={{ mixBlendMode: "multiply" }} />
+                                    <img loading="lazy" src={photos[2]} alt="Shoes" className="w-full h-full object-cover pointer-events-none" style={{ mixBlendMode: "multiply" }} />
                                   </div>
                                 )}
 
@@ -1344,7 +1344,7 @@ const OutfitCalendarInner = () => {
                                         {suggestions.map(s => (
                                           <span key={s.id} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md"
                                             style={{ background: "hsl(var(--primary) / 0.12)" }}>
-                                            {s.photo_url && <img src={s.photo_url} alt="" className="w-4 h-4 rounded object-contain bg-white" style={{ mixBlendMode: "multiply" }} />}
+                                            {s.photo_url && <img loading="lazy" src={s.photo_url} alt="" className="w-4 h-4 rounded object-contain bg-white" style={{ mixBlendMode: "multiply" }} />}
                                             {s.name || s.category}
                                           </span>
                                         ))}
@@ -1634,7 +1634,7 @@ const OutfitCalendarInner = () => {
                             className="relative w-12 h-14 rounded-lg bg-emerald/60 flex-shrink-0 flex items-center justify-center overflow-hidden ring-1 ring-gold/30 group"
                           >
                             {ci.photo_url ? (
-                              <img src={ci.photo_url} alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "multiply" }} />
+                              <img loading="lazy" src={ci.photo_url} alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "multiply" }} />
                             ) : (
                               <TShirt className="w-5 h-5 text-muted-foreground/30" />
                             )}
@@ -1667,7 +1667,7 @@ const OutfitCalendarInner = () => {
                         >
                           {ci.photo_url ? (
                             <div className="w-12 h-14 rounded-lg bg-white/90 flex items-center justify-center overflow-hidden">
-                              <img src={ci.photo_url} alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "multiply" }} />
+                              <img loading="lazy" src={ci.photo_url} alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "multiply" }} />
                             </div>
                           ) : (
                             <div className="w-12 h-14 rounded-lg bg-white/5 flex items-center justify-center">
@@ -1726,7 +1726,7 @@ const OutfitCalendarInner = () => {
                             className="relative w-12 h-14 rounded-lg bg-emerald/60 flex-shrink-0 flex items-center justify-center overflow-hidden ring-1 ring-gold/30 group"
                           >
                             {ci.photo_url ? (
-                              <img src={ci.photo_url} alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "multiply" }} />
+                              <img loading="lazy" src={ci.photo_url} alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "multiply" }} />
                             ) : (
                               <TShirt className="w-5 h-5 text-muted-foreground/30" />
                             )}
@@ -1765,7 +1765,7 @@ const OutfitCalendarInner = () => {
                                   }`}
                                 >
                                   {ci.photo_url && (
-                                    <img src={ci.photo_url} alt="" className="w-5 h-5 rounded object-contain bg-white" style={{ mixBlendMode: "multiply" }} />
+                                    <img loading="lazy" src={ci.photo_url} alt="" className="w-5 h-5 rounded object-contain bg-white" style={{ mixBlendMode: "multiply" }} />
                                   )}
                                   <span className="truncate max-w-[80px]">{ci.name || label}</span>
                                 </button>
@@ -1848,7 +1848,7 @@ const OutfitCalendarInner = () => {
                             >
                               {photoUrl ? (
                                 <div className="p-3">
-                                  <img src={photoUrl} alt={itemName} className="w-full aspect-square object-contain" style={{ mixBlendMode: "multiply" }} />
+                                  <img loading="lazy" src={photoUrl} alt={itemName} className="w-full aspect-square object-contain" style={{ mixBlendMode: "multiply" }} />
                                 </div>
                               ) : (
                                 <div className="w-full aspect-square flex items-center justify-center" style={{ background: "hsl(var(--muted) / 0.2)" }}>

@@ -291,7 +291,7 @@ const ColorTypeInner = () => {
 
           {previewUrl && (
             <div className="rounded-xl overflow-hidden">
-              <img src={previewUrl} alt="Uploaded" className="w-full max-h-48 object-cover rounded-xl" />
+              <img loading="lazy" src={previewUrl} alt="Uploaded" className="w-full max-h-48 object-cover rounded-xl" />
             </div>
           )}
 

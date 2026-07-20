@@ -193,7 +193,7 @@ export function ProStylistTweak({ imagePreview, imageUrl }: ProStylistTweakProps
                     </p>
                     <div className="rounded-2xl overflow-hidden border border-border shadow-lg bg-muted/20 aspect-[3/4]">
                       {imageSrc ? (
-                        <img src={imageSrc} alt="Original outfit" className="w-full h-full object-cover" />
+                        <img loading="lazy" src={imageSrc} alt="Original outfit" className="w-full h-full object-cover" />
                       ) : (
                         <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
                           No image

@@ -48,7 +48,7 @@ function ItemCard({ item, match }: { item: ClosetItem; match?: MatchResult }) {
   return (
     <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/50 border border-border">
       {item.photo_url ? (
-        <img src={item.photo_url} alt={item.name || "Item"} className="w-10 h-10 rounded-md object-cover" />
+        <img loading="lazy" src={item.photo_url} alt={item.name || "Item"} className="w-10 h-10 rounded-md object-cover" />
       ) : (
         <div className="w-10 h-10 rounded-md bg-muted flex items-center justify-center">
           <CategoryIcon category={item.category} />

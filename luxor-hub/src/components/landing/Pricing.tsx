@@ -195,7 +195,7 @@ const Pricing = () => {
 
   return (
     <section id="pricing" className="relative py-20 md:py-32 bg-background overflow-hidden">
-      <img src={brutalistBg} alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover opacity-[0.03] pointer-events-none select-none" />
+      <img loading="lazy" src={brutalistBg} alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover opacity-[0.03] pointer-events-none select-none" />
       <div className="max-w-6xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -330,7 +330,7 @@ const Pricing = () => {
               { src: "/payments/wechat.svg", alt: "WeChat Pay" },
               { src: "/payments/venmo.svg", alt: "Venmo" },
             ].map((icon) => (
-              <img key={icon.alt} src={icon.src} alt={icon.alt} className="h-8 w-auto rounded-md" />
+              <img loading="lazy" key={icon.alt} src={icon.src} alt={icon.alt} className="h-8 w-auto rounded-md" />
             ))}
           </div>
           <p className="text-xs font-sans text-muted-foreground">

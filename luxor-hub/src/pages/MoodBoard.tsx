@@ -218,7 +218,7 @@ const MoodBoard = () => {
   const renderItem = (item: BoardItem) => {
     switch (item.type) {
       case "image":
-        return <img src={item.content?.url} alt="" className="w-full h-full object-cover rounded-lg pointer-events-none" draggable={false} />;
+        return <img loading="lazy" src={item.content?.url} alt="" className="w-full h-full object-cover rounded-lg pointer-events-none" draggable={false} />;
       case "color":
         return <div className="w-full h-full rounded-lg pointer-events-none" style={{ backgroundColor: item.content?.hex || "#ccc" }} />;
       case "text":

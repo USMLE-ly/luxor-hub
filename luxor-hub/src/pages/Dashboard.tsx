@@ -115,7 +115,7 @@ function TrendingDesigns({ navigate }: { navigate: (path: string) => void }) {
             className="min-w-[150px] max-w-[150px] flex-shrink-0 rounded-2xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow snap-start text-left"
           >
             <div className="relative h-32 bg-secondary">
-              <img src={d.image_url} alt={d.prompt} className="w-full h-full object-cover" loading="lazy" />
+              <img loading="lazy" src={d.image_url} alt={d.prompt} className="w-full h-full object-cover" loading="lazy" />
               <div className="absolute top-2 right-2 flex items-center gap-1 bg-forest/60 text-white text-[10px] px-1.5 py-0.5 rounded-full">
                 <Heart className="w-2.5 h-2.5 fill-current" /> {d.likeCount}
               </div>
@@ -646,7 +646,7 @@ const Dashboard = () => {
                       {closetItems.slice(0, 4).map((item) => (
                         <div key={item.id} className="rounded-lg overflow-hidden bg-background/50">
                           {item.photo_url ? (
-                            <img src={item.photo_url} alt={item.name || ""} className="w-full h-full object-cover" />
+                            <img loading="lazy" src={item.photo_url} alt={item.name || ""} className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
                               <TShirt className="w-5 h-5 text-muted-foreground/30" />
@@ -685,7 +685,7 @@ const Dashboard = () => {
                           {outfitItemPhotos.slice(0, 4).map((item: any) => (
                             <div key={item.id} className="overflow-hidden">
                               {item.photo_url ? (
-                                <img src={item.photo_url} alt={item.name || ""} className="w-full h-full object-cover" />
+                                <img loading="lazy" src={item.photo_url} alt={item.name || ""} className="w-full h-full object-cover" />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center bg-background/30">
                                   <TShirt className="w-4 h-4 text-muted-foreground/30" />

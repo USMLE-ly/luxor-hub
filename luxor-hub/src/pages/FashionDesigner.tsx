@@ -312,7 +312,7 @@ export default function FashionDesigner() {
                       >
                         <Card className="glass-card overflow-hidden group">
                           <div className="relative aspect-square">
-                            <img src={design.imageUrl} alt={design.prompt} className="w-full h-full object-cover" />
+                            <img loading="lazy" src={design.imageUrl} alt={design.prompt} className="w-full h-full object-cover" />
                             <div className="absolute inset-0 bg-gradient-to-t from-forest/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4 gap-2">
                               <Button variant="secondary" size="sm" onClick={() => handleDownload(design.imageUrl, design.garmentType)}>
                                 <Download className="w-3 h-3 mr-1" /> Download
@@ -368,7 +368,7 @@ export default function FashionDesigner() {
                   >
                     <Card className="glass-card overflow-hidden group">
                       <div className="relative aspect-square">
-                        <img src={design.image_url} alt={design.prompt} className="w-full h-full object-cover" />
+                        <img loading="lazy" src={design.image_url} alt={design.prompt} className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-gradient-to-t from-forest/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4 gap-2">
                           <Button variant="secondary" size="sm" onClick={() => handleDownload(design.image_url, design.garment_type)}>
                             <Download className="w-3 h-3" />

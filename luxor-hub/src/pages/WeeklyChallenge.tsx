@@ -278,7 +278,7 @@ export default function WeeklyChallenge() {
                       <div className="space-y-2">
                         {userAnalyses.slice(0, 5).map((a) => (
                           <div key={a.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
-                            <img src={a.image_url} alt="" className="w-10 h-10 rounded-lg object-cover" />
+                            <img loading="lazy" src={a.image_url} alt="" className="w-10 h-10 rounded-lg object-cover" />
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium text-foreground truncate">{a.overall_style}</p>
                               <p className="text-xs text-muted-foreground">Score: {a.style_score}/100</p>
@@ -332,7 +332,7 @@ export default function WeeklyChallenge() {
                               {getRankIcon(i)}
                               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
                                 {entry.avatar_url ? (
-                                  <img src={entry.avatar_url} alt="" className="w-full h-full object-cover" />
+                                  <img loading="lazy" src={entry.avatar_url} alt="" className="w-full h-full object-cover" />
                                 ) : (
                                   <User className="w-4 h-4 text-primary" />
                                 )}
@@ -460,7 +460,7 @@ export default function WeeklyChallenge() {
                             {getRankIcon(i)}
                             <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
                               {entry.avatar_url ? (
-                                <img src={entry.avatar_url} alt="" className="w-full h-full object-cover" />
+                                <img loading="lazy" src={entry.avatar_url} alt="" className="w-full h-full object-cover" />
                               ) : (
                                 <User className="w-3 h-3 text-primary" />
                               )}

@@ -432,7 +432,7 @@ const CouncilInner = () => {
                   {closetItems.slice(0, 12).map((item) => (
                     <div key={item.id} className="flex-shrink-0 flex flex-col items-center gap-0.5">
                       {item.photo_url ? (
-                        <img src={item.photo_url} alt={item.name || ""} className="w-10 h-10 rounded-lg object-cover border border-border/40" />
+                        <img loading="lazy" src={item.photo_url} alt={item.name || ""} className="w-10 h-10 rounded-lg object-cover border border-border/40" />
                       ) : (
                         <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center border border-border/40">
                           <TShirt className="w-4 h-4 text-muted-foreground/40" />
@@ -507,7 +507,7 @@ const CouncilInner = () => {
                   <div className="max-w-[85%] rounded-2xl px-3.5 py-2.5 font-sans text-sm bg-foreground text-background rounded-br-md">
                     {msg.imagePreview && (
                       <div className="mb-2 rounded-lg overflow-hidden">
-                        <img src={msg.imagePreview} alt="Uploaded" className="w-full max-h-48 object-cover rounded-lg" />
+                        <img loading="lazy" src={msg.imagePreview} alt="Uploaded" className="w-full max-h-48 object-cover rounded-lg" />
                       </div>
                     )}
                     <p className="leading-relaxed">{msg.content}</p>
@@ -557,7 +557,7 @@ const CouncilInner = () => {
                             {msg.mentionedItems.map((item, mi) => (
                               <div key={mi} className="flex-shrink-0 rounded-lg overflow-hidden" style={{ background: "hsl(40 30% 96%)", border: "1px solid hsl(var(--border) / 0.4)" }}>
                                 {item.photo_url ? (
-                                  <img src={item.photo_url} alt={item.name || ""} className="w-12 h-12 object-contain p-1" style={{ mixBlendMode: "multiply" }} />
+                                  <img loading="lazy" src={item.photo_url} alt={item.name || ""} className="w-12 h-12 object-contain p-1" style={{ mixBlendMode: "multiply" }} />
                                 ) : (
                                   <div className="w-12 h-12 flex items-center justify-center">
                                     <TShirt className="w-5 h-5 text-muted-foreground/30" />
@@ -651,7 +651,7 @@ const CouncilInner = () => {
         {pendingImage && (
           <div className="px-4 pt-2">
             <div className="relative inline-block">
-              <img src={pendingImage} alt="To upload" className="h-20 w-20 object-cover rounded-xl border border-border" />
+              <img loading="lazy" src={pendingImage} alt="To upload" className="h-20 w-20 object-cover rounded-xl border border-border" />
               <button onClick={() => setPendingImage(null)} className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center">
                 <X className="w-3 h-3" />
               </button>

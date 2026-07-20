@@ -221,7 +221,7 @@ const OutfitBuilder = () => {
                       <DotsSixVertical className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                       <div className="w-8 h-8 rounded bg-secondary flex-shrink-0 overflow-hidden">
                         {item.photo_url ? (
-                          <img src={item.photo_url} alt="" className="w-full h-full object-cover" />
+                          <img loading="lazy" src={item.photo_url} alt="" className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
                             <TShirt className="h-4 w-4 text-muted-foreground" />
@@ -371,7 +371,7 @@ const OutfitBuilder = () => {
                   >
                     <div className="w-full h-full rounded-xl overflow-hidden bg-secondary border border-glass-border shadow-lg">
                       {item.photo_url ? (
-                        <img src={item.photo_url} alt={item.name || ""} className="w-full h-full object-cover" />
+                        <img loading="lazy" src={item.photo_url} alt={item.name || ""} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center p-1">
                           <TShirt className="h-6 w-6 text-muted-foreground" />
