@@ -8,7 +8,7 @@ const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID || "";
 const PLAN_IDS: Record<string, string> = {
   starter: import.meta.env.VITE_PAYPAL_STARTER_PLAN_ID || "P-6KB46929KR388530GNG6YDAA",
   pro: import.meta.env.VITE_PAYPAL_PRO_PLAN_ID || "P-3TT76167R1560735XNG6X7TQ",
-  elite: import.meta.env.VITE_PAYPAL_ELITE_PLAN_ID || "P-6KB46929KR388530GNG6YDAA",
+  elite: import.meta.env.VITE_PAYPAL_ELITE_PLAN_ID || "P-9L480741CF494730DNJPG2JI",
 };
 
 let sdkPromise: Promise<void> | null = null;
