@@ -9,6 +9,7 @@ from typing import Any, Optional, Dict, List
 import requests
 from backend.config import MIMO_API_KEY, MIMO_API_URL, MIMO_VISION_MODEL, MIMO_TEXT_MODEL
 from backend.ai.model_router import classify_complexity, get_model_for_tier, get_vision_model
+from backend.circuit_breaker import mimo_breaker, mimo_vision_breaker
 from backend.image.preprocess import compress_image_b64
 
 _log = logging.getLogger("luxor.mimo")
@@ -44,6 +45,11 @@ def call_mimo_vision(
     """
     if not MIMO_API_KEY:
         _log.error("[MIMO] No MIMO_API_KEY configured")
+        return None
+    
+    # Circuit breaker check
+    if not mimo_vision_breaker.allow_request():
+        _log.warning("[MIMO] Vision circuit OPEN — request blocked")
         return None
 
     _log.info("[MIMO] Stage 1/6: Compressing image")
@@ -126,6 +132,7 @@ def call_mimo_vision(
                 "[MIMO] Stage 6/6: OK keys=%s top=%s bottom=%s",
                 list(parsed.keys())[:5], top or "(not an outfit)", bottom or "(not an outfit)",
             )
+            mimo_vision_breaker.record_success()
             return parsed
         except json.JSONDecodeError:
             _log.error("[MIMO] JSON parse failed — response may be truncated")
@@ -133,12 +140,15 @@ def call_mimo_vision(
 
     except requests.exceptions.Timeout:
         _log.error("[MIMO] Timeout after 120s")
+        mimo_vision_breaker.record_failure()
         return None
     except requests.exceptions.ConnectionError as e:
         _log.error("[MIMO] Connection error: %s", e)
+        mimo_vision_breaker.record_failure()
         return None
     except Exception as exc:
         _log.error("[MIMO] Unexpected error: %s", exc)
+        mimo_vision_breaker.record_failure()
         return None
 
 
@@ -176,6 +186,11 @@ def call_mimo_text(
         _log.info("[MIMO-TEXT] Auto-routed: task=%s score=%d tier=%s model=%s", task_type or "auto", _score, _tier, routed_model)
     from backend.config import CIPHER_MAX_TOKENS
 
+    # Circuit breaker check
+    if not mimo_breaker.allow_request():
+        _log.warning("[MIMO-TEXT] Circuit OPEN — request blocked")
+        return None
+    
     for model_name in models_to_try:
         groq_messages = []
         if system_prompt:
@@ -193,6 +208,7 @@ def call_mimo_text(
             _log.info("[MIMO-TEXT] HTTP %s for %s (key=%s...)",
                       resp.status_code, model_name, MIMO_API_KEY[:8] if MIMO_API_KEY else "NONE")
             if resp.status_code == 200:
+                mimo_breaker.record_success()
                 choice = resp.json()["choices"][0]["message"]
                 content_text = choice.get("content", "")
                 reasoning_text = choice.get("reasoning_content", "")
@@ -228,6 +244,7 @@ def call_mimo_text(
                 return raw
             elif resp.status_code == 402:
                 _log.warning("[MIMO-TEXT] Insufficient balance")
+                mimo_breaker.record_failure()
                 time.sleep(0.5)
                 continue
             else:

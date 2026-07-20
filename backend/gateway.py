@@ -104,18 +104,74 @@ class SpendTracker:
         for user_id, usage in top_users:
             _log.info("[SPEND] Top user %s...: %d requests, %d tokens", user_id[:8], usage["count"], usage["tokens"])
     
-    def record_request(self, user_id: str, tokens_used: int = 0):
+    def record_request(self, user_id: str, tokens_used: int = 0, endpoint: str = "", tier: str = "free"):
         """Record a single API request for the given user."""
         self._check_reset()
         with self._lock:
             self._usage[user_id]["count"] += 1
             self._usage[user_id]["tokens"] += tokens_used
+            self._monthly[user_id]["count"] += 1
+            self._monthly[user_id]["tokens"] += tokens_used
+            self._flush_count += 1
         
-        # Periodic flush every 5 minutes
+        # Persist to Supabase every 100 requests
+        if self._flush_count >= 100:
+            self._flush_to_supabase()
+        
+        # Periodic summary flush every 5 minutes
         if time.time() - self._last_flush > 300:
             with self._lock:
                 self._flush_summary()
                 self._last_flush = time.time()
+    
+    def _flush_to_supabase(self):
+        """Persist recent requests to Supabase spend_logs table."""
+        self._flush_count = 0
+        try:
+            import requests as req
+            supabase_url = os.environ.get("VITE_SUPABASE_URL", "")
+            supabase_key = os.environ.get("VITE_SUPABASE_PUBLISHABLE_KEY", "")
+            if not supabase_url or not supabase_key:
+                return
+            
+            # Build batch insert from current usage snapshot
+            rows = []
+            with self._lock:
+                for uid, usage in self._usage.items():
+                    if usage["count"] > 0:
+                        rows.append({
+                            "user_id": uid,
+                            "daily_count": usage["count"],
+                            "daily_tokens": usage["tokens"],
+                            "month_count": self._monthly.get(uid, {}).get("count", 0),
+                            "month_tokens": self._monthly.get(uid, {}).get("tokens", 0),
+                        })
+            
+            if not rows:
+                return
+            
+            for row in rows:
+                req.post(
+                    f"{supabase_url}/rest/v1/spend_logs",
+                    json={
+                        "user_id": row["user_id"],
+                        "daily_count": row["daily_count"],
+                        "daily_tokens": row["daily_tokens"],
+                        "month_count": row["month_count"],
+                        "month_tokens": row["month_tokens"],
+                        "flushed_at": datetime.utcnow().isoformat(),
+                    },
+                    headers={
+                        "apikey": supabase_key,
+                        "Authorization": f"Bearer {supabase_key}",
+                        "Content-Type": "application/json",
+                        "Prefer": "resolution=merge-duplicates",
+                    },
+                    timeout=5,
+                )
+            _log.info("[SPEND] Flushed %d user records to Supabase", len(rows))
+        except Exception as exc:
+            _log.warning("[SPEND] Supabase flush failed: %s", exc)
     
     def get_usage(self, user_id: str) -> Dict[str, int]:
         """Get current daily usage for a user."""
@@ -242,6 +298,36 @@ def resolve_user_tier(user_id: str) -> str:
         return "free"
 
 
+
+
+# ── Rec #2: 80% Cap Alert System ────────────────────────────────────────
+
+_alerted_today: Dict[str, set] = {}  # tier → set of alerted user_ids
+
+def check_and_alert(user_id: str, tier: str, usage: Dict[str, int]):
+    """Send upgrade prompt when user hits 80% of daily cap."""
+    daily_cap = TIER_DAILY_CAPS.get(tier, TIER_DAILY_CAPS["free"])
+    threshold = int(daily_cap * 0.8)
+    
+    if usage["count"] >= threshold:
+        alerted = _alerted_today.get(tier, set())
+        if user_id not in alerted:
+            alerted.add(user_id)
+            _alerted_today[tier] = alerted
+            remaining = daily_cap - usage["count"]
+            _log.info(
+                "[ALERT] %s (tier=%s) hit %d/%d — %d remaining",
+                user_id[:8], tier, usage["count"], daily_cap, remaining,
+            )
+            # Return upgrade suggestion (frontend can show this as a toast)
+            return {
+                "alert": True,
+                "message": f"You've used {usage['count']}/{daily_cap} analyses today. Upgrade for more.",
+                "remaining": remaining,
+                "upgrade_url": "/pricing",
+            }
+    return None
+
 # ── Layer 1+2+3: Combined Gateway Decorator ─────────────────────────────
 
 def ai_endpoint(f):
@@ -297,6 +383,8 @@ def ai_endpoint(f):
                 "[GATEWAY] %s accessed %s — usage: %d/%d (tier=%s)",
                 user_id[:8], endpoint, usage["count"], cap, tier,
             )
+            # Check 80% threshold alert
+            alert = check_and_alert(user_id, tier, usage)
         
         return f(*args, **kwargs)
     return decorated

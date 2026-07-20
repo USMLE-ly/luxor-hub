@@ -51,7 +51,11 @@ def init_routes(app):
 
     @app.route("/debug/analyze", methods=["POST"], strict_slashes=False)
     def debug_analyze():
-        """Debug endpoint — bypasses JSON parsing, returns raw MiMo response."""
+        """Debug endpoint — blocked in production, only works on localhost."""
+        # Rec #3: Block in production
+        import os
+        if os.environ.get("FLASK_ENV") == "production" or os.environ.get("REPL_ID"):
+            return jsonify({"error": "Debug endpoint disabled in production"}), 403
         data = request.get_json(silent=True) or {}
         image_b64 = data.get("image_b64")
         if not image_b64:
