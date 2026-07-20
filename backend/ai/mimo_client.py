@@ -8,6 +8,7 @@ from typing import Any, Optional, Dict, List
 
 import requests
 from backend.config import MIMO_API_KEY, MIMO_API_URL, MIMO_VISION_MODEL, MIMO_TEXT_MODEL
+from backend.ai.model_router import classify_complexity, get_model_for_tier, get_vision_model
 from backend.image.preprocess import compress_image_b64
 
 _log = logging.getLogger("luxor.mimo")
@@ -148,6 +149,7 @@ def call_mimo_text(
     timeout: int = 30,
     max_tokens: Optional[int] = None,
     model: Optional[str] = None,
+    task_type: str = "",
 ) -> Any:
     """Call MiMo text completion — used by stylist, dressing room, etc."""
     if not MIMO_API_KEY:
@@ -160,7 +162,18 @@ def call_mimo_text(
         "X-Title": "LuxorHub",
     }
 
-    models_to_try = [model] if model else [MIMO_TEXT_MODEL]
+    # Auto-route via complexity classifier if no explicit model
+    if model:
+        models_to_try = [model]
+    else:
+        # Extract text from messages for complexity scoring
+        _msg_text = " ".join(m.get("content", "") for m in messages if isinstance(m, dict))
+        _tier, _score = classify_complexity(
+            task_type=task_type, text=_msg_text, has_image=False,
+        )
+        routed_model = get_model_for_tier(_tier)
+        models_to_try = [routed_model]
+        _log.info("[MIMO-TEXT] Auto-routed: task=%s score=%d tier=%s model=%s", task_type or "auto", _score, _tier, routed_model)
     from backend.config import CIPHER_MAX_TOKENS
 
     for model_name in models_to_try:

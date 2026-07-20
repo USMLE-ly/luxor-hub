@@ -10,10 +10,29 @@ load_dotenv(os.path.join(BASE_DIR, ".env"), override=True)
 
 _log = logging.getLogger("luxor.config")
 
-# ── MiMo Vision 2.5 ────────────────────────────────────────────────────
+# ── AI Model Tiers ─────────────────────────────────────────────────────
+# Three-tier model routing: match task complexity to model cost.
+#
+# LIGHTWEIGHT: Simple tasks (color extraction, basic classification, simple Q&A)
+#   → Fast, cheap, good enough for structured extraction
+# MID: Moderate tasks (style analysis, outfit recommendations, wardrobe tips)
+#   → Balanced cost/quality for conversational AI
+# HEAVY: Complex tasks (virtual try-on reasoning, trend forecasting, council debates)
+#   → Maximum reasoning depth for multi-step analysis
+#
+# Vision model is always the best available (images need quality).
 MIMO_API_KEY: str = os.getenv("MIMO_API_KEY", "")
 MIMO_API_URL: str = "https://api.xiaomimimo.com/v1/chat/completions"
+
+# Vision — always use the best model (image quality matters)
 MIMO_VISION_MODEL: str = os.getenv("MIMO_VISION_MODEL", "mimo-v2.5")
+
+# Text tiers — set via env vars, fallback to mimo-v2.5
+MIMO_LIGHTWEIGHT_MODEL: str = os.getenv("MIMO_LIGHTWEIGHT_MODEL", "mimo-v2.5")
+MIMO_MID_MODEL: str = os.getenv("MIMO_MID_MODEL", "mimo-v2.5")
+MIMO_HEAVY_MODEL: str = os.getenv("MIMO_HEAVY_MODEL", "mimo-v2.5")
+
+# Default text model (used when no tier is specified)
 MIMO_TEXT_MODEL: str = os.getenv("MIMO_TEXT_MODEL", "mimo-v2.5")
 
 # ── General ────────────────────────────────────────────────────────────
@@ -41,7 +60,7 @@ def log_config() -> None:
     """Log current config state (key values masked)."""
     _log.info("MiMo API key: %s (masked: %s)", bool(MIMO_API_KEY),
               MIMO_API_KEY[:8] + "..." + MIMO_API_KEY[-4:] if MIMO_API_KEY else "NONE")
-    _log.info("MiMo models: vision=%s text=%s", MIMO_VISION_MODEL, MIMO_TEXT_MODEL)
+    _log.info("MiMo models: vision=%s lightweight=%s mid=%s heavy=%s", MIMO_VISION_MODEL, MIMO_LIGHTWEIGHT_MODEL, MIMO_MID_MODEL, MIMO_HEAVY_MODEL)
     _log.info("Blob token: %s", bool(BLOB_READ_WRITE_TOKEN))
     _log.info("Qdrant: %s", bool(QDRANT_URL and QDRANT_API_KEY))
 

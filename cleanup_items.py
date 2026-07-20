@@ -22,10 +22,10 @@ import sys
 import requests
 import time
 
-SUPABASE_URL = "https://uakkwvdjoqsceewhsfjb.supabase.co"
-SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVha2t3dmRqb3FzY2Vld2hzZmpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NjE2ODEsImV4cCI6MjA4NzIzNzY4MX0.2bqKl0gFyNESBduLwg6GNYbFIMwF5XjDw_9xlWd1Nfo"
-QDRANT_URL = "https://1dfdf466-d06a-40b9-bfa4-aff0d5fd8942.us-east-1-1.aws.cloud.qdrant.io"
-QDRANT_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIiwic3ViamVjdCI6ImFwaS1rZXk6ZWIzNDExZjctYTYxNy00OTI3LThjMDEtNzQ0MWE2OWYwNDFhIn0.xUMjp2EUQPPZ977KpowKacgKIn6iMSyo3Rn6BYj5cZY"
+SUPABASE_URL = os.environ.get("VITE_SUPABASE_URL", "")
+SUPABASE_ANON_KEY = os.environ.get("VITE_SUPABASE_PUBLISHABLE_KEY", "")
+QDRANT_URL = os.environ.get("QDRANT_URL", "")
+QDRANT_API_KEY = os.environ.get("QDRANT_API_KEY", "")
 CLOSET_COLLECTION = "luxor_closet"
 LOCAL_CLOSET_FILE = "closet_items.json"
 

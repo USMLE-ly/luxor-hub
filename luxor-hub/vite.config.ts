@@ -9,16 +9,15 @@ export default defineConfig({
   build: {
     minify: "esbuild",
     sourcemap: false,
-    chunkSizeWarningLimit: 2000,
+    chunkSizeWarningLimit: 500,
     rollupOptions: {
-      maxParallelFileOps: 3,
+      maxParallelFileOps: 20,
     },
   },
   server: {
     host: "0.0.0.0",
     port: parseInt(process.env.PORT || "8080", 10),
     hmr: { overlay: false },
-    allowedHosts: true,
     proxy: {
       "/api": {
         target: process.env.VITE_API_URL || "http://localhost:5000",
@@ -29,7 +28,6 @@ export default defineConfig({
   preview: {
     host: "0.0.0.0",
     port: parseInt(process.env.PORT || "5173", 10),
-    allowedHosts: true,
   },
   plugins: [react()],
   resolve: {

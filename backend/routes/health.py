@@ -28,7 +28,6 @@ def init_routes(app, get_closet_count: Optional[Callable[[], int]] = None):
             "status": "ok",
             "service": "luxor-fashion-omega-v5",
             "mimo_configured": bool(MIMO_API_KEY),
-            "mimo_key_prefix": MIMO_API_KEY[:8] if MIMO_API_KEY else "",
             "blob_configured": bool(BLOB_READ_WRITE_TOKEN),
             "qdrant_configured": bool(QDRANT_URL and QDRANT_API_KEY),
             "closet_items": closet_count,
@@ -47,7 +46,7 @@ def init_routes(app, get_closet_count: Optional[Callable[[], int]] = None):
     @app.route("/api/health/config", methods=["GET"])
     def config_health():
         return jsonify({
-            "api_key": bool(MIMO_API_KEY),
+            "mimo_configured": bool(MIMO_API_KEY),
             "qdrant": bool(QDRANT_URL and QDRANT_API_KEY),
             "blob": bool(BLOB_READ_WRITE_TOKEN),
         })

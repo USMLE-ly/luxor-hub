@@ -35,3 +35,29 @@ luxor-hub/supabase/.temp/
 .replit
 dist_built
 venv/
+
+# Supabase config (contains project IDs)
+supabase/config.toml
+luxor-hub/supabase/config.toml
+
+# Environment files
+.env.local
+.env.*.local
+
+# Build artifacts
+.cache-bust-trigger
+.cache-trigger
+.trigger
+
+# Placeholder files
+.tsconfig-placeholder.ts
+
+# Vercel
+.vercel/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/

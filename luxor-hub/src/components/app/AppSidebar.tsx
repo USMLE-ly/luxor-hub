@@ -1,4 +1,4 @@
-import {House, TShirt, MagicWand, ChatCircle, ChartBar, GearSix, SignOut, Sparkle, ArrowsOut, User, Scan, Trophy, Flame, Bell, CalendarDots, SquaresFour, Video, PaintBrush, StackSimple, GlobeHemisphereWest, Crown, CurrencyDollar} from "@phosphor-icons/react";
+import {TShirt, MagicWand, ChatCircle, ChartBar, GearSix, SignOut, Sparkle, ArrowsOut, User, Scan, Trophy, Flame, Bell, CalendarDots, SquaresFour, Video, PaintBrush, StackSimple, GlobeHemisphereWest, Crown, CurrencyDollar} from "@phosphor-icons/react";
 import { NotificationBell } from "./NotificationBell";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,7 +19,6 @@ import {
 
 const navItems = [
   { title: "Closet", url: "/closet", icon: TShirt },
-  { title: "My Closet", url: "/closet", icon: TShirt },
   { title: "Outfit Generator", url: "/outfits", icon: MagicWand },
   { title: "Outfit Builder", url: "/outfit-builder", icon: ArrowsOut },
   { title: "Outfit Analysis", url: "/outfit-analysis", icon: Scan },

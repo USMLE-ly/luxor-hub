@@ -21,6 +21,6 @@
     "test:ci": "npm run validate && npm run preflight && npm run ci:dry-run && npm run smoke:urls"
   },
   "devDependencies": {
-    "typescript": "^7.0.2"
+    "typescript": "^5.8.3"
   }
 }

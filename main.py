@@ -23,6 +23,8 @@ import fcntl
 import requests
 from flask import Flask, request, jsonify, send_from_directory, make_response
 from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from PIL import Image
 from collections import Counter
 import numpy as np
@@ -70,7 +72,19 @@ logging.basicConfig(
 _log = logging.getLogger("luxor.omega")
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=["200 per minute"],
+    storage_uri="memory://",
+)
+limiter.init_app(app)
+
+CORS(app, resources={r"/*": {"origins": [
+    "https://luxor.ly",
+    "https://www.luxor.ly",
+    "http://localhost:5173",
+    "http://localhost:3000",
+]}})
 
 # CRITICAL: Handle OPTIONS preflight BEFORE any routing/redirects
 # Replit proxy adds trailing slashes, Flask redirects with 308 on mismatched routes
@@ -81,9 +95,12 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 def handle_preflight():
     if request.method == "OPTIONS":
         resp = jsonify({})
-        resp.headers.add("Access-Control-Allow-Origin", "*")
-        resp.headers.add("Access-Control-Allow-Headers", "*")
-        resp.headers.add("Access-Control-Allow-Methods", "*")
+        allowed_origins = ["https://luxor.ly", "https://www.luxor.ly"]
+        origin = request.headers.get("Origin", "")
+        if origin in allowed_origins:
+            resp.headers.add("Access-Control-Allow-Origin", origin)
+        resp.headers.add("Access-Control-Allow-Headers", "Content-Type, Authorization, apikey")
+        resp.headers.add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         resp.headers.add("Access-Control-Max-Age", "86400")
         return resp, 204
 
@@ -117,6 +134,64 @@ from backend.routes.analyze import init_routes as init_analyze_routes
 from backend.routes.health import init_routes as init_health_routes
 
 init_analyze_routes(app)
+
+from backend.auth import require_auth, optional_auth
+from backend.utils.categories import _cat
+
+
+# Allowed occasion values — prevents prompt injection
+
+
+# Input validation utilities
+MAX_IMAGE_SIZE_MB = 10
+MAX_LIMIT = 50
+
+def _validate_image_b64(image_b64: str) -> str | None:
+    """Validate base64 image. Returns error message or None if valid."""
+    if not image_b64:
+        return "Missing image_b64"
+    if len(image_b64) > MAX_IMAGE_SIZE_MB * 1024 * 1024 * 1.37:  # base64 is ~37% larger
+        return f"Image too large (max {MAX_IMAGE_SIZE_MB}MB)"
+    return None
+
+def _validate_limit(limit_str: str, default: int = 8) -> int:
+    """Validate and clamp limit parameter."""
+    try:
+        limit = int(limit_str)
+    except (ValueError, TypeError):
+        return default
+    return max(1, min(limit, MAX_LIMIT))
+
+
+ALLOWED_OCCASIONS = {
+    "casual", "business", "party", "sport", "date night", "date_night",
+    "formal", "wedding", "interview", "work", "gym", "travel",
+    "brunch", "dinner", "lunch", "coffee", "walk", "beach",
+    "outdoor", "indoor", "summer", "winter", "spring", "fall",
+    "everyday", "office", "night out", "night_out",
+}
+# Allowed occasion values — prevents prompt injection
+ALLOWED_OCCASIONS = {
+    "casual", "business", "party", "sport", "date night", "date_night",
+    "formal", "wedding", "interview", "work", "gym", "travel",
+    "brunch", "dinner", "lunch", "coffee", "walk", "beach",
+    "outdoor", "indoor", "summer", "winter", "spring", "fall",
+    "everyday", "office", "night out", "night_out",
+}
+
+def _sanitize_occasion(raw: str) -> str:
+    """Validate and sanitize occasion string. Returns safe value or default."""
+    if not raw:
+        return "casual"
+    clean = raw.strip().lower().replace("_", " ")
+    if clean not in ALLOWED_OCCASIONS:
+        return "casual"
+    return clean
+
+
+
+from backend.auth import require_auth, optional_auth
+
 
 # Color Dictionary
 # ---------------------------------------------------------------------------
@@ -278,17 +353,17 @@ def _acquire_json_lock():
     """Acquire a cross-process file lock for JSON writes.
     Returns the lock file descriptor (must be closed to release)."""
     fd = os.open(_JSON_LOCK_FILE, os.O_CREAT | os.O_RDWR, 0o644)
-    print(f"[LOCK-DEBUG] Acquiring exclusive lock (fd={fd})", flush=True)
+    _log.warning(f"[LOCK-DEBUG] Acquiring exclusive lock (fd={fd})")
     fcntl.flock(fd, fcntl.LOCK_EX)
-    print(f"[LOCK-DEBUG] Acquired exclusive lock (fd={fd})", flush=True)
+    _log.warning(f"[LOCK-DEBUG] Acquired exclusive lock (fd={fd})")
     return fd
 
 def _release_json_lock(fd):
     """Release the cross-process file lock."""
-    print(f"[LOCK-DEBUG] Releasing lock (fd={fd})", flush=True)
+    _log.warning(f"[LOCK-DEBUG] Releasing lock (fd={fd})")
     fcntl.flock(fd, fcntl.LOCK_UN)
     os.close(fd)
-    print(f"[LOCK-DEBUG] Released lock (fd={fd})", flush=True)
+    _log.warning(f"[LOCK-DEBUG] Released lock (fd={fd})")
 
 def _read_json_file():
     """Thread-safe and process-safe read of closet_items.json."""
@@ -296,13 +371,13 @@ def _read_json_file():
     try:
         with open(_LOCAL_CLOSET_FILE, 'r') as f:
             items = json.load(f)
-            print(f"[JSON-DEBUG] _read_json_file: loaded {len(items)} items from {_LOCAL_CLOSET_FILE}", flush=True)
+            _log.warning(f"[JSON-DEBUG] _read_json_file: loaded {len(items)} items from {_LOCAL_CLOSET_FILE}")
             return items
     except FileNotFoundError:
-        print(f"[JSON-DEBUG] _read_json_file: file not found (fresh state)", flush=True)
+        _log.warning(f"[JSON-DEBUG] _read_json_file: file not found (fresh state)")
         return []
     except json.JSONDecodeError:
-        print(f"[JSON-DEBUG] _read_json_file: CORRUPT JSON — returning empty", flush=True)
+        _log.warning(f"[JSON-DEBUG] _read_json_file: CORRUPT JSON — returning empty")
         return []
     finally:
         _release_json_lock(fd)
@@ -318,9 +393,9 @@ def _write_json_file(items):
             f.flush()
             os.fsync(f.fileno())
         os.rename(tmp_path, _LOCAL_CLOSET_FILE)
-        print(f"[JSON-DEBUG] _write_json_file: wrote {len(items)} items (temp+rename)", flush=True)
+        _log.warning(f"[JSON-DEBUG] _write_json_file: wrote {len(items)} items (temp+rename)")
     except Exception as e:
-        print(f"[JSON-DEBUG] _write_json_file: FAILED — {e}", flush=True)
+        _log.error(f"[JSON-DEBUG] _write_json_file: FAILED — {e}")
         raise
     finally:
         _release_json_lock(fd)
@@ -537,10 +612,10 @@ def qdrant_get_all_items(timeout: float = 8.0, user_id: str = "") -> List[Dict[s
     """
     from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
 
-    print(f"[QDRANT-DEBUG] qdrant_get_all_items called for user_id={user_id or 'all'}", flush=True)
+    _log.warning(f"[QDRANT-DEBUG] qdrant_get_all_items called for user_id={user_id or 'all'}")
     client = _qdrant_closet
     if client is None:
-        print(f"[QDRANT-DEBUG] Qdrant client is None — raising", flush=True)
+        _log.warning(f"[QDRANT-DEBUG] Qdrant client is None — raising")
         raise RuntimeError("Qdrant closet client is not initialized")
 
     def _do_scroll():
@@ -551,7 +626,7 @@ def qdrant_get_all_items(timeout: float = 8.0, user_id: str = "") -> List[Dict[s
                     key="user_id", match=qdrant_models.MatchValue(value=user_id)
                 )]
             )
-            print(f"[QDRANT-DEBUG] Using scroll filter for user_id={user_id}", flush=True)
+            _log.warning(f"[QDRANT-DEBUG] Using scroll filter for user_id={user_id}")
         # Paginated scroll to handle all items (max 10000)
         all_points = []
         offset = None
@@ -574,7 +649,7 @@ def qdrant_get_all_items(timeout: float = 8.0, user_id: str = "") -> List[Dict[s
         # Strip image_data_b64 from list responses — it's 100KB+ per item and bloats the response
         for pr in payload_results:
             pr.pop("image_data_b64", None)
-        print(f"[QDRANT-DEBUG] Scrolled {pages} page(s), {len(payload_results)} total items (user_id={user_id or 'all'})", flush=True)
+        _log.warning(f"[QDRANT-DEBUG] Scrolled {pages} page(s), {len(payload_results)} total items (user_id={user_id or 'all'})")
         return payload_results
 
     with ThreadPoolExecutor(max_workers=1) as executor:
@@ -585,11 +660,11 @@ def qdrant_get_all_items(timeout: float = 8.0, user_id: str = "") -> List[Dict[s
             return items
         except FuturesTimeout:
             _log.error("[QDRANT] Scroll timed out after %ss", timeout)
-            print(f"[QDRANT-DEBUG] Scroll TIMED OUT after {timeout}s", flush=True)
+            _log.warning(f"[QDRANT-DEBUG] Scroll TIMED OUT after {timeout}s")
             raise TimeoutError(f"Qdrant scroll timed out after {timeout}s")
         except Exception as exc:
             _log.error("[QDRANT] Scroll error: %s", exc)
-            print(f"[QDRANT-DEBUG] Scroll error: {exc}", flush=True)
+            _log.error(f"[QDRANT-DEBUG] Scroll error: {exc}")
             raise
 def qdrant_upsert_item(item: Dict[str, Any]) -> bool:
     """Upsert an item to BOTH Qdrant Cloud and local JSON.
@@ -603,7 +678,7 @@ def qdrant_upsert_item(item: Dict[str, Any]) -> bool:
     json_ok = False
     label = item.get("label", "unknown")
 
-    print(f"[UPSERT-DEBUG] Starting upsert for '{label}' (id={item_id})", flush=True)
+    _log.warning(f"[UPSERT-DEBUG] Starting upsert for '{label}' (id={item_id})")
 
     # 1. Upsert to Qdrant Cloud
     client = _qdrant_closet
@@ -611,7 +686,7 @@ def qdrant_upsert_item(item: Dict[str, Any]) -> bool:
         try:
             from uuid import uuid5, NAMESPACE_DNS
             point_id = str(uuid5(NAMESPACE_DNS, item_id))
-            print(f"[UPSERT-DEBUG] Qdrant point_id={point_id}", flush=True)
+            _log.warning(f"[UPSERT-DEBUG] Qdrant point_id={point_id}")
             client.upsert(
                 collection_name=_CLOSET_COLLECTION,
                 points=[qdrant_models.PointStruct(
@@ -621,27 +696,27 @@ def qdrant_upsert_item(item: Dict[str, Any]) -> bool:
                 )]
             )
             _log.info("[QDRANT] Upserted item %s to Qdrant Cloud", item_id)
-            print(f"[UPSERT-DEBUG] Qdrant upsert succeeded for '{label}'", flush=True)
+            _log.warning(f"[UPSERT-DEBUG] Qdrant upsert succeeded for '{label}'")
             qdrant_ok = True
         except Exception as exc:
             _log.error("[QDRANT] Cloud upsert FAILED for item %s: %s", item_id, exc)
-            print(f"[UPSERT-DEBUG] Qdrant upsert FAILED for '{label}': {exc}", flush=True)
+            _log.error(f"[UPSERT-DEBUG] Qdrant upsert FAILED for '{label}': {exc}")
 
     # 2. Always write to local JSON file as secondary persistence (process-safe)
     try:
         items = _read_json_file()
-        print(f"[UPSERT-DEBUG] Read {len(items)} items from JSON before append", flush=True)
+        _log.warning(f"[UPSERT-DEBUG] Read {len(items)} items from JSON before append")
         existing_ids = [i.get("id") for i in items]
         was_dup = item_id in existing_ids
         items = [i for i in items if i.get("id") != item_id]
         items.append(item)
         _write_json_file(items)
-        print(f"[UPSERT-DEBUG] Wrote {len(items)} items to JSON after append (was_dup={was_dup})", flush=True)
+        _log.warning(f"[UPSERT-DEBUG] Wrote {len(items)} items to JSON after append (was_dup={was_dup})")
         _log.info("[CLOSET] Saved item to local file: %s (%s)", label, item_id)
         json_ok = True
     except Exception as exc:
         _log.error("[CLOSET] Local save FAILED for item %s: %s", item_id, exc)
-        print(f"[UPSERT-DEBUG] JSON save FAILED: {exc}", flush=True)
+        _log.error(f"[UPSERT-DEBUG] JSON save FAILED: {exc}")
 
     if not qdrant_ok and json_ok:
         _log.warning("[QDRANT] Item %s saved to local file only (Qdrant unavailable)", item_id)
@@ -795,7 +870,7 @@ def closet_find_similar():
     try:
         item_id = request.args.get("item_id", "")
         user_id = request.args.get("user_id", "")
-        limit = int(request.args.get("limit", "8"))
+        limit = _validate_limit(request.args.get("limit", "8"))
         
         if not item_id:
             return jsonify({"error": "item_id is required", "success": False}), 400
@@ -804,9 +879,9 @@ def closet_find_similar():
         return jsonify({"success": True, "items": items})
     except Exception as e:
         import traceback
-        print(f"[FIND-SIMILAR] Error: {e}", flush=True)
+        _log.error(f"[FIND-SIMILAR] Error: {e}")
         traceback.print_exc()
-        return jsonify({"error": str(e), "success": False}), 500
+        return jsonify({"error": "Internal server error", "success": False}), 500
 
 
 # Prompts
@@ -1701,7 +1776,7 @@ def stylist_explore():
     seed = int(time.time() * 1000) % 10000
     messages.append({"role": "user", "content": f"Use seed={seed} for uniqueness."})
 
-    result = call_mimo_text(messages, STYLIST_PROMPT, temperature=0.8)
+    result = call_mimo_text(messages, STYLIST_PROMPT, temperature=0.8, task_type="outfit_recommendation")
     if not result:
         return jsonify({"next_question": "Tell me what kind of vibe you are going for today?", "options": ["Casual", "Business", "Party", "Date Night", "Sport"], "generated_prompt": "", "outfit_name": ""})
 
@@ -1757,7 +1832,7 @@ def closet_add():
         category = data.get("category", data.get("type", "other"))
         brand = data.get("brand", "")
         season = data.get("season", "all-season")
-        occasion = data.get("occasion", "")
+        occasion = _sanitize_occasion(data.get("occasion", ""))
         style = data.get("style", "")
         notes = data.get("notes", "")
         price = data.get("price", None)
@@ -1808,10 +1883,10 @@ def closet_add():
         }
 
         # ---- Persist to Qdrant Cloud + JSON (dual-write) ----
-        print(f"[ADD-DEBUG] ===== ADD ITEM START =====", flush=True)
-        print(f"[ADD-DEBUG] Label: '{label}', Category: {category}, Color: {color}, User: {user_id[:12]}...", flush=True)
-        print(f"[ADD-DEBUG] Item ID: {item_id}, Image URL: {image_url[:60] if image_url else 'NONE'}", flush=True)
-        print(f"[ADD-DEBUG] Image B64 length: {len(image_b64)}", flush=True)
+        _log.warning(f"[ADD-DEBUG] ===== ADD ITEM START =====")
+        _log.warning(f"[ADD-DEBUG] Label: '{label}', Category: {category}, Color: {color}, User: {user_id[:12]}...")
+        _log.warning(f"[ADD-DEBUG] Item ID: {item_id}, Image URL: {image_url[:60] if image_url else 'NONE'}")
+        _log.warning(f"[ADD-DEBUG] Image B64 length: {len(image_b64)}")
         ok = qdrant_upsert_item(item)
         if not ok:
             _log.error("[CLOSET] Failed to persist item %s", item_id)
@@ -1819,14 +1894,14 @@ def closet_add():
         
         # Debug: confirm base64 was persisted
         if image_b64:
-            print(f"[ADD-DEBUG] Saved Base64 for '{label}', b64 length: {len(image_b64)}", flush=True)
+            _log.warning(f"[ADD-DEBUG] Saved Base64 for '{label}', b64 length: {len(image_b64)}")
         
         return jsonify({"success": True, "item": item})
     except Exception as e:
         import traceback
-        print("=== CRITICAL ERROR IN /api/v1/closet/add-item ===", flush=True)
+        _log.error("=== CRITICAL ERROR IN /api/v1/closet/add-item ===")
         traceback.print_exc()
-        print("================================================", flush=True)
+        _log.info("================================================")
         return jsonify(_qdrant_error("upsert", str(e), traceback.format_exc())), 500
 @app.route("/api/v1/closet/list-items", methods=["GET", "OPTIONS"], strict_slashes=False)
 def closet_list():
@@ -1836,18 +1911,18 @@ def closet_list():
     if request.method == "OPTIONS":
         return "", 204
     uid = request.args.get("user_id", "")
-    print(f"[LIST-DEBUG] ===== LIST ITEMS CALLED for user_id={uid} =====", flush=True)
+    _log.warning(f"[LIST-DEBUG] ===== LIST ITEMS CALLED for user_id={uid} =====")
     # Retry Qdrant up to 2 times
     for attempt in range(2):
         try:
             items = qdrant_get_all_items(user_id=uid, timeout=10.0)
-            print(f"[LIST-DEBUG] Qdrant attempt {attempt+1}: {len(items)} items returned", flush=True)
+            _log.warning(f"[LIST-DEBUG] Qdrant attempt {attempt+1}: {len(items)} items returned")
             if items:
-                print(f"[LIST-DEBUG] Qdrant items: {[i.get('id','')+':'+i.get('label','unnamed')[:20] for i in items]}", flush=True)
+                _log.warning(f"[LIST-DEBUG] Qdrant items: {[i.get('id','')+':'+i.get('label','unnamed')[:20] for i in items]}")
             _log.info("[CLOSET] list-items returning %d items from Qdrant (attempt %d)", len(items), attempt + 1)
             return jsonify({"success": True, "items": items})
         except Exception as qe:
-            print(f"[LIST-DEBUG] Qdrant attempt {attempt+1} FAILED: {qe}", flush=True)
+            _log.error(f"[LIST-DEBUG] Qdrant attempt {attempt+1} FAILED: {qe}")
             if attempt == 0:
                 _log.warning("[CLOSET] Qdrant read attempt %d failed: %s — retrying...", attempt + 1, qe)
             else:
@@ -1859,14 +1934,15 @@ def closet_list():
             json_items = [i for i in json_items if i.get("user_id", "").strip() == uid.strip()]
         if json_items:
             _log.info("[CLOSET] Qdrant unavailable — returning %d items from JSON fallback", len(json_items))
-            print(f"[LIST-DEBUG] JSON fallback: returning {len(json_items)} items from file", flush=True)
+            _log.warning(f"[LIST-DEBUG] JSON fallback: returning {len(json_items)} items from file")
             return jsonify({"success": True, "items": json_items, "source": "json_fallback"})
     except Exception as je:
         _log.error("[CLOSET] JSON fallback ALSO failed: %s", je)
-        print(f"[LIST-DEBUG] JSON fallback failed: {je}", flush=True)
+        _log.error(f"[LIST-DEBUG] JSON fallback failed: {je}")
 
-    print(f"[LIST-DEBUG] All sources exhausted — returning empty", flush=True)
+    _log.warning(f"[LIST-DEBUG] All sources exhausted — returning empty")
     return jsonify({"success": True, "items": []})
+@require_auth
 @app.route("/api/v1/closet/delete-item", methods=["POST", "OPTIONS"], strict_slashes=False)
 def closet_delete():
     try:
@@ -2012,6 +2088,7 @@ RULES:
         "occasion": "Casual",
     }), 500
 
+@require_auth
 @app.route("/api/v1/closet/clear-all", methods=["POST", "OPTIONS"], strict_slashes=False)
 def closet_clear_all():
     """Delete ALL closet items from Supabase, Qdrant, and JSON for a given user.
@@ -2027,30 +2104,30 @@ def closet_clear_all():
         uid = data.get("user_id", "")
         access_token = data.get("access_token", "")
         # Check env var FIRST, then request body (so Replit Secrets work without curl changes)
-        service_role_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "") or data.get("service_role_key", "")
-        print(f"[CLEAR-DEBUG] Starting clear for user_id: {uid}", flush=True)
-        print(f"[CLEAR-DEBUG] Has access_token: {bool(access_token)}, Has env service_role_key: {bool(os.environ.get('SUPABASE_SERVICE_ROLE_KEY',''))}", flush=True)
+        service_role_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "") or ""
+        _log.warning(f"[CLEAR-DEBUG] Starting clear for user_id: {uid}")
+        _log.warning(f"[CLEAR-DEBUG] Has access_token: {bool(access_token)}, Has env service_role_key: {bool(os.environ.get('SUPABASE_SERVICE_ROLE_KEY',''))}")
         _log.info("[CLOSET] clear-all for user_id=%s", uid or "all")
 
         supabase_errors = []
 
         # ---- STEP 1: Delete from Supabase via REST API ----
-        supabase_rest_url = "https://rpxsicsakggmitgqhalw.supabase.co/rest/v1"
+        supabase_rest_url = f"{os.environ.get('VITE_SUPABASE_URL', '')}/rest/v1"
         
         # Determine auth header: prefer service_role_key (bypasses RLS), else access_token
         if service_role_key:
             auth_header = f"Bearer {service_role_key}"
-            print(f"[CLEAR-DEBUG] Using service_role_key for Supabase REST API", flush=True)
+            _log.warning(f"[CLEAR-DEBUG] Using service_role_key for Supabase REST API")
         elif access_token:
             auth_header = f"Bearer {access_token}"
-            print(f"[CLEAR-DEBUG] Using user access_token for Supabase REST API", flush=True)
+            _log.warning(f"[CLEAR-DEBUG] Using user access_token for Supabase REST API")
         else:
             auth_header = None
-            print(f"[CLEAR-DEBUG] No auth token provided — skipping Supabase deletion", flush=True)
+            _log.warning(f"[CLEAR-DEBUG] No auth token provided — skipping Supabase deletion")
 
         if auth_header and uid:
             headers = {
-                "apikey": "sb_publishable_X7EDgWhQM21N7ykgjLQKbQ_IfvkjGbU",
+                "apikey": os.environ.get("VITE_SUPABASE_PUBLISHABLE_KEY", ""),
                 "Authorization": auth_header,
                 "Content-Type": "application/json",
                 "Prefer": "return=minimal",
@@ -2087,7 +2164,7 @@ def closet_clear_all():
                                         headers=headers,
                                         timeout=10,
                                     )
-                                    print(f"[CLEAR-DEBUG] Deleted outfit_items batch: {del_resp.status_code}", flush=True)
+                                    _log.warning(f"[CLEAR-DEBUG] Deleted outfit_items batch: {del_resp.status_code}")
                     else:
                         if id_field:
                             del_resp = requests.delete(
@@ -2095,11 +2172,11 @@ def closet_clear_all():
                                 headers=headers,
                                 timeout=10,
                             )
-                            print(f"[CLEAR-DEBUG] Deleted {table}: {del_resp.status_code}", flush=True)
+                            _log.warning(f"[CLEAR-DEBUG] Deleted {table}: {del_resp.status_code}")
                             if not del_resp.ok and del_resp.status_code != 404:
                                 supabase_errors.append(f"{table}: {del_resp.status_code}")
                 except Exception as table_err:
-                    print(f"[CLEAR-DEBUG] Error deleting {table}: {table_err}", flush=True)
+                    _log.error(f"[CLEAR-DEBUG] Error deleting {table}: {table_err}")
                     supabase_errors.append(f"{table}: {str(table_err)[:100]}")
 
         # ---- STEP 2: Clear Qdrant items for this user ----
@@ -2187,14 +2264,15 @@ def closet_clear_all():
             "supabase_errors": supabase_errors if supabase_errors else None,
             "message": f"Cleared all items for user {uid or 'all'}",
         }
-        print(f"[CLEAR-DEBUG] Result: {json.dumps(result)}", flush=True)
+        _log.warning(f"[CLEAR-DEBUG] Result: {json.dumps(result)}")
         return jsonify(result)
     except Exception as exc:
-        print(f"[CLEAR-DEBUG] Fatal error: {exc}", flush=True)
+        _log.error(f"[CLEAR-DEBUG] Fatal error: {exc}")
         _log.error("[CLOSET] clear-all error: %s", exc)
-        return jsonify({"error": str(exc)}), 500
+        return jsonify({"error": "Internal server error"}), 500
 
 
+@require_auth
 @app.route("/api/v1/closet/force-clear", methods=["POST", "OPTIONS"], strict_slashes=False)
 def closet_force_clear():
     """NUCLEAR OPTION: Force-delete ALL items from Supabase + Qdrant + JSON.
@@ -2213,7 +2291,7 @@ def closet_force_clear():
     if request.method == "OPTIONS":
         return "", 204
     
-    print(f"[FORCE-CLEAR] ====== NUCLEAR CLEAR INITIATED =====", flush=True)
+    _log.info(f"[FORCE-CLEAR] ====== NUCLEAR CLEAR INITIATED =====")
     
     try:
         data = request.get_json(silent=True) or {}
@@ -2222,17 +2300,17 @@ def closet_force_clear():
         if not uid:
             return jsonify({"error": "Missing user_id. Provide it in the JSON body: {\"user_id\":\"your-uuid\"}"}), 400
         
-        print(f"[FORCE-CLEAR] Target user_id: {uid}", flush=True)
+        _log.info(f"[FORCE-CLEAR] Target user_id: {uid}")
         
         # Read service_role_key from environment variable first, fallback to request body
-        service_role_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "") or data.get("service_role_key", "")
-        print(f"[FORCE-CLEAR] Service role key source: {'env' if os.environ.get('SUPABASE_SERVICE_ROLE_KEY','') else 'request' if data.get('service_role_key','') else 'NONE'}", flush=True)
+        service_role_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "") or ""
+        _log.info(f"[FORCE-CLEAR] Service role key source: {'env' if os.environ.get('SUPABASE_SERVICE_ROLE_KEY','') else 'request' if data.get('service_role_key','') else 'NONE'}")
         
         results = {"qdrant": False, "json": False, "supabase": {}, "errors": []}
         
         # ---- STEP 1: Supabase deletion via REST API ----
-        SUPABASE_URL = "https://rpxsicsakggmitgqhalw.supabase.co"
-        SUPABASE_ANON_KEY = "sb_publishable_X7EDgWhQM21N7ykgjLQKbQ_IfvkjGbU"
+        SUPABASE_URL = os.environ.get("VITE_SUPABASE_URL", "")
+        SUPABASE_ANON_KEY = os.environ.get("VITE_SUPABASE_PUBLISHABLE_KEY", "")
         supabase_rest_url = f"{SUPABASE_URL}/rest/v1"
         
         headers = {
@@ -2244,11 +2322,11 @@ def closet_force_clear():
         if service_role_key:
             # Service role key bypasses all RLS
             headers["Authorization"] = f"Bearer {service_role_key}"
-            print(f"[FORCE-CLEAR] Using service_role_key — bypassing RLS", flush=True)
+            _log.info(f"[FORCE-CLEAR] Using service_role_key — bypassing RLS")
         else:
             # Without service role key, use anon key (will only work if RLS allows auth.uid() = user_id)
             headers["Authorization"] = f"Bearer {SUPABASE_ANON_KEY}"
-            print(f"[FORCE-CLEAR] No service_role_key — using anon key (RLS will filter by auth.uid())", flush=True)
+            _log.info(f"[FORCE-CLEAR] No service_role_key — using anon key (RLS will filter by auth.uid())")
         
         # Delete tables in dependency order (children before parents)
         tables_ordered = [
@@ -2262,19 +2340,19 @@ def closet_force_clear():
             try:
                 url = f"{supabase_rest_url}/{table}?user_id=eq.{uid}"
                 resp = requests.delete(url, headers=headers, timeout=15)
-                print(f"[FORCE-CLEAR] DELETE {table}: HTTP {resp.status_code}", flush=True)
+                _log.info(f"[FORCE-CLEAR] DELETE {table}: HTTP {resp.status_code}")
                 results["supabase"][table] = resp.status_code
                 if not resp.ok and resp.status_code >= 400:
                     # Try body for error details
                     try:
                         err_body = resp.json()
-                        print(f"[FORCE-CLEAR]   Error: {err_body}", flush=True)
+                        _log.error(f"[FORCE-CLEAR]   Error: {err_body}")
                     except:
-                        print(f"[FORCE-CLEAR]   Body: {resp.text[:200]}", flush=True)
+                        _log.info(f"[FORCE-CLEAR]   Body: {resp.text[:200]}")
             except Exception as e:
                 results["supabase"][table] = f"EXCEPTION: {e}"
                 results["errors"].append(f"{table}: {e}")
-                print(f"[FORCE-CLEAR]   Exception: {e}", flush=True)
+                _log.info(f"[FORCE-CLEAR]   Exception: {e}")
         
         # Delete outfit_items by fetching outfit_ids first
         try:
@@ -2282,10 +2360,10 @@ def closet_force_clear():
                 f"{supabase_rest_url}/outfits?user_id=eq.{uid}&select=id",
                 headers=headers, timeout=15,
             )
-            print(f"[FORCE-CLEAR] GET outfits (for outfit_items): HTTP {outfit_resp.status_code}", flush=True)
+            _log.info(f"[FORCE-CLEAR] GET outfits (for outfit_items): HTTP {outfit_resp.status_code}")
             if outfit_resp.ok:
                 outfit_ids = [o["id"] for o in outfit_resp.json()]
-                print(f"[FORCE-CLEAR]   Found {len(outfit_ids)} outfits", flush=True)
+                _log.info(f"[FORCE-CLEAR]   Found {len(outfit_ids)} outfits")
                 if outfit_ids:
                     for batch_start in range(0, len(outfit_ids), 50):
                         batch = outfit_ids[batch_start:batch_start+50]
@@ -2294,16 +2372,16 @@ def closet_force_clear():
                             f"{supabase_rest_url}/outfit_items?{or_conds}",
                             headers=headers, timeout=15,
                         )
-                        print(f"[FORCE-CLEAR] DELETE outfit_items batch: HTTP {resp.status_code}", flush=True)
+                        _log.info(f"[FORCE-CLEAR] DELETE outfit_items batch: HTTP {resp.status_code}")
                         results["supabase"]["outfit_items_batch"] = resp.status_code
         except Exception as e:
             results["errors"].append(f"outfit_items: {e}")
-            print(f"[FORCE-CLEAR]   outfit_items exception: {e}", flush=True)
+            _log.info(f"[FORCE-CLEAR]   outfit_items exception: {e}")
         
         # Delete outfits
         try:
             resp = requests.delete(f"{supabase_rest_url}/outfits?user_id=eq.{uid}", headers=headers, timeout=15)
-            print(f"[FORCE-CLEAR] DELETE outfits: HTTP {resp.status_code}", flush=True)
+            _log.info(f"[FORCE-CLEAR] DELETE outfits: HTTP {resp.status_code}")
             results["supabase"]["outfits"] = resp.status_code
         except Exception as e:
             results["supabase"]["outfits"] = f"EXCEPTION: {e}"
@@ -2312,7 +2390,7 @@ def closet_force_clear():
         # Delete clothing_items last (has FK references)
         try:
             resp = requests.delete(f"{supabase_rest_url}/clothing_items?user_id=eq.{uid}", headers=headers, timeout=15)
-            print(f"[FORCE-CLEAR] DELETE clothing_items: HTTP {resp.status_code}", flush=True)
+            _log.info(f"[FORCE-CLEAR] DELETE clothing_items: HTTP {resp.status_code}")
             results["supabase"]["clothing_items"] = resp.status_code
         except Exception as e:
             results["supabase"]["clothing_items"] = f"EXCEPTION: {e}"
@@ -2335,16 +2413,16 @@ def closet_force_clear():
                     ),
                 )
                 results["qdrant"] = True
-                print(f"[FORCE-CLEAR] Qdrant cleared for user_id={uid}", flush=True)
+                _log.info(f"[FORCE-CLEAR] Qdrant cleared for user_id={uid}")
         except Exception as qe:
             results["errors"].append(f"qdrant: {qe}")
-            print(f"[FORCE-CLEAR] Qdrant error: {qe}", flush=True)
+            _log.error(f"[FORCE-CLEAR] Qdrant error: {qe}")
         
         # ---- STEP 3: Clear JSON file ----
         try:
             _write_json_file([])
             results["json"] = True
-            print(f"[FORCE-CLEAR] JSON file cleared", flush=True)
+            _log.info(f"[FORCE-CLEAR] JSON file cleared")
         except Exception as je:
             results["errors"].append(f"json: {je}")
         
@@ -2354,11 +2432,11 @@ def closet_force_clear():
             for v in results["supabase"].values()
         )
         
-        print(f"[FORCE-CLEAR] ====== RESULTS =====", flush=True)
-        print(f"[FORCE-CLEAR] Supabase: {results['supabase']}", flush=True)
-        print(f"[FORCE-CLEAR] Qdrant: {results['qdrant']}", flush=True)
-        print(f"[FORCE-CLEAR] JSON: {results['json']}", flush=True)
-        print(f"[FORCE-CLEAR] Errors: {results['errors']}", flush=True)
+        _log.info(f"[FORCE-CLEAR] ====== RESULTS =====")
+        _log.info(f"[FORCE-CLEAR] Supabase: {results['supabase']}")
+        _log.info(f"[FORCE-CLEAR] Qdrant: {results['qdrant']}")
+        _log.info(f"[FORCE-CLEAR] JSON: {results['json']}")
+        _log.error(f"[FORCE-CLEAR] Errors: {results['errors']}")
         
         return jsonify({
             "success": supabase_ok or results["qdrant"] or results["json"],
@@ -2373,14 +2451,16 @@ def closet_force_clear():
             ],
         })
     except Exception as exc:
-        print(f"[FORCE-CLEAR] FATAL: {exc}", flush=True)
+        _log.info(f"[FORCE-CLEAR] FATAL: {exc}")
         import traceback
         traceback.print_exc()
-        return jsonify({"error": str(exc)}), 500
+        return jsonify({"error": "Internal server error"}), 500
 
 # ---------------------------------------------------------------------------
 # Dressing Room Generator (Groq Text picks from Qdrant closet)
 # ---------------------------------------------------------------------------
+@require_auth
+@limiter.limit("5 per minute")
 @app.route("/api/v1/upload-color-pdf", methods=["POST", "OPTIONS"], strict_slashes=False)
 def upload_color_pdf():
     if request.method == "OPTIONS":
@@ -2462,7 +2542,7 @@ def upload_color_pdf():
 
     except Exception as exc:
         _log.error("[COLOR-PDF] Upload error: %s", exc)
-        return jsonify({"success": False, "error": f"PDF processing error: {str(exc)}"}), 500
+        return jsonify({"success": False, "error": "Failed to process PDF"}), 500
 
 @app.route("/api/v1/color-dictionary", methods=["GET", "OPTIONS"], strict_slashes=False)
 def get_color_dictionary():
@@ -2588,6 +2668,7 @@ Respond in English only. Return EXACTLY this JSON:
 }"""
 
 
+@limiter.limit("10 per minute")
 @app.route("/api/v1/style-analyze", methods=["POST", "OPTIONS"], strict_slashes=False)
 def style_analyze():
     """Analyze a person's photo for body type, face shape, skin tone, proportions using MiMo Vision 2.5."""
@@ -2641,7 +2722,7 @@ def style_analyze():
         return jsonify({"success": True, "analysis": analysis, "timing": {"mimo_vision": _style_time, "total": round(time.time() - _t_style, 2)}})
     except Exception as exc:
         _log.error("[STYLE] Error: %s", exc, exc_info=True)
-        return jsonify({"success": False, "error": f"Analysis failed: {str(exc)[:100]}"}), 500
+        return jsonify({"success": False, "error": "Analysis failed — please try again"}), 500
 
 
 @app.route("/api/v1/style-recommendations", methods=["POST", "OPTIONS"], strict_slashes=False)
@@ -2667,7 +2748,7 @@ def style_recommendations():
         ]
 
         _t_rec = time.time()
-        result = call_mimo_text(messages, temperature=0.4, timeout=90, max_tokens=4096, model=MIMO_VISION_MODEL)
+        result = call_mimo_text(messages, temperature=0.4, timeout=90, max_tokens=4096, task_type="style_analysis_with_recommendation")
         _rec_time = round(time.time() - _t_rec, 2)
         if not result:
             return jsonify({"success": False, "error": "Failed to generate recommendations."})
@@ -2702,10 +2783,10 @@ def style_recommendations():
     except Exception as exc:
         _log.error("[STYLE] Error: %s", exc, exc_info=True)
         import traceback, sys
-        print("=== CRITICAL STYLE-RECOMMENDATIONS ERROR ===", file=sys.stderr)
+        _log.error("=== CRITICAL STYLE-RECOMMENDATIONS ERROR ===", file=sys.stderr)
         traceback.print_exc()
-        print("============================================", file=sys.stderr)
-        return jsonify({"success": False, "error": f"Recommendations failed: {str(exc)[:200]}"}), 500
+        _log.info("============================================", file=sys.stderr)
+        return jsonify({"success": False, "error": "Recommendations failed — please try again"}), 500
 
 
 @app.route("/api/v1/outfit-review", methods=["POST", "OPTIONS"], strict_slashes=False)
@@ -2716,7 +2797,7 @@ def outfit_review():
     try:
         data = request.get_json(silent=True) or {}
         image_b64 = data.get("image_b64", "")
-        occasion = data.get("occasion", "casual")
+        occasion = _sanitize_occasion(data.get("occasion", "casual"))
 
         if not image_b64:
             return jsonify({"success": False, "error": "No image provided"}), 400
@@ -2742,7 +2823,7 @@ def outfit_review():
         return jsonify({"success": True, "review": review, "timing": {"mimo_vision": _rev_time, "total": round(time.time() - _t_rev, 2)}})
     except Exception as exc:
         _log.error("[STYLE] Error: %s", exc, exc_info=True)
-        return jsonify({"success": False, "error": f"Review failed: {str(exc)[:100]}"}), 500
+        return jsonify({"success": False, "error": "Review failed — please try again"}), 500
 
 
 @app.route("/api/v1/check-availability", methods=["POST", "OPTIONS"], strict_slashes=False)
@@ -2751,7 +2832,7 @@ def check_availability():
         return "", 204
     try:
         data = request.get_json(silent=True) or {}
-        occasion = data.get("occasion", "casual")
+        occasion = _sanitize_occasion(data.get("occasion", "casual"))
         user_id = data.get("user_id", "")
         closet_items = data.get("closetItems", [])
         _log.info("[AVAIL] Checking availability for %s (user=%s)", occasion, user_id or "anon")
@@ -2777,30 +2858,6 @@ def check_availability():
             return jsonify({"success": True, "maxOutfits": 0, "categories": {}}), 200
         
         # Categorize items
-        def _cat(item):
-            t = (item.get("type") or item.get("category") or "").lower().strip()
-            tops_kw = ("top","shirt","blouse","t-shirt","tshirt","camisole","tank","sweater","hoodie","cardigan","blazer","vest","bodysuit","crop top","tube top","halter","jacket","coat","outerwear")
-            bottoms_kw = ("bottom","pants","jeans","trousers","shorts","skirt","leggings","chinos","cargo","culottes","palazzo")
-            shoes_kw = ("shoes","footwear","sneakers","boots","sandals","heels","flats","loafers","oxfords","mules","wedges","slides")
-            dress_kw = ("dress","gown","jumpsuit","romper","sundress","maxi dress","mini dress","midi dress")
-            acc_kw = ("accessory","bag","purse","belt","hat","scarf","jewelry","watch","sunglasses","earrings","necklace","bracelet","ring","wallet","backpack","tote","clutch","headband","gloves")
-            if t in tops_kw or t == "top" or t == "outerwear": return "top"
-            if t in bottoms_kw or t == "bottom": return "bottom"
-            if t in shoes_kw or t == "shoes": return "shoes"
-            if t in dress_kw or t == "dress": return "dress"
-            if t in acc_kw or t == "accessory": return "accessory"
-            label = (item.get("label","")+" "+item.get("name","")+" "+t).lower()
-            for kws,res in [
-                (("jacket","coat","blazer","hoodie","cardigan","vest"),"top"),
-                (("shirt","blouse","t-shirt","tee","tank","sweater","polo","top"),"top"),
-                (("pants","jeans","trousers","shorts","skirt","leggings","bottom"),"bottom"),
-                (("shoes","sneakers","boots","sandals","heels","flats","shoe"),"shoes"),
-                (("dress","gown","jumpsuit","romper","sundress"),"dress"),
-                (("bag","purse","belt","hat","scarf","jewelry","watch"),"accessory"),
-            ]:
-                if any(kw in label for kw in kws): return res
-            return "other"
-        
         tops = [i for i in closet_items if _cat(i) == "top"]
         bottoms = [i for i in closet_items if _cat(i) == "bottom"]
         shoes = [i for i in closet_items if _cat(i) == "shoes"]
@@ -2832,7 +2889,7 @@ def check_availability():
         }), 200
     except Exception as exc:
         _log.error("[AVAIL] Error: %s", exc, exc_info=True)
-        return jsonify({"success": False, "maxOutfits": 0, "error": str(exc)[:200]}), 500
+        return jsonify({"success": False, "maxOutfits": 0, "error": "Failed to generate outfits"}), 500
 
 @app.route("/api/v1/generate-outfits", methods=["POST", "OPTIONS"], strict_slashes=False)
 def generate_outfits():
@@ -2841,7 +2898,7 @@ def generate_outfits():
     try:
         import random
         data = request.get_json(silent=True) or {}
-        occasion = data.get("occasion", "casual")
+        occasion = _sanitize_occasion(data.get("occasion", "casual"))
         count = max(1, min(int(data.get("count", 3)), 7))
         _log.info("[DRESSING] Generating %d outfits for %s", count, occasion)
         _t_start = time.time()
@@ -2875,37 +2932,11 @@ def generate_outfits():
 
         # Allow items even without image_url — FlipGallery handles empty URLs gracefully (dark block)
         items_with_img = [i for i in closet_items if (i.get("image_url") or i.get("photo_url"))]
-        print(f"[DEBUG] Found {len(items_with_img)} items with image_url field")
+        _log.warning(f"[DEBUG] Found {len(items_with_img)} items with image_url field")
         if not items_with_img:
             return jsonify({"success": False, "images": [], "error": "No items found in closet. Add items first."}), 200
 
         # ---- Category detection ----
-        def _cat(item):
-            t = (item.get("type") or item.get("category") or "").lower().strip()
-            tops_kw = ("top","shirt","blouse","t-shirt","tshirt","camisole","tank","sweater","hoodie","cardigan","blazer","vest","bodysuit","crop top","tube top","halter","jacket","coat","outerwear")
-            bottoms_kw = ("bottom","pants","jeans","trousers","shorts","skirt","leggings","chinos","cargo","culottes","palazzo")
-            shoes_kw = ("shoes","footwear","sneakers","boots","sandals","heels","flats","loafers","oxfords","mules","wedges","slides")
-            dress_kw = ("dress","gown","jumpsuit","romper","sundress","maxi dress","mini dress","midi dress")
-            acc_kw = ("accessory","bag","purse","belt","hat","scarf","jewelry","watch","sunglasses","earrings","necklace","bracelet","ring","wallet","backpack","tote","clutch","headband","gloves")
-            full_kw = ("full outfit","full look","complete outfit","matching set","outfit set","coord set","co-ord","two-piece","suit set","ensemble")
-            if t in full_kw or t == "full_outfit": return "full_outfit"
-            if t in tops_kw or any(k in t for k in ("jacket","blazer","cardigan")): return "top"
-            if t in bottoms_kw: return "bottom"
-            if t in shoes_kw: return "shoes"
-            if t in dress_kw: return "dress"
-            if t in acc_kw: return "accessory"
-            label = (item.get("label","")+" "+item.get("name","")+" "+t).lower()
-            for kws,res in [
-                (("jacket","coat","blazer","hoodie","cardigan","vest","bomber","trench","puffer"),"top"),
-                (("shirt","blouse","t-shirt","tee","tank","camisole","crop top","sweater","polo","bodysuit","top"),"top"),
-                (("pants","jeans","trousers","shorts","skirt","leggings","chinos","bottom","pant"),"bottom"),
-                (("shoes","sneakers","boots","sandals","heels","flats","loafers","shoe","footwear"),"shoes"),
-                (("dress","gown","jumpsuit","romper","sundress"),"dress"),
-                (("bag","purse","belt","hat","scarf","jewelry","watch","sunglasses","earrings"),"accessory"),
-                (("full outfit","full look","complete outfit","matching set","outfit set","coord set","two-piece","suit set"),"full_outfit"),
-            ]:
-                if any(kw in label for kw in kws): return res
-            return "other"
         def _img_url(item, default=""):
             """Get image URL from item, ensuring it is an absolute URL to prevent CORB."""
             raw = item.get("image_url") or item.get("photo_url") or default
@@ -2916,11 +2947,11 @@ def generate_outfits():
                     if clean.startswith(prefix):
                         clean = clean[len(prefix):]
                 final_url = request.host_url.rstrip("/") + "/images/" + clean
-                print(f"[URL-DEBUG] Final generated image URL: {final_url}")
-                print(f"[IMG-DEBUG] Generated URL: {final_url} (from raw={raw} clean={clean})")
+                _log.warning(f"[URL-DEBUG] Final generated image URL: {final_url}")
+                _log.warning(f"[IMG-DEBUG] Generated URL: {final_url} (from raw={raw} clean={clean})")
                 return final_url
-            print(f"[URL-DEBUG] Final generated image URL: {raw}")
-            print(f"[IMG-DEBUG] Raw URL (no transform): {raw}")
+            _log.warning(f"[URL-DEBUG] Final generated image URL: {raw}")
+            _log.warning(f"[IMG-DEBUG] Raw URL (no transform): {raw}")
             return raw
 
         # ---- Group items ----
@@ -2930,12 +2961,12 @@ def generate_outfits():
         dresses = [i for i in items_with_img if _cat(i) == "dress"]
         accessories = [i for i in items_with_img if _cat(i) == "accessory"]
         full_outfits = [i for i in items_with_img if _cat(i) == "full_outfit"]
-        print(f"[CLOSET-DEBUG] Items: {len(items_with_img)} with images | Tops: {len(tops)} Bottoms: {len(bottoms)} Shoes: {len(shoes_list)} Dresses: {len(dresses)} Full: {len(full_outfits)} Accessories: {len(accessories)}")
-        print(f'[DEPLOYMENT-CHECK] Tops found: {len(tops)} items - {[t.get("label","") for t in tops[:3]]}')
-        print(f'[DEPLOYMENT-CHECK] Bottoms found: {len(bottoms)} items - {[b.get("label","") for b in bottoms[:3]]}')
-        print(f'[DEPLOYMENT-CHECK] Shoes found: {len(shoes_list)} items - {[s.get("label","") for s in shoes_list[:3]]}')
-        print(f'[DEPLOYMENT-CHECK] Full outfits found: {len(full_outfits)} items - {[f.get("label","") for f in full_outfits[:3]]}')
-        print(f'[DEPLOYMENT-CHECK] Dresses found: {len(dresses)} items - {[d.get("label","") for d in dresses[:3]]}')
+        _log.warning(f"[CLOSET-DEBUG] Items: {len(items_with_img)} with images | Tops: {len(tops)} Bottoms: {len(bottoms)} Shoes: {len(shoes_list)} Dresses: {len(dresses)} Full: {len(full_outfits)} Accessories: {len(accessories)}")
+        _log.info(f'[DEPLOYMENT-CHECK] Tops found: {len(tops)} items - {[t.get("label","") for t in tops[:3]]}')
+        _log.info(f'[DEPLOYMENT-CHECK] Bottoms found: {len(bottoms)} items - {[b.get("label","") for b in bottoms[:3]]}')
+        _log.info(f'[DEPLOYMENT-CHECK] Shoes found: {len(shoes_list)} items - {[s.get("label","") for s in shoes_list[:3]]}')
+        _log.info(f'[DEPLOYMENT-CHECK] Full outfits found: {len(full_outfits)} items - {[f.get("label","") for f in full_outfits[:3]]}')
+        _log.info(f'[DEPLOYMENT-CHECK] Dresses found: {len(dresses)} items - {[d.get("label","") for d in dresses[:3]]}')
         has_full = len(full_outfits) > 0
         has_dresses = len(dresses) > 0
         has_tops = len(tops) > 0
@@ -3072,15 +3103,15 @@ def generate_outfits():
                 mimo_result = call_mimo_vision(collage_b64, vision_prompt, temperature=0.2)
                 _log.info("[DRESSING] MiMo Vision: %s", str(mimo_result)[:300])
                 timing["mimo_vision"] = round(time.time() - _t_start, 2)
-                print("[DRESSING-DEBUG] MIMO_SELECTED:", json.dumps(mimo_result, indent=2)[:500], file=sys.stderr)
+                _log.warning("[DRESSING-DEBUG] MIMO_SELECTED:", json.dumps(mimo_result, indent=2)[:500], file=sys.stderr)
             except Exception as exc:
                 _log.warning("[DRESSING] MiMo Vision error: %s", exc)
 
         # ---- Build outfits from selection ----
 
-        if tops: print(f"[DRESSING-DEBUG] TOPS available: {[(t.get('id'), t.get('label',''), _img_url(t)[:40]) for t in tops]}", file=sys.stderr)
-        if bottoms: print(f"[DRESSING-DEBUG] BOTTOMS available: {[(b.get('id'), b.get('label',''), _img_url(b)[:40]) for b in bottoms]}", file=sys.stderr)
-        if shoes_list: print(f"[DRESSING-DEBUG] SHOES available: {[(s.get('id'), s.get('label',''), _img_url(s)[:40]) for s in shoes_list]}", file=sys.stderr)
+        if tops: _log.debug("DRESSING-DEBUG TOPS: %s", [(t.get("id"), t.get("label",""), _img_url(t)[:40]) for t in tops])
+        if bottoms: _log.debug("DRESSING-DEBUG BOTTOMS: %s", [(b.get("id"), b.get("label",""), _img_url(b)[:40]) for b in bottoms])
+        if shoes_list: _log.debug("DRESSING-DEBUG SHOES: %s", [(s.get("id"), s.get("label",""), _img_url(s)[:40]) for s in shoes_list])
         outfits = []
         used_ids = set()
         debug_source = "mimo_vision"
@@ -3222,7 +3253,7 @@ def generate_outfits():
             }), 200
 
         timing["total"] = round(time.time() - _t_start, 2)
-        print(f"[DEBUG] Requested: {count}, Returned: {len(outfits)} | Timing: {timing}")
+        _log.warning(f"[DEBUG] Requested: {count}, Returned: {len(outfits)} | Timing: {timing}")
         _log.info("[DRESSING] Timing breakdown: %s", timing)
         return jsonify({
             "success": True,
@@ -3253,13 +3284,13 @@ def serve_uploaded_image(filename):
         safe = safe[len("images/"):]
     images_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "public", "images")
     real_path = os.path.realpath(os.path.join(images_dir, safe))
-    print(f"[IMG-DEBUG] Request: filename={filename} safe={safe} path={real_path}", flush=True)
+    _log.warning(f"[IMG-DEBUG] Request: filename={filename} safe={safe} path={real_path}")
 
     # 1. Check disk first (ephemeral — may be empty after restart)
     if real_path.startswith(os.path.realpath(images_dir)) and os.path.isfile(real_path):
-        print(f"[IMG-DEBUG] Serving from disk: {safe}")
+        _log.warning(f"[IMG-DEBUG] Serving from disk: {safe}")
         resp = send_from_directory(images_dir, safe)
-        resp.headers.add("Access-Control-Allow-Origin", "*")
+        resp.headers.add("Access-Control-Allow-Origin", "https://luxor.ly")
         return resp
 
     # 2. Fallback: find matching item in JSON by EXACT filename, serve base64
@@ -3274,15 +3305,15 @@ def serve_uploaded_image(filename):
             if stored_filename == safe and b64_data and len(b64_data) > 100:
                 try:
                     img_bytes = base64.b64decode(b64_data)
-                    print(f"[IMG-DEBUG] Serving from base64: {safe} ({len(img_bytes)} bytes)")
+                    _log.warning(f"[IMG-DEBUG] Serving from base64: {safe} ({len(img_bytes)} bytes)")
                     resp = make_response(img_bytes)
                     resp.headers["Content-Type"] = "image/jpeg"
                     resp.headers["Access-Control-Allow-Origin"] = "*"
                     return resp
                 except Exception as dec_err:
-                    print(f"[IMG-ERR] Base64 decode failed for {safe}: {dec_err}", flush=True)
+                    _log.error(f"[IMG-ERR] Base64 decode failed for {safe}: {dec_err}")
     except Exception as fb_err:
-        print(f"[IMG-DEBUG] JSON fallback error: {fb_err}", flush=True)
+        _log.error(f"[IMG-DEBUG] JSON fallback error: {fb_err}")
 
     # 3. Fallback: search Qdrant Cloud for the item
     try:
@@ -3304,18 +3335,18 @@ def serve_uploaded_image(filename):
                 if stored_filename == safe and b64_data and len(b64_data) > 100:
                     try:
                         img_bytes = base64.b64decode(b64_data)
-                        print(f"[IMG-DEBUG] Serving from Qdrant base64: {safe} ({len(img_bytes)} bytes)")
+                        _log.warning(f"[IMG-DEBUG] Serving from Qdrant base64: {safe} ({len(img_bytes)} bytes)")
                         resp = make_response(img_bytes)
                         resp.headers["Content-Type"] = "image/jpeg"
                         resp.headers["Access-Control-Allow-Origin"] = "*"
                         return resp
                     except Exception as dec_err:
-                        print(f"[IMG-ERR] Qdrant Base64 decode failed for {safe}: {dec_err}", flush=True)
+                        _log.error(f"[IMG-ERR] Qdrant Base64 decode failed for {safe}: {dec_err}")
     except Exception as qd_err:
-        print(f"[IMG-DEBUG] Qdrant fallback error: {qd_err}", flush=True)
+        _log.error(f"[IMG-DEBUG] Qdrant fallback error: {qd_err}")
 
     # 4. Ultimate fallback — transparent pixel prevents CORB
-    print(f"[IMG-DEBUG] File not found: {safe} — returning transparent pixel", flush=True)
+    _log.warning(f"[IMG-DEBUG] File not found: {safe} — returning transparent pixel")
     resp = make_response(base64.b64decode(_TRANSPARENT_PIXEL_B64))
     resp.headers["Content-Type"] = "image/gif"
     resp.headers["Access-Control-Allow-Origin"] = "*"
@@ -3330,13 +3361,13 @@ def serve_media_file(filename):
         safe = safe.split("/", 1)[1] if "/" in safe else safe
     images_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "public", "images")
     real_path = os.path.realpath(os.path.join(images_dir, safe))
-    print(f"[IMG-DEBUG] /media/ Request: filename={filename} safe={safe}", flush=True)
+    _log.warning(f"[IMG-DEBUG] /media/ Request: filename={filename} safe={safe}")
 
     # 1. Check disk first
     if real_path.startswith(os.path.realpath(images_dir)) and os.path.isfile(real_path):
-        print(f"[IMG-DEBUG] /media/ Serving from disk: {safe}")
+        _log.warning(f"[IMG-DEBUG] /media/ Serving from disk: {safe}")
         resp = send_from_directory(images_dir, safe)
-        resp.headers.add("Access-Control-Allow-Origin", "*")
+        resp.headers.add("Access-Control-Allow-Origin", "https://luxor.ly")
         return resp
 
     # 2. Fallback: find matching item in JSON by EXACT filename, serve base64
@@ -3350,15 +3381,15 @@ def serve_media_file(filename):
             if stored_filename == safe and b64_data and len(b64_data) > 100:
                 try:
                     img_bytes = base64.b64decode(b64_data)
-                    print(f"[IMG-DEBUG] /media/ Serving from base64: {safe} ({len(img_bytes)} bytes)")
+                    _log.warning(f"[IMG-DEBUG] /media/ Serving from base64: {safe} ({len(img_bytes)} bytes)")
                     resp = make_response(img_bytes)
                     resp.headers["Content-Type"] = "image/jpeg"
                     resp.headers["Access-Control-Allow-Origin"] = "*"
                     return resp
                 except Exception as dec_err:
-                    print(f"[IMG-ERR] /media/ Base64 decode failed for {safe}: {dec_err}", flush=True)
+                    _log.error(f"[IMG-ERR] /media/ Base64 decode failed for {safe}: {dec_err}")
     except Exception as fb_err:
-        print(f"[IMG-DEBUG] /media/ JSON fallback error: {fb_err}", flush=True)
+        _log.error(f"[IMG-DEBUG] /media/ JSON fallback error: {fb_err}")
 
     # 3. Fallback: search Qdrant Cloud for the item
     try:
@@ -3380,18 +3411,18 @@ def serve_media_file(filename):
                 if stored_filename == safe and b64_data and len(b64_data) > 100:
                     try:
                         img_bytes = base64.b64decode(b64_data)
-                        print(f"[IMG-DEBUG] /media/ Serving from Qdrant base64: {safe} ({len(img_bytes)} bytes)")
+                        _log.warning(f"[IMG-DEBUG] /media/ Serving from Qdrant base64: {safe} ({len(img_bytes)} bytes)")
                         resp = make_response(img_bytes)
                         resp.headers["Content-Type"] = "image/jpeg"
                         resp.headers["Access-Control-Allow-Origin"] = "*"
                         return resp
                     except Exception as dec_err:
-                        print(f"[IMG-ERR] /media/ Qdrant Base64 decode failed for {safe}: {dec_err}", flush=True)
+                        _log.error(f"[IMG-ERR] /media/ Qdrant Base64 decode failed for {safe}: {dec_err}")
     except Exception as qd_err:
-        print(f"[IMG-DEBUG] /media/ Qdrant fallback error: {qd_err}", flush=True)
+        _log.error(f"[IMG-DEBUG] /media/ Qdrant fallback error: {qd_err}")
 
     # 4. Ultimate fallback — transparent pixel prevents CORB
-    print(f"[IMG-DEBUG] /media/ File not found: {safe} — returning transparent pixel", flush=True)
+    _log.warning(f"[IMG-DEBUG] /media/ File not found: {safe} — returning transparent pixel")
     resp = make_response(base64.b64decode(_TRANSPARENT_PIXEL_B64))
     resp.headers["Content-Type"] = "image/gif"
     resp.headers["Access-Control-Allow-Origin"] = "*"
@@ -3472,6 +3503,7 @@ def _humanize_stylist_note(note: str) -> str:
 # ---------------------------------------------------------------------------
 # Pro Stylist Tweak — POST /api/v1/pro-tweak/generate
 # ---------------------------------------------------------------------------
+@limiter.limit("5 per minute")
 @app.route("/api/v1/pro-tweak/generate", methods=["POST", "OPTIONS"], strict_slashes=False)
 def pro_tweak_generate():
     """Generate an AI-enhanced outfit tweak from an uploaded image."""
