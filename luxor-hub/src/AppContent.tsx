@@ -55,6 +55,8 @@ const DressingRoom = React.lazy(() => import("./pages/DressingRoom"));
 const StyleRecommendations = React.lazy(() => import("./pages/StyleRecommendations"));
 const UserAnalysis = React.lazy(() => import("./pages/UserAnalysis"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
+const Privacy = React.lazy(() => import("./pages/Privacy"));
+const Terms = React.lazy(() => import("./pages/Terms"));
 
 const RouteTracker = () => {
   const location = useLocation();
