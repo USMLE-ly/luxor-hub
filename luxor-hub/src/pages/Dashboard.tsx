@@ -115,7 +115,7 @@ function TrendingDesigns({ navigate }: { navigate: (path: string) => void }) {
             className="min-w-[150px] max-w-[150px] flex-shrink-0 rounded-2xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow snap-start text-left"
           >
             <div className="relative h-32 bg-secondary">
-              <img loading="lazy" src={d.image_url} alt={d.prompt} className="w-full h-full object-cover" loading="lazy" />
+              <img loading="lazy" src={d.image_url} alt={d.prompt} className="w-full h-full object-cover" />
               <div className="absolute top-2 right-2 flex items-center gap-1 bg-forest/60 text-white text-[10px] px-1.5 py-0.5 rounded-full">
                 <Heart className="w-2.5 h-2.5 fill-current" /> {d.likeCount}
               </div>
