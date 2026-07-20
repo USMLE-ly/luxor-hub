@@ -9,8 +9,7 @@ const COOLDOWN_HOURS = 24;
 
 const ExitIntentPopup = () => {
   const [visible, setVisible] = useState(false);
-  const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+
   const navigate = useNavigate();
 
   const shouldShow = useCallback(() => {
@@ -96,7 +95,7 @@ const ExitIntentPopup = () => {
                   onClick={handleCTA}
                   className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-sans font-semibold bg-gradient-to-r from-[hsl(43,80%,50%)] to-[hsl(43,70%,45%)] text-white shadow-[0_0_20px_hsl(43,80%,50%,0.2)] hover:shadow-[0_0_30px_hsl(43,80%,50%,0.35)] transition-shadow"
                 >
-                  Get Started Free
+                  Try Free — No Card Needed
                   <ArrowRight className="w-4 h-4" />
                 </button>
 

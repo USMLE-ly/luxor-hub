@@ -3,44 +3,11 @@ import {X, Diamond} from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const DISMISSED_KEY = "luxor-banner-dismissed";
-const TIMER_END_KEY = "luxor-countdown-end";
-const COUNTDOWN_HOURS = 24;
-
-function getOrCreateEndTime(): number {
-  const stored = localStorage.getItem(TIMER_END_KEY);
-  if (stored) {
-    const end = parseInt(stored, 10);
-    if (end > Date.now()) return end;
-  }
-  const end = Date.now() + COUNTDOWN_HOURS * 60 * 60 * 1000;
-  localStorage.setItem(TIMER_END_KEY, String(end));
-  return end;
-}
-
-function formatTime(ms: number) {
-  if (ms <= 0) return { h: "00", m: "00", s: "00" };
-  const totalSec = Math.floor(ms / 1000);
-  const h = String(Math.floor(totalSec / 3600)).padStart(2, "0");
-  const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, "0");
-  const s = String(totalSec % 60).padStart(2, "0");
-  return { h, m, s };
-}
 
 export default function AnnouncementBanner() {
   const [visible, setVisible] = useState(
     () => sessionStorage.getItem(DISMISSED_KEY) !== "1"
   );
-  const [remaining, setRemaining] = useState(() => getOrCreateEndTime() - Date.now());
-  // infoIndex removed
-
-  useEffect(() => {
-    if (!visible) return;
-    const id = setInterval(() => {
-      const diff = getOrCreateEndTime() - Date.now();
-      setRemaining(diff > 0 ? diff : 0);
-    }, 1000);
-    return () => clearInterval(id);
-  }, [visible]);
 
   // infoIndex removed — only 1 info slot, no cycling needed
 
@@ -49,12 +16,10 @@ export default function AnnouncementBanner() {
     setVisible(false);
   }, []);
 
-  const { h, m, s } = formatTime(remaining);
-
   const infoSlots = [
     <>
       <span className="text-muted-foreground">—</span>
-      <span className="text-muted-foreground">Lock in founding pricing</span>
+      <span className="text-muted-foreground">AI-powered styling for your wardrobe</span>
     </>,
   ];
 
@@ -72,14 +37,6 @@ export default function AnnouncementBanner() {
             <div className="flex items-center gap-2 text-xs font-sans font-medium">
               <Diamond className="w-3 h-3 text-foreground shrink-0" />
               <span className="font-semibold text-foreground">Early Access</span>
-
-              <span className="inline-flex items-center gap-0.5 font-mono text-[11px] text-foreground font-bold tracking-wider">
-                <span>{h}</span>
-                <span className="countdown-colon">:</span>
-                <span>{m}</span>
-                <span className="countdown-colon">:</span>
-                <span>{s}</span>
-              </span>
 
               <span className="hidden sm:inline-flex items-center gap-2">
                 {infoSlots[0]}

@@ -55,7 +55,7 @@ export default function StickyPricingBar() {
                 Join LUXOR® Now
               </span>
               <span className="text-[11px] font-sans text-muted-foreground">
-                Founding member pricing — limited spots
+                Early adopter pricing — lock it in
               </span>
             </div>
 

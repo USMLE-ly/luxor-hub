@@ -244,7 +244,7 @@ const Pricing = () => {
                         onClick={() => navigate("/auth")}
                         className="w-full h-10 rounded-lg border border-foreground/20 text-foreground font-sans font-semibold text-sm hover:bg-foreground/5 transition-colors"
                       >
-                        Start Free
+                        Try Free
                       </button>
                     ) : (
                       <div className="w-full">
