@@ -11,7 +11,6 @@ import { ErrorBoundary } from "@/components/app/ErrorBoundary";
 const Toaster = React.lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
 const Sonner = React.lazy(() => import("@/components/ui/sonner").then(m => ({ default: m.Toaster })));
 const TooltipProvider = React.lazy(() => import("@/components/ui/tooltip").then(m => ({ default: m.TooltipProvider })));
-const StarfieldBackground = React.lazy(() => import("@/components/ui/starfield-background"));
 const OfflineIndicator = React.lazy(() => import("@/components/app/OfflineIndicator"));
 const SupportWidget = React.lazy(() => import("@/components/support/SupportWidget"));
 const SplashScreen = React.lazy(() => import("@/components/app/SplashScreen"));
@@ -78,7 +77,6 @@ const AppContent = () => {
   return (
     <HelmetProvider>
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-      <React.Suspense fallback={null}><StarfieldBackground /></React.Suspense>
       <React.Suspense fallback={null}><OfflineIndicator /></React.Suspense>
       <React.Suspense fallback={null}><SplashScreen /></React.Suspense>
       <QueryClientProvider client={queryClientRef.current}>
