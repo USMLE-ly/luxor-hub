@@ -1,6 +1,6 @@
 {
   "installCommand": "cd luxor-hub && npm install --ignore-engines --no-audit --no-fund",
-  "buildCommand": "cd luxor-hub && rm -rf dist && rm -rf node_modules/.vite && npm run build",
+  "buildCommand": "cd luxor-hub && npm run build",
   "outputDirectory": "luxor-hub/dist",
   "rewrites": [
     {
