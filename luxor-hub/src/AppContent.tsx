@@ -45,6 +45,7 @@ const CommunityGallery = React.lazy(() => import("./pages/CommunityGallery"));
 const Install = React.lazy(() => import("./pages/Install"));
 const Council = React.lazy(() => import("./pages/Council"));
 const MonthlyReport = React.lazy(() => import("./pages/MonthlyReport"));
+const AdminSpend = React.lazy(() => import("./pages/AdminSpend"));
 const WardrobeValue = React.lazy(() => import("./pages/WardrobeValue"));
 const Blog = React.lazy(() => import("./pages/Blog"));
 const BlogArticle = React.lazy(() => import("./pages/BlogArticle"));
