@@ -1,12 +1,12 @@
-import { useEffect, useRef, useState, useCallback } from "react";
-import {Spinner, Lock} from "@phosphor-icons/react";
+import { useEffect, useRef, useState } from "react";
+import { Spinner, Lock } from "@phosphor-icons/react";
 
-const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID || "AQ69MhqcaJEsSYGOxzuSPUc-jmLJ46FYUVhamuas7ObCyww-fWDW4rQinnX9ezn9g_3iHjADGH4EqmBr";
+const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID || "";
 
 const PLAN_IDS: Record<string, string> = {
-  starter: import.meta.env.VITE_PAYPAL_STARTER_PLAN_ID || "P-09P20081V5924494JNG6X4QY",
-  pro: import.meta.env.VITE_PAYPAL_PRO_PLAN_ID || "P-3TT76167R1560735XNG6X7TQ",
-  elite: import.meta.env.VITE_PAYPAL_ELITE_PLAN_ID || "P-9L480741CF494730DNJPG2JI",
+  starter: import.meta.env.VITE_PAYPAL_STARTER_PLAN_ID || "",
+  pro: import.meta.env.VITE_PAYPAL_PRO_PLAN_ID || "",
+  elite: import.meta.env.VITE_PAYPAL_ELITE_PLAN_ID || "",
 };
 
 let sdkPromise: Promise<void> | null = null;
@@ -22,9 +22,7 @@ function loadPayPalSDK(): Promise<void> {
     script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&vault=true&intent=subscription`;
     script.dataset.sdkIntegrationSource = "button-factory";
     script.async = true;
-    script.onload = () => {
-      resolve();
-    };
+    script.onload = () => resolve();
     script.onerror = () => {
       sdkFailed = true;
       sdkPromise = null;
@@ -54,6 +52,13 @@ const PayPalButton = ({ tier, onApprove }: PayPalButtonProps) => {
     const render = async () => {
       setLoading(true);
       setError(null);
+
+      if (!PAYPAL_CLIENT_ID || !PLAN_IDS[tier]) {
+        setError("PayPal is not configured. Missing environment variables.");
+        setLoading(false);
+        return;
+      }
+
       try {
         await loadPayPalSDK();
         if (cancelled || !containerRef.current) return;
@@ -62,7 +67,7 @@ const PayPalButton = ({ tier, onApprove }: PayPalButtonProps) => {
 
         const paypal = (window as any).paypal;
         if (!paypal) {
-          throw new Error("PayPal object not available after SDK load");
+          throw new Error("PayPal SDK not available after load");
         }
 
         await paypal
@@ -88,7 +93,7 @@ const PayPalButton = ({ tier, onApprove }: PayPalButtonProps) => {
       } catch (err: any) {
         console.error("PayPal render error:", err);
         if (!cancelled) {
-          setError(err?.message || "Failed to load PayPal. Please try on the published site.");
+          setError(err?.message || "Failed to load PayPal.");
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -107,12 +112,7 @@ const PayPalButton = ({ tier, onApprove }: PayPalButtonProps) => {
         <div className="w-10 h-10 rounded-full bg-white/[0.06] border border-white/[0.08] mx-auto mb-3 flex items-center justify-center">
           <Lock className="w-4 h-4 text-white/40" />
         </div>
-        <p className="text-[12px] text-white/50 font-sans leading-relaxed">
-          PayPal loads on the published site.
-        </p>
-        <p className="text-[12px] text-foreground/80 font-sans font-medium mt-1">
-          Publish to test payments.
-        </p>
+        <p className="text-[12px] text-white/50 font-sans leading-relaxed">{error}</p>
       </div>
     );
   }
@@ -128,7 +128,7 @@ const PayPalButton = ({ tier, onApprove }: PayPalButtonProps) => {
       <div
         ref={containerRef}
         className="w-full min-h-[40px] rounded-2xl overflow-hidden [&_iframe]:rounded-2xl border border-white/[0.08] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.4)]"
-        style={{ background: 'linear-gradient(to bottom, hsl(var(--forest)), hsl(var(--forest)))' }}
+        style={{ background: "linear-gradient(to bottom, hsl(var(--forest)), hsl(var(--forest)))" }}
       />
       {!loading && !error && (
         <p className="mt-3 text-center text-[10px] text-white/30 font-sans flex items-center justify-center gap-1.5 tracking-wide">
