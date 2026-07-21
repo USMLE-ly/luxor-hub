@@ -98,6 +98,15 @@ def _handle_subscription_activated(resource):
 
     _log.info("[PAYPAL-WEBHOOK] Activated: user=%s tier=%s", user_id[:8], tier)
 
+    # Send confirmation email
+    try:
+        from backend.services.email_service import send_subscription_confirmed_email
+        user_email = resource.get("subscriber", {}).get("email_address", "")
+        if user_email:
+            send_subscription_confirmed_email(user_email, "", tier)
+    except Exception:
+        pass
+
 
 def _handle_subscription_updated(resource):
     """Subscription changed (upgrade/downgrade)."""

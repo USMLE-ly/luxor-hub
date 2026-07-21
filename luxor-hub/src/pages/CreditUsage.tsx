@@ -7,6 +7,9 @@ import { AppLayout } from "@/components/app/AppLayout";
 import { useCreditBalance } from "@/hooks/useCreditBalance";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import { CREDIT_COSTS, TIER_MONTHLY_CREDITS } from "@/lib/planRestrictions";
+import { CreditTopUp } from "@/components/app/CreditTopUp";
+import { CreditRewards } from "@/components/app/CreditRewards";
+import { SubscriptionManager } from "@/components/app/SubscriptionManager";
 import { useNavigate } from "react-router-dom";
 
 interface CreditEvent {
@@ -141,6 +144,29 @@ export default function CreditUsage() {
             </div>
           </motion.div>
 
+          {/* Subscription Management */}
+          <motion.div
+            initial={{ y: 16, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.12 }}
+            className="mb-6"
+          >
+            <SubscriptionManager />
+          </motion.div>
+
+          {/* Buy More Credits */}
+          <motion.div
+            initial={{ y: 16, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.15 }}
+            className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 mb-6"
+          >
+            <h2 className="text-sm font-sans font-semibold text-white/60 mb-4">
+              Need More Credits?
+            </h2>
+            <CreditTopUp />
+          </motion.div>
+
           {/* Spending breakdown */}
           {sortedBreakdown.length > 0 && (
             <motion.div
@@ -220,6 +246,19 @@ export default function CreditUsage() {
                 ))}
               </div>
             )}
+          </motion.div>
+
+          {/* Earn Free Credits */}
+          <motion.div
+            initial={{ y: 16, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.45 }}
+            className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 mb-6"
+          >
+            <h2 className="text-sm font-sans font-semibold text-white/60 mb-3">
+              Earn Free Credits
+            </h2>
+            <CreditRewards />
           </motion.div>
 
           {/* Credit costs reference */}

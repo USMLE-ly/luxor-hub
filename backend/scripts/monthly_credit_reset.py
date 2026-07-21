@@ -88,6 +88,51 @@ def reset_credits():
 
     _log.info("Credit reset complete: %d users allocated for %s", allocated_count, current_month)
 
+    # Low-credit email scan
+    try:
+        from backend.services.email_service import send_credit_alert
+        low_resp = requests.get(
+            f"{SUPABASE_URL}/rest/v1/credit_balances",
+            params={
+                "select": "user_id,credits_remaining,credits_allocated",
+                "month": f"eq.{current_month}",
+                "limit": "10000",
+            },
+            headers=headers, timeout=10,
+        )
+        if low_resp.status_code == 200:
+            low_users = low_resp.json()
+            emails_sent = 0
+            for u in low_users:
+                remaining = u.get("credits_remaining", 0)
+                allocated = u.get("credits_allocated", 30)
+                if allocated > 0 and remaining / allocated < 0.2:
+                    # Get user email from profiles
+                    profile_resp = requests.get(
+                        f"{SUPABASE_URL}/rest/v1/profiles",
+                        params={"select": "display_name", "id": f"eq.{u['user_id']}", "limit": "1"},
+                        headers=headers, timeout=5,
+                    )
+                    # Get email from auth
+                    auth_resp = requests.get(
+                        f"{SUPABASE_URL}/rest/v1/auth.users",
+                        params={"select": "email", "id": f"eq.{u['user_id']}", "limit": "1"},
+                        headers=headers, timeout=5,
+                    )
+                    if auth_resp.status_code == 200:
+                        users = auth_resp.json()
+                        if users and users[0].get("email"):
+                            name = ""
+                            if profile_resp.status_code == 200:
+                                profiles = profile_resp.json()
+                                if profiles:
+                                    name = profiles[0].get("display_name", "")
+                            send_credit_alert(users[0]["email"], name, remaining, "free")
+                            emails_sent += 1
+            _log.info("Low-credit emails sent: %d", emails_sent)
+    except Exception as exc:
+        _log.warning("Low-credit scan failed: %s", exc)
+
 
 if __name__ == "__main__":
     reset_credits()

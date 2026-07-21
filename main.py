@@ -3504,6 +3504,274 @@ def credits_allocate():
         return jsonify({"error": "Allocation failed"}), 500
 
 
+
+
+@app.route("/api/v1/credits/topup", methods=["POST"])
+@limiter.limit("5 per minute")
+@require_auth
+def credits_topup():
+    """Add purchased credit packs to a user's balance.
+    
+    This endpoint is called AFTER a one-time PayPal payment completes.
+    The frontend will use the standard PayPal button (not subscription) 
+    for credit packs: 100 / 500 / 1000 credits.
+    
+    Request body: {"pack": "small"|"medium"|"large", "paypal_transaction_id": "..."}
+    """
+    user = g.current_user
+    user_id = user.get("sub", "")
+    data = request.get_json(silent=True) or {}
+    
+    pack = data.get("pack", "")
+    paypal_txn = data.get("paypal_transaction_id", "")
+    
+    if not paypal_txn:
+        return jsonify({"error": "PayPal transaction ID required"}), 400
+    
+    PACKS = {
+        "small": {"credits": 100, "price": 3},
+        "medium": {"credits": 500, "price": 10},
+        "large": {"credits": 1000, "price": 15},
+    }
+    
+    if pack not in PACKS:
+        return jsonify({"error": "Invalid pack. Use: small (100), medium (500), large (1000)"}), 400
+    
+    pack_info = PACKS[pack]
+    from datetime import datetime
+    current_month = datetime.utcnow().strftime("%Y-%m")
+    
+    import requests as _req
+    from backend.credits import SUPABASE_URL, SUPABASE_KEY
+    
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        return jsonify({"error": "Supabase not configured"}), 500
+    
+    headers = {
+        "apikey": SUPABASE_KEY,
+        "Authorization": f"Bearer {SUPABASE_KEY}",
+        "Content-Type": "application/json",
+    }
+    
+    try:
+        # Find existing balance
+        resp = _req.get(
+            f"{SUPABASE_URL}/rest/v1/credit_balances",
+            params={"select": "id,credits_remaining", "user_id": f"eq.{user_id}", "month": f"eq.{current_month}", "limit": "1"},
+            headers=headers, timeout=5,
+        )
+        rows = resp.json() if resp.status_code == 200 else []
+        
+        if rows:
+            new_remaining = rows[0]["credits_remaining"] + pack_info["credits"]
+            _req.patch(
+                f"{SUPABASE_URL}/rest/v1/credit_balances?id=eq.{rows[0]['id']}",
+                json={"credits_remaining": new_remaining, "credits_allocated": new_remaining},
+                headers=headers, timeout=5,
+            )
+        else:
+            _req.post(
+                f"{SUPABASE_URL}/rest/v1/credit_balances",
+                json={"user_id": user_id, "month": current_month, "credits_allocated": pack_info["credits"], "credits_remaining": pack_info["credits"]},
+                headers=headers, timeout=5,
+            )
+        
+        # Log the purchase event
+        _req.post(
+            f"{SUPABASE_URL}/rest/v1/credit_events",
+            json={"user_id": user_id, "action": "credit_purchase", "cost": 0, "credits_remaining": new_remaining if rows else pack_info["credits"], "created_at": datetime.utcnow().isoformat()},
+            headers=headers, timeout=5,
+        )
+        
+        _log.info("[CREDITS] Topup: user=%s pack=%s (+%d credits, $%d)", user_id[:8], pack, pack_info["credits"], pack_info["price"])
+        
+        return jsonify({
+            "success": True,
+            "credits_added": pack_info["credits"],
+            "total_remaining": new_remaining if rows else pack_info["credits"],
+            "pack": pack,
+        })
+    except Exception as exc:
+        _log.error("[CREDITS] Topup failed: %s", exc)
+        return jsonify({"error": "Top-up failed"}), 500
+
+
+
+
+@app.route("/api/v1/credits/reward", methods=["POST"])
+@limiter.limit("30 per minute")
+@require_auth
+def credits_reward():
+    """Award credits for an engagement action."""
+    user = g.current_user
+    user_id = user.get("sub", "")
+    data = request.get_json(silent=True) or {}
+    action = data.get("action", "")
+
+    from backend.credit_rewards import award_reward
+    result = award_reward(user_id, action)
+
+    if result:
+        return jsonify(result)
+    return jsonify({"message": "Reward already claimed or invalid action"}), 200
+
+
+
+
+@app.route("/api/v1/admin/credit-costs", methods=["GET", "POST"])
+@limiter.limit("10 per minute")
+@require_auth
+def admin_credit_costs():
+    """Admin: View or adjust credit costs per action.
+    
+    GET: Returns current cost table (from backend.credits.py)
+    POST: Override specific action costs (stored in-memory, runtime only)
+    
+    Since costs are hardcoded in backend/credits.py, this endpoint
+    allows runtime overrides that persist until server restart.
+    """
+    user = g.current_user
+    user_id = user.get("sub", "")
+    
+    # Basic admin check — only allow specific admin users
+    try:
+        user_email = user.get("email", "")
+        admin_emails = os.environ.get("ADMIN_EMAILS", "").split(",")
+        if user_email not in admin_emails:
+            return jsonify({"error": "Unauthorized"}), 403
+    except Exception:
+        return jsonify({"error": "Admin check failed"}), 403
+    
+    from backend.credits import CREDIT_COSTS, TIER_MONTHLY_CREDITS, credit_manager
+    
+    if request.method == "GET":
+        return jsonify({
+            "credit_costs": CREDIT_COSTS,
+            "tier_allocations": TIER_MONTHLY_CREDITS,
+        })
+    
+    # POST: Override costs
+    data = request.get_json(silent=True) or {}
+    overrides = data.get("costs", {})
+    
+    for action, cost in overrides.items():
+        if action in CREDIT_COSTS and isinstance(cost, int) and 1 <= cost <= 20:
+            CREDIT_COSTS[action] = cost
+            _log.info("[ADMIN] Cost override: %s -> %d", action, cost)
+    
+    return jsonify({
+        "updated": True,
+        "credit_costs": CREDIT_COSTS,
+    })
+
+
+
+
+@app.route("/api/v1/subscription/pause", methods=["POST"])
+@limiter.limit("3 per hour")
+@require_auth
+def subscription_pause():
+    """Pause subscription — credits freeze at current level, no charges.
+    
+    POST /api/v1/subscription/pause
+    Body: {"pause_months": 1}  (1 or 2 months)
+    """
+    user = g.current_user
+    user_id = user.get("sub", "")
+    data = request.get_json(silent=True) or {}
+    pause_months = min(max(data.get("pause_months", 1), 1), 2)
+    
+    import requests as _req
+    from backend.credits import SUPABASE_URL, SUPABASE_KEY
+    from datetime import datetime, timedelta
+    
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        return jsonify({"error": "Not configured"}), 500
+    
+    headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}", "Content-Type": "application/json"}
+    
+    # Get active subscription
+    resp = _req.get(
+        f"{SUPABASE_URL}/rest/v1/subscriptions",
+        params={"select": "id,plan_tier,status", "user_id": f"eq.{user_id}", "status": "eq.active", "limit": "1"},
+        headers=headers, timeout=5,
+    )
+    rows = resp.json() if resp.status_code == 200 else []
+    
+    if not rows:
+        return jsonify({"error": "No active subscription found"}), 404
+    
+    resume_date = (datetime.utcnow() + timedelta(days=pause_months * 30)).strftime("%Y-%m-%d")
+    
+    # Update subscription to paused
+    _req.patch(
+        f"{SUPABASE_URL}/rest/v1/subscriptions?id=eq.{rows[0]['id']}",
+        json={
+            "status": "paused",
+            "pause_until": resume_date,
+        },
+        headers=headers, timeout=5,
+    )
+    
+    # Cache credits — don't reset next month
+    current_month = datetime.utcnow().strftime("%Y-%m")
+    _req.post(
+        f"{SUPABASE_URL}/rest/v1/rpc/reset_monthly_credits",
+        json={"target_user_id": user_id, "new_tier": rows[0]["plan_tier"]},
+        headers=headers, timeout=5,
+    )
+    
+    _log.info("[SUBSCRIPTION] Paused: user=%s tier=%s until %s", user_id[:8], rows[0]["plan_tier"], resume_date)
+    
+    return jsonify({
+        "status": "paused",
+        "resume_date": resume_date,
+        "message": f"Your subscription is paused until {resume_date}. Credits are preserved.",
+    })
+
+
+@app.route("/api/v1/subscription/resume", methods=["POST"])
+@limiter.limit("3 per hour")
+@require_auth
+def subscription_resume():
+    """Resume a paused subscription."""
+    user = g.current_user
+    user_id = user.get("sub", "")
+    
+    import requests as _req
+    from backend.credits import SUPABASE_URL, SUPABASE_KEY
+    
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        return jsonify({"error": "Not configured"}), 500
+    
+    headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}", "Content-Type": "application/json"}
+    
+    resp = _req.get(
+        f"{SUPABASE_URL}/rest/v1/subscriptions",
+        params={"select": "id,plan_tier", "user_id": f"eq.{user_id}", "status": "eq.paused", "limit": "1"},
+        headers=headers, timeout=5,
+    )
+    rows = resp.json() if resp.status_code == 200 else []
+    
+    if not rows:
+        return jsonify({"error": "No paused subscription found"}), 404
+    
+    # Restore to active
+    _req.patch(
+        f"{SUPABASE_URL}/rest/v1/subscriptions?id=eq.{rows[0]['id']}",
+        json={"status": "active", "pause_until": None},
+        headers=headers, timeout=5,
+    )
+    
+    # Re-allocate credits for the new month
+    from backend.credits import credit_manager
+    credit_manager._try_rollover(user_id, datetime.utcnow().strftime("%Y-%m"))
+    
+    _log.info("[SUBSCRIPTION] Resumed: user=%s tier=%s", user_id[:8], rows[0]["plan_tier"])
+    
+    return jsonify({"status": "active", "message": "Subscription resumed! Credits restored."})
+
+
 # Serve user-uploaded images with proper CORS headers
 @app.route("/images/<path:filename>")
 def serve_uploaded_image(filename):

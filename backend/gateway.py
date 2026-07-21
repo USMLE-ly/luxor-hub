@@ -346,6 +346,23 @@ def check_and_alert(user_id: str, tier: str, usage: Dict[str, int]):
             }
     return None
 
+def _log_usage_pattern(user_id: str, action: str, tier: str, credits_remaining: int):
+    """Log usage pattern for analytics (fire-and-forget)."""
+    try:
+        import requests as _req
+        from backend.credits import SUPABASE_URL, SUPABASE_KEY
+        if not SUPABASE_URL or not SUPABASE_KEY:
+            return
+        _req.post(
+            f"{SUPABASE_URL}/rest/v1/usage_patterns",
+            json={"user_id": user_id, "action": action, "tier": tier, "credits_remaining": credits_remaining},
+            headers={"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}", "Content-Type": "application/json"},
+            timeout=3,
+        )
+    except Exception:
+        pass  # Fire-and-forget — never block the request
+
+
 def _atomic_consume_credits(user_id: str, action: str, cost: int) -> Dict[str, Any]:
     """Atomically consume credits using Supabase RPC to prevent double-spend."""
     import requests as _req
@@ -464,6 +481,9 @@ def ai_endpoint(f):
                     user_id[:8], endpoint, cost,
                     credit_result.get("credits_remaining", 0), tier,
                 )
+
+                # Log usage pattern for analytics
+                _log_usage_pattern(user_id, credit_action, tier, credit_result.get("credits_remaining", 0))
             else:
                 _log.info("[GATEWAY] %s accessed %s (no credit cost, tier=%s)", user_id[:8], endpoint, tier)
             

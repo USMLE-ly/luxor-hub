@@ -21,6 +21,7 @@ type Tier = {
   label: string;
   price: string;
   desc: string;
+  annualPrice?: string;
   credits: number;
   estimatedAnalyses: string;
   creditBreakdown: { action: string; cost: number }[];
@@ -37,6 +38,7 @@ const tiers: Tier[] = [
     price: "0",
     desc: "Explore LUXOR with starter credits",
     isFree: true,
+    annualPrice: "0",
     credits: 30,
     estimatedAnalyses: "~6 analyses/mo",
     creditBreakdown: [
@@ -140,6 +142,7 @@ const Paywall = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [selectedTier, setSelectedTier] = useState<"free" | "starter" | "pro" | "elite">("pro");
+  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">("monthly");
   const [restoring, setRestoring] = useState(false);
 
   useState(() => {
@@ -258,7 +261,7 @@ const Paywall = () => {
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ type: "spring", stiffness: 200, damping: 25 }}
-          className="text-center mb-10"
+          className="text-center mb-6"
         >
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/20 bg-primary/5 mb-4">
             <Crown className="w-3.5 h-3.5 text-primary" />
@@ -269,9 +272,34 @@ const Paywall = () => {
           <h1 className="text-3xl md:text-4xl font-serif text-white mb-3">
             Unlock Your Style Potential
           </h1>
-          <p className="text-muted-foreground font-sans text-sm leading-relaxed max-w-md mx-auto">
+          <p className="text-muted-foreground font-sans text-sm leading-relaxed max-w-md mx-auto mb-4">
             Every AI action costs credits. Pick a plan that matches your styling ambitions.
           </p>
+          
+          {/* Monthly/Annual Toggle */}
+          <div className="inline-flex items-center gap-1 p-1 rounded-full bg-white/[0.04] border border-white/[0.08]">
+            <button
+              onClick={() => setBillingPeriod("monthly")}
+              className={`px-4 py-1.5 rounded-full text-xs font-sans font-semibold transition-all ${
+                billingPeriod === "monthly"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-white/40 hover:text-white/60"
+              }`}
+            >
+              Monthly
+            </button>
+            <button
+              onClick={() => setBillingPeriod("annual")}
+              className={`px-4 py-1.5 rounded-full text-xs font-sans font-semibold transition-all ${
+                billingPeriod === "annual"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-white/40 hover:text-white/60"
+              }`}
+            >
+              Annual
+              <span className="ml-1 text-[9px] text-emerald-400">Save 27%</span>
+            </button>
+          </div>
         </motion.div>
 
         {/* How Credits Work — Mini explainer */}
@@ -327,7 +355,9 @@ const Paywall = () => {
               <div className={t.isFree ? "border border-dashed border-foreground/15 rounded-2xl" : ""}>
                 <SquishyPricingCard
                   label={t.label}
-                  monthlyPrice={t.price}
+                  monthlyPrice={billingPeriod === "annual" && !t.isFree
+                    ? String(Math.round(parseFloat(t.price) * 12 * 0.73 / 12))
+                    : t.price}
                   description={t.desc}
                   features={t.features}
                   background={t.bg}

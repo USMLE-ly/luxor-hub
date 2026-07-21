@@ -198,3 +198,32 @@ BEGIN
   END IF;
 END;
 $$;
+
+-- ============================================================
+-- #18: Usage pattern analysis table
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.usage_patterns (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  action TEXT NOT NULL,
+  tier TEXT,
+  credits_remaining INTEGER,
+  response_time_ms INTEGER,
+  success BOOLEAN DEFAULT TRUE,
+  error_type TEXT,
+  session_id TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_usage_patterns_action_date ON public.usage_patterns(action, created_at);
+CREATE INDEX IF NOT EXISTS idx_usage_patterns_tier ON public.usage_patterns(tier, action);
+
+ALTER TABLE public.usage_patterns ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view own usage_patterns" ON public.usage_patterns;
+CREATE POLICY "Users can view own usage_patterns" ON public.usage_patterns
+  FOR SELECT USING (auth.uid()::text = user_id);
+
+DROP POLICY IF EXISTS "Service can insert usage_patterns" ON public.usage_patterns;
+CREATE POLICY "Service can insert usage_patterns" ON public.usage_patterns
+  FOR INSERT WITH CHECK (true);
