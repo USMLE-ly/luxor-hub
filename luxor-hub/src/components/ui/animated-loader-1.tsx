@@ -2,7 +2,7 @@ import React from 'react';
 
 const Loader = () => {
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden" style={{ background: 'linear-gradient(180deg, #060f0d 0%, #0c2420 35%, #10352a 55%, #0a1f1a 80%, #060f0d 100%)' }}>
+    <div className="flex flex-col items-center justify-center overflow-hidden min-h-screen" style={{ background: 'linear-gradient(180deg, #060f0d 0%, #0c2420 35%, #10352a 55%, #0a1f1a 80%, #060f0d 100%)' }}>
 
       {/* Layered radial glows */}
       <div className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(232,200,122,0.06) 0%, transparent 60%)' }} />

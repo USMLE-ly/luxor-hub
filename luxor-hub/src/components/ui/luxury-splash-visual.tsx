@@ -85,14 +85,17 @@ export function LuxurySplashScreen({
       setExit(true);
       onComplete?.();
     }, 3200);
+    // BULLETPROOF: Force-exit after 5 seconds no matter what
+    const forceExit = setTimeout(() => setExit(true), 5000);
 
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
       clearTimeout(t3);
       clearTimeout(t4);
+      clearTimeout(forceExit);
     };
-  }, [onComplete]);
+  }, []);
 
   return (
     <AnimatePresence>
