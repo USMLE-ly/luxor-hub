@@ -378,9 +378,37 @@ const Closet = () => {
   };
 
   const fetchItems = useCallback(async (): Promise<ClothingItem[]> => {
+    // PRIMARY: Supabase (always works, no backend dependency)
+    try {
+      const { data: sbData, error: sbErr } = await supabase
+        .from("clothing_items")
+        .select("id, name, category, color, photo_url, image_url, brand, occasion, price, season, style, notes")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+      if (!sbErr && sbData && sbData.length > 0) {
+        console.log("[CLOSET] Loaded", sbData.length, "items from Supabase");
+        return sbData.map((item: any) => ({
+          id: item.id || '',
+          name: item.name || null,
+          category: item.category || 'other',
+          rawCategory: item.category || undefined,
+          color: item.color || null,
+          brand: item.brand || null,
+          season: item.season || null,
+          occasion: item.occasion || null,
+          style: item.style || null,
+          photo_url: item.photo_url || item.image_url || null,
+          notes: item.notes || null,
+          price: item.price || null,
+        }));
+      }
+    } catch (sbErr) {
+      console.warn("[CLOSET] Supabase fetch failed:", sbErr);
+    }
+    // FALLBACK: Replit backend (Qdrant) — may fail if backend is sleeping
     try {
       const timeoutPromise = new Promise<Response>((_, reject) =>
-        setTimeout(() => reject(new Error("Request timed out")), 10000)
+        setTimeout(() => reject(new Error("Request timed out")), 8000)
       );
       const resp = await Promise.race([
         fetch(apiBase + '/api/v1/closet/list-items?user_id=' + encodeURIComponent(user.id), { headers: await getAuthHeaders() }),
@@ -388,7 +416,24 @@ const Closet = () => {
       ]);
       const data = await resp.json();
       if (data.success && Array.isArray(data.items) && data.items.length > 0) {
-        const mapped = data.items.map((item: any) => ({
+        console.log("[CLOSET] Fallback: loaded", data.items.length, "items from Qdrant");
+        // Sync back to Supabase so future reads are fast
+        try {
+          for (const item of data.items) {
+            await supabase.from("clothing_items").upsert({
+              id: item.id,
+              user_id: user.id,
+              name: item.label || item.name || null,
+              category: item.category || item.type || 'other',
+              color: item.color || null,
+              brand: item.brand || null,
+              photo_url: item.photo_url || item.image_url || null,
+              occasion: item.occasion || null,
+              price: item.price || null,
+            }, { onConflict: "id" });
+          }
+        } catch (syncErr) { console.warn("[CLOSET] Qdrant->Supabase sync failed:", syncErr); }
+        return data.items.map((item: any) => ({
           id: item.id || '',
           name: item.label || item.name || null,
           category: item.category || item.type || 'other',
@@ -402,67 +447,11 @@ const Closet = () => {
           notes: item.notes || null,
           price: item.price || null,
         }));
-        return mapped;
       }
-      // FALLBACK: Try Supabase clothing_items table (shared with Calendar page)
-      try {
-        const { data: sbData, error: sbErr } = await supabase
-          .from("clothing_items")
-          .select("id, name, category, color, photo_url, image_url, brand, occasion, price")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false });
-        if (!sbErr && sbData && sbData.length > 0) {
-          console.log("[CLOSET] Falling back to Supabase, found", sbData.length, "items");
-          return sbData.map((item: any) => ({
-            id: item.id || '',
-            name: item.name || null,
-            category: item.category || 'other',
-            rawCategory: item.category || undefined,
-            color: item.color || null,
-            brand: item.brand || null,
-            season: null,
-            occasion: item.occasion || null,
-            style: null,
-            photo_url: item.photo_url || item.image_url || null,
-            notes: null,
-            price: item.price || null,
-          }));
-        }
-      } catch (sbFallbackErr) {
-        console.warn("[CLOSET] Supabase fallback also failed:", sbFallbackErr);
-      }
-      return [];
     } catch (err) {
-      console.warn("[CLOSET] Qdrant fetch failed, trying Supabase:", err);
-      // FALLBACK: Try Supabase if Qdrant completely fails
-      try {
-        const { data: sbData, error: sbErr } = await supabase
-          .from("clothing_items")
-          .select("id, name, category, color, photo_url, image_url, brand, occasion, price")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false });
-        if (!sbErr && sbData && sbData.length > 0) {
-          console.log("[CLOSET] Supabase fallback found", sbData.length, "items");
-          return sbData.map((item: any) => ({
-            id: item.id || '',
-            name: item.name || null,
-            category: item.category || 'other',
-            rawCategory: item.category || undefined,
-            color: item.color || null,
-            brand: item.brand || null,
-            season: null,
-            occasion: item.occasion || null,
-            style: null,
-            photo_url: item.photo_url || item.image_url || null,
-            notes: null,
-            price: item.price || null,
-          }));
-        }
-      } catch (sbErr2) {
-        console.warn("[CLOSET] Supabase fallback also failed:", sbErr2);
-      }
-      return [];
+      console.warn("[CLOSET] Qdrant fallback also failed:", err);
     }
+    return [];
   }, [user, apiBase]);
   // Fetch closet items — cache-first, then background refresh
   useEffect(() => {
@@ -858,51 +847,47 @@ const Closet = () => {
         const compressed = await compressImage(dataUrl);
         image_b64 = compressed.includes(",") ? compressed.split(",")[1] : compressed;
       }
-      const addAuthH = await getAuthHeaders();
-      const resp = await fetch(apiBase + "/api/v1/closet/add-item", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...addAuthH },
-        body: JSON.stringify({
-          name: itemName,
-          type: newItem.category || "other",
-          color: newItem.color || "",
-          category: newItem.category || "other",
-          brand: newItem.brand || "",
-          season: newItem.season || "all-season",
-          occasion: newItem.occasion || "",
-          style: newItem.style || "",
-          notes: newItem.notes || "",
-          price: newItem.price ? parseFloat(newItem.price) : null,
-          image_b64: image_b64,
-          user_id: user.id,
-        }),
+      // Upload image to Supabase Storage if present
+      let photoUrl = "";
+      if (selectedFile) {
+        try {
+          const fileExt = selectedFile.name.split('.').pop() || 'jpg';
+          const filePath = `closet/${user.id}/${Date.now()}.${fileExt}`;
+          const { data: uploadData, error: uploadErr } = await supabase.storage
+            .from("closet-images")
+            .upload(filePath, selectedFile, { upsert: true });
+          if (!uploadErr && uploadData) {
+            const { data: urlData } = supabase.storage.from("closet-images").getPublicUrl(filePath);
+            photoUrl = urlData?.publicUrl || "";
+          }
+        } catch (storageErr) {
+          console.warn("[CLOSET] Storage upload failed, saving without image:", storageErr);
+        }
+      }
+      // Insert directly into Supabase clothing_items table
+      const newItemId = crypto.randomUUID().slice(0, 8);
+      const { error: insertErr } = await supabase.from("clothing_items").insert({
+        id: newItemId,
+        user_id: user.id,
+        name: itemName,
+        category: newItem.category || "other",
+        color: newItem.color || "",
+        brand: newItem.brand || "",
+        season: newItem.season || "all-season",
+        occasion: newItem.occasion || "",
+        style: newItem.style || "",
+        notes: newItem.notes || "",
+        price: newItem.price ? parseFloat(newItem.price) : null,
+        photo_url: photoUrl,
       });
-      const data = await resp.json();
-      if (!resp.ok) throw new Error(data.error || "Upload failed");
+      if (insertErr) throw new Error(insertErr.message || "Failed to save item");
       toast.success("Added. Your closet just got stronger.");
       setUploadOpen(false);
       setNewItem({ name: "", category: "top", color: "", brand: "", season: "all-season", occasion: "", style: "", notes: "", price: "" });
       setSelectedFile(null); setPreviewUrl(null);
-      // Also insert into Supabase clothing_items so Calendar and other pages see it
-      try {
-        await supabase.from("clothing_items").insert({
-          id: data.item?.id || undefined,
-          user_id: user.id,
-          name: itemName,
-          category: newItem.category || "other",
-          color: newItem.color || "",
-          brand: newItem.brand || "",
-          occasion: newItem.occasion || "",
-          price: newItem.price ? parseFloat(newItem.price) : null,
-          photo_url: data.item?.image_url || "",
-        });
-      } catch (sbInsertErr) {
-        console.warn("[CLOSET] Supabase insert failed (non-fatal):", sbInsertErr);
-      }
       const refreshed = await fetchItems();
       setItems(refreshed);
       if (user) saveCachedCloset(user.id, refreshed);
-      // Push to Zustand so DressingRoom and other pages see the new item immediately
       syncCatalogItems(refreshed.map(toWardrobeItem));
     } catch (err) { handleError(err, "Upload failed"); }
     finally { setUploading(false); }
