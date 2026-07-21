@@ -8,3 +8,7 @@ dist/
 !.env.example
 .replit
 dist_built/
+
+# Diagnostic logs (runtime)
+luxor-diagnostic-*.log
+*.diagnostic.*

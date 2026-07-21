@@ -1,4 +1,5 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
+import log from "@/lib/diagnosticLogger";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
@@ -66,24 +67,33 @@ const RouteTracker = () => {
   return null;
 };
 
-const Loading = () => (
-  <div className="flex items-center justify-center py-20">
-    <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-  </div>
-);
+import AnimatedLoader from "@/components/ui/animated-loader-1";
+const Loading = () => <AnimatedLoader />;
+
+/** Tracks when a Suspense child mounts (helps debug stuck loaders) */
+function SuspenseTracker({ name, children }: { name: string; children: React.ReactNode }) {
+  useEffect(() => {
+    log("LIFECYCLE", name, "Mounted inside Suspense");
+    return () => log("LIFECYCLE", name, "Unmounted from Suspense");
+  }, []);
+  return <>{children}</>;
+}
 
 const AppContent = () => {
+  log("LIFECYCLE", "AppContent", "Render");
   const location = useLocation();
   const queryClientRef = useRef<QueryClient | null>(null);
   if (!queryClientRef.current) {
     queryClientRef.current = new QueryClient();
   }
 
+  useEffect(() => { log("NAV", "AppContent", `Route: ${location.pathname}`); }, [location.pathname]);
+
   return (
     <HelmetProvider>
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
       <React.Suspense fallback={null}><OfflineIndicator /></React.Suspense>
-      <React.Suspense fallback={null}><SplashScreen /></React.Suspense>
+      <React.Suspense fallback={null}><SuspenseTracker name="SplashScreen"><SplashScreen /></SuspenseTracker></React.Suspense>
       <QueryClientProvider client={queryClientRef.current}>
         <React.Suspense fallback={null}><TooltipProvider /></React.Suspense>
         <React.Suspense fallback={null}><Toaster /></React.Suspense>

@@ -1,4 +1,6 @@
+import AnimatedLoader from "@/components/ui/animated-loader-1";
 import { ReactNode, useEffect } from "react";
+import log from "@/lib/diagnosticLogger";
 import { motion } from "framer-motion";
 import { scheduleEngagementNudges, clearEngagementNudges } from "@/lib/notificationService";
 
@@ -33,20 +35,22 @@ export function AppLayout({ children }: { children: ReactNode }) {
     return () => clearEngagementNudges();
   }, [isReady, user]);
 
-  // Show spinner while auth is still hydrating
+  log("AUTH", "AppLayout", `isReady=${isReady}, loading=${loading}, user=${user ? user.id : "null"}`);
+
   if (!isReady || loading) {
+    log("AUTH", "AppLayout", "SHOWING AnimatedLoader (auth hydrating) — FIXED inset-0 z-50");
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+        <AnimatedLoader />
       </div>
     );
   }
 
-  // User is not authenticated — show loader while redirect happens
   if (!user) {
+    log("AUTH", "AppLayout", "User null — SHOWING AnimatedLoader while redirecting to /auth");
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+        <AnimatedLoader />
       </div>
     );
   }

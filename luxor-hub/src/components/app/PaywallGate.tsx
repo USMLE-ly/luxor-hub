@@ -1,4 +1,6 @@
+import AnimatedLoader from "@/components/ui/animated-loader-1";
 import { Navigate } from "react-router-dom";
+import log from "@/lib/diagnosticLogger";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -60,26 +62,30 @@ const PaywallGate = ({ children }: { children: React.ReactNode }) => {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Wait for auth hydration before deciding — show loader instead of blank page
+  log("AUTH", "PaywallGate", `isReady=${isReady}, loading=${loading}, user=${user ? user.id.slice(0,8) : "null"}, subLoading=${subLoading}, hasAccess=${hasAccess}`);
+
   if (!isReady || loading) {
+    log("AUTH", "PaywallGate", "SHOWING AnimatedLoader — auth not ready");
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+        <AnimatedLoader />
       </div>
     );
   }
 
-  if (!user) return <Navigate to="/auth" replace />;
+  log("AUTH", "PaywallGate", "No user — redirecting to /auth");
+  return <Navigate to="/auth" replace />;
 
-  // Show loading state while subscription check runs (unless we already have cached data)
   if (subLoading) {
+    log("AUTH", "PaywallGate", "SHOWING AnimatedLoader — subscription check in progress");
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+        <AnimatedLoader />
       </div>
     );
   }
 
+  log("AUTH", "PaywallGate", hasAccess ? "ACCESS GRANTED — rendering children" : "No access — redirecting to /paywall");
   if (!hasAccess) return <Navigate to="/paywall" replace />;
 
   return <>{children}</>;

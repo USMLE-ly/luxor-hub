@@ -1,4 +1,5 @@
-import React, { lazy, Suspense, Component, useEffect } from "react";
+import React, { lazy, Suspense, Component, useEffect, ErrorInfo } from "react";
+import log from "@/lib/diagnosticLogger";
 import { BrowserRouter } from "react-router-dom";
 import { initAudio } from "@/lib/audio-system";
 import { initMonitor } from "@/lib/support";
@@ -6,13 +7,10 @@ import { initResilience } from "@/lib/resilience";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { MotionConfig } from "framer-motion";
 
+import AnimatedLoader from "@/components/ui/animated-loader-1";
 const AppContent = lazy(() => import("./AppContent"));
 
-const Loading = () => (
-  <div className="flex items-center justify-center min-h-screen">
-    <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-  </div>
-);
+const Loading = () => <AnimatedLoader />;
 
 function isChunkLoadError(error: any): boolean {
   return (
@@ -40,7 +38,7 @@ class AppErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    console.error('[LUXOR APPBOUNDARY]', error.name, error.message, info.componentStack);
+    log("ERROR", "AppErrorBoundary", `${error.name}: ${error.message}`, { stack: info.componentStack?.slice(0, 500) });
   }
 
   handleRetry = () => {
@@ -65,7 +63,6 @@ class AppErrorBoundary extends Component<
                 }
               </svg>
             </div>
-
             <h2 className="text-xl font-semibold text-white mb-2">
               {isChunk ? 'New Version Available' : 'Something went wrong'}
             </h2>
@@ -74,14 +71,12 @@ class AppErrorBoundary extends Component<
                 ? 'A new version of Luxor has been deployed. Please refresh to get the latest update.'
                 : 'An unexpected error occurred. Please try again.'}
             </p>
-
             <button
               onClick={this.handleRetry}
               className="px-6 py-2.5 bg-gradient-to-r from-gold to-gold/80 text-white font-medium rounded-xl hover:from-gold/90 hover:to-gold/70 transition-all shadow-lg shadow-gold/20"
             >
               {isChunk ? 'Load Latest Version' : 'Try Again'}
             </button>
-
             <p className="mt-4 text-[10px] text-gray-600 font-mono">
               {isChunk ? 'CIPHER: Chunk sync required' : (this.state.error?.message?.slice(0, 80) || '')}
             </p>
@@ -95,13 +90,10 @@ class AppErrorBoundary extends Component<
 
 const AudioInit = () => {
   useEffect(() => {
-    initMonitor(); // Start production error monitor
-    initResilience(); // Start resilience layer (service worker, offline queue, auto-retry)
-
+    initMonitor();
+    initResilience();
     const handleInteraction = () => {
-      // Initialize audio system
       initAudio();
-      // Force-play ALL videos that may have been blocked by autoplay policy
       document.querySelectorAll('video').forEach((video) => {
         if (video.paused) {
           video.play().catch(() => {});
@@ -123,18 +115,21 @@ const AudioInit = () => {
   return null;
 };
 
-const App = () => (
-  <AppErrorBoundary>
-    <MotionConfig reducedMotion="user">
-      <BrowserRouter>
-        <AudioInit />
-        <SpeedInsights />
-        <Suspense fallback={<Loading />}>
-          <AppContent />
-        </Suspense>
-      </BrowserRouter>
-    </MotionConfig>
-  </AppErrorBoundary>
-);
+const App = () => {
+  log("LIFECYCLE", "App", "Render");
+  return (
+    <AppErrorBoundary>
+      <MotionConfig reducedMotion="user">
+        <BrowserRouter>
+          <AudioInit />
+          <SpeedInsights />
+          <Suspense fallback={<Loading />}>
+            <AppContent />
+          </Suspense>
+        </BrowserRouter>
+      </MotionConfig>
+    </AppErrorBoundary>
+  );
+};
 
 export default App;

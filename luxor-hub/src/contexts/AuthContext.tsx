@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import log from "@/lib/diagnosticLogger";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase, isSupabaseConfigured } from "@/integrations/supabase/client";
 
@@ -32,8 +33,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     // If Supabase is not configured, skip auth entirely and go to offline mode
+    log("AUTH", "AuthProvider", isSupabaseConfigured ? "Supabase configured — starting auth" : "Supabase NOT configured — offline mode");
     if (!isSupabaseConfigured) {
-      console.warn("[AUTH] Supabase not configured — running in offline mode");
       setLoading(false);
       setIsReady(true);
       return;
@@ -47,7 +48,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         resolved = true;
         setLoading(false);
         setIsReady(true);
-        console.warn("[AUTH] Fallback timeout fired — forcing isReady=true");
+        log("AUTH", "AuthProvider", "FALLBACK TIMEOUT fired at 6s — forcing isReady=true");
       }
     }, 6000);
 
@@ -56,6 +57,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       // Subscribe FIRST — handles ALL auth events
       const result = supabase.auth.onAuthStateChange((_event, session) => {
+        log("AUTH", "AuthProvider", `onAuthStateChange fired — user=${session?.user?.id?.slice(0,8) || "null"}`);
         if (!resolved) {
           resolved = true;
           clearTimeout(timeout);
@@ -67,7 +69,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
       subscription = result.data?.subscription ?? null;
     } catch (err) {
-      console.warn("[AUTH] onAuthStateChange failed:", err);
+      log("ERROR", "AuthProvider", `onAuthStateChange failed: ${err}`);
       resolved = true;
       clearTimeout(timeout);
       setLoading(false);
@@ -77,6 +79,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Hydrate from stored session
     supabase.auth.getSession()
       .then(({ data: { session } }) => {
+        log("AUTH", "AuthProvider", `getSession resolved — user=${session?.user?.id?.slice(0,8) || "null"}`);
         if (resolved) return;
         resolved = true;
         clearTimeout(timeout);
@@ -86,7 +89,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setIsReady(true);
       })
       .catch((err) => {
-        console.warn("[AUTH] getSession failed:", err);
+        log("ERROR", "AuthProvider", `getSession failed: ${err}`);
         if (!resolved) {
           resolved = true;
           clearTimeout(timeout);
