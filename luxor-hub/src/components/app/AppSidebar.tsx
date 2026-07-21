@@ -34,6 +34,7 @@ const navItems = [
   { title: "Community Gallery", url: "/community-gallery", icon: GlobeHemisphereWest },
   { title: "Leaderboard", url: "/leaderboard", icon: Trophy },
   { title: "Weekly Challenge", url: "/weekly-challenge", icon: Flame },
+  { title: "Credits", url: "/credits", icon: Lightning },
   { title: "Badges", url: "/badges", icon: Trophy },
   { title: "Wardrobe Value", url: "/wardrobe-value", icon: CurrencyDollar },
   { title: "Notifications", url: "/notifications", icon: Bell },

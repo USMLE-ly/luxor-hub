@@ -369,6 +369,7 @@ const CouncilInner = () => {
 
   return (
     <AppLayout>
+      <PageCreditBar action="stylist_generate" costOverride={4} />
       <div className="flex flex-col h-[calc(100vh-56px)] max-w-lg mx-auto overflow-x-hidden" style={{ background: moodTint }}>
         {/* Header with mode toggle */}
         <div className="px-5 pt-4 pb-2 flex items-center justify-between" style={{ background: moodTint }}>

@@ -202,7 +202,8 @@ const UserAnalysis = () => {
   /* ---------- Derived data ---------- */
   const nextActions = useMemo(() => (data ? buildNextActions(data) : []), [data]);
 
-  if (loading) return <AppLayout><LoadingView /></AppLayout>;
+  if (loading) return <AppLayout>
+      <PageCreditBar action="analyze_outfit" costOverride={5} /><LoadingView /></AppLayout>;
 
   if (error || !data) {
     return (

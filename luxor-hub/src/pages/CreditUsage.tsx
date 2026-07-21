@@ -213,6 +213,36 @@ export default function CreditUsage() {
             className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 mb-6"
           >
             <h2 className="text-sm font-sans font-semibold text-white/60 mb-4">
+              This Month's Usage
+            </h2>
+            <div className="flex items-end gap-1 h-24 mb-4">
+              {Array.from({ length: 30 }, (_, i) => {
+                const dayEvents = events.filter((e) => {
+                  const d = new Date(e.created_at);
+                  return d.getDate() === i + 1 && d.getMonth() === new Date().getMonth();
+                });
+                const dayCost = dayEvents.reduce((sum, e) => sum + e.cost, 0);
+                const maxCost = Math.max(...Array.from({ length: 30 }, (_, j) =>
+                  events.filter((e) => {
+                    const d = new Date(e.created_at);
+                    return d.getDate() === j + 1 && d.getMonth() === new Date().getMonth();
+                  }).reduce((s, e) => s + e.cost, 0)
+                ), 1);
+                const height = (dayCost / maxCost) * 100;
+                return (
+                  <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                    <div
+                      className={`w-full rounded-t transition-all ${
+                        dayCost > 0 ? "bg-primary/60" : "bg-white/[0.04]"
+                      }`}
+                      style={{ height: `${Math.max(height, dayCost > 0 ? 4 : 0)}%` }}
+                      title={`${i + 1}: ${dayCost} credits`}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+            <h2 className="text-sm font-sans font-semibold text-white/60 mb-4">
               Recent Activity
             </h2>
             {events.length === 0 ? (
@@ -259,6 +289,43 @@ export default function CreditUsage() {
               Earn Free Credits
             </h2>
             <CreditRewards />
+          </motion.div>
+
+          {/* Refer a Friend */}
+          <motion.div
+            initial={{ y: 16, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.55 }}
+            className="rounded-2xl border border-primary/20 bg-primary/5 p-5 mb-6"
+          >
+            <h2 className="text-sm font-sans font-semibold text-primary mb-2">
+              Refer a Friend
+            </h2>
+            <p className="text-xs font-sans text-white/40 mb-3">
+              Both you and your friend get <strong className="text-primary">20 bonus credits</strong> when they sign up.
+            </p>
+            <button
+              onClick={async () => {
+                try {
+                  const { data: session } = await supabase.auth.getSession();
+                  const token = session?.session?.access_token;
+                  const apiUrl = import.meta.env.VITE_API_URL || "";
+                  const resp = await fetch(`${apiUrl}/api/v1/credits/referral/link`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                  });
+                  const data = await resp.json();
+                  if (data.referral_link) {
+                    navigator.clipboard.writeText(data.referral_link);
+                    toast.success("Referral link copied!");
+                  }
+                } catch {
+                  toast.error("Failed to get referral link");
+                }
+              }}
+              className="w-full h-9 rounded-xl bg-primary text-primary-foreground text-xs font-sans font-semibold hover:bg-primary/90 transition-colors"
+            >
+              Copy Referral Link
+            </button>
           </motion.div>
 
           {/* Credit costs reference */}

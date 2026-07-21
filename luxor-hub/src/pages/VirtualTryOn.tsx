@@ -122,6 +122,7 @@ function VirtualTryOnInner() {
 
   return (
     <AppLayout>
+      <PageCreditBar action="pro_tweak" costOverride={8} />
       <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-8">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="relative">
           <div className="absolute -top-4 -left-4 w-32 h-32 bg-primary/10 rounded-full blur-[60px]" />

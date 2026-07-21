@@ -9,9 +9,11 @@ interface PageCreditBarProps {
   action?: string;
   /** Override cost display */
   costOverride?: number;
+  /** Show consuming animation */
+  consuming?: boolean;
 }
 
-export function PageCreditBar({ action, costOverride }: PageCreditBarProps) {
+export function PageCreditBar({ action, costOverride, consuming }: PageCreditBarProps) {
   const { data, isLoading } = useCreditBalance();
   const { tier } = usePlanTier();
   const navigate = useNavigate();
@@ -59,9 +61,9 @@ export function PageCreditBar({ action, costOverride }: PageCreditBarProps) {
       <div className="flex-1 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
         <motion.div
           initial={{ width: 0 }}
-          animate={{ width: `${Math.min(100, percentage)}%` }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className={`h-full rounded-full ${getBarColor()}`}
+          animate={consuming ? { width: ["0%", "100%", `${Math.min(100, percentage)}%`] } : { width: `${Math.min(100, percentage)}%` }}
+          transition={consuming ? { duration: 2, ease: "easeInOut" } : { duration: 0.8, ease: "easeOut" }}
+          className={`h-full rounded-full ${getBarColor()} ${consuming ? "animate-pulse" : ""}`}
         />
       </div>
 

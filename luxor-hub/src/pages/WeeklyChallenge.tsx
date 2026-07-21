@@ -209,6 +209,7 @@ export default function WeeklyChallenge() {
 
   return (
     <AppLayout>
+      <PageCreditBar action="weekly_challenge" costOverride={15} />
       <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-8">
         <div>
           <h1 className="font-display text-3xl font-bold text-foreground">

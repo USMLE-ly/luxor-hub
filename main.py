@@ -3928,6 +3928,54 @@ def pricing_user_current():
     })
 
 
+
+
+@app.route("/api/v1/credits/referral", methods=["POST"])
+@limiter.limit("5 per hour")
+@require_auth
+def credits_referral():
+    """Process a referral — both users get 20 bonus credits."""
+    user = g.current_user
+    user_id = user.get("sub", "")
+    data = request.get_json(silent=True) or {}
+    referred_email = data.get("referred_email", "")
+
+    if not referred_email:
+        return jsonify({"error": "referred_email required"}), 400
+
+    import requests as _req
+    from backend.credits import SUPABASE_URL, SUPABASE_KEY
+
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        return jsonify({"error": "Not configured"}), 500
+
+    headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}", "Content-Type": "application/json"}
+
+    try:
+        # Find the referred user by email
+        resp = _req.post(
+            f"{SUPABASE_URL}/rest/v1/rpc/award_referral_bonus",
+            json={"p_referrer_id": user_id, "p_referred_id": referred_email},
+            headers=headers, timeout=5,
+        )
+        if resp.status_code == 200 and resp.json() is True:
+            return jsonify({"success": True, "message": "Referral recorded! Both users get 20 bonus credits."})
+        return jsonify({"message": "Referral already recorded or user not found"}), 200
+    except Exception as exc:
+        _log.error("[REFERRAL] Failed: %s", exc)
+        return jsonify({"error": "Referral failed"}), 500
+
+
+@app.route("/api/v1/credits/referral/link", methods=["GET"])
+@require_auth
+def referral_link():
+    """Get the user's unique referral link."""
+    user = g.current_user
+    user_id = user.get("sub", "")
+    referral_link = f"https://luxor.ly/auth?ref={user_id[:8]}"
+    return jsonify({"referral_link": referral_link, "bonus": 20})
+
+
 # Serve user-uploaded images with proper CORS headers
 @app.route("/images/<path:filename>")
 def serve_uploaded_image(filename):

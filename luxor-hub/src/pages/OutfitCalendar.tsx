@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useCreditGuard } from "@/hooks/useCreditGuard";
 import { useAiAction } from "@/hooks/useAiAction";
 import { PageCreditBar } from "@/components/app/PageCreditBar";
+import { CreditTooltip } from "@/components/ui/CreditTooltip";
 import { CreditCostBanner } from "@/components/app/CreditCostBanner";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";

@@ -44,6 +44,7 @@ const fadeUp = {
 export default function WardrobeValue() {
   return (
     <AppLayout>
+      <PageCreditBar action="closet_analyze" costOverride={3} />
       <TierGate requiredTier="pro" featureName="Wardrobe Value">
         <WardrobeValueContent />
       </TierGate>

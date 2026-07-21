@@ -227,3 +227,69 @@ CREATE POLICY "Users can view own usage_patterns" ON public.usage_patterns
 DROP POLICY IF EXISTS "Service can insert usage_patterns" ON public.usage_patterns;
 CREATE POLICY "Service can insert usage_patterns" ON public.usage_patterns
   FOR INSERT WITH CHECK (true);
+
+-- ============================================================
+-- #12: Referral bonus system
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.referrals (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  referrer_id TEXT NOT NULL,
+  referred_id TEXT NOT NULL,
+  bonus_credits INTEGER DEFAULT 20,
+  status TEXT DEFAULT 'pending',
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(referred_id)
+);
+
+ALTER TABLE public.referrals ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view own referrals" ON public.referrals;
+CREATE POLICY "Users can view own referrals" ON public.referrals
+  FOR SELECT USING (auth.uid()::text = referrer_id);
+
+DROP POLICY IF EXISTS "Users can insert referrals" ON public.referrals;
+CREATE POLICY "Users can insert referrals" ON public.referrals
+  FOR INSERT WITH CHECK (auth.uid()::text = referrer_id);
+
+-- Award referral bonus function
+CREATE OR REPLACE FUNCTION public.award_referral_bonus(p_referrer_id TEXT, p_referred_id TEXT)
+RETURNS BOOLEAN
+LANGUAGE plpgsql SECURITY DEFINER
+AS $$
+DECLARE
+  v_bonus INTEGER := 20;
+  v_current_month TEXT;
+  v_existing RECORD;
+BEGIN
+  v_current_month := to_char(now(), 'YYYY-MM');
+
+  -- Check if already referred
+  IF EXISTS (SELECT 1 FROM public.referrals WHERE referred_id = p_referred_id) THEN
+    RETURN FALSE;
+  END IF;
+
+  -- Record referral
+  INSERT INTO public.referrals (referrer_id, referred_id, bonus_credits, status)
+  VALUES (p_referrer_id, p_referred_id, v_bonus, 'completed');
+
+  -- Add credits to referrer
+  SELECT * INTO v_existing
+  FROM public.credit_balances
+  WHERE user_id = p_referrer_id AND month = v_current_month;
+
+  IF FOUND THEN
+    UPDATE public.credit_balances
+    SET credits_remaining = credits_remaining + v_bonus
+    WHERE id = v_existing.id;
+  ELSE
+    INSERT INTO public.credit_balances (user_id, month, credits_allocated, credits_remaining)
+    VALUES (p_referrer_id, v_current_month, 30, 30 + v_bonus);
+  END IF;
+
+  -- Log event
+  INSERT INTO public.credit_events (user_id, action, cost, credits_remaining, created_at)
+  VALUES (p_referrer_id, 'reward_referral', -v_bonus, (SELECT credits_remaining FROM public.credit_balances WHERE user_id = p_referrer_id AND month = v_current_month), now());
+
+  RETURN TRUE;
+END;
+$$;

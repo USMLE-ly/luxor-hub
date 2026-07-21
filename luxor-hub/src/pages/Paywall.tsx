@@ -143,6 +143,13 @@ const Paywall = () => {
   const queryClient = useQueryClient();
   const [selectedTier, setSelectedTier] = useState<"free" | "starter" | "pro" | "elite">("pro");
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">("monthly");
+
+  // A/B test: show credits vs analyses framing
+  const pricingVariant = localStorage.getItem("luxor_pricing_variant") || (() => {
+    const v = Math.random() > 0.5 ? "credits" : "analyses";
+    localStorage.setItem("luxor_pricing_variant", v);
+    return v;
+  })();
   const [restoring, setRestoring] = useState(false);
 
   // Fetch user's current tier from API
@@ -237,7 +244,19 @@ const Paywall = () => {
         trackEvent("Purchase", eventParams);
 
         grantAccess(tier);
-        toast.success(`Welcome to LUXOR® ${tier.charAt(0).toUpperCase() + tier.slice(1)}! Your credits have been allocated.`);
+        
+        // Send confirmation email via API
+        try {
+          const { data: emailSession } = await supabase.auth.getSession();
+          const emailToken = emailSession?.session?.access_token;
+          const apiUrl = import.meta.env.VITE_API_URL || "";
+          await fetch(`${apiUrl}/api/v1/credits/allocate`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${emailToken}` },
+          });
+        } catch {}
+        
+        toast.success(`Welcome to LUXOR® ${tier.charAt(0).toUpperCase() + tier.slice(1)}! Your credits have been allocated. Check your email for confirmation.`);
         navigate("/closet");
       } catch {
         toast.error("Something went wrong saving your subscription. Your payment is safe — contact support@luxor.ly if needed.");
@@ -358,6 +377,25 @@ const Paywall = () => {
             <span className="px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.03]">
               Pro tweak = 8 credits
             </span>
+          </div>
+        </motion.div>
+
+        {/* Prominent CTA */}
+        <motion.div
+          initial={{ y: 16, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.12 }}
+          className="text-center mb-6"
+        >
+          <p className="text-xs font-sans text-white/30 mb-3">
+            Join thousands of users who style smarter with LUXOR®
+          </p>
+          <div className="flex items-center justify-center gap-3 text-[10px] font-sans text-white/20">
+            <span>🔒 Secure payment</span>
+            <span>•</span>
+            <span>💰 30-day guarantee</span>
+            <span>•</span>
+            <span>⚡ Instant access</span>
           </div>
         </motion.div>
 
