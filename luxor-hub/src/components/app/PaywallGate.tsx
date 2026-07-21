@@ -1,10 +1,7 @@
-
 import { Navigate } from "react-router-dom";
-import log from "@/lib/diagnosticLogger";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-
 
 /**
  * Wraps app routes behind a paywall check.
@@ -13,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 const PaywallGate = ({ children }: { children: React.ReactNode }) => {
   const { user, loading, isReady } = useAuth();
 
-  // Always query the DB for subscription status — with timeout protection
+  // Always query the DB for subscription status — with hard 5s timeout
   const { data: hasAccess, isLoading: subLoading } = useQuery({
     queryKey: ["subscription-check", user?.id],
     queryFn: async () => {
@@ -30,24 +27,24 @@ const PaywallGate = ({ children }: { children: React.ReactNode }) => {
       if (data?.status === "active") return true;
 
       // If subscription exists but status is not active (pending),
-      // try to recover — but with a strict 8-second timeout
+      // try to recover — but with a hard 5-second timeout
       if (data?.status === "pending" || (data && data.status !== "active")) {
         try {
           const { data: session } = await supabase.auth.getSession();
           const token = session?.session?.access_token;
           const apiUrl = import.meta.env.VITE_API_URL || "";
-          
-          // CRITICAL: Add AbortController timeout to prevent hanging on sleeping backends
+
+          // HARD 5-SECOND TIMEOUT — prevents hanging on sleeping backends
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 8000);
-          
+          const timeoutId = setTimeout(() => controller.abort(), 5000);
+
           const resp = await fetch(`${apiUrl}/api/v1/credits/allocate`, {
             method: "POST",
             headers: { Authorization: `Bearer ${token}` },
             signal: controller.signal,
           });
           clearTimeout(timeoutId);
-          
+
           if (resp.ok) {
             await supabase
               .from("subscriptions")
@@ -67,32 +64,31 @@ const PaywallGate = ({ children }: { children: React.ReactNode }) => {
     staleTime: 5 * 60 * 1000,
   });
 
-  log("AUTH", "PaywallGate", `isReady=${isReady}, loading=${loading}, user=${user ? user.id.slice(0,8) : "null"}, subLoading=${subLoading}, hasAccess=${hasAccess}`);
-
+  // Auth still loading — subtle spinner, NO full-screen green overlay
   if (!isReady || loading) {
-    log("AUTH", "PaywallGate", "Auth not ready — showing non-blocking spinner");
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+      <div className="flex items-center justify-center w-full h-20">
+        <div className="w-6 h-6 border-2 border-zinc-400 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
-  log("AUTH", "PaywallGate", "No user — redirecting to /auth");
-  return <Navigate to="/auth" replace />;
+  // Not authenticated — redirect to auth
+  if (!user) return <Navigate to="/auth" replace />;
 
+  // Subscription check in progress — subtle spinner
   if (subLoading) {
-    log("AUTH", "PaywallGate", "Subscription check in progress — showing non-blocking spinner");
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+      <div className="flex items-center justify-center w-full h-20">
+        <div className="w-6 h-6 border-2 border-zinc-400 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
-  log("AUTH", "PaywallGate", hasAccess ? "ACCESS GRANTED — rendering children" : "No access — redirecting to /paywall");
+  // No access — redirect to paywall
   if (!hasAccess) return <Navigate to="/paywall" replace />;
 
+  // Access granted — render children
   return <>{children}</>;
 };
 

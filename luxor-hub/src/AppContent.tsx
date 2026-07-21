@@ -1,5 +1,4 @@
-import React, { useRef, useEffect } from "react";
-import log from "@/lib/diagnosticLogger";
+import React, { useRef } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
@@ -51,7 +50,6 @@ const WardrobeValue = React.lazy(() => import("./pages/WardrobeValue"));
 const Blog = React.lazy(() => import("./pages/Blog"));
 const BlogArticle = React.lazy(() => import("./pages/BlogArticle"));
 const DeepDive = React.lazy(() => import("./pages/DeepDive"));
-
 const DressingRoom = React.lazy(() => import("./pages/DressingRoom"));
 const StyleRecommendations = React.lazy(() => import("./pages/StyleRecommendations"));
 const UserAnalysis = React.lazy(() => import("./pages/UserAnalysis"));
@@ -67,31 +65,18 @@ const RouteTracker = () => {
   return null;
 };
 
-
-/** Tracks when a Suspense child mounts (helps debug stuck loaders) */
-function SuspenseTracker({ name, children }: { name: string; children: React.ReactNode }) {
-  useEffect(() => {
-    log("LIFECYCLE", name, "Mounted inside Suspense");
-    return () => log("LIFECYCLE", name, "Unmounted from Suspense");
-  }, []);
-  return <>{children}</>;
-}
-
 const AppContent = () => {
-  log("LIFECYCLE", "AppContent", "Render");
   const location = useLocation();
   const queryClientRef = useRef<QueryClient | null>(null);
   if (!queryClientRef.current) {
     queryClientRef.current = new QueryClient();
   }
 
-  useEffect(() => { log("NAV", "AppContent", `Route: ${location.pathname}`); }, [location.pathname]);
-
   return (
     <HelmetProvider>
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
       <React.Suspense fallback={null}><OfflineIndicator /></React.Suspense>
-      <React.Suspense fallback={null}><SuspenseTracker name="SplashScreen"><SplashScreen /></SuspenseTracker></React.Suspense>
+      <React.Suspense fallback={null}><SplashScreen /></React.Suspense>
       <QueryClientProvider client={queryClientRef.current}>
         <React.Suspense fallback={null}><TooltipProvider /></React.Suspense>
         <React.Suspense fallback={null}><Toaster /></React.Suspense>
@@ -129,9 +114,7 @@ const AppContent = () => {
             <Route path="/weekly-challenge" element={<PaywallGate><ErrorBoundary><WeeklyChallenge /></ErrorBoundary></PaywallGate>} />
             <Route path="/badges" element={<PaywallGate><ErrorBoundary><Badges /></ErrorBoundary></PaywallGate>} />
             <Route path="/notifications" element={<PaywallGate><ErrorBoundary><NotificationCenter /></ErrorBoundary></PaywallGate>} />
-
             <Route path="/calibration" element={<PaywallGate><ErrorBoundary><Calibration /></ErrorBoundary></PaywallGate>} />
-
             <Route path="/paywall" element={<ErrorBoundary><Paywall /></ErrorBoundary>} />
             <Route path="/pricing" element={<ErrorBoundary><Paywall /></ErrorBoundary>} />
             <Route path="/credits" element={<PaywallGate><ErrorBoundary><CreditUsage /></ErrorBoundary></PaywallGate>} />

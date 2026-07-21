@@ -1,8 +1,6 @@
 import { ReactNode, useEffect } from "react";
-import log from "@/lib/diagnosticLogger";
 import { motion } from "framer-motion";
 import { scheduleEngagementNudges, clearEngagementNudges } from "@/lib/notificationService";
-
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
@@ -32,21 +30,17 @@ export function AppLayout({ children }: { children: ReactNode }) {
     return () => clearEngagementNudges();
   }, [isReady, user]);
 
-  log("AUTH", "AppLayout", `isReady=${isReady}, loading=${loading}, user=${user ? user.id.slice(0,8) : "null"}`);
-
-  // Auth still hydrating — show subtle spinner, NOT the full-screen green AnimatedLoader
+  // Auth still hydrating — subtle spinner only, NO full-screen overlay
   if (!isReady || loading) {
-    log("AUTH", "AppLayout", "Auth hydrating — showing non-blocking spinner");
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+      <div className="flex items-center justify-center w-full h-20">
+        <div className="w-6 h-6 border-2 border-zinc-400 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
-  // Not authenticated — return null (the useEffect above handles redirect)
+  // Not authenticated — useEffect handles redirect, just show nothing
   if (!user) {
-    log("AUTH", "AppLayout", "No user — returning null, redirect handled by useEffect");
     return null;
   }
 

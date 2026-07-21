@@ -1,5 +1,4 @@
-import React, { lazy, Suspense, Component, useEffect, ErrorInfo } from "react";
-import log from "@/lib/diagnosticLogger";
+import React, { lazy, Suspense, Component, useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { initAudio } from "@/lib/audio-system";
 import { initMonitor } from "@/lib/support";
@@ -38,7 +37,7 @@ class AppErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    log("ERROR", "AppErrorBoundary", `${error.name}: ${error.message}`, { stack: info.componentStack?.slice(0, 500) });
+    console.error('[LUXOR APPBOUNDARY]', error.name, error.message, info.componentStack);
   }
 
   handleRetry = () => {
@@ -115,21 +114,18 @@ const AudioInit = () => {
   return null;
 };
 
-const App = () => {
-  log("LIFECYCLE", "App", "Render");
-  return (
-    <AppErrorBoundary>
-      <MotionConfig reducedMotion="user">
-        <BrowserRouter>
-          <AudioInit />
-          <SpeedInsights />
-          <Suspense fallback={<Loading />}>
-            <AppContent />
-          </Suspense>
-        </BrowserRouter>
-      </MotionConfig>
-    </AppErrorBoundary>
-  );
-};
+const App = () => (
+  <AppErrorBoundary>
+    <MotionConfig reducedMotion="user">
+      <BrowserRouter>
+        <AudioInit />
+        <SpeedInsights />
+        <Suspense fallback={<Loading />}>
+          <AppContent />
+        </Suspense>
+      </BrowserRouter>
+    </MotionConfig>
+  </AppErrorBoundary>
+);
 
 export default App;

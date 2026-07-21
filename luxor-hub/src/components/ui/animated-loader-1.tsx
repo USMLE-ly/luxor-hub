@@ -1,10 +1,7 @@
 import React, { useEffect } from 'react';
-import log from "@/lib/diagnosticLogger";
 
 const Loader = () => {
   useEffect(() => {
-    log("OVERLAY", "AnimatedLoader", "MOUNTED (fixed inset-0 z-50 green gradient) — caller sees green screen");
-    return () => log("OVERLAY", "AnimatedLoader", "UNMOUNTED — green screen should be gone");
   }, []);
 
   return (

@@ -1,6 +1,5 @@
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { useRef, useMemo, useState, useEffect } from "react";
-import log from "@/lib/diagnosticLogger";
 
 /* ───────────────────────────────────────────────────────────────
    Main Luxury Splash Visual
@@ -79,22 +78,18 @@ export function LuxurySplashScreen({
   const [exit, setExit] = useState(false);
 
   useEffect(() => {
-    log("SPLASH", "LuxurySplashScreen", "Mounted (z-[99999]) — phases will progress over 3.2s, force exit at 5s");
     const t1 = setTimeout(() => setPhase("wordmark"), 300);
     const t2 = setTimeout(() => setPhase("tagline"), 700);
     const t3 = setTimeout(() => setPhase("complete"), 1200);
     const t4 = setTimeout(() => {
-      log("SPLASH", "LuxurySplashScreen", "Setting exit=true at 3200ms");
       setExit(true);
       onComplete?.();
     }, 3200);
     const forceExit = setTimeout(() => {
-      log("SPLASH", "LuxurySplashScreen", "FORCE EXIT triggered at 5000ms");
       setExit(true);
     }, 5000);
 
     return () => {
-      log("SPLASH", "LuxurySplashScreen", "Unmounted / cleaned up");
       clearTimeout(t1);
       clearTimeout(t2);
       clearTimeout(t3);
