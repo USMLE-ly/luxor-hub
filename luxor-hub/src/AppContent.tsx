@@ -17,7 +17,6 @@ const SplashScreen = React.lazy(() => import("@/components/app/SplashScreen"));
 const PaywallGate = React.lazy(() => import("@/components/app/PaywallGate"));
 const Index = React.lazy(() => import("./pages/Index"));
 const Auth = React.lazy(() => import("./pages/Auth"));
-const Dashboard = React.lazy(() => import("./pages/Dashboard"));
 const Onboarding = React.lazy(() => import("./pages/Onboarding"));
 const Closet = React.lazy(() => import("./pages/Closet"));
 const Chat = React.lazy(() => import("./pages/Chat"));

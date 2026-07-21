@@ -213,8 +213,6 @@ def _sanitize_occasion(raw: str) -> str:
 
 
 
-from backend.auth import require_auth, optional_auth
-from backend.gateway import ai_endpoint, get_spend_tracker, TIER_DAILY_CAPS, TIER_REQUEST_LIMITS
 
 
 # Color Dictionary
@@ -884,6 +882,7 @@ def qdrant_find_similar(item_id: str, user_id: str = "", limit: int = 8) -> List
 
 
 # API endpoint for find-similar
+@require_auth
 @app.route("/api/v1/closet/find-similar", methods=["GET", "OPTIONS"], strict_slashes=False)
 def closet_find_similar():
     """Find items similar to a given item, filtered by category/color/style.
@@ -893,7 +892,7 @@ def closet_find_similar():
         return "", 204
     try:
         item_id = request.args.get("item_id", "")
-        user_id = request.args.get("user_id", "")
+        user_id = g.current_user["sub"]
         limit = _validate_limit(request.args.get("limit", "8"))
         
         if not item_id:
@@ -1772,6 +1771,7 @@ _STRENGTH_DETAILS = {
 }
 
 
+@ai_endpoint
 @app.route("/api/v1/stylist-explore", methods=["POST", "OPTIONS"], strict_slashes=False)
 def stylist_explore():
     if request.method == "OPTIONS":
@@ -1819,6 +1819,7 @@ def stylist_explore():
 # ---------------------------------------------------------------------------
 # Stylist Generate (Pollinations-only, no Groq dependency)
 # ---------------------------------------------------------------------------
+@ai_endpoint
 @app.route("/api/v1/stylist-generate", methods=["POST", "OPTIONS"], strict_slashes=False)
 def stylist_generate():
     if request.method == "OPTIONS":
@@ -1842,6 +1843,7 @@ def stylist_generate():
 # ---------------------------------------------------------------------------
 # Closet (Vercel Blob + Qdrant)
 # ---------------------------------------------------------------------------
+@require_auth
 @app.route("/api/v1/closet/add-item", methods=["POST", "OPTIONS"], strict_slashes=False)
 def closet_add():
     try:
@@ -1861,7 +1863,7 @@ def closet_add():
         notes = data.get("notes", "")
         price = data.get("price", None)
         image_b64 = data.get("image_b64", "")
-        user_id = data.get("user_id", "")
+        user_id = g.current_user["sub"]
 
         if not label and not image_b64:
             return jsonify({"error": "Need label or image"}), 400
@@ -1927,6 +1929,7 @@ def closet_add():
         traceback.print_exc()
         _log.info("================================================")
         return jsonify(_qdrant_error("upsert", str(e), traceback.format_exc())), 500
+@require_auth
 @app.route("/api/v1/closet/list-items", methods=["GET", "OPTIONS"], strict_slashes=False)
 def closet_list():
     """List all closet items — Qdrant only (persistent, no JSON fallback).
@@ -1934,7 +1937,7 @@ def closet_list():
     """
     if request.method == "OPTIONS":
         return "", 204
-    uid = request.args.get("user_id", "")
+    uid = g.current_user["sub"]
     _log.warning(f"[LIST-DEBUG] ===== LIST ITEMS CALLED for user_id={uid} =====")
     # Retry Qdrant up to 2 times
     for attempt in range(2):
@@ -3332,13 +3335,9 @@ def gateway_status():
     tracker = get_spend_tracker()
     return jsonify({
         "status": "ok",
-        "daily_caps": TIER_DAILY_CAPS,
-        "tier_limits": {k: {"max_image_mb": v["max_image_size_mb"], "max_tokens": v["max_tokens"]} for k, v in TIER_REQUEST_LIMITS.items()},
     })
 
-# Serve static files with proper CORS headers to prevent CORB errors
-@app.route("/static/<path:filename>")
-
+# Serve user-uploaded images with proper CORS headers
 @app.route("/images/<path:filename>")
 def serve_uploaded_image(filename):
     """Serve user-uploaded closet images — disk first, then base64 fallback from JSON."""
@@ -3493,12 +3492,6 @@ def serve_media_file(filename):
     return resp
 
 # Global CORS-safe error handlers — return JSON instead of HTML to prevent CORB
-
-# ── Root health endpoint (Replit deployment healthcheck) ──
-@app.route("/health", methods=["GET"])
-def root_health():
-    """Simple health check that always returns 200."""
-    return jsonify({"status": "ok", "service": "luxor-backend"}), 200
 
 # ── Catch-all: serve Vite frontend from luxor-hub/dist/ ──
 import os as _os
