@@ -865,7 +865,7 @@ const Closet = () => {
         }
       }
       // Insert directly into Supabase clothing_items table
-      const newItemId = crypto.randomUUID().slice(0, 8);
+      const newItemId = crypto.randomUUID();
       const { error: insertErr } = await supabase.from("clothing_items").insert({
         id: newItemId,
         user_id: user.id,
