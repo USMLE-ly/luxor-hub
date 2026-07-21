@@ -67,8 +67,6 @@ const RouteTracker = () => {
   return null;
 };
 
-import AnimatedLoader from "@/components/ui/animated-loader-1";
-const Loading = () => <AnimatedLoader />;
 
 /** Tracks when a Suspense child mounts (helps debug stuck loaders) */
 function SuspenseTracker({ name, children }: { name: string; children: React.ReactNode }) {
