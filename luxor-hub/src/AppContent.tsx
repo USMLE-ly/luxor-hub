@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route, useLocation, Navigate } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
+// framer-motion removed from route-level animation
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "next-themes";
 import { HelmetProvider } from "react-helmet-async";
@@ -86,14 +86,7 @@ const AppContent = () => {
           <ErrorBoundary>
           <React.Suspense fallback={null}><SupportWidget /></React.Suspense>
           <React.Suspense fallback={<div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" /></div>}>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={location.pathname}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            >
+          <div key={location.pathname}>
           <Routes>
             <Route path="/" element={<ErrorBoundary><Index /></ErrorBoundary>} />
             <Route path="/auth" element={<ErrorBoundary><Auth /></ErrorBoundary>} />
@@ -139,8 +132,7 @@ const AppContent = () => {
             <Route path="/user-analysis" element={<PaywallGate><ErrorBoundary><UserAnalysis /></ErrorBoundary></PaywallGate>} />
             <Route path="*" element={<ErrorBoundary><NotFound /></ErrorBoundary>} />
           </Routes>
-            </motion.div>
-          </AnimatePresence>
+            </div>
           </React.Suspense>
           </ErrorBoundary>
         </AuthProvider>

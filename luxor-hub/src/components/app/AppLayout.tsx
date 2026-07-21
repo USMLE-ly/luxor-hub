@@ -1,11 +1,11 @@
 import { ReactNode, useEffect } from "react";
-import { motion } from "framer-motion";
+
 import { scheduleEngagementNudges, clearEngagementNudges } from "@/lib/notificationService";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
-import { PageTransition } from "./PageTransition";
-import { AnimatePresence } from "framer-motion";
+
+
 import { CreditExhaustedOverlay } from "./CreditExhaustedOverlay";
 import { CreditConfirmModal } from "./CreditConfirmModal";
 import { PageCreditBar } from "./PageCreditBar";
@@ -46,17 +46,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <AnimatePresence mode="wait">
-        <PageTransition key={location.pathname}>
-          <motion.main
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-          >
-            {children}
-          </motion.main>
-        </PageTransition>
-      </AnimatePresence>
+      <main>
+        {children}
+      </main>
       <BottomNav />
       <CreditExhaustedOverlay
         isOpen={exhausted}

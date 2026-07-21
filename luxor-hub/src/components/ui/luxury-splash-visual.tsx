@@ -87,7 +87,7 @@ export function LuxurySplashScreen({
     }, 3200);
     const forceExit = setTimeout(() => {
       setExit(true);
-    }, 5000);
+    }, 2500);
 
     return () => {
       clearTimeout(t1);
@@ -105,8 +105,8 @@ export function LuxurySplashScreen({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed inset-0 z-[99999]"
+          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          className="fixed inset-0 z-[99999] pointer-events-none"
         >
           <LuxurySplashVisual>
 

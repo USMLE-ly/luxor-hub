@@ -14,9 +14,20 @@ const SplashScreen = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if (!show) return;
+    // Safety: force-dismiss after 2.5 seconds regardless
+    const timer = setTimeout(() => setShow(false), 2500);
+    return () => clearTimeout(timer);
+  }, [show]);
+
   if (!show) return null;
 
-  return <LuxurySplashScreen tagline="Your Personal Fashion Intelligence" />;
+  return (
+    <div className="fixed inset-0 z-[99999]" style={{ pointerEvents: "none" }}>
+      <LuxurySplashScreen tagline="Your Personal Fashion Intelligence" />
+    </div>
+  );
 };
 
 export default SplashScreen;

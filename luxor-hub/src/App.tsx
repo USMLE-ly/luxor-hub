@@ -8,9 +8,9 @@ import { MotionConfig } from "framer-motion";
 
 const AppContent = lazy(() => import("./AppContent"));
 
-/* Non-blocking loader — no fixed positioning, no green, no overlay */
+/* Non-blocking loader — minimal spinner, no full-screen green */
 const Loading = () => (
-  <div className="flex items-center justify-center min-h-screen" style={{ background: "linear-gradient(180deg, #060f0d 0%, #0c2420 35%, #10352a 55%, #0a1f1a 80%, #060f0d 100%)" }}>
+  <div className="flex items-center justify-center min-h-screen bg-[#10352a]">
     <div className="flex flex-col items-center gap-4">
       <div className="w-8 h-8 border-2 border-[#E8C87A]/30 border-t-[#E8C87A] rounded-full animate-spin" />
       <span className="text-[10px] tracking-[0.4em] uppercase text-[#E8C87A]/25 font-sans">Loading</span>
