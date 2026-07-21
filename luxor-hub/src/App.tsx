@@ -6,10 +6,17 @@ import { initResilience } from "@/lib/resilience";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { MotionConfig } from "framer-motion";
 
-import AnimatedLoader from "@/components/ui/animated-loader-1";
 const AppContent = lazy(() => import("./AppContent"));
 
-const Loading = () => <AnimatedLoader />;
+/* Non-blocking loader — no fixed positioning, no green, no overlay */
+const Loading = () => (
+  <div className="flex items-center justify-center min-h-screen" style={{ background: "linear-gradient(180deg, #060f0d 0%, #0c2420 35%, #10352a 55%, #0a1f1a 80%, #060f0d 100%)" }}>
+    <div className="flex flex-col items-center gap-4">
+      <div className="w-8 h-8 border-2 border-[#E8C87A]/30 border-t-[#E8C87A] rounded-full animate-spin" />
+      <span className="text-[10px] tracking-[0.4em] uppercase text-[#E8C87A]/25 font-sans">Loading</span>
+    </div>
+  </div>
+);
 
 function isChunkLoadError(error: any): boolean {
   return (
@@ -52,7 +59,7 @@ class AppErrorBoundary extends Component<
     if (this.state.hasError) {
       const isChunk = this.state.isChunkError;
       return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-background p-8 text-center">
+        <div className="flex flex-col items-center justify-center min-h-screen p-8 text-center" style={{ background: "linear-gradient(180deg, #060f0d 0%, #0c2420 35%, #10352a 55%, #0a1f1a 80%, #060f0d 100%)" }}>
           <div className="max-w-md">
             <div className={`w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center ${isChunk ? 'bg-gold/20' : 'bg-red-500/20'}`}>
               <svg className={`w-8 h-8 ${isChunk ? 'text-gold' : 'text-red-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -76,9 +83,6 @@ class AppErrorBoundary extends Component<
             >
               {isChunk ? 'Load Latest Version' : 'Try Again'}
             </button>
-            <p className="mt-4 text-[10px] text-gray-600 font-mono">
-              {isChunk ? 'CIPHER: Chunk sync required' : (this.state.error?.message?.slice(0, 80) || '')}
-            </p>
           </div>
         </div>
       );
@@ -129,4 +133,4 @@ const App = () => (
 );
 
 export default App;
-// deploy 1784652154
+// deploy-fix-1753141800
