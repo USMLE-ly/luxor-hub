@@ -489,7 +489,7 @@ const MonthlyReportInner = () => {
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
                 className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md shadow-lg shadow-forest/40 p-4 overflow-hidden">
                 <div className="flex items-center gap-2 mb-3">
-                  <ChartPie className="w-4 h-4 text-primary" />
+                  <ChartPieSlice className="w-4 h-4 text-primary" />
                   <p className="text-[10px] font-sans font-semibold text-muted-foreground uppercase tracking-[0.15em]">Occasion Breakdown</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
