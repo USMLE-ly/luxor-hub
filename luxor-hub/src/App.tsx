@@ -6,10 +6,13 @@ import { initResilience } from "@/lib/resilience";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { MotionConfig } from "framer-motion";
 
-import AnimatedLoader from "@/components/ui/animated-loader-1";
 const AppContent = lazy(() => import("./AppContent"));
 
-const Loading = () => <AnimatedLoader />;
+const Loading = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+  </div>
+);
 
 function isChunkLoadError(error: any): boolean {
   return (

@@ -2,7 +2,7 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import AnimatedLoader from "@/components/ui/animated-loader-1";
+
 
 /**
  * Wraps app routes behind a paywall check.
@@ -64,7 +64,7 @@ const PaywallGate = ({ children }: { children: React.ReactNode }) => {
   if (!isReady || loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <AnimatedLoader />
+        <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
       </div>
     );
   }
@@ -75,7 +75,7 @@ const PaywallGate = ({ children }: { children: React.ReactNode }) => {
   if (subLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <AnimatedLoader />
+        <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
       </div>
     );
   }
