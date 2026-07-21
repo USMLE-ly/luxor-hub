@@ -76,8 +76,10 @@ class SpendTracker:
     def __init__(self):
         self._lock = Lock()
         self._usage: Dict[str, Dict[str, int]] = defaultdict(lambda: {"count": 0, "tokens": 0})
+        self._monthly: Dict[str, Dict[str, int]] = defaultdict(lambda: {"count": 0, "tokens": 0})
         self._last_reset = datetime.utcnow().date()
         self._last_flush = time.time()
+        self._flush_count = 0
     
     def _check_reset(self):
         """Reset counters if it's a new day (UTC)."""
@@ -356,6 +358,14 @@ def ai_endpoint(f):
         
         # ── Resolve user tier from Supabase ──
         tier = resolve_user_tier(user_id)
+        
+        # A/B test: maybe upgrade tier for experiment group
+        try:
+            from backend.ab_testing import ab_manager
+            tier = ab_manager.get_effective_tier(user_id, tier)
+        except ImportError:
+            pass
+        
         g.user_tier = tier
         
         # ── Layer 2: Request Validation ──

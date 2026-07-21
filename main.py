@@ -134,6 +134,15 @@ from backend.routes.analyze import init_routes as init_analyze_routes
 from backend.routes.health import init_routes as init_health_routes
 
 init_analyze_routes(app)
+
+# PayPal webhook (no auth — PayPal sends unsigned POSTs)
+# Initialize Sentry error tracking
+from backend.monitoring import init_sentry
+init_sentry(app)
+
+# PayPal webhook (no auth — PayPal sends unsigned POSTs)
+from backend.routes.paypal_webhook import init_routes as init_paypal_webhook_routes
+init_paypal_webhook_routes(app)
 # ── Spend Tracking Summary ──────────────────────────────────────────────
 @app.route("/api/v1/spend/usage", methods=["GET"], strict_slashes=False)
 def spend_usage():
