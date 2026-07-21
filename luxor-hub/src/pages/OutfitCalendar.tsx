@@ -74,7 +74,6 @@ const weatherCodeToIcon = (code: number) => {
 };
 
 // Push notification helpers
-const { guard, remaining } = useCreditGuard();
 
   const requestNotificationPermission = async (): Promise<boolean> => {
   if (!("Notification" in window)) return false;
@@ -121,6 +120,7 @@ const OutfitCalendarInner = () => {
   const [autoFilling, setAutoFilling] = useState(false);
   const [flatLayEvent, setFlatLayEvent] = useState<CalendarEvent | null>(null);
   const [weatherData, setWeatherData] = useState<WeatherDay[]>([]);
+  const { guard, remaining } = useCreditGuard();
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [closetMap, setClosetMap] = useState<Map<string, string>>(new Map());
   const [notificationsEnabled, setNotificationsEnabled] = useState(
