@@ -10,8 +10,39 @@ export function hasTierAccess(userTier: PlanTier, requiredTier: PlanTier): boole
   return tierIndex(userTier) >= tierIndex(requiredTier);
 }
 
+// ── Credit-Based Limits ────────────────────────────────────────────────
+export const TIER_MONTHLY_CREDITS: Record<PlanTier, number> = {
+  free: 30,
+  starter: 200,
+  pro: 1000,
+  elite: 5000,
+};
+
+export const CREDIT_COSTS: Record<string, number> = {
+  analyze_outfit: 5,
+  style_analyze: 3,
+  style_recommendations: 3,
+  outfit_review: 2,
+  generate_outfits: 4,
+  pro_tweak: 8,
+  closet_analyze: 3,
+  stylist_explore: 2,
+  stylist_generate: 4,
+};
+
+export function getEstimatedAnalyses(tier: PlanTier): number {
+  const credits = TIER_MONTHLY_CREDITS[tier];
+  const avgCost = 4; // average cost per AI action
+  return Math.floor(credits / avgCost);
+}
+
+export function hasCreditsRemaining(creditsRemaining: number, actionCost: number): boolean {
+  return creditsRemaining >= actionCost;
+}
+
 export const PLAN_LIMITS = {
   free: {
+    monthlyCredits: 30,
     aiSuggestionsPerDay: 3,
     closetItems: 15,
     styleDna: "basic" as const,
@@ -29,6 +60,7 @@ export const PLAN_LIMITS = {
     prioritySupport: false,
   },
   starter: {
+    monthlyCredits: 200,
     aiSuggestionsPerDay: 10,
     closetItems: 50,
     styleDna: "basic" as const,
@@ -46,6 +78,7 @@ export const PLAN_LIMITS = {
     prioritySupport: false,
   },
   pro: {
+    monthlyCredits: 1000,
     aiSuggestionsPerDay: Infinity,
     closetItems: Infinity,
     styleDna: "full" as const,
@@ -63,6 +96,7 @@ export const PLAN_LIMITS = {
     prioritySupport: false,
   },
   elite: {
+    monthlyCredits: 5000,
     aiSuggestionsPerDay: Infinity,
     closetItems: Infinity,
     styleDna: "full" as const,

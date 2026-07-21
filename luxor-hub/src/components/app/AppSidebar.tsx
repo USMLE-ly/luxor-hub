@@ -1,8 +1,9 @@
-import {TShirt, MagicWand, ChatCircle, ChartBar, GearSix, SignOut, Sparkle, ArrowsOut, User, Scan, Trophy, Flame, Bell, CalendarDots, SquaresFour, Video, PaintBrush, StackSimple, GlobeHemisphereWest, Crown, CurrencyDollar} from "@phosphor-icons/react";
+import {TShirt, MagicWand, ChatCircle, ChartBar, GearSix, SignOut, Sparkle, ArrowsOut, User, Scan, Trophy, Flame, Bell, CalendarDots, SquaresFour, Video, PaintBrush, StackSimple, GlobeHemisphereWest, Crown, CurrencyDollar, Lightning} from "@phosphor-icons/react";
 import { NotificationBell } from "./NotificationBell";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePlanTier } from "@/hooks/usePlanTier";
+import { CreditBadge } from "@/components/app/CreditBadge";
 import type { PlanTier } from "@/lib/planRestrictions";
 import { useNavigate } from "react-router-dom";
 import {
@@ -88,6 +89,13 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      {/* Credit balance badge */}
+      {!collapsed && (
+        <div className="px-2 py-2">
+          <CreditBadge />
+        </div>
+      )}
 
       <div className="mt-auto p-4 border-t border-sidebar-border">
         {!collapsed && (

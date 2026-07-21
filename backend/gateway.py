@@ -62,8 +62,24 @@ AI_ENDPOINTS = {
     "/api/v1/generate-outfits",
     "/api/v1/pro-tweak/generate",
     "/api/v1/closet/analyze-item",
+    "/api/v1/stylist-explore",
+    "/api/v1/stylist-generate",
 }
 
+
+
+# ── Endpoint → Credit Action Mapping ────────────────────────────────────
+ENDPOINT_CREDIT_ACTION = {
+    "/api/v1/analyze-outfit":       "analyze_outfit",
+    "/api/v1/style-analyze":        "style_analyze",
+    "/api/v1/style-recommendations": "style_recommendations",
+    "/api/v1/outfit-review":        "outfit_review",
+    "/api/v1/generate-outfits":     "generate_outfits",
+    "/api/v1/pro-tweak/generate":   "pro_tweak",
+    "/api/v1/closet/analyze-item":  "closet_analyze",
+    "/api/v1/stylist-explore":      "stylist_explore",
+    "/api/v1/stylist-generate":     "stylist_generate",
+}
 
 # ── In-Memory Spend Tracker ─────────────────────────────────────────────
 
@@ -377,24 +393,47 @@ def ai_endpoint(f):
                 _log.warning("[GATEWAY] Payload rejected for %s: %s", user_id[:8], payload_error)
                 return jsonify({"error": payload_error, "code": "PAYLOAD_TOO_LARGE"}), 413
         
-        # ── Layer 3: Spend Tracking ──
+        # ── Layer 3: Credit-Based Spend Tracking ──
         endpoint = request.path.rstrip("/")
         if endpoint in AI_ENDPOINTS:
-            cap_error = _tracker.check_cap(user_id, tier)
-            if cap_error:
-                _log.warning("[GATEWAY] Cap exceeded for %s (tier=%s): %s", user_id[:8], tier, cap_error["message"])
-                return jsonify(cap_error), 429
+            # Determine credit action for this endpoint
+            credit_action = ENDPOINT_CREDIT_ACTION.get(endpoint)
             
-            # Record this request
+            if credit_action:
+                from backend.credits import credit_manager
+                credit_result = credit_manager.consume(user_id, credit_action, tier)
+                
+                if "error" in credit_result:
+                    _log.warning("[GATEWAY] Credit check failed for %s (tier=%s): %s", user_id[:8], tier, credit_result.get("message", credit_result["error"]))
+                    return jsonify({
+                        "error": "Insufficient credits",
+                        "message": credit_result.get("message", "Not enough credits for this action."),
+                        "credits_needed": credit_result.get("credits_needed", 0),
+                        "credits_remaining": credit_result.get("credits_remaining", 0),
+                        "credits_allocated": credit_result.get("credits_allocated", 0),
+                        "tier": tier,
+                        "upgrade_url": "/pricing",
+                        "code": "CREDITS_EXCEEDED",
+                    }), 429
+                
+                # Log successful credit consumption
+                g.credit_cost = credit_result.get("cost", 0)
+                g.credits_remaining = credit_result.get("credits_remaining", 0)
+                _log.info(
+                    "[GATEWAY] %s accessed %s — credits: -%d (remaining: %d, tier=%s)",
+                    user_id[:8], endpoint, credit_result.get("cost", 0),
+                    credit_result.get("credits_remaining", 0), tier,
+                )
+            else:
+                _log.info("[GATEWAY] %s accessed %s (no credit cost, tier=%s)", user_id[:8], endpoint, tier)
+            
+            # Also track in SpendKeeper for analytics
             _tracker.record_request(user_id)
             usage = _tracker.get_usage(user_id)
-            cap = TIER_DAILY_CAPS.get(tier, TIER_DAILY_CAPS["free"])
             _log.info(
-                "[GATEWAY] %s accessed %s — usage: %d/%d (tier=%s)",
-                user_id[:8], endpoint, usage["count"], cap, tier,
+                "[GATEWAY] %s accessed %s — requests today: %d (tier=%s)",
+                user_id[:8], endpoint, usage["count"], tier,
             )
-            # Check 80% threshold alert
-            alert = check_and_alert(user_id, tier, usage)
         
         return f(*args, **kwargs)
     return decorated

@@ -3346,6 +3346,78 @@ def gateway_status():
         "status": "ok",
     })
 
+
+
+# ── Credit System Endpoints ──────────────────────────────────────────────
+
+@app.route("/api/v1/credits/balance", methods=["GET"])
+@require_auth
+def credits_balance():
+    """Get current user's credit balance and allocation."""
+    user = g.current_user
+    user_id = user.get("sub", "")
+    tier = getattr(g, "user_tier", "free")
+    
+    from backend.credits import credit_manager
+    balance = credit_manager.get_balance(user_id)
+    allocation = credit_manager.get_tier_allocation(tier)
+    
+    return jsonify({
+        "user_id": user_id[:8] + "...",
+        "tier": tier,
+        "credits_allocated": allocation,
+        "credits_remaining": balance.get("credits_remaining", allocation),
+        "month": balance.get("month", ""),
+    })
+
+
+@app.route("/api/v1/credits/costs", methods=["GET"])
+def credits_costs():
+    """Return the credit cost table for each action (public endpoint for UI)."""
+    from backend.credits import credit_manager
+    costs = credit_manager.get_all_costs()
+    from backend.credits import TIER_MONTHLY_CREDITS
+    
+    return jsonify({
+        "credit_costs": costs,
+        "tier_allocations": TIER_MONTHLY_CREDITS,
+    })
+
+
+@app.route("/api/v1/credits/history", methods=["GET"])
+@require_auth
+def credits_history():
+    """Get recent credit consumption history."""
+    user = g.current_user
+    user_id = user.get("sub", "")
+    
+    import requests as _req
+    from backend.credits import SUPABASE_URL, SUPABASE_KEY
+    
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        return jsonify({"events": []})
+    
+    try:
+        resp = _req.get(
+            f"{SUPABASE_URL}/rest/v1/credit_events",
+            params={
+                "select": "*",
+                "user_id": f"eq.{user_id}",
+                "order": "created_at.desc",
+                "limit": "50",
+            },
+            headers={
+                "apikey": SUPABASE_KEY,
+                "Authorization": f"Bearer {SUPABASE_KEY}",
+            },
+            timeout=5,
+        )
+        events = resp.json() if resp.status_code == 200 else []
+        return jsonify({"events": events})
+    except Exception:
+        return jsonify({"events": []})
+
+
 # Serve user-uploaded images with proper CORS headers
 @app.route("/images/<path:filename>")
 def serve_uploaded_image(filename):
