@@ -5,6 +5,7 @@ const SESSION_KEY = "luxor_splash_shown";
 
 const SplashScreen = () => {
   const [show, setShow] = useState(false);
+  const [fading, setFading] = useState(false);
 
   useEffect(() => {
     const alreadyShown = sessionStorage.getItem(SESSION_KEY);
@@ -16,15 +17,22 @@ const SplashScreen = () => {
 
   useEffect(() => {
     if (!show) return;
-    // Safety: force-dismiss after 2.5 seconds regardless
-    const timer = setTimeout(() => setShow(false), 2500);
-    return () => clearTimeout(timer);
+    // Start fade-out at 2s, fully remove at 2.6s
+    const fadeTimer = setTimeout(() => setFading(true), 2000);
+    const removeTimer = setTimeout(() => setShow(false), 2600);
+    return () => { clearTimeout(fadeTimer); clearTimeout(removeTimer); };
   }, [show]);
 
   if (!show) return null;
 
   return (
-    <div className="fixed inset-0 z-[99999]" style={{ pointerEvents: "none" }}>
+    <div
+      className="fixed inset-0 z-[99999] transition-opacity duration-500"
+      style={{
+        pointerEvents: "none",
+        opacity: fading ? 0 : 1,
+      }}
+    >
       <LuxurySplashScreen tagline="Your Personal Fashion Intelligence" />
     </div>
   );

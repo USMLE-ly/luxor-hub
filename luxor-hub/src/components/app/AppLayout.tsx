@@ -30,11 +30,14 @@ export function AppLayout({ children }: { children: ReactNode }) {
     return () => clearEngagementNudges();
   }, [isReady, user]);
 
-  // Auth still hydrating — subtle spinner only, NO full-screen overlay
+  // Auth still hydrating — centered spinner, no overlay
   if (!isReady || loading) {
     return (
-      <div className="flex items-center justify-center w-full h-20">
-        <div className="w-6 h-6 border-2 border-zinc-400 border-t-transparent rounded-full animate-spin" />
+      <div className="flex items-center justify-center min-h-[40vh]">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+          <span className="text-xs text-muted-foreground tracking-wide">Loading your wardrobe...</span>
+        </div>
       </div>
     );
   }

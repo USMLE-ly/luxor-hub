@@ -142,6 +142,24 @@ type MannequinPanel = "dna" | "pose" | "trace" | "measure" | null;
 type GarmentFit = "regular" | "slim" | "relaxed";
 type FabricType = "default" | "cotton" | "silk" | "denim" | "wool" | "leather";
 
+const CLOSET_CACHE_KEY = "luxor_closet_cache";
+
+function loadCachedCloset(userId: string): ClothingItem[] {
+  try {
+    const raw = localStorage.getItem(CLOSET_CACHE_KEY + "_" + userId);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed;
+  } catch { return []; }
+}
+
+function saveCachedCloset(userId: string, items: ClothingItem[]) {
+  try {
+    localStorage.setItem(CLOSET_CACHE_KEY + "_" + userId, JSON.stringify(items));
+  } catch {}
+}
+
 const Closet = () => {
   const { user } = useAuth();
   const modulesRef = useRef<Awaited<ReturnType<typeof loadMannequinModules>> | null>(null);
@@ -379,38 +397,48 @@ const Closet = () => {
       return [];
     }
   }, [user, apiBase]);
-  // Fetch closet items — re-runs when user auth resolves, with 3s brute-force timeout
+  // Fetch closet items — cache-first, then background refresh
   useEffect(() => {
-    let mounted = true;
     if (hasLoadedCloset.current) return;
     hasLoadedCloset.current = true;
-    const forceTimeout = setTimeout(() => {
-    }, 8000);
-    const load = async () => {
-      setLoading(true);
+    if (!user) return;
+
+    // Step 1: Show cached items instantly (no green flash)
+    const cached = loadCachedCloset(user.id);
+    if (cached.length > 0) {
+      setItems(cached);
+      setLoading(false);
+      syncCatalogItems(cached.map(toWardrobeItem));
+      restoreClothingFromIDB();
+    }
+
+    // Step 2: Fetch fresh data from API in background
+    const loadFresh = async () => {
       try {
         const mapped = await fetchItems();
-        if (mounted) {
-          setLoadError(null);
+        if (mapped.length > 0) {
           setItems(mapped);
-          // Bridge: push fetched items into Zustand so DressingRoom sees them
+          setLoadError(null);
+          saveCachedCloset(user.id, mapped);
           syncCatalogItems(mapped.map(toWardrobeItem));
-          // Restore 3D models from IndexedDB AFTER items are synced
           restoreClothingFromIDB();
-          clearTimeout(forceTimeout);
-          setLoading(false);
+        } else if (cached.length === 0) {
+          // API returned empty AND no cache — truly empty closet
+          setItems([]);
+          setLoadError(null);
         }
+        // If API returned empty but cache had items, keep cache (API might be down)
       } catch (e) {
-        console.warn("[CLOSET] Failed to load closet:", e);
-        if (mounted) {
+        console.warn("[CLOSET] API fetch failed, keeping cache:", e);
+        if (cached.length === 0) {
           setLoadError("Could not load your closet. Please check your connection.");
-          clearTimeout(forceTimeout);
-          setLoading(false);
         }
+      } finally {
+        setLoading(false);
       }
     };
-    load();
-  }, []); // one-time mount fetch  // Re-fetch when fetchItems changes (e.g. user auth resolves)
+    loadFresh();
+  }, [user]);
 
   // Auto-remove backgrounds when flat-lay view is active
   useEffect(() => {
@@ -788,6 +816,7 @@ const Closet = () => {
       setSelectedFile(null); setPreviewUrl(null);
       const refreshed = await fetchItems();
       setItems(refreshed);
+      if (user) saveCachedCloset(user.id, refreshed);
       // Push to Zustand so DressingRoom and other pages see the new item immediately
       syncCatalogItems(refreshed.map(toWardrobeItem));
     } catch (err) { handleError(err, "Upload failed"); }
@@ -802,7 +831,11 @@ const Closet = () => {
         body: JSON.stringify({ id }),
       });
       if (resp.ok) {
-        setItems((prev) => prev.filter((item) => item.id !== id));
+        setItems((prev) => {
+          const next = prev.filter((item) => item.id !== id);
+          if (user) saveCachedCloset(user.id, next);
+          return next;
+        });
         toast.success("Item removed");
       } else {
         const errData = await resp.json();
@@ -812,7 +845,14 @@ const Closet = () => {
       console.warn("[CLOSET] Backend delete failed, fallback to Supabase");
       const { error } = await supabase.from("clothing_items").delete().eq("id", id);
       if (error) toast.error("Failed to delete item");
-      else { setItems((prev) => prev.filter((item) => item.id !== id)); toast.success("Item removed"); }
+      else {
+        setItems((prev) => {
+          const next = prev.filter((item) => item.id !== id);
+          if (user) saveCachedCloset(user.id, next);
+          return next;
+        });
+        toast.success("Item removed");
+      }
     }
   }, [apiBase, user]);
   const handleClearAll = async () => {
