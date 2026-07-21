@@ -1,4 +1,3 @@
-import AnimatedLoader from "@/components/ui/animated-loader-1";
 import { ReactNode, useEffect } from "react";
 import log from "@/lib/diagnosticLogger";
 import { motion } from "framer-motion";
@@ -21,13 +20,11 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const { exhausted, exhaustedAction, exhaustedCost, setExhausted, confirmAction, confirmPending, cancelConfirm } = useCreditGuard();
 
   useEffect(() => {
-    // Only redirect after session hydration is complete (isReady)
     if (isReady && !user) {
       navigate("/auth", { replace: true });
     }
   }, [user, isReady, navigate]);
 
-  // Schedule re-engagement notifications
   useEffect(() => {
     if (isReady && user) {
       scheduleEngagementNudges();
@@ -35,24 +32,22 @@ export function AppLayout({ children }: { children: ReactNode }) {
     return () => clearEngagementNudges();
   }, [isReady, user]);
 
-  log("AUTH", "AppLayout", `isReady=${isReady}, loading=${loading}, user=${user ? user.id : "null"}`);
+  log("AUTH", "AppLayout", `isReady=${isReady}, loading=${loading}, user=${user ? user.id.slice(0,8) : "null"}`);
 
+  // Auth still hydrating — show subtle spinner, NOT the full-screen green AnimatedLoader
   if (!isReady || loading) {
-    log("AUTH", "AppLayout", "SHOWING AnimatedLoader (auth hydrating) — FIXED inset-0 z-50");
+    log("AUTH", "AppLayout", "Auth hydrating — showing non-blocking spinner");
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <AnimatedLoader />
+        <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
       </div>
     );
   }
 
+  // Not authenticated — return null (the useEffect above handles redirect)
   if (!user) {
-    log("AUTH", "AppLayout", "User null — SHOWING AnimatedLoader while redirecting to /auth");
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <AnimatedLoader />
-      </div>
-    );
+    log("AUTH", "AppLayout", "No user — returning null, redirect handled by useEffect");
+    return null;
   }
 
   return (
@@ -69,7 +64,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
         </PageTransition>
       </AnimatePresence>
       <BottomNav />
-      {/* Global credit exhaustion overlay */}
       <CreditExhaustedOverlay
         isOpen={exhausted}
         onClose={() => setExhausted(false)}

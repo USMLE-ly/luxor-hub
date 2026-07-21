@@ -1,4 +1,4 @@
-import AnimatedLoader from "@/components/ui/animated-loader-1";
+
 import { Navigate } from "react-router-dom";
 import log from "@/lib/diagnosticLogger";
 import { useAuth } from "@/contexts/AuthContext";
