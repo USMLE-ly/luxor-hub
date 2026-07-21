@@ -15,6 +15,7 @@ const OfflineIndicator = React.lazy(() => import("@/components/app/OfflineIndica
 const SupportWidget = React.lazy(() => import("@/components/support/SupportWidget"));
 const SplashScreen = React.lazy(() => import("@/components/app/SplashScreen"));
 const PaywallGate = React.lazy(() => import("@/components/app/PaywallGate"));
+const CreditUsage = lazy(() => import("@/pages/CreditUsage"));
 const Index = React.lazy(() => import("./pages/Index"));
 const Auth = React.lazy(() => import("./pages/Auth"));
 const Onboarding = React.lazy(() => import("./pages/Onboarding"));
