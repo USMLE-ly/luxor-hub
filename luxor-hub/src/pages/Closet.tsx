@@ -382,7 +382,7 @@ const Closet = () => {
     try {
       const { data: sbData, error: sbErr } = await supabase
         .from("clothing_items")
-        .select("id, name, category, color, photo_url, image_url, brand, occasion, price, season, style, notes")
+        .select("id, name, category, color, photo_url, brand, occasion, price, season, style, notes")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
       if (!sbErr && sbData && sbData.length > 0) {
@@ -397,7 +397,7 @@ const Closet = () => {
           season: item.season || null,
           occasion: item.occasion || null,
           style: item.style || null,
-          photo_url: item.photo_url || item.image_url || null,
+          photo_url: item.photo_url || null,
           notes: item.notes || null,
           price: item.price || null,
         }));
@@ -427,7 +427,7 @@ const Closet = () => {
               category: item.category || item.type || 'other',
               color: item.color || null,
               brand: item.brand || null,
-              photo_url: item.photo_url || item.image_url || null,
+              photo_url: item.photo_url || null,
               occasion: item.occasion || null,
               price: item.price || null,
             }, { onConflict: "id" });
