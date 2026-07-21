@@ -3353,6 +3353,7 @@ def gateway_status():
 @app.route("/api/v1/credits/balance", methods=["GET"])
 @require_auth
 def credits_balance():
+    _log.info("[CREDITS] Balance requested for user=%s", user.get("sub", "")[:8])
     """Get current user's credit balance and allocation."""
     user = g.current_user
     user_id = user.get("sub", "")
@@ -3372,7 +3373,9 @@ def credits_balance():
 
 
 @app.route("/api/v1/credits/costs", methods=["GET"])
+@limiter.limit("30 per minute")
 def credits_costs():
+    _log.info("[CREDITS] Cost table requested")
     """Return the credit cost table for each action (public endpoint for UI)."""
     from backend.credits import credit_manager
     costs = credit_manager.get_all_costs()
@@ -3387,6 +3390,7 @@ def credits_costs():
 @app.route("/api/v1/credits/history", methods=["GET"])
 @require_auth
 def credits_history():
+    _log.info("[CREDITS] History requested for user=%s", user.get("sub", "")[:8])
     """Get recent credit consumption history."""
     user = g.current_user
     user_id = user.get("sub", "")
@@ -3423,6 +3427,7 @@ def credits_history():
 @app.route("/api/v1/credits/allocate", methods=["POST"])
 @require_auth
 def credits_allocate():
+    _log.info("[CREDITS] Allocation requested for user=%s tier=%s", user_id[:8], tier)
     """Manually allocate credits for a tier (called after PayPal approval)."""
     user = g.current_user
     user_id = user.get("sub", "")

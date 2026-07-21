@@ -120,6 +120,7 @@ const AppContent = () => {
             <Route path="/calibration" element={<PaywallGate><ErrorBoundary><Calibration /></ErrorBoundary></PaywallGate>} />
 
             <Route path="/paywall" element={<ErrorBoundary><Paywall /></ErrorBoundary>} />
+            <Route path="/credits" element={<ErrorBoundary><CreditUsage /></ErrorBoundary>} />
             <Route path="/outfit-calendar" element={<PaywallGate><ErrorBoundary fallbackMessage="Calendar hit an error. Try refreshing."><OutfitCalendar /></ErrorBoundary></PaywallGate>} />
             <Route path="/mood-board" element={<PaywallGate><ErrorBoundary><MoodBoard /></ErrorBoundary></PaywallGate>} />
             <Route path="/video-analysis" element={<PaywallGate><ErrorBoundary><VideoAnalysis /></ErrorBoundary></PaywallGate>} />

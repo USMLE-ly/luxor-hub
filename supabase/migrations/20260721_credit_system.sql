@@ -93,3 +93,108 @@ BEGIN
       updated_at = now();
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ============================================================
+-- CRITICAL #3: Atomic credit consumption function (prevents race conditions)
+-- ============================================================
+-- This function atomically deducts credits, preventing double-spend
+-- from simultaneous AI requests. Returns success/error in one transaction.
+CREATE OR REPLACE FUNCTION public.consume_credits(
+  p_user_id TEXT,
+  p_action TEXT,
+  p_cost INTEGER
+)
+RETURNS TABLE(success BOOLEAN, credits_remaining INTEGER, error_message TEXT)
+LANGUAGE plpgsql SECURITY DEFINER
+AS $$
+DECLARE
+  v_month TEXT;
+  v_current_remaining INTEGER;
+BEGIN
+  v_month := to_char(now(), 'YYYY-MM');
+
+  -- Atomic: deduct credits only if sufficient balance exists
+  UPDATE public.credit_balances
+  SET credits_remaining = credits_remaining - p_cost,
+      updated_at = now()
+  WHERE user_id = p_user_id
+    AND month = v_month
+    AND credits_remaining >= p_cost
+  RETURNING credit_balances.credits_remaining INTO v_current_remaining;
+
+  IF v_current_remaining IS NULL THEN
+    -- Insufficient credits or no balance record
+    RETURN QUERY SELECT FALSE, 0, 'Insufficient credits'::TEXT;
+    RETURN;
+  END IF;
+
+  -- Log the event
+  INSERT INTO public.credit_events (user_id, action, cost, credits_remaining, created_at)
+  VALUES (p_user_id, p_action, p_cost, v_current_remaining, now());
+
+  RETURN QUERY SELECT TRUE, v_current_remaining, NULL::TEXT;
+END;
+$$;
+
+-- ============================================================
+-- HIGH #6: Credit rollover for paid tiers (20% of unused credits carry over)
+-- ============================================================
+CREATE OR REPLACE FUNCTION public.rollover_credits(p_user_id TEXT)
+RETURNS VOID
+LANGUAGE plpgsql SECURITY DEFINER
+AS $$
+DECLARE
+  v_prev_month TEXT;
+  v_curr_month TEXT;
+  v_prev_balance RECORD;
+  v_new_allocated INTEGER;
+  v_rollover INTEGER;
+  v_prev_tier TEXT;
+BEGIN
+  v_prev_month := to_char(now() - interval '1 month', 'YYYY-MM');
+  v_curr_month := to_char(now(), 'YYYY-MM');
+
+  -- Get previous month's balance
+  SELECT * INTO v_prev_balance
+  FROM public.credit_balances
+  WHERE user_id = p_user_id AND month = v_prev_month;
+
+  IF NOT FOUND OR v_prev_balance.credits_remaining <= 0 THEN
+    RETURN;
+  END IF;
+
+  -- Determine tier from subscription
+  SELECT plan_tier INTO v_prev_tier
+  FROM public.subscriptions
+  WHERE user_id = p_user_id AND status = 'active' LIMIT 1;
+
+  v_new_allocated := CASE COALESCE(v_prev_tier, 'free')
+    WHEN 'starter' THEN 200
+    WHEN 'pro' THEN 1000
+    WHEN 'elite' THEN 5000
+    ELSE 30
+  END;
+
+  -- 20% rollover for paid tiers, 0% for free
+  IF v_prev_tier IN ('starter', 'pro', 'elite') THEN
+    v_rollover := GREATEST(0, LEAST(
+      FLOOR(v_prev_balance.credits_remaining * 0.2)::INTEGER,
+      FLOOR(v_new_allocated * 0.2)::INTEGER  -- Cap rollover at 20% of new allocation
+    ));
+  ELSE
+    v_rollover := 0;
+  END IF;
+
+  -- Set new month's balance with rollover
+  INSERT INTO public.credit_balances (user_id, month, credits_allocated, credits_remaining)
+  VALUES (p_user_id, v_curr_month, v_new_allocated, v_new_allocated + v_rollover)
+  ON CONFLICT (user_id, month) DO UPDATE
+  SET credits_allocated = v_new_allocated,
+      credits_remaining = GREATEST(credit_balances.credits_remaining, v_new_allocated + v_rollover),
+      updated_at = now();
+
+  IF v_rollover > 0 THEN
+    RAISE NOTICE 'Rollover: user=% prev=% rollover=% new=%', p_user_id, v_prev_balance.credits_remaining, v_rollover, v_new_allocated + v_rollover;
+  END IF;
+END;
+$$;

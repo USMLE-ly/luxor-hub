@@ -17,6 +17,8 @@ export function CreditCostBanner({ action, className = "" }: CreditCostBannerPro
   const cost = CREDIT_COSTS[action] ?? 0;
   const remaining = data?.credits_remaining ?? 30;
   const canAfford = remaining >= cost;
+  const afterAction = Math.max(0, remaining - cost);
+  const projectedAnalyses = cost > 0 ? Math.floor(afterAction / cost) : 0;
   const percentage = data?.credits_allocated
     ? (remaining / data.credits_allocated) * 100
     : 100;
@@ -42,10 +44,15 @@ export function CreditCostBanner({ action, className = "" }: CreditCostBannerPro
         <span className="text-[11px] font-sans text-white/50">
           {cost} credits
         </span>
+        {canAfford && cost > 0 && (
+          <span className="text-[10px] font-sans text-white/25">
+            &rarr; {afterAction} left ({projectedAnalyses} more {projectedAnalyses === 1 ? "action" : "actions"})
+          </span>
+        )}
       </div>
       <div className="flex items-center gap-2">
         <span className="text-[11px] font-sans text-white/30">
-          {remaining} left
+          {remaining} remaining
         </span>
         {!canAfford && (
           <button

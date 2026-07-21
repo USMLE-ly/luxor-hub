@@ -54,7 +54,7 @@ export function CreditBadge() {
         />
       </div>
       <p className="text-[9px] font-sans text-white/30 mt-1 group-hover:text-white/50 transition-colors">
-        {remaining} of {allocated.toLocaleString()} remaining
+        ~{Math.floor(remaining / 4)} analyses left this month
       </p>
     </button>
   );

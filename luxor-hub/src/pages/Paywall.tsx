@@ -168,18 +168,32 @@ const Paywall = () => {
         });
         if (error) throw error;
 
-        // Step 2: Immediately allocate credits via API
-        try {
-          const { data: session } = await supabase.auth.getSession();
-          const token = session?.session?.access_token;
-          const apiUrl = import.meta.env.VITE_API_URL || "";
-          await fetch(`${apiUrl}/api/v1/credits/allocate`, {
-            method: "POST",
-            headers: { Authorization: `Bearer ${token}` },
-          });
-        } catch {
-          // Webhook will also allocate — this is a best-effort immediate allocation
-          console.warn("Immediate credit allocation failed, webhook will handle it");
+        // Step 2: Immediately allocate credits via API (with retry)
+        const allocateWithRetry = async (attempt = 0): Promise<boolean> => {
+          try {
+            const { data: session } = await supabase.auth.getSession();
+            const token = session?.session?.access_token;
+            const apiUrl = import.meta.env.VITE_API_URL || "";
+            const resp = await fetch(`${apiUrl}/api/v1/credits/allocate`, {
+              method: "POST",
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            if (!resp.ok) throw new Error(`Allocate failed: ${resp.status}`);
+            return true;
+          } catch (err) {
+            if (attempt < 3) {
+              // Exponential backoff: 1s, 2s, 4s
+              const delay = Math.pow(2, attempt) * 1000;
+              await new Promise((r) => setTimeout(r, delay));
+              return allocateWithRetry(attempt + 1);
+            }
+            console.error("[LUXOR] Credit allocation failed after 3 retries:", err);
+            return false;
+          }
+        };
+        const creditsAllocated = await allocateWithRetry();
+        if (!creditsAllocated) {
+          toast.info("Your subscription is active! Credits will sync shortly. If this persists, contact support@luxor.ly");
         }
 
         // Step 3: Invalidate local cache so tier updates immediately

@@ -7,11 +7,15 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
 import { PageTransition } from "./PageTransition";
 import { AnimatePresence } from "framer-motion";
+import { CreditExhaustedOverlay } from "./CreditExhaustedOverlay";
+import { CreditConfirmModal } from "./CreditConfirmModal";
+import { useCreditGuard } from "@/hooks/useCreditGuard";
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { user, loading, isReady } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { exhausted, exhaustedAction, exhaustedCost, setExhausted, confirmAction, confirmPending, cancelConfirm } = useCreditGuard();
 
   useEffect(() => {
     // Only redirect after session hydration is complete (isReady)
@@ -60,6 +64,19 @@ export function AppLayout({ children }: { children: ReactNode }) {
         </PageTransition>
       </AnimatePresence>
       <BottomNav />
+      {/* Global credit exhaustion overlay */}
+      <CreditExhaustedOverlay
+        isOpen={exhausted}
+        onClose={() => setExhausted(false)}
+        actionCost={exhaustedCost}
+        actionName={exhaustedAction}
+      />
+      <CreditConfirmModal
+        isOpen={!!confirmAction}
+        action={confirmAction || ""}
+        onConfirm={confirmPending}
+        onCancel={cancelConfirm}
+      />
     </div>
   );
 }

@@ -346,6 +346,42 @@ def check_and_alert(user_id: str, tier: str, usage: Dict[str, int]):
             }
     return None
 
+def _atomic_consume_credits(user_id: str, action: str, cost: int) -> Dict[str, Any]:
+    """Atomically consume credits using Supabase RPC to prevent double-spend."""
+    import requests as _req
+    from backend.credits import SUPABASE_URL, SUPABASE_KEY
+
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        return {"success": True, "credits_remaining": 9999}
+
+    try:
+        resp = _req.post(
+            f"{SUPABASE_URL}/rest/v1/rpc/consume_credits",
+            json={"p_user_id": user_id, "p_action": action, "p_cost": cost},
+            headers={
+                "apikey": SUPABASE_KEY,
+                "Authorization": f"Bearer {SUPABASE_KEY}",
+                "Content-Type": "application/json",
+            },
+            timeout=5,
+        )
+        if resp.status_code == 200:
+            result = resp.json()
+            if isinstance(result, list) and len(result) > 0:
+                return {
+                    "success": result[0].get("success", False),
+                    "credits_remaining": result[0].get("credits_remaining", 0),
+                    "error": result[0].get("error_message"),
+                }
+            return {"success": True, "credits_remaining": 9999}
+        _log.warning("[GATEWAY] Atomic consume failed with status %d", resp.status_code)
+        return {"success": True, "credits_remaining": 9999}
+    except Exception as exc:
+        _log.warning("[GATEWAY] Atomic consume exception: %s", exc)
+        return {"success": True, "credits_remaining": 9999}
+
+
+
 # ── Layer 1+2+3: Combined Gateway Decorator ─────────────────────────────
 
 def ai_endpoint(f):
@@ -401,27 +437,31 @@ def ai_endpoint(f):
             
             if credit_action:
                 from backend.credits import credit_manager
-                credit_result = credit_manager.consume(user_id, credit_action, tier)
-                
-                if "error" in credit_result:
-                    _log.warning("[GATEWAY] Credit check failed for %s (tier=%s): %s", user_id[:8], tier, credit_result.get("message", credit_result["error"]))
+                cost = credit_manager.get_action_cost(credit_action) or 0
+
+                # CRITICAL: Use atomic DB function to prevent double-spend
+                credit_result = _atomic_consume_credits(user_id, credit_action, cost)
+
+                if not credit_result.get("success"):
+                    _log.warning("[GATEWAY] Credit check failed for %s (tier=%s): %s", user_id[:8], tier, credit_result.get("error", "Unknown"))
+                    from backend.credits import TIER_MONTHLY_CREDITS
+                    allocated = TIER_MONTHLY_CREDITS.get(tier, 30)
                     return jsonify({
                         "error": "Insufficient credits",
-                        "message": credit_result.get("message", "Not enough credits for this action."),
-                        "credits_needed": credit_result.get("credits_needed", 0),
+                        "message": f"You need {cost} credits for {credit_action.replace('_', ' ')}, but only have {credit_result.get('credits_remaining', 0)}.",
+                        "credits_needed": cost,
                         "credits_remaining": credit_result.get("credits_remaining", 0),
-                        "credits_allocated": credit_result.get("credits_allocated", 0),
+                        "credits_allocated": allocated,
                         "tier": tier,
                         "upgrade_url": "/pricing",
                         "code": "CREDITS_EXCEEDED",
                     }), 429
-                
-                # Log successful credit consumption
-                g.credit_cost = credit_result.get("cost", 0)
+
+                g.credit_cost = cost
                 g.credits_remaining = credit_result.get("credits_remaining", 0)
                 _log.info(
                     "[GATEWAY] %s accessed %s — credits: -%d (remaining: %d, tier=%s)",
-                    user_id[:8], endpoint, credit_result.get("cost", 0),
+                    user_id[:8], endpoint, cost,
                     credit_result.get("credits_remaining", 0), tier,
                 )
             else:

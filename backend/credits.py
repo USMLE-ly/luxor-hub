@@ -71,8 +71,12 @@ class CreditManager:
         # Query Supabase
         balance = self._query_balance(user_id, current_month)
         if balance is None:
-            # No record yet — create with default allocation
-            balance = self._create_balance(user_id, current_month)
+            # HIGH #6: Try rollover first (20% of previous month for paid tiers)
+            self._try_rollover(user_id, current_month)
+            balance = self._query_balance(user_id, current_month)
+            if balance is None:
+                # Still no record — create with default allocation
+                balance = self._create_balance(user_id, current_month)
         
         self._balances[user_id] = balance
         return balance
@@ -251,6 +255,26 @@ class CreditManager:
             )
         except Exception as exc:
             _log.warning("[CREDITS] Event log failed: %s", exc)
+
+    def _try_rollover(self, user_id: str, current_month: str):
+        """Attempt to roll over credits from previous month (paid tiers only)."""
+        if not SUPABASE_URL or not SUPABASE_KEY:
+            return
+        try:
+            resp = requests.post(
+                f"{SUPABASE_URL}/rest/v1/rpc/rollover_credits",
+                json={"p_user_id": user_id},
+                headers={
+                    "apikey": SUPABASE_KEY,
+                    "Authorization": f"Bearer {SUPABASE_KEY}",
+                    "Content-Type": "application/json",
+                },
+                timeout=5,
+            )
+            if resp.status_code == 200:
+                _log.info("[CREDITS] Rollover attempted for user=%s", user_id[:8])
+        except Exception as exc:
+            _log.warning("[CREDITS] Rollover failed: %s", exc)
 
 
 # Global singleton

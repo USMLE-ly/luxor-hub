@@ -17,15 +17,44 @@ const PaywallGate = ({ children }: { children: React.ReactNode }) => {
     queryFn: async () => {
       if (!user) return false;
 
+      // Check for active subscription
       const { data } = await supabase
         .from("subscriptions")
-        .select("id, plan_tier")
+        .select("id, plan_tier, status")
         .eq("user_id", user.id)
-        .eq("status", "active")
         .limit(1)
         .maybeSingle();
 
-      return !!data;
+      if (data?.status === "active") return true;
+
+      // CRITICAL: If subscription exists but status is not active (pending),
+      // the user likely closed the browser before onApprove completed.
+      // The webhook may have already activated it. Try to recover.
+      if (data?.status === "pending" || (data && data.status !== "active")) {
+        // Re-trigger credit allocation in case webhook already set status
+        try {
+          const { data: session } = await supabase.auth.getSession();
+          const token = session?.session?.access_token;
+          const apiUrl = import.meta.env.VITE_API_URL || "";
+          const resp = await fetch(`${apiUrl}/api/v1/credits/allocate`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (resp.ok) {
+            // Credits allocated — mark subscription as active
+            await supabase
+              .from("subscriptions")
+              .update({ status: "active" })
+              .eq("id", data.id);
+            return true;
+          }
+        } catch {
+          // Recovery failed — let them through anyway, webhook will fix it
+          return true;
+        }
+      }
+
+      return false;
     },
     enabled: !!user && isReady,
     staleTime: 5 * 60 * 1000,
