@@ -13,7 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 const PaywallGate = ({ children }: { children: React.ReactNode }) => {
   const { user, loading, isReady } = useAuth();
 
-  // Always query the DB for subscription status — no localStorage bypass
+  // Always query the DB for subscription status — with timeout protection
   const { data: hasAccess, isLoading: subLoading } = useQuery({
     queryKey: ["subscription-check", user?.id],
     queryFn: async () => {
@@ -29,21 +29,26 @@ const PaywallGate = ({ children }: { children: React.ReactNode }) => {
 
       if (data?.status === "active") return true;
 
-      // CRITICAL: If subscription exists but status is not active (pending),
-      // the user likely closed the browser before onApprove completed.
-      // The webhook may have already activated it. Try to recover.
+      // If subscription exists but status is not active (pending),
+      // try to recover — but with a strict 8-second timeout
       if (data?.status === "pending" || (data && data.status !== "active")) {
-        // Re-trigger credit allocation in case webhook already set status
         try {
           const { data: session } = await supabase.auth.getSession();
           const token = session?.session?.access_token;
           const apiUrl = import.meta.env.VITE_API_URL || "";
+          
+          // CRITICAL: Add AbortController timeout to prevent hanging on sleeping backends
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 8000);
+          
           const resp = await fetch(`${apiUrl}/api/v1/credits/allocate`, {
             method: "POST",
             headers: { Authorization: `Bearer ${token}` },
+            signal: controller.signal,
           });
+          clearTimeout(timeoutId);
+          
           if (resp.ok) {
-            // Credits allocated — mark subscription as active
             await supabase
               .from("subscriptions")
               .update({ status: "active" })
@@ -51,7 +56,7 @@ const PaywallGate = ({ children }: { children: React.ReactNode }) => {
             return true;
           }
         } catch {
-          // Recovery failed — let them through anyway, webhook will fix it
+          // Recovery failed or timed out — let them through anyway
           return true;
         }
       }
@@ -65,10 +70,10 @@ const PaywallGate = ({ children }: { children: React.ReactNode }) => {
   log("AUTH", "PaywallGate", `isReady=${isReady}, loading=${loading}, user=${user ? user.id.slice(0,8) : "null"}, subLoading=${subLoading}, hasAccess=${hasAccess}`);
 
   if (!isReady || loading) {
-    log("AUTH", "PaywallGate", "SHOWING AnimatedLoader — auth not ready");
+    log("AUTH", "PaywallGate", "Auth not ready — showing non-blocking spinner");
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <AnimatedLoader />
+        <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
       </div>
     );
   }
@@ -77,10 +82,10 @@ const PaywallGate = ({ children }: { children: React.ReactNode }) => {
   return <Navigate to="/auth" replace />;
 
   if (subLoading) {
-    log("AUTH", "PaywallGate", "SHOWING AnimatedLoader — subscription check in progress");
+    log("AUTH", "PaywallGate", "Subscription check in progress — showing non-blocking spinner");
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <AnimatedLoader />
+        <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
       </div>
     );
   }
