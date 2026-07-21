@@ -14,6 +14,7 @@ import {Sparkle, Spinner, DownloadSimple, Palette, TShirt, MagicWand, Heart, Sha
 import { motion, AnimatePresence } from "framer-motion";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { RainbowButton } from "@/components/ui/rainbow-button";
+import { PageCreditBar } from "@/components/app/PageCreditBar";
 
 const GARMENT_TYPES = [
   "Dress", "Blazer", "Jacket", "Coat", "Top", "Blouse", "Shirt",

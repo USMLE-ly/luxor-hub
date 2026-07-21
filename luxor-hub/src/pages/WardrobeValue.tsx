@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import {CurrencyDollar, TrendDown, TrendUp, Warning, X, TShirt, Footprints, Watch, ShoppingBag} from "@phosphor-icons/react";
 import TierGate from "@/components/app/TierGate";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import { PageCreditBar } from "@/components/app/PageCreditBar";
 
 interface ClothingItem {
   id: string;

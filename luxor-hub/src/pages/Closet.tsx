@@ -160,6 +160,18 @@ function saveCachedCloset(userId: string, items: ClothingItem[]) {
   } catch {}
 }
 
+
+/** Get Supabase access token for authenticated API calls */
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  try {
+    const { supabase } = await import("@/integrations/supabase/client");
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token;
+    if (token) return { "Authorization": `Bearer ${token}` };
+  } catch {}
+  return {};
+}
+
 const Closet = () => {
   const { user } = useAuth();
   const modulesRef = useRef<Awaited<ReturnType<typeof loadMannequinModules>> | null>(null);
@@ -371,7 +383,7 @@ const Closet = () => {
         setTimeout(() => reject(new Error("Request timed out")), 10000)
       );
       const resp = await Promise.race([
-        fetch(apiBase + '/api/v1/closet/list-items?user_id=' + encodeURIComponent(user.id)),
+        fetch(apiBase + '/api/v1/closet/list-items?user_id=' + encodeURIComponent(user.id), { headers: await getAuthHeaders() }),
         timeoutPromise,
       ]);
       const data = await resp.json();
@@ -720,9 +732,10 @@ const Closet = () => {
       const timeoutId = setTimeout(() => controller.abort(), 45000);
 
       const apiBase = getApiUrl();
+      const authH = await getAuthHeaders();
       const resp = await fetch(apiBase + '/api/v1/closet/analyze-item', {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authH },
         body: JSON.stringify({ image_b64: rawB64, item_name: newItem.name }),
         signal: controller.signal,
       });
@@ -790,9 +803,10 @@ const Closet = () => {
         const compressed = await compressImage(dataUrl);
         image_b64 = compressed.includes(",") ? compressed.split(",")[1] : compressed;
       }
+      const addAuthH = await getAuthHeaders();
       const resp = await fetch(apiBase + "/api/v1/closet/add-item", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...addAuthH },
         body: JSON.stringify({
           name: itemName,
           type: newItem.category || "other",
@@ -825,9 +839,10 @@ const Closet = () => {
 
   const handleDelete = useCallback(async (id: string) => {
     try {
+      const delAuthH = await getAuthHeaders();
       const resp = await fetch(apiBase + "/api/v1/closet/delete-item", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...delAuthH },
         body: JSON.stringify({ id }),
       });
       if (resp.ok) {

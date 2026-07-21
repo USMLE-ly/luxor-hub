@@ -12,6 +12,7 @@ import {UploadSimple, Spinner, Sparkle, Camera, DownloadSimple, ArrowRight, Imag
 import { motion, AnimatePresence } from "framer-motion";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { RainbowButton } from "@/components/ui/rainbow-button";
+import { PageCreditBar } from "@/components/app/PageCreditBar";
 
 interface SavedDesign {
   id: string;

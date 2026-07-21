@@ -11,6 +11,7 @@ import {Trophy, Crown, Medal, Flame, Clock, Spinner, User, Sparkle, CaretRight, 
 import { motion } from "framer-motion";
 import { PremiumSkeleton, PremiumCardSkeleton, PremiumTextSkeleton } from "@/components/ui/premium-skeleton";
 import { useNavigate } from "react-router-dom";
+import { PageCreditBar } from "@/components/app/PageCreditBar";
 
 interface ChallengeEntry {
   user_id: string;

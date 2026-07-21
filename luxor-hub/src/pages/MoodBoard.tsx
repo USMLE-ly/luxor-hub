@@ -8,6 +8,7 @@ import {SquaresFour, Plus, TrashSimple, Image, TextT, Palette, Link, X, DotsSixV
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { PageCreditBar } from "@/components/app/PageCreditBar";
 
 interface BoardItem {
   id: string;
