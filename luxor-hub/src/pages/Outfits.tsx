@@ -41,6 +41,7 @@ const Outfits = () => {
   const { user } = useAuth();
   const { styleProfile } = useUserProfile();
   const { items: closetItems } = useClosetItems();
+  const { guard } = useCreditGuard();
 
   const [occasion, setOccasion] = useState("everyday");
   const [mood, setMood] = useState("confident");

@@ -53,6 +53,7 @@ interface MultiAngleResult {
 
 export default function VideoAnalysis() {
   const { user } = useAuth();
+  const { guard } = useCreditGuard();
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [frames, setFrames] = useState<FrameAnalysis[]>([]);

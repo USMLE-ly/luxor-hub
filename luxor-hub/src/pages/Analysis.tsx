@@ -111,6 +111,7 @@ const itemAnim = {
 export default function Analysis() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { guard } = useCreditGuard();
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);

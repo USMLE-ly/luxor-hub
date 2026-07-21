@@ -149,6 +149,7 @@ const Closet = () => {
   // Pre-load 3D modules in background on mount
   useEffect(() => { loadMannequinModules().then(m => { modulesRef.current = m; }); }, []);
   const { handleError } = useErrorHandler();
+  const { guard } = useCreditGuard();
   const { tier } = usePlanTier();
   const itemLimit = PLAN_LIMITS[tier].closetItems;
   const [flatLayView, setFlatLayView] = useState(false);

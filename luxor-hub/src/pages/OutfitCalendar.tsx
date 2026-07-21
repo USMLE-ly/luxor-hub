@@ -90,7 +90,6 @@ const scheduleNotification = (title: string, body: string, delayMs: number) => {
   if (delayMs <= 0) return;
   setTimeout(() => {
     if (Notification.permission === "granted") {
-    if (!guard("outfit_review")) return;
       new Notification(title, {
         body,
         icon: "/pwa-192.png",
