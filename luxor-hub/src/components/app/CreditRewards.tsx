@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Gift, CheckCircle, Trophy, UserPlus, Shirt, Share } from "@phosphor-icons/react";
+import { Gift, CheckCircle, Trophy, UserPlus, TShirt, Share } from "@phosphor-icons/react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -20,7 +20,7 @@ export function CreditRewards() {
 
   const rewards: RewardAction[] = [
     { id: "complete_profile", label: "Complete your profile", credits: 10, icon: <UserPlus className="w-4 h-4" /> },
-    { id: "add_5_closet_items", label: "Add 5 closet items", credits: 5, icon: <Shirt className="w-4 h-4" /> },
+    { id: "add_5_closet_items", label: "Add 5 closet items", credits: 5, icon: <TShirt className="w-4 h-4" /> },
     { id: "share_outfit", label: "Share an outfit", credits: 3, icon: <Share className="w-4 h-4" /> },
     { id: "weekly_challenge", label: "Complete weekly challenge", credits: 15, icon: <Trophy className="w-4 h-4" /> },
   ];
