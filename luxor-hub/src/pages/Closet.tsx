@@ -387,7 +387,7 @@ const Closet = () => {
         timeoutPromise,
       ]);
       const data = await resp.json();
-      if (data.success && Array.isArray(data.items)) {
+      if (data.success && Array.isArray(data.items) && data.items.length > 0) {
         const mapped = data.items.map((item: any) => ({
           id: item.id || '',
           name: item.label || item.name || null,
@@ -404,8 +404,63 @@ const Closet = () => {
         }));
         return mapped;
       }
+      // FALLBACK: Try Supabase clothing_items table (shared with Calendar page)
+      try {
+        const { data: sbData, error: sbErr } = await supabase
+          .from("clothing_items")
+          .select("id, name, category, color, photo_url, image_url, brand, occasion, price")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false });
+        if (!sbErr && sbData && sbData.length > 0) {
+          console.log("[CLOSET] Falling back to Supabase, found", sbData.length, "items");
+          return sbData.map((item: any) => ({
+            id: item.id || '',
+            name: item.name || null,
+            category: item.category || 'other',
+            rawCategory: item.category || undefined,
+            color: item.color || null,
+            brand: item.brand || null,
+            season: null,
+            occasion: item.occasion || null,
+            style: null,
+            photo_url: item.photo_url || item.image_url || null,
+            notes: null,
+            price: item.price || null,
+          }));
+        }
+      } catch (sbFallbackErr) {
+        console.warn("[CLOSET] Supabase fallback also failed:", sbFallbackErr);
+      }
       return [];
     } catch (err) {
+      console.warn("[CLOSET] Qdrant fetch failed, trying Supabase:", err);
+      // FALLBACK: Try Supabase if Qdrant completely fails
+      try {
+        const { data: sbData, error: sbErr } = await supabase
+          .from("clothing_items")
+          .select("id, name, category, color, photo_url, image_url, brand, occasion, price")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false });
+        if (!sbErr && sbData && sbData.length > 0) {
+          console.log("[CLOSET] Supabase fallback found", sbData.length, "items");
+          return sbData.map((item: any) => ({
+            id: item.id || '',
+            name: item.name || null,
+            category: item.category || 'other',
+            rawCategory: item.category || undefined,
+            color: item.color || null,
+            brand: item.brand || null,
+            season: null,
+            occasion: item.occasion || null,
+            style: null,
+            photo_url: item.photo_url || item.image_url || null,
+            notes: null,
+            price: item.price || null,
+          }));
+        }
+      } catch (sbErr2) {
+        console.warn("[CLOSET] Supabase fallback also failed:", sbErr2);
+      }
       return [];
     }
   }, [user, apiBase]);
@@ -828,6 +883,22 @@ const Closet = () => {
       setUploadOpen(false);
       setNewItem({ name: "", category: "top", color: "", brand: "", season: "all-season", occasion: "", style: "", notes: "", price: "" });
       setSelectedFile(null); setPreviewUrl(null);
+      // Also insert into Supabase clothing_items so Calendar and other pages see it
+      try {
+        await supabase.from("clothing_items").insert({
+          id: data.item?.id || undefined,
+          user_id: user.id,
+          name: itemName,
+          category: newItem.category || "other",
+          color: newItem.color || "",
+          brand: newItem.brand || "",
+          occasion: newItem.occasion || "",
+          price: newItem.price ? parseFloat(newItem.price) : null,
+          photo_url: data.item?.image_url || "",
+        });
+      } catch (sbInsertErr) {
+        console.warn("[CLOSET] Supabase insert failed (non-fatal):", sbInsertErr);
+      }
       const refreshed = await fetchItems();
       setItems(refreshed);
       if (user) saveCachedCloset(user.id, refreshed);
