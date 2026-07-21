@@ -392,6 +392,8 @@ const Closet = () => {
           setItems(mapped);
           // Bridge: push fetched items into Zustand so DressingRoom sees them
           syncCatalogItems(mapped.map(toWardrobeItem));
+          // Restore 3D models from IndexedDB AFTER items are synced
+          restoreClothingFromIDB();
           clearTimeout(forceTimeout);
           setLoading(false);
         }
@@ -525,7 +527,7 @@ const Closet = () => {
   }, [user, gender, dna, pose, tracingUrl, tracingOpacity, showMeasurements, mannequinSaveKey]);
 
   // Fetch saved mannequin outfits
-  const fetchSavedOutfits = useCallback(async () => {
+  const loadSavedOutfits = useCallback(async () => {
     if (!user) return;
     setLoadingSavedOutfits(true);
     const data = await fetchSavedOutfits(user.id);
@@ -533,7 +535,7 @@ const Closet = () => {
     setLoadingSavedOutfits(false);
   }, [user]);
 
-  useEffect(() => { fetchSavedOutfits(); }, [fetchSavedOutfits]);
+  useEffect(() => { loadSavedOutfits(); }, [loadSavedOutfits]);
 
   const saveOutfit = async () => {
     if (!user || !outfitName.trim() || currentlyWearing.length === 0) return;
@@ -1617,9 +1619,12 @@ function ItemCard({
           </button>
         </div>
       </div>
-      <div className="p-2">
-        <p className="font-sans text-xs font-medium text-foreground break-words">{item.name || "Unnamed"}</p>
+      <div className="p-2 relative">
+        <p className="font-sans text-xs font-medium text-foreground break-words pr-7">{item.name || "Unnamed"}</p>
         <p className="text-[10px] text-muted-foreground font-sans capitalize">{item.category}</p>
+        <button onClick={() => onDelete(item.id)} className="absolute top-1 right-1 p-1 rounded-full bg-destructive/20 text-destructive hover:bg-destructive/40 transition-colors sm:hidden" aria-label="Delete item">
+          <TrashSimple className="h-3 w-3" />
+        </button>
       </div>
     </motion.div>
   );
