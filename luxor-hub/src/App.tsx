@@ -52,7 +52,7 @@ class AppErrorBoundary extends Component<
     if (this.state.hasError) {
       const isChunk = this.state.isChunkError;
       return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-forest p-8 text-center">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-background p-8 text-center">
           <div className="max-w-md">
             <div className={`w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center ${isChunk ? 'bg-gold/20' : 'bg-red-500/20'}`}>
               <svg className={`w-8 h-8 ${isChunk ? 'text-gold' : 'text-red-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
