@@ -202,8 +202,11 @@ export async function restoreClothingFromIDB(): Promise<void> {
 export function useWardrobeHydrated(): boolean {
   return useSyncExternalStore(
     (callback) => {
+      // Only subscribe to future hydration events.
+      // Do NOT call callback() here if already hydrated —
+      // getSnapshot already returns the correct value, and
+      // calling callback() causes an infinite re-render loop.
       const unsub = useWardrobeStore.persist.onFinishHydration(callback);
-      if (useWardrobeStore.persist.hasHydrated()) callback();
       return unsub;
     },
     () => useWardrobeStore.persist.hasHydrated(),
