@@ -88,7 +88,7 @@ const AppContent = () => {
         <AuthProvider>
           <ErrorBoundary>
           <React.Suspense fallback={null}><SupportWidget /></React.Suspense>
-          <React.Suspense fallback={<Loading />}>
+          <React.Suspense fallback={null}>
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}

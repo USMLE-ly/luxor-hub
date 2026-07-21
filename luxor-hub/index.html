@@ -34,11 +34,13 @@
       n.callMethod.apply(n,arguments):n.queue.push(arguments)};
       if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
       n.queue=[]}(window,document);
-      function loadFbPixel(){t=b.createElement(e);t.async=!0;
-      t.src='https://connect.facebook.net/en_US/fbevents.js';
-      s=b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t,s);
-      fbq('init','1567409157678795');fbq('track','PageView');}
+      function loadFbPixel(){try{
+      var t2=document.createElement('script');t2.async=!0;
+      t2.src='https://connect.facebook.net/en_US/fbevents.js';
+      var s2=document.getElementsByTagName('script')[0];
+      s2.parentNode.insertBefore(t2,s2);
+      fbq('init','1567409157678795');fbq('track','PageView');
+      }catch(e){console.warn('Facebook Pixel failed to load:',e);}}
       if(window.requestIdleCallback){requestIdleCallback(loadFbPixel, {timeout:3000});}
       else{setTimeout(loadFbPixel,2000);}
     </script>

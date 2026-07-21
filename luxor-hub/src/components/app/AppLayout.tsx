@@ -53,7 +53,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <PageCreditBar />
       <AnimatePresence mode="wait">
         <PageTransition key={location.pathname}>
           <motion.main
