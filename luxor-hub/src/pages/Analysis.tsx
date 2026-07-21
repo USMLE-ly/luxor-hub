@@ -12,6 +12,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import {UploadSimple, Camera, Spinner, InstagramLogo, TwitterLogo, ArrowSquareOut, ArrowsClockwise, Warning, StackSimple, File, Upload} from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
+import { useCreditGuard } from "@/hooks/useCreditGuard";
+import { CreditCostBanner } from "@/components/app/CreditCostBanner";
 import { ImageSwiper } from "@/components/ui/image-swiper";
 
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
@@ -220,6 +222,7 @@ export default function Analysis() {
     });
 
   const analyzeOutfit = async (file: File) => {
+    if (!guard("analyze_outfit")) return;
     setAnalysisFailed(false);
     setLoading(true);
     setGenerationStartTime(Date.now());
@@ -605,6 +608,7 @@ export default function Analysis() {
               <GlowingEffect spread={40} glow proximity={56} inactiveZone={0.01} borderWidth={3} />
               <Card className="glass-card border-0 shadow-none overflow-hidden">
                 <CardContent className="p-0">
+              <CreditCostBanner action="analyze_outfit" className="mb-3" />
                   {/* Upload area */}
                   <div
                     onClick={() => fileRef.current?.click()}

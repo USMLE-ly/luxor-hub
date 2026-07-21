@@ -38,7 +38,9 @@ export function usePlanTier(): { tier: PlanTier; isLoading: boolean } {
     },
     // Don't fetch until auth is fully hydrated
     enabled: !!user && isReady,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
 
   return { tier: tier ?? "free", isLoading };

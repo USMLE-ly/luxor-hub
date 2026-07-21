@@ -12,6 +12,8 @@ import {Video, Play, Pause, SkipForward, Spinner, Sparkle, Camera, TrashSimple, 
 import { motion, AnimatePresence } from "framer-motion";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { RainbowButton } from "@/components/ui/rainbow-button";
+import { useCreditGuard } from "@/hooks/useCreditGuard";
+import { CreditCostBanner } from "@/components/app/CreditCostBanner";
 
 interface FrameAnalysis {
   frameIndex: number;
@@ -79,6 +81,8 @@ export default function VideoAnalysis() {
   };
 
   const extractFrames = useCallback(async () => {
+    if (!guard("analyze_outfit")) return;
+
     if (!videoRef.current || !canvasRef.current) return;
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -246,6 +250,7 @@ export default function VideoAnalysis() {
             <GlowingEffect spread={40} glow proximity={64} inactiveZone={0.01} borderWidth={3} />
             <Card className="glass-card border-0 shadow-none">
               <CardContent className="p-8">
+              <CreditCostBanner action="analyze_outfit" className="mb-3" />
                 <motion.div
                   whileHover={{ scale: 1.01 }}
                   className="border-2 border-dashed border-border hover:border-primary/50 rounded-xl p-12 flex flex-col items-center gap-4 cursor-pointer transition-colors"

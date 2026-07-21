@@ -1,6 +1,8 @@
 import { getApiUrl } from "@/lib/api";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useCreditGuard } from "@/hooks/useCreditGuard";
+import { CreditCostBanner } from "@/components/app/CreditCostBanner";
 import { useWardrobeStore } from "@/store/useWardrobeStore";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
@@ -114,7 +116,10 @@ export default function DressingRoomPage() {
   const cal = useCalendarActions();
 
   /* ---------- Generate Outfit ---------- */
+  const { guard, remaining } = useCreditGuard();
+
   const generateOutfits = async (occasion: string, count: number) => {
+    if (!guard("pro_tweak")) return;
     if (!user) return;
     if (isGeneratingRef.current) return;
     isGeneratingRef.current = true;

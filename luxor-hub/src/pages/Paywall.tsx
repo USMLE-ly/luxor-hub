@@ -159,6 +159,7 @@ const Paywall = () => {
         return;
       }
       try {
+        // Step 1: Insert subscription into Supabase
         const { error } = await supabase.from("subscriptions").insert({
           user_id: user.id,
           paypal_subscription_id: subscriptionId,
@@ -166,6 +167,27 @@ const Paywall = () => {
           status: "active",
         });
         if (error) throw error;
+
+        // Step 2: Immediately allocate credits via API
+        try {
+          const { data: session } = await supabase.auth.getSession();
+          const token = session?.session?.access_token;
+          const apiUrl = import.meta.env.VITE_API_URL || "";
+          await fetch(`${apiUrl}/api/v1/credits/allocate`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${token}` },
+          });
+        } catch {
+          // Webhook will also allocate — this is a best-effort immediate allocation
+          console.warn("Immediate credit allocation failed, webhook will handle it");
+        }
+
+        // Step 3: Invalidate local cache so tier updates immediately
+        localStorage.removeItem(`luxor_plan_${user.id}`);
+        queryClient.invalidateQueries({ queryKey: ["plan-tier", user.id] });
+        queryClient.invalidateQueries({ queryKey: ["credit-balance", user.id] });
+        queryClient.invalidateQueries({ queryKey: ["subscription-check", user.id] });
+
         const eventParams = {
           value: tier === "starter" ? 9.00 : tier === "pro" ? 29.00 : 99.00,
           currency: "USD",
@@ -176,14 +198,15 @@ const Paywall = () => {
         };
         trackEvent("Subscribe", eventParams);
         trackEvent("Purchase", eventParams);
+
         grantAccess(tier);
-        toast.success("Welcome to LUXOR®! Your style journey begins now.");
+        toast.success(`Welcome to LUXOR® ${tier.charAt(0).toUpperCase() + tier.slice(1)}! Your credits have been allocated.`);
         navigate("/closet");
       } catch {
-        toast.error("Something went wrong saving your subscription.");
+        toast.error("Something went wrong saving your subscription. Your payment is safe — contact support@luxor.ly if needed.");
       }
     },
-    [user, navigate, grantAccess]
+    [user, navigate, grantAccess, queryClient]
   );
 
   const handleRestore = async () => {

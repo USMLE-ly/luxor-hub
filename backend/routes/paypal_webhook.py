@@ -92,6 +92,10 @@ def _handle_subscription_activated(resource):
         return
 
     _upsert_subscription(user_id, tier, "active", subscription_id)
+
+    # Allocate credits for the new tier
+    _allocate_credits_for_tier(user_id, tier)
+
     _log.info("[PAYPAL-WEBHOOK] Activated: user=%s tier=%s", user_id[:8], tier)
 
 
@@ -104,6 +108,8 @@ def _handle_subscription_updated(resource):
 
     if user_id:
         _upsert_subscription(user_id, tier, "active", subscription_id)
+        # Re-allocate credits for new tier on upgrade
+        _allocate_credits_for_tier(user_id, tier)
         _log.info("[PAYPAL-WEBHOOK] Updated: user=%s tier=%s", user_id[:8], tier)
 
 
@@ -122,6 +128,48 @@ def _handle_payment_completed(resource):
     subscription_id = resource.get("subscription_id", "")
     amount = resource.get("amount", {}).get("total", "0")
     _log.info("[PAYPAL-WEBHOOK] Payment: sub=%s amount=%s", subscription_id[:20], amount)
+
+
+def _allocate_credits_for_tier(user_id: str, tier: str):
+    """Allocate credits when subscription activates or upgrades."""
+    from backend.credits import TIER_MONTHLY_CREDITS
+    from datetime import datetime
+
+    allocated = TIER_MONTHLY_CREDITS.get(tier, 30)
+    current_month = datetime.utcnow().strftime("%Y-%m")
+
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        _log.warning("[PAYPAL-WEBHOOK] Cannot allocate credits - Supabase not configured")
+        return
+
+    try:
+        resp = requests.get(
+            f"{SUPABASE_URL}/rest/v1/credit_balances",
+            params={"select": "id", "user_id": f"eq.{user_id}", "month": f"eq.{current_month}", "limit": "1"},
+            headers={"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"},
+            timeout=5,
+        )
+
+        rows = resp.json() if resp.status_code == 200 else []
+        headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}", "Content-Type": "application/json"}
+
+        if rows:
+            requests.patch(
+                f"{SUPABASE_URL}/rest/v1/credit_balances?id=eq.{rows[0]['id']}",
+                json={"credits_allocated": allocated, "credits_remaining": allocated},
+                headers=headers, timeout=5,
+            )
+        else:
+            requests.post(
+                f"{SUPABASE_URL}/rest/v1/credit_balances",
+                json={"user_id": user_id, "month": current_month, "credits_allocated": allocated, "credits_remaining": allocated},
+                headers=headers, timeout=5,
+            )
+
+        _log.info("[PAYPAL-WEBHOOK] Credits %s for user=%s tier=%s alloc=%d",
+                  "updated" if rows else "allocated", user_id[:8], tier, allocated)
+    except Exception as exc:
+        _log.error("[PAYPAL-WEBHOOK] Credit allocation failed: %s", exc)
 
 
 def _extract_user_id(resource) -> Optional[str]:

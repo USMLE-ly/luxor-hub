@@ -21,6 +21,8 @@ import {MagicWand, Spinner, Heart, Sparkle, TShirt, CalendarPlus, CalendarDots, 
 import { ShareButton } from "@/components/app/ShareCard";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useCreditGuard } from "@/hooks/useCreditGuard";
+import { CreditCostBanner } from "@/components/app/CreditCostBanner";
 
 interface OutfitSuggestion {
   name: string;
@@ -54,6 +56,8 @@ const Outfits = () => {
   }, [user]);
 
   const generate = async () => {
+    if (!guard("generate_outfits")) return;
+
     if (closetItems.length < 2) {
       toast.error("Add at least 2 items to your closet first");
       return;

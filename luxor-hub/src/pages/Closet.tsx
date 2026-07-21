@@ -68,6 +68,8 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { useCreditGuard } from "@/hooks/useCreditGuard";
+import { CreditCostBanner } from "@/components/app/CreditCostBanner";
 
 interface ClothingItem {
   id: string;
@@ -644,6 +646,8 @@ const Closet = () => {
   const isAnalyzingRef = useRef(false);
 
   const analyzeWithAI = useCallback(async () => {
+    if (!guard("closet_analyze")) return;
+
     if (isAnalyzingRef.current) {
       console.log("[CRASH GUARD] Analysis already in progress. Blocking retrigger.");
       return;
@@ -1437,6 +1441,7 @@ const Closet = () => {
               </div>
             ) : (
               <div className="space-y-6">
+              <CreditCostBanner action="closet_analyze" className="mb-3" />
                 {Object.entries(categoryMap).map(([section, { categories }], si) => {
                   const sectionItems = filtered.filter((item) => categories.includes(item.category));
                   const placeholders = placeholdersBySection[section] || [];

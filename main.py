@@ -3418,6 +3418,87 @@ def credits_history():
         return jsonify({"events": []})
 
 
+
+
+@app.route("/api/v1/credits/allocate", methods=["POST"])
+@require_auth
+def credits_allocate():
+    """Manually allocate credits for a tier (called after PayPal approval)."""
+    user = g.current_user
+    user_id = user.get("sub", "")
+    tier = getattr(g, "user_tier", "free")
+    
+    from backend.credits import credit_manager, TIER_MONTHLY_CREDITS
+    from datetime import datetime
+    
+    allocated = TIER_MONTHLY_CREDITS.get(tier, TIER_MONTHLY_CREDITS["free"])
+    current_month = datetime.utcnow().strftime("%Y-%m")
+    
+    import requests as _req
+    from backend.credits import SUPABASE_URL, SUPABASE_KEY
+    
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        return jsonify({"error": "Supabase not configured"}), 500
+    
+    try:
+        # Check existing balance
+        resp = _req.get(
+            f"{SUPABASE_URL}/rest/v1/credit_balances",
+            params={
+                "select": "id, credits_remaining",
+                "user_id": f"eq.{user_id}",
+                "month": f"eq.{current_month}",
+                "limit": "1",
+            },
+            headers={
+                "apikey": SUPABASE_KEY,
+                "Authorization": f"Bearer {SUPABASE_KEY}",
+            },
+            timeout=5,
+        )
+        
+        rows = resp.json() if resp.status_code == 200 else []
+        headers = {
+            "apikey": SUPABASE_KEY,
+            "Authorization": f"Bearer {SUPABASE_KEY}",
+            "Content-Type": "application/json",
+        }
+        
+        if rows:
+            # Update — but only if new allocation is higher (never downgrade mid-month)
+            existing = rows[0].get("credits_allocated", 0)
+            if allocated > existing:
+                _req.patch(
+                    f"{SUPABASE_URL}/rest/v1/credit_balances?id=eq.{rows[0]['id']}",
+                    json={"credits_allocated": allocated, "credits_remaining": allocated},
+                    headers=headers, timeout=5,
+                )
+            return jsonify({
+                "credits_allocated": max(allocated, existing),
+                "credits_remaining": rows[0].get("credits_remaining", allocated),
+                "tier": tier,
+            })
+        else:
+            _req.post(
+                f"{SUPABASE_URL}/rest/v1/credit_balances",
+                json={
+                    "user_id": user_id,
+                    "month": current_month,
+                    "credits_allocated": allocated,
+                    "credits_remaining": allocated,
+                },
+                headers=headers, timeout=5,
+            )
+            return jsonify({
+                "credits_allocated": allocated,
+                "credits_remaining": allocated,
+                "tier": tier,
+            })
+    except Exception as exc:
+        _log.error("[CREDITS] Allocate failed: %s", exc)
+        return jsonify({"error": "Allocation failed"}), 500
+
+
 # Serve user-uploaded images with proper CORS headers
 @app.route("/images/<path:filename>")
 def serve_uploaded_image(filename):

@@ -10,6 +10,8 @@ import { humanizeText } from "@/lib/humanizer";
 
 import FashionReviewCard from "@/components/ui/fashion-review-card";
 import GlassTabs, { type GlassTab } from "@/components/ui/glass-tabs";
+import { useCreditGuard } from "@/hooks/useCreditGuard";
+import { CreditCostBanner } from "@/components/app/CreditCostBanner";
 
 interface StyleAnalysis {
   face_shape: string;
@@ -219,6 +221,8 @@ export default function StyleRecommendationsPage() {
   };
 
   // ── Consolidated full analysis: face/body → recommendations → outfit review ──
+  const { guard, remaining } = useCreditGuard();
+
   const handleFullAnalysis = async () => {
     if (!imagePreview) return;
     setAnalyzing(true);
@@ -241,6 +245,7 @@ export default function StyleRecommendationsPage() {
       // Strip 'for' key
       if (styleData && typeof styleData === 'object') delete (styleData as any).for;
       if (!styleData.success || !styleData.analysis) {
+    if (!guard("style_recommendations")) return;
         throw new Error(styleData.error || "Face/body analysis failed");
       }
       setAnalysis(styleData.analysis);

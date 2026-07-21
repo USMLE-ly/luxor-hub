@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useCreditGuard } from "@/hooks/useCreditGuard";
+import { CreditCostBanner } from "@/components/app/CreditCostBanner";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { useClosetItems } from "@/hooks/useClosetItems";
@@ -72,7 +74,9 @@ const weatherCodeToIcon = (code: number) => {
 };
 
 // Push notification helpers
-const requestNotificationPermission = async (): Promise<boolean> => {
+const { guard, remaining } = useCreditGuard();
+
+  const requestNotificationPermission = async (): Promise<boolean> => {
   if (!("Notification" in window)) return false;
   if (Notification.permission === "granted") return true;
   if (Notification.permission === "denied") return false;
@@ -84,6 +88,7 @@ const scheduleNotification = (title: string, body: string, delayMs: number) => {
   if (delayMs <= 0) return;
   setTimeout(() => {
     if (Notification.permission === "granted") {
+    if (!guard("outfit_review")) return;
       new Notification(title, {
         body,
         icon: "/pwa-192.png",
