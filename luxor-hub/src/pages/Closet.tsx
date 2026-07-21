@@ -163,6 +163,7 @@ const Closet = () => {
   const [uploading, setUploading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisStartTime, setAnalysisStartTime] = useState<number | null>(null);
+  const [analysisEta, setAnalysisEta] = useState<string | null>(null);
   const [newItem, setNewItem] = useState({
     name: "", category: "top", color: "", brand: "", season: "all-season", occasion: "", style: "", notes: "", price: "",
   });
@@ -734,7 +735,14 @@ const Closet = () => {
 
 
   const handleUpload = async () => {
-    if (!user) return;
+    if (!user) {
+      toast.error("Please sign in to add items.");
+      return;
+    }
+    if (!selectedFile && !newItem.name.trim()) {
+      toast.error("Please add a name or upload an image.");
+      return;
+    }
     if (items.length >= itemLimit) {
       toast.error(`Your ${tier} plan allows up to ${itemLimit} items. Upgrade for more.`);
       return;
