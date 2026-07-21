@@ -9,6 +9,7 @@ import { PageTransition } from "./PageTransition";
 import { AnimatePresence } from "framer-motion";
 import { CreditExhaustedOverlay } from "./CreditExhaustedOverlay";
 import { CreditConfirmModal } from "./CreditConfirmModal";
+import { FloatingCreditBadge } from "./FloatingCreditBadge";
 import { useCreditGuard } from "@/hooks/useCreditGuard";
 
 export function AppLayout({ children }: { children: ReactNode }) {
@@ -52,6 +53,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background pb-20">
+      <FloatingCreditBadge />
       <AnimatePresence mode="wait">
         <PageTransition key={location.pathname}>
           <motion.main
