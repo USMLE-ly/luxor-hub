@@ -16,3 +16,7 @@ PORT = "5173"
 deploymentTarget = "autoscale"
 run = "bash start.sh"
 build = ["bash", "build.sh"]
+
+[healthcheck]
+port = 5173
+path = "/ping"

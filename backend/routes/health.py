@@ -19,7 +19,12 @@ from backend.config import (
 
 
 def init_routes(app, get_closet_count: Optional[Callable[[], int]] = None):
-# Root "/" removed — catch-all in main.py serves the frontend
+    # Fast ping — no dependencies, instant response for Replit healthcheck
+    @app.route("/ping", methods=["GET"])
+    def ping():
+        return jsonify({"status": "ok"}), 200
+
+    # Root "/" removed — catch-all in main.py serves the frontend
     @app.route("/api/health", methods=["GET"])
     @app.route("/health", methods=["GET"])
     def health():
