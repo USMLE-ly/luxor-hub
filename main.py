@@ -3772,6 +3772,162 @@ def subscription_resume():
     return jsonify({"status": "active", "message": "Subscription resumed! Credits restored."})
 
 
+
+
+# ── Pricing Tiers API ─────────────────────────────────────────────────────
+
+@app.route("/api/v1/pricing/tiers", methods=["GET"])
+def pricing_tiers():
+    """Return all pricing tiers with credit allocations and costs.
+    This is the single source of truth for the frontend pricing display.
+    """
+    from backend.credits import TIER_MONTHLY_CREDITS, CREDIT_COSTS
+
+    tiers = [
+        {
+            "key": "free",
+            "label": "Free",
+            "price_monthly": 0,
+            "price_annual": 0,
+            "credits_per_month": TIER_MONTHLY_CREDITS["free"],
+            "estimated_analyses": TIER_MONTHLY_CREDITS["free"] // 4,
+            "features": [
+                {"text": "30 credits every month", "included": True},
+                {"text": "Up to 6 AI analyses", "included": True},
+                {"text": "Closet — up to 15 items", "included": True},
+                {"text": "Basic Style DNA", "included": True},
+                {"text": "Color analysis", "included": False},
+                {"text": "Capsule wardrobes", "included": False},
+                {"text": "Virtual try-on", "included": False},
+                {"text": "Personal concierge", "included": False},
+            ],
+            "credit_costs": {
+                "outfit_analysis": CREDIT_COSTS["analyze_outfit"],
+                "style_analysis": CREDIT_COSTS["style_analyze"],
+                "outfit_generation": CREDIT_COSTS["generate_outfits"],
+                "pro_tweak": CREDIT_COSTS["pro_tweak"],
+                "outfit_review": CREDIT_COSTS["outfit_review"],
+                "closet_analysis": CREDIT_COSTS["closet_analyze"],
+            },
+        },
+        {
+            "key": "starter",
+            "label": "Starter",
+            "price_monthly": 9,
+            "price_annual": 79,
+            "credits_per_month": TIER_MONTHLY_CREDITS["starter"],
+            "estimated_analyses": TIER_MONTHLY_CREDITS["starter"] // 4,
+            "features": [
+                {"text": "200 credits every month", "included": True},
+                {"text": "Up to 40 AI analyses", "included": True},
+                {"text": "Basic color analysis", "included": True},
+                {"text": "Closet — up to 50 items", "included": True},
+                {"text": "Daily outfit of the day", "included": True},
+                {"text": "Style DNA deep analysis", "included": False},
+                {"text": "Weekly capsule wardrobes", "included": False},
+                {"text": "Virtual try-on", "included": False},
+            ],
+            "paypal_plan_id": os.environ.get("VITE_PAYPAL_STARTER_PLAN_ID", ""),
+        },
+        {
+            "key": "pro",
+            "label": "Pro",
+            "price_monthly": 29,
+            "price_annual": 249,
+            "credits_per_month": TIER_MONTHLY_CREDITS["pro"],
+            "estimated_analyses": TIER_MONTHLY_CREDITS["pro"] // 4,
+            "popular": True,
+            "features": [
+                {"text": "1,000 credits every month", "included": True},
+                {"text": "Up to 200 AI analyses", "included": True},
+                {"text": "Full color & style DNA", "included": True},
+                {"text": "Unlimited closet items", "included": True},
+                {"text": "Weekly capsule wardrobes", "included": True},
+                {"text": "Priority AI stylist chat", "included": True},
+                {"text": "Outfit calendar & planning", "included": True},
+                {"text": "Virtual try-on", "included": False},
+            ],
+            "paypal_plan_id": os.environ.get("VITE_PAYPAL_PRO_PLAN_ID", ""),
+        },
+        {
+            "key": "elite",
+            "label": "Elite",
+            "price_monthly": 99,
+            "price_annual": 849,
+            "credits_per_month": TIER_MONTHLY_CREDITS["elite"],
+            "estimated_analyses": TIER_MONTHLY_CREDITS["elite"] // 4,
+            "features": [
+                {"text": "5,000 credits every month", "included": True},
+                {"text": "Up to 1,000 AI analyses", "included": True},
+                {"text": "Virtual try-on technology", "included": True},
+                {"text": "Personal style concierge", "included": True},
+                {"text": "Trend intelligence reports", "included": True},
+                {"text": "Shopping recommendations", "included": True},
+                {"text": "Wardrobe gap analysis", "included": True},
+                {"text": "Monthly style report", "included": True},
+            ],
+            "paypal_plan_id": os.environ.get("VITE_PAYPAL_ELITE_PLAN_ID", ""),
+        },
+    ]
+
+    return jsonify({"tiers": tiers, "credit_costs": CREDIT_COSTS})
+
+
+@app.route("/api/v1/pricing/compare", methods=["GET"])
+def pricing_compare():
+    """Compare what each tier includes — for the pricing page feature matrix."""
+    from backend.credits import TIER_MONTHLY_CREDITS, CREDIT_COSTS
+
+    features = [
+        {"name": "Monthly credits", "free": 30, "starter": 200, "pro": 1000, "elite": 5000},
+        {"name": "AI analyses/month", "free": 6, "starter": 40, "pro": 200, "elite": 1000},
+        {"name": "Closet items", "free": 15, "starter": 50, "pro": "Unlimited", "elite": "Unlimited"},
+        {"name": "Color analysis", "free": False, "starter": True, "pro": True, "elite": True},
+        {"name": "Style DNA", "free": "Basic", "starter": "Basic", "pro": "Full", "elite": "Full"},
+        {"name": "Capsule wardrobes", "free": False, "starter": False, "pro": True, "elite": True},
+        {"name": "Virtual try-on", "free": False, "starter": False, "pro": False, "elite": True},
+        {"name": "Personal concierge", "free": False, "starter": False, "pro": False, "elite": True},
+        {"name": "Trend intelligence", "free": False, "starter": False, "pro": False, "elite": True},
+        {"name": "Priority support", "free": False, "starter": False, "pro": False, "elite": True},
+    ]
+
+    return jsonify({"features": features, "credit_costs": CREDIT_COSTS})
+
+
+@app.route("/api/v1/pricing/user-current", methods=["GET"])
+@require_auth
+def pricing_user_current():
+    """Return the user's current tier, credits, and what they'd get with each upgrade."""
+    user = g.current_user
+    user_id = user.get("sub", "")
+    tier = getattr(g, "user_tier", "free")
+
+    from backend.credits import TIER_MONTHLY_CREDITS, credit_manager
+
+    balance = credit_manager.get_balance(user_id)
+    current_credits = balance.get("credits_remaining", 0)
+
+    # Calculate what each upgrade would give
+    upgrades = {}
+    for t in ["starter", "pro", "elite"]:
+        new_credits = TIER_MONTHLY_CREDITS[t]
+        price = {"starter": 9, "pro": 29, "elite": 99}[t]
+        extra_credits = new_credits - TIER_MONTHLY_CREDITS.get(tier, 30)
+        upgrades[t] = {
+            "credits": new_credits,
+            "price": price,
+            "extra_credits": extra_credits,
+            "extra_analyses": extra_credits // 4,
+        }
+
+    return jsonify({
+        "current_tier": tier,
+        "current_credits": current_credits,
+        "allocated": TIER_MONTHLY_CREDITS.get(tier, 30),
+        "upgrades": upgrades,
+    })
+
+
 # Serve user-uploaded images with proper CORS headers
 @app.route("/images/<path:filename>")
 def serve_uploaded_image(filename):

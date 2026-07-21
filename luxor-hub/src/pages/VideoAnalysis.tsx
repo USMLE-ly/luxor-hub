@@ -13,6 +13,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { RainbowButton } from "@/components/ui/rainbow-button";
 import { useCreditGuard } from "@/hooks/useCreditGuard";
+import { useAiAction } from "@/hooks/useAiAction";
+import { PageCreditBar } from "@/components/app/PageCreditBar";
 import { CreditCostBanner } from "@/components/app/CreditCostBanner";
 
 interface FrameAnalysis {
@@ -235,6 +237,7 @@ export default function VideoAnalysis() {
 
   return (
     <AppLayout>
+      <PageCreditBar action="analyze_outfit" costOverride={5} />
       <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-8">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
           <div className="absolute -top-4 -left-4 w-32 h-32 bg-primary/10 rounded-full blur-[60px]" />

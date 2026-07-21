@@ -145,6 +145,26 @@ const Paywall = () => {
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">("monthly");
   const [restoring, setRestoring] = useState(false);
 
+  // Fetch user's current tier from API
+  const { data: userCurrent } = useQuery({
+    queryKey: ["pricing-user-current", user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      try {
+        const { data: session } = await supabase.auth.getSession();
+        const token = session?.session?.access_token;
+        const apiUrl = import.meta.env.VITE_API_URL || "";
+        const resp = await fetch(`${apiUrl}/api/v1/pricing/user-current`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (resp.ok) return resp.json();
+      } catch {}
+      return null;
+    },
+    enabled: !!user,
+    staleTime: 60_000,
+  });
+
   useState(() => {
     trackEvent("InitiateCheckout", { content_name: "LUXOR® Paywall View" });
   });
@@ -275,6 +295,18 @@ const Paywall = () => {
           <p className="text-muted-foreground font-sans text-sm leading-relaxed max-w-md mx-auto mb-4">
             Every AI action costs credits. Pick a plan that matches your styling ambitions.
           </p>
+
+          {/* Show current plan if logged in */}
+          {user && userCurrent && (
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/20 bg-primary/5 mb-4">
+              <span className="text-xs font-sans text-primary/70">
+                Current plan: <strong className="text-primary">{userCurrent.current_tier.charAt(0).toUpperCase() + userCurrent.current_tier.slice(1)}</strong>
+              </span>
+              <span className="text-[10px] font-sans text-white/40">
+                — {userCurrent.current_credits} / {userCurrent.allocated} credits remaining
+              </span>
+            </div>
+          )}
           
           {/* Monthly/Annual Toggle */}
           <div className="inline-flex items-center gap-1 p-1 rounded-full bg-white/[0.04] border border-white/[0.08]">

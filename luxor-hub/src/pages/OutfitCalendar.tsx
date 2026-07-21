@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useCreditGuard } from "@/hooks/useCreditGuard";
+import { useAiAction } from "@/hooks/useAiAction";
+import { PageCreditBar } from "@/components/app/PageCreditBar";
 import { CreditCostBanner } from "@/components/app/CreditCostBanner";
 import { AppLayout } from "@/components/app/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
@@ -121,6 +123,7 @@ const OutfitCalendarInner = () => {
   const [flatLayEvent, setFlatLayEvent] = useState<CalendarEvent | null>(null);
   const [weatherData, setWeatherData] = useState<WeatherDay[]>([]);
   const { guard, remaining } = useCreditGuard();
+  const { execute: executeAi } = useAiAction();
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [closetMap, setClosetMap] = useState<Map<string, string>>(new Map());
   const [notificationsEnabled, setNotificationsEnabled] = useState(
@@ -864,6 +867,7 @@ const OutfitCalendarInner = () => {
 
   return (
     <AppLayout>
+      <PageCreditBar action="outfit_review" costOverride={2} />
       <div className="p-5 max-w-2xl mx-auto pb-28">
         {/* Premium Header */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>

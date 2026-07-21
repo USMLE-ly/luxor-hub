@@ -2,6 +2,8 @@ import { getApiUrl } from "@/lib/api";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCreditGuard } from "@/hooks/useCreditGuard";
+import { useAiAction } from "@/hooks/useAiAction";
+import { PageCreditBar } from "@/components/app/PageCreditBar";
 import { CreditCostBanner } from "@/components/app/CreditCostBanner";
 import { useWardrobeStore } from "@/store/useWardrobeStore";
 import { AppLayout } from "@/components/app/AppLayout";
@@ -117,6 +119,7 @@ export default function DressingRoomPage() {
 
   /* ---------- Generate Outfit ---------- */
   const { guard, remaining } = useCreditGuard();
+  const { execute: executeAi, remaining: creditRemaining } = useAiAction();
 
   const generateOutfits = async (occasion: string, count: number) => {
     if (!guard("pro_tweak")) return;
@@ -322,6 +325,7 @@ export default function DressingRoomPage() {
   return (
     <ErrorBoundary fallbackMessage="The Dressing Room hit an error. Try refreshing the page.">
     <AppLayout>
+      <PageCreditBar action="pro_tweak" costOverride={8} />
       <ClipPathDefs />
       <ScrollReveal delay={0.1}>
       <div className="p-4 md:p-8 mx-auto max-w-5xl space-y-4 overflow-x-hidden pb-32">

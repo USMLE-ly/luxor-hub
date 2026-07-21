@@ -11,6 +11,8 @@ import { humanizeText } from "@/lib/humanizer";
 import FashionReviewCard from "@/components/ui/fashion-review-card";
 import GlassTabs, { type GlassTab } from "@/components/ui/glass-tabs";
 import { useCreditGuard } from "@/hooks/useCreditGuard";
+import { useAiAction } from "@/hooks/useAiAction";
+import { PageCreditBar } from "@/components/app/PageCreditBar";
 import { CreditCostBanner } from "@/components/app/CreditCostBanner";
 
 interface StyleAnalysis {
@@ -222,6 +224,7 @@ export default function StyleRecommendationsPage() {
 
   // ── Consolidated full analysis: face/body → recommendations → outfit review ──
   const { guard, remaining } = useCreditGuard();
+  const { execute: executeAi } = useAiAction();
 
   const handleFullAnalysis = async () => {
     if (!imagePreview) return;
@@ -313,6 +316,7 @@ export default function StyleRecommendationsPage() {
 
   return (
     <AppLayout>
+      <PageCreditBar action="style_recommendations" costOverride={3} />
       <div className="p-4 md:p-8 mx-auto max-w-7xl space-y-8">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
           <h1 className="font-display text-4xl font-bold text-foreground">

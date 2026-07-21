@@ -69,6 +69,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useCreditGuard } from "@/hooks/useCreditGuard";
+import { PageCreditBar } from "@/components/app/PageCreditBar";
 import { CreditCostBanner } from "@/components/app/CreditCostBanner";
 
 interface ClothingItem {
@@ -1078,6 +1079,7 @@ const Closet = () => {
 
   return (
     <AppLayout>
+      <PageCreditBar action="closet_analyze" costOverride={3} />
       <ScrollReveal delay={0.1}>
       <div className="px-4 sm:px-5 py-2 max-w-lg mx-auto">
         {/* Header */}

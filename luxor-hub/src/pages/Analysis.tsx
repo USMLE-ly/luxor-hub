@@ -13,6 +13,8 @@ import { GlowingEffect } from "@/components/ui/glowing-effect";
 import {UploadSimple, Camera, Spinner, InstagramLogo, TwitterLogo, ArrowSquareOut, ArrowsClockwise, Warning, StackSimple, File, Upload} from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 import { useCreditGuard } from "@/hooks/useCreditGuard";
+import { useAiAction } from "@/hooks/useAiAction";
+import { PageCreditBar } from "@/components/app/PageCreditBar";
 import { CreditCostBanner } from "@/components/app/CreditCostBanner";
 import { ImageSwiper } from "@/components/ui/image-swiper";
 
@@ -554,6 +556,7 @@ export default function Analysis() {
   if (!data && analysisFailed) {
     return (
       <AppLayout>
+      <PageCreditBar action="analyze_outfit" costOverride={5} />
         <div className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center max-w-md mx-auto">
           <div className="w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center mb-6">
             <Warning className="w-8 h-8 text-amber-400" />

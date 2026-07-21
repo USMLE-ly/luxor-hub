@@ -22,6 +22,8 @@ import { ShareButton } from "@/components/app/ShareCard";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useCreditGuard } from "@/hooks/useCreditGuard";
+import { useAiAction } from "@/hooks/useAiAction";
+import { PageCreditBar } from "@/components/app/PageCreditBar";
 import { CreditCostBanner } from "@/components/app/CreditCostBanner";
 
 interface OutfitSuggestion {
@@ -153,6 +155,7 @@ const Outfits = () => {
 
   return (
     <AppLayout>
+      <PageCreditBar action="generate_outfits" costOverride={4} />
       <div className="p-6 lg:p-8 max-w-5xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
           <h1 className="font-display text-3xl font-bold text-foreground flex items-center gap-2">
