@@ -1655,3 +1655,4 @@ function ItemCard({
 }
 
 export default Closet;
+
