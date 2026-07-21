@@ -1944,40 +1944,36 @@ def closet_list():
     """List all closet items — Qdrant only (persistent, no JSON fallback).
     Supports ?user_id=xxx for per-user filtering.
     """
-    if request.method == "OPTIONS":
-        return "", 204
-    uid = g.current_user["sub"]
-    _log.warning(f"[LIST-DEBUG] ===== LIST ITEMS CALLED for user_id={uid} =====")
-    # Retry Qdrant up to 2 times
-    for attempt in range(2):
-        try:
-            items = qdrant_get_all_items(user_id=uid, timeout=10.0)
-            _log.warning(f"[LIST-DEBUG] Qdrant attempt {attempt+1}: {len(items)} items returned")
-            if items:
-                _log.warning(f"[LIST-DEBUG] Qdrant items: {[i.get('id','')+':'+i.get('label','unnamed')[:20] for i in items]}")
-            _log.info("[CLOSET] list-items returning %d items from Qdrant (attempt %d)", len(items), attempt + 1)
-            return jsonify({"success": True, "items": items})
-        except Exception as qe:
-            _log.error(f"[LIST-DEBUG] Qdrant attempt {attempt+1} FAILED: {qe}")
-            if attempt == 0:
-                _log.warning("[CLOSET] Qdrant read attempt %d failed: %s — retrying...", attempt + 1, qe)
-            else:
-                _log.warning("[CLOSET] Qdrant read attempt %d failed: %s — returning empty", attempt + 1, qe)
-    # Fallback to local JSON file when Qdrant is unavailable
     try:
-        json_items = _read_json_file()
-        if uid:
-            json_items = [i for i in json_items if i.get("user_id", "").strip() == uid.strip()]
-        if json_items:
-            _log.info("[CLOSET] Qdrant unavailable — returning %d items from JSON fallback", len(json_items))
-            _log.warning(f"[LIST-DEBUG] JSON fallback: returning {len(json_items)} items from file")
-            return jsonify({"success": True, "items": json_items, "source": "json_fallback"})
-    except Exception as je:
-        _log.error("[CLOSET] JSON fallback ALSO failed: %s", je)
-        _log.error(f"[LIST-DEBUG] JSON fallback failed: {je}")
+        if request.method == "OPTIONS":
+            return "", 204
+        uid = g.current_user["sub"]
+        # Retry Qdrant up to 2 times
+        for attempt in range(2):
+            try:
+                items = qdrant_get_all_items(user_id=uid, timeout=10.0)
+                if items:
+                    _log.info("[CLOSET] list-items returning %d items from Qdrant (attempt %d)", len(items), attempt + 1)
+                    return jsonify({"success": True, "items": items})
+            except Exception as qe:
+                if attempt == 0:
+                    _log.warning("[CLOSET] Qdrant read attempt %d failed: %s — retrying...", attempt + 1, qe)
+                else:
+                    _log.warning("[CLOSET] Qdrant read attempt %d failed: %s — returning empty", attempt + 1, qe)
+        # Fallback to local JSON file when Qdrant is unavailable
+        try:
+            json_items = _read_json_file()
+            if uid:
+                json_items = [i for i in json_items if i.get("user_id", "").strip() == uid.strip()]
+            if json_items:
+                return jsonify({"success": True, "items": json_items, "source": "json_fallback"})
+        except Exception as je:
+            _log.error("[CLOSET] JSON fallback ALSO failed: %s", je)
 
-    _log.warning(f"[LIST-DEBUG] All sources exhausted — returning empty")
-    return jsonify({"success": True, "items": []})
+        return jsonify({"success": True, "items": []})
+    except Exception as e:
+        _log.error("[CLOSET] closet_list unhandled error: %s", e)
+        return jsonify({"error": str(e), "status": 500}), 500
 @require_auth
 @app.route("/api/v1/closet/delete-item", methods=["POST", "OPTIONS"], strict_slashes=False)
 def closet_delete():
@@ -3353,12 +3349,12 @@ def gateway_status():
 @app.route("/api/v1/credits/balance", methods=["GET"])
 @require_auth
 def credits_balance():
-    _log.info("[CREDITS] Balance requested for user=%s", user.get("sub", "")[:8])
-    """Get current user's credit balance and allocation."""
+    """Get current user credit balance and allocation."""
     user = g.current_user
+    _log.info("[CREDITS] Balance requested for user=%s", user.get("sub", "")[:8])
     user_id = user.get("sub", "")
     tier = getattr(g, "user_tier", "free")
-    
+    tier = getattr(g, "user_tier", "free")
     from backend.credits import credit_manager
     balance = credit_manager.get_balance(user_id)
     allocation = credit_manager.get_tier_allocation(tier)
@@ -3390,10 +3386,10 @@ def credits_costs():
 @app.route("/api/v1/credits/history", methods=["GET"])
 @require_auth
 def credits_history():
-    _log.info("[CREDITS] History requested for user=%s", user.get("sub", "")[:8])
     """Get recent credit consumption history."""
     user = g.current_user
     user_id = user.get("sub", "")
+    _log.info("[CREDITS] History requested for user=%s", user_id[:8])
     
     import requests as _req
     from backend.credits import SUPABASE_URL, SUPABASE_KEY
