@@ -157,6 +157,7 @@ const Closet = () => {
   const apiBase = getApiUrl();
 
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const [uploadOpen, setUploadOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -389,6 +390,7 @@ const Closet = () => {
       try {
         const mapped = await fetchItems();
         if (mounted) {
+          setLoadError(null);
           setItems(mapped);
           // Bridge: push fetched items into Zustand so DressingRoom sees them
           syncCatalogItems(mapped.map(toWardrobeItem));
@@ -398,7 +400,9 @@ const Closet = () => {
           setLoading(false);
         }
       } catch (e) {
+        console.warn("[CLOSET] Failed to load closet:", e);
         if (mounted) {
+          setLoadError("Could not load your closet. Please check your connection.");
           clearTimeout(forceTimeout);
           setLoading(false);
         }
@@ -1330,7 +1334,19 @@ const Closet = () => {
             </div>
 
             {/* Items */}
-            {loading ? (
+            {loadError ? (
+              <div className="flex flex-col items-center justify-center min-h-[40vh] text-center p-6">
+                <div className="text-4xl mb-4">⚠️</div>
+                <h3 className="text-lg font-sans font-medium text-foreground mb-2">Unable to load your closet</h3>
+                <p className="text-sm text-muted-foreground max-w-sm mb-6 font-sans">{loadError}</p>
+                <button 
+                  onClick={() => window.location.reload()}
+                  className="px-6 py-2.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors border border-primary/20 font-sans text-sm"
+                >
+                  Try Again
+                </button>
+              </div>
+            ) : loading ? (
               <div className="flex items-center justify-center py-20">
                 <Spinner className="h-8 w-8 animate-spin text-primary" />
               </div>
