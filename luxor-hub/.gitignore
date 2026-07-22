@@ -12,3 +12,4 @@ dist_built/
 # Diagnostic logs (runtime)
 luxor-diagnostic-*.log
 *.diagnostic.*
+graphify-out/
