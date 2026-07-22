@@ -1854,6 +1854,7 @@ def stylist_generate():
 # ---------------------------------------------------------------------------
 @require_auth
 @app.route("/api/v1/closet/add-item", methods=["POST", "OPTIONS"], strict_slashes=False)
+@require_auth
 def closet_add():
     try:
         if request.method == "OPTIONS":

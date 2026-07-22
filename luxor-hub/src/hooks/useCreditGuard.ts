@@ -1,8 +1,9 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { useCreditBalance } from "./useCreditBalance";
 import { CREDIT_COSTS } from "@/lib/planRestrictions";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 import { toast } from "sonner";
 
 /**
@@ -115,6 +116,12 @@ export function useCreditGuard() {
         }
 
         const apiUrl = import.meta.env.VITE_API_URL || "";
+        if (!apiUrl) return true; // Offline mode — allow action
+
+        // 8-second timeout prevents hanging on sleeping backends
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+
         const resp = await fetch(`${apiUrl}/api/v1/credits/consume`, {
           method: "POST",
           headers: {
@@ -122,7 +129,9 @@ export function useCreditGuard() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ action }),
+          signal: controller.signal,
         });
+        clearTimeout(timeoutId);
 
         if (resp.status === 402) {
           const data = await resp.json();
@@ -148,9 +157,11 @@ export function useCreditGuard() {
           queryClient.invalidateQueries({ queryKey: ["credit-balance"] });
         }
         return true;
-      } catch (err) {
-        console.warn("[CREDITS] Consume error:", err);
-        return false;
+      } catch (err: any) {
+        clearTimeout((globalThis as any).__credit_timeout);
+        console.warn("[CREDITS] Consume error:", err?.name === "AbortError" ? "timeout" : err);
+        // Timeout or network error — allow the action (don't block UX)
+        return true;
       }
     },
     [guard]
