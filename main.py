@@ -3408,6 +3408,29 @@ def credits_balance():
     })
 
 
+@app.route("/api/v1/credits/consume", methods=["POST"])
+@limiter.limit("60 per minute")
+@require_auth
+def credits_consume():
+    """Deduct credits for an AI action. Called by frontend after successful action."""
+    user = g.current_user
+    user_id = user.get("sub", "")
+    tier = getattr(g, "user_tier", "free")
+    data = request.get_json(silent=True) or {}
+    action = data.get("action", "")
+
+    if not action:
+        return jsonify({"error": "Missing action"}), 400
+
+    from backend.credits import credit_manager
+    result = credit_manager.consume(user_id, action, tier)
+
+    if result.get("error"):
+        return jsonify(result), 402
+
+    return jsonify(result)
+
+
 @app.route("/api/v1/credits/costs", methods=["GET"])
 @limiter.limit("30 per minute")
 def credits_costs():

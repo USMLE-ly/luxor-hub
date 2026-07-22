@@ -111,7 +111,7 @@ const itemAnim = {
 export default function Analysis() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { guard } = useCreditGuard();
+  const { guard, consume } = useCreditGuard();
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -338,6 +338,7 @@ export default function Analysis() {
       
       // No tweak image generation (disabled due to quality issues)
       setSavedId(null);
+      await consume('outfit_analysis');
       toast.success('Outfit analyzed! ✨');
     } catch (e: any) {
       setAnalysisFailed(true);

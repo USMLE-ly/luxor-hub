@@ -228,6 +228,7 @@ export default function StyleRecommendationsPage() {
 
   const handleFullAnalysis = async () => {
     if (!imagePreview) return;
+    if (!guard("style_analyze")) return;
     setAnalyzing(true);
     setAnalysisStartTime(Date.now());
     setEstimatedRemainingSeconds(null);
@@ -300,6 +301,10 @@ export default function StyleRecommendationsPage() {
       // Done!
       setProgressValue(100);
       setProgressStage("Complete!");
+      // Deduct credits for all 3 steps
+      await consume("style_analyze");
+      await consume("style_recommendations");
+      await consume("outfit_review");
       setActiveTab("analyze");
       toast.success("Full analysis complete! ✨");
       notifyEvent("analyze-complete");

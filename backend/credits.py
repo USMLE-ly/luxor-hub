@@ -48,6 +48,15 @@ CREDIT_COSTS = {
     "closet_analyze":       3,   # Closet item analysis
     "stylist_explore":      2,   # Stylist quiz
     "stylist_generate":     4,   # Stylist output
+    "ai_fill_details":      2,   # AI auto-fill closet item details
+    "generate_1_outfit":    3,   # Generate 1 outfit
+    "generate_2_outfits":   5,   # Generate 2 outfits
+    "generate_3_outfits":   7,   # Generate 3 outfits
+    "calendar_manual":      2,   # Manual calendar event creation
+    "dressing_room_style":  3,   # Dressing room AI styling
+    "dressing_room_tryon":  4,   # Virtual try-on in dressing room
+    "outfit_analysis":      5,   # Full outfit analysis page
+    "outfit_recommendation": 3,  # Style recommendations page
 }
 
 

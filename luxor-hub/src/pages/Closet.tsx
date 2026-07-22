@@ -179,7 +179,7 @@ const Closet = () => {
   // Pre-load 3D modules in background on mount
   useEffect(() => { loadMannequinModules().then(m => { modulesRef.current = m; }); }, []);
   const { handleError } = useErrorHandler();
-  const { guard } = useCreditGuard();
+  const { guard, consume } = useCreditGuard();
   const { tier } = usePlanTier();
   const itemLimit = PLAN_LIMITS[tier].closetItems;
   const [flatLayView, setFlatLayView] = useState(false);
@@ -813,6 +813,8 @@ const Closet = () => {
           name: prev.name || analysis.suggested_name || analysis.item_name || prev.name,
         };
       });
+      // Deduct credits for AI fill
+      await consume("ai_fill_details");
       toast.success("Details filled. Check and save.");
     } catch (err: any) {
       console.error("[CLOSET-AI] Analysis error:", err?.name, err?.message, err);

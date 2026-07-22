@@ -33,7 +33,7 @@ interface AiActionOptions {
  * 3. The response is returned to the page
  */
 export function useAiAction() {
-  const { guard, remaining } = useCreditGuard();
+  const { guard, consume, remaining } = useCreditGuard();
   const { user } = useAuth();
 
   const execute = useCallback(
@@ -90,6 +90,10 @@ export function useAiAction() {
         }
 
         const data = await resp.json();
+
+        // Deduct credits server-side after successful action
+        await consume(action);
+
         onSuccess?.(data);
         return data;
       } catch (err: any) {

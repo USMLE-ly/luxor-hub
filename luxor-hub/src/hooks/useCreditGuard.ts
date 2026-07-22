@@ -100,5 +100,58 @@ export function useCreditGuard() {
     setPendingHandler(null);
   }, []);
 
-  return { guard, guardWithConfirm, canAfford, getActionCost, remaining, exhausted, exhaustedAction, exhaustedCost, setExhausted, confirmAction, confirmPending, cancelConfirm };
+  const consume = useCallback(
+    async (action: string): Promise<boolean> => {
+      // Check locally first
+      if (!guard(action)) return false;
+
+      try {
+        const { data: session } = await supabase.auth.getSession();
+        const token = session?.session?.access_token;
+        if (!token) {
+          toast.error("Session expired. Please sign in again.");
+          return false;
+        }
+
+        const apiUrl = import.meta.env.VITE_API_URL || "";
+        const resp = await fetch(`${apiUrl}/api/v1/credits/consume`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ action }),
+        });
+
+        if (resp.status === 402) {
+          const data = await resp.json();
+          toast.error(data.message || "Not enough credits", {
+            duration: 5000,
+            action: {
+              label: "Upgrade",
+              onClick: () => window.location.href = "/pricing",
+            },
+          });
+          return false;
+        }
+
+        if (!resp.ok) {
+          console.warn("[CREDITS] Consume failed:", resp.status);
+          return false;
+        }
+
+        const data = await resp.json();
+        if (data.credits_remaining !== undefined) {
+          toast.info(`${data.cost} credits used — ${data.credits_remaining} remaining`, { duration: 2000 });
+        }
+        return true;
+      } catch (err) {
+        console.warn("[CREDITS] Consume error:", err);
+        return false;
+      }
+    },
+    [guard]
+  );
+
+  return { guard, guardWithConfirm, canAfford, getActionCost, consume, remaining, exhausted, exhaustedAction, exhaustedCost, setExhausted, confirmAction, confirmPending, cancelConfirm };
 }

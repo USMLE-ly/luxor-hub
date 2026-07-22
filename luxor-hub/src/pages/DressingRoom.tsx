@@ -119,11 +119,13 @@ export default function DressingRoomPage() {
   const cal = useCalendarActions();
 
   /* ---------- Generate Outfit ---------- */
-  const { guard, remaining } = useCreditGuard();
+  const { guard, consume, remaining } = useCreditGuard();
   const { execute: executeAi, remaining: creditRemaining } = useAiAction();
 
   const generateOutfits = async (occasion: string, count: number) => {
-    if (!guard("pro_tweak")) return;
+    // Tiered credit cost: 1 outfit = 3, 2 = 5, 3 = 7
+    const action = count === 1 ? "generate_1_outfit" : count === 2 ? "generate_2_outfits" : "generate_3_outfits";
+    if (!guard(action)) return;
     if (!user) return;
     if (isGeneratingRef.current) return;
     isGeneratingRef.current = true;
@@ -178,6 +180,7 @@ export default function DressingRoomPage() {
         setGeneratedImages(normalized);
         setHasGeneratedOutfit(true);
         setDisplayProgress(100);
+        await consume(action);
         toast.success(`${data.images.length} outfits generated!`);
         notifyEvent("outfit-generated");
       } else {

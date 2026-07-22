@@ -28,6 +28,15 @@ export const CREDIT_COSTS: Record<string, number> = {
   closet_analyze: 3,
   stylist_explore: 2,
   stylist_generate: 4,
+  ai_fill_details: 2,
+  generate_1_outfit: 3,
+  generate_2_outfits: 5,
+  generate_3_outfits: 7,
+  calendar_manual: 2,
+  dressing_room_style: 3,
+  dressing_room_tryon: 4,
+  outfit_analysis: 5,
+  outfit_recommendation: 3,
 };
 
 export function getEstimatedAnalyses(tier: PlanTier): number {

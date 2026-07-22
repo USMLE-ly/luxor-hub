@@ -122,7 +122,7 @@ const OutfitCalendarInner = () => {
   const [autoFilling, setAutoFilling] = useState(false);
   const [flatLayEvent, setFlatLayEvent] = useState<CalendarEvent | null>(null);
   const [weatherData, setWeatherData] = useState<WeatherDay[]>([]);
-  const { guard, remaining } = useCreditGuard();
+  const { guard, consume, remaining } = useCreditGuard();
   const { execute: executeAi } = useAiAction();
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [closetMap, setClosetMap] = useState<Map<string, string>>(new Map());
@@ -355,6 +355,7 @@ const OutfitCalendarInner = () => {
 
   const addEvent = async () => {
     if (!user || !selectedDate || !newEvent.title.trim()) return;
+    if (!guard("calendar_manual")) return;
     const outfit = savedOutfits.find(o => o.id === newEvent.outfitId);
     // Build outfit_items from saved outfit OR manually picked closet items
     let outfitItems: any[] = outfit?.mannequin_items || [];
@@ -374,6 +375,7 @@ const OutfitCalendarInner = () => {
     });
     if (error) toast.error("Failed to add event");
     else {
+      await consume("calendar_manual");
       toast.success("Event added!");
       notifyEvent("outfit-added-calendar");
       setShowAddDialog(false);
