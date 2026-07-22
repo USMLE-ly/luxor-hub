@@ -220,6 +220,39 @@ def _sanitize_occasion(raw: str) -> str:
         return "casual"
     return clean
 
+def _load_closet_items(data, user_id=""):
+    """Load closet items with fallback chain: request body -> Qdrant -> local JSON.
+    Shared by check-availability and generate-outfits routes.
+    """
+    closet_items = data.get("closetItems", [])
+    if closet_items:
+        _log.info("[CLOSET-LOAD] Using %d items from request body", len(closet_items))
+        return closet_items
+    # Fallback: Qdrant Cloud
+    try:
+        closet_items = qdrant_get_all_items(user_id=user_id)
+        if closet_items:
+            _log.info("[CLOSET-LOAD] Loaded %d items from Qdrant", len(closet_items))
+            return closet_items
+    except Exception as qe:
+        _log.warning("[CLOSET-LOAD] Qdrant read failed: %s", qe)
+    # Fallback: local JSON file
+    try:
+        with open(_LOCAL_CLOSET_FILE, "r") as f:
+            closet_items = json.load(f)
+            if not isinstance(closet_items, list):
+                closet_items = []
+        if user_id:
+            closet_items = [i for i in closet_items if i.get("user_id") == user_id]
+        if closet_items:
+            _log.info("[CLOSET-LOAD] Loaded %d items from local JSON", len(closet_items))
+            return closet_items
+    except (FileNotFoundError, json.JSONDecodeError):
+        pass
+    return []
+
+
+
 
 
 
@@ -2911,25 +2944,8 @@ def check_availability():
         data = request.get_json(silent=True) or {}
         occasion = _sanitize_occasion(data.get("occasion", "casual"))
         user_id = data.get("user_id", "")
-        closet_items = data.get("closetItems", [])
         _log.info("[AVAIL] Checking availability for %s (user=%s)", occasion, user_id or "anon")
-        
-        # Load items from Qdrant (or local JSON fallback)
-        if not closet_items:
-            try:
-                closet_items = qdrant_get_all_items(user_id=user_id)
-            except Exception:
-                pass
-        if not closet_items:
-            try:
-                with open(_LOCAL_CLOSET_FILE, "r") as f:
-                    closet_items = json.load(f)
-                    if not isinstance(closet_items, list):
-                        closet_items = []
-                    if user_id:
-                        closet_items = [i for i in closet_items if i.get("user_id") == user_id]
-            except (FileNotFoundError, json.JSONDecodeError):
-                pass
+        closet_items = _load_closet_items(data, user_id)
         
         if not closet_items:
             return jsonify({"success": True, "maxOutfits": 0, "categories": {}}), 200
@@ -2982,37 +2998,18 @@ def generate_outfits():
         _t_start = time.time()
         timing = {}
 
-        # Load items from Qdrant (or local JSON fallback)
         gen_uid = data.get("user_id", "")
         _log.info("[DRESSING] user_id=%s", gen_uid or "all")
-
-        # Primary: load from Qdrant Cloud (persists across restarts)
-        closet_items = []
-        try:
-            closet_items = qdrant_get_all_items(user_id=gen_uid)
-        except Exception as qe:
-            _log.warning("[DRESSING] Qdrant read failed: %s — falling back to JSON", qe)
-        # Fallback: read from local JSON file
-        if not closet_items:
-            try:
-                with open(_LOCAL_CLOSET_FILE, "r") as f:
-                    closet_items = json.load(f)
-                    if not isinstance(closet_items, list):
-                        closet_items = []
-                # Filter by user_id if provided
-                if gen_uid:
-                    closet_items = [i for i in closet_items if i.get("user_id") == gen_uid]
-            except (FileNotFoundError, json.JSONDecodeError):
-                pass
+        closet_items = _load_closet_items(data, gen_uid)
         timing["load_closet"] = round(time.time() - _t_start, 2)
         if not closet_items:
-            return jsonify({"success": False, "images": [], "error": "Your closet is empty! Add items first."}), 200
+            return jsonify({"success": False, "images": [], "error": "No closet items found. Make sure your closet has items with images."}), 200
 
         # Allow items even without image_url — FlipGallery handles empty URLs gracefully (dark block)
         items_with_img = [i for i in closet_items if (i.get("image_url") or i.get("photo_url"))]
         _log.warning(f"[DEBUG] Found {len(items_with_img)} items with image_url field")
         if not items_with_img:
-            return jsonify({"success": False, "images": [], "error": "No items found in closet. Add items first."}), 200
+            return jsonify({"success": False, "images": [], "error": "Closet items found but none have images. Upload photos of your clothes."}), 200
 
         # ---- Category detection ----
         def _img_url(item, default=""):
