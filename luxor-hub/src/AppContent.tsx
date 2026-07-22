@@ -6,6 +6,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "next-themes";
 import { HelmetProvider } from "react-helmet-async";
 import { ErrorBoundary } from "@/components/app/ErrorBoundary";
+const SplashScreen = React.lazy(() => import("@/components/app/SplashScreen"));
 
 // Lazy-load all UI and page components
 const Toaster = React.lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
@@ -74,6 +75,7 @@ const AppContent = () => {
   return (
     <HelmetProvider>
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+      <React.Suspense fallback={null}><SplashScreen /></React.Suspense>
       <React.Suspense fallback={null}><OfflineIndicator /></React.Suspense>
       <QueryClientProvider client={queryClientRef.current}>
         <React.Suspense fallback={null}><TooltipProvider /></React.Suspense>
