@@ -139,13 +139,19 @@ export default function DressingRoomPage() {
 
       const api = getApiUrl();
       const genUrl = api + "/api/v1/generate-outfits";
-      console.log("[DR] Generating outfits:", genUrl, { occasion, count, user_id: user.id });
+      // Send closet items so backend doesn't need to load from Qdrant
+      const currentCloset = useWardrobeStore.getState().catalogItems;
+      const itemsForBackend = currentCloset.map((item) => ({
+        ...item,
+        category: item.rawCategory || item.category,
+      }));
+      console.log("[DR] Generating outfits:", genUrl, { occasion, count, user_id: user.id, items: itemsForBackend.length });
       const genController = new AbortController();
       const genTimeout = setTimeout(() => genController.abort(), 120000);
       const res = await fetch(genUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ occasion, count, user_id: user.id }),
+        body: JSON.stringify({ occasion, count, user_id: user.id, closetItems: itemsForBackend }),
         signal: genController.signal,
       });
       clearTimeout(genTimeout);
