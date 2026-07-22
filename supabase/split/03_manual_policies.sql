@@ -1,6 +1,5 @@
 -- ============================================================
--- PART 3: Manual RLS Policies for special tables
--- Run this THIRD (after 02)
+-- PART 3: Manual Policies (special cases that don't follow the user_id pattern)
 -- ============================================================
 
 -- Profiles
@@ -22,17 +21,17 @@ drop policy if exists "Users can delete own follows" on public.follows;
 create policy "Users can delete own follows" on public.follows
   for delete using (auth.uid() = follower_id);
 
--- Newsletter (anyone can subscribe)
+-- Newsletter
 drop policy if exists "Anyone can subscribe" on public.newsletter_subscribers;
 create policy "Anyone can subscribe" on public.newsletter_subscribers
   for insert with check (true);
 
--- Weekly challenges (all auth users can view)
+-- Weekly challenges
 drop policy if exists "Authenticated users can view challenges" on public.weekly_challenges;
 create policy "Authenticated users can view challenges" on public.weekly_challenges
   for select using (auth.role() = 'authenticated');
 
--- User Looks (public read for auth users)
+-- User Looks
 drop policy if exists "Authenticated users can view public looks" on public.user_looks;
 create policy "Authenticated users can view public looks" on public.user_looks
   for select using (auth.role() = 'authenticated' AND is_public = true);

@@ -1,9 +1,7 @@
 -- ============================================================
 -- PART 6: Functions + Triggers
--- Run this LAST (after 05)
 -- ============================================================
 
--- Auto-create profile + free subscription on signup
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
@@ -20,7 +18,6 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
 
--- Auto-update updated_at on any row update
 create or replace function public.update_updated_at()
 returns trigger as $$
 begin

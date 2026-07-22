@@ -1,6 +1,5 @@
 -- ============================================================
--- PART 2: Enable Row Level Security on ALL tables
--- Run this SECOND (after 01)
+-- PART 2: Enable Row Level Security on all tables
 -- ============================================================
 
 alter table public.profiles enable row level security;

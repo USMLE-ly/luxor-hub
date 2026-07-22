@@ -187,3 +187,178 @@ create table if not exists public.ab_experiments (
   user_id uuid references auth.users(id) on delete cascade not null,
   experiment_name text, variant text, created_at timestamptz default now()
 );
+-- ============================================================
+-- PART 2: Enable Row Level Security on all tables
+-- ============================================================
+
+alter table public.profiles enable row level security;
+alter table public.style_profiles enable row level security;
+alter table public.clothing_items enable row level security;
+alter table public.outfits enable row level security;
+alter table public.outfit_items enable row level security;
+alter table public.calendar_events enable row level security;
+alter table public.wear_logs enable row level security;
+alter table public.subscriptions enable row level security;
+alter table public.outfit_analyses enable row level security;
+alter table public.follows enable row level security;
+alter table public.user_looks enable row level security;
+alter table public.look_comments enable row level security;
+alter table public.look_likes enable row level security;
+alter table public.mannequin_state enable row level security;
+alter table public.weekly_challenges enable row level security;
+alter table public.challenge_entries enable row level security;
+alter table public.user_badges enable row level security;
+alter table public.newsletter_subscribers enable row level security;
+alter table public.outfit_feedback enable row level security;
+alter table public.style_points enable row level security;
+alter table public.spend_logs enable row level security;
+alter table public.spend_summary enable row level security;
+alter table public.ab_experiments enable row level security;
+-- ============================================================
+-- PART 3: Manual Policies (special cases that don't follow the user_id pattern)
+-- ============================================================
+
+-- Profiles
+drop policy if exists "Users can view own profile" on public.profiles;
+create policy "Users can view own profile" on public.profiles
+  for select using (auth.uid() = id);
+drop policy if exists "Users can update own profile" on public.profiles;
+create policy "Users can update own profile" on public.profiles
+  for update using (auth.uid() = id);
+
+-- Follows
+drop policy if exists "Users can view own follows" on public.follows;
+create policy "Users can view own follows" on public.follows
+  for select using (auth.uid() = follower_id);
+drop policy if exists "Users can insert own follows" on public.follows;
+create policy "Users can insert own follows" on public.follows
+  for insert with check (auth.uid() = follower_id);
+drop policy if exists "Users can delete own follows" on public.follows;
+create policy "Users can delete own follows" on public.follows
+  for delete using (auth.uid() = follower_id);
+
+-- Newsletter
+drop policy if exists "Anyone can subscribe" on public.newsletter_subscribers;
+create policy "Anyone can subscribe" on public.newsletter_subscribers
+  for insert with check (true);
+
+-- Weekly challenges
+drop policy if exists "Authenticated users can view challenges" on public.weekly_challenges;
+create policy "Authenticated users can view challenges" on public.weekly_challenges
+  for select using (auth.role() = 'authenticated');
+
+-- User Looks
+drop policy if exists "Authenticated users can view public looks" on public.user_looks;
+create policy "Authenticated users can view public looks" on public.user_looks
+  for select using (auth.role() = 'authenticated' AND is_public = true);
+drop policy if exists "Authenticated users can view public look comments" on public.look_comments;
+create policy "Authenticated users can view public look comments" on public.look_comments
+  for select using (auth.role() = 'authenticated');
+drop policy if exists "Authenticated users can view public look likes" on public.look_likes;
+create policy "Authenticated users can view public look likes" on public.look_likes
+  for select using (auth.role() = 'authenticated');
+-- ============================================================
+-- PART 4: Auto-generate SELECT + INSERT + UPDATE + DELETE
+-- for every table that has a uuid user_id column.
+-- Run this FOURTH (after Part 3)
+-- ============================================================
+
+do $$
+declare
+  tbl text;
+  has_user_id boolean;
+  col_type text;
+begin
+  for tbl in select tablename from pg_tables
+    where schemaname = 'public'
+    and tablename not in (
+      'weekly_challenges', 'newsletter_subscribers',
+      'profiles', 'follows', 'spend_summary', 'ab_experiments',
+      'spend_logs', 'user_looks', 'look_comments', 'look_likes'
+    )
+  loop
+    select exists(
+      select 1 from information_schema.columns
+      where table_schema = 'public' and table_name = tbl and column_name = 'user_id'
+    ) into has_user_id;
+    if has_user_id then
+      select data_type into col_type
+      from information_schema.columns
+      where table_schema = 'public' and table_name = tbl and column_name = 'user_id';
+      if col_type = 'uuid' then
+        execute format('drop policy if exists "Users can view own %I" on public.%I;', tbl, tbl);
+        execute format('create policy "Users can view own %I" on public.%I for select using (auth.uid() = user_id);', tbl, tbl);
+        execute format('drop policy if exists "Users can insert own %I" on public.%I;', tbl, tbl);
+        execute format('create policy "Users can insert own %I" on public.%I for insert with check (auth.uid() = user_id);', tbl, tbl);
+        execute format('drop policy if exists "Users can update own %I" on public.%I;', tbl, tbl);
+        execute format('create policy "Users can update own %I" on public.%I for update using (auth.uid() = user_id);', tbl, tbl);
+        execute format('drop policy if exists "Users can delete own %I" on public.%I;', tbl, tbl);
+        execute format('create policy "Users can delete own %I" on public.%I for delete using (auth.uid() = user_id);', tbl, tbl);
+        raise notice 'Created 4 policies for: %', tbl;
+      end if;
+    end if;
+  end loop;
+end $$;
+-- ============================================================
+-- PART 5: Storage Bucket + Policies
+-- ============================================================
+
+insert into storage.buckets (id, name, public)
+values ('closet-images', 'closet-images', true)
+on conflict (id) do nothing;
+
+drop policy if exists "Authenticated users can upload closet images" on storage.objects;
+create policy "Authenticated users can upload closet images"
+  on storage.objects for insert
+  with check (bucket_id = 'closet-images' and auth.role() = 'authenticated');
+
+drop policy if exists "Anyone can view closet images" on storage.objects;
+create policy "Anyone can view closet images"
+  on storage.objects for select
+  using (bucket_id = 'closet-images');
+
+drop policy if exists "Users can delete own closet images" on storage.objects;
+create policy "Users can delete own closet images"
+  on storage.objects for delete
+  using (bucket_id = 'closet-images' and auth.uid()::text = (storage.foldername(name))[1]);
+-- ============================================================
+-- PART 6: Functions + Triggers
+-- ============================================================
+
+create or replace function public.handle_new_user()
+returns trigger as $$
+begin
+  insert into public.profiles (id, display_name)
+  values (new.id, new.raw_user_meta_data->>'display_name');
+  insert into public.subscriptions (user_id, plan_tier, status)
+  values (new.id, 'free', 'active');
+  return new;
+end;
+$$ language plpgsql security definer;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.handle_new_user();
+
+create or replace function public.update_updated_at()
+returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$ language plpgsql;
+
+do $$
+declare
+  tbl text;
+begin
+  for tbl in select tablename from pg_tables
+    where schemaname = 'public'
+    and exists (select 1 from information_schema.columns
+                where table_schema = 'public' and table_name = tablename and column_name = 'updated_at')
+  loop
+    execute format('drop trigger if exists set_updated_at on public.%I;', tbl);
+    execute format('create trigger set_updated_at before update on public.%I for each row execute function public.update_updated_at();', tbl);
+  end loop;
+end $$;

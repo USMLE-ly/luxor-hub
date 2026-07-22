@@ -1,9 +1,7 @@
 -- ============================================================
 -- PART 4: Auto-generate SELECT + INSERT + UPDATE + DELETE
 -- for every table that has a uuid user_id column.
--- This is the CRITICAL part — it creates all 4 CRUD policies
--- for clothing_items, calendar_events, subscriptions, etc.
--- Run this FOURTH (after 03)
+-- Run this FOURTH (after Part 3)
 -- ============================================================
 
 do $$
