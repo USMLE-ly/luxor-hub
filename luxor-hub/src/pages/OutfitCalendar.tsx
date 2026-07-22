@@ -1697,7 +1697,7 @@ const OutfitCalendarInner = () => {
 
               <Input placeholder="Notes (optional)" value={newEvent.notes} onChange={e => setNewEvent(p => ({ ...p, notes: e.target.value }))} />
               <Button onClick={addEvent} disabled={!newEvent.title.trim()} className="w-full gold-gradient text-primary-foreground font-sans">
-                Save to Calendar
+                Save to Calendar <span className="text-[10px] opacity-60 ml-1">· 2 credits</span>
               </Button>
             </div>
           </DialogContent>

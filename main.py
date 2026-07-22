@@ -166,7 +166,7 @@ def spend_usage():
     })
 
 
-from backend.auth import require_auth, optional_auth
+from backend.auth import require_auth, optional_auth, get_current_user
 from backend.gateway import ai_endpoint, get_spend_tracker, TIER_DAILY_CAPS, TIER_REQUEST_LIMITS
 from backend.utils.categories import _cat
 
@@ -3408,14 +3408,39 @@ def credits_balance():
     })
 
 
-@app.route("/api/v1/credits/consume", methods=["POST"])
+@app.route("/api/v1/credits/consume", methods=["POST", "OPTIONS"])
 @limiter.limit("60 per minute")
-@require_auth
 def credits_consume():
     """Deduct credits for an AI action. Called by frontend after successful action."""
-    user = g.current_user
+    if request.method == "OPTIONS":
+        return "", 204
+    user = get_current_user()
+    if not user or user.get("role") != "authenticated":
+        return jsonify({"error": "Authentication required"}), 401
+    g.current_user = user
     user_id = user.get("sub", "")
-    tier = getattr(g, "user_tier", "free")
+
+    # Resolve tier from subscriptions table
+    tier = "free"
+    try:
+        _supabase_url = os.environ.get("VITE_SUPABASE_URL", "")
+        _supabase_key = os.environ.get("VITE_SUPABASE_PUBLISHABLE_KEY", "")
+        if _supabase_url and _supabase_key:
+            import requests as _sb_req
+            _svc_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+            _auth_key = _svc_key or _supabase_key
+            sub_resp = _sb_req.get(
+                f"{_supabase_url}/rest/v1/subscriptions?user_id=eq.{user_id}&status=eq.active&select=plan_tier&limit=1",
+                headers={"apikey": _supabase_key, "Authorization": f"Bearer {_auth_key}"},
+                timeout=5,
+            )
+            if sub_resp.status_code == 200:
+                subs = sub_resp.json()
+                if subs and len(subs) > 0:
+                    tier = subs[0].get("plan_tier", "free")
+    except Exception as e:
+        _log.warning("[CREDITS] Tier lookup failed, using free: %s", e)
+
     data = request.get_json(silent=True) or {}
     action = data.get("action", "")
 

@@ -356,6 +356,7 @@ export default function StyleRecommendationsPage() {
               onClick={handleFullAnalysis}
               disabled={!imagePreview || analyzing}
               className="relative overflow-hidden rounded-xl px-6 py-3 text-slate-800 font-medium shadow-lg transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed enabled:hover:scale-105 bg-white/90 backdrop-blur-sm enabled:hover:bg-white"
+              title="Costs 8 credits (3+3+2 for 3-step pipeline)"
             >
               {analyzing ? (
                 <span className="relative z-10 flex items-center gap-2">

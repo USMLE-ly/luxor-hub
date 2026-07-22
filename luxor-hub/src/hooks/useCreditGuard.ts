@@ -12,6 +12,7 @@ import { toast } from "sonner";
 export function useCreditGuard() {
   const { data } = useCreditBalance();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const remaining = data?.credits_remaining ?? 30;
   const [exhausted, setExhausted] = useState(false);
@@ -143,6 +144,8 @@ export function useCreditGuard() {
         const data = await resp.json();
         if (data.credits_remaining !== undefined) {
           toast.info(`${data.cost} credits used — ${data.credits_remaining} remaining`, { duration: 2000 });
+          // Refetch balance so UI updates immediately
+          queryClient.invalidateQueries({ queryKey: ["credit-balance"] });
         }
         return true;
       } catch (err) {

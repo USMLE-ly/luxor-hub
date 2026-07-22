@@ -38,7 +38,8 @@ export function useCreditBalance() {
     },
     enabled: !!user,
     meta: { logSource: 'useCreditBalance' },
-    staleTime: 60_000,
+    staleTime: 10_000,
     refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
 }

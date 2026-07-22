@@ -517,8 +517,9 @@ export default function DressingRoomPage() {
                       onClick={handleGenerateClick}
                       disabled={isGenerating}
                       className="flex-1 py-3.5 rounded-full bg-gradient-to-r from-[#E8C87A] to-[#E8C87A]/80 text-zinc-900 text-sm font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-40"
+                      title="Costs 3-7 credits depending on outfit count"
                     >
-                      Generate
+                      Generate <span className="text-[10px] opacity-60 ml-1">· 3-7 credits</span>
                     </button>
                     <button
                       onClick={handleDismiss}
