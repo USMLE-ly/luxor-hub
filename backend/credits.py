@@ -286,5 +286,14 @@ class CreditManager:
             _log.warning("[CREDITS] Rollover failed: %s", exc)
 
 
+
+    def get_all_costs(self) -> dict:
+        """Return the full credit cost table."""
+        return dict(CREDIT_COSTS)
+
+    def get_tier_allocation(self, tier: str) -> int:
+        """Return the monthly credit allocation for a given tier."""
+        return TIER_MONTHLY_CREDITS.get(tier, TIER_MONTHLY_CREDITS["free"])
+
 # Global singleton
 credit_manager = CreditManager()
