@@ -78,16 +78,16 @@ export function LuxurySplashScreen({
   const [exit, setExit] = useState(false);
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase("wordmark"), 500);
-    const t2 = setTimeout(() => setPhase("tagline"), 1200);
-    const t3 = setTimeout(() => setPhase("complete"), 2000);
+    const t1 = setTimeout(() => setPhase("wordmark"), 250);
+    const t2 = setTimeout(() => setPhase("tagline"), 600);
+    const t3 = setTimeout(() => setPhase("complete"), 1000);
     const t4 = setTimeout(() => {
       setExit(true);
       onComplete?.();
-    }, 4500);
+    }, 2200);
     const forceExit = setTimeout(() => {
       setExit(true);
-    }, 4000);
+    }, 1800);
 
     return () => {
       clearTimeout(t1);

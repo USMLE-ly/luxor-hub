@@ -25,8 +25,8 @@ const SplashOverlay = () => {
   const [fading, setFading] = useState(false);
 
   useEffect(() => {
-    const fadeTimer = setTimeout(() => setFading(true), 3500);
-    const removeTimer = setTimeout(() => setShow(false), 4200);
+    const fadeTimer = setTimeout(() => setFading(true), 1500);
+    const removeTimer = setTimeout(() => setShow(false), 2000);
     return () => { clearTimeout(fadeTimer); clearTimeout(removeTimer); };
   }, []);
 
@@ -142,20 +142,28 @@ const AudioInit = () => {
   return null;
 };
 
-const App = () => (
-  <AppErrorBoundary>
-    <MotionConfig reducedMotion="user">
-      <BrowserRouter>
-        <AudioInit />
-        <SpeedInsights />
-        <SplashOverlay />
-        <Suspense fallback={<Loading />}>
-          <AppContent />
-        </Suspense>
-      </BrowserRouter>
-    </MotionConfig>
-  </AppErrorBoundary>
-);
+const App = () => {
+  const [minLoadDone, setMinLoadDone] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setMinLoadDone(true), 2500);
+    return () => clearTimeout(t);
+  }, []);
+
+  return (
+    <AppErrorBoundary>
+      <MotionConfig reducedMotion="user">
+        <BrowserRouter>
+          <AudioInit />
+          <SpeedInsights />
+          <SplashOverlay />
+          <Suspense fallback={<Loading />}>
+            {minLoadDone ? <AppContent /> : <Loading />}
+          </Suspense>
+        </BrowserRouter>
+      </MotionConfig>
+    </AppErrorBoundary>
+  );
+};
 
 export default App;
 // deploy-fix-1753141800
