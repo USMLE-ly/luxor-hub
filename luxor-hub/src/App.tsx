@@ -1,5 +1,5 @@
-import React, { lazy, Suspense, Component, useEffect, useState } from "react";
-import { BrowserRouter } from "react-router-dom";
+import React, { lazy, Suspense, Component, useEffect, useState, useCallback } from "react";
+import { BrowserRouter, useLocation } from "react-router-dom";
 import { initAudio } from "@/lib/audio-system";
 import { initMonitor } from "@/lib/support";
 import { initResilience } from "@/lib/resilience";
@@ -84,6 +84,21 @@ class AppErrorBoundary extends Component<
   }
 }
 
+/* Shows LoadingScreen briefly on every route change */
+const RouteTransitionLoader = () => {
+  const location = useLocation();
+  const [transitioning, setTransitioning] = useState(false);
+
+  useEffect(() => {
+    setTransitioning(true);
+    const t = setTimeout(() => setTransitioning(false), 600);
+    return () => clearTimeout(t);
+  }, [location.pathname]);
+
+  if (!transitioning) return null;
+  return <LoadingScreen />;
+};
+
 const AudioInit = () => {
   useEffect(() => {
     initMonitor();
@@ -116,6 +131,7 @@ const App = () => (
         <AudioInit />
         <SpeedInsights />
         <SplashScreen />
+        <RouteTransitionLoader />
         <Suspense fallback={<LoadingScreen />}>
           <AppContent />
         </Suspense>
