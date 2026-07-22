@@ -7,6 +7,9 @@ Actions that earn credits:
 - Invite friend who signs up: +20 credits
 - Complete weekly challenge: +15 credits
 - First outfit analysis: +5 credits (onboarding bonus)
+
+Bug fix: Replaced in-memory _claimed_rewards dict with Supabase query
+to prevent re-claims after server restart.
 """
 
 import os
@@ -20,7 +23,6 @@ _log = logging.getLogger("luxor.rewards")
 SUPABASE_URL = os.environ.get("VITE_SUPABASE_URL", "")
 SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or os.environ.get("VITE_SUPABASE_PUBLISHABLE_KEY", "")
 
-# Credit rewards for each action
 REWARD_ACTIONS = {
     "complete_profile": {"credits": 10, "description": "Complete your profile"},
     "add_5_closet_items": {"credits": 5, "description": "Add 5 closet items"},
@@ -30,8 +32,30 @@ REWARD_ACTIONS = {
     "first_analysis": {"credits": 5, "description": "First outfit analysis"},
 }
 
-# Track which rewards a user has already claimed this month
-_claimed_rewards: dict = {}  # user_id → set of action names
+
+def _was_claimed_this_month(user_id: str, action: str) -> bool:
+    """Check if user already claimed this reward this month (DB-backed)."""
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        return False
+    try:
+        current_month = datetime.utcnow().strftime("%Y-%m")
+        resp = requests.get(
+            f"{SUPABASE_URL}/rest/v1/credit_events",
+            params={
+                "select": "id",
+                "user_id": f"eq.{user_id}",
+                "action": f"eq.reward_{action}",
+                "created_at": f"gte.{current_month}-01T00:00:00Z",
+                "limit": "1",
+            },
+            headers={"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"},
+            timeout=5,
+        )
+        if resp.status_code == 200:
+            return len(resp.json()) > 0
+    except Exception:
+        pass
+    return False
 
 
 def award_reward(user_id: str, action: str) -> Optional[dict]:
@@ -43,11 +67,7 @@ def award_reward(user_id: str, action: str) -> Optional[dict]:
     reward = REWARD_ACTIONS[action]
     credits = reward["credits"]
 
-    # Check if already claimed this month
-    month_key = f"{user_id}:{datetime.utcnow().strftime('%Y-%m')}"
-    if month_key not in _claimed_rewards:
-        _claimed_rewards[month_key] = set()
-    if action in _claimed_rewards[month_key]:
+    if _was_claimed_this_month(user_id, action):
         _log.info("[REWARDS] Already claimed: user=%s action=%s", user_id[:8], action)
         return None
 
@@ -58,7 +78,6 @@ def award_reward(user_id: str, action: str) -> Optional[dict]:
         current_month = datetime.utcnow().strftime("%Y-%m")
         headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}", "Content-Type": "application/json"}
 
-        # Add credits to balance
         resp = requests.get(
             f"{SUPABASE_URL}/rest/v1/credit_balances",
             params={"select": "id,credits_remaining", "user_id": f"eq.{user_id}", "month": f"eq.{current_month}", "limit": "1"},
@@ -81,16 +100,13 @@ def award_reward(user_id: str, action: str) -> Optional[dict]:
                 headers=headers, timeout=5,
             )
 
-        # Log reward event
         requests.post(
             f"{SUPABASE_URL}/rest/v1/credit_events",
             json={"user_id": user_id, "action": f"reward_{action}", "cost": -credits, "credits_remaining": new_remaining, "created_at": datetime.utcnow().isoformat()},
             headers=headers, timeout=5,
         )
 
-        _claimed_rewards[month_key].add(action)
         _log.info("[REWARDS] Awarded %d credits to user=%s for %s", credits, user_id[:8], action)
-
         return {"credits": credits, "description": reward["description"], "total": new_remaining}
     except Exception as exc:
         _log.error("[REWARDS] Failed: %s", exc)
