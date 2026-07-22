@@ -379,13 +379,17 @@ const Closet = () => {
 
   const fetchItems = useCallback(async (): Promise<ClothingItem[]> => {
     // PRIMARY: Supabase (always works, no backend dependency)
+    let supabaseFailed = false;
     try {
       const { data: sbData, error: sbErr } = await supabase
         .from("clothing_items")
         .select("id, name, category, color, photo_url, brand, occasion, price, season, style, notes")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
-      if (!sbErr && sbData && sbData.length > 0) {
+      if (sbErr) {
+        console.warn("[CLOSET] Supabase query error:", sbErr.message);
+        supabaseFailed = true;
+      } else if (sbData && sbData.length > 0) {
         console.log("[CLOSET] Loaded", sbData.length, "items from Supabase");
         return sbData.map((item: any) => ({
           id: item.id || '',
@@ -401,9 +405,13 @@ const Closet = () => {
           notes: item.notes || null,
           price: item.price || null,
         }));
+      } else {
+        console.log("[CLOSET] Supabase returned 0 items, trying Qdrant fallback");
+        supabaseFailed = true;
       }
     } catch (sbErr) {
       console.warn("[CLOSET] Supabase fetch failed:", sbErr);
+      supabaseFailed = true;
     }
     // FALLBACK: Replit backend (Qdrant) — may fail if backend is sleeping
     try {
@@ -894,37 +902,37 @@ const Closet = () => {
   };
 
   const handleDelete = useCallback(async (id: string) => {
+    // Remove from UI immediately for instant feedback
+    setItems((prev) => {
+      const next = prev.filter((item) => item.id !== id);
+      if (user) saveCachedCloset(user.id, next);
+      return next;
+    });
+    syncCatalogItems(
+      useWardrobeStore.getState().catalogItems.filter((c) => c.id !== id)
+    );
+
+    // Delete from Supabase (primary source of truth)
+    try {
+      const { error } = await supabase.from("clothing_items").delete().eq("id", id);
+      if (error) console.warn("[CLOSET] Supabase delete failed:", error.message);
+    } catch (sbErr) {
+      console.warn("[CLOSET] Supabase delete exception:", sbErr);
+    }
+
+    // Also delete from Qdrant (legacy storage)
     try {
       const delAuthH = await getAuthHeaders();
-      const resp = await fetch(apiBase + "/api/v1/closet/delete-item", {
+      await fetch(apiBase + "/api/v1/closet/delete-item", {
         method: "POST",
         headers: { "Content-Type": "application/json", ...delAuthH },
         body: JSON.stringify({ id }),
       });
-      if (resp.ok) {
-        setItems((prev) => {
-          const next = prev.filter((item) => item.id !== id);
-          if (user) saveCachedCloset(user.id, next);
-          return next;
-        });
-        toast.success("Item removed");
-      } else {
-        const errData = await resp.json();
-        toast.error(errData.error || "Failed to delete");
-      }
-    } catch (err) {
-      console.warn("[CLOSET] Backend delete failed, fallback to Supabase");
-      const { error } = await supabase.from("clothing_items").delete().eq("id", id);
-      if (error) toast.error("Failed to delete item");
-      else {
-        setItems((prev) => {
-          const next = prev.filter((item) => item.id !== id);
-          if (user) saveCachedCloset(user.id, next);
-          return next;
-        });
-        toast.success("Item removed");
-      }
+    } catch (qtErr) {
+      console.warn("[CLOSET] Qdrant delete failed (non-fatal):", qtErr);
     }
+
+    toast.success("Item removed");
   }, [apiBase, user]);
   const handleClearAll = async () => {
     if (!user) return;

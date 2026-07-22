@@ -703,7 +703,7 @@ def qdrant_upsert_item(item: Dict[str, Any]) -> bool:
     the local JSON save, ensuring the item is always persisted.
     Returns True if at least one storage layer succeeded.
     """
-    item_id = item.get("id", str(uuid.uuid4())[:8])
+    item_id = item.get("id", str(uuid.uuid4()))
     item["id"] = item_id
     qdrant_ok = False
     json_ok = False
@@ -1895,7 +1895,7 @@ def closet_add():
                     _log.warning("[CLOSET] Local image save failed: %s", exc)
 
         # Build item
-        item_id = str(uuid.uuid4())[:8]
+        item_id = str(uuid.uuid4())
         now = datetime.now(timezone.utc).isoformat()
         item = {
             "id": item_id,
@@ -1930,6 +1930,46 @@ def closet_add():
         # Debug: confirm base64 was persisted
         if image_b64:
             _log.warning(f"[ADD-DEBUG] Saved Base64 for '{label}', b64 length: {len(image_b64)}")
+        
+        # ---- DUAL-WRITE: Also insert into Supabase clothing_items ----
+        try:
+            _supabase_url = os.environ.get('VITE_SUPABASE_URL', '')
+            _supabase_key = os.environ.get('VITE_SUPABASE_PUBLISHABLE_KEY', '')
+            _service_key = os.environ.get('SUPABASE_SERVICE_ROLE_KEY', '')
+            if _supabase_url and (_service_key or _supabase_key):
+                import requests as _sb_req
+                # Use service_role key to bypass RLS, fallback to anon key
+                _auth_key = _service_key or _supabase_key
+                _sb_resp = _sb_req.post(
+                    f'{_supabase_url}/rest/v1/clothing_items',
+                    headers={
+                        'apikey': _supabase_key,
+                        'Authorization': f'Bearer {_auth_key}',
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal',
+                    },
+                    json={
+                        'id': item_id,
+                        'user_id': user_id,
+                        'name': label,
+                        'category': category or 'other',
+                        'color': color or '',
+                        'brand': brand or '',
+                        'season': season or 'all-season',
+                        'occasion': occasion or '',
+                        'style': style or '',
+                        'notes': notes or '',
+                        'price': price,
+                        'photo_url': image_url or '',
+                    },
+                    timeout=10,
+                )
+                if _sb_resp.status_code not in (200, 201):
+                    _log.warning('[CLOSET] Supabase insert returned %s: %s', _sb_resp.status_code, _sb_resp.text[:200])
+                else:
+                    _log.info('[CLOSET] Dual-write to Supabase OK for item %s', item_id)
+        except Exception as sb_err:
+            _log.warning('[CLOSET] Supabase dual-write failed (non-fatal): %s', sb_err)
         
         return jsonify({"success": True, "item": item})
     except Exception as e:
