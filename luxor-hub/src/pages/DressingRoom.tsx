@@ -17,6 +17,7 @@ import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import {CalendarDots, Check, CaretLeft, CaretRight} from "@phosphor-icons/react";
 import { notifyEvent } from "@/lib/notificationService";
 import { supabase } from "@/integrations/supabase/client";
+import { storeOutfitDecision } from "@/lib/supermemory";
 import { humanizeTextArray } from "@/lib/humanizer";
 import { VerticalImageStack } from "@/components/ui/vertical-image-stack";
 import { useCalendarActions } from "@/hooks/useCalendarActions";

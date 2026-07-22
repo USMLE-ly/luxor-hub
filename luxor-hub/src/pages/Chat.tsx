@@ -17,6 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useClosetItems } from "@/hooks/useClosetItems";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { supabase } from "@/integrations/supabase/client";
+import { getChatContext, addFashionMemory } from "@/lib/supermemory";
 import { toast } from "sonner";
 import {Sparkle, TrashSimple, ArrowUp, Camera, X, Users} from "@phosphor-icons/react";
 import ReactMarkdown from "react-markdown";

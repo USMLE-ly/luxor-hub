@@ -3,6 +3,7 @@ import { motion, AnimatePresence, useMotionValue } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { storeStylePreference } from "@/lib/supermemory";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {ArrowRight, ArrowLeft, Check, Eye, Gift} from "@phosphor-icons/react";
