@@ -1,14 +1,15 @@
-import React, { lazy, Suspense, Component, useEffect } from "react";
+import React, { lazy, Suspense, Component, useEffect, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { initAudio } from "@/lib/audio-system";
 import { initMonitor } from "@/lib/support";
 import { initResilience } from "@/lib/resilience";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { MotionConfig } from "framer-motion";
+import { LuxurySplashScreen } from "@/components/ui/luxury-splash-visual";
 
 const AppContent = lazy(() => import("./AppContent"));
 
-/* Non-blocking loader — matches splash aesthetic */
+/* Loading spinner — shows while AppContent lazy-loads */
 const Loading = () => (
   <div className="flex items-center justify-center min-h-screen" style={{ background: "linear-gradient(180deg, #060f0d 0%, #0c2420 35%, #10352a 55%, #0a1f1a 80%, #060f0d 100%)" }}>
     <div className="flex flex-col items-center gap-4">
@@ -17,6 +18,29 @@ const Loading = () => (
     </div>
   </div>
 );
+
+/* Splash screen — renders on top of everything, fades after 4.2s */
+const SplashOverlay = () => {
+  const [show, setShow] = useState(true);
+  const [fading, setFading] = useState(false);
+
+  useEffect(() => {
+    const fadeTimer = setTimeout(() => setFading(true), 3500);
+    const removeTimer = setTimeout(() => setShow(false), 4200);
+    return () => { clearTimeout(fadeTimer); clearTimeout(removeTimer); };
+  }, []);
+
+  if (!show) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-[99999] transition-opacity duration-700"
+      style={{ pointerEvents: "none", opacity: fading ? 0 : 1 }}
+    >
+      <LuxurySplashScreen tagline="Your Personal Fashion Intelligence" />
+    </div>
+  );
+};
 
 function isChunkLoadError(error: any): boolean {
   return (
@@ -124,6 +148,7 @@ const App = () => (
       <BrowserRouter>
         <AudioInit />
         <SpeedInsights />
+        <SplashOverlay />
         <Suspense fallback={<Loading />}>
           <AppContent />
         </Suspense>
