@@ -3431,6 +3431,34 @@ def gateway_status():
 
 
 
+
+@app.route("/api/v1/security/console-report", methods=["POST", "OPTIONS"])
+@limiter.limit("10 per minute")
+def console_report():
+    """Receive console tamper reports from the frontend."""
+    if request.method == "OPTIONS":
+        return "", 204
+    
+    user = get_current_user()
+    user_id = user.get("sub", "") if user else "anonymous"
+    ip = request.remote_addr or "unknown"
+    
+    data = request.get_json(silent=True) or {}
+    activity_type = data.get("activity_type", "unknown")
+    details = data.get("details", "")
+    page_url = data.get("url", "")
+    
+    # Log the report
+    _log.warning("[SECURITY] Console report: user=%s ip=%s type=%s details=%s",
+                 user_id[:8], ip, activity_type, details[:200])
+    
+    # Record as suspicious activity — may trigger auto-ban
+    from backend.security import record_suspicious_activity
+    record_suspicious_activity(user_id, ip, activity_type, details)
+    
+    return jsonify({"status": "reported"}), 200
+
+
 @app.route("/api/v1/admin/security-status", methods=["GET"])
 @limiter.limit("5 per minute")
 @require_auth
