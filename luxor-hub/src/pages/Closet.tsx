@@ -874,7 +874,12 @@ const Closet = () => {
           }
         } catch (storageErr) {
           console.warn("[CLOSET] Storage upload failed, saving without image:", storageErr);
+          toast.warning("Image upload failed. Your item will be saved without a photo.");
         }
+      }
+      // Warn if no image was uploaded
+      if (!photoUrl && selectedFile) {
+        toast.warning("No image was uploaded. The item will appear without a photo.");
       }
       // Insert directly into Supabase clothing_items table
       const newItemId = crypto.randomUUID();
