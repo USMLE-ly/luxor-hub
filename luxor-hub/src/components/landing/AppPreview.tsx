@@ -1,11 +1,8 @@
-import { useNavigate } from "react-router-dom";
 import { ContainerScroll } from "@/components/ui/container-scroll";
-import { GradientButton } from "@/components/ui/gradient-button";
 import { Diamond } from "@phosphor-icons/react";
 import outfitGen from "@/assets/feature-outfit-gen.jpg";
 
 const AppPreview = () => {
-  const navigate = useNavigate();
   return (
     <section className="relative overflow-hidden bg-background">
       <ContainerScroll
@@ -20,10 +17,6 @@ const AppPreview = () => {
             <p className="text-muted-foreground font-sans text-lg max-w-2xl">
               Everything you need to master your personal style — powered by AI, designed for you.
             </p>
-            <GradientButton onClick={() => navigate("/auth")} className="mt-2">
-              <Diamond className="w-4 h-4 mr-2" />
-              Try Free — No Card Needed
-            </GradientButton>
           </div>
         }
       >
