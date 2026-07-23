@@ -97,7 +97,7 @@ export const CardCarousel: React.FC = () => {
         spaceBetween={16}
         grabCursor
         loop={false}
-        autoplay={{ delay: 6000, disableOnInteraction: false }}
+        autoplay={{ delay: 8000, disableOnInteraction: false }}
         pagination={{ clickable: true }}
         navigation
         onSlideChange={handleSlideChange}
@@ -124,7 +124,7 @@ export const CardCarousel: React.FC = () => {
                 muted={isMuted}
                 loop
                 playsInline
-                preload="auto"
+                preload="metadata"
                 style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 1 }}
               />
 
