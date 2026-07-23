@@ -49,12 +49,12 @@ const Index = () => {
       <Section><AnnouncementBanner /></Section>
       <Section><Navbar /></Section>
       <Section><Hero /></Section>
-      <Section><AppPreview /></Section>
       <Section><TabbedFeatures /></Section>
 
       <Section><SocialProofStrip /></Section>
       <Section><BrandMarquee /></Section>
 
+      <Section><AppPreview /></Section>
       <Section><Features /></Section>
       <Section><AIFashionEditorial /></Section>
       <Section><HowItWorks /></Section>
