@@ -2,6 +2,7 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { getApiUrl } from "@/lib/api";
 
 /**
  * Wraps app routes behind a paywall check.
@@ -32,7 +33,7 @@ const PaywallGate = ({ children }: { children: React.ReactNode }) => {
         try {
           const { data: session } = await supabase.auth.getSession();
           const token = session?.session?.access_token;
-          const apiUrl = import.meta.env.VITE_API_URL || "";
+          const apiUrl = getApiUrl();
 
           // HARD 5-SECOND TIMEOUT — prevents hanging on sleeping backends
           const controller = new AbortController();
