@@ -35,14 +35,13 @@ const SplashScreen = () => {
 };
 
 function LuxurySplashContent() {
-  const [phase, setPhase] = useState<"diamond" | "wordmark" | "line" | "tagline" | "subtle">("diamond");
+  const [phase, setPhase] = useState<"wordmark" | "line" | "tagline" | "subtle">("wordmark");
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase("wordmark"), 400);
-    const t2 = setTimeout(() => setPhase("line"), 1000);
-    const t3 = setTimeout(() => setPhase("tagline"), 1600);
-    const t4 = setTimeout(() => setPhase("subtle"), 2200);
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4); };
+    const t1 = setTimeout(() => setPhase("line"), 500);
+    const t2 = setTimeout(() => setPhase("tagline"), 1200);
+    const t3 = setTimeout(() => setPhase("subtle"), 2000);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, []);
 
   return (
@@ -79,20 +78,9 @@ function LuxurySplashContent() {
         ))}
       </div>
 
-      {/* Diamond icon */}
-      <div className={`relative z-10 mb-6 transition-all duration-1000 ease-out ${
-        phase !== "diamond" ? "opacity-100 scale-100" : "opacity-0 scale-75"
-      }`}>
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(232,200,122,0.35)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M6 3h12l4 6-10 13L2 9z" />
-          <path d="M2 9h20" />
-          <path d="M10 3l-4 6 6 13 6-13-4-6" />
-        </svg>
-      </div>
-
       {/* Wordmark */}
       <h1 className={`relative z-10 font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-light tracking-[0.3em] transition-all duration-[1200ms] ease-out ${
-          phase !== "diamond" ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+          "opacity-100 translate-y-0"
         }`}
         style={{ textShadow: "0 0 80px rgba(232,200,122,0.06)" }}>
         <span className="text-white/90">LUXOR</span>
@@ -102,7 +90,7 @@ function LuxurySplashContent() {
 
       {/* Thin gold line */}
       <div className={`relative z-10 h-px mt-8 transition-all duration-1000 ease-out ${
-          phase !== "diamond" && phase !== "wordmark" ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0"
+          phase === "line" || phase === "tagline" || phase === "subtle" ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0"
         }`}
         style={{ width: "48px", backgroundColor: "rgba(232,200,122,0.25)" }} />
 
