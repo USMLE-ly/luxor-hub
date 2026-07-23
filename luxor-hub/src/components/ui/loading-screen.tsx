@@ -18,10 +18,13 @@ const LoadingScreen = () => {
         pointerEvents: canDismiss ? "none" : "auto",
       }}
     >
+      {/* Ambient glow */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="w-[600px] h-[600px] rounded-full"
           style={{ background: "radial-gradient(circle, rgba(232,200,122,0.06) 0%, rgba(232,200,122,0.02) 40%, transparent 70%)" }} />
       </div>
+
+      {/* Floating particles */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {[...Array(12)].map((_, i) => (
           <div key={i}
@@ -38,22 +41,26 @@ const LoadingScreen = () => {
           />
         ))}
       </div>
+
+      {/* Moving diamond grid */}
       <div className="relative w-28 h-28 rotate-45 mb-8">
         {[...Array(8)].map((_, i) => (
           <div key={i}
-            className="absolute top-0 left-0 rounded-[3px]"
+            className="absolute rounded-[3px]"
             style={{
               width: '22px',
               height: '22px',
               margin: '3px',
               background: 'linear-gradient(135deg, #E8C87A 0%, #d4a843 100%)',
-              boxShadow: '0 0 12px rgba(232,200,122,0.15)',
-              animation: 'luxor-square 8s ease-in-out infinite both',
-              animationDelay: `${-1 * i * 1}s`,
+              boxShadow: '0 0 12px rgba(232,200,122,0.3)',
+              animation: 'luxor-square 4s cubic-bezier(0.4,0,0.2,1) infinite both',
+              animationDelay: `${-1 * i * 0.5}s`,
             }}
           />
         ))}
       </div>
+
+      {/* Brand text */}
       <div className="relative z-10 flex flex-col items-center gap-3">
         <h1 className="font-display text-3xl sm:text-4xl font-light tracking-[0.35em] text-white/80"
           style={{ textShadow: "0 0 40px rgba(232,200,122,0.08)" }}>
@@ -65,25 +72,18 @@ const LoadingScreen = () => {
           Loading your style...
         </p>
       </div>
+
       <style>{`
         @keyframes luxor-square {
-          0% { left: 0; top: 0; opacity: 1; }
-          10.5% { left: 0; top: 0; opacity: 1; }
-          12.5% { left: 28px; top: 0; opacity: 0.8; }
-          23% { left: 28px; top: 0; opacity: 0.8; }
-          25% { left: 56px; top: 0; opacity: 1; }
-          35.5% { left: 56px; top: 0; opacity: 1; }
-          37.5% { left: 56px; top: 28px; opacity: 0.8; }
-          48% { left: 56px; top: 28px; opacity: 0.8; }
-          50% { left: 28px; top: 28px; opacity: 1; }
-          60.5% { left: 28px; top: 28px; opacity: 1; }
-          62.5% { left: 28px; top: 56px; opacity: 0.8; }
-          73% { left: 28px; top: 56px; opacity: 0.8; }
-          75% { left: 0; top: 56px; opacity: 1; }
-          85.5% { left: 0; top: 56px; opacity: 1; }
-          87.5% { left: 0; top: 28px; opacity: 0.8; }
-          98% { left: 0; top: 28px; opacity: 0.8; }
-          100% { left: 0; top: 0; opacity: 1; }
+          0%   { transform: translate(0, 0) scale(1);   opacity: 0.3; }
+          12%  { transform: translate(0, 0) scale(1.1); opacity: 1; }
+          25%  { transform: translate(28px, 0) scale(1); opacity: 0.3; }
+          37%  { transform: translate(28px, 0) scale(1.1); opacity: 1; }
+          50%  { transform: translate(28px, 28px) scale(1); opacity: 0.3; }
+          62%  { transform: translate(28px, 28px) scale(1.1); opacity: 1; }
+          75%  { transform: translate(0, 28px) scale(1); opacity: 0.3; }
+          87%  { transform: translate(0, 28px) scale(1.1); opacity: 1; }
+          100% { transform: translate(0, 0) scale(1);   opacity: 0.3; }
         }
         @keyframes float-particle {
           0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
