@@ -3005,11 +3005,9 @@ def generate_outfits():
         if not closet_items:
             return jsonify({"success": False, "images": [], "error": "No closet items found. Make sure your closet has items with images."}), 200
 
-        # Allow items even without image_url — FlipGallery handles empty URLs gracefully (dark block)
-        items_with_img = [i for i in closet_items if (i.get("image_url") or i.get("photo_url") or i.get("imageUrl"))]
-        _log.warning(f"[DEBUG] Found {len(items_with_img)} items with image_url field")
-        if not items_with_img:
-            return jsonify({"success": False, "images": [], "error": "Closet items found but none have images. Upload photos of your clothes."}), 200
+        # Use ALL items for categorization - outfit generation handles missing images (dark blocks)
+        items_with_img = closet_items
+        _log.warning(f"[DEBUG] Using {len(items_with_img)} total closet items for outfit generation")
 
         # ---- Category detection ----
         def _img_url(item, default=""):
