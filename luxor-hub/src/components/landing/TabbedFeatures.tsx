@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import Pressable from "@/components/ui/pressable";
 import {Check} from "@phosphor-icons/react";
-import featureOutfitGen from "@/assets/feature-outfit-gen.jpg";
+const featureOutfitGen = "/images/recommendation-demo.jpg";
 import { ContainerScroll } from "@/components/ui/container-scroll-animation";
 
 const bullets = [
