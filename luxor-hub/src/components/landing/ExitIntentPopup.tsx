@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
 import { X, ArrowRight } from "@phosphor-icons/react";
 import { trackEvent } from "@/lib/fbPixel";
 
@@ -11,7 +10,6 @@ const ExitIntentPopup = () => {
   const [submitted, setSubmitted] = useState(false);
   const [visible, setVisible] = useState(false);
 
-  const navigate = useNavigate();
 
   const shouldShow = useCallback(() => {
     try {
@@ -40,7 +38,7 @@ const ExitIntentPopup = () => {
   const handleCTA = () => {
     trackEvent("InitiateCheckout", { content_name: "Exit Intent Popup CTA" });
     setSubmitted(true);
-    setTimeout(() => navigate("/auth"), 1500);
+    setTimeout(() => setVisible(false), 1500);
   };
 
   if (!visible) return null;
