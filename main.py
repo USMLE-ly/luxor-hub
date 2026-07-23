@@ -3035,10 +3035,6 @@ def generate_outfits():
     if request.method == "OPTIONS":
         return "", 204
 
-    # ── Server-side credit enforcement ──
-    credit_check = _enforce_credits("generate_outfits")
-    if credit_check:
-        return credit_check
     try:
         import random
         data = request.get_json(silent=True) or {}
