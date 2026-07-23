@@ -51,7 +51,7 @@ const FloatingCircle = ({
     transition={{
       opacity: { duration: 2, delay },
     }}
-    className="absolute rounded-full pointer-events-none border border-white/[0.08] backdrop-blur-[2px] floating-circle"
+    className="absolute rounded-full pointer-events-none border border-white/[0.10] backdrop-blur-[2px] floating-circle"
     style={{
       width: size,
       height: size,
@@ -116,7 +116,7 @@ export default function GlassmorphismTrustHero() {
         <div
           className="absolute inset-0 opacity-30"
           style={{
-            background: "radial-gradient(ellipse at 30% 20%, hsl(var(--gold) / 0.15), transparent 60%), radial-gradient(ellipse at 70% 80%, hsl(var(--forest) / 0.25), transparent 60%)",
+            background: "radial-gradient(ellipse at 25% 15%, hsl(var(--gold) / 0.20), transparent 55%), radial-gradient(ellipse at 75% 85%, hsl(var(--forest) / 0.30), transparent 55%), radial-gradient(ellipse at 50% 50%, hsl(var(--gold) / 0.05), transparent 80%)",
           }}
         />
         <div
@@ -130,16 +130,16 @@ export default function GlassmorphismTrustHero() {
       {/* Luxury floating garment accent — CSS-only, zero JS */}
       <div className="absolute right-[-2%] top-[8%] w-[40%] h-[70%] z-[1] pointer-events-none opacity-50 hidden lg:flex items-center justify-center">
         <div className="relative w-[280px] h-[360px]">
-          <div className="absolute inset-0 rounded-[40%] border border-gold/10 animate-[spin_20s_linear_infinite]" />
-          <div className="absolute inset-[15%] rounded-[45%] border border-gold/15 animate-[spin_15s_linear_infinite_reverse]" />
-          <div className="absolute inset-[30%] rounded-full bg-gradient-to-br from-gold/20 via-gold/5 to-transparent animate-pulse" />
+          <div className="absolute inset-0 rounded-[40%] border border-gold/15 animate-[spin_20s_linear_infinite]" />
+          <div className="absolute inset-[15%] rounded-[45%] border border-gold/20 animate-[spin_15s_linear_infinite_reverse]" />
+          <div className="absolute inset-[30%] rounded-full bg-gradient-to-br from-gold/25 via-gold/10 to-transparent animate-pulse" />
           <div className="absolute inset-0 rounded-[40%] bg-gradient-to-tr from-transparent via-white/[0.03] to-transparent" />
         </div>
       </div>
       <div className="absolute inset-0 z-[1] overflow-hidden pointer-events-none">
-        <FloatingCircle size={320} top="-5%" left="-8%" gradient="radial-gradient(circle, hsl(var(--gold) / 0.08) 0%, transparent 70%)" duration={14} delay={0} />
-        <FloatingCircle size={200} top="15%" left="75%" gradient="radial-gradient(circle, hsl(var(--accent) / 0.08) 0%, transparent 70%)" duration={12} delay={1} />
-        <FloatingCircle size={400} top="55%" left="60%" gradient="radial-gradient(circle, hsl(var(--gold) / 0.05) 0%, transparent 70%)" duration={16} delay={2} />
+        <FloatingCircle size={400} top="-8%" left="-10%" gradient="radial-gradient(circle, hsl(var(--gold) / 0.12) 0%, transparent 65%)" duration={16} delay={0} />
+        <FloatingCircle size={250} top="12%" left="72%" gradient="radial-gradient(circle, hsl(var(--gold) / 0.10) 0%, transparent 65%)" duration={14} delay={1} />
+        <FloatingCircle size={500} top="50%" left="55%" gradient="radial-gradient(circle, hsl(var(--gold) / 0.08) 0%, transparent 60%)" duration={18} delay={2} />
       </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 pt-24 pb-12 sm:px-6 md:pt-32 md:pb-20 lg:px-8">
@@ -181,13 +181,13 @@ export default function GlassmorphismTrustHero() {
             {/* CTA Buttons */}
             <ScrollReveal direction="up" delay={0.4} className="flex flex-col sm:flex-row gap-4">
               <motion.button
-                onClick={() => navigate("/auth")}
+                onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 className="group inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-8 py-4 text-sm font-semibold text-background transition-colors hover:opacity-90"
               >
-                <span>Try Free — No Card Needed</span>
+                <span>See Pricing</span>
                 <motion.span
                   animate={{ x: [0, 3, 0] }}
                   transition={{ duration: 1.5, ease: [0.77, 0, 0.175, 1] }}
