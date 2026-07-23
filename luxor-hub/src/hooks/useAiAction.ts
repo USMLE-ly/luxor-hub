@@ -3,8 +3,9 @@ import { useCreditGuard } from "./useCreditGuard";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getApiUrl } from "@/lib/api";
 
-const API_URL = import.meta.env.VITE_API_URL || "";
+const API_URL = getApiUrl();
 
 interface AiActionOptions {
   /** Credit action key (e.g., "analyze_outfit", "pro_tweak") */
