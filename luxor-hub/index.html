@@ -161,10 +161,16 @@
     <meta name="twitter:title" content="LUXOR® — AI Fashion Stylist & Virtual Wardrobe | Personal Style OS">
     <meta property="og:description" content="LUXOR® is the AI fashion platform that styles your wardrobe. Get daily outfit recommendations, trend forecasting, and personal fashion styling — powered by AI.">
     <meta name="twitter:description" content="LUXOR® is the AI fashion platform that styles your wardrobe. Get daily outfit recommendations, trend forecasting, and personal fashion styling — powered by AI.">
+    <!-- Preload critical landing page resources -->
+    <link rel="preload" as="image" href="/images/feature-demo.jpg" fetchpriority="high" />
+    <link rel="preload" as="image" href="/images/hero-image.jpg" fetchpriority="high" />
+    <link rel="preload" as="font" href="/fonts/Geist-Bold.woff2" type="font/woff2" crossorigin />
+    <link rel="preload" as="font" href="/fonts/Geist-Regular.woff2" type="font/woff2" crossorigin />
+    <link rel="preload" as="video" href="/videos/hero-video.mp4" type="video/mp4" />
   </head>
   <body>
     <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1567409157678795&ev=PageView&noscript=1"/></noscript>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <script type="module" src="/src/main.tsx" fetchpriority="high"></script>
   </body>
 </html>
