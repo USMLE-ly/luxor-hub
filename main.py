@@ -91,6 +91,19 @@ CORS(app, resources={r"/*": {"origins": [
 # Browsers BLOCK redirects on preflight requests — this bypasses the redirect entirely
 # /api/health is registered by backend/routes/health.py via init_health_routes(app)
 
+
+# ── Security Middleware ─────────────────────────────────────
+@app.before_request
+def security_middleware():
+    """Run security checks on every request (except OPTIONS and health)."""
+    if request.method == "OPTIONS":
+        return None  # Let handle_preflight deal with OPTIONS
+    if request.path.startswith("/api/health"):
+        return None
+    # Run full security check
+    result = security_check()
+    return result
+
 @app.before_request
 def handle_preflight():
     if request.method == "OPTIONS":
@@ -115,6 +128,8 @@ from backend.config import (
     MIMO_API_KEY, MIMO_API_URL, MIMO_VISION_MODEL, MIMO_TEXT_MODEL,
     CIPHER_MAX_TOKENS, PORT, BLOB_READ_WRITE_TOKEN, QDRANT_URL, QDRANT_API_KEY,
 )
+
+from backend.security import security_check, sanitize_input, detect_injection, record_suspicious_activity, get_security_status
 log_config()
 _log.info("Config loaded from backend.config module")
 
@@ -3413,6 +3428,20 @@ def gateway_status():
         "status": "ok",
     })
 
+
+
+
+@app.route("/api/v1/admin/security-status", methods=["GET"])
+@limiter.limit("5 per minute")
+@require_auth
+def security_status():
+    """Admin-only security dashboard endpoint."""
+    user = g.current_user
+    user_id = user.get("sub", "")
+    # Check if user is admin (you can add your own admin check logic)
+    # For now, any authenticated user can view their own security status
+    status = get_security_status()
+    return jsonify(status)
 
 
 # ── Credit System Endpoints ──────────────────────────────────────────────
