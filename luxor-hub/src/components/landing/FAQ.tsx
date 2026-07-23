@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { StaggerContainer, StaggerItem, MagneticCard } from "@/components/ui/scroll-reveal";
-import ombraBg from "@/assets/brand/ombra.png";
+const ombraBg = "/images/closet-demo.jpg";
 import {
   Accordion,
   AccordionContent,
