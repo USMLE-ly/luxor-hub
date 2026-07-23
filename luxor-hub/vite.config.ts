@@ -12,7 +12,23 @@ export default defineConfig({
     chunkSizeWarningLimit: 500,
     rollupOptions: {
       maxParallelFileOps: 20,
+      output: {
+        manualChunks: {
+          // Split heavy libraries into separate chunks
+          "vendor-react": ["react", "react-dom", "react-router-dom"],
+          "vendor-motion": ["framer-motion"],
+          "vendor-three": ["three", "@react-three/fiber", "@react-three/drei"],
+          "vendor-ui": ["@radix-ui/react-dialog", "@radix-ui/react-dropdown-menu", "@radix-ui/react-tooltip", "@radix-ui/react-accordion"],
+          "vendor-charts": ["recharts", "reaviz"],
+          "vendor-swiper": ["swiper"],
+          "vendor-supabase": ["@supabase/supabase-js"],
+        },
+      },
     },
+    // Enable CSS code splitting
+    cssCodeSplit: true,
+    // Report compressed size
+    reportCompressedSize: true,
   },
   server: {
     host: "0.0.0.0",
