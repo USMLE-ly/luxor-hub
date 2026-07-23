@@ -11,7 +11,7 @@ import PayPalButton from "@/components/app/PayPalButton";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import brutalistBg from "@/assets/brand/brutalist-lines.png";
+const brutalistBg = "/images/analysis-demo.jpg";
 import {
   Collapsible,
   CollapsibleContent,
