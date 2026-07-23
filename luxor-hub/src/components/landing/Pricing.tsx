@@ -5,7 +5,6 @@ import { StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import { DoubleBezel } from "@/components/ui/double-bezel";
 import { MagneticCard } from "@/components/ui/scroll-reveal";
 import {Shield, CaretDown, Check, Minus} from "@phosphor-icons/react";
-import { useNavigate } from "react-router-dom";
 import { trackEvent } from "@/lib/fbPixel";
 import PayPalButton from "@/components/app/PayPalButton";
 import { useAuth } from "@/contexts/AuthContext";
@@ -158,7 +157,6 @@ const CellValue = ({ value }: { value: boolean | string }) => {
 };
 
 const Pricing = () => {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [compareOpen, setCompareOpen] = useState(false);
@@ -172,7 +170,7 @@ const Pricing = () => {
   const handlePayPalApprove = useCallback(
     async (subscriptionId: string, tier: string) => {
       if (!user) {
-        navigate("/auth");
+        toast.info("Please sign in to subscribe.");
         return;
       }
       try {
@@ -191,7 +189,7 @@ const Pricing = () => {
         toast.error("Something went wrong saving your subscription.");
       }
     },
-    [user, navigate, grantAccess]
+    [user, grantAccess]
   );
 
   return (
@@ -242,10 +240,9 @@ const Pricing = () => {
                   footer={
                     t.isFree ? (
                       <button
-                        onClick={() => navigate("/auth")}
-                        className="w-full h-10 rounded-lg border border-foreground/20 text-foreground font-sans font-semibold text-sm hover:bg-foreground/5 transition-colors"
+                        className="w-full h-10 rounded-lg border border-foreground/20 text-foreground font-sans font-semibold text-sm"
                       >
-                        Try Free
+                        Free Tier
                       </button>
                     ) : (
                       <div className="w-full">
