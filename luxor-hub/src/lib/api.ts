@@ -8,15 +8,12 @@
  * All fetch calls MUST use this function. Never hardcode a domain.
  */
 export function getApiUrl(): string {
-  // Explicit dev override via .env
-  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
-
-  // Local dev: Vite proxy handles /api → localhost:5000
+  // Local dev: allow VITE_API_URL override from .env (e.g. http://localhost:5000)
   if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-    return "";
+    return import.meta.env.VITE_API_URL || "";
   }
 
-  // All other environments (Vercel, Replit preview, production): use relative paths.
-  // Vercel's rewrites in vercel.json proxy /api/* to the Flask backend.
+  // Production (Vercel, Replit preview, luxor.ly): ALWAYS use relative paths.
+  // Vercel rewrites proxy /api/* to the Flask backend. Never use absolute URLs.
   return "";
 }
