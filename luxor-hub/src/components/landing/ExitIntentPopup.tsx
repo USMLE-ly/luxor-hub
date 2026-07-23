@@ -93,13 +93,7 @@ const ExitIntentPopup = () => {
                   </p>
                 </div>
 
-                <button
-                  onClick={handleCTA}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-sans font-semibold border border-[hsl(43,80%,50%,0.3)] text-[hsl(43,80%,50%)] bg-[hsl(43,80%,50%,0.05)] hover:bg-[hsl(43,80%,50%,0.1)] transition-colors"
-                >
-                  Get Started Free
-                  <ArrowRight className="w-4 h-4" />
-                </button>
+
 
                 <p className="text-center text-[10px] text-white/30 font-sans mt-3">
                   30-day money-back guarantee on all paid plans
