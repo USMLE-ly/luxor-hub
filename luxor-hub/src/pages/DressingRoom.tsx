@@ -146,7 +146,6 @@ export default function DressingRoomPage() {
         ...item,
         category: item.rawCategory || item.category,
       }));
-      console.log("[DR] Generating outfits:", genUrl, { occasion, count, user_id: user.id, items: itemsForBackend.length });
       const genController = new AbortController();
       const genTimeout = setTimeout(() => genController.abort(), 120000);
       const res = await fetch(genUrl, {
@@ -156,10 +155,7 @@ export default function DressingRoomPage() {
         signal: genController.signal,
       });
       clearTimeout(genTimeout);
-
-      console.log("[DR] Generate response status:", res.status);
       const data = await res.json();
-      console.log("[DR] Generate response:", data?.success, "images:", data?.images?.length, "timing:", data?.timing);
       if (data?.timing) lastTimingRef.current = data.timing;
       // Strip 'for' key from API response if present (causes ".for is not iterable" crash)
       if (data && typeof data === "object" && "for" in data) { delete data.for; }
@@ -233,7 +229,6 @@ export default function DressingRoomPage() {
         category: item.rawCategory || item.category,
       }));
       const fetchUrl = api + "/api/v1/check-availability";
-      console.log("[DR] Fetching availability:", fetchUrl, "items:", itemsForBackend.length);
       const res = await fetch(fetchUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -245,7 +240,6 @@ export default function DressingRoomPage() {
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      console.log("[DR] Availability response:", data);
       const count = data.maxOutfits || 0;
       if (count > 0) {
         setAvailableOutfitCount(Math.min(count, 5));
