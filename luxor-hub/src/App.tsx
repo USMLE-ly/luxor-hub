@@ -117,8 +117,7 @@ const App = () => (
       <BrowserRouter>
         <AudioInit />
         <SpeedInsights />
-        <SplashScreen />
-        <Suspense fallback={<LoadingScreen />}>
+        <Suspense fallback={<div />}>
           <AppContent />
         </Suspense>
       </BrowserRouter>
