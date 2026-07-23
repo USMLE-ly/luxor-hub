@@ -18,6 +18,7 @@ export interface ClothingItem {
   fit?: string;
   fabric?: string;
   imageUrl?: string;
+  photo_url?: string;
 }
 
 interface WardrobeState {
@@ -139,8 +140,8 @@ export const useWardrobeStore = create<WardrobeState>()(
         gender: state.gender,
         selected: state.selected,
         selectedItems: state.selectedItems,
-        catalogItems: state.catalogItems.map(({ id, name, category, rawCategory, color, fit, fabric, imageUrl }) => ({
-          id, name, category, rawCategory, color, fit, fabric, imageUrl,
+        catalogItems: state.catalogItems.map(({ id, name, category, rawCategory, color, fit, fabric, imageUrl, photo_url }) => ({
+          id, name, category, rawCategory, color, fit, fabric, imageUrl, photo_url,
         })),
       }),
       merge: (persistedState, currentState) => {
