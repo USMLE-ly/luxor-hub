@@ -57,10 +57,17 @@ def search_knowledge(query, domain="all", top_k=5):
     
     for d in domains:
         chunks_dir = os.path.join(KBASE, d, "chunks")
-        if not os.path.isdir(chunks_dir):
+        base_real = os.path.realpath(KBASE)
+        chunks_real = os.path.realpath(chunks_dir)
+        if os.path.commonpath([base_real, chunks_real]) != base_real:
             continue
-        for cf in sorted(glob.glob(os.path.join(chunks_dir, "*.json"))):
-            with open(cf) as f:
+        if not os.path.isdir(chunks_real):
+            continue
+        for cf in sorted(glob.glob(os.path.join(chunks_real, "*.json"))):
+            cf_real = os.path.realpath(cf)
+            if os.path.commonpath([base_real, cf_real]) != base_real:
+                continue
+            with open(cf_real) as f:
                 data = json.load(f)
             for i, chunk in enumerate(data.get("chunks", [])):
                 chunk_lower = chunk.lower()
