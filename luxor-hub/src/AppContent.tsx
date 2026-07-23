@@ -7,6 +7,7 @@ import { ThemeProvider } from "next-themes";
 import { HelmetProvider } from "react-helmet-async";
 import { ErrorBoundary } from "@/components/app/ErrorBoundary";
 const SplashScreen = React.lazy(() => import("@/components/app/SplashScreen"));
+import LoadingScreen from "@/components/ui/loading-screen";
 
 // Lazy-load all UI and page components
 const Toaster = React.lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
@@ -85,7 +86,7 @@ const AppContent = () => {
         <AuthProvider>
           <ErrorBoundary>
           <React.Suspense fallback={null}><SupportWidget /></React.Suspense>
-          <React.Suspense fallback={<div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" /></div>}>
+          <React.Suspense fallback={<LoadingScreen />}>
           <div key={location.pathname}>
           <Routes>
             <Route path="/" element={<ErrorBoundary><Index /></ErrorBoundary>} />
