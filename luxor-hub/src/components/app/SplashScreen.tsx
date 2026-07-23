@@ -17,8 +17,8 @@ const SplashScreen = () => {
   useEffect(() => {
     if (!show) return;
     // Show for 5 seconds, then fade out over 800ms
-    const fadeTimer = setTimeout(() => setFading(true), 5000);
-    const removeTimer = setTimeout(() => setShow(false), 5800);
+    const fadeTimer = setTimeout(() => setFading(true), 2000);
+    const removeTimer = setTimeout(() => setShow(false), 2600);
     return () => { clearTimeout(fadeTimer); clearTimeout(removeTimer); };
   }, [show]);
 
