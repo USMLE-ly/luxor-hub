@@ -1,17 +1,27 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 const LoadingScreen = () => {
-  return (
-    <div className="fixed inset-0 z-[90] flex flex-col items-center justify-center overflow-hidden"
-      style={{ background: "linear-gradient(180deg, #060f0d 0%, #0c2420 25%, #10352a 50%, #0c2420 75%, #060f0d 100%)" }}>
+  const [canDismiss, setCanDismiss] = useState(false);
 
-      {/* Ambient radial glow */}
+  useEffect(() => {
+    const timer = setTimeout(() => setCanDismiss(true), 7000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <div
+      className="fixed inset-0 z-[90] flex flex-col items-center justify-center overflow-hidden"
+      style={{
+        background: "linear-gradient(180deg, #060f0d 0%, #0c2420 25%, #10352a 50%, #0c2420 75%, #060f0d 100%)",
+        transition: canDismiss ? "opacity 0.5s ease-out" : "none",
+        opacity: canDismiss ? 0 : 1,
+        pointerEvents: canDismiss ? "none" : "auto",
+      }}
+    >
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="w-[600px] h-[600px] rounded-full"
           style={{ background: "radial-gradient(circle, rgba(232,200,122,0.06) 0%, rgba(232,200,122,0.02) 40%, transparent 70%)" }} />
       </div>
-
-      {/* Floating particles */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {[...Array(12)].map((_, i) => (
           <div key={i}
@@ -28,27 +38,22 @@ const LoadingScreen = () => {
           />
         ))}
       </div>
-
-      {/* Luxor diamond loader */}
       <div className="relative w-28 h-28 rotate-45 mb-8">
         {[...Array(8)].map((_, i) => (
-          <div
-            key={i}
+          <div key={i}
             className="absolute top-0 left-0 rounded-[3px]"
             style={{
               width: '22px',
               height: '22px',
               margin: '3px',
-              background: `linear-gradient(135deg, #E8C87A 0%, #d4a843 100%)`,
+              background: 'linear-gradient(135deg, #E8C87A 0%, #d4a843 100%)',
               boxShadow: '0 0 12px rgba(232,200,122,0.15)',
-              animation: `luxor-square 8s ease-in-out infinite both`,
+              animation: 'luxor-square 8s ease-in-out infinite both',
               animationDelay: `${-1 * i * 1}s`,
             }}
           />
         ))}
       </div>
-
-      {/* Luxor wordmark */}
       <div className="relative z-10 flex flex-col items-center gap-3">
         <h1 className="font-display text-3xl sm:text-4xl font-light tracking-[0.35em] text-white/80"
           style={{ textShadow: "0 0 40px rgba(232,200,122,0.08)" }}>
@@ -60,7 +65,6 @@ const LoadingScreen = () => {
           Loading your style...
         </p>
       </div>
-
       <style>{`
         @keyframes luxor-square {
           0% { left: 0; top: 0; opacity: 1; }
