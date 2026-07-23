@@ -6,6 +6,7 @@ import { initResilience } from "@/lib/resilience";
 import { initConsoleGuard } from "@/lib/security/console-guard";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { MotionConfig } from "framer-motion";
+import LoadingScreen from "@/components/ui/loading-screen";
 
 const AppContent = lazy(() => import("./AppContent"));
 
@@ -117,7 +118,7 @@ const App = () => (
       <BrowserRouter>
         <AudioInit />
         <SpeedInsights />
-        <Suspense fallback={<div />}>
+        <Suspense fallback={<LoadingScreen />}>
           <AppContent />
         </Suspense>
       </BrowserRouter>
