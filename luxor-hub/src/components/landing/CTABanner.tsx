@@ -1,22 +1,15 @@
 import { motion } from "framer-motion";
-import { ArrowRight } from "@phosphor-icons/react";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 
 const CTABanner = () => {
-  const navigate = useNavigate();
-
   return (
     <section className="relative py-16 md:py-24 overflow-hidden"
       style={{ background: "linear-gradient(180deg, #060f0d 0%, #0c2420 30%, #10352a 50%, #0c2420 70%, #060f0d 100%)" }}>
 
-      {/* Ambient glow */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] rounded-full"
           style={{ background: "radial-gradient(ellipse, rgba(232,200,122,0.06) 0%, transparent 65%)" }} />
       </div>
 
-      {/* Floating particles */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {[...Array(8)].map((_, i) => (
           <div key={i}
@@ -71,30 +64,13 @@ const CTABanner = () => {
             Free to start. Results in 3 minutes. Cancel anytime.
           </motion.p>
 
-          <motion.div
-            className="flex justify-center"
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.45, duration: 0.5, type: "spring", stiffness: 200, damping: 18 }}
-          >
-            <Button
-              size="lg"
-              className="text-base px-8 group bg-white/90 text-[#0c2420] hover:bg-white"
-              onClick={() => navigate("/auth")}
-            >
-              Try Free — No Card Needed
-              <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Button>
-          </motion.div>
-
           <motion.p
-            className="mt-5 font-sans text-xs"
+            className="font-sans text-xs"
             style={{ color: "rgba(232,200,122,0.25)" }}
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.6, duration: 0.5 }}
+            transition={{ delay: 0.45, duration: 0.5 }}
           >
             30-day money-back guarantee. Zero risk.
           </motion.p>
