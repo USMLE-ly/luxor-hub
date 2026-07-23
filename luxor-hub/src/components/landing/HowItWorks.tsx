@@ -1,4 +1,11 @@
 import { Gallery4 } from "@/components/ui/gallery4";
+import transparencyBg from "@/assets/brand/transparency.png";
+import featureStyleDna from "@/assets/feature-style-dna.jpg";
+import featureClosetScanner from "@/assets/feature-closet-scanner.jpg";
+import featureOutfitGen from "@/assets/feature-outfit-gen.jpg";
+import featureAiChat from "@/assets/feature-ai-chat.jpg";
+import featureShopping from "@/assets/feature-shopping.jpg";
+import featureAnalytics from "@/assets/feature-analytics.jpg";
 
 const howItWorksItems = [
   {
@@ -6,47 +13,48 @@ const howItWorksItems = [
     title: "Photograph Your Closet",
     description: "Snap photos. AI tags every piece in under two minutes.",
     href: "#features",
-    image: "/images/feature-closet-scanner.jpg",
+    image: featureClosetScanner,
   },
   {
     id: "style-dna",
     title: "Let the AI Learn You",
     description: "Body shape, color season, lifestyle — mapped in one session.",
     href: "#features",
-    image: "/images/feature-style-dna.jpg",
+    image: featureStyleDna,
   },
   {
     id: "daily-outfits",
     title: "Wake Up to Your Outfit",
     description: "A complete look every morning, weather-checked.",
     href: "#features",
-    image: "/images/feature-outfit-gen.jpg",
+    image: featureOutfitGen,
   },
   {
     id: "ai-stylist",
     title: "Ask Anything",
     description: "\"What do I wear tonight?\" — answered in seconds.",
     href: "#features",
-    image: "/images/feature-ai-chat.jpg",
+    image: featureAiChat,
   },
   {
     id: "smart-shopping",
     title: "Buy Only What You Need",
     description: "AI finds wardrobe gaps. Every pick fills one.",
     href: "#features",
-    image: "/images/feature-shopping.jpg",
+    image: featureShopping,
   },
   {
     id: "track-progress",
     title: "Watch Your Confidence Grow",
     description: "Style scores, cost-per-wear, and earned badges.",
     href: "#features",
-    image: "/images/feature-analytics.jpg",
+    image: featureAnalytics,
   },
 ];
 
 const HowItWorks = () => (
   <div id="how-it-works" className="relative overflow-hidden">
+    <img loading="lazy" src={transparencyBg} alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover opacity-[0.03] pointer-events-none select-none z-0" />
     <Gallery4
       title="Three Steps. That\'s It."
       description="Scan your closet. Let AI learn you. Wake up to your outfit."
