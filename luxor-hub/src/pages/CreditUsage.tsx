@@ -1,3 +1,4 @@
+import { getApiUrl } from "@/lib/api";
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
@@ -93,7 +94,7 @@ export default function CreditUsage() {
       const { data: session } = await supabase.auth.getSession();
       const token = session?.session?.access_token;
       if (!token) return [];
-      const apiUrl = import.meta.env.VITE_API_URL || "";
+      const apiUrl = getApiUrl();
       const resp = await fetch(`${apiUrl}/api/v1/credits/history`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -136,7 +137,7 @@ export default function CreditUsage() {
     const { data: session } = await supabase.auth.getSession();
     const token = session?.session?.access_token;
     if (!token) return;
-    const apiUrl = import.meta.env.VITE_API_URL || "";
+    const apiUrl = getApiUrl();
     try {
       const resp = await fetch(`${apiUrl}/api/v1/credits/reward`, {
         method: "POST",
@@ -163,7 +164,7 @@ export default function CreditUsage() {
     try {
       const { data: session } = await supabase.auth.getSession();
       const token = session?.session?.access_token;
-      const apiUrl = import.meta.env.VITE_API_URL || "";
+      const apiUrl = getApiUrl();
       const resp = await fetch(`${apiUrl}/api/v1/credits/referral/link`, {
         headers: { Authorization: `Bearer ${token}` },
       });
