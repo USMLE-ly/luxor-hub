@@ -6,8 +6,6 @@ import { initResilience } from "@/lib/resilience";
 import { initConsoleGuard } from "@/lib/security/console-guard";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { MotionConfig } from "framer-motion";
-import LoadingScreen from "@/components/ui/loading-screen";
-import SplashScreen from "@/components/app/SplashScreen";
 
 const AppContent = lazy(() => import("./AppContent"));
 
@@ -85,20 +83,7 @@ class AppErrorBoundary extends Component<
   }
 }
 
-/* Shows LoadingScreen briefly on every route change */
-const RouteTransitionLoader = () => {
-  const location = useLocation();
-  const [transitioning, setTransitioning] = useState(false);
 
-  useEffect(() => {
-    setTransitioning(true);
-    const t = setTimeout(() => setTransitioning(false), 600);
-    return () => clearTimeout(t);
-  }, [location.pathname]);
-
-  if (!transitioning) return null;
-  return <LoadingScreen />;
-};
 
 const AudioInit = () => {
   useEffect(() => {
@@ -133,7 +118,6 @@ const App = () => (
         <AudioInit />
         <SpeedInsights />
         <SplashScreen />
-        <RouteTransitionLoader />
         <Suspense fallback={<LoadingScreen />}>
           <AppContent />
         </Suspense>
