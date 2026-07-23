@@ -148,9 +148,14 @@ export default function DressingRoomPage() {
       }));
       const genController = new AbortController();
       const genTimeout = setTimeout(() => genController.abort(), 120000);
+      const { data: session } = await supabase.auth.getSession();
+      const token = session?.session?.access_token;
       const res = await fetch(genUrl, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({ occasion, count, user_id: user.id, closetItems: itemsForBackend }),
         signal: genController.signal,
       });
