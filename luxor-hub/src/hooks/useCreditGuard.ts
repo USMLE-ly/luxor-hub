@@ -160,8 +160,8 @@ export function useCreditGuard() {
       } catch (err: any) {
         clearTimeout((globalThis as any).__credit_timeout);
         console.warn("[CREDITS] Consume error:", err?.name === "AbortError" ? "timeout" : err);
-        // Timeout or network error — allow the action (don't block UX)
-        return true;
+        // Timeout or network error — credits were NOT consumed, so return false
+        return false;
       }
     },
     [guard]
