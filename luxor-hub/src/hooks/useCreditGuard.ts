@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCreditBalance } from "./useCreditBalance";
+import { getApiUrl } from "@/lib/api";
 import { CREDIT_COSTS } from "@/lib/planRestrictions";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -115,8 +116,7 @@ export function useCreditGuard() {
           return false;
         }
 
-        const apiUrl = import.meta.env.VITE_API_URL || "";
-        if (!apiUrl) return true; // Offline mode — allow action
+        const apiUrl = getApiUrl();
 
         // 8-second timeout prevents hanging on sleeping backends
         const controller = new AbortController();
