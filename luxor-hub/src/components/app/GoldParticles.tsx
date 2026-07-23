@@ -1,12 +1,10 @@
-import { motion } from "framer-motion";
 import { useMemo } from "react";
 
 export function GoldParticles() {
-  const particles = useMemo(() => 
+  const particles = useMemo(() =>
     Array.from({ length: 20 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
-      y: -10 - Math.random() * 20,
       size: Math.random() * 2.5 + 1,
       duration: Math.random() * 10 + 14,
       delay: Math.random() * 10,
@@ -16,27 +14,26 @@ export function GoldParticles() {
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <style>{`
+        @keyframes gold-float {
+          0% { transform: translateY(0) translateX(0); opacity: 0; }
+          10% { opacity: 0.6; }
+          90% { opacity: 0.4; }
+          100% { transform: translateY(-110vh) translateX(var(--drift)); opacity: 0; }
+        }
+      `}</style>
       {particles.map((p) => (
-        <motion.div
+        <div
           key={p.id}
           className="absolute rounded-full"
           style={{
             left: `${p.x}%`,
-            top: `${p.y}%`,
+            bottom: "-10%",
             width: p.size,
             height: p.size,
-            background: "radial-gradient(circle, hsl(var(--gold) / 0.5), transparent)",
-          }}
-          animate={{
-            y: [0, 80, 200],
-            x: [0, p.drift * 0.5, p.drift],
-            opacity: [0, 0.4, 0],
-            scale: [0.5, 1, 0.6],
-          }}
-          transition={{
-            duration: p.duration,
-            delay: p.delay,
-            ease: "linear",
+            background: "radial-gradient(circle, hsl(43, 80%, 60% / 0.5), transparent)",
+            animation: `gold-float ${p.duration}s ease-in-out ${p.delay}s infinite`,
+            ["--drift" as string]: `${p.drift}px`,
           }}
         />
       ))}
