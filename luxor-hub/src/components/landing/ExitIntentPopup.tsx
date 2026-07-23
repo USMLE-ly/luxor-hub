@@ -8,6 +8,7 @@ const STORAGE_KEY = "luxor_exit_popup_shown";
 const COOLDOWN_HOURS = 24;
 
 const ExitIntentPopup = () => {
+  const [submitted, setSubmitted] = useState(false);
   const [visible, setVisible] = useState(false);
 
   const navigate = useNavigate();
@@ -38,7 +39,8 @@ const ExitIntentPopup = () => {
 
   const handleCTA = () => {
     trackEvent("InitiateCheckout", { content_name: "Exit Intent Popup CTA" });
-    navigate("/auth");
+    setSubmitted(true);
+    setTimeout(() => navigate("/auth"), 1500);
   };
 
   if (!visible) return null;
