@@ -287,5 +287,76 @@ class CreditManager:
 
 
 
+# ── Server-Side Credit Enforcement ──────────────────────────
+# Idempotency: prevent double-deduct within 5 seconds
+import threading
+_idempotency_lock = threading.Lock()
+_recent_deducts: Dict[str, float] = {}  # "user_id:action" → timestamp
+
+# Actions that cost credits (must match CREDIT_COSTS keys)
+CREDITED_ACTIONS = set(CREDITS.keys()) if 'CREDITS' in dir() else set(CREDIT_COSTS.keys())
+
+
+def check_and_deduct(user_id: str, action: str, tier: str) -> Dict[str, Any]:
+    """Server-side credit check + deduction. Called BEFORE the AI action runs.
+    
+    Returns {"ok": True, "cost": N, "remaining": N} on success.
+    Returns {"ok": False, "error": "...", "status": 402/500} on failure.
+    """
+    if action not in CREDIT_COSTS:
+        return {"ok": True, "cost": 0, "remaining": 0}  # Free action
+    
+    cost = CREDIT_COSTS[action]
+    now = time.time()
+    idem_key = f"{user_id}:{action}"
+    
+    # Idempotency: if same user+action was deducted < 5s ago, skip
+    with _idempotency_lock:
+        last = _recent_deducts.get(idem_key, 0)
+        if now - last < 5:
+            _log.warning("[CREDITS] Idempotent block: %s tried %s within 5s", user_id[:8], action)
+            return {"ok": True, "cost": 0, "remaining": 0, "idempotent": True}
+        _recent_deducts[idem_key] = now
+        # Cleanup old entries (keep dict small)
+        if len(_recent_deducts) > 10000:
+            cutoff = now - 60
+            _recent_deducts = {k: v for k, v in _recent_deducts.items() if v > cutoff}
+    
+    # Get balance
+    balance = credit_manager.get_balance(user_id)
+    remaining = balance.get("credits_remaining", 0)
+    
+    if remaining < cost:
+        allocated = TIER_MONTHLY_CREDITS.get(tier, TIER_MONTHLY_CREDITS["free"])
+        return {
+            "ok": False,
+            "status": 402,
+            "error": "Not enough credits",
+            "message": f"You need {cost} credits but only have {remaining}. Upgrade for more credits.",
+            "credits_needed": cost,
+            "credits_remaining": remaining,
+            "credits_allocated": allocated,
+            "tier": tier,
+        }
+    
+    # Deduct
+    new_remaining = remaining - cost
+    credit_manager._update_balance(user_id, new_remaining)
+    credit_manager._log_event(user_id, action, cost, new_remaining)
+    
+    # Update cache
+    credit_manager._balances[user_id] = {
+        "credits_remaining": new_remaining,
+        "credits_allocated": balance.get("credits_allocated", 30),
+        "month": balance.get("month", ""),
+        "tier": tier,
+    }
+    
+    _log.info("[CREDITS] %s server-deducted %d for %s — remaining: %d", user_id[:8], cost, action, new_remaining)
+    return {"ok": True, "cost": cost, "remaining": new_remaining}
+
+
+
+
 # Global singleton
 credit_manager = CreditManager()
