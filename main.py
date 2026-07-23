@@ -1818,6 +1818,11 @@ _STRENGTH_DETAILS = {
 def stylist_explore():
     if request.method == "OPTIONS":
         return "", 204
+
+    # ── Server-side credit enforcement ──
+    credit_check = _enforce_credits("stylist_explore")
+    if credit_check:
+        return credit_check
     data = request.get_json(silent=True) or {}
     image_b64 = data.get("image_b64")
     chat_history = data.get("chat_history", [])
@@ -1866,6 +1871,11 @@ def stylist_explore():
 def stylist_generate():
     if request.method == "OPTIONS":
         return "", 204
+
+    # ── Server-side credit enforcement ──
+    credit_check = _enforce_credits("stylist_generate")
+    if credit_check:
+        return credit_check
     data = request.get_json(silent=True) or {}
     vibe = data.get("vibe", "Casual")
     weather = data.get("weather", "Mild")
@@ -2088,6 +2098,11 @@ def closet_delete():
 def closet_analyze_item():
     if request.method == "OPTIONS":
         return "", 204
+
+    # ── Server-side credit enforcement ──
+    credit_check = _enforce_credits("closet_analyze")
+    if credit_check:
+        return credit_check
     data = request.get_json(silent=True) or {}
     image_b64 = data.get("image_b64", "")
     item_name = data.get("item_name", "")
@@ -2782,6 +2797,11 @@ def style_analyze():
     """Analyze a person's photo for body type, face shape, skin tone, proportions using MiMo Vision 2.5."""
     if request.method == "OPTIONS":
         return "", 204
+
+    # ── Server-side credit enforcement ──
+    credit_check = _enforce_credits("style_analyze")
+    if credit_check:
+        return credit_check
     try:
         data = request.get_json(silent=True) or {}
         image_b64 = data.get("image_b64", "")
@@ -2839,6 +2859,11 @@ def style_recommendations():
     """Generate personalized style recommendations based on analysis data."""
     if request.method == "OPTIONS":
         return "", 204
+
+    # ── Server-side credit enforcement ──
+    credit_check = _enforce_credits("style_recommendations")
+    if credit_check:
+        return credit_check
     try:
         data = request.get_json(silent=True) or {}
         analysis = data.get("analysis", {})
@@ -2904,6 +2929,11 @@ def outfit_review():
     """Review an outfit photo with detailed scoring and honest feedback."""
     if request.method == "OPTIONS":
         return "", 204
+
+    # ── Server-side credit enforcement ──
+    credit_check = _enforce_credits("outfit_review")
+    if credit_check:
+        return credit_check
     try:
         data = request.get_json(silent=True) or {}
         image_b64 = data.get("image_b64", "")
@@ -2989,6 +3019,11 @@ def check_availability():
 def generate_outfits():
     if request.method == "OPTIONS":
         return "", 204
+
+    # ── Server-side credit enforcement ──
+    credit_check = _enforce_credits("generate_outfits")
+    if credit_check:
+        return credit_check
     try:
         import random
         data = request.get_json(silent=True) or {}
@@ -3381,6 +3416,21 @@ def gateway_status():
 
 
 # ── Credit System Endpoints ──────────────────────────────────────────────
+def _enforce_credits(action: str):
+    """Server-side credit enforcement. Call at the top of every AI endpoint.
+    Returns None if credits OK (proceed with action).
+    Returns a Flask response tuple if credits insufficient (return this immediately).
+    """
+    from backend.credits import check_and_deduct
+    user = getattr(g, "current_user", None) or get_current_user()
+    if not user or user.get("role") != "authenticated":
+        return (jsonify({"error": "Authentication required"}), 401)
+    user_id = user.get("sub", "")
+    tier = getattr(g, "user_tier", "free")
+    result = check_and_deduct(user_id, action, tier)
+    if not result.get("ok"):
+        return (jsonify(result), result.get("status", 402))
+    return None
 
 @app.route("/api/v1/credits/balance", methods=["GET"])
 @require_auth
@@ -4334,6 +4384,11 @@ def pro_tweak_generate():
     """Generate an AI-enhanced outfit tweak from an uploaded image."""
     if request.method == "OPTIONS":
         return "", 204
+
+    # ── Server-side credit enforcement ──
+    credit_check = _enforce_credits("pro_tweak")
+    if credit_check:
+        return credit_check
     try:
         data = request.get_json(silent=True) or {}
         image_b64 = data.get("image_b64")
