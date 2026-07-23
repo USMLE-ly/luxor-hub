@@ -2,7 +2,7 @@ import React from "react";
 
 const LoadingScreen = () => {
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden"
+    <div className="fixed inset-0 z-[90] flex flex-col items-center justify-center overflow-hidden"
       style={{ background: "linear-gradient(180deg, #060f0d 0%, #0c2420 30%, #10352a 55%, #0a1f1a 80%, #060f0d 100%)" }}>
 
       {/* Subtle radial glow */}
