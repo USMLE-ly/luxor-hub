@@ -5,6 +5,7 @@ import { StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import { DoubleBezel } from "@/components/ui/double-bezel";
 import { MagneticCard } from "@/components/ui/scroll-reveal";
 import {Shield, CaretDown, Check, Minus} from "@phosphor-icons/react";
+import { useNavigate } from "react-router-dom";
 import { trackEvent } from "@/lib/fbPixel";
 import PayPalButton from "@/components/app/PayPalButton";
 import { useAuth } from "@/contexts/AuthContext";
@@ -158,6 +159,7 @@ const CellValue = ({ value }: { value: boolean | string }) => {
 
 const Pricing = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [compareOpen, setCompareOpen] = useState(false);
 
@@ -240,9 +242,10 @@ const Pricing = () => {
                   footer={
                     t.isFree ? (
                       <button
-                        className="w-full h-10 rounded-lg border border-foreground/20 text-foreground font-sans font-semibold text-sm"
+                        onClick={() => navigate("/auth")}
+                        className="w-full h-10 rounded-lg border border-foreground/20 text-foreground font-sans font-semibold text-sm hover:bg-foreground/5 transition-colors"
                       >
-                        Free Tier
+                        Try Free
                       </button>
                     ) : (
                       <div className="w-full">
