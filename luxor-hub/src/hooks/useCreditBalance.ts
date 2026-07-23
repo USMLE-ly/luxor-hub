@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { getApiUrl } from "@/lib/api";
 
 interface CreditBalance {
   credits_allocated: number;
@@ -28,8 +29,7 @@ export function useCreditBalance() {
       const token = session?.session?.access_token;
       if (!token) return DEFAULT_BALANCE;
 
-      const apiUrl = import.meta.env.VITE_API_URL || "";
-      if (!apiUrl) return DEFAULT_BALANCE;
+      const apiUrl = getApiUrl();
 
       // 8-second timeout prevents hanging on sleeping backends
       const controller = new AbortController();
