@@ -27,7 +27,7 @@ import requests
 _log = logging.getLogger("luxor.credits")
 
 SUPABASE_URL = os.environ.get("VITE_SUPABASE_URL", "")
-SUPABASE_KEY = os.environ.get("VITE_SUPABASE_PUBLISHABLE_KEY", "")
+SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "") or os.environ.get("VITE_SUPABASE_PUBLISHABLE_KEY", "")
 
 # ── Tier Credit Allocations (per month) ─────────────────────
 TIER_MONTHLY_CREDITS = {
