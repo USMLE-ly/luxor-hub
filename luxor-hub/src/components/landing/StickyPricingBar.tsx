@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {X, ArrowRight} from "@phosphor-icons/react";
-import { useNavigate } from "react-router-dom";
 import { trackEvent } from "@/lib/fbPixel";
 
 const DISMISSED_KEY = "luxor-sticky-bar-dismissed";
 
 export default function StickyPricingBar() {
-  const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(
     () => sessionStorage.getItem(DISMISSED_KEY) === "1"
@@ -36,7 +34,6 @@ export default function StickyPricingBar() {
 
   const handleCTA = () => {
     trackEvent("InitiateCheckout", { content_name: "Sticky Bar CTA" });
-    navigate("/auth");
   };
 
   return (
