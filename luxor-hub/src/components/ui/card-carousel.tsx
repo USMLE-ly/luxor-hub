@@ -8,9 +8,9 @@ import { motion } from "framer-motion";
 import { Play, Pause, SpeakerHigh, SpeakerSlash } from "@phosphor-icons/react";
 
 const videos = [
-  { src: "/videos/howto-1.mp4", title: "How to Upload — Step 1", alt: "Upload tutorial part 1" },
-  { src: "/videos/howto-2.mp4", title: "How to Upload — Step 2", alt: "Upload tutorial part 2" },
-  { src: "/videos/howto-3.mp4", title: "How to Upload — Step 3", alt: "Upload tutorial part 3" },
+  { src: "/videos/howto-1.mp4", poster: "/images/feature-demo-poster.jpg", title: "How to Upload — Step 1", alt: "Upload tutorial part 1" },
+  { src: "/videos/howto-2.mp4", poster: "/images/closet-demo-poster.jpg", title: "How to Upload — Step 2", alt: "Upload tutorial part 2" },
+  { src: "/videos/howto-3.mp4", poster: "/images/analysis-demo-poster.jpg", title: "How to Upload — Step 3", alt: "Upload tutorial part 3" },
 ];
 
 export const CardCarousel: React.FC = () => {
