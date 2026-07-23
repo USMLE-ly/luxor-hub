@@ -1,11 +1,11 @@
 import { useRef, useState, useEffect, useCallback } from "react";
-import { motion, useInView, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { motion, useInView, AnimatePresence } from "framer-motion";
 import { StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import { IPhoneMockup } from "@/components/ui/iphone-mockup";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { SpeakerHigh, SpeakerSlash } from "@phosphor-icons/react";
 
-const shimmerParticles = Array.from({ length: 12 }, (_, i) => ({
+const shimmerParticles = Array.from({ length: 6 }, (_, i) => ({
   id: i,
   x: 15 + Math.random() * 70,
   y: 20 + Math.random() * 60,
@@ -18,8 +18,7 @@ const phones = [
   { video: "/videos/feature-demo.mp4", image: "/images/feature-demo.jpg", label: "Manual Upload" },
   { video: "/videos/closet-demo.mp4", image: "/images/closet-demo.jpg", label: "Smart Closet" },
   { video: "/videos/recommendation-demo.mp4", image: "/images/recommendation-demo.jpg", label: "AI Recommendations" },
-  { video: "/videos/auto-calendar-demo.mp4", image: "/images/auto-calendar-demo.jpg", label: "Auto Calendar" },
-  { video: "/videos/analysis-demo.mp4", image: "/images/analysis-demo.jpg", label: "Style Analysis", landscape: true },
+
 ];
 
 const featureNames = [
@@ -48,13 +47,7 @@ const Features = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"],
-  });
 
-  const mockupY = useTransform(scrollYProgress, [0, 1], [40, -40]);
-  const glowOpacity = useTransform(scrollYProgress, [0.2, 0.5, 0.8], [0.2, 0.6, 0.3]);
 
   const phoneScale = isMobile ? 0.55 : 0.72;
 
@@ -121,7 +114,6 @@ const Features = () => {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={isInView ? { opacity: 1, scale: 1 } : {}}
           transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1], delay: 0.2 }}
-          style={{ y: mockupY }}
           className="relative mb-8 md:mb-12"
         >
           <motion.div
