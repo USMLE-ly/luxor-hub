@@ -1,7 +1,6 @@
 import React, { useEffect, Suspense } from "react";
 import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import { captureUTMParams } from "@/lib/utmTracker";
-import LoadingScreen from "@/components/ui/loading-screen";
 
 // Lazy-load ALL landing sections — none render until scrolled into view
 const Navbar = React.lazy(() => import("@/components/landing/Navbar"));
