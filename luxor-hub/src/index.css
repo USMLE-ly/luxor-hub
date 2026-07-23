@@ -203,13 +203,13 @@
 @layer utilities {
   .glass {
     background-color: hsl(var(--card) / 0.6);
-    backdrop-filter: blur(24px);
+    backdrop-filter: blur(12px);
     border: 1px solid hsl(var(--glass-border));
   }
 
   .glass-strong {
     background-color: hsl(var(--card) / 0.8);
-    backdrop-filter: blur(40px);
+    backdrop-filter: blur(16px);
     border: 1px solid hsl(var(--glass-border));
   }
 
@@ -688,11 +688,13 @@
 /* Hero scroll progress bar */
 .scroll-progress-bar {
   will-change: transform, opacity;
+  transform: translateZ(0);
 }
 
 /* Animated elements: promote to own compositor layer */
 .floating-circle {
   will-change: transform;
+  transform: translateZ(0);
 }
 
 /* Reduce motion for users who prefer it */
