@@ -110,6 +110,7 @@ function toWardrobeItem(item: ClothingItem) {
     rawCategory: item.category || undefined,
     src: "",
     imageUrl: item.photo_url || undefined,
+    photo_url: item.photo_url || undefined,
   };
 }
 
