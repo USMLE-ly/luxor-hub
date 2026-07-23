@@ -3,6 +3,7 @@ import { BrowserRouter, useLocation } from "react-router-dom";
 import { initAudio } from "@/lib/audio-system";
 import { initMonitor } from "@/lib/support";
 import { initResilience } from "@/lib/resilience";
+import { initConsoleGuard } from "@/lib/security/console-guard";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { MotionConfig } from "framer-motion";
 import LoadingScreen from "@/components/ui/loading-screen";
@@ -103,6 +104,7 @@ const AudioInit = () => {
   useEffect(() => {
     initMonitor();
     initResilience();
+    initConsoleGuard();
     const handleInteraction = () => {
       initAudio();
       document.querySelectorAll("video").forEach((video) => {
