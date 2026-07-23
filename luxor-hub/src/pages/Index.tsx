@@ -1,25 +1,33 @@
-import { useEffect } from "react";
+import React, { useEffect, Suspense } from "react";
 import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import { captureUTMParams } from "@/lib/utmTracker";
-import Navbar from "@/components/landing/Navbar";
-import Hero from "@/components/landing/Hero";
+import LoadingScreen from "@/components/ui/loading-screen";
 
-import HowItWorks from "@/components/landing/HowItWorks";
-import Features from "@/components/landing/Features";
-import TabbedFeatures from "@/components/landing/TabbedFeatures";
-import Pricing from "@/components/landing/Pricing";
-import FAQ from "@/components/landing/FAQ";
-import Footer from "@/components/landing/Footer";
-import CTABanner from "@/components/landing/CTABanner";
-import AnnouncementBanner from "@/components/landing/AnnouncementBanner";
-import StickyPricingBar from "@/components/landing/StickyPricingBar";
-import ScrollToTop from "@/components/landing/ScrollToTop";
-import BrandMarquee from "@/components/landing/BrandMarquee";
-import SocialProofStrip from "@/components/landing/SocialProofStrip";
-import AIFashionEditorial from "@/components/landing/AIFashionEditorial";
-import VideoTestimonials from "@/components/landing/VideoTestimonials";
-import AppPreview from "@/components/landing/AppPreview";
-import ExitIntentPopup from "@/components/landing/ExitIntentPopup";
+// Lazy-load ALL landing sections — none render until scrolled into view
+const Navbar = React.lazy(() => import("@/components/landing/Navbar"));
+const Hero = React.lazy(() => import("@/components/landing/Hero"));
+const SocialProofStrip = React.lazy(() => import("@/components/landing/SocialProofStrip"));
+const BrandMarquee = React.lazy(() => import("@/components/landing/BrandMarquee"));
+const TabbedFeatures = React.lazy(() => import("@/components/landing/TabbedFeatures"));
+const Features = React.lazy(() => import("@/components/landing/Features"));
+const AIFashionEditorial = React.lazy(() => import("@/components/landing/AIFashionEditorial"));
+const HowItWorks = React.lazy(() => import("@/components/landing/HowItWorks"));
+const VideoTestimonials = React.lazy(() => import("@/components/landing/VideoTestimonials"));
+const AppPreview = React.lazy(() => import("@/components/landing/AppPreview"));
+const Pricing = React.lazy(() => import("@/components/landing/Pricing"));
+const FAQ = React.lazy(() => import("@/components/landing/FAQ"));
+const CTABanner = React.lazy(() => import("@/components/landing/CTABanner"));
+const Footer = React.lazy(() => import("@/components/landing/Footer"));
+const StickyPricingBar = React.lazy(() => import("@/components/landing/StickyPricingBar"));
+const ScrollToTop = React.lazy(() => import("@/components/landing/ScrollToTop"));
+const ExitIntentPopup = React.lazy(() => import("@/components/landing/ExitIntentPopup"));
+const AnnouncementBanner = React.lazy(() => import("@/components/landing/AnnouncementBanner"));
+
+const Section = ({ children }: { children: React.ReactNode }) => (
+  <React.Suspense fallback={<div className="min-h-[200px]" />}>
+    {children}
+  </React.Suspense>
+);
 
 const Index = () => {
   const { scrollYProgress } = useScroll();
@@ -41,104 +49,32 @@ const Index = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
       </motion.div>
 
-      <AnnouncementBanner />
-      <Navbar />
-      <Hero />
+      <Section><AnnouncementBanner /></Section>
+      <Section><Navbar /></Section>
+      <Section><Hero /></Section>
       
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8 }}
-      >
-        <SocialProofStrip />
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8 }}
-      >
-        <BrandMarquee />
-      </motion.div>
-      
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8 }}
-      >
-        <TabbedFeatures />
-      </motion.div>
-
+      <Section><SocialProofStrip /></Section>
+      <Section><BrandMarquee /></Section>
+      <Section><TabbedFeatures /></Section>
 
       <div className="py-8 text-center">
         <a href="/auth" className="inline-flex items-center gap-2 px-8 py-3 rounded-full text-sm font-sans font-semibold bg-gradient-to-r from-[hsl(43,80%,50%)] to-[hsl(43,70%,45%)] text-white shadow-[0_0_30px_hsl(43,80%,50%,0.25)] hover:shadow-[0_0_40px_hsl(43,80%,50%,0.4)] transition-shadow">
           Try LUXOR® Free — No Card Needed
         </a>
       </div>
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8, delay: 0.1 }}
-      >
-        <Features />
-      </motion.div>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8, delay: 0.15 }}
-      >
-        <AIFashionEditorial />
-      </motion.div>
-      
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8, delay: 0.2 }}
-      >
-        <HowItWorks />
-      </motion.div>
-      
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8, delay: 0.25 }}
-      >
-        <VideoTestimonials />
-      </motion.div>
-      
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8, delay: 0.15 }}
-      >
-        <AppPreview />
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8, delay: 0.3 }}
-      >
-        <Pricing />
-      </motion.div>
-      
-      <FAQ />
-
-      <CTABanner />
-      <Footer />
-      <StickyPricingBar />
-      <ScrollToTop />
-      <ExitIntentPopup />
+      <Section><Features /></Section>
+      <Section><AIFashionEditorial /></Section>
+      <Section><HowItWorks /></Section>
+      <Section><VideoTestimonials /></Section>
+      <Section><AppPreview /></Section>
+      <Section><Pricing /></Section>
+      <Section><FAQ /></Section>
+      <Section><CTABanner /></Section>
+      <Section><Footer /></Section>
+      <Section><StickyPricingBar /></Section>
+      <Section><ScrollToTop /></Section>
+      <Section><ExitIntentPopup /></Section>
     </div>
   );
 };
