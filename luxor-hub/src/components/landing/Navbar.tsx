@@ -105,14 +105,7 @@ const Navbar = () => {
 
           {/* Right: CTA + hamburger */}
           <div className="flex items-center gap-3">
-            <motion.button
-              onClick={() => navigate("/auth")}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              className="hidden md:flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[10px] font-sans font-semibold uppercase tracking-wider bg-gradient-to-r from-[hsl(43,80%,50%)] to-[hsl(43,70%,45%)] text-white shadow-[0_0_20px_hsl(43,80%,50%,0.2)] hover:shadow-[0_0_30px_hsl(43,80%,50%,0.35)] transition-shadow"
-            >
-              Try Free
-            </motion.button>
+
 
             <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
               <SheetTrigger asChild>
@@ -144,13 +137,7 @@ const Navbar = () => {
                     ))}
                   </div>
                   <div className="h-px w-full bg-border my-6" />
-                  <motion.button
-                    onClick={() => { setSheetOpen(false); navigate("/auth"); }}
-                    whileTap={{ scale: 0.97 }}
-                    className="w-full py-3 rounded-xl text-sm font-sans font-semibold uppercase tracking-wider bg-gradient-to-r from-[hsl(43,80%,50%)] to-[hsl(43,70%,45%)] text-white shadow-[0_0_20px_hsl(43,80%,50%,0.2)]"
-                  >
-                    Try Free
-                  </motion.button>
+
                 </div>
               </SheetContent>
             </Sheet>
