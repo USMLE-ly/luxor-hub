@@ -36,13 +36,12 @@ const faqs = [
 
 const FAQ = () => (
   <section id="faq" className="relative py-16 md:py-28 overflow-hidden">
-    {/* Premium dark background with subtle gold radial */}
-    <div className="absolute inset-0 bg-gradient-to-b from-[#0a0f0d] via-[#0d1210] to-[#0a0f0d]" />
-    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_hsl(43,50%,8%,0.4)_0%,_transparent_60%)]" />
-    {/* Subtle texture overlay */}
-    <div className="absolute inset-0 opacity-[0.02] bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIyMCIgY3k9IjIwIiByPSIxIiBmaWxsPSIjRThDODdBIi8+PC9zdmc+')]" />
-    {/* Gold accent line */}
-    <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#E8C87A]/15 to-transparent" />
+    {/* Dark green background matching landing --background: 176 33% 17% */}
+    <div className="absolute inset-0 bg-[hsl(176,33%,17%)]" />
+    {/* Subtle gold radial glow from top */}
+    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_hsl(47,23%,48%,0.06)_0%,_transparent_60%)]" />
+    {/* Gold accent line at top */}
+    <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[hsl(47,23%,48%,0.2)] to-transparent" />
 
     <div className="relative z-10 max-w-3xl mx-auto px-4">
       <motion.div
@@ -51,10 +50,12 @@ const FAQ = () => (
         viewport={{ once: true, margin: "-80px" }}
         className="text-center mb-14"
       >
-        <p className="font-sans text-xs font-semibold text-[#E8C87A]/60 tracking-[0.25em] uppercase mb-4">
+        <p className="font-sans text-xs font-semibold tracking-[0.25em] uppercase mb-4"
+           style={{ color: "hsl(47,23%,48%,0.6)" }}>
           FAQ
         </p>
-        <h2 className="font-display text-3xl md:text-5xl font-bold text-white">
+        <h2 className="font-display text-3xl md:text-5xl font-bold"
+            style={{ color: "hsl(40,18%,88%)" }}>
           Still on the Fence?
         </h2>
       </motion.div>
@@ -71,12 +72,19 @@ const FAQ = () => (
                 <MagneticCard>
                   <AccordionItem
                     value={`faq-${i}`}
-                    className="border-b border-white/[0.06] px-0 rounded-none"
+                    className="border-b px-0 rounded-none"
+                    style={{ borderColor: "hsl(176,33%,17%,0.8)" }}
                   >
-                    <AccordionTrigger className="font-sans text-sm font-semibold text-white/90 hover:text-[#E8C87A] hover:no-underline py-5 transition-colors duration-200">
+                    <AccordionTrigger
+                      className="font-sans text-sm font-semibold hover:no-underline py-5 transition-colors duration-200"
+                      style={{ color: "hsl(40,18%,88%,0.9)" }}
+                    >
                       {faq.q}
                     </AccordionTrigger>
-                    <AccordionContent className="font-sans text-sm text-white/40 leading-relaxed">
+                    <AccordionContent
+                      className="font-sans text-sm leading-relaxed"
+                      style={{ color: "hsl(40,10%,65%)" }}
+                    >
                       {faq.a}
                     </AccordionContent>
                   </AccordionItem>
