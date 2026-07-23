@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useScroll, useTransform, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { GoldParticles } from "@/components/app/GoldParticles";
 import NumberTicker from "@/components/ui/number-ticker";
@@ -88,9 +88,7 @@ export default function GlassmorphismTrustHero() {
   const navigate = useNavigate();
   const heroRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef(0);
-  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
-  const videoY = useTransform(scrollYProgress, [0, 1], ["0%", "35%"]);
-  const videoScale = useTransform(scrollYProgress, [0, 0.4], [1, 1.1]);
+
   const [testimonialIdx, setTestimonialIdx] = useState(0);
 
   useEffect(() => {
@@ -103,7 +101,7 @@ export default function GlassmorphismTrustHero() {
       <CursorSpotlight />
 
       {/* Background video with parallax + scale */}
-      <motion.div className="absolute inset-0 z-0" style={{ y: videoY, scale: videoScale }}>
+      <div className="absolute inset-0 z-0">
         <video
           src="/videos/hero-video.mp4"
           preload="auto"
