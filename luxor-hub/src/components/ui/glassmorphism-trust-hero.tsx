@@ -123,7 +123,7 @@ export default function GlassmorphismTrustHero() {
           className="absolute inset-0 pointer-events-none"
           style={{ boxShadow: "inset 0 0 120px 60px hsl(var(--background))" }}
         />
-      </motion.div>
+      </div>
 
       {/* Floating premium circles */}
       <GoldParticles />
