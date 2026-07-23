@@ -4,7 +4,7 @@ const LoadingScreen = () => {
   const [canDismiss, setCanDismiss] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setCanDismiss(true), 7000);
+    const timer = setTimeout(() => setCanDismiss(true), 2500);
     return () => clearTimeout(timer);
   }, []);
 
