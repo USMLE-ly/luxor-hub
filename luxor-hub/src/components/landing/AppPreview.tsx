@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { ContainerScroll } from "@/components/ui/container-scroll";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { Diamond } from "@phosphor-icons/react";
-import heroAppMockup from "@/assets/hero-app-mockup.jpg";
+import outfitGen from "@/assets/feature-outfit-gen.jpg";
 
 const AppPreview = () => {
   const navigate = useNavigate();
@@ -27,10 +27,9 @@ const AppPreview = () => {
           </div>
         }
       >
-        {/* App mockup image */}
         <div className="h-full w-full overflow-hidden rounded-xl">
           <img
-            src={heroAppMockup}
+            src={outfitGen}
             alt="Luxor App Preview"
             className="w-full h-full object-cover object-top"
             loading="lazy"
