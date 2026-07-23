@@ -432,7 +432,7 @@ def ai_endpoint(f):
         try:
             from backend.ab_testing import ab_manager
             tier = ab_manager.get_effective_tier(user_id, tier)
-        except ImportError:
+        except Exception:
             pass
         
         g.user_tier = tier
