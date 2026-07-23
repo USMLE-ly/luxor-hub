@@ -18,7 +18,8 @@ const phones = [
   { video: "/videos/feature-demo.mp4", image: "/images/feature-demo.jpg", label: "Manual Upload" },
   { video: "/videos/closet-demo.mp4", image: "/images/closet-demo.jpg", label: "Smart Closet" },
   { video: "/videos/recommendation-demo.mp4", image: "/images/recommendation-demo.jpg", label: "AI Recommendations" },
-
+  { video: "/videos/auto-calendar-demo.mp4", image: "/images/auto-calendar-demo.jpg", label: "Auto Calendar" },
+  { video: "/videos/analysis-demo.mp4", image: "/images/analysis-demo.jpg", label: "Style Analysis", landscape: true },
 ];
 
 const featureNames = [
