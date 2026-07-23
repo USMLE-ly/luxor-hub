@@ -3433,6 +3433,7 @@ def _enforce_credits(action: str):
     return None
 
 @app.route("/api/v1/credits/balance", methods=["GET"])
+@limiter.limit("30 per minute")
 @require_auth
 def credits_balance():
     """Get current user credit balance and allocation."""
@@ -3493,7 +3494,11 @@ def credits_consume():
     if not action:
         return jsonify({"error": "Missing action"}), 400
 
-    from backend.credits import credit_manager
+    # Validate action against whitelist — prevent arbitrary action injection
+    from backend.credits import credit_manager, CREDIT_COSTS
+    if action not in CREDIT_COSTS:
+        return jsonify({"error": f"Invalid action: {action}"}), 400
+
     result = credit_manager.consume(user_id, action, tier)
 
     if result.get("error"):
@@ -3555,6 +3560,7 @@ def credits_history():
 
 
 @app.route("/api/v1/credits/allocate", methods=["POST"])
+@limiter.limit("10 per minute")
 @require_auth
 def credits_allocate():
     _log.info("[CREDITS] Allocation requested for user=%s tier=%s", user_id[:8], tier)
