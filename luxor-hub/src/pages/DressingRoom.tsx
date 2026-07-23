@@ -74,11 +74,11 @@ export default function DressingRoomPage() {
       try {
         const { data } = await supabase
           .from("clothing_items")
-          .select("id, name, category, color, image_url")
+          .select("id, name, category, color, photo_url")
           .eq("user_id", user.id)
           .order("created_at", { ascending: false });
         if (data && data.length > 0) {
-          syncCatalogItems(data.map((item: { id: string; name: string | null; category: string | null; color: string | null; image_url: string | null }) => {
+          syncCatalogItems(data.map((item: { id: string; name: string | null; category: string | null; color: string | null; photo_url: string | null }) => {
             const cat = (item.category || "").toLowerCase();
             const zustandCat = (["top","outerwear"].includes(cat) ? "top"
               : ["bottom","shoes"].includes(cat) ? "bottom"
@@ -86,10 +86,11 @@ export default function DressingRoomPage() {
             return {
               id: item.id,
               name: item.name || "Unnamed",
-              src: item.image_url || "/placeholder.svg",
+              src: item.photo_url || "/placeholder.svg",
               category: zustandCat,
               rawCategory: item.category || undefined,
-              imageUrl: item.image_url || undefined,
+              imageUrl: item.photo_url || undefined,
+              photo_url: item.photo_url || undefined,
               color: item.color || undefined,
             };
           }));
