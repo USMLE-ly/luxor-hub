@@ -106,28 +106,110 @@ def detect_injection(value: str) -> Optional[str]:
 
 # ── User Banning ───────────────────────────────────────────
 def is_user_banned(user_id: str) -> bool:
-    """Check if a user is currently banned."""
+    """Check if a user is currently banned (in-memory + Supabase persistent)."""
+    # 1. Check in-memory cache first (fast)
     with _lock:
         ban_info = _banned_users.get(user_id)
-        if not ban_info:
-            return False
-        expires = ban_info.get("expires_at")
-        if expires and datetime.utcnow() > expires:
-            # Ban expired
-            del _banned_users[user_id]
-            return False
-        return True
+        if ban_info:
+            expires = ban_info.get("expires_at")
+            if expires and datetime.utcnow() > expires:
+                del _banned_users[user_id]
+            else:
+                return True
+    
+    # 2. Check Supabase persistent bans (survives restarts)
+    if SUPABASE_URL and SUPABASE_SERVICE_KEY:
+        try:
+            resp = requests.get(
+                f"{SUPABASE_URL}/rest/v1/banned_users",
+                params={
+                    "select": "reason,severity,expires_at",
+                    "user_id": f"eq.{user_id}",
+                    "limit": "1",
+                },
+                headers={
+                    "apikey": SUPABASE_SERVICE_KEY,
+                    "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
+                },
+                timeout=3,
+            )
+            if resp.status_code == 200:
+                rows = resp.json()
+                if rows:
+                    row = rows[0]
+                    expires_str = row.get("expires_at")
+                    if expires_str:
+                        expires = datetime.fromisoformat(expires_str.replace("Z", "+00:00")).replace(tzinfo=None)
+                        if datetime.utcnow() > expires:
+                            # Ban expired in DB — clean up
+                            _cleanup_expired_ban(user_id)
+                            return False
+                    # Cache in memory
+                    with _lock:
+                        _banned_users[user_id] = {
+                            "reason": row.get("reason", ""),
+                            "severity": row.get("severity", "medium"),
+                            "banned_at": datetime.utcnow(),
+                            "expires": expires if expires_str else None,
+                        }
+                    return True
+        except Exception as exc:
+            _log.warning("[SECURITY] Supabase ban check failed: %s", exc)
+    
+    return False
+
+
+def _cleanup_expired_ban(user_id: str):
+    """Remove expired ban from Supabase."""
+    if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
+        return
+    try:
+        requests.delete(
+            f"{SUPABASE_URL}/rest/v1/banned_users?user_id=eq.{user_id}",
+            headers={
+                "apikey": SUPABASE_SERVICE_KEY,
+                "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
+            },
+            timeout=3,
+        )
+    except Exception:
+        pass
 
 
 def ban_user(user_id: str, reason: str, hours: int = BAN_DURATION_HOURS, severity: str = "medium"):
-    """Ban a user for a specified duration."""
+    """Ban a user for a specified duration (in-memory + persistent)."""
+    expires_at = datetime.utcnow() + timedelta(hours=hours)
+    
     with _lock:
         _banned_users[user_id] = {
             "reason": reason,
             "severity": severity,
             "banned_at": datetime.utcnow(),
-            "expires_at": datetime.utcnow() + timedelta(hours=hours),
+            "expires_at": expires_at,
         }
+    
+    # Persist to Supabase
+    if SUPABASE_URL and SUPABASE_SERVICE_KEY:
+        try:
+            requests.post(
+                f"{SUPABASE_URL}/rest/v1/banned_users",
+                json={
+                    "user_id": user_id,
+                    "reason": reason,
+                    "severity": severity,
+                    "expires_at": expires_at.isoformat() + "Z",
+                },
+                headers={
+                    "apikey": SUPABASE_SERVICE_KEY,
+                    "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
+                    "Content-Type": "application/json",
+                    "Prefer": "resolution=merge-duplicates",
+                },
+                timeout=5,
+            )
+        except Exception as exc:
+            _log.warning("[SECURITY] Failed to persist ban: %s", exc)
+    
     _log.warning("[SECURITY] BANNED user=%s reason=%s severity=%s duration=%dh", user_id[:8], reason, severity, hours)
     _log_to_supabase("user_banned", user_id, {"reason": reason, "severity": severity, "hours": hours})
 
