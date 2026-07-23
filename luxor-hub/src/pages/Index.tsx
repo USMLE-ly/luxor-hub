@@ -18,9 +18,7 @@ const Pricing = React.lazy(() => import("@/components/landing/Pricing"));
 const FAQ = React.lazy(() => import("@/components/landing/FAQ"));
 const CTABanner = React.lazy(() => import("@/components/landing/CTABanner"));
 const Footer = React.lazy(() => import("@/components/landing/Footer"));
-const StickyPricingBar = React.lazy(() => import("@/components/landing/StickyPricingBar"));
 const ScrollToTop = React.lazy(() => import("@/components/landing/ScrollToTop"));
-const ExitIntentPopup = React.lazy(() => import("@/components/landing/ExitIntentPopup"));
 const AnnouncementBanner = React.lazy(() => import("@/components/landing/AnnouncementBanner"));
 
 const Section = ({ children }: { children: React.ReactNode }) => (
@@ -58,12 +56,6 @@ const Index = () => {
       <Section><SocialProofStrip /></Section>
       <Section><BrandMarquee /></Section>
 
-      <div className="py-8 text-center">
-        <a href="/auth" className="inline-flex items-center gap-2 px-8 py-3 rounded-full text-sm font-sans font-semibold bg-gradient-to-r from-[hsl(43,80%,50%)] to-[hsl(43,70%,45%)] text-white shadow-[0_0_30px_hsl(43,80%,50%,0.25)] hover:shadow-[0_0_40px_hsl(43,80%,50%,0.4)] transition-shadow">
-          Try LUXOR\u00ae Free \u2014 No Card Needed
-        </a>
-      </div>
-
       <Section><Features /></Section>
       <Section><AIFashionEditorial /></Section>
       <Section><HowItWorks /></Section>
@@ -72,9 +64,7 @@ const Index = () => {
       <Section><FAQ /></Section>
       <Section><CTABanner /></Section>
       <Section><Footer /></Section>
-      <Section><StickyPricingBar /></Section>
       <Section><ScrollToTop /></Section>
-      <Section><ExitIntentPopup /></Section>
     </div>
   );
 };
