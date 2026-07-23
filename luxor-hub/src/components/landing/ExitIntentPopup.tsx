@@ -95,9 +95,9 @@ const ExitIntentPopup = () => {
 
                 <button
                   onClick={handleCTA}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-sans font-semibold bg-gradient-to-r from-[hsl(43,80%,50%)] to-[hsl(43,70%,45%)] text-white shadow-[0_0_20px_hsl(43,80%,50%,0.2)] hover:shadow-[0_0_30px_hsl(43,80%,50%,0.35)] transition-shadow"
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-sans font-semibold border border-[hsl(43,80%,50%,0.3)] text-[hsl(43,80%,50%)] bg-[hsl(43,80%,50%,0.05)] hover:bg-[hsl(43,80%,50%,0.1)] transition-colors"
                 >
-                  Try Free — No Card Needed
+                  Get Started Free
                   <ArrowRight className="w-4 h-4" />
                 </button>
 
