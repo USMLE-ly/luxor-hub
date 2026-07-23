@@ -77,12 +77,11 @@ export function StaggerItem({ children, className }: { children: ReactNode; clas
   return (
     <motion.div
       variants={{
-        hidden: { opacity: 0, y: 20, scale: 0.98, filter: "blur(4px)" },
+        hidden: { opacity: 0, y: 20, scale: 0.98 },
         visible: {
           opacity: 1,
           y: 0,
           scale: 1,
-          filter: "blur(0px)",
           transition: SPRING_SNAPPY,
         },
       }}
