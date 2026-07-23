@@ -1,5 +1,4 @@
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
-import Pressable from "@/components/ui/pressable";
 import { Check } from "@phosphor-icons/react";
 
 const featureOutfitGen = "/images/recommendation-demo.jpg";
@@ -14,18 +13,8 @@ const bullets = [
 const TabbedFeatures = () => (
   <section id="tabbed-features" className="bg-background py-16 md:py-24">
     <div className="max-w-4xl mx-auto px-4">
-      <ScrollReveal direction="up">
-        <div className="text-center mb-10">
-          <p className="font-sans text-xs font-semibold text-primary tracking-widest uppercase">
-            Your Morning With LUXOR\u00ae
-          </p>
-          <h3 className="font-display text-2xl md:text-4xl font-bold text-foreground leading-tight mt-3">
-            Open the app. Your outfit is ready.
-          </h3>
-        </div>
-      </ScrollReveal>
 
-      <ScrollReveal direction="up" delay={0.15}>
+      <ScrollReveal direction="up">
         <div className="relative rounded-2xl overflow-hidden mb-10">
           <img
             src={featureOutfitGen}
@@ -38,7 +27,7 @@ const TabbedFeatures = () => (
         </div>
       </ScrollReveal>
 
-      <ScrollReveal direction="up" delay={0.3}>
+      <ScrollReveal direction="up" delay={0.15}>
         <ul className="space-y-3 max-w-2xl mx-auto">
           {bullets.map((b) => (
             <li key={b} className="flex items-start gap-3 font-sans text-sm text-muted-foreground">
