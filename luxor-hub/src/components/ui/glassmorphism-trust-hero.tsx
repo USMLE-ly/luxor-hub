@@ -106,7 +106,7 @@ export default function GlassmorphismTrustHero() {
       <motion.div className="absolute inset-0 z-0" style={{ y: videoY, scale: videoScale }}>
         <video
           src="/videos/hero-video.mp4"
-          preload="metadata"
+          preload="auto"
           autoPlay
           loop
           muted
