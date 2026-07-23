@@ -1,52 +1,53 @@
-import { motion } from "framer-motion";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import Pressable from "@/components/ui/pressable";
-import {Check} from "@phosphor-icons/react";
+import { Check } from "@phosphor-icons/react";
+
 const featureOutfitGen = "/images/recommendation-demo.jpg";
-import { ContainerScroll } from "@/components/ui/container-scroll-animation";
 
 const bullets = [
   "A complete outfit waiting when you wake up",
   "Weather and calendar already factored in",
   "Built entirely from your own closet",
-  "Learns what you like — gets smarter daily",
+  "Learns what you like \u2014 gets smarter daily",
 ];
 
 const TabbedFeatures = () => (
-  <section id="tabbed-features" className="bg-background">
-    <ContainerScroll
-      titleComponent={
-        <div className="flex flex-col items-center gap-3 mb-4">
+  <section id="tabbed-features" className="bg-background py-16 md:py-24">
+    <div className="max-w-4xl mx-auto px-4">
+      <ScrollReveal direction="up">
+        <div className="text-center mb-10">
           <p className="font-sans text-xs font-semibold text-primary tracking-widest uppercase">
-            Your Morning With LUXOR®
+            Your Morning With LUXOR\u00ae
           </p>
-          <h3 className="font-display text-2xl md:text-4xl font-bold text-foreground leading-tight">
+          <h3 className="font-display text-2xl md:text-4xl font-bold text-foreground leading-tight mt-3">
             Open the app. Your outfit is ready.
           </h3>
         </div>
-      }
-    >
-      <div className="relative h-full w-full">
-        <img
-          src={featureOutfitGen}
-          alt="Three elegant outfits on mannequins styled by LUXOR AI"
-          className="mx-auto rounded-2xl object-cover h-full w-full object-center"
-          draggable={false}
-        />
-        <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-background/70 via-background/30 to-transparent rounded-b-2xl pointer-events-none" />
-      </div>
-    </ContainerScroll>
+      </ScrollReveal>
 
-    {/* Bullets below */}
-    <div className="max-w-2xl mx-auto px-4 -mt-20 md:-mt-32 pb-16 md:pb-24">
-      <ul className="space-y-3">
-        {bullets.map((b) => (
-          <li key={b} className="flex items-start gap-3 font-sans text-sm text-muted-foreground">
-            <Check className="w-4 h-4 mt-0.5 text-primary shrink-0" />
-            <span>{b}</span>
-          </li>
-        ))}
-      </ul>
+      <ScrollReveal direction="up" delay={0.15}>
+        <div className="relative rounded-2xl overflow-hidden mb-10">
+          <img
+            src={featureOutfitGen}
+            alt="Three elegant outfits on mannequins styled by LUXOR AI"
+            className="w-full h-auto object-cover rounded-2xl"
+            draggable={false}
+            loading="lazy"
+          />
+          <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-background/70 via-background/30 to-transparent rounded-b-2xl pointer-events-none" />
+        </div>
+      </ScrollReveal>
+
+      <ScrollReveal direction="up" delay={0.3}>
+        <ul className="space-y-3 max-w-2xl mx-auto">
+          {bullets.map((b) => (
+            <li key={b} className="flex items-start gap-3 font-sans text-sm text-muted-foreground">
+              <Check className="w-4 h-4 mt-0.5 text-primary shrink-0" />
+              <span>{b}</span>
+            </li>
+          ))}
+        </ul>
+      </ScrollReveal>
     </div>
   </section>
 );
