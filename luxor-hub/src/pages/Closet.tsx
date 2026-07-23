@@ -392,7 +392,6 @@ const Closet = () => {
         console.warn("[CLOSET] Supabase query error:", sbErr.message);
         supabaseFailed = true;
       } else if (sbData && sbData.length > 0) {
-        console.log("[CLOSET] Loaded", sbData.length, "items from Supabase");
         return sbData.map((item: any) => ({
           id: item.id || '',
           name: item.name || null,
@@ -408,7 +407,6 @@ const Closet = () => {
           price: item.price || null,
         }));
       } else {
-        console.log("[CLOSET] Supabase returned 0 items, trying Qdrant fallback");
         supabaseFailed = true;
       }
     } catch (sbErr) {
@@ -426,7 +424,6 @@ const Closet = () => {
       ]);
       const data = await resp.json();
       if (data.success && Array.isArray(data.items) && data.items.length > 0) {
-        console.log("[CLOSET] Fallback: loaded", data.items.length, "items from Qdrant");
         // Sync back to Supabase so future reads are fast
         try {
           for (const item of data.items) {
