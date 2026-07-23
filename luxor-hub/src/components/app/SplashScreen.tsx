@@ -102,13 +102,7 @@ function LuxurySplashContent() {
         Your Personal Fashion Intelligence
       </p>
 
-      {/* Subtle version text */}
-      <p className={`relative z-10 font-sans text-[8px] uppercase tracking-[0.3em] mt-3 font-light transition-all duration-1000 ease-out ${
-          phase === "subtle" ? "opacity-100" : "opacity-0"
-        }`}
-        style={{ color: "rgba(232,200,122,0.12)" }}>
-        v1.0
-      </p>
+
 
       <style>{`
         @keyframes splash-particle {
