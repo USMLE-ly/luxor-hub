@@ -202,7 +202,7 @@ const Features = () => {
           </div>
 
           <motion.div
-            style={{ opacity: glowOpacity }}
+            style={{ opacity: 0.4 }}
             className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-1/2 h-12 rounded-full bg-primary/15 blur-2xl pointer-events-none"
           />
           <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background via-background/60 to-transparent pointer-events-none z-10" />
