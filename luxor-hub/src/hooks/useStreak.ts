@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { getApiUrl } from "@/lib/api";
 
 interface StreakInfo {
   current_streak: number;
@@ -44,8 +45,7 @@ export function useStreak() {
       const token = session?.session?.access_token;
       if (!token) return DEFAULT_STREAK;
 
-      const apiUrl = import.meta.env.VITE_API_URL || "";
-      if (!apiUrl) return DEFAULT_STREAK;
+      const apiUrl = getApiUrl();
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 8000);
@@ -75,8 +75,7 @@ export function useStreak() {
     const token = session?.session?.access_token;
     if (!token) return null;
 
-    const apiUrl = import.meta.env.VITE_API_URL || "";
-    if (!apiUrl) return null;
+    const apiUrl = getApiUrl();
 
     try {
       const resp = await fetch(`${apiUrl}/api/v1/streak/login`, {
@@ -99,8 +98,7 @@ export function useStreak() {
     const token = session?.session?.access_token;
     if (!token) return null;
 
-    const apiUrl = import.meta.env.VITE_API_URL || "";
-    if (!apiUrl) return null;
+    const apiUrl = getApiUrl();
 
     try {
       const resp = await fetch(`${apiUrl}/api/v1/streak/claim`, {
