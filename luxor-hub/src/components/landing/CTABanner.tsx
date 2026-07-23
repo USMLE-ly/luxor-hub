@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import {ArrowRight} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import timelessBg from "@/assets/brand/timeless.png";
+const timelessBg = "/images/feature-demo.jpg";
 
 const CTABanner = () => {
   const navigate = useNavigate();
