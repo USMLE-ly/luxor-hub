@@ -234,6 +234,8 @@ export default function DressingRoomPage() {
         category: item.rawCategory || item.category,
       }));
       const fetchUrl = api + "/api/v1/check-availability";
+      const availController = new AbortController();
+      const availTimeout = setTimeout(() => availController.abort(), 45000);
       const res = await fetch(fetchUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -242,7 +244,9 @@ export default function DressingRoomPage() {
           user_id: user?.id,
           closetItems: itemsForBackend,
         }),
+        signal: availController.signal,
       });
+      clearTimeout(availTimeout);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       const count = data.maxOutfits || 0;
@@ -251,9 +255,13 @@ export default function DressingRoomPage() {
       } else {
         toast.info("No outfits available for this occasion. Try adding more clothes.");
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error("[DR] Availability check failed:", e);
-      toast.error("Could not check availability. Try again.");
+      if (e?.name === "AbortError") {
+        toast.error("Backend is waking up. Please try again in a moment.");
+      } else {
+        toast.error("Could not check availability. Try again.");
+      }
     } finally {
       setIsLoadingAvailability(false);
     }
