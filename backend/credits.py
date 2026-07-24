@@ -114,10 +114,29 @@ class CreditManager:
         
         # Deduct credits
         new_remaining = remaining - cost
-        self._update_balance(user_id, new_remaining)
+        
+        # Update DB — MUST succeed for consumption to be valid
+        db_updated = self._update_balance(user_id, new_remaining)
+        
+        if not db_updated:
+            _log.error("[CREDITS] DB update FAILED for %s — NOT consuming %d credits for %s", user_id[:8], cost, action)
+            return {
+                "error": "Credit system error",
+                "message": "We could not process your credit deduction. Please try again.",
+                "credits_remaining": remaining,
+                "credits_needed": cost,
+            }
         
         # Log the event
         self._log_event(user_id, action, cost, new_remaining)
+        
+        # Update in-memory cache
+        self._balances[user_id] = {
+            "credits_remaining": new_remaining,
+            "credits_allocated": balance.get("credits_allocated", TIER_MONTHLY_CREDITS.get(tier, 30)),
+            "month": balance.get("month", ""),
+            "tier": tier,
+        }
         
         _log.info(
             "[CREDITS] %s consumed %d for %s — remaining: %d/%d (tier=%s)",
@@ -220,25 +239,34 @@ class CreditManager:
             _log.warning("[CREDITS] Create balance failed: %s", exc)
             return {"credits_remaining": allocated, "credits_allocated": allocated, "month": month}
     
-    def _update_balance(self, user_id: str, new_remaining: int):
-        """Update remaining credits in Supabase."""
+    def _update_balance(self, user_id: str, new_remaining: int) -> bool:
+        """Update remaining credits in Supabase. Returns True if DB was updated."""
         if not SUPABASE_URL or not SUPABASE_KEY:
-            return
+            _log.error("[CREDITS] Cannot update balance — SUPABASE_URL or SUPABASE_KEY not set")
+            return False
         
         current_month = datetime.utcnow().strftime("%Y-%m")
         try:
-            requests.patch(
+            resp = requests.patch(
                 f"{SUPABASE_URL}/rest/v1/credit_balances?user_id=eq.{user_id}&month=eq.{current_month}",
-                json={"credits_remaining": new_remaining},
+                json={"credits_remaining": new_remaining, "updated_at": datetime.utcnow().isoformat()},
                 headers={
                     "apikey": SUPABASE_KEY,
                     "Authorization": f"Bearer {SUPABASE_KEY}",
                     "Content-Type": "application/json",
+                    "Prefer": "return=minimal",
                 },
-                timeout=5,
+                timeout=10,
             )
+            if resp.status_code in (200, 204):
+                _log.info("[CREDITS] Updated balance for %s: %d remaining", user_id[:8], new_remaining)
+                return True
+            else:
+                _log.error("[CREDITS] Balance update FAILED — status %d, body: %s", resp.status_code, resp.text[:200])
+                return False
         except Exception as exc:
-            _log.warning("[CREDITS] Update failed: %s", exc)
+            _log.error("[CREDITS] Balance update exception: %s", exc, exc_info=True)
+            return False
     
     def _log_event(self, user_id: str, action: str, cost: int, remaining: int):
         """Log a billable event for analytics and billing."""
