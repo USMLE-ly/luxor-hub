@@ -364,12 +364,17 @@ def _log_usage_pattern(user_id: str, action: str, tier: str, credits_remaining: 
 
 
 def _atomic_consume_credits(user_id: str, action: str, cost: int) -> Dict[str, Any]:
-    """Atomically consume credits using Supabase RPC to prevent double-spend."""
+    """Atomically consume credits using Supabase RPC to prevent double-spend.
+    
+    Returns {"success": True, ...} ONLY when the RPC confirmed deduction.
+    Returns {"success": False, ...} on ANY failure — gateway MUST block the request.
+    """
     import requests as _req
     from backend.credits import SUPABASE_URL, SUPABASE_KEY
 
     if not SUPABASE_URL or not SUPABASE_KEY:
-        return {"success": True, "credits_remaining": 9999}
+        _log.error("[GATEWAY] CRITICAL: SUPABASE_URL or SUPABASE_KEY not set — cannot consume credits")
+        return {"success": False, "credits_remaining": 0, "error": "Credit system not configured"}
 
     try:
         resp = _req.post(
@@ -380,22 +385,28 @@ def _atomic_consume_credits(user_id: str, action: str, cost: int) -> Dict[str, A
                 "Authorization": f"Bearer {SUPABASE_KEY}",
                 "Content-Type": "application/json",
             },
-            timeout=5,
+            timeout=10,
         )
         if resp.status_code == 200:
             result = resp.json()
             if isinstance(result, list) and len(result) > 0:
-                return {
-                    "success": result[0].get("success", False),
-                    "credits_remaining": result[0].get("credits_remaining", 0),
-                    "error": result[0].get("error_message"),
-                }
-            return {"success": True, "credits_remaining": 9999}
-        _log.warning("[GATEWAY] Atomic consume failed with status %d", resp.status_code)
-        return {"success": True, "credits_remaining": 9999}
+                rpc_success = result[0].get("success", False)
+                remaining = result[0].get("credits_remaining", 0)
+                error_msg = result[0].get("error_message")
+                if rpc_success:
+                    _log.info("[GATEWAY] RPC consumed %d credits for %s — remaining: %d", cost, action, remaining)
+                    return {"success": True, "credits_remaining": remaining, "error": error_msg}
+                else:
+                    _log.warning("[GATEWAY] RPC rejected: %s — %s", action, error_msg)
+                    return {"success": False, "credits_remaining": remaining, "error": error_msg or "Insufficient credits"}
+            _log.error("[GATEWAY] RPC returned unexpected format: %s", resp.text[:200])
+            return {"success": False, "credits_remaining": 0, "error": "Invalid RPC response"}
+        else:
+            _log.error("[GATEWAY] Atomic consume FAILED — status %d, body: %s", resp.status_code, resp.text[:200])
+            return {"success": False, "credits_remaining": 0, "error": f"Credit service error (HTTP {resp.status_code})"}
     except Exception as exc:
-        _log.warning("[GATEWAY] Atomic consume exception: %s", exc)
-        return {"success": True, "credits_remaining": 9999}
+        _log.error("[GATEWAY] Atomic consume exception: %s", exc, exc_info=True)
+        return {"success": False, "credits_remaining": 0, "error": f"Credit service unavailable: {str(exc)[:100]}"}
 
 
 
