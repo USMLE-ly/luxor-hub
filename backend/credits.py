@@ -369,7 +369,18 @@ def check_and_deduct(user_id: str, action: str, tier: str) -> Dict[str, Any]:
     
     # Deduct
     new_remaining = remaining - cost
-    credit_manager._update_balance(user_id, new_remaining)
+    db_updated = credit_manager._update_balance(user_id, new_remaining)
+    
+    if not db_updated:
+        _log.error("[CREDITS] check_and_deduct: DB update FAILED for %s — NOT deducting %d for %s", user_id[:8], cost, action)
+        return {
+            "ok": False,
+            "status": 500,
+            "error": "Credit system error",
+            "message": "Could not process credit deduction. Please try again.",
+            "credits_remaining": remaining,
+        }
+    
     credit_manager._log_event(user_id, action, cost, new_remaining)
     
     # Update cache
