@@ -121,7 +121,7 @@ export default function DressingRoomPage() {
   const cal = useCalendarActions();
 
   /* ---------- Generate Outfit ---------- */
-  const { guard, consume, remaining } = useCreditGuard();
+  const { guard, remaining } = useCreditGuard();
   const { execute: executeAi, remaining: creditRemaining } = useAiAction();
 
   const generateOutfits = async (occasion: string, count: number) => {
