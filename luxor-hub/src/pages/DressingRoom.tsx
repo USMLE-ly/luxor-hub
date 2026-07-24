@@ -189,7 +189,6 @@ export default function DressingRoomPage() {
         setGeneratedImages(normalized);
         setHasGeneratedOutfit(true);
         setDisplayProgress(100);
-        await consume(action);
         toast.success(`${data.images.length} outfits generated!`);
         notifyEvent("outfit-generated");
       } else {
