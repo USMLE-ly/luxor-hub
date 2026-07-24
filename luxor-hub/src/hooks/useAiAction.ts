@@ -92,8 +92,7 @@ export function useAiAction() {
 
         const data = await resp.json();
 
-        // Deduct credits server-side after successful action
-        await consume(action);
+        // Credits already deducted by @ai_endpoint decorator — no duplicate consume needed
 
         onSuccess?.(data);
         return data;
