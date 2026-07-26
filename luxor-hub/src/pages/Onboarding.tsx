@@ -296,7 +296,7 @@ const Onboarding = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col overflow-hidden relative">
+    <div className="zodiak-font min-h-screen bg-background flex flex-col overflow-hidden relative">
       <SwipeParticles swipeVelocity={swipeVelocity} swipeTrigger={swipeTrigger} />
 
       {/* Ambient background glow */}
