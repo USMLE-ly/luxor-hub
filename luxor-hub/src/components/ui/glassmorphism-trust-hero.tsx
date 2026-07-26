@@ -167,7 +167,7 @@ export default function GlassmorphismTrustHero() {
               }}
             >
              Your AI Fashion Stylist<br />
-              <span className="candy-text">
+              <span className="gold-text">
                 That Actually
               </span><br />
               Knows You
