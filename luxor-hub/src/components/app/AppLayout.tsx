@@ -48,7 +48,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="zodiak-font min-h-screen bg-background pb-20">
       <main>
         {children}
       </main>
