@@ -85,7 +85,7 @@ const Features = () => {
           <StaggerItem>
             <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground text-center">
               Every Fashion Tool You Need.{" "}
-              <span className="gold-text">One App.</span>
+              <span className="candy-text">One App.</span>
             </h2>
           </StaggerItem>
           <StaggerItem>
