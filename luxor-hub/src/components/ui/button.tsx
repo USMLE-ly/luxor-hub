@@ -13,12 +13,12 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "text-white bg-primary border-2 border-border shadow-[var(--box-shadow-x)_var(--box-shadow-y)_0_0_hsl(var(--border)),0_4px_0_0_hsl(var(--border))] hover:translate-y-[-2px] hover:shadow-[var(--box-shadow-x)_var(--box-shadow-y)_0_0_hsl(var(--border)),0_6px_0_0_hsl(var(--border))] active:shadow-[0_1px_0_0_hsl(var(--border))]",
-        noShadow: "text-white bg-primary border-2 border-border",
+          "text-mtext bg-main border-2 border-border shadow-[var(--box-shadow-x)_var(--box-shadow-y)_0_0_hsl(var(--border)),0_4px_0_0_hsl(var(--border))] hover:translate-y-[-2px] hover:shadow-[var(--box-shadow-x)_var(--box-shadow-y)_0_0_hsl(var(--border)),0_6px_0_0_hsl(var(--border))] active:shadow-[0_1px_0_0_hsl(var(--border))]",
+        noShadow: "text-mtext bg-main border-2 border-border",
         neutral:
-          "bg-background text-foreground border-2 border-border shadow-[var(--box-shadow-x)_var(--box-shadow-y)_0_0_hsl(var(--border)),0_4px_0_0_hsl(var(--border))] hover:translate-y-[-2px] hover:shadow-[var(--box-shadow-x)_var(--box-shadow-y)_0_0_hsl(var(--border)),0_6px_0_0_hsl(var(--border))] active:shadow-[0_1px_0_0_hsl(var(--border))]",
+          "bg-bw text-text border-2 border-border shadow-[var(--box-shadow-x)_var(--box-shadow-y)_0_0_hsl(var(--border)),0_4px_0_0_hsl(var(--border))] hover:translate-y-[-2px] hover:shadow-[var(--box-shadow-x)_var(--box-shadow-y)_0_0_hsl(var(--border)),0_6px_0_0_hsl(var(--border))] active:shadow-[0_1px_0_0_hsl(var(--border))]",
         reverse:
-          "text-white bg-primary border-2 border-border hover:translate-y-[-2px] hover:shadow-[var(--box-shadow-x)_var(--box-shadow-y)_0_0_hsl(var(--border)),0_6px_0_0_hsl(var(--border))] active:shadow-[0_1px_0_0_hsl(var(--border))]",
+          "text-mtext bg-main border-2 border-border hover:translate-y-[-2px] hover:shadow-[var(--box-shadow-x)_var(--box-shadow-y)_0_0_hsl(var(--border)),0_6px_0_0_hsl(var(--border))] active:shadow-[0_1px_0_0_hsl(var(--border))]",
         destructive: "bg-destructive text-destructive-foreground border-2 border-border shadow-[0_4px_0_0_hsl(var(--border))] hover:translate-y-[-2px] hover:shadow-[0_6px_0_0_hsl(var(--border))] active:shadow-[0_1px_0_0_hsl(var(--border))]",
         outline: "border-2 border-border bg-background text-foreground shadow-[0_4px_0_0_hsl(var(--border))] hover:translate-y-[-2px] hover:shadow-[0_6px_0_0_hsl(var(--border))] active:shadow-[0_1px_0_0_hsl(var(--border))]",
         secondary: "bg-secondary text-secondary-foreground border-2 border-border shadow-[0_4px_0_0_hsl(var(--border))] hover:translate-y-[-2px] hover:shadow-[0_6px_0_0_hsl(var(--border))] active:shadow-[0_1px_0_0_hsl(var(--border))]",
