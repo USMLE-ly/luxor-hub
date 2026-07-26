@@ -43,6 +43,23 @@
   font-display: swap;
 }
 
+/* ── Zodiak — App Pages Font ── */
+@font-face {
+  font-family: 'Zodiak';
+  src: url('/fonts/Zodiak-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Zodiak';
+  src: url('/fonts/Zodiak-VariableItalic.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+
 /* ── Custom Easing Tokens ── */
 :root {
   --ease-luxury-out: cubic-bezier(0.23, 1, 0.32, 1);
@@ -732,3 +749,18 @@
 .hero-delay-300 { animation-delay: 0.3s; }
 .hero-delay-400 { animation-delay: 0.4s; }
 .hero-delay-500 { animation-delay: 0.5s; }
+
+/* ── Zodiak Font Scope (app pages only) ── */
+.zodiak-font,
+.zodiak-font body {
+  font-family: 'Zodiak', Georgia, serif !important;
+}
+.zodiak-font h1, .zodiak-font h2, .zodiak-font h3,
+.zodiak-font h4, .zodiak-font h5, .zodiak-font h6 {
+  font-family: 'Zodiak', Georgia, serif !important;
+}
+.zodiak-font .font-display,
+.zodiak-font .font-sans,
+.zodiak-font .font-serif {
+  font-family: 'Zodiak', Georgia, serif !important;
+}
