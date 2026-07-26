@@ -108,7 +108,7 @@ const Blog = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background dark">
+    <div className="zodiak-font min-h-screen bg-background dark">
       {/* Nav */}
       <nav className="sticky top-0 z-50 border-b border-border/20 bg-background/80 backdrop-blur-xl">
         <div className="max-w-5xl mx-auto flex items-center justify-between px-4 sm:px-6 h-14">
