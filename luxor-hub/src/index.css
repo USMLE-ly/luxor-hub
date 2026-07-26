@@ -1,47 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
-/* ── Geist Sans — Primary UI Font ── */
-@font-face {
-  font-family: 'Geist';
-  src: url('/fonts/Geist-Thin.woff2') format('woff2');
-  font-weight: 100;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Geist';
-  src: url('/fonts/Geist-Light.woff2') format('woff2');
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Geist';
-  src: url('/fonts/Geist-Regular.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Geist';
-  src: url('/fonts/Geist-Medium.woff2') format('woff2');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Geist';
-  src: url('/fonts/Geist-SemiBold.woff2') format('woff2');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Geist';
-  src: url('/fonts/Geist-Bold.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Inter:wght@100..900&display=swap');
 
 /* ── Custom Easing Tokens ── */
 :root {
@@ -64,121 +21,122 @@
   /* Theme transitions scoped to html only — global element transitions removed for performance */
 
   :root {
-    --color-1: 0 100% 63%;
-    --color-2: 270 100% 63%;
-    --color-3: 210 100% 63%;
-    --color-4: 195 100% 63%;
-    --color-5: 90 100% 63%;
-    --background: 0 0% 100%;
-    --foreground: 0 0% 8%;
+    /* Candy palette — light mode */
+    --color-1: 342 93% 67%;
+    --color-2: 318 55% 63%;
+    --color-3: 22 87% 56%;
+    --color-4: 44 96% 53%;
+    --color-5: 150 55% 40%;
+    --background: 20 12% 98%;
+    --foreground: 30 8% 12%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 8%;
+    --card: 20 12% 98%;
+    --card-foreground: 30 8% 12%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 8%;
+    --popover: 20 12% 98%;
+    --popover-foreground: 30 8% 12%;
 
-    --primary: 0 0% 10%;
+    --primary: 342 79% 57%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 95%;
-    --secondary-foreground: 0 0% 15%;
+    --secondary: 30 14% 95%;
+    --secondary-foreground: 30 8% 23%;
 
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 30 14% 95%;
+    --muted-foreground: 28 7% 51%;
 
-    --accent: 0 0% 15%;
+    --accent: 22 87% 56%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 342 79% 57%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 0 0% 20%;
+    --border: 30 10% 90%;
+    --input: 30 10% 90%;
+    --ring: 342 79% 57%;
 
     --radius: 0.75rem;
     --border-radius: 0.625rem;
 
-    --forest: 176 33% 17%;
-    --emerald: 165 52% 21%;
-    --ivory: 32 24% 79%;
+    --forest: 150 55% 26%;
+    --emerald: 150 63% 33%;
+    --ivory: 30 12% 83%;
 
-    --main: 0 0% 10%;
+    --main: 342 79% 57%;
     --mtext: 0 0% 100%;
     --bw: 0 0% 100%;
-    --text: 0 0% 8%;
+    --text: 30 8% 12%;
     --box-shadow-x: 2px;
     --box-shadow-y: 2px;
 
-    --gold: 47 23% 55%;
-    --gold-light: 47 25% 72%;
-    --gold-dark: 47 20% 38%;
+    --gold: 342 93% 67%;
+    --gold-light: 342 100% 83%;
+    --gold-dark: 342 66% 46%;
 
-    --glass: 0 0% 100%;
-    --glass-border: 0 0% 90%;
+    --glass: 20 12% 98%;
+    --glass-border: 30 10% 90%;
 
-    --sidebar-background: 0 0% 97%;
-    --sidebar-foreground: 0 0% 12%;
-    --sidebar-primary: 0 0% 10%;
+    --sidebar-background: 30 14% 97%;
+    --sidebar-foreground: 30 8% 12%;
+    --sidebar-primary: 342 79% 57%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 95%;
-    --sidebar-accent-foreground: 0 0% 12%;
-    --sidebar-border: 0 0% 90%;
-    --sidebar-ring: 0 0% 20%;
+    --sidebar-accent: 30 14% 95%;
+    --sidebar-accent-foreground: 30 8% 12%;
+    --sidebar-border: 30 10% 90%;
+    --sidebar-ring: 342 79% 57%;
   }
 
   .dark {
-    --background: 176 33% 17%;
-    --foreground: 40 18% 88%;
+    --background: 30 8% 12%;
+    --foreground: 30 14% 95%;
 
-    --card: 165 52% 21%;
-    --card-foreground: 40 18% 88%;
+    --card: 30 8% 23%;
+    --card-foreground: 30 14% 95%;
 
-    --popover: 165 40% 19%;
-    --popover-foreground: 40 18% 88%;
+    --popover: 30 8% 23%;
+    --popover-foreground: 30 14% 95%;
 
-    --primary: 47 23% 46%;
-    --primary-foreground: 176 33% 12%;
+    --primary: 342 93% 67%;
+    --primary-foreground: 30 8% 12%;
 
-    --secondary: 165 30% 25%;
-    --secondary-foreground: 40 18% 85%;
+    --secondary: 28 10% 30%;
+    --secondary-foreground: 30 14% 95%;
 
-    --muted: 165 25% 22%;
-    --muted-foreground: 40 10% 65%;
+    --muted: 28 10% 30%;
+    --muted-foreground: 28 9% 67%;
 
-    --accent: 47 23% 46%;
-    --accent-foreground: 176 33% 12%;
+    --accent: 22 87% 56%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62% 51%;
-    --destructive-foreground: 40 18% 95%;
+    --destructive: 342 93% 67%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 165 20% 28%;
-    --input: 165 20% 28%;
-    --ring: 47 23% 46%;
+    --border: 28 8% 43%;
+    --input: 28 8% 43%;
+    --ring: 342 93% 67%;
 
-    --main: 40 18% 88%;
-    --mtext: 176 33% 12%;
-    --bw: 176 33% 12%;
-    --text: 40 18% 88%;
+    --main: 30 14% 95%;
+    --mtext: 30 8% 12%;
+    --bw: 30 8% 12%;
+    --text: 30 14% 95%;
     --box-shadow-x: 2px;
     --box-shadow-y: 2px;
 
-    --gold: 47 23% 48%;
-    --gold-light: 47 25% 62%;
-    --gold-dark: 47 20% 34%;
+    --gold: 342 100% 74%;
+    --gold-light: 342 100% 83%;
+    --gold-dark: 342 79% 57%;
 
-    --glass: 165 52% 21%;
-    --glass-border: 165 20% 30%;
+    --glass: 30 8% 23%;
+    --glass-border: 28 8% 43%;
 
-    --sidebar-background: 176 33% 14%;
-    --sidebar-foreground: 40 18% 85%;
-    --sidebar-primary: 47 23% 46%;
-    --sidebar-primary-foreground: 176 33% 12%;
-    --sidebar-accent: 165 30% 24%;
-    --sidebar-accent-foreground: 40 18% 85%;
-    --sidebar-border: 165 20% 26%;
-    --sidebar-ring: 47 23% 46%;
+    --sidebar-background: 30 8% 12%;
+    --sidebar-foreground: 30 14% 95%;
+    --sidebar-primary: 342 93% 67%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 28 10% 30%;
+    --sidebar-accent-foreground: 30 14% 95%;
+    --sidebar-border: 28 8% 43%;
+    --sidebar-ring: 342 93% 67%;
   }
 }
 
@@ -192,11 +150,11 @@
     color: hsl(var(--foreground));
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    font-family: 'Geist', 'Inter', sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-family: 'Fraunces', Georgia, serif;
   }
 }
 
@@ -213,22 +171,22 @@
     border: 1px solid hsl(var(--glass-border));
   }
 
-  .gold-gradient {
+  .candy-gradient {
     background: linear-gradient(135deg, hsl(var(--gold-dark)), hsl(var(--gold)), hsl(var(--gold-light)));
   }
 
-  .gold-text {
+  .candy-text {
     background: linear-gradient(135deg, hsl(var(--foreground)), hsl(var(--muted-foreground)));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  .gold-glow {
+  .candy-glow {
     box-shadow: 0 0 30px -5px hsl(var(--foreground) / 0.15);
   }
 
-  .gold-shimmer-text {
+  .candy-shimmer-text {
     background: linear-gradient(
       110deg,
       hsl(var(--foreground)) 0%,
@@ -294,7 +252,7 @@
     box-shadow: 0 8px 25px -5px hsl(var(--foreground) / 0.1);
   }
 
-  .gold-shimmer {
+  .candy-shimmer {
     background: linear-gradient(
       110deg,
       hsl(var(--foreground)) 0%,
@@ -334,7 +292,7 @@
     50% { filter: drop-shadow(0 0 16px hsl(var(--foreground) / 0.2)); }
   }
 
-  .gold-ring-glow {
+  .candy-ring-glow {
     animation: gold-pulse 3s ease-in-out infinite;
   }
 
@@ -479,7 +437,7 @@
 }
 
 .slide-title {
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: 'Fraunces', Georgia, serif;
   font-size: clamp(2.5rem, 6vw, 5rem);
   font-weight: 700;
   color: #ffffff;
@@ -489,7 +447,7 @@
 }
 
 .slide-description {
-  font-family: 'Geist', 'Inter', sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
   font-size: clamp(0.85rem, 1.2vw, 1rem);
   color: rgba(255, 255, 255, 0.7);
   margin-top: 0.75rem;
@@ -564,7 +522,7 @@
 }
 
 .slide-nav-title {
-  font-family: 'Geist', 'Inter', sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
   font-size: 10px;
   color: rgba(255, 255, 255, 0.6);
   letter-spacing: 0.1em;
@@ -655,21 +613,21 @@
 
 /* ── Perspective + Highlight for Stylist Notes ── */
 :root {
-  --perspective-red-bg: #e89c9c;
-  --perspective-red-ring: 220, 130, 130;
-  --perspective-purple-bg: #b8a0db;
-  --perspective-purple-ring: 160, 120, 220;
-  --perspective-green-bg: #9fd68d;
-  --perspective-green-ring: 120, 200, 100;
+  --perspective-red-bg: #ff7a9c;
+  --perspective-red-ring: 255, 122, 156;
+  --perspective-purple-bg: #9970ff;
+  --perspective-purple-ring: 153, 112, 255;
+  --perspective-green-bg: #4dc07f;
+  --perspective-green-ring: 77, 192, 127;
 }
 
 .dark {
-  --perspective-red-bg: #d48989;
-  --perspective-red-ring: 200, 120, 120;
-  --perspective-purple-bg: #a78fcd;
-  --perspective-purple-ring: 145, 110, 200;
-  --perspective-green-bg: #8dc77b;
-  --perspective-green-ring: 115, 185, 95;
+  --perspective-red-bg: #ff7a9c;
+  --perspective-red-ring: 255, 122, 156;
+  --perspective-purple-bg: #7c50f0;
+  --perspective-purple-ring: 124, 80, 240;
+  --perspective-green-bg: #29a763;
+  --perspective-green-ring: 41, 167, 99;
 }
 
 @keyframes perspective-blur-in {
