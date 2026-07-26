@@ -6,7 +6,7 @@ const Privacy = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="zodiak-font min-h-screen bg-background">
       <div className="max-w-3xl mx-auto px-4 py-16">
         <motion.button
           initial={{ opacity: 0, x: -10 }}
