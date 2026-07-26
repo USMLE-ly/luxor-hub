@@ -293,7 +293,7 @@ const Paywall = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0a1a12] via-[#0d2218] to-background flex flex-col items-center justify-center px-4 py-12">
+    <div className="zodiak-font min-h-screen bg-gradient-to-b from-[#0a1a12] via-[#0d2218] to-background flex flex-col items-center justify-center px-4 py-12">
       <div className="max-w-5xl w-full">
         {/* Header */}
         <motion.div
