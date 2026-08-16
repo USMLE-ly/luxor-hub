@@ -195,7 +195,11 @@ export default function DressingRoomPage() {
         toast.error("No outfits returned. Try again.");
       }
     } catch (e: any) {
-      toast.error(e.message || "Failed to generate outfits");
+      if (e?.name === "AbortError") {
+        toast.error("The AI service is waking up — please try again in a moment.");
+      } else {
+        toast.error(e.message || "Failed to generate outfits");
+      }
     } finally {
       setIsGenerating(false);
       isGeneratingRef.current = false;
