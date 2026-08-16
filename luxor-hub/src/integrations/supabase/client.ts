@@ -12,6 +12,12 @@ if (!isSupabaseConfigured) {
     'Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY in your .env file or Vercel dashboard.'
   );
 }
+} else {
+  console.info('[SUPABASE] Auth endpoint:', SUPABASE_URL);
+  if (!/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/.test(SUPABASE_URL)) {
+    console.warn('[SUPABASE] VITE_SUPABASE_URL does not look like a Supabase project URL:', SUPABASE_URL);
+  }
+}
 
 export const supabase = createClient<Database>(
   SUPABASE_URL || 'https://placeholder.supabase.co',
