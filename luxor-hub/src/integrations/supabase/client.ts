@@ -11,7 +11,6 @@ if (!isSupabaseConfigured) {
     '[SUPABASE] Environment variables missing — app running in offline/mock mode.\n' +
     'Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY in your .env file or Vercel dashboard.'
   );
-}
 } else {
   console.info('[SUPABASE] Auth endpoint:', SUPABASE_URL);
   if (!/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/.test(SUPABASE_URL)) {
