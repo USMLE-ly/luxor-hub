@@ -1,0 +1,328 @@
+import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
+import { withRetry } from "@/lib/supabaseRetry";
+import { toast } from "sonner";
+import {ArrowLeft, Envelope, Lock, User} from "@phosphor-icons/react";
+import { trackEvent } from "@/lib/fbPixel";
+import { playSuccess } from "@/lib/audio-system";
+import { GoldParticles } from "@/components/app/GoldParticles";
+import { GoldDivider, PremiumCardWrapper, GoldShimmerButton } from "@/components/app/PremiumAuthCard";
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+interface ValidationErrors {
+  email?: string;
+  password?: string;
+  displayName?: string;
+}
+
+const Auth = () => {
+  const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<ValidationErrors>({});
+  const [lockoutUntil, setLockoutUntil] = useState(0);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const navigate = useNavigate();
+
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
+
+  const validate = (): boolean => {
+    const newErrors: ValidationErrors = {};
+
+    if (!isLogin && !displayName.trim()) {
+      newErrors.displayName = "Display name is required.";
+    }
+
+    if (!email.trim()) {
+      newErrors.email = "Email is required.";
+    } else if (!EMAIL_REGEX.test(email)) {
+      newErrors.email = "Please enter a valid email address.";
+    }
+
+    if (!password) {
+      newErrors.password = "Password is required.";
+    } else if (password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters.";
+    }
+
+    setErrors(newErrors);
+
+    if (newErrors.displayName) nameRef.current?.focus();
+    else if (newErrors.email) emailRef.current?.focus();
+    else if (newErrors.password) passwordRef.current?.focus();
+
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validate()) return;
+    if (loading) return;
+
+    // Client-side rate limiting: exponential backoff after failed attempts
+    const now = Date.now();
+    if (now < lockoutUntil) {
+      const remaining = Math.ceil((lockoutUntil - now) / 1000);
+      toast.error(`Too many attempts. Please wait ${remaining}s.`);
+      return;
+    }
+
+    if (!navigator.onLine) {
+      toast.error("You appear to be offline. Please check your connection and try again.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      if (isLogin) {
+        const { error } = await withRetry(() => supabase.auth.signInWithPassword({ email, password }));
+        if (error) throw error;
+        toast.success("Welcome back to LUXOR®!");
+        playSuccess();
+        // Get the user from the session we already have
+        const { data: { user: sessionUser } } = await supabase.auth.getUser();
+        const uid = sessionUser?.id;
+        // Check if onboarding was completed — gracefully handle missing profile table
+        let onboardingDone = false;
+        if (uid) {
+          try {
+            // Check if style_profiles row exists
+            const { data: profile } = await supabase
+              .from("style_profiles")
+              .select("onboarding_completed")
+              .eq("user_id", uid)
+              .maybeSingle();
+
+            if (profile) {
+              onboardingDone = profile?.onboarding_completed === true;
+            } else {
+              // No profile row exists yet — create one
+              const { error: insertErr } = await supabase.from("style_profiles").insert({
+                user_id: uid,
+                onboarding_completed: false,
+                style_score: 50,
+                preferences: {},
+              });
+              if (insertErr) {
+                // Row may have been created by trigger — try fetching again
+                const { data: retryProfile } = await supabase
+                  .from("style_profiles")
+                  .select("onboarding_completed")
+                  .eq("user_id", uid)
+                  .maybeSingle();
+                onboardingDone = retryProfile?.onboarding_completed === true;
+              }
+            }
+          } catch (e) {
+            // table may not exist yet — treat as not onboarded
+          }
+        }
+        navigate(onboardingDone ? "/closet" : "/onboarding");
+      } else {
+        const { data: signUpData, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { display_name: displayName },
+            emailRedirectTo: window.location.origin,
+          },
+        });
+        if (error) throw error;
+        trackEvent("CompleteRegistration", { content_name: "LUXOR® Signup" });
+
+        // If session is returned, user was auto-confirmed — go to onboarding
+        if (signUpData?.session) {
+          toast.success("Account created! Welcome to LUXOR®!");
+          playSuccess();
+          navigate("/onboarding");
+        } else {
+          // Email confirmation is still required — inform user
+          toast.success("Account created! Check your email to confirm your account, then sign in.");
+          setIsLogin(true);
+        }
+      }
+    } catch (error: any) {
+      const msg = error.message || "";
+      if (msg.includes("fetch") || msg.includes("network") || msg.includes("Failed to fetch")) {
+        console.error("[AUTH] Supabase request failed — verify VITE_SUPABASE_URL points to a live project:", import.meta.env.VITE_SUPABASE_URL, error);
+        toast.error("Network error. Please check your connection and try again.");
+      } else if (msg.includes("Invalid login credentials")) {
+        toast.error("Incorrect email or password. Please try again.");
+      } else if (msg.includes("Email not confirmed")) {
+        toast.error("Please verify your email before signing in. Check your inbox.");
+      } else if (msg.includes("User already registered")) {
+        toast.error("This email is already registered. Try signing in instead.");
+      } else {
+        toast.error(msg || "Something went wrong. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="zodiak-font min-h-screen bg-background flex items-center justify-center px-4 relative overflow-hidden">
+      <div className="absolute inset-0">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-[hsl(43,80%,42%)]/10 rounded-full blur-[100px]" />
+      </div>
+      <GoldParticles />
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="relative z-10 w-full max-w-md"
+      >
+        <button
+          onClick={() => navigate("/")}
+          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8 font-sans text-sm"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to home
+        </button>
+
+        <PremiumCardWrapper>
+          <div className="text-center mb-6">
+            {/* Decorative top line */}
+            <div className="flex items-center justify-center gap-3 mb-3">
+              <div className="h-px w-8 bg-gradient-to-r from-transparent to-[hsl(43,80%,58%,0.4)]" />
+              <span className="text-[10px] tracking-[0.3em] text-[hsl(43,80%,58%,0.6)] font-sans uppercase">Est. 2020</span>
+              <div className="h-px w-8 bg-gradient-to-l from-transparent to-[hsl(43,80%,58%,0.4)]" />
+            </div>
+            <h1 className="font-display text-3xl font-bold gold-text">LUXOR®</h1>
+            <GoldDivider />
+            <p className="text-muted-foreground font-sans text-sm">
+              {isLogin ? "Welcome back. Your style awaits." : "Begin your style journey."}
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5" aria-label="Authentication form" noValidate>
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-sm font-sans text-muted-foreground">
+                  Display Name
+                </Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    ref={nameRef}
+                    id="name"
+                    type="text"
+                    placeholder="Your name"
+                    value={displayName}
+                    onChange={(e) => { setDisplayName(e.target.value); setErrors((p) => ({ ...p, displayName: undefined })); }}
+                    autoComplete="name"
+                    aria-invalid={!!errors.displayName}
+                    aria-describedby={errors.displayName ? "name-error" : undefined}
+                    className="pl-10 bg-secondary border-glass-border rounded-xl h-12 font-sans focus:border-[hsl(43,80%,58%,0.5)] focus:ring-1 focus:ring-[hsl(43,80%,58%,0.3)] transition-all"
+                  />
+                </div>
+                {errors.displayName && (
+                  <p id="name-error" role="alert" className="text-xs text-destructive font-sans mt-1">{errors.displayName}</p>
+                )}
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-sm font-sans text-muted-foreground">
+                Email
+              </Label>
+              <div className="relative">
+                <Envelope className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  ref={emailRef}
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); setErrors((p) => ({ ...p, email: undefined })); }}
+                  autoComplete="email"
+                  aria-invalid={!!errors.email}
+                  aria-describedby={errors.email ? "email-error" : undefined}
+                  className="pl-10 bg-secondary border-glass-border rounded-xl h-12 font-sans focus:border-[hsl(43,80%,58%,0.5)] focus:ring-1 focus:ring-[hsl(43,80%,58%,0.3)] transition-all"
+                />
+              </div>
+              {errors.email && (
+                <p id="email-error" role="alert" className="text-xs text-destructive font-sans mt-1">{errors.email}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-sm font-sans text-muted-foreground">
+                Password
+              </Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  ref={passwordRef}
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => { setPassword(e.target.value); setErrors((p) => ({ ...p, password: undefined })); }}
+                  autoComplete={isLogin ? "current-password" : "new-password"}
+                  aria-invalid={!!errors.password}
+                  aria-describedby={errors.password ? "password-error" : undefined}
+                  className="pl-10 bg-secondary border-glass-border rounded-xl h-12 font-sans focus:border-[hsl(43,80%,58%,0.5)] focus:ring-1 focus:ring-[hsl(43,80%,58%,0.3)] transition-all"
+                />
+              </div>
+              {errors.password && (
+                <p id="password-error" role="alert" className="text-xs text-destructive font-sans mt-1">{errors.password}</p>
+              )}
+            </div>
+
+            <GoldShimmerButton>
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full gold-gradient text-primary-foreground font-semibold rounded-xl h-12 text-base hover:shadow-[0_0_20px_hsl(43,80%,58%,0.3)] transition-all relative"
+              >
+                {loading ? (
+                  <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                ) : (
+                  <>{isLogin ? "Sign In" : "Create Account"}</>
+                )}
+              </Button>
+            </GoldShimmerButton>
+          </form>
+
+          <div className="mt-6 text-center space-y-2">
+            <button
+              onClick={() => { setIsLogin(!isLogin); setErrors({}); }}
+              className="text-sm font-sans block mx-auto group"
+            >
+              <span className="text-muted-foreground">
+                {isLogin ? "Don't have an account? " : "Already have an account? "}
+              </span>
+              <span className="bg-gradient-to-r from-[hsl(38,72%,42%)] to-[hsl(48,80%,58%)] bg-clip-text text-transparent font-medium group-hover:brightness-125 transition-all">
+                {isLogin ? "Sign up" : "Sign in"}
+              </span>
+            </button>
+            {isLogin && (
+              <button
+                onClick={() => navigate("/forgot-password")}
+                className="text-xs font-sans block mx-auto bg-gradient-to-r from-[hsl(38,72%,42%)] to-[hsl(48,80%,58%)] bg-clip-text text-transparent hover:brightness-125 transition-all"
+              >
+                Forgot your password?
+              </button>
+            )}
+          </div>
+        </PremiumCardWrapper>
+      </motion.div>
+    </div>
+  );
+};
+
+export default Auth;
