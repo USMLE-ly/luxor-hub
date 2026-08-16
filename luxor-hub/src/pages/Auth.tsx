@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { withRetry } from "@/lib/supabaseRetry";
 import { toast } from "sonner";
 import {ArrowLeft, Envelope, Lock, User} from "@phosphor-icons/react";
 import { trackEvent } from "@/lib/fbPixel";
@@ -85,7 +86,7 @@ const Auth = () => {
 
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await withRetry(() => supabase.auth.signInWithPassword({ email, password }));
         if (error) throw error;
         toast.success("Welcome back to LUXOR®!");
         playSuccess();
@@ -154,6 +155,7 @@ const Auth = () => {
     } catch (error: any) {
       const msg = error.message || "";
       if (msg.includes("fetch") || msg.includes("network") || msg.includes("Failed to fetch")) {
+        console.error("[AUTH] Supabase request failed — verify VITE_SUPABASE_URL points to a live project:", import.meta.env.VITE_SUPABASE_URL, error);
         toast.error("Network error. Please check your connection and try again.");
       } else if (msg.includes("Invalid login credentials")) {
         toast.error("Incorrect email or password. Please try again.");
